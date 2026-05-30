@@ -84,6 +84,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const loading = ref(false)
 const events = ref<any[]>([])
@@ -93,7 +94,7 @@ const total = ref(0)
 const showDetail = ref(false)
 const current = ref<any>(null)
 const filters = reactive({ event_type: '', severity: '' })
-const API = '/api/v1/events'
+const API = R.EVENTS
 
 function eventTypeTag(t: string) {
   const m: Record<string, string> = { threshold_exceeded: 'warning', service_down: 'danger', port_unreachable: 'danger', disk_usage_high: 'warning', collector_offline: 'info' }

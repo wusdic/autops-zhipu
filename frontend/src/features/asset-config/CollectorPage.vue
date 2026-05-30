@@ -66,6 +66,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const loading = ref(false)
 const collectors = ref<any[]>([])
@@ -77,7 +78,7 @@ function formatTime(t: string) { return t ? new Date(t).toLocaleString('zh-CN') 
 async function loadCollectors() {
   loading.value = true
   try {
-    const { data } = await api.get('/api/v1/collectors', { params: { page: 1, page_size: 50 } })
+    const { data } = await api.get(R.COLLECTORS, { params: { page: 1, page_size: 50 } })
     if (data.code === 0) collectors.value = data.data.items || []
   } finally { loading.value = false }
 }
@@ -85,7 +86,7 @@ async function loadCollectors() {
 async function loadResults() {
   resultLoading.value = true
   try {
-    const { data } = await api.get('/api/v1/collection-results', { params: { page: 1, page_size: 20 } })
+    const { data } = await api.get(R.COLLECTION_JOBS, { params: { page: 1, page_size: 20 } })
     if (data.code === 0) results.value = data.data.items || []
   } finally { resultLoading.value = false }
 }

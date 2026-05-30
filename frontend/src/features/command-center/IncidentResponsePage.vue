@@ -150,6 +150,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const alertLoading = ref(false)
 const activeAlerts = ref<any[]>([])
@@ -167,7 +168,7 @@ function parseActionChain(s: string) {
 async function loadAlerts() {
   alertLoading.value = true
   try {
-    const { data } = await api.get('/api/v1/alerts', { params: { page: 1, page_size: 50 } })
+    const { data } = await api.get(R.ALERTS, { params: { page: 1, page_size: 50 } })
     if (data.code === 0) activeAlerts.value = (data.data.items || []).filter((a: any) => a.status !== 'resolved')
   } finally { alertLoading.value = false }
 }
@@ -197,13 +198,13 @@ async function resolveAlert(id: string) {
 }
 
 async function createTicketFromAlert(alertId: string) {
-  const { data } = await api.post('/api/v1/tickets', { title: `告警工单: ${selectedAlert.value?.title}`, alert_ids: JSON.stringify([alertId]) })
+  const { data } = await api.post(R.TICKETS, { title: `告警工单: ${selectedAlert.value?.title}`, alert_ids: JSON.stringify([alertId]) })
   if (data.code === 0) { ElMessage.success('工单已创建'); timeline.value.push({ type: 'primary', tagType: 'primary', tag: '工单', time: new Date().toLocaleString('zh-CN'), title: '创建工单', detail: data.data.id }) }
 }
 
 async function matchPolicy() {
   if (!selectedAlert.value) return
-  const { data } = await api.get('/api/v1/policies', { params: { page: 1, page_size: 50 } })
+  const { data } = await api.get(R.POLICIES, { params: { page: 1, page_size: 50 } })
   if (data.code === 0) {
     const policies = data.data.items || []
     matchedPolicy.value = policies.length > 0 ? policies[0] : null
@@ -234,7 +235,7 @@ async function executeAction() {
   }
   const scripts = parseActionChain(matchedPolicy.value.action_chain)
   if (scripts.length > 0) {
-    const { data } = await api.post('/api/v1/executions', {
+    const { data } = await api.post(R.EXECUTIONS, {
       execution_type: 'script', target_id: scripts[0].script_name,
       asset_ids: [selectedAlert.value?.asset_id || 'test'], is_dry_run: false
     })
@@ -249,7 +250,7 @@ async function startAIDiagnosis() {
   if (!selectedAlert.value) { ElMessage.warning('请先选择告警'); return }
   aiLoading.value = true
   try {
-    const { data } = await api.post('/api/v1/aiops/diagnose', {
+    const { data } = await api.post(R.AIOPS.DIAGNOSE, {
       alert_id: selectedAlert.value.id, alert_title: selectedAlert.value.title,
       alert_context: selectedAlert.value.context || ''
     })

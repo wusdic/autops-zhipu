@@ -84,6 +84,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const loading = ref(false)
 const tickets = ref<any[]>([])
@@ -96,7 +97,7 @@ const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 const form = reactive({ title: '', ticket_type: 'incident', priority: 'medium', description: '' })
-const API = '/api/v1/tickets'
+const API = R.TICKETS
 
 async function load() {
   loading.value = true

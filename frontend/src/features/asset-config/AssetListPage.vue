@@ -163,6 +163,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const loading = ref(false)
 const saving = ref(false)
@@ -204,7 +205,7 @@ async function loadAssets() {
     const params: any = { page: pagination.page, page_size: pagination.pageSize }
     if (filters.asset_type) params.asset_type = filters.asset_type
     if (filters.status) params.status = filters.status
-    const { data } = await api.get('/api/v1/assets', { params })
+    const { data } = await api.get(R.ASSETS, { params })
     if (data.code === 0) {
       assets.value = data.data.items || []
       pagination.total = data.data.total || 0
@@ -256,7 +257,7 @@ async function saveAsset() {
         ElMessage.error(data.message || '保存失败')
       }
     } else {
-      const { data } = await api.post('/api/v1/assets', formData)
+      const { data } = await api.post(R.ASSETS, formData)
       if (data.code === 0) {
         ElMessage.success('创建成功')
         showFormDialog.value = false

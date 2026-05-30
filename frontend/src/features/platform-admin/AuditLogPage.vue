@@ -38,6 +38,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const loading = ref(false)
 const logs = ref<any[]>([])
@@ -55,7 +56,7 @@ async function loadLogs() {
     const params: any = { page: page.value, page_size: pageSize.value }
     if (filters.user) params.username = filters.user
     if (filters.action) params.action = filters.action
-    const { data } = await api.get('/api/v1/audit-logs', { params })
+    const { data } = await api.get(R.AUDIT, { params })
     if (data.code === 0) { logs.value = data.data.items || []; total.value = data.data.total || 0 }
   } finally { loading.value = false }
 }

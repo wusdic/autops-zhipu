@@ -78,6 +78,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const loading = ref(false)
 const saving = ref(false)
@@ -86,7 +87,7 @@ const configType = ref('')
 const showCreateDialog = ref(false)
 const editingConfig = ref<any>(null)
 const configForm = reactive({ config_key: '', config_value: '', config_type: 'system', description: '' })
-const API = '/api/v1/configs/definitions'
+const API = R.CONFIGS
 
 function formatTime(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '' }
 function truncate(s: string, n: number) { return s && s.length > n ? s.substring(0, n) + '...' : s }

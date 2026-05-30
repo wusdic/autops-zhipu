@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.database import get_db
 from app.common.audit import AuditLog
-from app.common.response import success
+from app.common.response import paginate, success
 
 router = APIRouter(prefix="/audit-logs", tags=["audit"])
 
@@ -43,8 +43,8 @@ async def list_audit_logs(
     )
     items = result.scalars().all()
 
-    return success(data={
-        "items": [
+    return paginate(
+        [
             {
                 "id": item.id,
                 "trace_id": item.trace_id,
@@ -59,7 +59,7 @@ async def list_audit_logs(
             }
             for item in items
         ],
-        "total": total,
-        "page": page,
-        "page_size": page_size,
-    })
+        total,
+        page,
+        page_size,
+    )

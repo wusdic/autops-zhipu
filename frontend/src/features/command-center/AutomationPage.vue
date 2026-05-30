@@ -126,6 +126,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const loading = ref(false)
 const scripts = ref<any[]>([])
@@ -149,7 +150,7 @@ function execStatusTag(s: string) {
 async function loadScripts() {
   loading.value = true
   try {
-    const { data } = await api.get('/api/v1/scripts', { params: { page: 1, page_size: 100 } })
+    const { data } = await api.get(R.SCRIPTS, { params: { page: 1, page_size: 100 } })
     if (data.code === 0) scripts.value = data.data.items || []
   } finally { loading.value = false }
 }
@@ -157,7 +158,7 @@ async function loadScripts() {
 async function loadPolicies() {
   policyLoading.value = true
   try {
-    const { data } = await api.get('/api/v1/policies', { params: { page: 1, page_size: 100 } })
+    const { data } = await api.get(R.POLICIES, { params: { page: 1, page_size: 100 } })
     if (data.code === 0) policies.value = data.data.items || []
   } finally { policyLoading.value = false }
 }
@@ -165,7 +166,7 @@ async function loadPolicies() {
 async function loadExecutions() {
   execLoading.value = true
   try {
-    const { data } = await api.get('/api/v1/executions', { params: { page: 1, page_size: 50 } })
+    const { data } = await api.get(R.EXECUTIONS, { params: { page: 1, page_size: 50 } })
     if (data.code === 0) executions.value = data.data.items || []
   } finally { execLoading.value = false }
 }

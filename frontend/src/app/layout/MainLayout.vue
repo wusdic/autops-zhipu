@@ -78,6 +78,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { Monitor, Grid, Bell, Tickets, Collection, Setting, Warning, Connection,
   InfoFilled, VideoPlay, MagicStick, User, Document, Expand, Fold } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const router = useRouter()
 const route = useRoute()
@@ -97,7 +98,7 @@ const pageTitle = computed(() => {
 
 async function loadAlertCount() {
   try {
-    const { data } = await api.get('/api/v1/alerts', { params: { page: 1, page_size: 1, status: 'firing' } })
+    const { data } = await api.get(R.ALERTS, { params: { page: 1, page_size: 1, status: 'firing' } })
     if (data.code === 0) alertCount.value = data.data.total || 0
   } catch { /* ignore */ }
 }

@@ -59,6 +59,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const loading = ref(false)
 const articles = ref<any[]>([])
@@ -67,7 +68,7 @@ const current = ref<any>(null)
 const searchText = ref('')
 const page = ref(1)
 const total = ref(0)
-const API = '/api/v1/knowledge'
+const API = R.KNOWLEDGE
 
 function typeLabel(t: string) {
   const m: Record<string, string> = { standard_solution: '标准方案', incident_summary: '事件总结', best_practice: '最佳实践', draft: '草稿' }

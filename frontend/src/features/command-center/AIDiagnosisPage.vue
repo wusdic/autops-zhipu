@@ -96,6 +96,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const loading = ref(false)
 const result = ref<any>(null)
@@ -113,7 +114,7 @@ function resetForm() {
 
 async function checkLLM() {
   try {
-    const { data } = await api.get('/api/v1/aiops/health')
+    const { data } = await api.get(R.AIOPS.HEALTH)
     llmAvailable.value = data.code === 0
   } catch { llmAvailable.value = false }
 }
@@ -123,7 +124,7 @@ async function diagnose() {
   loading.value = true
   result.value = null
   try {
-    const { data } = await api.post('/api/v1/aiops/diagnose', form)
+    const { data } = await api.post(R.AIOPS.DIAGNOSE, form)
     if (data.code === 0) {
       result.value = data.data
     } else {
@@ -136,7 +137,7 @@ async function diagnose() {
 
 async function loadHistory() {
   try {
-    const { data } = await api.get('/api/v1/aiops/analyses', { params: { page: 1, page_size: 20 } })
+    const { data } = await api.get(R.AIOPS.ANALYSES, { params: { page: 1, page_size: 20 } })
     if (data.code === 0) history.value = data.data.items || []
   } catch { /* ignore */ }
 }

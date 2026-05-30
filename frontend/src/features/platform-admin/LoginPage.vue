@@ -21,7 +21,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
+import { API as APIRoutes } from '@/shared/api/routes'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { setToken } from '@/app/router/guards'
@@ -37,7 +38,7 @@ async function handleLogin() {
   }
   loading.value = true
   try {
-    const res = await fetch('/api/v1/auth/login', {
+    const res = await fetch(APIRoutes.AUTH.LOGIN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
