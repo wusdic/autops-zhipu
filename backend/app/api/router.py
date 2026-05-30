@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.health import router as health_router
 from app.domains.asset.api import group_router as asset_group_router, router as asset_router
 from app.domains.config.api import cred_router, router as config_router
 from app.domains.collector.api import job_router, router as collector_router
@@ -24,9 +23,6 @@ from app.domains.aiops.api import router as aiops_router
 from app.domains.governance.api import router as governance_router
 
 api_router = APIRouter()
-
-# Health
-api_router.include_router(health_router)
 
 # Governance (auth, users, roles)
 api_router.include_router(governance_router)

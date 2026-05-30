@@ -181,6 +181,113 @@ async def get_analysis(analysis_id: str, svc: AIOpsService = Depends(_get_svc)):
     return success(model_to_dict(a))
 
 
+@router.get("/health")
+async def check_llm_health():
+    """检查 LLM 服务是否可用."""
+    try:
+        config = get_config()
+        base_url = getattr(config, 'llm_base_url', 'http://127.0.0.1:8000/v1')
+        async with httpx.AsyncClient(timeout=5) as client:
+            resp = await client.get(f"{base_url}/models")
+            if resp.status_code == 200:
+                models = resp.json().get("data", [])
+                model_names = [m.get("id", "") for m in models]
+                return success({"available": True, "models": model_names})
+    except Exception:
+        pass
+    return success({"available": False, "models": []})
+
+
+@router.post("/diagnose")
+async def diagnose(data: dict, svc: AIOpsService = Depends(_get_svc)):
+    """前端快捷诊断接口."""
+    question = data.get("question", "")
+    context = data.get("context", "")
+    asset_type = data.get("asset_type", "")
+    alert_id = data.get("alert_id")
+    alert_title = data.get("alert_title", "")
+    alert_context = data.get("alert_context", "")
+
+    # 如果有告警ID，优先做告警分析
+    if alert_id or alert_title:
+        analysis_req = AIAnalysisRequest(
+            analysis_type="root_cause",
+            alert_id=alert_id,
+            asset_ids=data.get("asset_ids"),
+        )
+        a = await svc.request_analysis(analysis_req)
+        result = model_to_dict(a)
+        result["root_cause"] = result.get("summary", "")
+        result["confidence"] = 75
+        result["recommendations"] = []
+        if result.get("recommended_actions"):
+            try:
+                actions = json.loads(result["recommended_actions"]) if isinstance(result["recommended_actions"], str) else result["recommended_actions"]
+                result["recommendations"] = [{"action": a.get("action", str(a)), "risk": a.get("risk_level", "low"), "auto": True} for a in actions]
+            except Exception:
+                pass
+        if result.get("raw_output"):
+            try:
+                raw = json.loads(result["raw_output"]) if isinstance(result["raw_output"], str) else result["raw_output"]
+                result["raw_response"] = json.dumps(raw, ensure_ascii=False, indent=2)
+            except Exception:
+                result["raw_response"] = result.get("raw_output", "")
+        return success(result)
+
+    # 自由问答模式
+    config = get_config()
+    base_url = getattr(config, 'llm_base_url', 'http://127.0.0.1:8000/v1')
+    model = getattr(config, 'llm_model', 'qwen3.5-0.8b')
+
+    system_prompt = """你是 AUTOPS 自治运维系统的 AI 运维分析专家。你的职责是：
+1. 分析运维问题的根因
+2. 提供结构化的处置建议
+3. 评估操作风险
+
+请用 JSON 格式回复：
+{"root_cause": "根因分析", "confidence": 85, "recommendations": [{"action": "具体动作", "risk": "low/medium/high", "auto": true/false}]}"""
+
+    user_prompt = f"问题: {question}"
+    if context:
+        user_prompt += f"\n上下文: {context}"
+    if asset_type:
+        user_prompt += f"\n资产类型: {asset_type}"
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                f"{base_url}/chat/completions",
+                json={
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    "temperature": 0.3,
+                    "max_tokens": 1024,
+                },
+            )
+            if resp.status_code == 200:
+                content = resp.json()["choices"][0]["message"]["content"]
+                result = {"raw_response": content}
+                try:
+                    start = content.find("{")
+                    end = content.rfind("}") + 1
+                    if start >= 0 and end > start:
+                        parsed = json.loads(content[start:end])
+                        result.update(parsed)
+                except json.JSONDecodeError:
+                    result["root_cause"] = content
+                    result["confidence"] = 50
+                    result["recommendations"] = []
+                return success(result)
+            return success({"error": f"LLM 返回 {resp.status_code}", "root_cause": "模型服务暂时不可用", "confidence": 0, "recommendations": []})
+    except httpx.ConnectError:
+        return success({"error": "模型服务不可用", "root_cause": "vLLM 服务未启动", "confidence": 0, "recommendations": []})
+    except Exception as e:
+        return success({"error": str(e), "root_cause": "分析失败", "confidence": 0, "recommendations": []})
+
+
 @router.post("/analyses/{analysis_id}/feedback")
 async def submit_feedback(analysis_id: str, data: AIFeedback, svc: AIOpsService = Depends(_get_svc)):
     a = await svc.submit_feedback(analysis_id, data)

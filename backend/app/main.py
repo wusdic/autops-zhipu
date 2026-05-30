@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
+from app.api.health import router as health_router
 from app.common.exceptions import AppError, app_error_handler, generic_error_handler
 from app.common.trace import TraceIdMiddleware
 from app.infra.config import get_config
@@ -53,6 +54,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(Exception, generic_error_handler)
 
     # 路由
+    app.include_router(health_router)  # /health, /ready at root level
     app.include_router(api_router, prefix=config.api_prefix)
 
     return app
