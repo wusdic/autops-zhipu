@@ -1,0 +1,59 @@
+"""采集器 API."""
+
+from __future__ import annotations
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.common.response import paginate, success
+from app.common.crud_service import model_to_dict
+from app.infra.database import get_db
+from app.domains.collector.service import CollectorService
+from app.domains.collector.schemas import CollectorCreate, CollectionJobCreate
+
+router = APIRouter(prefix="/collectors", tags=["采集器"])
+job_router = APIRouter(prefix="/collection-jobs", tags=["采集任务"])
+
+
+def _get_svc(db: AsyncSession = Depends(get_db)) -> CollectorService:
+    return CollectorService(db)
+
+
+@router.get("")
+async def list_collectors(svc: CollectorService = Depends(_get_svc)):
+    items = await svc.list_collectors()
+    return success([model_to_dict(i) for i in items])
+
+
+@router.post("")
+async def register_collector(data: CollectorCreate, svc: CollectorService = Depends(_get_svc)):
+    c = await svc.register_collector(**data.model_dump())
+    return success(model_to_dict(c))
+
+
+@job_router.get("")
+async def list_jobs(
+    asset_id: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    svc: CollectorService = Depends(_get_svc),
+):
+    items, total = await svc.list_jobs(asset_id, page, page_size)
+    return paginate([model_to_dict(i) for i in items], total, page, page_size)
+
+
+@job_router.post("")
+async def create_job(data: CollectionJobCreate, svc: CollectorService = Depends(_get_svc)):
+    job = await svc.create_job(**data.model_dump())
+    return success(model_to_dict(job))
+
+
+@job_router.get("/{job_id}/results")
+async def get_job_results(
+    job_id: str,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    svc: CollectorService = Depends(_get_svc),
+):
+    items, total = await svc.get_job_results(job_id, page, page_size)
+    return paginate([model_to_dict(i) for i in items], total, page, page_size)

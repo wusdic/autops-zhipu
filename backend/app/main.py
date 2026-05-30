@@ -39,7 +39,6 @@ def create_app() -> FastAPI:
     )
 
     # 中间件
-    app.add_middleware(TraceIdMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=config.cors_origins,
@@ -47,6 +46,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(TraceIdMiddleware)
 
     # 异常处理
     app.add_exception_handler(AppError, app_error_handler)
