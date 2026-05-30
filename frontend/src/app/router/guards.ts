@@ -1,6 +1,7 @@
 import type { Router } from 'vue-router'
+import { APP_CONFIG } from '@/shared/config'
 
-const TOKEN_KEY = 'autops_token'
+const TOKEN_KEY = APP_CONFIG.TOKEN_KEY
 const LOGIN_PATH = '/login'
 
 // Routes that don't require authentication

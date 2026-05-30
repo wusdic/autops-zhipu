@@ -26,8 +26,6 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { setToken } from '@/app/router/guards'
 
-const API = (window as any).__AUTOPS_API__ || 'http://localhost:8001'
-
 const router = useRouter()
 const loading = ref(false)
 const form = reactive({ username: '', password: '' })
@@ -39,7 +37,7 @@ async function handleLogin() {
   }
   loading.value = true
   try {
-    const res = await fetch(`${API}/api/v1/auth/login`, {
+    const res = await fetch('/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
@@ -47,6 +45,7 @@ async function handleLogin() {
     const data = await res.json()
     if (data.code === 0 && data.data?.access_token) {
       setToken(data.data.access_token)
+      localStorage.setItem('username', form.username)
       ElMessage.success('登录成功')
       const redirect = (router.currentRoute.value.query.redirect as string) || '/'
       router.push(redirect)
@@ -79,7 +78,7 @@ async function handleLogin() {
 .login-header h1 {
   margin: 0;
   font-size: 28px;
-  color: #409eff;
+  color: #303133;
 }
 .login-header p {
   margin: 4px 0 0;

@@ -86,7 +86,7 @@ const configType = ref('')
 const showCreateDialog = ref(false)
 const editingConfig = ref<any>(null)
 const configForm = reactive({ config_key: '', config_value: '', config_type: 'system', description: '' })
-const API = '/api/v1/configs'
+const API = '/api/v1/configs/definitions'
 
 function formatTime(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '' }
 function truncate(s: string, n: number) { return s && s.length > n ? s.substring(0, n) + '...' : s }

@@ -53,7 +53,7 @@ async function loadLogs() {
   loading.value = true
   try {
     const params: any = { page: page.value, page_size: pageSize.value }
-    if (filters.user) params.user_id = filters.user
+    if (filters.user) params.username = filters.user
     if (filters.action) params.action = filters.action
     const { data } = await api.get('/api/v1/audit-logs', { params })
     if (data.code === 0) { logs.value = data.data.items || []; total.value = data.data.total || 0 }

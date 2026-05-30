@@ -87,7 +87,8 @@ function renderMarkdown(text: string) {
 async function loadArticles() {
   loading.value = true
   try {
-    const params: any = { page: page.value, page_size: 20, status: 'published' }
+    const params: any = { page: page.value, page_size: 20 }
+    if (searchText.value) params.search = searchText.value
     const { data } = await api.get(API, { params })
     if (data.code === 0) { articles.value = data.data.items || []; total.value = data.data.total || 0 }
   } finally { loading.value = false }

@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <span>资产列表</span>
-          <el-button type="primary" @click="showCreateDialog = true">
+          <el-button type="primary" @click="openCreateDialog">
             <el-icon><Plus /></el-icon> 新建资产
           </el-button>
         </div>
@@ -60,7 +60,7 @@
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="viewAsset(row)">详情</el-button>
-            <el-button size="small" type="warning" @click="editAsset(row)">编辑</el-button>
+            <el-button size="small" type="warning" @click="openEditDialog(row)">编辑</el-button>
             <el-popconfirm title="确认删除?" @confirm="deleteAsset(row.id)">
               <template #reference>
                 <el-button size="small" type="danger">删除</el-button>
@@ -81,14 +81,14 @@
       />
     </el-card>
 
-    <!-- Create Dialog -->
-    <el-dialog v-model="showCreateDialog" title="新建资产" width="600px">
-      <el-form :model="createForm" label-width="80px">
+    <!-- Create/Edit Dialog -->
+    <el-dialog v-model="showFormDialog" :title="isEditing ? '编辑资产' : '新建资产'" width="600px">
+      <el-form :model="formData" label-width="80px">
         <el-form-item label="名称" required>
-          <el-input v-model="createForm.name" />
+          <el-input v-model="formData.name" />
         </el-form-item>
         <el-form-item label="类型" required>
-          <el-select v-model="createForm.asset_type" style="width: 100%">
+          <el-select v-model="formData.asset_type" style="width: 100%">
             <el-option label="Linux 服务器" value="linux_server" />
             <el-option label="Windows 服务器" value="windows_server" />
             <el-option label="数据库" value="database" />
@@ -97,31 +97,38 @@
           </el-select>
         </el-form-item>
         <el-form-item label="IP" required>
-          <el-input v-model="createForm.ip" />
+          <el-input v-model="formData.ip" />
         </el-form-item>
         <el-form-item label="端口">
-          <el-input-number v-model="createForm.port" :min="1" :max="65535" />
+          <el-input-number v-model="formData.port" :min="1" :max="65535" />
         </el-form-item>
         <el-form-item label="操作系统">
-          <el-select v-model="createForm.os_type">
+          <el-select v-model="formData.os_type">
             <el-option label="Linux" value="linux" />
             <el-option label="Windows" value="windows" />
           </el-select>
         </el-form-item>
-        <el-form-item label="描述">
-          <el-input v-model="createForm.description" type="textarea" :rows="3" />
+        <el-form-item label="状态">
+          <el-select v-model="formData.status">
+            <el-option label="活跃" value="active" />
+            <el-option label="停用" value="inactive" />
+            <el-option label="维护中" value="maintenance" />
+          </el-select>
         </el-form-item>
         <el-form-item label="环境">
-          <el-select v-model="createForm.environment">
+          <el-select v-model="formData.environment">
             <el-option label="生产" value="production" />
             <el-option label="测试" value="staging" />
             <el-option label="开发" value="development" />
           </el-select>
         </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="formData.description" type="textarea" :rows="3" />
+        </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showCreateDialog = false">取消</el-button>
-        <el-button type="primary" @click="createAsset" :loading="creating">创建</el-button>
+        <el-button @click="showFormDialog = false">取消</el-button>
+        <el-button type="primary" @click="saveAsset" :loading="saving">{{ isEditing ? '保存' : '创建' }}</el-button>
       </template>
     </el-dialog>
 
@@ -144,6 +151,7 @@
           <el-descriptions-item label="环境">{{ currentAsset.environment || '-' }}</el-descriptions-item>
           <el-descriptions-item label="描述">{{ currentAsset.description || '-' }}</el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ currentAsset.created_at }}</el-descriptions-item>
+          <el-descriptions-item label="更新时间">{{ currentAsset.updated_at || '-' }}</el-descriptions-item>
         </el-descriptions>
       </template>
     </el-drawer>
@@ -157,21 +165,22 @@ import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 
 const loading = ref(false)
-const creating = ref(false)
+const saving = ref(false)
 const assets = ref<any[]>([])
-const showCreateDialog = ref(false)
+const showFormDialog = ref(false)
 const showDetail = ref(false)
 const currentAsset = ref<any>(null)
+const isEditing = ref(false)
+const editingId = ref('')
 
 const filters = reactive({ search: '', asset_type: '', status: '' })
 const pagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
-const createForm = reactive({
+const defaultForm = {
   name: '', asset_type: 'linux_server', ip: '', port: undefined as number | undefined,
-  os_type: 'linux', description: '', environment: 'production',
-})
-
-const API_BASE = '/api/v1'
+  os_type: 'linux', description: '', environment: 'production', status: 'active',
+}
+const formData = reactive({ ...defaultForm })
 
 function formatType(t: string) {
   const map: Record<string, string> = {
@@ -195,7 +204,7 @@ async function loadAssets() {
     const params: any = { page: pagination.page, page_size: pagination.pageSize }
     if (filters.asset_type) params.asset_type = filters.asset_type
     if (filters.status) params.status = filters.status
-    const { data } = await api.get(`${API_BASE}/assets`, { params })
+    const { data } = await api.get('/api/v1/assets', { params })
     if (data.code === 0) {
       assets.value = data.data.items || []
       pagination.total = data.data.total || 0
@@ -207,22 +216,60 @@ async function loadAssets() {
   }
 }
 
-async function createAsset() {
-  creating.value = true
+function openCreateDialog() {
+  isEditing.value = false
+  editingId.value = ''
+  Object.assign(formData, { ...defaultForm })
+  showFormDialog.value = true
+}
+
+function openEditDialog(row: any) {
+  isEditing.value = true
+  editingId.value = row.id
+  Object.assign(formData, {
+    name: row.name,
+    asset_type: row.asset_type,
+    ip: row.ip,
+    port: row.port,
+    os_type: row.os_type || 'linux',
+    description: row.description || '',
+    environment: row.environment || 'production',
+    status: row.status || 'active',
+  })
+  showFormDialog.value = true
+}
+
+async function saveAsset() {
+  if (!formData.name || !formData.ip) {
+    ElMessage.warning('名称和IP为必填项')
+    return
+  }
+  saving.value = true
   try {
-    const { data } = await api.post(`${API_BASE}/assets`, createForm)
-    if (data.code === 0) {
-      ElMessage.success('资产创建成功')
-      showCreateDialog.value = false
-      Object.assign(createForm, { name: '', ip: '', description: '' })
-      loadAssets()
+    if (isEditing.value) {
+      const { data } = await api.put(`/api/v1/assets/${editingId.value}`, formData)
+      if (data.code === 0) {
+        ElMessage.success('保存成功')
+        showFormDialog.value = false
+        loadAssets()
+      } else {
+        ElMessage.error(data.message || '保存失败')
+      }
     } else {
-      ElMessage.error(data.message || '创建失败')
+      const { data } = await api.post('/api/v1/assets', formData)
+      if (data.code === 0) {
+        ElMessage.success('创建成功')
+        showFormDialog.value = false
+        Object.assign(formData, { ...defaultForm })
+        loadAssets()
+      } else {
+        ElMessage.error(data.message || '创建失败')
+      }
     }
   } catch (e: any) {
-    ElMessage.error('创建失败: ' + (e.message || e))
+    ElMessage.error((isEditing.value ? '保存' : '创建') + '失败: ' + (e.message || e))
   } finally {
-    creating.value = false
+    saving.value = false
   }
 }
 
@@ -231,14 +278,9 @@ function viewAsset(row: any) {
   showDetail.value = true
 }
 
-function editAsset(row: any) {
-  // TODO: edit dialog
-  ElMessage.info('编辑功能开发中')
-}
-
 async function deleteAsset(id: string) {
   try {
-    await api.delete(`${API_BASE}/assets/${id}`)
+    await api.delete(`/api/v1/assets/${id}`)
     ElMessage.success('删除成功')
     loadAssets()
   } catch (e: any) {

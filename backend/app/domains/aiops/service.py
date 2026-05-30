@@ -177,7 +177,17 @@ class AIOpsService:
         asset_type = data.get("asset_type", "")
         alert_id = data.get("alert_id")
         alert_title = data.get("alert_title", "")
-        # alert_context = data.get("alert_context", "")
+
+        # Check LLM availability first
+        health = await self.check_llm_health()
+        if not health.get("available"):
+            return {
+                "error": "模型服务不可用",
+                "root_cause": "AI 模型服务（vLLM）当前未启动。请先启动模型服务后重试。",
+                "confidence": 0,
+                "recommendations": [],
+                "degraded": True,
+            }
 
         # 如果有告警ID，优先做告警分析
         if alert_id or alert_title:

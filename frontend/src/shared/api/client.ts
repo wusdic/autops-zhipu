@@ -1,10 +1,10 @@
 import axios from 'axios'
-import { useAuthStore } from '@/app/store/auth'
+import { APP_CONFIG } from '@/shared/config'
 import router from '@/app/router'
 
 const apiClient = axios.create({
-  baseURL: '/api/v1',
-  timeout: 30000,
+  baseURL: '',
+  timeout: APP_CONFIG.API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -12,9 +12,9 @@ const apiClient = axios.create({
 
 // 请求拦截：注入 Token
 apiClient.interceptors.request.use((config) => {
-  const authStore = useAuthStore()
-  if (authStore.token) {
-    config.headers.Authorization = `Bearer ${authStore.token}`
+  const token = localStorage.getItem(APP_CONFIG.TOKEN_KEY)
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
   }
   return config
 })
@@ -30,9 +30,8 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      const authStore = useAuthStore()
-      authStore.clearAuth()
-      router.push({ name: 'Login' })
+      localStorage.removeItem(APP_CONFIG.TOKEN_KEY)
+      router.push({ name: 'login' })
     }
     const message = error.response?.data?.message || error.message || '网络错误'
     return Promise.reject(new Error(message))

@@ -21,6 +21,7 @@ from app.domains.ticket.api import router as ticket_router
 from app.domains.knowledge.api import router as knowledge_router
 from app.domains.aiops.api import router as aiops_router
 from app.domains.governance.api import router as governance_router
+from app.api.audit import router as audit_router
 
 api_router = APIRouter()
 
@@ -68,3 +69,6 @@ api_router.include_router(knowledge_router)
 
 # AIops
 api_router.include_router(aiops_router)
+
+# Audit
+api_router.include_router(audit_router)

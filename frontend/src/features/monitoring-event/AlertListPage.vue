@@ -63,7 +63,7 @@ const loading = ref(false)
 const alerts = ref<any[]>([])
 const filters = reactive({ status: '' })
 const pagination = reactive({ page: 1, pageSize: 20, total: 0 })
-const API_BASE = '/api/v1'
+
 
 function severityType(s: string) {
   return s === 'critical' ? 'danger' : s === 'warning' ? 'warning' : 'info'
@@ -83,7 +83,7 @@ async function loadAlerts() {
   try {
     const params: any = { page: pagination.page, page_size: pagination.pageSize }
     if (filters.status) params.status = filters.status
-    const { data } = await api.get(`${API_BASE}/alerts`, { params })
+    const { data } = await api.get(`/api/v1/alerts`, { params })
     if (data.code === 0) {
       alerts.value = data.data.items || []
       pagination.total = data.data.total || 0
@@ -97,7 +97,7 @@ async function loadAlerts() {
 
 async function ackAlert(id: string) {
   try {
-    const { data } = await api.post(`${API_BASE}/alerts/${id}/acknowledge`)
+    const { data } = await api.post(`/api/v1/alerts/${id}/acknowledge`)
     if (data.code === 0) {
       ElMessage.success('告警已确认')
       loadAlerts()
@@ -109,7 +109,7 @@ async function ackAlert(id: string) {
 
 async function resolveAlert(id: string) {
   try {
-    const { data } = await api.post(`${API_BASE}/alerts/${id}/resolve`)
+    const { data } = await api.post(`/api/v1/alerts/${id}/resolve`)
     if (data.code === 0) {
       ElMessage.success('告警已恢复')
       loadAlerts()
@@ -126,7 +126,7 @@ async function createTicket(alert: any) {
       cancelButtonText: '取消',
       inputPlaceholder: '请输入工单描述',
     }).then(async ({ value }) => {
-      const { data } = await api.post(`${API_BASE}/tickets`, {
+      const { data } = await api.post(`/api/v1/tickets`, {
         title: `[告警] ${alert.title}`,
         ticket_type: 'incident',
         priority: alert.severity === 'critical' ? 'high' : 'medium',

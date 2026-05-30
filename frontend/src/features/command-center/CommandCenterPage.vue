@@ -93,7 +93,7 @@ import api from '@/shared/api/client'
 const stats = reactive({ criticalAlerts: 0, totalAlerts: 0, totalAssets: 0, runningExecutions: 0 })
 const recentAlerts = ref<any[]>([])
 const assetHealth = reactive({ healthy: 0, warning: 0, critical: 0, unknown: 0 })
-const API_BASE = '/api/v1'
+
 
 const healthPercent = computed(() => {
   const total = assetHealth.healthy + assetHealth.warning + assetHealth.critical + assetHealth.unknown || 1
@@ -108,7 +108,7 @@ const healthPercent = computed(() => {
 async function loadDashboard() {
   // Load alerts
   try {
-    const { data: alertData } = await api.get(`${API_BASE}/alerts`, { params: { page_size: 10 } })
+    const { data: alertData } = await api.get(`/api/v1/alerts`, { params: { page_size: 10 } })
     if (alertData.code === 0) {
       recentAlerts.value = alertData.data.items || []
       stats.totalAlerts = alertData.data.total || 0
@@ -118,7 +118,7 @@ async function loadDashboard() {
 
   // Load assets
   try {
-    const { data: assetData } = await api.get(`${API_BASE}/assets`, { params: { page_size: 100 } })
+    const { data: assetData } = await api.get(`/api/v1/assets`, { params: { page_size: 100 } })
     if (assetData.code === 0) {
       const items = assetData.data.items || []
       stats.totalAssets = assetData.data.total || 0
@@ -128,7 +128,7 @@ async function loadDashboard() {
 
   // Load executions
   try {
-    const { data: execData } = await api.get(`${API_BASE}/executions`, { params: { status: 'running', page_size: 1 } })
+    const { data: execData } = await api.get(`/api/v1/executions`, { params: { status: 'running', page_size: 1 } })
     if (execData.code === 0) {
       stats.runningExecutions = execData.data.total || 0
     }
