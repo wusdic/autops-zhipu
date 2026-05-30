@@ -73,7 +73,7 @@ class AIOpsService:
 
     async def _call_llm(self, analysis: AIAnalysis) -> dict:
         config = self.llm_config
-        base_url = getattr(config, 'llm_base_url', 'http://127.0.0.1:8000/v1')
+        base_url = getattr(config, 'llm_base_url', '')
         model = getattr(config, 'model_name', getattr(config, 'llm_model', 'default'))
 
         prompt = f"""你是运维分析专家。请分析以下问题并给出结构化的JSON响应。
@@ -155,7 +155,7 @@ class AIOpsService:
         """检查 LLM 服务是否可用."""
         try:
             config = get_config()
-            base_url = getattr(config, 'llm_base_url', 'http://127.0.0.1:8000/v1')
+            base_url = getattr(config, 'llm_base_url', '')
             async with httpx.AsyncClient(timeout=5) as client:
                 resp = await client.get(f"{base_url}/models")
                 if resp.status_code == 200:
@@ -207,7 +207,7 @@ class AIOpsService:
 
         # 自由问答模式
         config = self.llm_config
-        base_url = getattr(config, 'llm_base_url', 'http://127.0.0.1:8000/v1')
+        base_url = getattr(config, 'llm_base_url', '')
         model = getattr(config, 'model_name', getattr(config, 'llm_model', 'default'))
 
         system_prompt = """你是 AUTOPS 自治运维系统的 AI 运维分析专家。你的职责是：

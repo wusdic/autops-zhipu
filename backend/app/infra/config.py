@@ -65,7 +65,7 @@ class RedisConfig(BaseSettings):
 class LLMConfig(BaseSettings):
     """LLM 配置."""
 
-    base_url: str = "http://127.0.0.1:8000/v1"
+    base_url: str = ""
     model_name: str = "default"
     api_key: str = "EMPTY"
     timeout: int = 60
