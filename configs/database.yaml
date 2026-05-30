@@ -1,0 +1,9 @@
+# AUTOPS 数据库配置
+database:
+  host: 127.0.0.1
+  port: 3306
+  user: autops
+  password: ""
+  database: autops
+  pool_size: 10
+  max_overflow: 20
