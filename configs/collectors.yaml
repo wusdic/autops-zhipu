@@ -1,0 +1,68 @@
+# AUTOPS 采集器配置
+collectors:
+  ssh:
+    name: SSH 采集器
+    protocol: ssh
+    port: 22
+    timeout: 30
+    commands:
+      - name: cpu_usage
+        command: "top -bn1 | grep 'Cpu(s)'"
+        interval: 60
+      - name: memory_usage
+        command: "free -m"
+        interval: 60
+      - name: disk_usage
+        command: "df -h"
+        interval: 300
+      - name: service_status
+        command: "systemctl is-active {service_name}"
+        interval: 60
+
+  winrm:
+    name: WinRM 采集器
+    protocol: winrm
+    port: 5985
+    timeout: 30
+    commands:
+      - name: service_status
+        command: "Get-Service -Name {service_name} | Select-Object Status"
+        interval: 60
+      - name: disk_usage
+        command: "Get-WmiObject Win32_LogicalDisk"
+        interval: 300
+
+  http:
+    name: HTTP/TCP 采集器
+    protocol: http
+    timeout: 10
+    checks:
+      - name: port_reachable
+        type: tcp
+        interval: 30
+      - name: http_status
+        type: http
+        expected_status: 200
+        interval: 30
+
+  database:
+    name: 数据库采集器
+    protocol: database
+    timeout: 15
+    queries:
+      - name: connections
+        query: "SHOW STATUS LIKE 'Threads_connected'"
+        interval: 60
+      - name: connection_limit
+        query: "SHOW VARIABLES LIKE 'max_connections'"
+        interval: 300
+
+  certificate:
+    name: 证书采集器
+    protocol: certificate
+    timeout: 10
+    checks:
+      - name: ssl_expiry
+        type: ssl_cert
+        warn_days_before: 30
+        interval: 86400

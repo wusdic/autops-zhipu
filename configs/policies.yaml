@@ -1,0 +1,32 @@
+# AUTOPS 默认策略配置
+policies:
+  defaults:
+    max_concurrent_executions: 5
+    default_timeout: 300
+    approval_required_for_risk: high
+    auto_resolve_on_success: true
+    auto_ticket_on_failure: true
+
+  risk_levels:
+    low:
+      requires_approval: false
+      max_impact_assets: 10
+    medium:
+      requires_approval: false
+      max_impact_assets: 5
+    high:
+      requires_approval: true
+      max_impact_assets: 2
+    critical:
+      requires_approval: true
+      max_impact_assets: 1
+
+  blocked_commands:
+    - "rm -rf /"
+    - "mkfs"
+    - "dd if="
+    - ":(){ :|:& };:"
+    - "shutdown -h now"
+    - "reboot"
+    - "init 0"
+    - "init 6"

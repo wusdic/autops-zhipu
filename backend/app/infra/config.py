@@ -66,7 +66,7 @@ class LLMConfig(BaseSettings):
     """LLM 配置."""
 
     base_url: str = "http://127.0.0.1:8000/v1"
-    model_name: str = "qwen3.5-0.8b"
+    model_name: str = "default"
     api_key: str = "EMPTY"
     timeout: int = 60
     max_tokens: int = 2048
