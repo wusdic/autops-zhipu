@@ -1,0 +1,23 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install system deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc default-libmysqlclient-dev pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python deps
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt 2>/dev/null || \
+    pip install --no-cache-dir fastapi uvicorn sqlalchemy[asyncio] aiomysql \
+    alembic pydantic pydantic-settings redis python-jose[cryptography] \
+    passlib[bcrypt] python-multipart pyyaml httpx
+
+# Copy application
+COPY . .
+
+# Run migrations and start
+EXPOSE 8001
+
+CMD ["sh", "-c", "alembic upgrade head 2>/dev/null; uvicorn app.main:app --host 0.0.0.0 --port 8001"]
