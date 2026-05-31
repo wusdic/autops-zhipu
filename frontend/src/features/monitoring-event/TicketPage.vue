@@ -1,134 +1,1223 @@
 <template>
-  <div>
-    <el-card>
+  <div class="ticket-list-page">
+    <!-- ========== Statistics Row ========== -->
+    <el-row :gutter="16" class="stats-row">
+      <el-col :span="4">
+        <el-card shadow="hover" class="stat-card stat-card--total">
+          <div class="stat-card__body">
+            <div class="stat-card__icon">
+              <el-icon :size="28"><Tickets /></el-icon>
+            </div>
+            <div class="stat-card__info">
+              <div class="stat-card__value">{{ stats.total }}</div>
+              <div class="stat-card__label">全部工单</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover" class="stat-card stat-card--open">
+          <div class="stat-card__body">
+            <div class="stat-card__icon">
+              <el-icon :size="28"><Bell /></el-icon>
+            </div>
+            <div class="stat-card__info">
+              <div class="stat-card__value">{{ stats.open }}</div>
+              <div class="stat-card__label">待处理</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover" class="stat-card stat-card--progress">
+          <div class="stat-card__body">
+            <div class="stat-card__icon">
+              <el-icon :size="28"><Loading /></el-icon>
+            </div>
+            <div class="stat-card__info">
+              <div class="stat-card__value">{{ stats.inProgress }}</div>
+              <div class="stat-card__label">处理中</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover" class="stat-card stat-card--closed">
+          <div class="stat-card__body">
+            <div class="stat-card__icon">
+              <el-icon :size="28"><CircleCheckFilled /></el-icon>
+            </div>
+            <div class="stat-card__info">
+              <div class="stat-card__value">{{ stats.closed }}</div>
+              <div class="stat-card__label">已关闭</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover" class="stat-card stat-card--overdue">
+          <div class="stat-card__body">
+            <div class="stat-card__icon">
+              <el-icon :size="28"><WarningFilled /></el-icon>
+            </div>
+            <div class="stat-card__info">
+              <div class="stat-card__value">{{ stats.overdue }}</div>
+              <div class="stat-card__label">SLA超时</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="4">
+        <el-card shadow="hover" class="stat-card stat-card--sla">
+          <div class="stat-card__body">
+            <div class="stat-card__icon">
+              <el-icon :size="28"><Timer /></el-icon>
+            </div>
+            <div class="stat-card__info">
+              <div class="stat-card__value">{{ slaPercent }}%</div>
+              <div class="stat-card__label">SLA达标率</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- ========== SLA Summary Bar ========== -->
+    <el-card v-if="stats.total > 0" class="sla-bar-card" shadow="never">
+      <div class="sla-bar">
+        <span class="sla-bar__label">SLA 达标统计</span>
+        <el-progress
+          :percentage="slaPercent"
+          :color="slaPercent >= 90 ? '#67c23a' : slaPercent >= 70 ? '#e6a23c' : '#f56c6c'"
+          :stroke-width="18"
+          :text-inside="true"
+          style="flex: 1; margin: 0 16px"
+        />
+        <span class="sla-bar__detail">
+          达标 <strong>{{ stats.withinSla }}</strong> / {{ stats.total }} 工单
+        </span>
+      </div>
+    </el-card>
+
+    <!-- ========== Main Card ========== -->
+    <el-card class="main-card">
       <template #header>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span>工单中心</span>
-          <el-button type="primary" @click="showCreate = true">新建工单</el-button>
+        <div class="card-header">
+          <span class="card-header__title">工单中心</span>
+          <div class="card-header__actions">
+            <el-button type="primary" :icon="Plus" @click="openCreateDialog">新建工单</el-button>
+            <el-button :icon="Download" @click="exportTickets">导出</el-button>
+            <el-button :icon="Refresh" circle size="small" @click="loadTickets" />
+          </div>
         </div>
       </template>
 
-      <el-table :data="tickets" v-loading="loading" stripe>
-        <el-table-column prop="priority" label="优先级" width="80">
+      <!-- ========== Filters ========== -->
+      <el-form :inline="true" class="filter-form" @submit.prevent="handleSearch">
+        <el-form-item label="状态">
+          <el-select v-model="filters.status" placeholder="全部状态" clearable style="width: 140px">
+            <el-option label="待处理" value="open" />
+            <el-option label="处理中" value="in_progress" />
+            <el-option label="待审批" value="pending_approval" />
+            <el-option label="已解决" value="resolved" />
+            <el-option label="已关闭" value="closed" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="优先级">
+          <el-select v-model="filters.priority" placeholder="全部优先级" clearable style="width: 130px">
+            <el-option label="紧急" value="critical" />
+            <el-option label="高" value="high" />
+            <el-option label="中" value="medium" />
+            <el-option label="低" value="low" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="来源">
+          <el-select v-model="filters.source" placeholder="全部来源" clearable style="width: 130px">
+            <el-option label="手动创建" value="manual" />
+            <el-option label="告警触发" value="alert" />
+            <el-option label="自动化" value="automation" />
+            <el-option label="策略触发" value="policy" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="负责人">
+          <el-input
+            v-model="filters.assignee"
+            placeholder="搜索负责人"
+            clearable
+            :prefix-icon="Search"
+            style="width: 150px"
+          />
+        </el-form-item>
+        <el-form-item label="时间范围">
+          <el-date-picker
+            v-model="filters.dateRange"
+            type="datetimerange"
+            range-separator="至"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            format="YYYY-MM-DD HH:mm"
+            value-format="YYYY-MM-DDTHH:mm:ssZ"
+            style="width: 360px"
+          />
+        </el-form-item>
+        <el-form-item label="关键词">
+          <el-input
+            v-model="filters.keyword"
+            placeholder="搜索工单标题/描述"
+            clearable
+            :prefix-icon="Search"
+            style="width: 180px"
+            @keyup.enter="handleSearch"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :icon="Search" @click="handleSearch">查询</el-button>
+          <el-button :icon="RefreshLeft" @click="resetFilters">重置</el-button>
+        </el-form-item>
+      </el-form>
+
+      <!-- ========== Batch Operations Bar ========== -->
+      <transition name="el-fade-in">
+        <div v-if="selectedIds.length > 0" class="batch-bar">
+          <span class="batch-bar__info">
+            已选择 <strong>{{ selectedIds.length }}</strong> 条工单
+          </span>
+          <el-button type="primary" size="small" :icon="User" @click="batchAssign">
+            批量指派
+          </el-button>
+          <el-button type="success" size="small" :icon="CircleCheck" @click="batchClose">
+            批量关闭
+          </el-button>
+          <el-button size="small" @click="clearSelection">取消选择</el-button>
+        </div>
+      </transition>
+
+      <!-- ========== Ticket Table ========== -->
+      <el-table
+        ref="tableRef"
+        :data="tickets"
+        v-loading="loading"
+        stripe
+        border
+        row-key="id"
+        @selection-change="handleSelectionChange"
+        @row-click="handleRowClick"
+        class="ticket-table"
+      >
+        <el-table-column type="selection" width="45" fixed="left" />
+        <el-table-column prop="id" label="ID" width="90" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-tag :type="row.priority==='critical'?'danger':row.priority==='high'?'warning':'info'" size="small">
-              {{ row.priority }}
+            <el-button link type="primary" size="small" @click.stop="viewDetail(row)">
+              #{{ row.id?.slice(0, 8) || '-' }}
+            </el-button>
+          </template>
+        </el-table-column>
+        <el-table-column prop="title" label="标题" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="ticket-title" @click.stop="viewDetail(row)">{{ row.title || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="source" label="来源" width="100" align="center">
+          <template #default="{ row }">
+            <el-tooltip :content="sourceTooltip(row.source)" placement="top">
+              <el-icon :size="18">
+                <component :is="sourceIcon(row.source)" />
+              </el-icon>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column prop="priority" label="优先级" width="90" align="center">
+          <template #default="{ row }">
+            <el-tag :type="priorityType(row.priority)" size="small" effect="dark">
+              {{ priorityLabel(row.priority) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="title" label="标题" min-width="200" />
-        <el-table-column prop="ticket_type" label="类型" width="90" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag size="small">{{ row.status }}</el-tag>
+            <el-tag :type="statusType(row.status)" size="small">
+              <el-icon v-if="row.status === 'overdue'" style="margin-right: 2px"><WarningFilled /></el-icon>
+              {{ statusLabel(row.status) }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="创建时间" width="170" />
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column prop="assigned_to" label="负责人" width="110" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-button size="small" @click="viewTicket(row)">查看</el-button>
-            <el-button v-if="row.status==='open'" size="small" type="success"
-              @click="closeTicket(row.id)">关闭</el-button>
+            <span>{{ row.assigned_to || row.assigned_to_name || '未分配' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="SLA倒计时" width="130" align="center">
+          <template #default="{ row }">
+            <template v-if="row.sla_deadline && !['resolved', 'closed'].includes(row.status)">
+              <el-tag
+                v-if="isSlaOverdue(row.sla_deadline)"
+                type="danger"
+                effect="dark"
+                size="small"
+              >
+                <el-icon><WarningFilled /></el-icon>
+                超时
+              </el-tag>
+              <el-tag v-else type="warning" size="small">
+                {{ slaCountdown(row.sla_deadline) }}
+              </el-tag>
+            </template>
+            <span v-else style="color: #c0c4cc">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="created_at" label="创建时间" width="170">
+          <template #default="{ row }">
+            {{ formatTime(row.created_at) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="220" fixed="right" align="center">
+          <template #default="{ row }">
+            <el-button
+              size="small"
+              type="primary"
+              link
+              @click.stop="viewDetail(row)"
+            >详情</el-button>
+            <el-button
+              v-if="!row.assigned_to && row.status === 'open'"
+              size="small"
+              type="warning"
+              link
+              @click.stop="assignToMe(row)"
+            >认领</el-button>
+            <el-button
+              v-if="['open', 'in_progress'].includes(row.status)"
+              size="small"
+              type="success"
+              link
+              @click.stop="closeTicket(row)"
+            >关闭</el-button>
+            <el-button
+              v-if="['open', 'in_progress'].includes(row.status)"
+              size="small"
+              type="danger"
+              link
+              @click.stop="escalateTicket(row)"
+            >升级</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <el-pagination v-model:current-page="page" v-model:page-size="pageSize" :total="total"
-        layout="total, prev, pager, next" @change="load" style="margin-top:16px;justify-content:flex-end" />
+      <!-- ========== Pagination ========== -->
+      <div class="pagination-wrapper">
+        <el-pagination
+          v-model:current-page="pagination.page"
+          v-model:page-size="pagination.pageSize"
+          :total="pagination.total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          background
+          @change="loadTickets"
+        />
+      </div>
     </el-card>
 
-    <el-dialog v-model="showCreate" title="新建工单" width="500px">
-      <el-form :model="form" label-width="80px">
-        <el-form-item label="标题"><el-input v-model="form.title" /></el-form-item>
-        <el-form-item label="类型">
-          <el-select v-model="form.ticket_type"><el-option label="事件" value="incident" />
-            <el-option label="变更" value="change" /><el-option label="任务" value="task" /></el-select>
+    <!-- ========== Create Ticket Dialog ========== -->
+    <el-dialog
+      v-model="createDialogVisible"
+      title="新建工单"
+      width="600px"
+      destroy-on-close
+      :close-on-click-modal="false"
+    >
+      <el-form
+        ref="createFormRef"
+        :model="createForm"
+        :rules="createRules"
+        label-width="100px"
+        label-position="right"
+      >
+        <el-form-item label="标题" prop="title">
+          <el-input v-model="createForm.title" placeholder="请输入工单标题" maxlength="200" show-word-limit />
         </el-form-item>
-        <el-form-item label="优先级">
-          <el-select v-model="form.priority"><el-option label="紧急" value="critical" />
-            <el-option label="高" value="high" /><el-option label="中" value="medium" />
-            <el-option label="低" value="low" /></el-select>
+        <el-form-item label="描述" prop="description">
+          <el-input
+            v-model="createForm.description"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入工单描述"
+            maxlength="2000"
+            show-word-limit
+          />
         </el-form-item>
-        <el-form-item label="描述"><el-input v-model="form.description" type="textarea" :rows="3" /></el-form-item>
+        <el-form-item label="优先级" prop="priority">
+          <el-select v-model="createForm.priority" style="width: 100%">
+            <el-option label="紧急" value="critical" />
+            <el-option label="高" value="high" />
+            <el-option label="中" value="medium" />
+            <el-option label="低" value="low" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="指派给">
+          <el-select
+            v-model="createForm.assigned_to"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="搜索用户（可选）"
+            :remote-method="searchUsers"
+            :loading="usersLoading"
+            clearable
+            style="width: 100%"
+          >
+            <el-option
+              v-for="user in userOptions"
+              :key="user.id"
+              :label="user.display_name || user.username"
+              :value="user.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="关联告警ID">
+          <el-input v-model="createForm.related_alert_id" placeholder="关联告警ID（可选）" clearable />
+        </el-form-item>
+        <el-form-item label="关联资产ID">
+          <el-input v-model="createForm.related_asset_id" placeholder="关联资产ID（可选）" clearable />
+        </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showCreate = false">取消</el-button>
-        <el-button type="primary" @click="createTicket">创建</el-button>
+        <el-button @click="createDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitCreate" :loading="createSubmitting">创建</el-button>
       </template>
     </el-dialog>
 
-    <el-drawer v-model="showDetail" title="工单详情" size="450px">
-      <template v-if="current">
-        <el-descriptions :column="1" border>
-          <el-descriptions-item label="标题">{{ current.title }}</el-descriptions-item>
-          <el-descriptions-item label="类型">{{ current.ticket_type }}</el-descriptions-item>
-          <el-descriptions-item label="状态"><el-tag>{{ current.status }}</el-tag></el-descriptions-item>
-          <el-descriptions-item label="优先级">{{ current.priority }}</el-descriptions-item>
-          <el-descriptions-item label="描述">{{ current.description || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ current.created_at }}</el-descriptions-item>
-        </el-descriptions>
-        <h4 style="margin-top:20px">评论</h4>
-        <div v-for="c in comments" :key="c.id" style="margin:8px 0;padding:8px;background:#f5f7fa;border-radius:4px">
-          <div style="font-size:12px;color:#909399">{{ c.created_at }}</div>
-          <div>{{ c.content }}</div>
-        </div>
-        <el-input v-model="commentText" placeholder="输入评论" style="margin-top:8px">
-          <template #append><el-button @click="addComment(current.id)">发送</el-button></template>
-        </el-input>
+    <!-- ========== Batch Assign Dialog ========== -->
+    <el-dialog
+      v-model="batchAssignDialogVisible"
+      title="批量指派"
+      width="480px"
+      destroy-on-close
+    >
+      <el-form label-width="80px">
+        <el-form-item label="选中数量">
+          <span>{{ selectedIds.length }} 条工单</span>
+        </el-form-item>
+        <el-form-item label="指派给">
+          <el-select
+            v-model="batchAssignee"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="搜索用户"
+            :remote-method="searchUsers"
+            :loading="usersLoading"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="user in userOptions"
+              :key="user.id"
+              :label="user.display_name || user.username"
+              :value="user.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="batchAssignDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitBatchAssign" :loading="batchSubmitting" :disabled="!batchAssignee">
+          确认指派
+        </el-button>
       </template>
-    </el-drawer>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
+import {
+  Search,
+  Refresh,
+  RefreshLeft,
+  Plus,
+  Download,
+  CircleCheck,
+  CircleCheckFilled,
+  WarningFilled,
+  Bell,
+  Tickets,
+  Timer,
+  Loading,
+  User,
+  EditPen,
+  Promotion,
+  Notification,
+  Monitor,
+  SetUp,
+  Operation,
+} from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 
+const router = useRouter()
+
+// ── State ──────────────────────────────────────────────────────────
 const loading = ref(false)
 const tickets = ref<any[]>([])
-const showCreate = ref(false)
-const showDetail = ref(false)
-const current = ref<any>(null)
-const comments = ref<any[]>([])
-const commentText = ref('')
-const page = ref(1)
-const pageSize = ref(20)
-const total = ref(0)
-const form = reactive({ title: '', ticket_type: 'incident', priority: 'medium', description: '' })
-const API = R.TICKETS
+const selectedRows = ref<any[]>([])
+const selectedIds = ref<string[]>([])
+const tableRef = ref()
 
-async function load() {
+const stats = reactive({
+  total: 0,
+  open: 0,
+  inProgress: 0,
+  closed: 0,
+  overdue: 0,
+  withinSla: 0,
+})
+
+const filters = reactive({
+  status: '',
+  priority: '',
+  source: '',
+  assignee: '',
+  dateRange: null as [string, string] | null,
+  keyword: '',
+})
+
+const pagination = reactive({
+  page: 1,
+  pageSize: 20,
+  total: 0,
+})
+
+// ── Computed ────────────────────────────────────────────────────────
+const slaPercent = computed(() => {
+  if (stats.total === 0) return 100
+  return Math.round((stats.withinSla / stats.total) * 100)
+})
+
+// ── Helpers ─────────────────────────────────────────────────────────
+function formatTime(val: string | null | undefined): string {
+  if (!val) return '-'
+  const d = new Date(val)
+  if (isNaN(d.getTime())) return '-'
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
+function priorityType(p: string): string {
+  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: '', low: 'info' }
+  return map[p] || 'info'
+}
+
+function priorityLabel(p: string): string {
+  const map: Record<string, string> = { critical: '紧急', high: '高', medium: '中', low: '低' }
+  return map[p] || p || '-'
+}
+
+function statusType(s: string): string {
+  const map: Record<string, string> = {
+    open: 'warning',
+    in_progress: '',
+    pending_approval: 'info',
+    resolved: 'success',
+    closed: 'info',
+    overdue: 'danger',
+  }
+  return map[s] || 'info'
+}
+
+function statusLabel(s: string): string {
+  const map: Record<string, string> = {
+    open: '待处理',
+    in_progress: '处理中',
+    pending_approval: '待审批',
+    pending: '待处理',
+    resolved: '已解决',
+    closed: '已关闭',
+    overdue: '已超时',
+  }
+  return map[s] || s || '-'
+}
+
+function sourceIcon(s: string) {
+  const map: Record<string, string> = {
+    manual: 'EditPen',
+    alert: 'Bell',
+    automation: 'SetUp',
+    policy: 'Operation',
+  }
+  return map[s] || 'Notification'
+}
+
+function sourceTooltip(s: string): string {
+  const map: Record<string, string> = {
+    manual: '手动创建',
+    alert: '告警触发',
+    automation: '自动化',
+    policy: '策略触发',
+  }
+  return map[s] || s || '未知'
+}
+
+function isSlaOverdue(deadline: string): boolean {
+  return new Date(deadline).getTime() < Date.now()
+}
+
+function slaCountdown(deadline: string): string {
+  const diff = new Date(deadline).getTime() - Date.now()
+  if (diff <= 0) return '超时'
+  const hours = Math.floor(diff / 3600000)
+  const minutes = Math.floor((diff % 3600000) / 60000)
+  if (hours >= 24) {
+    const days = Math.floor(hours / 24)
+    return `${days}天${hours % 24}时`
+  }
+  if (hours > 0) return `${hours}时${minutes}分`
+  return `${minutes}分`
+}
+
+// ── Statistics ──────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const { data } = await api.get(R.TICKETS, {
+      params: { page: 1, page_size: 1 },
+    })
+    if (data.code === 0 && data.data) {
+      // If backend provides stats endpoint, use it. Otherwise derive from list query.
+      const summary = data.data.stats || data.data.summary
+      if (summary) {
+        stats.total = summary.total ?? 0
+        stats.open = summary.open_count ?? summary.open ?? 0
+        stats.inProgress = summary.in_progress_count ?? summary.in_progress ?? 0
+        stats.closed = summary.closed_count ?? summary.closed ?? 0
+        stats.overdue = summary.overdue_count ?? summary.overdue ?? 0
+        stats.withinSla = summary.within_sla ?? summary.withinSla ?? stats.total
+      } else {
+        stats.total = data.data.total || 0
+      }
+    }
+  } catch {
+    // stats are non-critical; silently ignore
+  }
+}
+
+async function loadFullStats() {
+  try {
+    // Try a dedicated stats endpoint first
+    const { data } = await api.get('/api/v1/tickets/stats/overview')
+    if (data.code === 0 && data.data) {
+      const s = data.data
+      stats.total = s.total ?? 0
+      stats.open = s.open_count ?? s.open ?? 0
+      stats.inProgress = s.in_progress_count ?? s.in_progress ?? 0
+      stats.closed = s.closed_count ?? s.closed ?? 0
+      stats.overdue = s.overdue_count ?? s.overdue ?? 0
+      stats.withinSla = s.within_sla ?? s.withinSla ?? stats.total
+    }
+  } catch {
+    // Fallback: derive stats from individual count queries
+    try {
+      const [openRes, progressRes, closedRes, overdueRes] = await Promise.allSettled([
+        api.get(R.TICKETS, { params: { status: 'open', page: 1, page_size: 1 } }),
+        api.get(R.TICKETS, { params: { status: 'in_progress', page: 1, page_size: 1 } }),
+        api.get(R.TICKETS, { params: { status: 'closed', page: 1, page_size: 1 } }),
+        api.get(R.TICKETS, { params: { sla_overdue: true, page: 1, page_size: 1 } }),
+      ])
+      const extract = (r: PromiseSettledResult<any>) =>
+        r.status === 'fulfilled' && r.value.data?.code === 0 ? r.value.data.data?.total || 0 : 0
+
+      stats.open = extract(openRes)
+      stats.inProgress = extract(progressRes)
+      stats.closed = extract(closedRes)
+      stats.overdue = extract(overdueRes)
+      stats.total = stats.open + stats.inProgress + stats.closed
+      stats.withinSla = Math.max(0, stats.total - stats.overdue)
+    } catch {
+      // silently ignore
+    }
+  }
+}
+
+// ── Ticket List ─────────────────────────────────────────────────────
+async function loadTickets() {
   loading.value = true
   try {
-    const { data } = await api.get(API, { params: { page: page.value, page_size: pageSize.value } })
-    if (data.code === 0) { tickets.value = data.data.items || []; total.value = data.data.total || 0 }
-  } finally { loading.value = false }
+    const params: Record<string, any> = {
+      page: pagination.page,
+      page_size: pagination.pageSize,
+    }
+    if (filters.status) params.status = filters.status
+    if (filters.priority) params.priority = filters.priority
+    if (filters.source) params.source = filters.source
+    if (filters.assignee) params.assignee = filters.assignee
+    if (filters.keyword) params.keyword = filters.keyword
+    if (filters.dateRange && filters.dateRange.length === 2) {
+      params.start_time = filters.dateRange[0]
+      params.end_time = filters.dateRange[1]
+    }
+    const { data } = await api.get(R.TICKETS, { params })
+    if (data.code === 0) {
+      tickets.value = data.data.items || data.data.list || []
+      pagination.total = data.data.total || 0
+    }
+  } catch {
+    ElMessage.error('加载工单列表失败')
+  } finally {
+    loading.value = false
+  }
 }
 
-async function createTicket() {
-  const { data } = await api.post(API, form)
-  if (data.code === 0) { ElMessage.success('创建成功'); showCreate.value = false; load() }
+function handleSearch() {
+  pagination.page = 1
+  loadTickets()
 }
 
-async function viewTicket(row: any) {
-  current.value = row
-  showDetail.value = true
-  const { data } = await api.get(`${API}/${row.id}/comments`)
-  if (data.code === 0) comments.value = data.data || []
+function resetFilters() {
+  filters.status = ''
+  filters.priority = ''
+  filters.source = ''
+  filters.assignee = ''
+  filters.dateRange = null
+  filters.keyword = ''
+  pagination.page = 1
+  loadTickets()
 }
 
-async function addComment(id: string) {
-  if (!commentText.value.trim()) return
-  const { data } = await api.post(`${API}/${id}/comments`, { content: commentText.value })
-  if (data.code === 0) { commentText.value = ''; viewTicket(current.value) }
+// ── Selection ───────────────────────────────────────────────────────
+function handleSelectionChange(rows: any[]) {
+  selectedRows.value = rows
+  selectedIds.value = rows.map((r) => r.id)
 }
 
-async function closeTicket(id: string) {
-  const { data } = await api.put(`${API}/${id}`, { status: 'closed' })
-  if (data.code === 0) { ElMessage.success('工单已关闭'); load() }
+function clearSelection() {
+  tableRef.value?.clearSelection()
 }
 
-onMounted(() => load())
+// ── Navigation ──────────────────────────────────────────────────────
+function handleRowClick(row: any) {
+  viewDetail(row)
+}
+
+function viewDetail(row: any) {
+  router.push({ name: 'ticket-detail', params: { id: row.id } })
+}
+
+// ── Create Ticket ───────────────────────────────────────────────────
+const createDialogVisible = ref(false)
+const createSubmitting = ref(false)
+const createFormRef = ref<FormInstance>()
+const createForm = reactive({
+  title: '',
+  description: '',
+  priority: 'medium',
+  assigned_to: '',
+  related_alert_id: '',
+  related_asset_id: '',
+})
+
+const createRules: FormRules = {
+  title: [{ required: true, message: '请输入工单标题', trigger: 'blur' }],
+  priority: [{ required: true, message: '请选择优先级', trigger: 'change' }],
+}
+
+function openCreateDialog() {
+  createForm.title = ''
+  createForm.description = ''
+  createForm.priority = 'medium'
+  createForm.assigned_to = ''
+  createForm.related_alert_id = ''
+  createForm.related_asset_id = ''
+  createDialogVisible.value = true
+}
+
+async function submitCreate() {
+  if (!createFormRef.value) return
+  await createFormRef.value.validate(async (valid) => {
+    if (!valid) return
+    createSubmitting.value = true
+    try {
+      const payload: Record<string, any> = {
+        title: createForm.title,
+        description: createForm.description,
+        priority: createForm.priority,
+      }
+      if (createForm.assigned_to) payload.assigned_to = createForm.assigned_to
+      if (createForm.related_alert_id) payload.alert_ids = JSON.stringify([createForm.related_alert_id])
+      if (createForm.related_asset_id) payload.asset_id = createForm.related_asset_id
+
+      const { data } = await api.post(R.TICKETS, payload)
+      if (data.code === 0) {
+        ElMessage.success('工单创建成功')
+        createDialogVisible.value = false
+        loadTickets()
+        loadFullStats()
+      } else {
+        ElMessage.error(data.message || '创建失败')
+      }
+    } catch (err: any) {
+      ElMessage.error(err.message || '创建工单失败')
+    } finally {
+      createSubmitting.value = false
+    }
+  })
+}
+
+// ── User Search ─────────────────────────────────────────────────────
+const userOptions = ref<any[]>([])
+const usersLoading = ref(false)
+
+async function searchUsers(query: string) {
+  usersLoading.value = true
+  try {
+    const params: Record<string, string> = {}
+    if (query) params.keyword = query
+    const { data } = await api.get(R.GOVERNANCE.USERS, { params })
+    if (data.code === 0) {
+      const list = Array.isArray(data.data) ? data.data : data.data?.items || []
+      userOptions.value = list
+    }
+  } catch {
+    userOptions.value = []
+  } finally {
+    usersLoading.value = false
+  }
+}
+
+// ── Quick Actions ───────────────────────────────────────────────────
+async function assignToMe(row: any) {
+  try {
+    await ElMessageBox.confirm('确认将此工单指派给自己？', '认领工单', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'info',
+    })
+    const { data } = await api.patch(R.TICKET_DETAIL(row.id), {
+      assigned_to: 'me',
+      status: 'in_progress',
+    })
+    if (data.code === 0) {
+      ElMessage.success('已认领工单')
+      loadTickets()
+      loadFullStats()
+    }
+  } catch {
+    // cancelled or error
+  }
+}
+
+async function closeTicket(row: any) {
+  try {
+    const { value: reason } = await ElMessageBox.prompt(
+      '请输入关闭原因（可选）',
+      '关闭工单',
+      {
+        confirmButtonText: '关闭',
+        cancelButtonText: '取消',
+        inputPlaceholder: '关闭原因',
+        inputValidator: (val: string) => true,
+      },
+    )
+    const { data } = await api.patch(R.TICKET_DETAIL(row.id), {
+      status: 'closed',
+      resolution: reason || '',
+    })
+    if (data.code === 0) {
+      ElMessage.success('工单已关闭')
+      loadTickets()
+      loadFullStats()
+    }
+  } catch {
+    // cancelled
+  }
+}
+
+async function escalateTicket(row: any) {
+  try {
+    const { value: reason } = await ElMessageBox.prompt(
+      '请输入升级原因',
+      '升级工单',
+      {
+        confirmButtonText: '升级',
+        cancelButtonText: '取消',
+        inputPlaceholder: '升级原因',
+        inputValidator: (val: string) => (val.trim() ? true : '请输入升级原因'),
+      },
+    )
+    // Escalate by increasing priority
+    const priorityOrder = ['low', 'medium', 'high', 'critical']
+    const currentIdx = priorityOrder.indexOf(row.priority)
+    const newPriority = priorityOrder[Math.min(currentIdx + 1, priorityOrder.length - 1)]
+
+    const { data } = await api.patch(R.TICKET_DETAIL(row.id), {
+      priority: newPriority,
+      escalation_reason: reason,
+    })
+    if (data.code === 0) {
+      ElMessage.success('工单已升级')
+      loadTickets()
+      loadFullStats()
+    }
+  } catch {
+    // cancelled
+  }
+}
+
+// ── Batch Operations ────────────────────────────────────────────────
+const batchAssignDialogVisible = ref(false)
+const batchAssignee = ref('')
+const batchSubmitting = ref(false)
+
+function batchAssign() {
+  batchAssignee.value = ''
+  batchAssignDialogVisible.value = true
+  searchUsers('')
+}
+
+async function submitBatchAssign() {
+  if (!batchAssignee.value || !selectedIds.value.length) return
+  batchSubmitting.value = true
+  try {
+    const promises = selectedIds.value.map((id) =>
+      api.patch(R.TICKET_DETAIL(id), { assigned_to: batchAssignee.value }),
+    )
+    const results = await Promise.allSettled(promises)
+    const failed = results.filter((r) => r.status === 'rejected').length
+    if (failed === 0) {
+      ElMessage.success(`${selectedIds.value.length} 条工单已全部指派`)
+    } else {
+      ElMessage.warning(`${selectedIds.value.length - failed} 条成功，${failed} 条失败`)
+    }
+    clearSelection()
+    batchAssignDialogVisible.value = false
+    loadTickets()
+    loadFullStats()
+  } catch {
+    ElMessage.error('批量指派失败')
+  } finally {
+    batchSubmitting.value = false
+  }
+}
+
+async function batchClose() {
+  const ids = selectedIds.value
+  if (!ids.length) return
+  try {
+    await ElMessageBox.confirm(`确认批量关闭 ${ids.length} 条工单？`, '批量关闭', {
+      confirmButtonText: '关闭',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+    const promises = ids.map((id) =>
+      api.patch(R.TICKET_DETAIL(id), { status: 'closed' }),
+    )
+    const results = await Promise.allSettled(promises)
+    const failed = results.filter((r) => r.status === 'rejected').length
+    if (failed === 0) {
+      ElMessage.success(`${ids.length} 条工单已全部关闭`)
+    } else {
+      ElMessage.warning(`${ids.length - failed} 条成功，${failed} 条失败`)
+    }
+    clearSelection()
+    loadTickets()
+    loadFullStats()
+  } catch {
+    // cancelled
+  }
+}
+
+// ── Export ───────────────────────────────────────────────────────────
+async function exportTickets() {
+  try {
+    const params: Record<string, any> = {
+      page: 1,
+      page_size: 10000,
+      export: true,
+    }
+    if (filters.status) params.status = filters.status
+    if (filters.priority) params.priority = filters.priority
+    if (filters.source) params.source = filters.source
+    if (filters.keyword) params.keyword = filters.keyword
+
+    const { data } = await api.get(R.TICKETS, {
+      params,
+      responseType: 'blob',
+    })
+
+    // If the response is actually JSON (not a blob export), fall back to CSV generation
+    if (data instanceof Blob && data.type?.includes('json')) {
+      // Backend doesn't support export param, generate CSV client-side
+      generateCsv()
+      return
+    }
+
+    if (data instanceof Blob) {
+      const url = URL.createObjectURL(data)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `tickets_${new Date().toISOString().slice(0, 10)}.csv`
+      link.click()
+      URL.revokeObjectURL(url)
+      ElMessage.success('导出成功')
+      return
+    }
+
+    // Fallback: client-side CSV
+    generateCsv()
+  } catch {
+    // Fallback to client-side CSV generation
+    generateCsv()
+  }
+}
+
+function generateCsv() {
+  if (!tickets.value.length) {
+    ElMessage.warning('暂无数据可导出')
+    return
+  }
+  const headers = ['ID', '标题', '来源', '优先级', '状态', '负责人', 'SLA截止', '创建时间']
+  const rows = tickets.value.map((t) => [
+    t.id || '',
+    `"${(t.title || '').replace(/"/g, '""')}"`,
+    t.source || '',
+    t.priority || '',
+    t.status || '',
+    t.assigned_to || t.assigned_to_name || '',
+    t.sla_deadline ? formatTime(t.sla_deadline) : '',
+    formatTime(t.created_at),
+  ])
+  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `tickets_${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+  ElMessage.success('导出成功')
+}
+
+// ── Lifecycle ───────────────────────────────────────────────────────
+let statsTimer: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  loadFullStats()
+  loadTickets()
+  // Auto-refresh stats every 30s
+  statsTimer = setInterval(loadFullStats, 30_000)
+})
+
+onBeforeUnmount(() => {
+  if (statsTimer) {
+    clearInterval(statsTimer)
+    statsTimer = null
+  }
+})
 </script>
+
+<style scoped>
+.ticket-list-page {
+  padding: 20px;
+}
+
+/* ── Statistics Cards ── */
+.stats-row {
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.stat-card__body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-card__value {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stat-card__label {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 2px;
+}
+
+.stat-card--total .stat-card__icon {
+  background: rgba(144, 147, 153, 0.12);
+  color: #909399;
+}
+.stat-card--total .stat-card__value {
+  color: #606266;
+}
+
+.stat-card--open .stat-card__icon {
+  background: rgba(230, 162, 60, 0.12);
+  color: #e6a23c;
+}
+.stat-card--open .stat-card__value {
+  color: #e6a23c;
+}
+
+.stat-card--progress .stat-card__icon {
+  background: rgba(64, 158, 255, 0.12);
+  color: #409eff;
+}
+.stat-card--progress .stat-card__value {
+  color: #409eff;
+}
+
+.stat-card--closed .stat-card__icon {
+  background: rgba(103, 194, 58, 0.12);
+  color: #67c23a;
+}
+.stat-card--closed .stat-card__value {
+  color: #67c23a;
+}
+
+.stat-card--overdue .stat-card__icon {
+  background: rgba(245, 108, 108, 0.12);
+  color: #f56c6c;
+}
+.stat-card--overdue .stat-card__value {
+  color: #f56c6c;
+}
+
+.stat-card--sla .stat-card__icon {
+  background: rgba(103, 194, 58, 0.12);
+  color: #67c23a;
+}
+.stat-card--sla .stat-card__value {
+  color: #67c23a;
+}
+
+/* ── SLA Summary Bar ── */
+.sla-bar-card {
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+.sla-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sla-bar__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #606266;
+  white-space: nowrap;
+}
+
+.sla-bar__detail {
+  font-size: 13px;
+  color: #909399;
+  white-space: nowrap;
+}
+
+/* ── Main Card ── */
+.main-card {
+  border-radius: 8px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header__title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Filter Form ── */
+.filter-form {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.filter-form :deep(.el-form-item) {
+  margin-bottom: 12px;
+}
+
+/* ── Batch Operations Bar ── */
+.batch-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  background: #ecf5ff;
+  border: 1px solid #d9ecff;
+  border-radius: 6px;
+}
+
+.batch-bar__info {
+  margin-right: auto;
+  font-size: 14px;
+  color: #606266;
+}
+
+/* ── Table ── */
+.ticket-table {
+  width: 100%;
+}
+
+.ticket-table :deep(.el-table__fixed-right) {
+  right: 0 !important;
+}
+
+.ticket-title {
+  cursor: pointer;
+  color: #409eff;
+}
+
+.ticket-title:hover {
+  text-decoration: underline;
+}
+
+/* ── Pagination ── */
+.pagination-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .filter-form :deep(.el-form-item__content) {
+    max-width: 160px;
+  }
+  .filter-form :deep(.el-date-editor) {
+    width: 280px !important;
+  }
+}
+</style>

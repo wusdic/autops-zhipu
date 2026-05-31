@@ -38,10 +38,9 @@ const router = createRouter({
     { path: '/policies/:id/simulate', name: 'policy-simulate', component: () => import('@/features/automation-orchestration/PolicySimulatePage.vue') },
     { path: '/executions', name: 'executions', component: () => import('@/features/automation-orchestration/ExecutionListPage.vue') },
     { path: '/executions/:id', name: 'execution-detail', component: () => import('@/features/automation-orchestration/ExecutionDetailPage.vue') },
-    { path: '/automation', name: 'automation', component: () => import('@/features/command-center/AutomationPage.vue') },
 
     // 2.6 AI 与知识台
-    { path: '/aiops', name: 'aiops', component: () => import('@/features/command-center/AIDiagnosisPage.vue') },
+    { path: '/aiops', name: 'aiops', component: () => import('@/features/aiops-knowledge/AiOpsPage.vue') },
     { path: '/knowledge', name: 'knowledge', component: () => import('@/features/aiops-knowledge/KnowledgePage.vue') },
     { path: '/knowledge/:id', name: 'knowledge-detail', component: () => import('@/features/aiops-knowledge/KnowledgeDetailPage.vue') },
     { path: '/knowledge/:id/edit', name: 'knowledge-edit', component: () => import('@/features/aiops-knowledge/KnowledgeEditPage.vue') },

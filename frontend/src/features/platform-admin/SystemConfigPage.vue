@@ -214,7 +214,7 @@ import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
   Edit, Plus, Refresh, Search, Lock, View, Hide, WarningFilled,
-  Setting, Shield, MagicStick, DataLine, Bell,
+  Setting, Lock as Shield, MagicStick, DataLine, Bell,
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'

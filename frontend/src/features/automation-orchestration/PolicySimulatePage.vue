@@ -29,7 +29,7 @@
             v-model="simParams.extra_json"
             type="textarea"
             :rows="4"
-            placeholder="可选 JSON 扩展参数，如 {\"cpu_usage\": 95}"
+            placeholder="可选 JSON 扩展参数，如 {&quot;cpu_usage&quot;: 95}"
             style="font-family: monospace"
           />
         </el-form-item>

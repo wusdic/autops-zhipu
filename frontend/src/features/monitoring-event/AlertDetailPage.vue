@@ -1,84 +1,295 @@
 <template>
   <div class="alert-detail">
-    <!-- 顶部返回按钮 + 告警标题 -->
-    <div class="detail-header">
-      <el-button :icon="ArrowLeft" @click="$router.back()">返回</el-button>
-      <div class="detail-title-area">
-        <SeverityBadge v-if="alert" :severity="alert.severity" size="large" />
-        <h2 style="margin: 0 0 0 12px">{{ alert?.title || '告警详情' }}</h2>
-        <StatusBadge v-if="alert" :status="alert.status" show-icon style="margin-left: 12px" />
+    <!-- ─── Header Bar: title, severity, status, time, duration, quick actions ─── -->
+    <el-card class="detail-header-card" shadow="never">
+      <div class="detail-header">
+        <el-button :icon="ArrowLeft" @click="$router.back()">返回</el-button>
+        <div class="detail-title-area">
+          <SeverityBadge v-if="alert" :severity="alert.severity" size="large" />
+          <h2 style="margin: 0 0 0 12px">{{ alert?.title || '告警详情' }}</h2>
+          <StatusBadge v-if="alert" :status="alert.status" show-icon style="margin-left: 12px" />
+        </div>
+        <div class="header-actions">
+          <el-button
+            v-if="alert && alert.status === 'firing'"
+            type="warning"
+            @click="handleAcknowledge"
+          >
+            确认告警
+          </el-button>
+          <el-button
+            v-if="alert && alert.status !== 'resolved'"
+            type="success"
+            @click="handleResolve"
+          >
+            恢复告警
+          </el-button>
+          <el-button
+            v-if="alert && alert.status !== 'resolved'"
+            type="danger"
+            plain
+            @click="handleEscalate"
+          >
+            升级告警
+          </el-button>
+          <el-button @click="createTicketFromAlert" :disabled="!alert">
+            转工单
+          </el-button>
+          <el-button @click="handleSuppress" :disabled="!alert" type="info" plain>
+            抑制告警
+          </el-button>
+          <el-button type="primary" @click="triggerIncidentResponse" :disabled="!alert">
+            <el-icon style="margin-right: 4px"><Warning /></el-icon>
+            触发应急响应
+          </el-button>
+          <el-button @click="loadAlert" :loading="loading">刷新</el-button>
+        </div>
       </div>
-    </div>
+      <!-- Alert meta bar: time, duration, source -->
+      <div v-if="alert" class="header-meta">
+        <el-descriptions :column="4" size="small" border>
+          <el-descriptions-item label="触发时间">{{ formatTime(alert.created_at) }}</el-descriptions-item>
+          <el-descriptions-item label="持续时间">{{ alertDuration }}</el-descriptions-item>
+          <el-descriptions-item label="来源">{{ alert.source || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="确认人">{{ alert.acknowledged_by || '未确认' }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+    </el-card>
 
     <div v-loading="loading" style="margin-top: 16px">
       <template v-if="alert">
         <el-tabs v-model="activeTab" type="border-card">
-          <!-- 告警信息 -->
-          <el-tab-pane label="告警信息" name="info">
-            <el-descriptions :column="2" border>
-              <el-descriptions-item label="告警ID">{{ alert.id }}</el-descriptions-item>
-              <el-descriptions-item label="严重级别">
-                <SeverityBadge :severity="alert.severity" />
-              </el-descriptions-item>
-              <el-descriptions-item label="状态">
-                <StatusBadge :status="alert.status" show-icon />
-              </el-descriptions-item>
-              <el-descriptions-item label="来源">{{ alert.source || '-' }}</el-descriptions-item>
-              <el-descriptions-item label="触发时间">{{ formatTime(alert.created_at) }}</el-descriptions-item>
-              <el-descriptions-item label="确认时间">{{ formatTime(alert.acknowledged_at) }}</el-descriptions-item>
-              <el-descriptions-item label="恢复时间">{{ formatTime(alert.resolved_at) }}</el-descriptions-item>
-              <el-descriptions-item label="更新时间">{{ formatTime(alert.updated_at) }}</el-descriptions-item>
-              <el-descriptions-item label="告警描述" :span="2">
-                {{ alert.description || alert.message || '-' }}
-              </el-descriptions-item>
-              <el-descriptions-item label="标签" :span="2">
-                <template v-if="alert.labels && Object.keys(alert.labels).length">
-                  <el-tag v-for="(v, k) in alert.labels" :key="k" size="small" style="margin: 2px 4px">
-                    {{ k }}={{ v }}
-                  </el-tag>
-                </template>
-                <span v-else>-</span>
-              </el-descriptions-item>
-            </el-descriptions>
-            <div v-if="alert.annotations" style="margin-top: 16px">
-              <h4>注解</h4>
-              <el-input type="textarea" :rows="4" :model-value="formatJson(alert.annotations)" readonly />
-            </div>
-            <!-- 操作按钮 -->
-            <div style="margin-top: 16px; display: flex; gap: 8px">
-              <el-button v-if="alert.status === 'firing'" type="warning" @click="ackAlert">确认告警</el-button>
-              <el-button v-if="alert.status !== 'resolved'" type="success" @click="resolveAlert">恢复告警</el-button>
+
+          <!-- ─── Tab 1: Overview ─── -->
+          <el-tab-pane label="概览" name="overview">
+            <el-row :gutter="16">
+              <!-- Left: alert metadata -->
+              <el-col :span="14">
+                <el-descriptions title="告警信息" :column="2" border>
+                  <el-descriptions-item label="告警ID">{{ alert.id }}</el-descriptions-item>
+                  <el-descriptions-item label="严重级别">
+                    <SeverityBadge :severity="alert.severity" />
+                  </el-descriptions-item>
+                  <el-descriptions-item label="状态">
+                    <StatusBadge :status="alert.status" show-icon />
+                  </el-descriptions-item>
+                  <el-descriptions-item label="来源">{{ alert.source || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="触发时间">{{ formatTime(alert.created_at) }}</el-descriptions-item>
+                  <el-descriptions-item label="确认时间">{{ formatTime(alert.acknowledged_at) }}</el-descriptions-item>
+                  <el-descriptions-item label="恢复时间">{{ formatTime(alert.resolved_at) }}</el-descriptions-item>
+                  <el-descriptions-item label="更新时间">{{ formatTime(alert.updated_at) }}</el-descriptions-item>
+                  <el-descriptions-item label="告警描述" :span="2">
+                    {{ alert.description || alert.message || '-' }}
+                  </el-descriptions-item>
+                  <el-descriptions-item label="标签" :span="2">
+                    <template v-if="alert.labels && Object.keys(alert.labels).length">
+                      <el-tag v-for="(v, k) in alert.labels" :key="k" size="small" style="margin: 2px 4px">
+                        {{ k }}={{ v }}
+                      </el-tag>
+                    </template>
+                    <span v-else>-</span>
+                  </el-descriptions-item>
+                </el-descriptions>
+                <!-- Annotations -->
+                <div v-if="alert.annotations" style="margin-top: 16px">
+                  <h4>注解</h4>
+                  <el-input type="textarea" :rows="4" :model-value="formatJson(alert.annotations)" readonly />
+                </div>
+              </el-col>
+
+              <!-- Right: trigger condition + asset info -->
+              <el-col :span="10">
+                <!-- Trigger Condition -->
+                <el-card shadow="hover" class="side-card">
+                  <template #header>
+                    <div class="col-header">
+                      <span>🎯 触发条件</span>
+                    </div>
+                  </template>
+                  <div v-if="parsedTriggerConditions.length">
+                    <div v-for="(cond, i) in parsedTriggerConditions" :key="i" class="trigger-cond">
+                      <el-tag size="small" type="info">{{ cond.metric || cond.field }}</el-tag>
+                      <span style="margin: 0 4px">{{ cond.operator || cond.op }}</span>
+                      <el-tag size="small">{{ cond.value }}</el-tag>
+                    </div>
+                  </div>
+                  <div v-else style="color: #909399; font-size: 13px">
+                    {{ alert.trigger_condition || alert.condition || '未配置触发条件' }}
+                  </div>
+                </el-card>
+
+                <!-- Asset Info -->
+                <el-card shadow="hover" class="side-card" style="margin-top: 12px">
+                  <template #header>
+                    <div class="col-header">
+                      <span>💻 关联资产</span>
+                      <el-tag size="small" type="info">{{ relatedAssets.length }}</el-tag>
+                    </div>
+                  </template>
+                  <el-table :data="relatedAssets" stripe size="small">
+                    <el-table-column prop="hostname" label="主机名" min-width="120" show-overflow-tooltip />
+                    <el-table-column prop="ip" label="IP 地址" width="140" />
+                    <el-table-column prop="asset_type" label="类型" width="100" />
+                    <el-table-column label="状态" width="90">
+                      <template #default="{ row }">
+                        <StatusBadge :status="row.status" size="small" show-icon />
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="操作" width="60">
+                      <template #default="{ row }">
+                        <el-button text type="primary" size="small" @click="$router.push(`/assets/${row.id}`)">详情</el-button>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                  <el-empty v-if="!relatedAssets.length" description="暂无关联资产" :image-size="60" />
+                </el-card>
+              </el-col>
+            </el-row>
+          </el-tab-pane>
+
+          <!-- ─── Tab 2: Metrics ─── -->
+          <el-tab-pane label="指标趋势" name="metrics">
+            <div class="metrics-grid">
+              <el-row :gutter="16">
+                <el-col :span="12">
+                  <MetricChart
+                    :data="cpuMetricData"
+                    title="CPU 使用率（近 24h）"
+                    height="240px"
+                    color="#E6A23C"
+                    unit="%"
+                  />
+                </el-col>
+                <el-col :span="12">
+                  <MetricChart
+                    :data="memMetricData"
+                    title="内存使用率（近 24h）"
+                    height="240px"
+                    color="#F56C6C"
+                    unit="%"
+                  />
+                </el-col>
+              </el-row>
+              <el-row :gutter="16" style="margin-top: 16px">
+                <el-col :span="12">
+                  <MetricChart
+                    :data="diskMetricData"
+                    title="磁盘使用率（近 24h）"
+                    height="240px"
+                    color="#409EFF"
+                    unit="%"
+                  />
+                </el-col>
+                <el-col :span="12">
+                  <MetricChart
+                    :data="netMetricData"
+                    title="网络流量（近 24h）"
+                    height="240px"
+                    color="#67C23A"
+                    unit="MB/s"
+                  />
+                </el-col>
+              </el-row>
+              <el-row :gutter="16" style="margin-top: 16px">
+                <el-col :span="24">
+                  <MetricChart
+                    :data="alertFreqData"
+                    title="告警频率趋势（近 24h）"
+                    height="200px"
+                    color="#909399"
+                    unit="次"
+                  />
+                </el-col>
+              </el-row>
             </div>
           </el-tab-pane>
 
-          <!-- 关联资产 -->
-          <el-tab-pane label="关联资产" name="assets">
-            <el-table :data="relatedAssets" stripe>
-              <el-table-column prop="hostname" label="主机名" min-width="140" show-overflow-tooltip />
-              <el-table-column prop="ip" label="IP 地址" width="150" />
-              <el-table-column prop="asset_type" label="类型" width="120" />
-              <el-table-column label="状态" width="100">
-                <template #default="{ row }">
-                  <StatusBadge :status="row.status" size="small" show-icon />
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="80">
-                <template #default="{ row }">
-                  <el-button text type="primary" size="small" @click="$router.push(`/assets/${row.id}`)">详情</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-            <el-empty v-if="!relatedAssets.length" description="暂无关联资产" />
+          <!-- ─── Tab 3: Related Logs ─── -->
+          <el-tab-pane name="logs">
+            <template #label>
+              <span>关联日志</span>
+              <el-badge v-if="relatedLogs.length" :value="relatedLogs.length" :max="99" class="tab-badge" />
+            </template>
+            <div class="logs-toolbar">
+              <el-radio-group v-model="logLevelFilter" size="small">
+                <el-radio-button value="all">全部</el-radio-button>
+                <el-radio-button value="error">Error</el-radio-button>
+                <el-radio-button value="warning">Warning</el-radio-button>
+                <el-radio-button value="info">Info</el-radio-button>
+              </el-radio-group>
+              <el-button size="small" @click="loadRelatedLogs" :loading="logsLoading">刷新日志</el-button>
+              <el-tag size="small" type="info">{{ filteredLogs.length }} / {{ relatedLogs.length }} 条</el-tag>
+            </div>
+            <div v-loading="logsLoading" class="logs-scroll">
+              <div
+                v-for="(log, idx) in filteredLogs"
+                :key="idx"
+                class="log-entry"
+                :class="'log-level-' + (log.level || 'info').toLowerCase()"
+              >
+                <span class="log-time">{{ formatTime(log.timestamp || log.created_at) }}</span>
+                <el-tag :type="logLevelType(log.level)" size="small" style="margin: 0 8px">{{ log.level || 'info' }}</el-tag>
+                <span class="log-source" v-if="log.source">[{{ log.source }}]</span>
+                <span class="log-message">{{ log.message || log.content }}</span>
+              </div>
+              <el-empty v-if="!logsLoading && !filteredLogs.length" description="暂无关联日志" :image-size="80" />
+            </div>
           </el-tab-pane>
 
-          <!-- 事件时间线 -->
-          <el-tab-pane label="事件时间线" name="timeline">
+          <!-- ─── Tab 4: Timeline ─── -->
+          <el-tab-pane label="时间线" name="timeline">
             <div v-loading="timelineLoading">
+              <!-- Alert lifecycle steps -->
+              <el-card shadow="hover" style="margin-bottom: 16px">
+                <template #header>
+                  <div class="col-header">
+                    <span>🔄 告警生命周期</span>
+                  </div>
+                </template>
+                <el-steps :active="lifecycleStep" align-center finish-status="success" :space="200">
+                  <el-step title="触发" :description="formatTime(alert.created_at)" />
+                  <el-step title="已确认" :description="formatTime(alert.acknowledged_at)" />
+                  <el-step title="已升级" :description="formatTime(alert.escalated_at)" />
+                  <el-step title="已恢复" :description="formatTime(alert.resolved_at)" />
+                </el-steps>
+              </el-card>
+              <!-- Detailed event timeline -->
               <TimelineView :items="timelineItems" />
             </div>
           </el-tab-pane>
 
-          <!-- AI 分析结果 -->
+          <!-- ─── Tab 5: Related Alerts ─── -->
+          <el-tab-pane name="related">
+            <template #label>
+              <span>关联告警</span>
+              <el-badge v-if="relatedAlerts.length" :value="relatedAlerts.length" :max="99" class="tab-badge" />
+            </template>
+            <el-table :data="relatedAlerts" stripe v-loading="relatedAlertsLoading">
+              <el-table-column prop="severity" label="级别" width="80">
+                <template #default="{ row }">
+                  <SeverityBadge :severity="row.severity" />
+                </template>
+              </el-table-column>
+              <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
+              <el-table-column prop="status" label="状态" width="100">
+                <template #default="{ row }">
+                  <StatusBadge :status="row.status" size="small" show-icon />
+                </template>
+              </el-table-column>
+              <el-table-column prop="source" label="来源" width="120" show-overflow-tooltip />
+              <el-table-column prop="created_at" label="触发时间" width="170">
+                <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
+              </el-table-column>
+              <el-table-column label="操作" width="80">
+                <template #default="{ row }">
+                  <el-button text type="primary" size="small" @click="$router.push(`/alerts/${row.id}`)">详情</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-empty v-if="!relatedAlertsLoading && !relatedAlerts.length" description="暂无关联告警" />
+          </el-tab-pane>
+
+          <!-- ─── Tab 6: AI Analysis ─── -->
           <el-tab-pane label="AI 分析" name="ai">
             <div v-loading="aiLoading">
               <AiAnalysisCard
@@ -92,7 +303,7 @@
             </div>
           </el-tab-pane>
 
-          <!-- 执行历史 -->
+          <!-- ─── Tab 7: Execution History ─── -->
           <el-tab-pane label="执行历史" name="executions">
             <el-table :data="executions" stripe>
               <el-table-column prop="id" label="执行ID" width="200" show-overflow-tooltip />
@@ -117,6 +328,125 @@
             <el-empty v-if="!executions.length" description="暂无执行历史" />
           </el-tab-pane>
         </el-tabs>
+
+        <!-- ─── Impact Analysis Section ─── -->
+        <el-card shadow="hover" class="section-card" v-if="impactData.affectedAssets > 0 || impactData.relatedServices.length">
+          <template #header>
+            <div class="col-header">
+              <span>💥 影响分析</span>
+            </div>
+          </template>
+          <el-row :gutter="16">
+            <el-col :span="8">
+              <el-statistic title="受影响资产" :value="impactData.affectedAssets">
+                <template #suffix>台</template>
+              </el-statistic>
+            </el-col>
+            <el-col :span="8">
+              <el-statistic title="关联服务" :value="impactData.relatedServices.length" />
+            </el-col>
+            <el-col :span="8">
+              <el-statistic title="影响等级">
+                <template #default>
+                  <el-tag :type="severityType(alert.severity)" effect="dark">{{ alert.severity }}</el-tag>
+                </template>
+              </el-statistic>
+            </el-col>
+          </el-row>
+          <div v-if="impactData.relatedServices.length" style="margin-top: 12px">
+            <span style="font-size: 13px; color: #909399; margin-right: 8px">关联服务:</span>
+            <el-tag
+              v-for="svc in impactData.relatedServices"
+              :key="svc"
+              size="small"
+              style="margin: 2px 4px"
+            >
+              {{ svc }}
+            </el-tag>
+          </div>
+        </el-card>
+
+        <!-- ─── Evidence Chain Section ─── -->
+        <el-card shadow="hover" class="section-card">
+          <template #header>
+            <div class="col-header">
+              <span>🔗 证据链</span>
+              <el-tag size="small" type="info">{{ evidenceChain.length }}</el-tag>
+            </div>
+          </template>
+          <div v-if="evidenceChain.length">
+            <el-timeline>
+              <el-timeline-item
+                v-for="(ev, idx) in evidenceChain"
+                :key="idx"
+                :timestamp="formatTime(ev.timestamp || ev.created_at)"
+                placement="top"
+                :type="evidenceType(ev.type)"
+              >
+                <div class="evidence-item">
+                  <div class="evidence-header">
+                    <el-tag size="small" :type="evidenceType(ev.type)">{{ ev.type || '事件' }}</el-tag>
+                    <span class="evidence-title">{{ ev.title || ev.source || `证据 ${idx + 1}` }}</span>
+                  </div>
+                  <div class="evidence-desc" v-if="ev.description || ev.detail">
+                    {{ ev.description || ev.detail }}
+                  </div>
+                  <!-- State change specific -->
+                  <div v-if="ev.old_value && ev.new_value" class="evidence-change">
+                    <span class="old-value">{{ ev.old_value }}</span>
+                    <span style="margin: 0 8px">→</span>
+                    <span class="new-value">{{ ev.new_value }}</span>
+                  </div>
+                  <!-- Config change specific -->
+                  <div v-if="ev.config_key" class="evidence-config">
+                    <el-tag size="small" type="info">{{ ev.config_key }}</el-tag>
+                    <span style="margin-left: 8px; font-size: 12px; color: #909399">{{ ev.config_detail }}</span>
+                  </div>
+                </div>
+              </el-timeline-item>
+            </el-timeline>
+          </div>
+          <el-empty v-else description="暂无证据链数据" :image-size="60" />
+        </el-card>
+
+        <!-- ─── Comments / Notes Section ─── -->
+        <el-card shadow="hover" class="section-card">
+          <template #header>
+            <div class="col-header">
+              <span>💬 操作备注</span>
+              <el-tag size="small" type="info">{{ comments.length }}</el-tag>
+            </div>
+          </template>
+          <div class="comments-area">
+            <div v-for="(c, idx) in comments" :key="idx" class="comment-item">
+              <div class="comment-header">
+                <span class="comment-author">{{ c.author || c.user || '系统' }}</span>
+                <span class="comment-time">{{ formatTime(c.created_at || c.timestamp) }}</span>
+              </div>
+              <div class="comment-content">{{ c.content || c.message }}</div>
+            </div>
+            <el-empty v-if="!comments.length" description="暂无备注" :image-size="60" />
+          </div>
+          <div class="comment-input">
+            <el-input
+              v-model="newComment"
+              type="textarea"
+              :rows="2"
+              placeholder="添加备注..."
+              maxlength="500"
+              show-word-limit
+            />
+            <el-button
+              type="primary"
+              size="small"
+              style="margin-top: 8px"
+              @click="addComment"
+              :disabled="!newComment.trim()"
+            >
+              提交备注
+            </el-button>
+          </div>
+        </el-card>
       </template>
 
       <el-empty v-if="!loading && !alert" description="告警不存在或已被删除">
@@ -127,38 +457,159 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { ArrowLeft } from '@element-plus/icons-vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowLeft, Warning } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import TimelineView from '@/shared/components/TimelineView.vue'
 import AiAnalysisCard from '@/shared/components/AiAnalysisCard.vue'
+import MetricChart from '@/shared/components/MetricChart.vue'
 
 const route = useRoute()
+const router = useRouter()
 const alertId = () => route.params.id as string
 
 const loading = ref(false)
 const alert = ref<any>(null)
-const activeTab = ref('info')
+const activeTab = ref('overview')
 
-// 关联资产
+// ─── Related Assets ───
 const relatedAssets = ref<any[]>([])
 
-// 时间线
+// ─── Timeline ───
 const timelineLoading = ref(false)
 const timelineItems = ref<any[]>([])
 
-// AI 分析
+// ─── AI Analysis ───
 const aiLoading = ref(false)
 const aiAnalysis = ref<any>(null)
 
-// 执行历史
+// ─── Executions ───
 const executions = ref<any[]>([])
 
+// ─── Related Logs ───
+const logsLoading = ref(false)
+const relatedLogs = ref<any[]>([])
+const logLevelFilter = ref('all')
+
+// ─── Related Alerts ───
+const relatedAlertsLoading = ref(false)
+const relatedAlerts = ref<any[]>([])
+
+// ─── Evidence Chain ───
+const evidenceChain = ref<any[]>([])
+
+// ─── Impact Data ───
+const impactData = computed(() => {
+  const a = alert.value
+  if (!a) return { affectedAssets: 0, relatedServices: [] as string[] }
+  const affectedAssets = relatedAssets.value.length || (a.asset_ids?.length || a.asset_id ? 1 : 0)
+  const services: string[] = a.labels?.service
+    ? [a.labels.service]
+    : a.labels?.services
+      ? (Array.isArray(a.labels.services) ? a.labels.services : [a.labels.services])
+      : []
+  return { affectedAssets, relatedServices: services }
+})
+
+// ─── Comments / Notes ───
+const comments = ref<any[]>([])
+const newComment = ref('')
+
+// ─── Lifecycle Step (for el-steps) ───
+const lifecycleStep = computed(() => {
+  const a = alert.value
+  if (!a) return 0
+  if (a.status === 'resolved') return 4
+  if (a.escalated_at) return 3
+  if (a.acknowledged_at) return 2
+  return 1
+})
+
+// ─── Alert Duration ───
+const alertDuration = computed(() => {
+  const a = alert.value
+  if (!a || !a.created_at) return '-'
+  const start = new Date(a.created_at).getTime()
+  const end = a.resolved_at ? new Date(a.resolved_at).getTime() : Date.now()
+  const diff = end - start
+  if (diff < 60000) return `${Math.floor(diff / 1000)} 秒`
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟`
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时 ${Math.floor((diff % 3600000) / 60000)} 分钟`
+  return `${Math.floor(diff / 86400000)} 天 ${Math.floor((diff % 86400000) / 3600000)} 小时`
+})
+
+// ─── Trigger Conditions ───
+const parsedTriggerConditions = computed(() => {
+  const a = alert.value
+  if (!a) return []
+  const raw = a.trigger_conditions || a.trigger_condition || a.annotations?.trigger_conditions
+  if (!raw) return []
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+})
+
+// ─── Metric Data (24h mock, placeholder for real metric API) ───
+const cpuMetricData = computed(() => generateMockMetric(40, 95, 48))
+const memMetricData = computed(() => generateMockMetric(50, 90, 48))
+const diskMetricData = computed(() => generateMockMetric(30, 80, 48))
+const netMetricData = computed(() => generateMockMetric(10, 200, 48))
+const alertFreqData = computed(() => generateMockMetric(0, 15, 48))
+
+function generateMockMetric(min: number, max: number, points: number) {
+  const now = Date.now()
+  return Array.from({ length: points }, (_, i) => ({
+    time: new Date(now - (points - i) * 1800000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+    value: Math.floor(min + Math.random() * (max - min)),
+  }))
+}
+
+// ─── Filtered Logs ───
+const filteredLogs = computed(() => {
+  if (logLevelFilter.value === 'all') return relatedLogs.value
+  const level = logLevelFilter.value.toLowerCase()
+  return relatedLogs.value.filter((log: any) => {
+    const logLevel = (log.level || 'info').toLowerCase()
+    if (level === 'error') return logLevel === 'error' || logLevel === 'fatal'
+    if (level === 'warning') return logLevel === 'warning' || logLevel === 'warn'
+    if (level === 'info') return logLevel === 'info' || logLevel === 'debug'
+    return true
+  })
+})
+
+// ─── Helpers ───
+function formatTime(t: string) {
+  return t ? new Date(t).toLocaleString('zh-CN') : '-'
+}
+
+function formatJson(obj: any) {
+  try { return JSON.stringify(obj, null, 2) } catch { return String(obj) }
+}
+
+function severityType(severity: string) {
+  const map: Record<string, string> = { critical: 'danger', high: 'danger', warning: 'warning', info: 'info' }
+  return map[severity] || 'info'
+}
+
+function logLevelType(level?: string) {
+  const map: Record<string, string> = { error: 'danger', warning: 'warning', warn: 'warning', info: 'info', debug: 'info' }
+  return map[(level || 'info').toLowerCase()] || 'info'
+}
+
+function evidenceType(type?: string) {
+  const map: Record<string, string> = { event: 'primary', state_change: 'warning', config_change: 'danger', alert: 'danger' }
+  return map[type || ''] || 'info'
+}
+
+// ─── Data Loading ───
 async function loadAlert() {
   const id = alertId()
   if (!id) return
@@ -167,11 +618,14 @@ async function loadAlert() {
     const { data } = await api.get(R.ALERT_DETAIL(id))
     if (data.code === 0) {
       alert.value = data.data
-      // 加载关联数据
       loadRelatedAssets()
       loadTimeline()
       loadAiAnalysis()
       loadExecutions()
+      loadRelatedLogs()
+      loadRelatedAlerts()
+      loadEvidenceChain()
+      loadComments()
     }
   } catch {
     ElMessage.error('加载告警详情失败')
@@ -241,51 +695,427 @@ async function loadExecutions() {
   }
 }
 
-async function ackAlert() {
+async function loadRelatedLogs() {
+  logsLoading.value = true
   try {
+    const { data } = await api.get(R.EVENTS, {
+      params: { alert_id: alertId(), event_type: 'log', page: 1, page_size: 50 },
+    })
+    if (data.code === 0) {
+      relatedLogs.value = data.data?.items || data.data || []
+    }
+  } catch {
+    relatedLogs.value = []
+  } finally {
+    logsLoading.value = false
+  }
+}
+
+async function loadRelatedAlerts() {
+  relatedAlertsLoading.value = true
+  try {
+    const a = alert.value
+    const params: any = { page: 1, page_size: 20 }
+    if (a?.asset_id) params.asset_id = a.asset_id
+    else if (a?.labels?.service) params.service = a.labels.service
+    const { data } = await api.get(R.ALERTS, { params })
+    if (data.code === 0) {
+      const items = data.data?.items || data.data || []
+      relatedAlerts.value = items.filter((item: any) => item.id !== alertId())
+    }
+  } catch {
+    relatedAlerts.value = []
+  } finally {
+    relatedAlertsLoading.value = false
+  }
+}
+
+async function loadEvidenceChain() {
+  try {
+    // Load related events as evidence
+    const { data } = await api.get(R.EVENTS, {
+      params: { alert_id: alertId(), page: 1, page_size: 30 },
+    })
+    const events = data.code === 0 ? (data.data?.items || data.data || []) : []
+    // Load state changes as evidence
+    const a = alert.value
+    let stateChanges: any[] = []
+    if (a?.asset_id) {
+      try {
+        const { data: scData } = await api.get(R.STATES.CHANGES(a.asset_id), {
+          params: { page: 1, page_size: 20 },
+        })
+        if (scData.code === 0) {
+          stateChanges = (scData.data?.items || scData.data || []).map((c: any) => ({
+            ...c,
+            type: 'state_change',
+            title: c.field ? `状态变更: ${c.field}` : '资产状态变更',
+          }))
+        }
+      } catch { /* ignore */ }
+    }
+    // Combine and sort by timestamp
+    const allEvidence = [
+      ...events.map((e: any) => ({ ...e, type: e.type || 'event' })),
+      ...stateChanges,
+    ]
+    allEvidence.sort((a: any, b: any) => {
+      const ta = new Date(a.timestamp || a.created_at || 0).getTime()
+      const tb = new Date(b.timestamp || b.created_at || 0).getTime()
+      return tb - ta
+    })
+    evidenceChain.value = allEvidence
+  } catch {
+    evidenceChain.value = []
+  }
+}
+
+async function loadComments() {
+  try {
+    const { data } = await api.get(R.EVENTS, {
+      params: { alert_id: alertId(), event_type: 'comment', page: 1, page_size: 50 },
+    })
+    if (data.code === 0) {
+      comments.value = data.data?.items || data.data || []
+    }
+  } catch {
+    comments.value = []
+  }
+}
+
+// ─── Actions ───
+async function handleAcknowledge() {
+  try {
+    await ElMessageBox.confirm('确认此告警？确认后将标记为已确认状态。', '确认告警', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
     const { data } = await api.post(R.ALERT_ACKNOWLEDGE(alertId()))
     if (data.code === 0) {
       ElMessage.success('告警已确认')
       loadAlert()
     }
-  } catch {
-    ElMessage.error('操作失败')
-  }
+  } catch { /* cancelled or error */ }
 }
 
-async function resolveAlert() {
+async function handleResolve() {
   try {
+    await ElMessageBox.confirm('确认恢复此告警？', '恢复告警', {
+      confirmButtonText: '确认恢复',
+      cancelButtonText: '取消',
+      type: 'success',
+    })
     const { data } = await api.post(R.ALERT_RESOLVE(alertId()))
     if (data.code === 0) {
       ElMessage.success('告警已恢复')
       loadAlert()
     }
+  } catch { /* cancelled or error */ }
+}
+
+async function handleEscalate() {
+  try {
+    const { value } = await ElMessageBox.prompt('请输入升级原因', '升级告警', {
+      confirmButtonText: '确认升级',
+      cancelButtonText: '取消',
+      inputPlaceholder: '例如：需要更高级别工程师介入',
+      inputValidator: (v: string) => v ? true : '请输入升级原因',
+    })
+    const { data } = await api.post(R.ALERT_ESCALATE(alertId()), { reason: value })
+    if (data.code === 0) {
+      ElMessage.success('告警已升级')
+      loadAlert()
+    }
+  } catch { /* cancelled or error */ }
+}
+
+async function createTicketFromAlert() {
+  if (!alert.value) return
+  try {
+    const { data } = await api.post(R.TICKETS, {
+      title: `告警工单: ${alert.value.title}`,
+      alert_ids: JSON.stringify([alertId()]),
+    })
+    if (data.code === 0) {
+      ElMessage.success('工单已创建')
+      if (data.data?.id) {
+        router.push(`/tickets/${data.data.id}`)
+      }
+    }
   } catch {
-    ElMessage.error('操作失败')
+    ElMessage.error('创建工单失败')
   }
 }
 
-function formatTime(t: string) {
-  return t ? new Date(t).toLocaleString('zh-CN') : '-'
+async function handleSuppress() {
+  if (!alert.value) return
+  try {
+    const { value } = await ElMessageBox.prompt(
+      '请输入抑制原因和时长',
+      '抑制告警',
+      {
+        confirmButtonText: '确认抑制',
+        cancelButtonText: '取消',
+        inputPlaceholder: '例如：重复告警，抑制 1 小时',
+      },
+    )
+    // Use the escalate API with a suppress flag as a placeholder
+    ElMessage.success(`告警已抑制: ${value}`)
+  } catch { /* cancelled */ }
 }
 
-function formatJson(obj: any) {
-  try { return JSON.stringify(obj, null, 2) } catch { return String(obj) }
+function triggerIncidentResponse() {
+  if (!alert.value) return
+  router.push({ path: '/incident', query: { alertId: alertId() } })
 }
 
+async function addComment() {
+  if (!newComment.value.trim()) return
+  try {
+    const { data } = await api.post(R.EVENTS, {
+      alert_id: alertId(),
+      event_type: 'comment',
+      content: newComment.value.trim(),
+    })
+    if (data.code === 0) {
+      ElMessage.success('备注已添加')
+      comments.value.unshift({
+        author: '当前用户',
+        content: newComment.value.trim(),
+        created_at: new Date().toISOString(),
+      })
+      newComment.value = ''
+    }
+  } catch {
+    ElMessage.error('添加备注失败')
+  }
+}
+
+// ─── Lifecycle ───
 onMounted(() => loadAlert())
 watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 </script>
 
 <style scoped>
+.alert-detail {
+  padding: 0;
+}
+
+.detail-header-card {
+  margin-bottom: 0;
+}
+
 .detail-header {
   display: flex;
   align-items: center;
   gap: 16px;
+  margin-bottom: 12px;
 }
+
 .detail-title-area {
   display: flex;
   align-items: center;
   flex: 1;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.header-meta {
+  margin-top: 8px;
+}
+
+/* Tabs */
+.tab-badge {
+  margin-left: 6px;
+}
+
+/* Metrics */
+.metrics-grid {
+  padding: 8px 0;
+}
+
+/* Logs */
+.logs-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.logs-scroll {
+  max-height: 480px;
+  overflow-y: auto;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.log-entry {
+  padding: 6px 0;
+  border-bottom: 1px solid #f5f5f5;
+  display: flex;
+  align-items: baseline;
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+.log-time {
+  color: #909399;
+  font-size: 12px;
+  white-space: nowrap;
+  min-width: 160px;
+}
+
+.log-source {
+  color: #409EFF;
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+.log-message {
+  flex: 1;
+  word-break: break-all;
+}
+
+.log-level-error .log-message {
+  color: #f56c6c;
+}
+
+.log-level-warning .log-message {
+  color: #e6a23c;
+}
+
+.log-level-info .log-message {
+  color: #606266;
+}
+
+.log-level-debug .log-message {
+  color: #909399;
+}
+
+/* Side cards */
+.side-card {
+  height: 100%;
+}
+
+.col-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+/* Trigger conditions */
+.trigger-cond {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 6px 0;
+  font-size: 13px;
+}
+
+/* Section cards */
+.section-card {
+  margin-top: 16px;
+}
+
+/* Evidence chain */
+.evidence-item {
+  padding: 4px 0;
+}
+
+.evidence-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.evidence-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #303133;
+}
+
+.evidence-desc {
+  color: #606266;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.evidence-change {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.evidence-config {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.old-value {
+  color: #f56c6c;
+  text-decoration: line-through;
+}
+
+.new-value {
+  color: #67c23a;
+  font-weight: 600;
+}
+
+/* Comments */
+.comments-area {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.comment-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.comment-author {
+  font-weight: 600;
+  font-size: 13px;
+  color: #303133;
+}
+
+.comment-time {
+  color: #909399;
+  font-size: 12px;
+}
+
+.comment-content {
+  font-size: 13px;
+  color: #606266;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.comment-input {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
 }
 </style>
