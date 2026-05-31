@@ -31,6 +31,33 @@ logger = logging.getLogger(__name__)
 _handlers_registered = False
 
 
+async def on_alert_created_match_policy(event):
+    """告警创建后自动匹配策略（通过 PolicyService.match_and_execute 闭环）."""
+    try:
+        from app.infra.database import async_session_factory
+        from app.domains.policy.service import PolicyService
+
+        payload = event.payload
+        alert_id = payload.get("alert_id", "")
+        event_type = payload.get("event_type", "")
+        severity = payload.get("severity", "info")
+        asset_ids = payload.get("asset_ids", [])
+
+        async with async_session_factory() as session:
+            policy_svc = PolicyService(session)
+            match = await policy_svc.match_and_execute(
+                event_type=event_type,
+                severity=severity,
+                asset_ids=asset_ids,
+                alert_id=alert_id,
+            )
+            if match:
+                logger.info(f"Policy matched and execution created: {match}")
+            await session.commit()
+    except Exception as e:
+        logger.error(f"Failed to match policy for alert: {e}")
+
+
 def register_all_handlers() -> None:
     """注册所有领域事件处理器（幂等，只执行一次）."""
     global _handlers_registered
@@ -52,6 +79,7 @@ def register_all_handlers() -> None:
 
     # 3. 告警 → 触发策略匹配
     bus.subscribe(AlertEvents.ALERT_CREATED, _on_alert_created)
+    bus.subscribe(AlertEvents.ALERT_CREATED, on_alert_created_match_policy)
     bus.subscribe(AlertEvents.ALERT_ESCALATED, _on_alert_escalated)
 
     # 4. 策略触发 → 创建自动化执行
@@ -77,7 +105,11 @@ def register_all_handlers() -> None:
     # 9. 全局审计日志（通配处理器）
     bus.subscribe_all(_on_any_event_audit)
 
-    logger.info("EventBus: 所有领域事件处理器已注册 (9个联动链路)")
+    # 10. 外部通知渠道
+    _register_external_notification_channels()
+    bus.subscribe(AlertEvents.ALERT_CREATED, on_alert_created_notify_external)
+
+    logger.info("EventBus: 所有领域事件处理器已注册 (10个联动链路)")
 
 
 # ============================================================
@@ -496,3 +528,36 @@ async def _update_state_from_collection(payload: dict) -> None:
                 await session.commit()
     except Exception as e:
         logger.error("更新状态快照失败: %s", e)
+
+
+def _register_external_notification_channels() -> None:
+    """注册外部通知渠道."""
+    from app.integrations.registry import NotificationRegistry
+    from app.integrations.webhook import WebhookChannel
+    from app.integrations.dingtalk import DingTalkChannel
+    from app.integrations.email_channel import EmailChannel
+
+    notif_registry = NotificationRegistry.get_instance()
+    notif_registry.register(WebhookChannel(enabled=False))
+    notif_registry.register(DingTalkChannel(enabled=False))
+    notif_registry.register(EmailChannel(enabled=False))
+
+
+async def on_alert_created_notify_external(event):
+    """告警创建后发送外部通知."""
+    try:
+        from app.integrations.registry import NotificationRegistry
+        from app.integrations.base import NotificationPayload
+        payload = event.payload
+        severity = payload.get("severity", "info")
+        if severity in ("critical", "warning"):
+            registry = NotificationRegistry.get_instance()
+            await registry.broadcast(NotificationPayload(
+                title=payload.get("title", "New Alert"),
+                severity=severity,
+                alert_id=payload.get("alert_id"),
+                asset_name=payload.get("asset_name"),
+                message=payload.get("detail"),
+            ))
+    except Exception as e:
+        logger.error(f"External notification failed: {e}")

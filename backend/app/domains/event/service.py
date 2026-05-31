@@ -18,11 +18,41 @@ class EventService:
         self.session = session
         self.repo = BaseRepository(session, Event)
 
+    @staticmethod
+    def _generate_fingerprint(event_type: str, source: str, asset_id: str | None, title: str) -> str:
+        """生成事件指纹用于去重."""
+        key = f"{event_type}|{source}|{asset_id or ''}|{title}"
+        return hashlib.md5(key.encode()).hexdigest()
+
+    async def _find_duplicate(self, fingerprint: str, minutes: int = 5):
+        """查找指定时间窗口内的重复事件."""
+        from datetime import datetime, timedelta
+        cutoff = datetime.utcnow() - timedelta(minutes=minutes)
+        q = select(Event).where(
+            Event.fingerprint == fingerprint,
+            Event.created_at >= cutoff
+        ).order_by(Event.created_at.desc()).limit(1)
+        result = await self.session.execute(q)
+        return result.scalar_one_or_none()
+
     async def create_event(self, **kwargs) -> Event:
-        # Generate fingerprint for dedup
-        fp_data = f"{kwargs.get('event_type')}:{kwargs.get('asset_id')}:{kwargs.get('source')}:{kwargs.get('title')}"
-        fingerprint = hashlib.md5(fp_data.encode()).hexdigest()
+        """创建事件，支持5分钟窗口内自动去重."""
+        fingerprint = self._generate_fingerprint(
+            event_type=kwargs.get('event_type', ''),
+            source=kwargs.get('source', ''),
+            asset_id=kwargs.get('asset_id'),
+            title=kwargs.get('title', ''),
+        )
         kwargs.setdefault('fingerprint', fingerprint)
+
+        # 查找5分钟内相同指纹的事件
+        dup = await self._find_duplicate(fingerprint)
+        if dup:
+            dup.is_deduplicated = True
+            await self.session.flush()
+            await self.session.refresh(dup)
+            return dup
+
         event = await self.repo.create(**kwargs)
         await self.session.flush()
         await self.session.refresh(event)

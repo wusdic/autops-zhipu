@@ -90,3 +90,24 @@ async def upload_attachment(
         "size": body.size,
         "uploaded_at": _dt.utcnow().isoformat(),
     })
+
+
+@router.post("/{ticket_id}/convert-knowledge")
+async def convert_ticket_to_knowledge(ticket_id: str, db: AsyncSession = Depends(get_db)):
+    """工单关闭后转知识草稿."""
+    from app.domains.knowledge.service import KnowledgeService
+    from app.domains.knowledge.schemas import KnowledgeCreate
+    import json
+
+    ticket_svc = TicketService(db)
+    draft = await ticket_svc.convert_to_knowledge_draft(ticket_id)
+
+    knowledge_svc = KnowledgeService(db)
+    article = await knowledge_svc.create_article(KnowledgeCreate(
+        title=draft["title"],
+        article_type=draft.get("article_type", "runbook"),
+        content=json.dumps(draft.get("context", {}), ensure_ascii=False),
+        source=draft.get("source", "ticket"),
+        source_id=draft.get("source_id", ticket_id),
+    ))
+    return success({"article_id": article.id, "title": article.title, "status": "draft"})

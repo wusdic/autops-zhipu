@@ -84,3 +84,51 @@ class PolicyService:
         p.status = "disabled"
         p.enabled = False
         await self.session.flush()
+
+    async def match_and_execute(self, event_type: str, severity: str, asset_ids: list, alert_id: str):
+        """根据告警匹配策略并创建执行."""
+        q = select(Policy).where(Policy.enabled == True, Policy.status == "active")
+        result = await self.session.execute(q)
+        policies = list(result.scalars().all())
+
+        matched = []
+        for policy in policies:
+            tc = policy.trigger_condition
+            if isinstance(tc, str):
+                tc = json.loads(tc)
+            if isinstance(tc, dict) and tc.get("event_type") == event_type:
+                if severity in tc.get("severity", []):
+                    matched.append(policy)
+
+        if not matched:
+            return None
+
+        best = matched[0]
+
+        # 创建 PolicyExecution 记录
+        import uuid as _uuid
+        from datetime import datetime as _dt
+        pe = PolicyExecution(
+            id=str(_uuid.uuid4()),
+            policy_id=best.id,
+            policy_version=best.version,
+            alert_id=alert_id,
+            trigger_event=event_type,
+            matched_assets=json.dumps(asset_ids) if isinstance(asset_ids, list) else str(asset_ids),
+            status="matched",
+            result=json.dumps({"explanation": f"告警类型 '{event_type}' 严重级别 '{severity}' 匹配策略 '{best.name}'"}, ensure_ascii=False),
+            created_at=_dt.utcnow()
+        )
+        self.session.add(pe)
+        await self.session.flush()
+
+        # 如果需要审批，发事件
+        if best.requires_approval:
+            pe.status = "awaiting_approval"
+            await self.session.flush()
+        else:
+            # 自动执行
+            pe.status = "executing"
+            await self.session.flush()
+
+        return {"policy_execution_id": pe.id, "policy_name": best.name, "status": pe.status}

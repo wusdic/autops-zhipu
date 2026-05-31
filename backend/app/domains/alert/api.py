@@ -133,3 +133,92 @@ async def escalate_alert(
     """升级告警."""
     alert = await svc.escalate(alert_id, body.escalate_to, body.reason)
     return success(model_to_dict(alert))
+
+
+@router.get("/{alert_id}/evidence-chain")
+async def get_evidence_chain(alert_id: str, db: AsyncSession = Depends(get_db)):
+    """获取告警的完整证据链（时间线聚合）."""
+    import json as _json
+
+    from app.domains.event.service import EventService
+    from app.domains.aiops.models import AIAnalysis
+    from app.domains.automation.models import Execution
+    from app.domains.ticket.service import TicketService
+
+    alert_svc = AlertService(db)
+    alert = await alert_svc.get_alert(alert_id)
+
+    timeline = []
+    # 告警本身
+    timeline.append({
+        "time": alert.created_at.isoformat() if alert.created_at else None,
+        "type": "alert_created",
+        "severity": alert.severity,
+        "title": alert.title,
+        "data": {"alert_id": str(alert.id), "status": alert.status}
+    })
+
+    # 关联事件
+    event_ids_raw = alert.event_ids
+    if event_ids_raw:
+        try:
+            event_ids = _json.loads(event_ids_raw) if isinstance(event_ids_raw, str) else event_ids_raw
+        except Exception:
+            event_ids = []
+        if event_ids:
+            event_svc = EventService(db)
+            for eid in event_ids:
+                try:
+                    event = await event_svc.get_event(eid)
+                    timeline.append({
+                        "time": event.created_at.isoformat() if event.created_at else None,
+                        "type": "event",
+                        "title": event.title,
+                        "data": {"event_id": str(event.id), "event_type": event.event_type, "severity": event.severity}
+                    })
+                except Exception:
+                    pass
+
+    # 关联AI分析 — 直接按 alert_id 查询
+    analyses_result = await db.execute(
+        select(AIAnalysis).where(AIAnalysis.alert_id == alert_id).order_by(AIAnalysis.created_at)
+    )
+    for a in analyses_result.scalars().all():
+        summary_text = a.summary or "N/A"
+        timeline.append({
+            "time": a.created_at.isoformat() if a.created_at else None,
+            "type": "ai_analysis",
+            "title": f"AI分析: {summary_text[:50]}",
+            "data": {"analysis_id": str(a.id), "root_causes": a.root_causes, "recommendations": a.recommended_actions}
+        })
+
+    # 关联自动化执行 — 直接按 trigger_source_id 查询
+    executions_result = await db.execute(
+        select(Execution).where(Execution.trigger_source_id == alert_id).order_by(Execution.created_at)
+    )
+    for e in executions_result.scalars().all():
+        timeline.append({
+            "time": e.created_at.isoformat() if e.created_at else None,
+            "type": "execution",
+            "title": f"自动化执行: {e.execution_type}",
+            "data": {"execution_id": str(e.id), "status": e.status, "is_dry_run": e.is_dry_run}
+        })
+
+    # 按时间排序
+    timeline.sort(key=lambda x: x["time"] or "")
+
+    # 关联工单
+    ticket_info = None
+    if alert.ticket_id:
+        try:
+            ticket_svc = TicketService(db)
+            ticket = await ticket_svc.get_ticket(alert.ticket_id)
+            ticket_info = {"ticket_id": str(ticket.id), "status": ticket.status, "title": ticket.title}
+        except Exception:
+            pass
+
+    return success({
+        "alert": {"id": str(alert.id), "title": alert.title, "severity": alert.severity, "status": alert.status},
+        "timeline": timeline,
+        "related_ticket": ticket_info
+    })
