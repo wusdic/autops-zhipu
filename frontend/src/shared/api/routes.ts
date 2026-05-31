@@ -165,6 +165,11 @@ export const API = {
     API_KEY_DETAIL: (id: string) => `/api/v1/api-keys/${id}`,
   },
 
+  // 通知渠道
+  NOTIFICATION_CHANNELS: '/api/v1/notification-channels',
+  NOTIFICATION_CHANNEL_DETAIL: (name: string) => `/api/v1/notification-channels/${name}`,
+  NOTIFICATION_CHANNEL_TEST: (name: string) => `/api/v1/notification-channels/${name}/test`,
+
   // 平台
   PLATFORM_STATUS: '/api/v1/platform/status',
 } as const

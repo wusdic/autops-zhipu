@@ -15,6 +15,10 @@
         </div>
         <div class="header-right">
           <el-button @click="loadAlerts" :loading="alertLoading" size="default">刷新告警</el-button>
+          <el-button size="default" @click="showChannelDialog">
+            <el-icon style="margin-right: 4px"><Bell /></el-icon>
+            通知设置
+          </el-button>
           <el-button
             type="primary"
             @click="startAIDiagnosis"
@@ -419,6 +423,59 @@
       @confirm="onApprovalConfirm"
       @cancel="approvalVisible = false"
     />
+
+    <!-- 通知渠道配置弹窗 -->
+    <el-dialog
+      v-model="channelDialogVisible"
+      title="通知渠道设置"
+      width="640px"
+      destroy-on-close
+    >
+      <el-table :data="channels" v-loading="channelsLoading" size="small" style="width: 100%">
+        <el-table-column prop="name" label="渠道名称" width="140">
+          <template #default="{ row }">
+            <span style="font-weight: 600">{{ row.name }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="description" label="描述" min-width="160" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.description || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="启用" width="90" align="center">
+          <template #default="{ row }">
+            <el-switch
+              :model-value="row.enabled"
+              @change="(val: boolean) => toggleChannel(row.name, val)"
+              size="small"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="100" align="center">
+          <template #default="{ row }">
+            <el-button
+              link
+              type="primary"
+              size="small"
+              @click="testChannel(row.name)"
+              :loading="testingChannel === row.name"
+              :disabled="!row.enabled"
+            >
+              测试
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div v-if="channelTestResult" style="margin-top: 12px">
+        <el-alert
+          :title="channelTestResult"
+          :type="channelTestSuccess ? 'success' : 'error'"
+          :closable="true"
+          @close="channelTestResult = ''"
+          show-icon
+        />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -426,7 +483,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { MagicStick, Loading } from '@element-plus/icons-vue'
+import { MagicStick, Loading, Bell } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 import TimelineView from '@/shared/components/TimelineView.vue'
@@ -462,6 +519,14 @@ const relatedLogs = ref<any[]>([])
 const assetChanges = ref<any[]>([])
 const logLevelFilter = ref<string>('all')
 const applyingPolicy = ref(false)
+
+// ─── Notification Channel State ───
+const channelDialogVisible = ref(false)
+const channels = ref<any[]>([])
+const channelsLoading = ref(false)
+const testingChannel = ref('')
+const channelTestResult = ref('')
+const channelTestSuccess = ref(false)
 
 // ─── Mock Metric Data (demonstrates MetricChart usage) ───
 const metricData = computed(() => generateMockMetric(70, 95))
@@ -971,6 +1036,63 @@ async function loadExecutionLogs(execId: string) {
     logLines.value = ['[错误] 无法加载执行日志']
   } finally {
     logLoading.value = false
+  }
+}
+
+// ─── Notification Channels ───
+async function loadChannels() {
+  channelsLoading.value = true
+  try {
+    const { data } = await api.get(API.NOTIFICATION_CHANNELS)
+    if (data.code === 0) {
+      channels.value = data.data || []
+    }
+  } catch {
+    ElMessage.error('加载通知渠道失败')
+  } finally {
+    channelsLoading.value = false
+  }
+}
+
+function showChannelDialog() {
+  channelTestResult.value = ''
+  channelDialogVisible.value = true
+  loadChannels()
+}
+
+async function toggleChannel(name: string, enabled: boolean) {
+  try {
+    const { data } = await api.patch(API.NOTIFICATION_CHANNEL_DETAIL(name), {
+      name,
+      enabled,
+    })
+    if (data.code === 0) {
+      ElMessage.success(`${name} 渠道已${enabled ? '启用' : '禁用'}`)
+      loadChannels()
+    }
+  } catch {
+    ElMessage.error('更新渠道状态失败')
+  }
+}
+
+async function testChannel(name: string) {
+  testingChannel.value = name
+  channelTestResult.value = ''
+  try {
+    const { data } = await api.post(API.NOTIFICATION_CHANNEL_TEST(name), {
+      message: '测试通知',
+    })
+    if (data.code === 0) {
+      channelTestSuccess.value = data.data?.sent ?? true
+      channelTestResult.value = data.data?.sent
+        ? `${name} 渠道测试通知发送成功`
+        : `${name} 渠道测试通知发送失败`
+    }
+  } catch {
+    channelTestSuccess.value = false
+    channelTestResult.value = `${name} 渠道测试失败，请检查配置`
+  } finally {
+    testingChannel.value = ''
   }
 }
 

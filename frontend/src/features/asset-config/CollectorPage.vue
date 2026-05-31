@@ -1,6 +1,9 @@
 <template>
   <div class="collector-page">
-    <!-- ========== 采集器列表 ========== -->
+    <!-- ========== Tab 切换：本地采集器 / Edge采集器 ========== -->
+    <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+      <!-- ========== 本地采集器 Tab ========== -->
+      <el-tab-pane label="本地采集器" name="local">
     <el-card class="section-card">
       <template #header>
         <div class="card-header">
@@ -339,11 +342,105 @@
         <el-button type="primary" :loading="triggering" @click="submitTrigger">触发采集</el-button>
       </template>
     </el-dialog>
+      </el-tab-pane>
+
+      <!-- ========== Edge 采集器 Tab ========== -->
+      <el-tab-pane label="Edge采集器" name="edge">
+        <!-- Edge 状态统计 + 刷新 -->
+        <el-card class="section-card">
+          <template #header>
+            <div class="card-header">
+              <span class="section-title">Edge 采集器管理</span>
+              <div class="header-actions">
+                <el-tag type="success" class="edge-stat-tag">在线: {{ edgeOnlineCount }}</el-tag>
+                <el-tag type="danger" class="edge-stat-tag">离线: {{ edgeOfflineCount }}</el-tag>
+                <el-button @click="loadEdgeCollectors">
+                  <el-icon><Refresh /></el-icon> 刷新
+                </el-button>
+              </div>
+            </div>
+          </template>
+
+          <!-- Edge 采集器表格 -->
+          <el-table :data="edgeCollectors" v-loading="edgeLoading" stripe row-key="collector_id">
+            <el-table-column prop="collector_id" label="Collector ID" min-width="180" show-overflow-tooltip />
+            <el-table-column prop="name" label="名称" min-width="130" show-overflow-tooltip>
+              <template #default="{ row }">{{ row.name || '-' }}</template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态" width="110">
+              <template #default="{ row }">
+                <el-tag
+                  size="small"
+                  :type="edgeStatusTagType(row.status)"
+                >
+                  {{ edgeStatusLabel(row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="last_heartbeat" label="最后心跳" width="170">
+              <template #default="{ row }">{{ formatTime(row.last_heartbeat) }}</template>
+            </el-table-column>
+            <el-table-column prop="ip" label="IP" width="140">
+              <template #default="{ row }">{{ row.ip || '-' }}</template>
+            </el-table-column>
+            <el-table-column prop="version" label="版本" width="100">
+              <template #default="{ row }">{{ row.version || '-' }}</template>
+            </el-table-column>
+            <el-table-column label="操作" width="260" fixed="right">
+              <template #default="{ row }">
+                <el-button size="small" @click="viewEdgeStatus(row)">查看状态</el-button>
+                <el-button size="small" type="primary" @click="viewEdgeTasks(row)">查看任务</el-button>
+                <el-popconfirm title="确定删除此 Edge 采集器？" @confirm="deleteEdgeCollector(row.collector_id)">
+                  <template #reference>
+                    <el-button size="small" type="danger">删除</el-button>
+                  </template>
+                </el-popconfirm>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
+      </el-tab-pane>
+    </el-tabs>
+
+    <!-- ========== Edge 查看状态对话框 ========== -->
+    <el-dialog v-model="showEdgeStatusDialog" title="Edge 采集器状态" width="700px" destroy-on-close>
+      <div v-if="edgeStatusData" class="detail-section">
+        <JsonViewer :data="edgeStatusData" />
+      </div>
+      <el-empty v-else description="暂无状态数据" :image-size="60" />
+    </el-dialog>
+
+    <!-- ========== Edge 查看任务对话框 ========== -->
+    <el-dialog v-model="showEdgeTasksDialog" title="Edge 采集器任务" width="800px" destroy-on-close>
+      <template v-if="currentEdgeCollector">
+        <el-descriptions :column="2" border size="small" style="margin-bottom: 16px">
+          <el-descriptions-item label="Collector ID">{{ currentEdgeCollector.collector_id }}</el-descriptions-item>
+          <el-descriptions-item label="名称">{{ currentEdgeCollector.name || '-' }}</el-descriptions-item>
+        </el-descriptions>
+      </template>
+      <el-table :data="edgeTasks" v-loading="edgeTasksLoading" stripe size="default">
+        <el-table-column prop="task_id" label="任务ID" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="task_type" label="类型" width="120">
+          <template #default="{ row }">{{ row.task_type || '-' }}</template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag size="small" :type="edgeTaskStatusTagType(row.status)">{{ row.status || '-' }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="created_at" label="创建时间" width="170">
+          <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
+        </el-table-column>
+        <el-table-column prop="result" label="结果" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.result || '-' }}</template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { Refresh, VideoPlay } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
@@ -383,6 +480,26 @@ interface HealthCheck {
   status: string
   message: string
   checked_at: string
+}
+
+// ---------- Edge Types ----------
+interface EdgeCollector {
+  collector_id: string
+  name: string
+  status: string
+  last_heartbeat: string
+  ip: string
+  version: string
+  [key: string]: any
+}
+
+interface EdgeTask {
+  task_id: string
+  task_type: string
+  status: string
+  created_at: string
+  result: string
+  [key: string]: any
 }
 
 // ---------- Constants ----------
@@ -442,6 +559,19 @@ const triggerForm = reactive({
   job_type: 'full_collect',
   params: '',
 })
+
+// ---------- Tab State ----------
+const activeTab = ref('local')
+
+// ---------- Edge Collector State ----------
+const edgeLoading = ref(false)
+const edgeCollectors = ref<EdgeCollector[]>([])
+const showEdgeStatusDialog = ref(false)
+const edgeStatusData = ref<any>(null)
+const showEdgeTasksDialog = ref(false)
+const currentEdgeCollector = ref<EdgeCollector | null>(null)
+const edgeTasks = ref<EdgeTask[]>([])
+const edgeTasksLoading = ref(false)
 
 // ---------- Helpers ----------
 function formatTime(t: string | undefined | null): string {
@@ -657,10 +787,119 @@ async function retryJob(job: CollectionJob) {
   }
 }
 
+// ---------- Edge Computed ----------
+const edgeOnlineCount = computed(() => {
+  return edgeCollectors.value.filter(c => c.status === 'healthy' || c.status === 'degraded').length
+})
+
+const edgeOfflineCount = computed(() => {
+  return edgeCollectors.value.filter(c => c.status === 'offline').length
+})
+
+// ---------- Edge Helpers ----------
+function edgeStatusTagType(status: string): string {
+  switch (status) {
+    case 'healthy': return 'success'
+    case 'degraded': return 'warning'
+    case 'offline': return 'danger'
+    default: return 'info'
+  }
+}
+
+function edgeStatusLabel(status: string): string {
+  switch (status) {
+    case 'healthy': return '健康'
+    case 'degraded': return '降级'
+    case 'offline': return '离线'
+    default: return status || '未知'
+  }
+}
+
+function edgeTaskStatusTagType(status: string): string {
+  switch (status) {
+    case 'success': return 'success'
+    case 'running': return ''
+    case 'pending': return 'info'
+    case 'failed': return 'danger'
+    default: return 'info'
+  }
+}
+
+// ---------- Edge API ----------
+async function loadEdgeCollectors() {
+  edgeLoading.value = true
+  try {
+    // 调用 Edge 状态列表接口
+    const { data } = await api.get('/api/v1/collectors/edge')
+    if (data.code === 0) {
+      edgeCollectors.value = data.data?.items || data.data || []
+    }
+  } catch (e: any) {
+    ElMessage.error('加载 Edge 采集器失败: ' + (e.message || e))
+  } finally {
+    edgeLoading.value = false
+  }
+}
+
+async function viewEdgeStatus(row: EdgeCollector) {
+  edgeStatusData.value = null
+  showEdgeStatusDialog.value = true
+  try {
+    const { data } = await api.get(R.EDGE_STATUS(row.collector_id))
+    if (data.code === 0) {
+      edgeStatusData.value = data.data
+    }
+  } catch (e: any) {
+    ElMessage.error('获取 Edge 状态失败: ' + (e.message || e))
+  }
+}
+
+async function viewEdgeTasks(row: EdgeCollector) {
+  currentEdgeCollector.value = row
+  edgeTasks.value = []
+  edgeTasksLoading.value = true
+  showEdgeTasksDialog.value = true
+  try {
+    const { data } = await api.get(R.EDGE_TASKS(row.collector_id))
+    if (data.code === 0) {
+      edgeTasks.value = data.data?.items || data.data || []
+    }
+  } catch (e: any) {
+    ElMessage.error('获取 Edge 任务失败: ' + (e.message || e))
+  } finally {
+    edgeTasksLoading.value = false
+  }
+}
+
+async function deleteEdgeCollector(collectorId: string) {
+  try {
+    const { data } = await api.delete(`/api/v1/collectors/edge/${collectorId}`)
+    if (data.code === 0) {
+      ElMessage.success('Edge 采集器已删除')
+      loadEdgeCollectors()
+    } else {
+      ElMessage.error(data.message || '删除失败')
+    }
+  } catch (e: any) {
+    ElMessage.error('删除 Edge 采集器失败: ' + (e.message || e))
+  }
+}
+
+// ---------- Tab Change ----------
+function handleTabChange(tab: string | number) {
+  if (tab === 'edge' && edgeCollectors.value.length === 0) {
+    loadEdgeCollectors()
+  }
+}
+
 // ---------- Init ----------
 onMounted(() => {
   loadCollectors()
   loadJobs()
+  // 如果当前 Tab 为 edge，也加载 Edge 数据
+  if (activeTab.value === 'edge') {
+    loadEdgeCollectors()
+  }
 })
 </script>
 
@@ -766,5 +1005,12 @@ onMounted(() => {
 :deep(.el-dialog__body) {
   padding-top: 16px;
   padding-bottom: 8px;
+}
+
+.edge-stat-tag {
+  font-size: 13px;
+  padding: 0 12px;
+  height: 32px;
+  line-height: 30px;
 }
 </style>
