@@ -78,7 +78,8 @@
                 v-if="ticket.status === 'resolved' || ticket.status === 'closed'"
                 type="warning"
                 :icon="Document"
-                @click="openKnowledgeDialog"
+                :loading="knowledgeConverting"
+                @click="convertToKnowledge"
               >
                 转知识草稿
               </el-button>
@@ -284,7 +285,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, WarningFilled, Document, Upload } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
@@ -333,6 +334,7 @@ function startSlaTimer() {
 }
 
 // ─── 转知识草稿 ───
+const knowledgeConverting = ref(false)
 const knowledgeDialogVisible = ref(false)
 const knowledgeSubmitting = ref(false)
 const knowledgeForm = ref({
@@ -341,6 +343,33 @@ const knowledgeForm = ref({
   type: 'incident' as string,
   tags: [] as string[],
 })
+
+async function convertToKnowledge() {
+  const t = ticket.value
+  if (!t) return
+  try {
+    await ElMessageBox.confirm(
+      '确认将此工单转为知识草稿？系统将自动生成知识文章草稿。',
+      '转知识草稿',
+      { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' }
+    )
+  } catch {
+    return // 用户取消
+  }
+  knowledgeConverting.value = true
+  try {
+    const { data } = await api.post(R.TICKET_CONVERT_KNOWLEDGE(t.id))
+    if (data.code === 0) {
+      ElMessage.success('已成功转为知识草稿')
+    } else {
+      ElMessage.error(data.message || '转换失败')
+    }
+  } catch {
+    ElMessage.error('转知识草稿失败')
+  } finally {
+    knowledgeConverting.value = false
+  }
+}
 
 function openKnowledgeDialog() {
   const t = ticket.value

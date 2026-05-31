@@ -173,8 +173,7 @@ Final Answer: 最终结论和建议
         """调用 LLM."""
         if self.llm:
             return await self.llm.chat(messages)
-        # 降级模式：返回固定响应
-        return "Thought: 需要更多信息\nFinal Answer: LLM 服务暂不可用，请稍后重试。"
+        return "Thought: LLM 服务未配置\nFinal Answer: LLM 服务暂不可用，请配置 llm.yaml 后重试。"
 
     def _parse_response(self, response: str) -> dict:
         """解析 LLM 响应."""

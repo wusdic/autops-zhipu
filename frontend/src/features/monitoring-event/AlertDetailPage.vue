@@ -367,7 +367,7 @@
         </el-card>
 
         <!-- ─── Evidence Chain Section ─── -->
-        <el-card shadow="hover" class="section-card">
+        <el-card shadow="hover" class="section-card" v-loading="evidenceChainLoading">
           <template #header>
             <div class="col-header">
               <span>🔗 证据链</span>
@@ -501,6 +501,7 @@ const relatedAlertsLoading = ref(false)
 const relatedAlerts = ref<any[]>([])
 
 // ─── Evidence Chain ───
+const evidenceChainLoading = ref(false)
 const evidenceChain = ref<any[]>([])
 
 // ─── Impact Data ───
@@ -731,42 +732,31 @@ async function loadRelatedAlerts() {
 }
 
 async function loadEvidenceChain() {
+  const id = alertId()
+  if (!id) return
+  evidenceChainLoading.value = true
   try {
-    // Load related events as evidence
-    const { data } = await api.get(R.EVENTS, {
-      params: { alert_id: alertId(), page: 1, page_size: 30 },
-    })
-    const events = data.code === 0 ? (data.data?.items || data.data || []) : []
-    // Load state changes as evidence
-    const a = alert.value
-    let stateChanges: any[] = []
-    if (a?.asset_id) {
-      try {
-        const { data: scData } = await api.get(R.STATES.CHANGES(a.asset_id), {
-          params: { page: 1, page_size: 20 },
-        })
-        if (scData.code === 0) {
-          stateChanges = (scData.data?.items || scData.data || []).map((c: any) => ({
-            ...c,
-            type: 'state_change',
-            title: c.field ? `状态变更: ${c.field}` : '资产状态变更',
-          }))
-        }
-      } catch { /* ignore */ }
+    const { data } = await api.get(R.ALERT_EVIDENCE_CHAIN(id))
+    if (data.code === 0) {
+      const items = data.data?.items || data.data || []
+      // Normalize evidence items and sort by timestamp descending
+      evidenceChain.value = (Array.isArray(items) ? items : []).map((ev: any, idx: number) => ({
+        ...ev,
+        type: ev.type || 'event',
+        title: ev.title || ev.source || `证据 ${idx + 1}`,
+        timestamp: ev.timestamp || ev.created_at,
+      })).sort((a: any, b: any) => {
+        const ta = new Date(a.timestamp || 0).getTime()
+        const tb = new Date(b.timestamp || 0).getTime()
+        return tb - ta
+      })
+    } else {
+      evidenceChain.value = []
     }
-    // Combine and sort by timestamp
-    const allEvidence = [
-      ...events.map((e: any) => ({ ...e, type: e.type || 'event' })),
-      ...stateChanges,
-    ]
-    allEvidence.sort((a: any, b: any) => {
-      const ta = new Date(a.timestamp || a.created_at || 0).getTime()
-      const tb = new Date(b.timestamp || b.created_at || 0).getTime()
-      return tb - ta
-    })
-    evidenceChain.value = allEvidence
   } catch {
     evidenceChain.value = []
+  } finally {
+    evidenceChainLoading.value = false
   }
 }
 

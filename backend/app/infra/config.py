@@ -23,6 +23,7 @@ def _load_yaml(filename: str) -> dict:
 
 
 class DatabaseConfig(BaseSettings):
+    dialect: str = "mysql"
     host: str = "127.0.0.1"
     port: int = 3306
     user: str = "autops"
@@ -34,8 +35,14 @@ class DatabaseConfig(BaseSettings):
 
     @property
     def url(self) -> str:
+        from app.infra.db_dialect import DialectAdapter
+        adapter = DialectAdapter(self.dialect)
         p = f":{self.db_password}" if self.db_password else ""
-        return f"mysql+aiomysql://{self.user}{p}@{self.host}:{self.port}/{self.database}?charset=utf8mb4"
+        base_url = adapter.build_connection_url(self.user, p.lstrip(":"), self.host, self.port, self.database)
+        # MySQL-compatible dialects use charset parameter
+        if adapter.is_mysql_compatible:
+            return f"{base_url}?charset=utf8mb4"
+        return base_url
 
     class Config:
         env_prefix = "DB_"

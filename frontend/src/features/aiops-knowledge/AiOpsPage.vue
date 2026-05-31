@@ -6,9 +6,34 @@
         <el-icon style="margin-right: 6px"><MagicStick /></el-icon>
         AI 智能诊断
       </span>
-      <span class="page-subtitle">选择告警，由 AI 自动构建上下文并进行根因分析</span>
+      <span class="page-subtitle">
+        <template v-if="activeMode === 'analysis'">选择告警，由 AI 自动构建上下文并进行根因分析</template>
+        <template v-else>输入运维任务，Agent 自主规划并执行多步骤排查</template>
+      </span>
     </div>
 
+    <!-- Mode Tab Switch -->
+    <div class="mode-tabs">
+      <div
+        class="mode-tab"
+        :class="{ active: activeMode === 'analysis' }"
+        @click="activeMode = 'analysis'"
+      >
+        <el-icon><DataAnalysis /></el-icon>
+        分析模式
+      </div>
+      <div
+        class="mode-tab"
+        :class="{ active: activeMode === 'agent' }"
+        @click="activeMode = 'agent'"
+      >
+        <el-icon><Promotion /></el-icon>
+        Agent 模式
+      </div>
+    </div>
+
+    <!-- ===================== 分析模式 ===================== -->
+    <template v-if="activeMode === 'analysis'">
     <!-- Main Layout: Left (Workflow) + Right (History) -->
     <el-row :gutter="16">
       <!-- Left Column: Analysis Workflow -->
@@ -385,15 +410,195 @@
         </el-card>
       </el-col>
     </el-row>
+    </template>
+
+    <!-- ===================== Agent 模式 ===================== -->
+    <template v-if="activeMode === 'agent'">
+    <el-row :gutter="16">
+      <!-- Left Column: Agent Task + Process -->
+      <el-col :span="16">
+        <!-- Task Input -->
+        <el-card shadow="hover" class="workflow-card">
+          <template #header>
+            <div class="card-header">
+              <span class="card-header-title">
+                <el-icon><EditPen /></el-icon>
+                任务输入
+              </span>
+            </div>
+          </template>
+          <el-input
+            v-model="agentTask"
+            type="textarea"
+            :rows="4"
+            placeholder="请描述您的运维任务，例如：排查 web-server-01 CPU 持续飙高的原因并给出修复建议"
+            :disabled="agentRunning"
+          />
+          <div class="agent-input-actions">
+            <el-button
+              type="primary"
+              :icon="Promotion"
+              :loading="agentRunning"
+              :disabled="!agentTask.trim()"
+              @click="runAgent"
+            >
+              {{ agentRunning ? 'Agent 运行中...' : '运行 Agent' }}
+            </el-button>
+            <el-button
+              v-if="agentRunning"
+              type="danger"
+              @click="cancelAgent"
+            >
+              取消运行
+            </el-button>
+          </div>
+        </el-card>
+
+        <!-- Thinking Process (Real-time Steps) -->
+        <el-card v-if="agentSteps.length > 0" shadow="hover" class="workflow-card">
+          <template #header>
+            <div class="card-header">
+              <span class="card-header-title">
+                <el-icon><Cpu /></el-icon>
+                思考过程
+              </span>
+              <el-tag v-if="agentRunning" type="warning" effect="dark" size="small">
+                <el-icon class="is-loading"><Loading /></el-icon>
+                运行中
+              </el-tag>
+              <el-tag v-else type="success" effect="dark" size="small">已完成</el-tag>
+            </div>
+          </template>
+          <el-timeline>
+            <el-timeline-item
+              v-for="(step, idx) in agentSteps"
+              :key="idx"
+              :type="step.status === 'error' ? 'danger' : step.status === 'running' ? 'warning' : 'success'"
+              :hollow="step.status === 'running'"
+            >
+              <div class="agent-step">
+                <div class="agent-step-header">
+                  <span class="agent-step-index">Step {{ idx + 1 }}</span>
+                  <span class="agent-step-action">{{ step.action }}</span>
+                  <el-tag
+                    v-if="step.status === 'running'"
+                    type="warning"
+                    size="small"
+                    effect="plain"
+                  >
+                    <el-icon class="is-loading"><Loading /></el-icon>
+                    执行中
+                  </el-tag>
+                  <el-tag v-else-if="step.status === 'done'" type="success" size="small" effect="plain">完成</el-tag>
+                  <el-tag v-else-if="step.status === 'error'" type="danger" size="small" effect="plain">失败</el-tag>
+                </div>
+                <div v-if="step.thought" class="agent-step-thought">
+                  <strong>思考：</strong>{{ step.thought }}
+                </div>
+                <div v-if="step.observation" class="agent-step-observation">
+                  <strong>观察：</strong>{{ step.observation }}
+                </div>
+                <div v-if="step.tool" class="agent-step-tool">
+                  <el-tag size="small" effect="plain" type="info">
+                    <el-icon><SetUp /></el-icon>
+                    {{ step.tool }}
+                  </el-tag>
+                </div>
+              </div>
+            </el-timeline-item>
+          </el-timeline>
+        </el-card>
+
+        <!-- Final Conclusion -->
+        <el-card v-if="agentConclusion" shadow="hover" class="workflow-card">
+          <template #header>
+            <div class="card-header">
+              <span class="card-header-title">
+                <el-icon><Finished /></el-icon>
+                最终结论
+              </span>
+              <el-tag type="info" size="small">{{ formatTime(agentConclusion.completed_at) }}</el-tag>
+            </div>
+          </template>
+          <div class="agent-conclusion-summary">{{ agentConclusion.summary }}</div>
+          <div v-if="agentConclusion.actions?.length" class="result-section" style="margin-top: 16px;">
+            <div class="section-label">建议操作</div>
+            <div class="action-list">
+              <div v-for="(act, idx) in agentConclusion.actions" :key="idx" class="action-item">
+                <div class="action-info">
+                  <div class="action-header">
+                    <span class="action-index">#{{ idx + 1 }}</span>
+                    <span class="action-title">{{ act.title || act.name }}</span>
+                  </div>
+                  <div v-if="act.description" class="action-desc">{{ act.description }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Raw Response -->
+          <el-collapse class="raw-collapse" style="margin-top: 16px;">
+            <el-collapse-item name="raw">
+              <template #title>
+                <span class="raw-toggle">查看原始数据</span>
+              </template>
+              <JsonViewer :data="agentConclusion" />
+            </el-collapse-item>
+          </el-collapse>
+        </el-card>
+      </el-col>
+
+      <!-- Right Column: Agent History -->
+      <el-col :span="8">
+        <el-card shadow="hover" class="history-card">
+          <template #header>
+            <div class="card-header">
+              <span class="card-header-title">
+                <el-icon><Clock /></el-icon>
+                Agent 运行历史
+              </span>
+              <el-button text type="primary" size="small" @click="loadAgentHistory" :loading="agentHistoryLoading">
+                <el-icon><Refresh /></el-icon>
+              </el-button>
+            </div>
+          </template>
+          <div v-loading="agentHistoryLoading">
+            <el-empty v-if="!agentHistoryLoading && !agentHistoryList.length" description="暂无 Agent 运行记录" :image-size="80" />
+            <div v-else class="history-list">
+              <div
+                v-for="item in agentHistoryList"
+                :key="item.id"
+                class="history-item"
+                :class="{ active: agentConclusion && agentConclusion.id === item.id }"
+                @click="loadAgentResult(item.id)"
+              >
+                <div class="history-item-header">
+                  <span class="history-alert-title">{{ item.task_summary || item.task || `任务 #${item.id}` }}</span>
+                  <el-tag
+                    :type="item.status === 'completed' ? 'success' : item.status === 'failed' ? 'danger' : 'warning'"
+                    size="small"
+                  >
+                    {{ item.status === 'completed' ? '完成' : item.status === 'failed' ? '失败' : '运行中' }}
+                  </el-tag>
+                </div>
+                <div class="history-item-summary">{{ item.summary || '-' }}</div>
+                <div class="history-item-time">{{ formatTime(item.created_at || item.completed_at) }}</div>
+              </div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import {
   MagicStick, Bell, Refresh, Cpu, FolderOpened, Warning, Monitor,
   Timer, Document, Reading, Tickets, SetUp, VideoPlay, Position,
-  Select, CloseBold, Clock,
+  Select, CloseBold, Clock, DataAnalysis, Promotion, EditPen,
+  Loading, Finished,
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
@@ -483,6 +688,10 @@ interface HistoryItem {
 }
 
 // ─── State ───────────────────────────────────────────────────────────
+// Mode switch
+const activeMode = ref<'analysis' | 'agent'>('analysis')
+
+// --- Analysis mode state ---
 const alerts = ref<Alert[]>([])
 const alertsLoading = ref(false)
 const selectedAlertId = ref<string>('')
@@ -501,6 +710,171 @@ const historyList = ref<HistoryItem[]>([])
 const historyLoading = ref(false)
 
 const actionExecuting = ref<Record<number, boolean>>({})
+
+// ─── Agent Mode Types ────────────────────────────────────────────────
+interface AgentStep {
+  action: string
+  thought?: string
+  observation?: string
+  tool?: string
+  status: 'running' | 'done' | 'error'
+}
+
+interface AgentConclusion {
+  id: string
+  summary: string
+  actions?: Array<{ title?: string; name?: string; description?: string }>
+  completed_at: string
+  [key: string]: any
+}
+
+interface AgentHistoryItem {
+  id: string
+  task?: string
+  task_summary?: string
+  summary?: string
+  status: string
+  created_at?: string
+  completed_at?: string
+}
+
+// ─── Agent Mode State ────────────────────────────────────────────────
+const agentTask = ref('')
+const agentRunning = ref(false)
+const agentSteps = ref<AgentStep[]>([])
+const agentConclusion = ref<AgentConclusion | null>(null)
+const agentHistoryList = ref<AgentHistoryItem[]>([])
+const agentHistoryLoading = ref(false)
+let agentPollTimer: ReturnType<typeof setInterval> | null = null
+
+// ─── Agent: Run Task ────────────────────────────────────────────────
+async function runAgent() {
+  const task = agentTask.value.trim()
+  if (!task) return
+
+  agentRunning.value = true
+  agentSteps.value = []
+  agentConclusion.value = null
+
+  try {
+    const { data } = await api.post(R.AIOPS.AGENT_RUN, { task })
+    if (data.code === 0) {
+      const runId = data.data?.id || data.data?.task_id
+      ElMessage.success('Agent 任务已提交')
+      // Start polling for steps & result
+      startAgentPolling(runId)
+    } else {
+      ElMessage.error(data.message || 'Agent 启动失败')
+      agentRunning.value = false
+    }
+  } catch (e: any) {
+    ElMessage.error('Agent 启动失败: ' + (e.message || e))
+    agentRunning.value = false
+  }
+}
+
+function startAgentPolling(runId: string) {
+  // Poll every 2 seconds
+  agentPollTimer = setInterval(async () => {
+    try {
+      const { data } = await api.get(R.AIOPS.AGENT_RESULTS, {
+        params: { task_id: runId },
+      })
+      if (data.code === 0) {
+        const result = data.data
+        // Update steps
+        if (result.steps?.length) {
+          agentSteps.value = result.steps.map((s: any) => ({
+            action: s.action || s.name || '',
+            thought: s.thought || s.reasoning || '',
+            observation: s.observation || s.result || '',
+            tool: s.tool || s.tool_name || '',
+            status: s.status || (s.error ? 'error' : 'done'),
+          }))
+        }
+        // Check completion
+        if (result.status === 'completed' || result.conclusion) {
+          agentConclusion.value = {
+            id: result.id || runId,
+            summary: result.conclusion || result.summary || '',
+            actions: result.actions || [],
+            completed_at: result.completed_at || new Date().toISOString(),
+            ...result,
+          }
+          stopAgentPolling()
+          agentRunning.value = false
+          loadAgentHistory()
+        } else if (result.status === 'failed') {
+          stopAgentPolling()
+          agentRunning.value = false
+          ElMessage.error('Agent 运行失败: ' + (result.error || '未知错误'))
+        }
+      }
+    } catch {
+      // Continue polling on transient errors
+    }
+  }, 2000)
+}
+
+function stopAgentPolling() {
+  if (agentPollTimer) {
+    clearInterval(agentPollTimer)
+    agentPollTimer = null
+  }
+}
+
+function cancelAgent() {
+  stopAgentPolling()
+  agentRunning.value = false
+  ElMessage.info('Agent 运行已取消')
+}
+
+// ─── Agent: Load History ────────────────────────────────────────────
+async function loadAgentHistory() {
+  agentHistoryLoading.value = true
+  try {
+    const { data } = await api.get(R.AIOPS.AGENT_RESULTS, {
+      params: { page_size: 20 },
+    })
+    if (data.code === 0) {
+      agentHistoryList.value = data.data?.items || data.data || []
+    }
+  } catch (e: any) {
+    ElMessage.error('加载 Agent 历史失败: ' + (e.message || e))
+  } finally {
+    agentHistoryLoading.value = false
+  }
+}
+
+// ─── Agent: Load Single Result ──────────────────────────────────────
+async function loadAgentResult(id: string) {
+  try {
+    const { data } = await api.get(R.AIOPS.AGENT_RESULTS, {
+      params: { task_id: id },
+    })
+    if (data.code === 0) {
+      const result = data.data
+      if (result.steps?.length) {
+        agentSteps.value = result.steps.map((s: any) => ({
+          action: s.action || s.name || '',
+          thought: s.thought || s.reasoning || '',
+          observation: s.observation || s.result || '',
+          tool: s.tool || s.tool_name || '',
+          status: s.status || (s.error ? 'error' : 'done'),
+        }))
+      }
+      agentConclusion.value = {
+        id: result.id || id,
+        summary: result.conclusion || result.summary || '',
+        actions: result.actions || [],
+        completed_at: result.completed_at || '',
+        ...result,
+      }
+    }
+  } catch (e: any) {
+    ElMessage.error('加载 Agent 结果失败: ' + (e.message || e))
+  }
+}
 
 // ─── Computed ────────────────────────────────────────────────────────
 const contextSourceCount = computed(() => {
@@ -797,6 +1171,18 @@ async function loadHistory() {
 onMounted(() => {
   loadAlerts()
   loadHistory()
+  loadAgentHistory()
+})
+
+onUnmounted(() => {
+  stopAgentPolling()
+})
+
+// Load agent history when switching to agent mode
+watch(activeMode, (mode) => {
+  if (mode === 'agent' && !agentHistoryList.value.length) {
+    loadAgentHistory()
+  }
 })
 </script>
 
@@ -1086,5 +1472,106 @@ onMounted(() => {
 
 .history-feedback-badge {
   margin-top: 4px;
+}
+
+/* ─── Mode Tabs ────────────────────────────────────────────────────── */
+.mode-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #e4e7ed;
+}
+
+.mode-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #909399;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.mode-tab:hover {
+  color: #409eff;
+}
+
+.mode-tab.active {
+  color: #409eff;
+  border-bottom-color: #409eff;
+}
+
+/* ─── Agent Mode ───────────────────────────────────────────────────── */
+.agent-input-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.agent-step {
+  padding: 4px 0;
+}
+
+.agent-step-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.agent-step-index {
+  font-weight: 700;
+  color: #409eff;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.agent-step-action {
+  font-weight: 600;
+  color: #303133;
+  font-size: 14px;
+}
+
+.agent-step-thought {
+  color: #606266;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 6px 10px;
+  background: #fdf6ec;
+  border-radius: 4px;
+  margin: 4px 0;
+  border-left: 3px solid #e6a23c;
+}
+
+.agent-step-observation {
+  color: #606266;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 6px 10px;
+  background: #f0f9eb;
+  border-radius: 4px;
+  margin: 4px 0;
+  border-left: 3px solid #67c23a;
+}
+
+.agent-step-tool {
+  margin-top: 4px;
+}
+
+.agent-conclusion-summary {
+  color: #303133;
+  line-height: 1.8;
+  padding: 12px 16px;
+  background: #ecf5ff;
+  border-radius: 8px;
+  border-left: 4px solid #409eff;
+  font-size: 14px;
+  white-space: pre-wrap;
 }
 </style>

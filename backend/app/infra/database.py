@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import logging
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from app.infra.config import get_config
+from app.infra.db_dialect import DialectAdapter
+
+logger = logging.getLogger(__name__)
 
 engine = None
 async_session_factory = None
@@ -21,11 +26,14 @@ def init_db_engine():
     """初始化数据库引擎."""
     global engine, async_session_factory
     config = get_config()
+    db_conf = config.database
+    adapter = DialectAdapter(db_conf.dialect)
+    logger.info("Initializing DB engine: dialect=%s, connector=%s", adapter.config.name, adapter.config.connector)
     engine = create_async_engine(
-        config.database.url,
-        pool_size=config.database.pool_size,
-        max_overflow=config.database.max_overflow,
-        echo=config.database.echo,
+        db_conf.url,
+        pool_size=db_conf.pool_size,
+        max_overflow=db_conf.max_overflow,
+        echo=db_conf.echo,
         pool_pre_ping=True,
     )
     async_session_factory = async_sessionmaker(

@@ -21,6 +21,7 @@ from app.domains.log.api import router as log_router
 from app.domains.ticket.api import router as ticket_router
 from app.domains.knowledge.api import router as knowledge_router
 from app.domains.aiops.api import router as aiops_router
+from app.domains.aiops.agent.api import router as agent_router
 from app.domains.governance.api import (
     apikey_router as governance_apikey_router,
     role_router as governance_role_router,
@@ -84,6 +85,7 @@ api_router.include_router(knowledge_router)
 
 # AIops
 api_router.include_router(aiops_router)
+api_router.include_router(agent_router, prefix="/aiops")
 
 # Audit
 api_router.include_router(audit_router)

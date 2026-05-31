@@ -1,5 +1,6 @@
 # AUTOPS 数据库配置
 database:
+  dialect: mysql
   host: 127.0.0.1
   port: 3306
   user: autops

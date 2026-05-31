@@ -121,7 +121,23 @@ export const API = {
     ANALYSES: '/api/v1/aiops/analyses',
     ANALYSIS_DETAIL: (id: string) => `/api/v1/aiops/analyses/${id}`,
     FEEDBACK: (id: string) => `/api/v1/aiops/analyses/${id}/feedback`,
+    // Agent
+    AGENT_RUN: '/api/v1/aiops/agent/run',
+    AGENT_RESULTS: '/api/v1/aiops/agent/results',
+    AGENT_APPROVE: (id: string) => `/api/v1/aiops/agent/${id}/approve`,
   },
+
+  // 证据链
+  ALERT_EVIDENCE_CHAIN: (id: string) => `/api/v1/alerts/${id}/evidence-chain`,
+
+  // 工单转知识
+  TICKET_CONVERT_KNOWLEDGE: (id: string) => `/api/v1/tickets/${id}/convert-knowledge`,
+
+  // Edge Collector
+  EDGE_REGISTER: '/api/v1/collectors/edge/register',
+  EDGE_HEARTBEAT: '/api/v1/collectors/edge/heartbeat',
+  EDGE_STATUS: (id: string) => `/api/v1/collectors/edge/${id}/status`,
+  EDGE_TASKS: (id: string) => `/api/v1/collectors/edge/${id}/tasks`,
 
   // 状态
   STATES: {
