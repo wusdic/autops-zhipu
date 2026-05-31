@@ -18,6 +18,7 @@
         <el-sub-menu v-if="!isCollapsed" index="asset">
           <template #title><el-icon><Grid /></el-icon><span>资产配置</span></template>
           <el-menu-item index="/assets"><span>资产列表</span></el-menu-item>
+          <el-menu-item index="/assets/discovery"><span>资产发现</span></el-menu-item>
           <el-menu-item index="/asset-groups"><span>资产分组</span></el-menu-item>
           <el-menu-item index="/credentials"><span>凭证管理</span></el-menu-item>
           <el-menu-item index="/config"><span>配置管理</span></el-menu-item>
@@ -44,6 +45,7 @@
         <el-sub-menu v-if="!isCollapsed" index="kb">
           <template #title><el-icon><Collection /></el-icon><span>知识</span></template>
           <el-menu-item index="/knowledge"><span>知识库</span></el-menu-item>
+          <el-menu-item index="/knowledge/import"><span>知识导入</span></el-menu-item>
         </el-sub-menu>
         <!-- 管理 -->
         <el-sub-menu v-if="!isCollapsed" index="admin">
@@ -134,27 +136,29 @@ const activeMenu = computed(() => {
 const pageTitle = computed(() => {
   const map: Record<string, string> = {
     '/': '运维指挥台',
-    '/assets': '资产列表', '/asset-groups': '资产分组', '/credentials': '凭证管理',
+    '/assets': '资产列表', '/assets/discovery': '资产发现', '/asset-groups': '资产分组', '/credentials': '凭证管理',
     '/config': '配置管理', '/collectors': '采集器管理',
     '/monitoring': '监控总览', '/events': '事件列表', '/alerts': '告警中心',
     '/alert-rules': '告警规则', '/tickets': '工单中心',
     '/incident': '故障处置', '/aiops': 'AI 诊断',
     '/scripts': '脚本库', '/playbooks': 'Playbook', '/policies': '策略管理',
     '/executions': '执行历史', '/automation': '自动化编排',
-    '/knowledge': '知识库',
+    '/knowledge': '知识库', '/knowledge/import': '知识导入',
     '/admin/users': '用户管理', '/admin/roles': '角色管理',
     '/admin/api-keys': 'API Key', '/admin/config': '系统配置',
     '/admin/status': '平台状态', '/admin/backup': '备份恢复',
     '/audit': '审计日志',
   }
   // For dynamic routes, show parent title + context
-  if (route.path.match(/^\/assets\/.+/)) return '资产详情'
+  if (route.path.match(/^\/assets\/.+\/topology/)) return '资产拓扑图'
+  if (route.path.match(/^\/assets\/.+/) && !route.path.endsWith('/discovery')) return '资产详情'
   if (route.path.match(/^\/alerts\/.+/)) return '告警详情'
   if (route.path.match(/^\/incident\/.+/)) return '故障处置'
+  if (route.path.match(/^\/tickets\/.+/)) return '工单详情'
   if (route.path.match(/^\/policies\/.+\/simulate/)) return '策略模拟'
   if (route.path.match(/^\/executions\/.+/)) return '执行详情'
   if (route.path.match(/^\/knowledge\/.+\/edit/)) return '知识编辑'
-  if (route.path.match(/^\/knowledge\/.+/)) return '知识详情'
+  if (route.path.match(/^\/knowledge\/.+/) && !route.path.endsWith('/import')) return '知识详情'
   return map[route.path] || 'AUTOPS'
 })
 

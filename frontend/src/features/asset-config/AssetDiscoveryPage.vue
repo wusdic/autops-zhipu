@@ -167,7 +167,7 @@ async function loadCredentials() {
 async function loadResults() {
   resultLoading.value = true
   try {
-    const { data } = await api.get('/api/v1/discovery/results', {
+    const { data } = await api.get(R.DISCOVERY_RESULTS, {
       params: { page: pagination.page, page_size: pagination.pageSize },
     })
     if (data.code === 0) {

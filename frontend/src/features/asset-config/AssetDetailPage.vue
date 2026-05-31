@@ -3,6 +3,9 @@
     <!-- 顶部导航 -->
     <div class="page-top">
       <el-button @click="goBack" :icon="ArrowLeft">返回资产列表</el-button>
+      <el-button v-if="asset" type="primary" link @click="$router.push(`/assets/${asset.id}/topology`)">
+        <el-icon><Connection /></el-icon> 拓扑图
+      </el-button>
       <div class="asset-title" v-if="asset">
         <span class="name">{{ asset.name }}</span>
         <el-tag :type="statusType(asset.status)" size="small" style="margin-left: 8px">{{ asset.status }}</el-tag>
@@ -168,7 +171,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Plus } from '@element-plus/icons-vue'
+import { ArrowLeft, Plus, Connection } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'

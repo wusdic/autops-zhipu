@@ -18,7 +18,17 @@ export const API = {
   ASSET_DETAIL: (id: string) => `/api/v1/assets/${id}`,
   ASSET_IMPORT: '/api/v1/assets/import',
   ASSET_RELATIONS: (id: string) => `/api/v1/assets/${id}/relations`,
+  ASSET_RELATION_DELETE: (assetId: string, relId: string) => `/api/v1/assets/${assetId}/relations/${relId}`,
   ASSET_TIMELINE: (id: string) => `/api/v1/assets/${id}/timeline`,
+
+  // 资产发现
+  DISCOVERY: '/api/v1/discovery',
+  DISCOVERY_TASKS: '/api/v1/discovery/tasks',
+  DISCOVERY_RESULTS: '/api/v1/discovery/results',
+
+  // 备份恢复
+  BACKUPS: '/api/v1/backups',
+  BACKUP_RESTORE: (id: string) => `/api/v1/backups/${id}/restore`,
 
   // 资产分组
   ASSET_GROUPS: '/api/v1/asset-groups',

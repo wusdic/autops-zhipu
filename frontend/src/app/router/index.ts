@@ -13,6 +13,7 @@ const router = createRouter({
     // 2.2 资产与配置台
     { path: '/assets', name: 'assets', component: () => import('@/features/asset-config/AssetListPage.vue') },
     { path: '/assets/:id', name: 'asset-detail', component: () => import('@/features/asset-config/AssetDetailPage.vue') },
+    { path: '/assets/:id/topology', name: 'asset-topology', component: () => import('@/features/asset-config/AssetTopologyPage.vue') },
     { path: '/assets/discovery', name: 'asset-discovery', component: () => import('@/features/asset-config/AssetDiscoveryPage.vue') },
     { path: '/asset-groups', name: 'asset-groups', component: () => import('@/features/asset-config/AssetGroupPage.vue') },
     { path: '/credentials', name: 'credentials', component: () => import('@/features/asset-config/CredentialPage.vue') },
@@ -44,9 +45,11 @@ const router = createRouter({
     { path: '/knowledge', name: 'knowledge', component: () => import('@/features/asset-config/KnowledgePage.vue') },
     { path: '/knowledge/:id', name: 'knowledge-detail', component: () => import('@/features/aiops-knowledge/KnowledgeDetailPage.vue') },
     { path: '/knowledge/:id/edit', name: 'knowledge-edit', component: () => import('@/features/aiops-knowledge/KnowledgeEditPage.vue') },
+    { path: '/knowledge/import', name: 'knowledge-import', component: () => import('@/features/aiops-knowledge/KnowledgeImportPage.vue') },
 
     // 2.7 工单
     { path: '/tickets', name: 'tickets', component: () => import('@/features/monitoring-event/TicketPage.vue') },
+    { path: '/tickets/:id', name: 'ticket-detail', component: () => import('@/features/monitoring-event/TicketDetailPage.vue') },
 
     // 2.8 平台管理台
     { path: '/admin/users', name: 'admin-users', component: () => import('@/features/platform-admin/UserManagementPage.vue') },

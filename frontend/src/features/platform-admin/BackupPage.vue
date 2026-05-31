@@ -77,6 +77,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 // NOTE: 后端暂无备份 API，页面先做 UI 框架，API 调用使用 try/catch 空处理
 
@@ -117,7 +118,7 @@ async function loadBackups() {
   loading.value = true
   try {
     // TODO: 替换为实际备份 API 路由常量
-    const { data } = await api.get('/api/v1/backups')
+    const { data } = await api.get(R.BACKUPS)
     if (data.code === 0) {
       backups.value = data.data.items || data.data || []
     }
@@ -133,7 +134,7 @@ async function handleCreateBackup() {
   creating.value = true
   try {
     // TODO: 替换为实际备份 API 路由常量
-    await api.post('/api/v1/backups', { type: 'full' })
+    await api.post(R.BACKUPS, { type: 'full' })
     ElMessage.success('备份任务已创建')
     loadBackups()
   } catch {
@@ -157,7 +158,7 @@ async function doRestore() {
   restoring.value = true
   try {
     // TODO: 替换为实际备份 API 路由常量
-    await api.post(`/api/v1/backups/${restoreTarget.id}/restore`)
+    await api.post(R.BACKUP_RESTORE(restoreTarget.id))
     ElMessage.success('恢复任务已启动')
     restoreDialogVisible.value = false
     loadBackups()
