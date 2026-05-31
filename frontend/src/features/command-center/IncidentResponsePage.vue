@@ -115,6 +115,19 @@
               :confidence="aiResult?.confidence"
               :summary="aiResult?.impact"
             />
+            <!-- Evidence Chain -->
+            <div v-if="aiResult?.evidence_chain?.length" style="margin-top: 12px">
+              <div style="font-weight: 600; margin-bottom: 6px">🔗 证据链</div>
+              <el-steps direction="vertical" :active="aiResult.evidence_chain.length" finish-status="success" :space="40">
+                <el-step
+                  v-for="(ev, idx) in aiResult.evidence_chain"
+                  :key="idx"
+                  :title="ev.source || `证据 ${idx + 1}`"
+                  :description="ev.detail || ev.description || ev"
+                  :status="ev.confirmed ? 'success' : 'process'"
+                />
+              </el-steps>
+            </div>
           </el-card>
 
           <!-- 告警上下文详情 -->
@@ -141,6 +154,78 @@
               </el-descriptions-item>
             </el-descriptions>
           </el-card>
+
+          <!-- 关联告警 -->
+          <el-card shadow="hover" class="col-card" style="margin-bottom: 16px" v-if="relatedAlerts.length">
+            <template #header>
+              <div class="col-header">
+                <span>🔔 关联告警</span>
+                <el-tag size="small" type="info">{{ relatedAlerts.length }}</el-tag>
+              </div>
+            </template>
+            <el-table :data="relatedAlerts" size="small" max-height="200">
+              <el-table-column prop="severity" label="级别" width="80">
+                <template #default="{ row }">
+                  <el-tag :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="title" label="告警标题" min-width="180" show-overflow-tooltip />
+              <el-table-column prop="status" label="状态" width="100">
+                <template #default="{ row }">
+                  <StatusBadge :status="row.status" size="small" />
+                </template>
+              </el-table-column>
+              <el-table-column prop="created_at" label="时间" width="150">
+                <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+
+          <!-- 关联日志 -->
+          <el-card shadow="hover" class="col-card" style="margin-bottom: 16px">
+            <template #header>
+              <div class="col-header">
+                <span>📄 关联日志</span>
+                <el-tag size="small" type="info">{{ relatedLogs.length }} 条</el-tag>
+              </div>
+            </template>
+            <div class="related-logs-scroll">
+              <div v-for="(log, idx) in relatedLogs" :key="idx" class="log-entry" :class="'log-level-' + (log.level || 'info').toLowerCase()">
+                <span class="log-time">{{ formatTime(log.timestamp || log.created_at) }}</span>
+                <el-tag :type="logLevelType(log.level)" size="small" style="margin: 0 8px">{{ log.level || 'info' }}</el-tag>
+                <span class="log-message">{{ log.message || log.content }}</span>
+              </div>
+              <el-empty v-if="!relatedLogs.length" description="暂无关联日志" :image-size="60" />
+            </div>
+          </el-card>
+
+          <!-- 资产状态变更 -->
+          <el-card shadow="hover" class="col-card" v-if="assetChanges.length">
+            <template #header>
+              <div class="col-header">
+                <span>🔄 资产状态变更</span>
+                <el-tag size="small" type="info">{{ assetChanges.length }}</el-tag>
+              </div>
+            </template>
+            <el-timeline>
+              <el-timeline-item
+                v-for="(change, idx) in assetChanges"
+                :key="idx"
+                :timestamp="formatTime(change.timestamp || change.created_at)"
+                placement="top"
+              >
+                <div class="asset-change-item">
+                  <span class="change-asset">{{ change.asset_name || change.asset_id }}</span>
+                  <el-tag size="small" type="info">{{ change.field || '状态' }}</el-tag>
+                  <span class="change-values">
+                    <span class="old-value">{{ change.old_value }}</span>
+                    →
+                    <span class="new-value">{{ change.new_value }}</span>
+                  </span>
+                </div>
+              </el-timeline-item>
+            </el-timeline>
+          </el-card>
         </div>
       </el-col>
 
@@ -158,10 +243,19 @@
               <el-button
                 type="warning"
                 style="width: 100%"
-                @click="acknowledgeAlert(selectedAlert.id)"
+                @click="handleAcknowledge(selectedAlert.id)"
                 :disabled="selectedAlert.status !== 'firing'"
               >
                 确认告警
+              </el-button>
+              <el-button
+                type="danger"
+                style="width: 100%"
+                plain
+                @click="handleEscalate(selectedAlert.id)"
+                :disabled="!selectedAlert || selectedAlert.status === 'resolved'"
+              >
+                升级告警
               </el-button>
               <el-button
                 type="primary"
@@ -196,7 +290,7 @@
               <el-button
                 type="success"
                 style="width: 100%"
-                @click="resolveAlert(selectedAlert.id)"
+                @click="handleResolve(selectedAlert.id)"
                 :disabled="selectedAlert.status === 'resolved'"
               >
                 关闭告警
@@ -221,12 +315,35 @@
                   {{ matchedPolicy.requires_approval ? '是' : '否' }}
                 </el-tag>
               </el-descriptions-item>
+              <!-- Trigger Conditions -->
+              <el-descriptions-item label="触发条件">
+                <div v-if="parseTriggerConditions(matchedPolicy.trigger_conditions).length">
+                  <div v-for="(cond, i) in parseTriggerConditions(matchedPolicy.trigger_conditions)" :key="i" class="trigger-cond">
+                    <el-tag size="small" type="info">{{ cond.metric || cond.field }}</el-tag>
+                    <span style="margin: 0 4px">{{ cond.operator || cond.op }}</span>
+                    <el-tag size="small">{{ cond.value }}</el-tag>
+                  </div>
+                </div>
+                <span v-else style="color: #909399">{{ matchedPolicy.trigger_conditions || '未配置' }}</span>
+              </el-descriptions-item>
               <el-descriptions-item label="动作链">
                 <div v-for="(a, i) in parseActionChain(matchedPolicy.action_chain)" :key="i" style="margin: 2px 0">
                   <el-tag size="small" type="info">{{ a.step || a.name || `步骤${i + 1}` }}</el-tag>
                 </div>
               </el-descriptions-item>
             </el-descriptions>
+            <!-- One-click Apply -->
+            <div style="margin-top: 12px; text-align: center">
+              <el-button
+                type="primary"
+                size="small"
+                @click="applyPolicyNow"
+                :loading="applyingPolicy"
+                style="width: 100%"
+              >
+                一键应用此策略
+              </el-button>
+            </div>
           </el-card>
 
           <!-- 执行历史 -->
@@ -271,7 +388,13 @@
       <template #header>
         <div class="col-header">
           <span>🖥️ 实时日志流</span>
-          <div>
+          <div class="log-stream-controls">
+            <el-radio-group v-model="logLevelFilter" size="small" style="margin-right: 12px">
+              <el-radio-button value="all">全部</el-radio-button>
+              <el-radio-button value="error">Error</el-radio-button>
+              <el-radio-button value="warning">Warning</el-radio-button>
+              <el-radio-button value="info">Info</el-radio-button>
+            </el-radio-group>
             <el-button
               v-if="currentExecutionId"
               size="small"
@@ -282,11 +405,11 @@
             >
               刷新日志
             </el-button>
-            <el-tag size="small" type="info">{{ logLines.length }} 行</el-tag>
+            <el-tag size="small" type="info">{{ filteredLogLines.length }} / {{ logLines.length }} 行</el-tag>
           </div>
         </div>
       </template>
-      <LogStream :lines="logLines" height="260px" />
+      <LogStream :lines="filteredLogLines" height="260px" />
     </el-card>
 
     <!-- 审批对话框 -->
@@ -332,6 +455,13 @@ const logLines = ref<string[]>([])
 const currentExecutionId = ref<string>('')
 
 const approvalVisible = ref(false)
+
+// ─── New Evidence State ───
+const relatedAlerts = ref<any[]>([])
+const relatedLogs = ref<any[]>([])
+const assetChanges = ref<any[]>([])
+const logLevelFilter = ref<string>('all')
+const applyingPolicy = ref(false)
 
 // ─── Mock Metric Data (demonstrates MetricChart usage) ───
 const metricData = computed(() => generateMockMetric(70, 95))
@@ -430,6 +560,34 @@ function severityType(severity: string) {
   return map[severity] || 'info'
 }
 
+function logLevelType(level?: string) {
+  const map: Record<string, string> = { error: 'danger', warning: 'warning', warn: 'warning', info: 'info', debug: 'info' }
+  return map[(level || 'info').toLowerCase()] || 'info'
+}
+
+function parseTriggerConditions(raw: string | undefined | any[]) {
+  if (!raw) return []
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+// ─── Filtered log lines (by level) ───
+const filteredLogLines = computed(() => {
+  if (logLevelFilter.value === 'all') return logLines.value
+  const level = logLevelFilter.value.toLowerCase()
+  return logLines.value.filter(line => {
+    const lower = line.toLowerCase()
+    if (level === 'error') return lower.includes('error') || lower.includes('fail') || lower.includes('exception')
+    if (level === 'warning') return lower.includes('warning') || lower.includes('warn')
+    if (level === 'info') return !lower.includes('error') && !lower.includes('warning') && !lower.includes('warn')
+    return true
+  })
+})
+
 // ─── Data Loading ───
 async function loadAlerts() {
   alertLoading.value = true
@@ -452,6 +610,9 @@ async function loadAlertDetail(id: string) {
       loadRelatedEvents(id)
       loadExecutions(id)
       loadAlertMetrics(id)
+      loadRelatedAlerts(id)
+      loadRelatedLogs(id)
+      loadAssetChanges(id)
     }
   } catch {
     ElMessage.error('加载告警详情失败')
@@ -484,6 +645,43 @@ function loadAlertMetrics(_alertId: string) {
   // Metric data is currently mock; placeholder for future real metric API
 }
 
+async function loadRelatedAlerts(alertId: string) {
+  try {
+    const { data } = await api.get(API.ALERTS, { params: { related_to: alertId, page: 1, page_size: 20 } })
+    if (data.code === 0) {
+      const items = data.data.items || data.data || []
+      relatedAlerts.value = items.filter((a: any) => a.id !== alertId)
+    }
+  } catch {
+    relatedAlerts.value = []
+  }
+}
+
+async function loadRelatedLogs(alertId: string) {
+  try {
+    const { data } = await api.get(API.EVENTS, { params: { alert_id: alertId, event_type: 'log', page: 1, page_size: 50 } })
+    if (data.code === 0) {
+      relatedLogs.value = data.data.items || data.data || []
+    }
+  } catch {
+    relatedLogs.value = []
+  }
+}
+
+async function loadAssetChanges(alertId: string) {
+  try {
+    const alert = selectedAlert.value
+    const assetId = alert?.asset_id
+    if (!assetId) { assetChanges.value = []; return }
+    const { data } = await api.get(API.STATES.CHANGES(assetId), { params: { page: 1, page_size: 20 } })
+    if (data.code === 0) {
+      assetChanges.value = data.data.items || data.data || []
+    }
+  } catch {
+    assetChanges.value = []
+  }
+}
+
 // ─── Alert Selection ───
 function selectAlert(row: any) {
   if (!row) return
@@ -494,6 +692,10 @@ function selectAlert(row: any) {
   currentExecutionId.value = ''
   relatedEvents.value = []
   executionRecords.value = []
+  relatedAlerts.value = []
+  relatedLogs.value = []
+  assetChanges.value = []
+  logLevelFilter.value = 'all'
 
   // Load full detail if we have an id
   if (row.id) {
@@ -501,7 +703,7 @@ function selectAlert(row: any) {
   }
 }
 
-// ─── Alert Actions ───
+// ─── Alert Actions (with confirmation) ───
 async function acknowledgeAlert(id: string) {
   try {
     const { data } = await api.post(API.ALERT_ACKNOWLEDGE(id))
@@ -515,6 +717,17 @@ async function acknowledgeAlert(id: string) {
   }
 }
 
+async function handleAcknowledge(id: string) {
+  try {
+    await ElMessageBox.confirm('确认此告警？确认后将标记为已确认状态。', '确认告警', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+    await acknowledgeAlert(id)
+  } catch { /* cancelled */ }
+}
+
 async function resolveAlert(id: string) {
   try {
     const { data } = await api.post(API.ALERT_RESOLVE(id))
@@ -526,6 +739,57 @@ async function resolveAlert(id: string) {
   } catch {
     ElMessage.error('关闭失败')
   }
+}
+
+async function handleResolve(id: string) {
+  try {
+    await ElMessageBox.confirm('确认关闭此告警？关闭后将标记为已解决状态。', '关闭告警', {
+      confirmButtonText: '确认关闭',
+      cancelButtonText: '取消',
+      type: 'success',
+    })
+    await resolveAlert(id)
+  } catch { /* cancelled */ }
+}
+
+async function escalateAlert(id: string) {
+  try {
+    const { data } = await api.post(API.ALERT_ESCALATE(id), {
+      reason: '手动升级',
+      alert_id: id,
+    })
+    if (data.code === 0) {
+      ElMessage.success('告警已升级')
+      loadAlertDetail(id)
+      loadAlerts()
+    }
+  } catch {
+    ElMessage.error('升级失败')
+  }
+}
+
+async function handleEscalate(id: string) {
+  try {
+    const { value } = await ElMessageBox.prompt('请输入升级原因', '升级告警', {
+      confirmButtonText: '确认升级',
+      cancelButtonText: '取消',
+      inputPlaceholder: '例如：需要更高级别工程师介入',
+      inputValidator: (v: string) => v ? true : '请输入升级原因',
+    })
+    try {
+      const { data } = await api.post(API.ALERT_ESCALATE(id), {
+        reason: value,
+        alert_id: id,
+      })
+      if (data.code === 0) {
+        ElMessage.success('告警已升级')
+        loadAlertDetail(id)
+        loadAlerts()
+      }
+    } catch {
+      ElMessage.error('升级失败')
+    }
+  } catch { /* cancelled */ }
 }
 
 async function createTicketFromAlert(alertId: string) {
@@ -587,6 +851,50 @@ async function matchPolicy() {
     }
   } catch {
     ElMessage.error('策略匹配失败')
+  }
+}
+
+async function applyPolicyNow() {
+  if (!matchedPolicy.value || !selectedAlert.value) return
+  applyingPolicy.value = true
+  try {
+    // First do a dry-run to validate
+    const { data: simData } = await api.post(API.POLICY_SIMULATE(matchedPolicy.value.id), {
+      trigger_event: selectedAlert.value.severity || 'alert',
+      asset_ids: [selectedAlert.value.asset_id || 'test'],
+    })
+    if (simData.code !== 0) {
+      ElMessage.warning('策略模拟执行未通过，请检查策略配置')
+      applyingPolicy.value = false
+      return
+    }
+    // If approval required, show approval dialog
+    if (matchedPolicy.value.requires_approval) {
+      applyingPolicy.value = false
+      approvalVisible.value = true
+      return
+    }
+    // Execute directly
+    const scripts = parseActionChain(matchedPolicy.value.action_chain)
+    if (scripts.length > 0) {
+      const { data } = await api.post(API.EXECUTIONS, {
+        execution_type: 'script',
+        target_id: scripts[0].script_name || scripts[0].step,
+        asset_ids: [selectedAlert.value.asset_id || 'test'],
+        is_dry_run: false,
+        policy_id: matchedPolicy.value.id,
+      })
+      if (data.code === 0) {
+        ElMessage.success('策略已应用并执行')
+        currentExecutionId.value = data.data.id
+        executionRecords.value.unshift(data.data)
+        loadExecutionLogs(data.data.id)
+      }
+    }
+  } catch {
+    ElMessage.error('策略应用失败')
+  } finally {
+    applyingPolicy.value = false
   }
 }
 
@@ -784,5 +1092,90 @@ onMounted(async () => {
 
 .log-stream-card {
   margin-top: 0;
+}
+
+.log-stream-controls {
+  display: flex;
+  align-items: center;
+}
+
+.related-logs-scroll {
+  max-height: 240px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.log-entry {
+  padding: 4px 0;
+  border-bottom: 1px solid #f5f5f5;
+  display: flex;
+  align-items: baseline;
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+.log-time {
+  color: #909399;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.log-message {
+  flex: 1;
+  word-break: break-all;
+}
+
+.log-level-error .log-message {
+  color: #f56c6c;
+}
+
+.log-level-warning .log-message {
+  color: #e6a23c;
+}
+
+.log-level-info .log-message {
+  color: #606266;
+}
+
+.log-level-debug .log-message {
+  color: #909399;
+}
+
+.asset-change-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.change-asset {
+  font-weight: 600;
+  color: #303133;
+}
+
+.change-values {
+  color: #606266;
+}
+
+.old-value {
+  color: #f56c6c;
+  text-decoration: line-through;
+}
+
+.new-value {
+  color: #67c23a;
+  font-weight: 600;
+}
+
+.trigger-cond {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 0;
+  font-size: 13px;
 }
 </style>

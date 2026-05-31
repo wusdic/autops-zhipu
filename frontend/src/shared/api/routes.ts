@@ -20,6 +20,12 @@ export const API = {
   ASSET_RELATIONS: (id: string) => `/api/v1/assets/${id}/relations`,
   ASSET_RELATION_DELETE: (assetId: string, relId: string) => `/api/v1/assets/${assetId}/relations/${relId}`,
   ASSET_TIMELINE: (id: string) => `/api/v1/assets/${id}/timeline`,
+  ASSET_CREDENTIALS: (id: string) => `/api/v1/assets/${id}/credentials`,
+  ASSET_CREDENTIAL_UNBIND: (assetId: string, credId: string) => `/api/v1/assets/${assetId}/credentials/${credId}`,
+  ASSET_COLLECTION_CONFIGS: (id: string) => `/api/v1/assets/${id}/collection-configs`,
+  ASSET_COLLECTION_TRIGGER: (id: string) => `/api/v1/assets/${id}/collection-trigger`,
+  ASSET_POLICIES: (id: string) => `/api/v1/assets/${id}/policies`,
+  ASSET_POLICY_UNBIND: (assetId: string, policyId: string) => `/api/v1/assets/${assetId}/policies/${policyId}`,
 
   // 资产发现
   DISCOVERY: '/api/v1/discovery',
@@ -28,7 +34,11 @@ export const API = {
 
   // 备份恢复
   BACKUPS: '/api/v1/backups',
+  BACKUP_DETAIL: (id: string) => `/api/v1/backups/${id}`,
+  BACKUP_DOWNLOAD: (id: string) => `/api/v1/backups/${id}/download`,
   BACKUP_RESTORE: (id: string) => `/api/v1/backups/${id}/restore`,
+  BACKUP_SETTINGS: '/api/v1/backups/settings',
+  BACKUP_STORAGE: '/api/v1/backups/storage',
 
   // 资产分组
   ASSET_GROUPS: '/api/v1/asset-groups',
@@ -40,6 +50,7 @@ export const API = {
   ALERTS: '/api/v1/alerts',
   ALERT_DETAIL: (id: string) => `/api/v1/alerts/${id}`,
   ALERT_ACKNOWLEDGE: (id: string) => `/api/v1/alerts/${id}/acknowledge`,
+  ALERT_ESCALATE: (id: string) => `/api/v1/alerts/${id}/escalate`,
   ALERT_RESOLVE: (id: string) => `/api/v1/alerts/${id}/resolve`,
   ALERT_STATS: '/api/v1/alerts/stats/overview',
   ALERT_RULES: '/api/v1/alert-rules',
@@ -52,6 +63,8 @@ export const API = {
   TICKETS: '/api/v1/tickets',
   TICKET_DETAIL: (id: string) => `/api/v1/tickets/${id}`,
   TICKET_COMMENTS: (id: string) => `/api/v1/tickets/${id}/comments`,
+  TICKET_ATTACHMENTS: (id: string) => `/api/v1/tickets/${id}/attachments`,
+  TICKET_ATTACHMENT: (ticketId: string, attachmentId: string) => `/api/v1/tickets/${ticketId}/attachments/${attachmentId}`,
 
   // 策略
   POLICIES: '/api/v1/policies',
@@ -68,6 +81,8 @@ export const API = {
   EXECUTIONS: '/api/v1/executions',
   EXECUTION_DETAIL: (id: string) => `/api/v1/executions/${id}`,
   EXECUTION_APPROVE: (id: string) => `/api/v1/executions/${id}/approve`,
+  EXECUTION_CANCEL: (id: string) => `/api/v1/executions/${id}/cancel`,
+  EXECUTION_VERIFICATION: (id: string) => `/api/v1/executions/${id}/verification`,
 
   // 采集器
   COLLECTORS: '/api/v1/collectors',
@@ -89,6 +104,15 @@ export const API = {
   KNOWLEDGE: '/api/v1/knowledge',
   KNOWLEDGE_DETAIL: (id: string) => `/api/v1/knowledge/${id}`,
   KNOWLEDGE_PUBLISH: (id: string) => `/api/v1/knowledge/${id}/publish`,
+  KNOWLEDGE_EXPORT: '/api/v1/knowledge/export',
+  KNOWLEDGE_VIEW: (id: string) => `/api/v1/knowledge/${id}/view`,
+  KNOWLEDGE_RELATED: (id: string) => `/api/v1/knowledge/${id}/related`,
+  KNOWLEDGE_VERSIONS: (id: string) => `/api/v1/knowledge/${id}/versions`,
+  KNOWLEDGE_FEEDBACK: (id: string) => `/api/v1/knowledge/${id}/feedback`,
+  KNOWLEDGE_CONVERT_RUNBOOK: (id: string) => `/api/v1/knowledge/${id}/convert-runbook`,
+  KNOWLEDGE_IMPORT_VALIDATE: '/api/v1/knowledge/import/validate',
+  KNOWLEDGE_IMPORT_BATCH: '/api/v1/knowledge/import/batch',
+  KNOWLEDGE_STATS: '/api/v1/knowledge/stats',
 
   // AIops
   AIOPS: {
@@ -110,6 +134,7 @@ export const API = {
   // 日志
   LOGS: {
     EXECUTION: (execId: string) => `/api/v1/logs/execution/${execId}`,
+    STEP: (execId: string, stepId: string) => `/api/v1/logs/execution/${execId}/step/${stepId}`,
   },
 
   // 审计

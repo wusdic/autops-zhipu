@@ -42,7 +42,7 @@ const router = createRouter({
 
     // 2.6 AI 与知识台
     { path: '/aiops', name: 'aiops', component: () => import('@/features/command-center/AIDiagnosisPage.vue') },
-    { path: '/knowledge', name: 'knowledge', component: () => import('@/features/asset-config/KnowledgePage.vue') },
+    { path: '/knowledge', name: 'knowledge', component: () => import('@/features/aiops-knowledge/KnowledgePage.vue') },
     { path: '/knowledge/:id', name: 'knowledge-detail', component: () => import('@/features/aiops-knowledge/KnowledgeDetailPage.vue') },
     { path: '/knowledge/:id/edit', name: 'knowledge-edit', component: () => import('@/features/aiops-knowledge/KnowledgeEditPage.vue') },
     { path: '/knowledge/import', name: 'knowledge-import', component: () => import('@/features/aiops-knowledge/KnowledgeImportPage.vue') },

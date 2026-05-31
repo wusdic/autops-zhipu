@@ -4,9 +4,14 @@
       <template #header>
         <div class="card-header">
           <span>资产列表</span>
-          <el-button type="primary" @click="openCreateDialog">
-            <el-icon><Plus /></el-icon> 新建资产
-          </el-button>
+          <div>
+            <el-button type="success" @click="showImportDialog = true">
+              <el-icon><Upload /></el-icon> 批量导入
+            </el-button>
+            <el-button type="primary" @click="openCreateDialog">
+              <el-icon><Plus /></el-icon> 新建资产
+            </el-button>
+          </div>
         </div>
       </template>
 
@@ -31,13 +36,50 @@
             <el-option label="维护中" value="maintenance" />
           </el-select>
         </el-form-item>
+        <el-form-item label="环境">
+          <el-select v-model="filters.environment" placeholder="全部" clearable @change="loadAssets">
+            <el-option label="生产" value="production" />
+            <el-option label="预发布" value="staging" />
+            <el-option label="开发" value="development" />
+            <el-option label="测试" value="test" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="健康">
+          <el-select v-model="filters.health_status" placeholder="全部" clearable @change="loadAssets">
+            <el-option label="健康" value="healthy" />
+            <el-option label="警告" value="warning" />
+            <el-option label="严重" value="critical" />
+            <el-option label="未知" value="unknown" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="标签">
+          <el-select
+            v-model="filters.tags"
+            multiple
+            filterable
+            allow-create
+            default-first-option
+            placeholder="输入标签"
+            clearable
+            @change="loadAssets"
+          >
+            <el-option v-for="tag in availableTags" :key="tag" :label="tag" :value="tag" />
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="loadAssets">查询</el-button>
         </el-form-item>
       </el-form>
 
       <!-- Table -->
-      <el-table :data="assets" v-loading="loading" stripe>
+      <el-table
+        ref="tableRef"
+        :data="assets"
+        v-loading="loading"
+        stripe
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="45" />
         <el-table-column prop="name" label="名称" min-width="140" />
         <el-table-column prop="asset_type" label="类型" width="130">
           <template #default="{ row }">
@@ -55,9 +97,16 @@
             <el-tag :type="healthType(row.health_status)" size="small">{{ row.health_status }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="lifecycle_status" label="生命周期" width="110">
+          <template #default="{ row }">
+            <el-tag :type="lifecycleType(row.lifecycle_status)" size="small" effect="dark">
+              {{ formatLifecycle(row.lifecycle_status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="os_type" label="系统" width="90" />
         <el-table-column prop="environment" label="环境" width="90" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="viewAsset(row)">详情</el-button>
             <el-button size="small" type="warning" @click="openEditDialog(row)">编辑</el-button>
@@ -66,6 +115,24 @@
                 <el-button size="small" type="danger">删除</el-button>
               </template>
             </el-popconfirm>
+            <el-dropdown trigger="click" @command="(cmd: string) => handleQuickAction(cmd, row)">
+              <el-button size="small" type="info" class="quick-action-btn">
+                更多<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="collect">
+                    <el-icon><VideoPlay /></el-icon> 快速采集
+                  </el-dropdown-item>
+                  <el-dropdown-item command="check">
+                    <el-icon><Monitor /></el-icon> 状态检查
+                  </el-dropdown-item>
+                  <el-dropdown-item command="bind-credential">
+                    <el-icon><Key /></el-icon> 绑定凭证
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -80,6 +147,23 @@
         style="margin-top: 16px; justify-content: flex-end"
       />
     </el-card>
+
+    <!-- Batch Operation Bar -->
+    <transition name="batch-bar">
+      <div v-if="selectedAssets.length > 0" class="batch-operation-bar">
+        <span class="batch-info">已选择 <strong>{{ selectedAssets.length }}</strong> 项</span>
+        <el-button type="danger" @click="batchDelete" :loading="batchLoading">
+          <el-icon><Delete /></el-icon> 批量删除
+        </el-button>
+        <el-button type="warning" @click="openBatchCredentialDialog">
+          <el-icon><Key /></el-icon> 批量绑定凭证
+        </el-button>
+        <el-button type="success" @click="openBatchGroupDialog">
+          <el-icon><FolderAdd /></el-icon> 批量加入分组
+        </el-button>
+        <el-button @click="clearSelection">取消选择</el-button>
+      </div>
+    </transition>
 
     <!-- Create/Edit Dialog -->
     <el-dialog v-model="showFormDialog" :title="isEditing ? '编辑资产' : '新建资产'" width="600px">
@@ -118,7 +202,7 @@
         <el-form-item label="环境">
           <el-select v-model="formData.environment">
             <el-option label="生产" value="production" />
-            <el-option label="测试" value="staging" />
+            <el-option label="预发布" value="staging" />
             <el-option label="开发" value="development" />
           </el-select>
         </el-form-item>
@@ -147,6 +231,11 @@
           <el-descriptions-item label="健康状态">
             <el-tag :type="healthType(currentAsset.health_status)">{{ currentAsset.health_status }}</el-tag>
           </el-descriptions-item>
+          <el-descriptions-item label="生命周期">
+            <el-tag :type="lifecycleType(currentAsset.lifecycle_status)" effect="dark">
+              {{ formatLifecycle(currentAsset.lifecycle_status) }}
+            </el-tag>
+          </el-descriptions-item>
           <el-descriptions-item label="操作系统">{{ currentAsset.os_type || '-' }}</el-descriptions-item>
           <el-descriptions-item label="环境">{{ currentAsset.environment || '-' }}</el-descriptions-item>
           <el-descriptions-item label="描述">{{ currentAsset.description || '-' }}</el-descriptions-item>
@@ -155,16 +244,133 @@
         </el-descriptions>
       </template>
     </el-drawer>
+
+    <!-- Import Dialog -->
+    <el-dialog v-model="showImportDialog" title="批量导入资产" width="750px" destroy-on-close>
+      <el-upload
+        ref="importUploadRef"
+        :auto-upload="false"
+        :limit="1"
+        accept=".csv,.xlsx,.xls"
+        :on-change="handleImportFileChange"
+        :on-remove="handleImportFileRemove"
+        drag
+      >
+        <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
+        <div class="el-upload__text">拖拽文件到此处，或 <em>点击上传</em></div>
+        <template #tip>
+          <div class="el-upload__tip">支持 CSV / Excel 文件，包含列: name, asset_type, ip, port, os_type, environment, status</div>
+        </template>
+      </el-upload>
+
+      <div v-if="importPreviewData.length > 0" class="import-preview">
+        <el-divider>数据预览 (共 {{ importPreviewData.length }} 条)</el-divider>
+        <el-table :data="importPreviewData" stripe max-height="300" size="small">
+          <el-table-column prop="name" label="名称" min-width="120" />
+          <el-table-column prop="asset_type" label="类型" width="120" />
+          <el-table-column prop="ip" label="IP" width="130" />
+          <el-table-column prop="port" label="端口" width="70" />
+          <el-table-column prop="environment" label="环境" width="80" />
+          <el-table-column prop="status" label="状态" width="80" />
+        </el-table>
+      </div>
+
+      <template #footer>
+        <el-button @click="closeImportDialog">取消</el-button>
+        <el-button
+          type="primary"
+          :disabled="importPreviewData.length === 0"
+          :loading="importLoading"
+          @click="executeImport"
+        >
+          确认导入
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Batch Bind Credential Dialog -->
+    <el-dialog v-model="showBatchCredDialog" title="批量绑定凭证" width="450px">
+      <el-form label-width="80px">
+        <el-form-item label="选中资产">
+          <span>{{ selectedAssets.length }} 项</span>
+        </el-form-item>
+        <el-form-item label="选择凭证" required>
+          <el-select v-model="batchCredId" placeholder="请选择凭证" filterable style="width: 100%">
+            <el-option
+              v-for="cred in credentialOptions"
+              :key="cred.id"
+              :label="cred.name"
+              :value="cred.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showBatchCredDialog = false">取消</el-button>
+        <el-button type="primary" :loading="batchLoading" @click="batchBindCredential">确认绑定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Batch Add to Group Dialog -->
+    <el-dialog v-model="showBatchGroupDialog" title="批量加入分组" width="450px">
+      <el-form label-width="80px">
+        <el-form-item label="选中资产">
+          <span>{{ selectedAssets.length }} 项</span>
+        </el-form-item>
+        <el-form-item label="选择分组" required>
+          <el-select v-model="batchGroupId" placeholder="请选择分组" filterable style="width: 100%">
+            <el-option
+              v-for="group in groupOptions"
+              :key="group.id"
+              :label="group.name"
+              :value="group.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showBatchGroupDialog = false">取消</el-button>
+        <el-button type="primary" :loading="batchLoading" @click="batchAddToGroup">确认加入</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Quick Bind Credential Dialog (single row) -->
+    <el-dialog v-model="showQuickBindDialog" title="绑定凭证" width="400px">
+      <el-form label-width="80px">
+        <el-form-item label="资产">
+          <span>{{ quickBindAsset?.name }}</span>
+        </el-form-item>
+        <el-form-item label="选择凭证" required>
+          <el-select v-model="quickBindCredId" placeholder="请选择凭证" filterable style="width: 100%">
+            <el-option
+              v-for="cred in credentialOptions"
+              :key="cred.id"
+              :label="cred.name"
+              :value="cred.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showQuickBindDialog = false">取消</el-button>
+        <el-button type="primary" :loading="quickActionLoading" @click="executeQuickBind">确认绑定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { Plus } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import {
+  Plus, Upload, UploadFilled, Delete, Key, FolderAdd,
+  ArrowDown, VideoPlay, Monitor,
+} from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import type { UploadFile } from 'element-plus'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 
+// ---------- State ----------
 const loading = ref(false)
 const saving = ref(false)
 const assets = ref<any[]>([])
@@ -173,16 +379,55 @@ const showDetail = ref(false)
 const currentAsset = ref<any>(null)
 const isEditing = ref(false)
 const editingId = ref('')
+const tableRef = ref()
 
-const filters = reactive({ search: '', asset_type: '', status: '' })
+// Filters
+const filters = reactive({
+  search: '',
+  asset_type: '',
+  status: '',
+  environment: '',
+  health_status: '',
+  tags: [] as string[],
+})
+const availableTags = ref<string[]>([])
 const pagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
+// Selection & Batch
+const selectedAssets = ref<any[]>([])
+const batchLoading = ref(false)
+
+// Batch credential dialog
+const showBatchCredDialog = ref(false)
+const batchCredId = ref('')
+const credentialOptions = ref<any[]>([])
+
+// Batch group dialog
+const showBatchGroupDialog = ref(false)
+const batchGroupId = ref('')
+const groupOptions = ref<any[]>([])
+
+// Import
+const showImportDialog = ref(false)
+const importLoading = ref(false)
+const importPreviewData = ref<any[]>([])
+const importFileRaw = ref<File | null>(null)
+const importUploadRef = ref()
+
+// Quick actions
+const quickActionLoading = ref(false)
+const showQuickBindDialog = ref(false)
+const quickBindAsset = ref<any>(null)
+const quickBindCredId = ref('')
+
+// ---------- Form ----------
 const defaultForm = {
   name: '', asset_type: 'linux_server', ip: '', port: undefined as number | undefined,
   os_type: 'linux', description: '', environment: 'production', status: 'active',
 }
 const formData = reactive({ ...defaultForm })
 
+// ---------- Helpers ----------
 function formatType(t: string) {
   const map: Record<string, string> = {
     linux_server: 'Linux', windows_server: 'Windows', database: '数据库',
@@ -199,16 +444,39 @@ function healthType(h: string) {
   return h === 'healthy' ? 'success' : h === 'warning' ? 'warning' : h === 'critical' ? 'danger' : 'info'
 }
 
+function lifecycleType(ls: string) {
+  const map: Record<string, string> = {
+    managed: '', online: 'success', maintenance: 'warning', retired: 'danger',
+  }
+  return map[ls] || 'info'
+}
+
+function formatLifecycle(ls: string) {
+  const map: Record<string, string> = {
+    managed: '纳管', online: '在线', maintenance: '维护中', retired: '退役',
+  }
+  return map[ls] || ls || '-'
+}
+
+// ---------- Load ----------
 async function loadAssets() {
   loading.value = true
   try {
     const params: any = { page: pagination.page, page_size: pagination.pageSize }
+    if (filters.search) params.search = filters.search
     if (filters.asset_type) params.asset_type = filters.asset_type
     if (filters.status) params.status = filters.status
+    if (filters.environment) params.environment = filters.environment
+    if (filters.health_status) params.health_status = filters.health_status
+    if (filters.tags.length > 0) params.tags = filters.tags.join(',')
     const { data } = await api.get(R.ASSETS, { params })
     if (data.code === 0) {
       assets.value = data.data.items || []
       pagination.total = data.data.total || 0
+      // Collect tags from items for filter suggestions
+      const tagSet = new Set<string>()
+      assets.value.forEach((a: any) => (a.tags || []).forEach((t: string) => tagSet.add(t)))
+      tagSet.forEach(t => { if (!availableTags.value.includes(t)) availableTags.value.push(t) })
     }
   } catch (e: any) {
     ElMessage.error('加载资产失败: ' + (e.message || e))
@@ -217,6 +485,30 @@ async function loadAssets() {
   }
 }
 
+async function loadCredentialOptions() {
+  try {
+    const { data } = await api.get(R.CREDENTIALS, { params: { page_size: 200 } })
+    if (data.code === 0) credentialOptions.value = data.data.items || []
+  } catch { /* ignore */ }
+}
+
+async function loadGroupOptions() {
+  try {
+    const { data } = await api.get(R.ASSET_GROUPS, { params: { page_size: 200 } })
+    if (data.code === 0) groupOptions.value = data.data.items || []
+  } catch { /* ignore */ }
+}
+
+// ---------- Selection ----------
+function handleSelectionChange(rows: any[]) {
+  selectedAssets.value = rows
+}
+
+function clearSelection() {
+  tableRef.value?.clearSelection()
+}
+
+// ---------- CRUD ----------
 function openCreateDialog() {
   isEditing.value = false
   editingId.value = ''
@@ -289,10 +581,274 @@ async function deleteAsset(id: string) {
   }
 }
 
+// ---------- Batch Operations ----------
+async function batchDelete() {
+  try {
+    await ElMessageBox.confirm(
+      `确认删除选中的 ${selectedAssets.value.length} 项资产？此操作不可撤销。`,
+      '批量删除确认',
+      { type: 'warning' },
+    )
+  } catch { return }
+
+  batchLoading.value = true
+  try {
+    const ids = selectedAssets.value.map(a => a.id)
+    await Promise.all(ids.map(id => api.delete(R.ASSET_DETAIL(id))))
+    ElMessage.success(`成功删除 ${ids.length} 项资产`)
+    clearSelection()
+    loadAssets()
+  } catch (e: any) {
+    ElMessage.error('批量删除失败: ' + (e.message || e))
+  } finally {
+    batchLoading.value = false
+  }
+}
+
+function openBatchCredentialDialog() {
+  batchCredId.value = ''
+  loadCredentialOptions()
+  showBatchCredDialog.value = true
+}
+
+async function batchBindCredential() {
+  if (!batchCredId.value) {
+    ElMessage.warning('请选择凭证')
+    return
+  }
+  batchLoading.value = true
+  try {
+    const assetIds = selectedAssets.value.map(a => a.id)
+    await api.post(R.CREDENTIAL_BIND(batchCredId.value), { asset_ids: assetIds })
+    ElMessage.success(`已绑定凭证到 ${assetIds.length} 项资产`)
+    showBatchCredDialog.value = false
+    clearSelection()
+    loadAssets()
+  } catch (e: any) {
+    ElMessage.error('批量绑定凭证失败: ' + (e.message || e))
+  } finally {
+    batchLoading.value = false
+  }
+}
+
+function openBatchGroupDialog() {
+  batchGroupId.value = ''
+  loadGroupOptions()
+  showBatchGroupDialog.value = true
+}
+
+async function batchAddToGroup() {
+  if (!batchGroupId.value) {
+    ElMessage.warning('请选择分组')
+    return
+  }
+  batchLoading.value = true
+  try {
+    const assetIds = selectedAssets.value.map(a => a.id)
+    await api.post(R.ASSET_GROUP_MEMBERS(batchGroupId.value), { asset_ids: assetIds })
+    ElMessage.success(`已将 ${assetIds.length} 项资产加入分组`)
+    showBatchGroupDialog.value = false
+    clearSelection()
+  } catch (e: any) {
+    ElMessage.error('批量加入分组失败: ' + (e.message || e))
+  } finally {
+    batchLoading.value = false
+  }
+}
+
+// ---------- Import ----------
+function handleImportFileChange(file: UploadFile) {
+  if (!file.raw) return
+  importFileRaw.value = file.raw
+  parseImportFile(file.raw)
+}
+
+function handleImportFileRemove() {
+  importFileRaw.value = null
+  importPreviewData.value = []
+}
+
+function parseImportFile(file: File) {
+  const isCsv = file.name.endsWith('.csv')
+  if (isCsv) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const text = e.target?.result as string
+      const lines = text.trim().split('\n')
+      if (lines.length < 2) {
+        ElMessage.warning('文件为空或缺少数据行')
+        return
+      }
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+      const rows = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim())
+        const obj: Record<string, string> = {}
+        headers.forEach((h, i) => { obj[h] = values[i] || '' })
+        return obj
+      })
+      importPreviewData.value = rows
+    }
+    reader.readAsText(file)
+  } else {
+    // For xlsx/xls, inform user that parsing is handled server-side
+    ElMessage.info('Excel 文件将在上传后由服务端解析预览')
+    importPreviewData.value = []
+  }
+}
+
+function closeImportDialog() {
+  showImportDialog.value = false
+  importPreviewData.value = []
+  importFileRaw.value = null
+}
+
+async function executeImport() {
+  if (!importFileRaw.value) {
+    ElMessage.warning('请先选择文件')
+    return
+  }
+  importLoading.value = true
+  try {
+    const formDataObj = new FormData()
+    formDataObj.append('file', importFileRaw.value)
+    const { data } = await api.post(R.ASSET_IMPORT, formDataObj, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    if (data.code === 0) {
+      ElMessage.success(`成功导入 ${data.data?.created || 0} 项资产`)
+      closeImportDialog()
+      loadAssets()
+    } else {
+      ElMessage.error(data.message || '导入失败')
+    }
+  } catch (e: any) {
+    ElMessage.error('导入失败: ' + (e.message || e))
+  } finally {
+    importLoading.value = false
+  }
+}
+
+// ---------- Quick Actions ----------
+async function handleQuickAction(command: string, row: any) {
+  switch (command) {
+    case 'collect':
+      await quickCollect(row)
+      break
+    case 'check':
+      await quickStatusCheck(row)
+      break
+    case 'bind-credential':
+      quickBindAsset.value = row
+      quickBindCredId.value = ''
+      loadCredentialOptions()
+      showQuickBindDialog.value = true
+      break
+  }
+}
+
+async function quickCollect(row: any) {
+  quickActionLoading.value = true
+  try {
+    const { data } = await api.post(R.ASSET_COLLECTION_TRIGGER(row.id))
+    if (data.code === 0) {
+      ElMessage.success(`已触发 [${row.name}] 采集任务`)
+    } else {
+      ElMessage.error(data.message || '触发采集失败')
+    }
+  } catch (e: any) {
+    ElMessage.error('触发采集失败: ' + (e.message || e))
+  } finally {
+    quickActionLoading.value = false
+  }
+}
+
+async function quickStatusCheck(row: any) {
+  quickActionLoading.value = true
+  try {
+    const { data } = await api.get(R.STATES.LATEST(row.id))
+    if (data.code === 0) {
+      ElMessage.success(`[${row.name}] 状态: ${data.data?.health_status || '正常'}`)
+    } else {
+      ElMessage.warning(data.message || '无法获取状态')
+    }
+  } catch (e: any) {
+    ElMessage.error('状态检查失败: ' + (e.message || e))
+  } finally {
+    quickActionLoading.value = false
+  }
+}
+
+async function executeQuickBind() {
+  if (!quickBindCredId.value) {
+    ElMessage.warning('请选择凭证')
+    return
+  }
+  quickActionLoading.value = true
+  try {
+    await api.post(R.CREDENTIAL_BIND(quickBindCredId.value), {
+      asset_ids: [quickBindAsset.value.id],
+    })
+    ElMessage.success(`凭证已绑定到 [${quickBindAsset.value.name}]`)
+    showQuickBindDialog.value = false
+  } catch (e: any) {
+    ElMessage.error('绑定凭证失败: ' + (e.message || e))
+  } finally {
+    quickActionLoading.value = false
+  }
+}
+
+// ---------- Init ----------
 onMounted(() => loadAssets())
 </script>
 
 <style scoped>
-.card-header { display: flex; justify-content: space-between; align-items: center; }
-.filter-form { margin-bottom: 16px; }
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.filter-form {
+  margin-bottom: 16px;
+}
+.quick-action-btn {
+  margin-left: 4px;
+}
+
+/* Batch operation floating bar */
+.batch-operation-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  background: #fff;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.batch-info {
+  color: #606266;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+/* Transition for batch bar */
+.batch-bar-enter-active,
+.batch-bar-leave-active {
+  transition: all 0.3s ease;
+}
+.batch-bar-enter-from,
+.batch-bar-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(20px);
+}
+
+/* Import preview */
+.import-preview {
+  margin-top: 16px;
+}
 </style>

@@ -5,6 +5,29 @@
       <el-button type="primary" @click="showCreateDialog">新建用户</el-button>
     </div>
 
+    <!-- Filters -->
+    <div class="filter-bar">
+      <el-input
+        v-model="filters.search"
+        placeholder="搜索用户名/邮箱"
+        clearable
+        prefix-icon="Search"
+        style="width: 240px"
+        @keyup.enter="handleSearch"
+        @clear="handleSearch"
+      />
+      <el-select v-model="filters.role" placeholder="角色筛选" clearable style="width: 160px" @change="handleSearch">
+        <el-option v-for="r in roles" :key="r.id" :label="r.name" :value="r.id" />
+      </el-select>
+      <el-select v-model="filters.status" placeholder="状态筛选" clearable style="width: 130px" @change="handleSearch">
+        <el-option label="启用" value="active" />
+        <el-option label="禁用" value="disabled" />
+        <el-option label="锁定" value="locked" />
+      </el-select>
+      <el-button @click="handleSearch">查询</el-button>
+      <el-button @click="resetFilters">重置</el-button>
+    </div>
+
     <el-table :data="users" v-loading="loading" stripe border style="width: 100%">
       <el-table-column prop="username" label="用户名" width="140" />
       <el-table-column prop="display_name" label="显示名" width="140" />
@@ -22,9 +45,19 @@
         </template>
       </el-table-column>
       <el-table-column prop="created_at" label="创建时间" width="180" />
-      <el-table-column label="操作" width="200" fixed="right">
+      <el-table-column label="操作" width="320" fixed="right">
         <template #default="{ row }">
           <el-button size="small" @click="editUser(row)">编辑</el-button>
+          <el-button size="small" @click="handleResetPassword(row)">重置密码</el-button>
+          <el-switch
+            size="small"
+            :model-value="row.status === 'active'"
+            active-text="启用"
+            inactive-text="禁用"
+            inline-prompt
+            style="margin: 0 6px"
+            @change="(val: boolean) => toggleUserStatus(row, val)"
+          />
           <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
@@ -65,11 +98,30 @@
         <el-button type="primary" :loading="saving" @click="handleSave">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- Reset Password Dialog -->
+    <el-dialog v-model="resetPwdVisible" title="重置密码" width="420px">
+      <el-form :model="resetPwdForm" label-width="80px">
+        <el-form-item label="用户">
+          <el-input :model-value="resetPwdTarget?.username" disabled />
+        </el-form-item>
+        <el-form-item label="新密码" required>
+          <el-input v-model="resetPwdForm.new_password" type="password" show-password placeholder="请输入新密码" />
+        </el-form-item>
+        <el-form-item label="确认密码" required>
+          <el-input v-model="resetPwdForm.confirm_password" type="password" show-password placeholder="请确认新密码" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="resetPwdVisible = false">取消</el-button>
+        <el-button type="primary" :loading="resettingPwd" @click="submitResetPassword">确定重置</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
@@ -88,10 +140,81 @@ const formData = ref<any>({
   username: '', display_name: '', email: '', password: '', role_ids: [], status: 'active'
 })
 
+// Filters
+const filters = reactive({ search: '', role: '', status: '' })
+
+function resetFilters() {
+  filters.search = ''
+  filters.role = ''
+  filters.status = ''
+  currentPage.value = 1
+  loadUsers()
+}
+
+function handleSearch() {
+  currentPage.value = 1
+  loadUsers()
+}
+
+// Reset password
+const resetPwdVisible = ref(false)
+const resettingPwd = ref(false)
+const resetPwdTarget = ref<any>(null)
+const resetPwdForm = ref({ new_password: '', confirm_password: '' })
+
+function handleResetPassword(row: any) {
+  resetPwdTarget.value = row
+  resetPwdForm.value = { new_password: '', confirm_password: '' }
+  resetPwdVisible.value = true
+}
+
+async function submitResetPassword() {
+  if (!resetPwdForm.value.new_password) { ElMessage.warning('请输入新密码'); return }
+  if (resetPwdForm.value.new_password !== resetPwdForm.value.confirm_password) {
+    ElMessage.warning('两次密码输入不一致'); return
+  }
+  resettingPwd.value = true
+  try {
+    await api.post(R.GOVERNANCE.USERS + '/' + resetPwdTarget.value.id + '/reset-password', {
+      new_password: resetPwdForm.value.new_password,
+    })
+    ElMessage.success('密码重置成功')
+    resetPwdVisible.value = false
+  } catch (e: any) {
+    ElMessage.error(e.response?.data?.message || '密码重置失败')
+  } finally {
+    resettingPwd.value = false
+  }
+}
+
+// Enable / Disable user toggle
+async function toggleUserStatus(row: any, enabled: boolean) {
+  const newStatus = enabled ? 'active' : 'disabled'
+  const actionText = enabled ? '启用' : '禁用'
+  try {
+    await ElMessageBox.confirm(`确定${actionText}用户 ${row.username}?`, '确认', { type: 'warning' })
+    await api.put(R.GOVERNANCE.USERS + '/' + row.id, { status: newStatus })
+    ElMessage.success(`已${actionText}用户 ${row.username}`)
+    loadUsers()
+  } catch {
+    // user cancelled or API error – revert is handled by re-fetch
+  }
+}
+
 async function loadUsers() {
   loading.value = true
   try {
-    const { data } = await api.get(R.GOVERNANCE.USERS, { params: { page: currentPage.value, page_size: pageSize.value } })
+    const params: any = { page: currentPage.value, page_size: pageSize.value }
+    if (filters.search) {
+      params.search = filters.search
+    }
+    if (filters.role) {
+      params.role_id = filters.role
+    }
+    if (filters.status) {
+      params.status = filters.status
+    }
+    const { data } = await api.get(R.GOVERNANCE.USERS, { params })
     if (data.code === 0) {
       users.value = data.data.items || data.data || []
       total.value = data.data.total || users.value.length
@@ -164,6 +287,17 @@ onMounted(() => { loadUsers(); loadRoles() })
 
 <style scoped>
 .page-container { padding: 20px; }
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .page-header h2 { margin: 0; font-size: 20px; color: #303133; }
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #f5f7fa;
+  border-radius: 6px;
+}
 </style>

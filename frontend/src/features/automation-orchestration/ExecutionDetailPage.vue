@@ -10,7 +10,26 @@
     <!-- Basic Info -->
     <el-card v-loading="loading">
       <template #header>
-        <span>基本信息</span>
+        <div class="card-header">
+          <span>基本信息</span>
+          <div class="header-actions">
+            <el-button
+              v-if="execution && (execution.status === 'running' || execution.status === 'pending')"
+              type="warning"
+              @click="handleCancel"
+              :loading="cancelling"
+            >
+              取消执行
+            </el-button>
+            <el-button
+              v-if="execution && execution.status === 'failed'"
+              type="danger"
+              @click="showRollbackDialog = true"
+            >
+              回滚
+            </el-button>
+          </div>
+        </div>
       </template>
       <el-descriptions v-if="execution" :column="3" border>
         <el-descriptions-item label="执行ID">{{ execution.id }}</el-descriptions-item>
@@ -35,7 +54,24 @@
       <template #header>
         <span>执行步骤</span>
       </template>
-      <el-table :data="steps" stripe v-if="steps.length > 0">
+      <el-table
+        :data="steps"
+        stripe
+        v-if="steps.length > 0"
+        row-key="id"
+        @row-click="toggleStepExpand"
+        :row-class-name="stepRowClass"
+      >
+        <el-table-column type="expand">
+          <template #default="{ row }">
+            <div class="step-log-container" v-loading="stepLogsLoading[row.id]">
+              <pre v-if="stepLogs[row.id] && stepLogs[row.id].length > 0" class="log-content">{{
+                stepLogs[row.id].join('\n')
+              }}</pre>
+              <el-empty v-else description="该步骤暂无日志" :image-size="40" />
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column type="index" label="#" width="60" />
         <el-table-column prop="name" label="步骤名称" min-width="160" />
         <el-table-column prop="action_type" label="动作类型" width="140" />
@@ -56,7 +92,10 @@
       <template #header>
         <div class="card-header">
           <span>实时日志</span>
-          <el-button size="small" @click="loadLogs" :loading="logsLoading">刷新日志</el-button>
+          <div>
+            <el-button size="small" @click="downloadLogs" :disabled="logs.length === 0">下载日志</el-button>
+            <el-button size="small" @click="loadLogs" :loading="logsLoading">刷新日志</el-button>
+          </div>
         </div>
       </template>
       <div class="log-container" v-loading="logsLoading">
@@ -100,15 +139,110 @@
         </el-descriptions-item>
       </el-descriptions>
     </el-card>
+
+    <!-- Verification Result Section -->
+    <el-card
+      v-if="execution && (execution.status === 'completed' || execution.status === 'failed')"
+      style="margin-top: 16px"
+      v-loading="verificationLoading"
+    >
+      <template #header>
+        <div class="card-header">
+          <span>验证结果</span>
+          <el-button size="small" @click="loadVerification" :loading="verificationLoading">刷新验证</el-button>
+        </div>
+      </template>
+      <template v-if="verification">
+        <el-descriptions :column="2" border style="margin-bottom: 16px">
+          <el-descriptions-item label="验证状态">
+            <el-tag
+              :type="verification.passed ? 'success' : 'danger'"
+              size="large"
+            >
+              {{ verification.passed ? '验证通过' : '验证失败' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="检查项数">
+            {{ verification.checks?.length || 0 }}
+          </el-descriptions-item>
+        </el-descriptions>
+        <el-table
+          v-if="verification.checks && verification.checks.length > 0"
+          :data="verification.checks"
+          stripe
+          border
+        >
+          <el-table-column type="index" label="#" width="50" />
+          <el-table-column prop="name" label="检查项" min-width="180" />
+          <el-table-column prop="status" label="状态" width="110" align="center">
+            <template #default="{ row }">
+              <el-tag :type="row.status === 'pass' ? 'success' : 'danger'" size="small">
+                {{ row.status === 'pass' ? '通过' : '失败' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="message" label="详情" min-width="260" show-overflow-tooltip />
+        </el-table>
+        <el-empty v-else description="暂无验证检查数据" :image-size="60" />
+      </template>
+      <el-empty v-else-if="!verificationLoading" description="暂无验证结果" :image-size="60" />
+    </el-card>
+
+    <!-- Rollback Dialog -->
+    <el-dialog v-model="showRollbackDialog" title="选择回滚脚本/Playbook" width="560px" destroy-on-close>
+      <el-form label-width="100px">
+        <el-form-item label="回滚类型">
+          <el-radio-group v-model="rollbackType">
+            <el-radio value="script">脚本</el-radio>
+            <el-radio value="playbook">Playbook</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="选择项目">
+          <el-select
+            v-model="rollbackItemId"
+            placeholder="请选择"
+            filterable
+            style="width: 100%"
+            v-loading="rollbackItemsLoading"
+          >
+            <el-option
+              v-for="item in rollbackItems"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input
+            v-model="rollbackComment"
+            type="textarea"
+            :rows="3"
+            placeholder="可选填写回滚原因"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showRollbackDialog = false">取消</el-button>
+        <el-button
+          type="danger"
+          @click="submitRollback"
+          :loading="rollbackSubmitting"
+          :disabled="!rollbackItemId"
+        >
+          确认回滚
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, reactive, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
-import { API } from '@/shared/api/routes'
+import { API as R } from '@/shared/api/routes'
 
 const route = useRoute()
 const executionId = route.params.id as string
@@ -116,9 +250,27 @@ const executionId = route.params.id as string
 const loading = ref(false)
 const logsLoading = ref(false)
 const approving = ref(false)
+const cancelling = ref(false)
+const verificationLoading = ref(false)
 const execution = ref<any>(null)
 const logs = ref<string[]>([])
 const approveComment = ref('')
+
+// Verification result
+const verification = ref<any>(null)
+
+// Per-step logs
+const stepLogs = reactive<Record<string, string[]>>({})
+const stepLogsLoading = reactive<Record<string, boolean>>({})
+
+// Rollback dialog
+const showRollbackDialog = ref(false)
+const rollbackType = ref<'script' | 'playbook'>('script')
+const rollbackItemId = ref('')
+const rollbackComment = ref('')
+const rollbackItems = ref<any[]>([])
+const rollbackItemsLoading = ref(false)
+const rollbackSubmitting = ref(false)
 
 const steps = computed(() => execution.value?.steps || [])
 
@@ -141,7 +293,7 @@ function statusLabel(s: string) {
 async function loadExecution() {
   loading.value = true
   try {
-    const { data } = await api.get(API.EXECUTION_DETAIL(executionId))
+    const { data } = await api.get(R.EXECUTION_DETAIL(executionId))
     if (data.code === 0) {
       execution.value = data.data
     }
@@ -155,7 +307,7 @@ async function loadExecution() {
 async function loadLogs() {
   logsLoading.value = true
   try {
-    const { data } = await api.get(API.LOGS.EXECUTION(executionId))
+    const { data } = await api.get(R.LOGS.EXECUTION(executionId))
     if (data.code === 0) {
       logs.value = data.data.items || data.data.lines || []
     }
@@ -166,10 +318,35 @@ async function loadLogs() {
   }
 }
 
+async function loadStepLogs(stepId: string) {
+  stepLogsLoading[stepId] = true
+  try {
+    const { data } = await api.get(R.LOGS.STEP(executionId, stepId))
+    if (data.code === 0) {
+      stepLogs[stepId] = data.data.items || data.data.lines || []
+    }
+  } catch (e: any) {
+    ElMessage.error('加载步骤日志失败: ' + (e.message || e))
+  } finally {
+    stepLogsLoading[stepId] = false
+  }
+}
+
+function toggleStepExpand(row: any) {
+  if (!row.id) return
+  if (!stepLogs[row.id]) {
+    loadStepLogs(row.id)
+  }
+}
+
+function stepRowClass({ row }: { row: any }) {
+  return 'step-row--clickable'
+}
+
 async function approveExecution(approved: boolean) {
   approving.value = true
   try {
-    const { data } = await api.post(API.EXECUTION_APPROVE(executionId), {
+    const { data } = await api.post(R.EXECUTION_APPROVE(executionId), {
       approved,
       comment: approveComment.value,
     })
@@ -185,6 +362,119 @@ async function approveExecution(approved: boolean) {
     approving.value = false
   }
 }
+
+// --- Cancel Execution ---
+async function handleCancel() {
+  try {
+    await ElMessageBox.confirm(
+      '确定要取消此执行吗？此操作不可撤销。',
+      '取消执行',
+      { confirmButtonText: '确定取消', cancelButtonText: '返回', type: 'warning' },
+    )
+  } catch {
+    return // user dismissed
+  }
+
+  cancelling.value = true
+  try {
+    const { data } = await api.post(R.EXECUTION_CANCEL(executionId))
+    if (data.code === 0) {
+      ElMessage.success('执行已取消')
+      loadExecution()
+    } else {
+      ElMessage.error(data.message || '取消执行失败')
+    }
+  } catch (e: any) {
+    ElMessage.error('取消执行失败: ' + (e.message || e))
+  } finally {
+    cancelling.value = false
+  }
+}
+
+// --- Verification Results ---
+async function loadVerification() {
+  verificationLoading.value = true
+  try {
+    const { data } = await api.get(R.EXECUTION_VERIFICATION(executionId))
+    if (data.code === 0) {
+      verification.value = data.data
+    }
+  } catch (e: any) {
+    // Verification endpoint may not exist for all executions — silently ignore 404
+    if (e?.response?.status !== 404) {
+      ElMessage.error('加载验证结果失败: ' + (e.message || e))
+    }
+  } finally {
+    verificationLoading.value = false
+  }
+}
+
+// --- Rollback ---
+async function loadRollbackItems() {
+  rollbackItemsLoading.value = true
+  try {
+    const url = rollbackType.value === 'script' ? R.SCRIPTS : R.PLAYBOOKS
+    const { data } = await api.get(url)
+    if (data.code === 0) {
+      rollbackItems.value = data.data.items || data.data || []
+    }
+  } catch (e: any) {
+    ElMessage.error('加载回滚项目列表失败: ' + (e.message || e))
+  } finally {
+    rollbackItemsLoading.value = false
+  }
+}
+
+async function submitRollback() {
+  if (!rollbackItemId.value) return
+
+  rollbackSubmitting.value = true
+  try {
+    const payload: any = {
+      type: rollbackType.value === 'script' ? 'script_execution' : 'playbook_execution',
+      ref_id: rollbackItemId.value,
+      comment: rollbackComment.value || `回滚执行 ${executionId}`,
+      rollback_for: executionId,
+      asset_id: execution.value?.asset_id,
+    }
+    const { data } = await api.post(R.EXECUTIONS, payload)
+    if (data.code === 0) {
+      ElMessage.success('回滚执行已创建')
+      showRollbackDialog.value = false
+      rollbackItemId.value = ''
+      rollbackComment.value = ''
+    } else {
+      ElMessage.error(data.message || '创建回滚执行失败')
+    }
+  } catch (e: any) {
+    ElMessage.error('创建回滚执行失败: ' + (e.message || e))
+  } finally {
+    rollbackSubmitting.value = false
+  }
+}
+
+// --- Download Logs ---
+function downloadLogs() {
+  if (logs.value.length === 0) return
+  const content = logs.value.join('\n')
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `execution-${executionId}-logs.txt`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+// --- Watch rollback type change to reload items ---
+import { watch } from 'vue'
+watch(rollbackType, () => {
+  rollbackItemId.value = ''
+  rollbackItems.value = []
+  loadRollbackItems()
+})
 
 // Auto-refresh logs when execution is running
 function startLogPolling() {
@@ -202,13 +492,27 @@ onMounted(() => {
   startLogPolling()
 })
 
-onUnmounted(() => {
-  if (logTimer) clearInterval(logTimer)
-})
+// Load verification when execution finishes (and on mount if already finished)
+watch(
+  () => execution.value?.status,
+  (status) => {
+    if (status === 'completed' || status === 'failed') {
+      loadVerification()
+    }
+  },
+)
 </script>
 
 <style scoped>
-.card-header { display: flex; justify-content: space-between; align-items: center; }
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
 .log-container {
   max-height: 400px;
   overflow-y: auto;
@@ -223,5 +527,16 @@ onUnmounted(() => {
   color: #d4d4d4;
   white-space: pre-wrap;
   word-break: break-all;
+}
+.step-log-container {
+  padding: 8px 16px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: #1e1e1e;
+  border-radius: 4px;
+  margin: 4px 0;
+}
+:deep(.step-row--clickable) {
+  cursor: pointer;
 }
 </style>

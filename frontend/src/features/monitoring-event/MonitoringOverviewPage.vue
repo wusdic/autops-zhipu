@@ -1,108 +1,154 @@
 <template>
   <div class="monitoring-overview">
-    <!-- 顶部状态分布卡片 -->
-    <el-row :gutter="16" class="status-cards">
+    <!-- ===== 顶部统计卡片 ===== -->
+    <el-row :gutter="16" class="stat-cards">
       <el-col :span="6">
-        <el-card shadow="hover" class="status-card status-online">
-          <div class="status-card-inner">
-            <el-icon :size="36" color="#67C23A"><SuccessFilled /></el-icon>
-            <div class="status-card-info">
-              <div class="status-card-value">{{ stats.online }}</div>
-              <div class="status-card-label">在线</div>
+        <el-card shadow="hover" class="stat-card stat-events">
+          <div class="stat-card-inner">
+            <el-icon :size="36" color="#E6A23C"><Bell /></el-icon>
+            <div class="stat-card-info">
+              <div class="stat-card-value">{{ overview.activeEvents24h }}</div>
+              <div class="stat-card-label">24h 活跃事件</div>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="status-card status-offline">
-          <div class="status-card-inner">
-            <el-icon :size="36" color="#F56C6C"><CircleCloseFilled /></el-icon>
-            <div class="status-card-info">
-              <div class="status-card-value">{{ stats.offline }}</div>
-              <div class="status-card-label">离线</div>
+        <el-card shadow="hover" class="stat-card stat-alerts">
+          <div class="stat-card-inner">
+            <el-icon :size="36" color="#F56C6C"><WarningFilled /></el-icon>
+            <div class="stat-card-info">
+              <div class="stat-card-value">{{ overview.activeAlerts }}</div>
+              <div class="stat-card-label">活跃告警</div>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="status-card status-unknown">
-          <div class="status-card-inner">
-            <el-icon :size="36" color="#909399"><QuestionFilled /></el-icon>
-            <div class="status-card-info">
-              <div class="status-card-value">{{ stats.unknown }}</div>
-              <div class="status-card-label">未知</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="status-card status-total">
-          <div class="status-card-inner">
+        <el-card shadow="hover" class="stat-card stat-assets">
+          <div class="stat-card-inner">
             <el-icon :size="36" color="#409EFF"><Monitor /></el-icon>
-            <div class="status-card-info">
-              <div class="status-card-value">{{ stats.total }}</div>
-              <div class="status-card-label">资产总数</div>
+            <div class="stat-card-info">
+              <div class="stat-card-value">{{ overview.totalAssets }}</div>
+              <div class="stat-card-label">监控资产总数</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover" class="stat-card stat-rate">
+          <div class="stat-card-inner">
+            <el-icon :size="36" color="#67C23A"><CircleCheckFilled /></el-icon>
+            <div class="stat-card-info">
+              <div class="stat-card-value">{{ overview.collectionRate }}<span class="stat-unit">%</span></div>
+              <div class="stat-card-label">采集成功率</div>
             </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
+    <!-- ===== 主内容区 ===== -->
     <el-row :gutter="16" style="margin-top: 16px">
-      <!-- 指标趋势折线图 -->
+      <!-- 左栏 span=16 -->
       <el-col :span="16">
+        <!-- 事件趋势图（24h，按严重级别分组） -->
         <el-card>
           <template #header>
             <div class="card-header">
-              <span>指标趋势</span>
-              <el-radio-group v-model="metricRange" size="small" @change="loadMetrics">
-                <el-radio-button value="1h">1小时</el-radio-button>
-                <el-radio-button value="6h">6小时</el-radio-button>
-                <el-radio-button value="24h">24小时</el-radio-button>
-              </el-radio-group>
+              <span>事件趋势（近 24 小时）</span>
+              <el-button text type="primary" @click="loadEventTrend">刷新</el-button>
             </div>
           </template>
-          <div v-loading="metricsLoading">
+          <div v-loading="trendLoading">
             <MetricChart
-              :data="metricData"
-              title="告警趋势"
-              color="#E6A23C"
+              :multiple="trendSeries"
+              :data="[]"
+              title="每小时事件数"
               height="320px"
               unit=" 次"
             />
           </div>
         </el-card>
+
+        <!-- 告警严重级别分布饼图 -->
+        <el-card style="margin-top: 16px">
+          <template #header>
+            <div class="card-header">
+              <span>告警严重级别分布</span>
+              <el-button text type="primary" @click="loadSeverityDist">刷新</el-button>
+            </div>
+          </template>
+          <div v-loading="severityLoading">
+            <MetricChart
+              :data="severityData"
+              title=""
+              chart-type="pie"
+              height="300px"
+            />
+          </div>
+        </el-card>
       </el-col>
 
-      <!-- 资产健康概览 -->
+      <!-- 右栏 span=8 -->
       <el-col :span="8">
+        <!-- 最近事件列表 -->
         <el-card>
           <template #header>
             <div class="card-header">
-              <span>资产健康概览</span>
-              <el-button text type="primary" @click="$router.push('/assets')">查看全部</el-button>
+              <span>最近事件</span>
+              <el-button text type="primary" @click="$router.push('/monitoring/events')">查看全部</el-button>
             </div>
           </template>
-          <div v-loading="healthLoading">
-            <div v-for="item in healthList" :key="item.id" class="health-item">
-              <div class="health-item-main">
-                <span class="health-item-name">{{ item.name || item.hostname }}</span>
-                <StatusBadge :status="item.status" size="small" show-icon />
+          <div v-loading="eventsLoading" class="recent-events-list">
+            <div
+              v-for="item in recentEvents"
+              :key="item.id"
+              class="recent-event-item"
+            >
+              <SeverityBadge :severity="item.severity" size="small" />
+              <div class="recent-event-content">
+                <span class="recent-event-title" :title="item.title">{{ item.title }}</span>
+                <span class="recent-event-time">{{ formatTime(item.created_at) }}</span>
               </div>
-              <el-progress
-                :percentage="item.health_score ?? 0"
-                :color="healthColor(item.health_score ?? 0)"
-                :stroke-width="8"
-                style="margin-top: 6px"
-              />
             </div>
-            <el-empty v-if="!healthLoading && healthList.length === 0" description="暂无资产数据" :image-size="60" />
+            <el-empty v-if="!eventsLoading && recentEvents.length === 0" description="暂无事件" :image-size="60" />
+          </div>
+        </el-card>
+
+        <!-- 告警最多的资产 -->
+        <el-card style="margin-top: 16px">
+          <template #header>
+            <div class="card-header">
+              <span>告警最多资产 TOP 10</span>
+            </div>
+          </template>
+          <div v-loading="topAssetsLoading" class="top-assets-list">
+            <div
+              v-for="(item, idx) in topAlertAssets"
+              :key="item.asset_id ?? idx"
+              class="top-asset-item"
+            >
+              <span class="top-asset-rank">{{ idx + 1 }}</span>
+              <span class="top-asset-name" :title="item.asset_name">{{ item.asset_name }}</span>
+              <div class="top-asset-bar-wrap">
+                <div
+                  class="top-asset-bar"
+                  :style="{
+                    width: barWidth(item.alert_count),
+                    backgroundColor: barColor(item.alert_count),
+                  }"
+                />
+                <span class="top-asset-count">{{ item.alert_count }}</span>
+              </div>
+            </div>
+            <el-empty v-if="!topAssetsLoading && topAlertAssets.length === 0" description="暂无数据" :image-size="60" />
           </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 最近状态变更列表 -->
+    <!-- ===== 底部：状态变更时间线 ===== -->
     <el-card style="margin-top: 16px">
       <template #header>
         <div class="card-header">
@@ -132,79 +178,215 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { SuccessFilled, CircleCloseFilled, QuestionFilled, Monitor } from '@element-plus/icons-vue'
+import { Bell, WarningFilled, Monitor, CircleCheckFilled } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import MetricChart from '@/shared/components/MetricChart.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 
-// ---- 状态分布 ----
-const stats = reactive({ online: 0, offline: 0, unknown: 0, total: 0 })
+// ===================== 顶部概览统计 =====================
+const overview = reactive({
+  activeEvents24h: 0,
+  activeAlerts: 0,
+  totalAssets: 0,
+  collectionRate: 0,
+})
 
-async function loadStats() {
+async function loadOverview() {
   try {
-    const { data } = await api.get(R.ALERT_STATS)
+    // 并行拉取三项数据
+    const [alertStatsRes, assetsRes, collectionRes] = await Promise.allSettled([
+      api.get(R.ALERT_STATS),
+      api.get(R.ASSETS, { params: { page: 1, page_size: 1 } }),
+      api.get(R.COLLECTION_JOBS, { params: { page: 1, page_size: 1 } }),
+    ])
+
+    // 告警统计
+    if (alertStatsRes.status === 'fulfilled') {
+      const d = alertStatsRes.value.data?.data
+      if (alertStatsRes.value.data?.code === 0 && d) {
+        overview.activeAlerts = d.active ?? d.active_alerts ?? 0
+        overview.activeEvents24h = d.events_24h ?? d.active_events_24h ?? 0
+      }
+    }
+
+    // 资产总数
+    if (assetsRes.status === 'fulfilled') {
+      const d = assetsRes.value.data?.data
+      if (assetsRes.value.data?.code === 0) {
+        overview.totalAssets = d?.total ?? d?.items?.length ?? 0
+      }
+    }
+
+    // 采集成功率
+    if (collectionRes.status === 'fulfilled') {
+      const d = collectionRes.value.data?.data
+      if (collectionRes.value.data?.code === 0) {
+        overview.collectionRate = d?.success_rate ?? d?.collection_rate ?? 0
+      }
+    }
+  } catch {
+    // 静默处理，卡片显示 0
+  }
+}
+
+// ===================== 事件趋势（24h，severity 分组） =====================
+const trendLoading = ref(false)
+const trendSeries = ref<Array<{ name: string; data: Array<{ time: string; value: number }>; color: string }>>([])
+
+const severityColors: Record<string, string> = {
+  critical: '#F56C6C',
+  high: '#E6A23C',
+  medium: '#409EFF',
+  low: '#67C23A',
+  info: '#909399',
+}
+
+async function loadEventTrend() {
+  trendLoading.value = true
+  try {
+    const { data } = await api.get(R.EVENTS, {
+      params: { range: '24h', aggregation: 'hourly', group_by: 'severity' },
+    })
+    if (data.code === 0 && Array.isArray(data.data?.series)) {
+      trendSeries.value = data.data.series.map((s: any) => ({
+        name: s.name ?? s.severity ?? '事件',
+        data: (s.items ?? s.data ?? []).map((t: any) => ({
+          time: t.time ?? t.hour ?? '',
+          value: t.value ?? t.count ?? 0,
+        })),
+        color: severityColors[s.severity ?? s.name] ?? '#409EFF',
+      }))
+    } else if (data.code === 0 && Array.isArray(data.data?.items)) {
+      // 降级：接口不按 severity 分组时单线显示
+      trendSeries.value = [{
+        name: '事件',
+        data: data.data.items.map((t: any) => ({
+          time: t.time ?? t.hour ?? '',
+          value: t.value ?? t.count ?? 1,
+        })),
+        color: '#409EFF',
+      }]
+    }
+  } catch {
+    ElMessage.error('加载事件趋势失败')
+  } finally {
+    trendLoading.value = false
+  }
+}
+
+// ===================== 告警严重级别分布（饼图） =====================
+const severityLoading = ref(false)
+const severityData = ref<Array<{ time: string; value: number }>>([])
+
+async function loadSeverityDist() {
+  severityLoading.value = true
+  try {
+    const { data } = await api.get(R.ALERT_STATS, { params: { group_by: 'severity' } })
+    if (data.code === 0 && data.data) {
+      const d = data.data
+      // 适配后端返回格式: { severity_dist: [...] } 或直接 { critical: N, high: N, ... }
+      if (Array.isArray(d.severity_dist)) {
+        severityData.value = d.severity_dist.map((s: any) => ({
+          time: s.severity ?? s.name,
+          value: s.count ?? s.value ?? 0,
+        }))
+      } else {
+        const severityLabels: Record<string, string> = {
+          critical: '严重', high: '高', medium: '中', low: '低', info: '信息',
+        }
+        const entries = Object.entries(d)
+          .filter(([k]) => severityLabels[k])
+          .map(([k, v]) => ({ time: severityLabels[k], value: Number(v) ?? 0 }))
+        severityData.value = entries.length ? entries : defaultSeverityData()
+      }
+    }
+  } catch {
+    severityData.value = defaultSeverityData()
+  } finally {
+    severityLoading.value = false
+  }
+}
+
+function defaultSeverityData() {
+  return [
+    { time: '严重', value: 0 },
+    { time: '高', value: 0 },
+    { time: '中', value: 0 },
+    { time: '低', value: 0 },
+    { time: '信息', value: 0 },
+  ]
+}
+
+// ===================== 最近事件列表 =====================
+const eventsLoading = ref(false)
+const recentEvents = ref<any[]>([])
+
+async function loadRecentEvents() {
+  eventsLoading.value = true
+  try {
+    const { data } = await api.get(R.EVENTS, { params: { page: 1, page_size: 20 } })
+    if (data.code === 0) {
+      recentEvents.value = data.data?.items ?? data.data ?? []
+    }
+  } catch {
+    ElMessage.error('加载最近事件失败')
+  } finally {
+    eventsLoading.value = false
+  }
+}
+
+// ===================== 告警最多资产 TOP 10 =====================
+const topAssetsLoading = ref(false)
+const topAlertAssets = ref<Array<{ asset_id?: string; asset_name: string; alert_count: number }>>([])
+
+const maxAlertCount = computed(() => {
+  if (topAlertAssets.value.length === 0) return 1
+  return Math.max(...topAlertAssets.value.map(a => a.alert_count), 1)
+})
+
+function barWidth(count: number) {
+  return `${Math.max((count / maxAlertCount.value) * 100, 4)}%`
+}
+
+function barColor(count: number) {
+  const ratio = count / maxAlertCount.value
+  if (ratio > 0.7) return '#F56C6C'
+  if (ratio > 0.4) return '#E6A23C'
+  return '#409EFF'
+}
+
+async function loadTopAlertAssets() {
+  topAssetsLoading.value = true
+  try {
+    const { data } = await api.get(R.ALERT_STATS, { params: { group_by: 'asset', top: 10 } })
     if (data.code === 0) {
       const d = data.data
-      stats.online = d.online ?? d.healthy ?? 0
-      stats.offline = d.offline ?? d.down ?? 0
-      stats.unknown = d.unknown ?? 0
-      stats.total = d.total ?? 0
+      if (Array.isArray(d.top_assets)) {
+        topAlertAssets.value = d.top_assets.map((a: any) => ({
+          asset_id: a.asset_id ?? a.id,
+          asset_name: a.asset_name ?? a.name ?? '未知',
+          alert_count: a.alert_count ?? a.count ?? 0,
+        }))
+      } else if (Array.isArray(d)) {
+        topAlertAssets.value = d.slice(0, 10).map((a: any) => ({
+          asset_id: a.asset_id ?? a.id,
+          asset_name: a.asset_name ?? a.name ?? '未知',
+          alert_count: a.alert_count ?? a.count ?? 0,
+        }))
+      }
     }
   } catch {
-    // 静默失败，状态卡片显示 0
-  }
-}
-
-// ---- 指标趋势 ----
-const metricRange = ref('6h')
-const metricsLoading = ref(false)
-const metricData = ref<Array<{ time: string; value: number }>>([])
-
-async function loadMetrics() {
-  metricsLoading.value = true
-  try {
-    const { data } = await api.get(R.ALERTS, { params: { range: metricRange.value, aggregation: true } })
-    if (data.code === 0 && Array.isArray(data.data?.items)) {
-      metricData.value = data.data.items.map((t: any) => ({
-        time: t.time || t.created_at,
-        value: t.value ?? t.count ?? 1,
-      }))
-    }
-  } catch {
-    ElMessage.error('加载指标趋势失败')
+    ElMessage.error('加载告警资产排名失败')
   } finally {
-    metricsLoading.value = false
+    topAssetsLoading.value = false
   }
 }
 
-// ---- 资产健康概览 ----
-const healthLoading = ref(false)
-const healthList = ref<any[]>([])
-
-async function loadHealth() {
-  healthLoading.value = true
-  try {
-    const { data } = await api.get(R.ASSETS, { params: { page: 1, page_size: 8 } })
-    if (data.code === 0) {
-      healthList.value = (data.data?.items || []).slice(0, 8)
-    }
-  } catch {
-    ElMessage.error('加载资产健康概览失败')
-  } finally {
-    healthLoading.value = false
-  }
-}
-
-function healthColor(score: number) {
-  if (score >= 80) return '#67C23A'
-  if (score >= 50) return '#E6A23C'
-  return '#F56C6C'
-}
-
-// ---- 最近状态变更 ----
+// ===================== 状态变更时间线 =====================
 const changesLoading = ref(false)
 const changes = ref<any[]>([])
 
@@ -213,7 +395,7 @@ async function loadChanges() {
   try {
     const { data } = await api.get(R.STATES.ALL_CHANGES, { params: { page: 1, page_size: 20 } })
     if (data.code === 0) {
-      changes.value = data.data?.items || data.data || []
+      changes.value = data.data?.items ?? data.data ?? []
     }
   } catch {
     ElMessage.error('加载状态变更失败')
@@ -222,63 +404,176 @@ async function loadChanges() {
   }
 }
 
-// ---- 工具函数 ----
+// ===================== 工具函数 =====================
 function formatTime(t: string) {
   return t ? new Date(t).toLocaleString('zh-CN') : ''
 }
 
-// ---- 初始化 ----
+// ===================== 初始化 =====================
 onMounted(() => {
-  loadStats()
-  loadMetrics()
-  loadHealth()
+  loadOverview()
+  loadEventTrend()
+  loadSeverityDist()
+  loadRecentEvents()
+  loadTopAlertAssets()
   loadChanges()
 })
 </script>
 
 <style scoped>
-.status-cards { margin-bottom: 0; }
-.status-card-inner {
+/* ---- 顶部统计卡片 ---- */
+.stat-cards {
+  margin-bottom: 0;
+}
+
+.stat-card-inner {
   display: flex;
   align-items: center;
   gap: 16px;
 }
-.status-card-info {
+
+.stat-card-info {
   display: flex;
   flex-direction: column;
 }
-.status-card-value {
+
+.stat-card-value {
   font-size: 28px;
   font-weight: 700;
   line-height: 1.2;
 }
-.status-card-label {
+
+.stat-unit {
+  font-size: 14px;
+  font-weight: 400;
+  color: #909399;
+  margin-left: 2px;
+}
+
+.stat-card-label {
   font-size: 13px;
   color: #909399;
   margin-top: 2px;
 }
+
+/* ---- 通用卡片头部 ---- */
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.health-item {
-  margin-bottom: 14px;
+
+/* ---- 最近事件列表 ---- */
+.recent-events-list {
+  max-height: 520px;
+  overflow-y: auto;
 }
-.health-item:last-child {
-  margin-bottom: 0;
-}
-.health-item-main {
+
+.recent-event-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
 }
-.health-item-name {
-  font-weight: 500;
+
+.recent-event-item:last-child {
+  border-bottom: none;
+}
+
+.recent-event-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.recent-event-title {
   font-size: 14px;
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 180px;
+}
+
+.recent-event-time {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+}
+
+/* ---- 告警最多资产 ---- */
+.top-assets-list {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.top-asset-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.top-asset-rank {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f5f7fa;
+  color: #606266;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.top-asset-item:nth-child(1) .top-asset-rank {
+  background: #fef0f0;
+  color: #f56c6c;
+}
+
+.top-asset-item:nth-child(2) .top-asset-rank {
+  background: #fdf6ec;
+  color: #e6a23c;
+}
+
+.top-asset-item:nth-child(3) .top-asset-rank {
+  background: #ecf5ff;
+  color: #409eff;
+}
+
+.top-asset-name {
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 0;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.top-asset-bar-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.top-asset-bar {
+  height: 8px;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  min-width: 4px;
+}
+
+.top-asset-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: #606266;
+  flex-shrink: 0;
 }
 </style>

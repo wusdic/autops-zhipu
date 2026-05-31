@@ -81,6 +81,33 @@
           <span class="page-title">{{ pageTitle }}</span>
         </div>
         <div class="header-right">
+          <!-- Global Search -->
+          <el-input
+            v-model="searchQuery"
+            placeholder="搜索资产/告警/工单/知识... (Ctrl+K)"
+            style="width: 280px"
+            clearable
+            @keyup.enter="doSearch"
+            @focus="showSearchResults = true"
+            @blur="hideSearchResults"
+            :prefix-icon="Search"
+            size="default"
+          >
+            <template #append>
+              <el-button @click="doSearch" :icon="Search" />
+            </template>
+          </el-input>
+          <!-- Search Results Dropdown -->
+          <div v-if="showSearchResults && searchResults.length" class="search-dropdown">
+            <div v-for="item in searchResults" :key="item.type + item.id"
+              class="search-item" @mousedown.prevent="goSearchResult(item)">
+              <el-tag size="small" :type="searchTagType(item.type)" style="width:50px;text-align:center">{{ item.typeLabel }}</el-tag>
+              <span class="search-item-title">{{ item.title }}</span>
+              <span class="search-item-sub">{{ item.sub || '' }}</span>
+            </div>
+            <div v-if="searchResults.length === 0" class="search-empty">无结果</div>
+          </div>
+
           <el-badge :value="alertCount" :max="99" class="alert-badge" :hidden="alertCount === 0">
             <el-icon :size="20" @click="$router.push('/alerts')" style="cursor:pointer"><Bell /></el-icon>
           </el-badge>
@@ -91,7 +118,8 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/admin/config')">系统设置</el-dropdown-item>
+                <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -108,7 +136,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Monitor, Grid, Bell, Tickets, Collection, Setting, Warning, Connection,
-  InfoFilled, VideoPlay, MagicStick, User, Document, Expand, Fold, DataLine } from '@element-plus/icons-vue'
+  InfoFilled, VideoPlay, MagicStick, User, Document, Expand, Fold, DataLine, Search } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import { useAuthStore } from '@/app/store/auth'
@@ -119,6 +147,64 @@ const route = useRoute()
 const isCollapsed = ref(false)
 const alertCount = ref(0)
 const username = ref(localStorage.getItem('username') || 'admin')
+
+// ─── Global Search ───
+const searchQuery = ref('')
+const showSearchResults = ref(false)
+const searchResults = ref<Array<{type: string; typeLabel: string; id: string; title: string; sub?: string; path: string}>>([])
+
+function searchTagType(type: string) {
+  const m: Record<string, string> = { asset: '', alert: 'danger', ticket: 'warning', knowledge: 'success' }
+  return (m[type] || 'info') as any
+}
+
+async function doSearch() {
+  const q = searchQuery.value.trim()
+  if (!q) { searchResults.value = []; return }
+  showSearchResults.value = true
+  const results: typeof searchResults.value = []
+  try {
+    // Search assets
+    const { data: aData } = await api.get(R.ASSETS, { params: { search: q, page_size: 5 } })
+    if (aData.code === 0) {
+      (aData.data.items || []).forEach((a: any) => results.push({ type: 'asset', typeLabel: '资产', id: a.id, title: a.name || a.hostname, sub: a.ip, path: `/assets/${a.id}` }))
+    }
+  } catch {}
+  try {
+    // Search alerts
+    const { data: alData } = await api.get(R.ALERTS, { params: { search: q, page_size: 5 } })
+    if (alData.code === 0) {
+      (alData.data.items || []).forEach((a: any) => results.push({ type: 'alert', typeLabel: '告警', id: a.id, title: a.title, sub: a.severity, path: `/alerts/${a.id}` }))
+    }
+  } catch {}
+  try {
+    // Search tickets
+    const { data: tData } = await api.get(R.TICKETS, { params: { search: q, page_size: 5 } })
+    if (tData.code === 0) {
+      (tData.data.items || []).forEach((t: any) => results.push({ type: 'ticket', typeLabel: '工单', id: t.id, title: t.title, sub: t.status, path: `/tickets/${t.id}` }))
+    }
+  } catch {}
+  searchResults.value = results.slice(0, 10)
+}
+
+function goSearchResult(item: typeof searchResults.value[0]) {
+  showSearchResults.value = false
+  searchQuery.value = ''
+  router.push(item.path)
+}
+
+function hideSearchResults() {
+  setTimeout(() => { showSearchResults.value = false }, 200)
+}
+
+// Ctrl+K shortcut
+function handleKeydown(e: KeyboardEvent) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault()
+    const input = document.querySelector('.header-right .el-input__inner') as HTMLInputElement
+    input?.focus()
+  }
+}
 
 // Active menu: use base path for dynamic routes
 const activeMenu = computed(() => {
@@ -180,7 +266,10 @@ async function logout() {
   router.push('/login')
 }
 
-onMounted(() => loadAlertCount())
+onMounted(() => {
+  loadAlertCount()
+  window.addEventListener('keydown', handleKeydown)
+})
 </script>
 
 <style scoped>
@@ -201,8 +290,18 @@ onMounted(() => loadAlertCount())
 .collapse-btn { cursor: pointer; color: #606266; }
 .collapse-btn:hover { color: #409eff; }
 .page-title { font-size: 16px; font-weight: 600; color: #303133; }
-.header-right { display: flex; align-items: center; gap: 20px; }
+.header-right { display: flex; align-items: center; gap: 12px; position: relative; }
 .user-info { display: flex; align-items: center; cursor: pointer; }
-.alert-badge { margin-right: 8px; }
+.alert-badge { margin-right: 4px; }
+.search-dropdown {
+  position: absolute; top: 40px; right: 200px; width: 400px;
+  background: #fff; border: 1px solid #dcdfe6; border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 999; max-height: 320px; overflow-y: auto;
+}
+.search-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
+.search-item:hover { background: #f5f7fa; }
+.search-item-title { flex: 1; font-size: 13px; color: #303133; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-item-sub { font-size: 12px; color: #909399; }
+.search-empty { padding: 20px; text-align: center; color: #909399; }
 .main-content { background: #f0f2f5; min-height: calc(100vh - 56px); overflow-y: auto; }
 </style>

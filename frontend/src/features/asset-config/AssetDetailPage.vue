@@ -161,6 +161,200 @@
                 <TimelineView v-else :items="timeline" />
               </div>
             </el-tab-pane>
+
+            <!-- 凭证绑定 -->
+            <el-tab-pane label="凭证绑定" name="credentials">
+              <div class="tab-toolbar">
+                <el-button type="primary" size="small" @click="showCredentialDialog = true">绑定凭证</el-button>
+              </div>
+              <div v-loading="credentialsLoading">
+                <el-empty v-if="!credentialsLoading && !boundCredentials.length" description="暂无绑定凭证" />
+                <el-table v-else :data="boundCredentials" stripe size="small">
+                  <el-table-column prop="name" label="凭证名称" min-width="140" />
+                  <el-table-column prop="type" label="类型" width="120">
+                    <template #default="{ row }">
+                      <el-tag size="small">{{ row.type || '-' }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="username" label="用户名" width="140" />
+                  <el-table-column prop="bound_at" label="绑定时间" width="170">
+                    <template #default="{ row }">{{ formatTime(row.bound_at) }}</template>
+                  </el-table-column>
+                  <el-table-column label="操作" width="100" fixed="right">
+                    <template #default="{ row }">
+                      <el-popconfirm title="确定解绑该凭证？" @confirm="unbindCredential(row.id)">
+                        <template #reference>
+                          <el-button type="danger" link size="small">解绑</el-button>
+                        </template>
+                      </el-popconfirm>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+
+              <!-- 绑定凭证对话框 -->
+              <el-dialog v-model="showCredentialDialog" title="绑定凭证" width="480px" destroy-on-close>
+                <el-form label-width="80px">
+                  <el-form-item label="选择凭证">
+                    <el-select
+                      v-model="selectedCredentialId"
+                      placeholder="请选择凭证"
+                      filterable
+                      style="width: 100%"
+                      v-loading="allCredentialsLoading"
+                    >
+                      <el-option
+                        v-for="c in allCredentials"
+                        :key="c.id"
+                        :label="`${c.name}（${c.username || c.type || '-'}）`"
+                        :value="c.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-form>
+                <template #footer>
+                  <el-button @click="showCredentialDialog = false">取消</el-button>
+                  <el-button type="primary" :disabled="!selectedCredentialId" @click="bindCredential">确定绑定</el-button>
+                </template>
+              </el-dialog>
+            </el-tab-pane>
+
+            <!-- 采集配置 -->
+            <el-tab-pane label="采集配置" name="collection">
+              <div class="tab-toolbar">
+                <el-button type="primary" size="small" @click="showCollectionDialog = true">绑定采集模板</el-button>
+              </div>
+              <div v-loading="collectionLoading">
+                <el-empty v-if="!collectionLoading && !collectionConfigs.length" description="暂无采集配置" />
+                <el-table v-else :data="collectionConfigs" stripe size="small">
+                  <el-table-column prop="config_name" label="配置名称" min-width="140" />
+                  <el-table-column prop="type" label="类型" width="120">
+                    <template #default="{ row }">
+                      <el-tag size="small">{{ row.type || '-' }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="interval" label="采集间隔" width="120">
+                    <template #default="{ row }">{{ row.interval || '-' }}</template>
+                  </el-table-column>
+                  <el-table-column prop="last_collection_at" label="最近采集" width="170">
+                    <template #default="{ row }">{{ formatTime(row.last_collection_at) }}</template>
+                  </el-table-column>
+                  <el-table-column prop="status" label="状态" width="100">
+                    <template #default="{ row }">
+                      <StatusBadge :status="row.status" />
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="操作" width="120" fixed="right">
+                    <template #default="{ row }">
+                      <el-button type="primary" link size="small" @click="triggerCollection(row.id)">触发采集</el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+
+                <!-- 最近采集结果预览 -->
+                <div class="section-block" v-if="lastCollectionResult">
+                  <h4>最近采集结果</h4>
+                  <el-descriptions :column="2" border size="small">
+                    <el-descriptions-item label="状态">
+                      <StatusBadge :status="lastCollectionResult.status" />
+                    </el-descriptions-item>
+                    <el-descriptions-item label="采集时间">{{ formatTime(lastCollectionResult.collected_at) }}</el-descriptions-item>
+                    <el-descriptions-item label="耗时">{{ lastCollectionResult.duration || '-' }}</el-descriptions-item>
+                    <el-descriptions-item label="数据条数">{{ lastCollectionResult.item_count ?? '-' }}</el-descriptions-item>
+                    <el-descriptions-item label="摘要" :span="2">{{ lastCollectionResult.summary || '-' }}</el-descriptions-item>
+                  </el-descriptions>
+                </div>
+              </div>
+
+              <!-- 绑定采集模板对话框 -->
+              <el-dialog v-model="showCollectionDialog" title="绑定采集模板" width="480px" destroy-on-close>
+                <el-form label-width="100px">
+                  <el-form-item label="选择配置">
+                    <el-select
+                      v-model="selectedCollectionId"
+                      placeholder="请选择采集配置"
+                      filterable
+                      style="width: 100%"
+                      v-loading="allCollectionConfigsLoading"
+                    >
+                      <el-option
+                        v-for="c in allCollectionConfigs"
+                        :key="c.id"
+                        :label="`${c.name}（${c.type || '-'}）`"
+                        :value="c.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-form>
+                <template #footer>
+                  <el-button @click="showCollectionDialog = false">取消</el-button>
+                  <el-button type="primary" :disabled="!selectedCollectionId" @click="bindCollection">确定绑定</el-button>
+                </template>
+              </el-dialog>
+            </el-tab-pane>
+
+            <!-- 策略绑定 -->
+            <el-tab-pane label="策略绑定" name="policies">
+              <div class="tab-toolbar">
+                <el-button type="primary" size="small" @click="showPolicyDialog = true">绑定策略</el-button>
+              </div>
+              <div v-loading="policiesLoading">
+                <el-empty v-if="!policiesLoading && !boundPolicies.length" description="暂无绑定策略" />
+                <el-table v-else :data="boundPolicies" stripe size="small">
+                  <el-table-column prop="name" label="策略名称" min-width="140" />
+                  <el-table-column prop="trigger_condition" label="触发条件" min-width="160" show-overflow-tooltip />
+                  <el-table-column prop="risk_level" label="风险等级" width="100">
+                    <template #default="{ row }">
+                      <el-tag :type="riskLevelType(row.risk_level)" size="small">{{ row.risk_level || '-' }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="enabled" label="启用状态" width="100">
+                    <template #default="{ row }">
+                      <el-switch
+                        :model-value="row.enabled"
+                        size="small"
+                        @change="(val: boolean) => togglePolicyEnabled(row.id, val)"
+                      />
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="操作" width="100" fixed="right">
+                    <template #default="{ row }">
+                      <el-popconfirm title="确定解绑该策略？" @confirm="unbindPolicy(row.id)">
+                        <template #reference>
+                          <el-button type="danger" link size="small">解绑</el-button>
+                        </template>
+                      </el-popconfirm>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+
+              <!-- 绑定策略对话框 -->
+              <el-dialog v-model="showPolicyDialog" title="绑定策略" width="480px" destroy-on-close>
+                <el-form label-width="80px">
+                  <el-form-item label="选择策略">
+                    <el-select
+                      v-model="selectedPolicyId"
+                      placeholder="请选择策略"
+                      filterable
+                      style="width: 100%"
+                      v-loading="allPoliciesLoading"
+                    >
+                      <el-option
+                        v-for="p in allPolicies"
+                        :key="p.id"
+                        :label="`${p.name}（${p.risk_level || '-'}）`"
+                        :value="p.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-form>
+                <template #footer>
+                  <el-button @click="showPolicyDialog = false">取消</el-button>
+                  <el-button type="primary" :disabled="!selectedPolicyId" @click="bindPolicy">确定绑定</el-button>
+                </template>
+              </el-dialog>
+            </el-tab-pane>
           </el-tabs>
         </el-card>
       </template>
@@ -169,13 +363,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Plus, Connection } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import TimelineView from '@/shared/components/TimelineView.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -189,6 +384,31 @@ const relations = ref<any[]>([])
 const timeline = ref<any[]>([])
 const activeTab = ref('info')
 const newTag = ref('')
+
+// ---- 凭证绑定 ----
+const credentialsLoading = ref(false)
+const boundCredentials = ref<any[]>([])
+const showCredentialDialog = ref(false)
+const selectedCredentialId = ref('')
+const allCredentials = ref<any[]>([])
+const allCredentialsLoading = ref(false)
+
+// ---- 采集配置 ----
+const collectionLoading = ref(false)
+const collectionConfigs = ref<any[]>([])
+const lastCollectionResult = ref<any>(null)
+const showCollectionDialog = ref(false)
+const selectedCollectionId = ref('')
+const allCollectionConfigs = ref<any[]>([])
+const allCollectionConfigsLoading = ref(false)
+
+// ---- 策略绑定 ----
+const policiesLoading = ref(false)
+const boundPolicies = ref<any[]>([])
+const showPolicyDialog = ref(false)
+const selectedPolicyId = ref('')
+const allPolicies = ref<any[]>([])
+const allPoliciesLoading = ref(false)
 
 function formatType(t: string) {
   const map: Record<string, string> = {
@@ -212,6 +432,13 @@ function statusType(s: string) {
 
 function healthType(h: string) {
   return h === 'healthy' ? 'success' : h === 'warning' ? 'warning' : h === 'critical' ? 'danger' : 'info'
+}
+
+function riskLevelType(level: string) {
+  const map: Record<string, string> = {
+    critical: 'danger', high: 'danger', medium: 'warning', low: 'success', info: 'info',
+  }
+  return map[level] || 'info'
 }
 
 function formatTime(t: string) {
@@ -296,10 +523,210 @@ async function removeTag(tag: string) {
   }
 }
 
+// ==================== 凭证绑定 ====================
+
+async function loadCredentials() {
+  credentialsLoading.value = true
+  try {
+    const { data } = await api.get(R.ASSET_CREDENTIALS(assetId.value))
+    if (data.code === 0) {
+      boundCredentials.value = data.data?.items || data.data || []
+    }
+  } catch (e: any) {
+    ElMessage.error('加载凭证列表失败: ' + (e.message || e))
+  } finally {
+    credentialsLoading.value = false
+  }
+}
+
+async function loadAllCredentials() {
+  allCredentialsLoading.value = true
+  try {
+    const { data } = await api.get(R.CREDENTIALS)
+    if (data.code === 0) {
+      allCredentials.value = data.data?.items || data.data || []
+    }
+  } catch (e: any) {
+    ElMessage.error('加载凭证选择列表失败')
+  } finally {
+    allCredentialsLoading.value = false
+  }
+}
+
+async function bindCredential() {
+  if (!selectedCredentialId.value) return
+  try {
+    const { data } = await api.post(R.ASSET_CREDENTIALS(assetId.value), {
+      credential_id: selectedCredentialId.value,
+    })
+    if (data.code === 0) {
+      ElMessage.success('凭证绑定成功')
+      showCredentialDialog.value = false
+      selectedCredentialId.value = ''
+      loadCredentials()
+    }
+  } catch (e: any) {
+    ElMessage.error('绑定凭证失败: ' + (e.message || e))
+  }
+}
+
+async function unbindCredential(credId: string) {
+  try {
+    const { data } = await api.delete(R.ASSET_CREDENTIAL_UNBIND(assetId.value, credId))
+    if (data.code === 0) {
+      ElMessage.success('凭证已解绑')
+      loadCredentials()
+    }
+  } catch (e: any) {
+    ElMessage.error('解绑凭证失败: ' + (e.message || e))
+  }
+}
+
+// ==================== 采集配置 ====================
+
+async function loadCollectionConfigs() {
+  collectionLoading.value = true
+  try {
+    const { data } = await api.get(R.ASSET_COLLECTION_CONFIGS(assetId.value))
+    if (data.code === 0) {
+      collectionConfigs.value = data.data?.items || data.data || []
+      lastCollectionResult.value = data.data?.last_result || null
+    }
+  } catch (e: any) {
+    ElMessage.error('加载采集配置失败: ' + (e.message || e))
+  } finally {
+    collectionLoading.value = false
+  }
+}
+
+async function loadAllCollectionConfigs() {
+  allCollectionConfigsLoading.value = true
+  try {
+    const { data } = await api.get(R.COLLECTORS)
+    if (data.code === 0) {
+      allCollectionConfigs.value = data.data?.items || data.data || []
+    }
+  } catch (e: any) {
+    ElMessage.error('加载采集模板列表失败')
+  } finally {
+    allCollectionConfigsLoading.value = false
+  }
+}
+
+async function bindCollection() {
+  if (!selectedCollectionId.value) return
+  try {
+    const { data } = await api.post(R.ASSET_COLLECTION_CONFIGS(assetId.value), {
+      config_id: selectedCollectionId.value,
+    })
+    if (data.code === 0) {
+      ElMessage.success('采集配置绑定成功')
+      showCollectionDialog.value = false
+      selectedCollectionId.value = ''
+      loadCollectionConfigs()
+    }
+  } catch (e: any) {
+    ElMessage.error('绑定采集配置失败: ' + (e.message || e))
+  }
+}
+
+async function triggerCollection(configId: string) {
+  try {
+    const { data } = await api.post(R.ASSET_COLLECTION_TRIGGER(assetId.value), {
+      config_id: configId,
+    })
+    if (data.code === 0) {
+      ElMessage.success('采集任务已触发')
+      loadCollectionConfigs()
+    }
+  } catch (e: any) {
+    ElMessage.error('触发采集失败: ' + (e.message || e))
+  }
+}
+
+// ==================== 策略绑定 ====================
+
+async function loadPolicies() {
+  policiesLoading.value = true
+  try {
+    const { data } = await api.get(R.ASSET_POLICIES(assetId.value))
+    if (data.code === 0) {
+      boundPolicies.value = data.data?.items || data.data || []
+    }
+  } catch (e: any) {
+    ElMessage.error('加载策略列表失败: ' + (e.message || e))
+  } finally {
+    policiesLoading.value = false
+  }
+}
+
+async function loadAllPolicies() {
+  allPoliciesLoading.value = true
+  try {
+    const { data } = await api.get(R.POLICIES)
+    if (data.code === 0) {
+      allPolicies.value = data.data?.items || data.data || []
+    }
+  } catch (e: any) {
+    ElMessage.error('加载策略选择列表失败')
+  } finally {
+    allPoliciesLoading.value = false
+  }
+}
+
+async function bindPolicy() {
+  if (!selectedPolicyId.value) return
+  try {
+    const { data } = await api.post(R.ASSET_POLICIES(assetId.value), {
+      policy_id: selectedPolicyId.value,
+    })
+    if (data.code === 0) {
+      ElMessage.success('策略绑定成功')
+      showPolicyDialog.value = false
+      selectedPolicyId.value = ''
+      loadPolicies()
+    }
+  } catch (e: any) {
+    ElMessage.error('绑定策略失败: ' + (e.message || e))
+  }
+}
+
+async function unbindPolicy(policyId: string) {
+  try {
+    const { data } = await api.delete(R.ASSET_POLICY_UNBIND(assetId.value, policyId))
+    if (data.code === 0) {
+      ElMessage.success('策略已解绑')
+      loadPolicies()
+    }
+  } catch (e: any) {
+    ElMessage.error('解绑策略失败: ' + (e.message || e))
+  }
+}
+
+async function togglePolicyEnabled(policyId: string, enabled: boolean) {
+  try {
+    const row = boundPolicies.value.find((p: any) => p.id === policyId)
+    const { data } = await api.put(R.ASSET_POLICY_UNBIND(assetId.value, policyId), { enabled })
+    if (data.code === 0) {
+      if (row) row.enabled = enabled
+      ElMessage.success(enabled ? '策略已启用' : '策略已禁用')
+    }
+  } catch (e: any) {
+    ElMessage.error('更新策略状态失败')
+  }
+}
+
+watch(showCredentialDialog, (val) => { if (val) loadAllCredentials() })
+watch(showCollectionDialog, (val) => { if (val) loadAllCollectionConfigs() })
+watch(showPolicyDialog, (val) => { if (val) loadAllPolicies() })
+
 onMounted(async () => {
   await loadAsset()
   loadRelations()
   loadTimeline()
+  loadCredentials()
+  loadCollectionConfigs()
+  loadPolicies()
 })
 </script>
 
@@ -343,5 +770,10 @@ onMounted(async () => {
   color: #303133;
   border-left: 3px solid #409eff;
   padding-left: 8px;
+}
+.tab-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
 }
 </style>
