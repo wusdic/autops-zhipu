@@ -102,6 +102,19 @@ class ApiKeyResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+    @model_validator(mode="before")
+    @classmethod
+    def parse_scope(cls, data):
+        if hasattr(data, "scope"):
+            raw = data.scope
+            if isinstance(raw, str):
+                object.__setattr__(data, "scope", json.loads(raw))
+        elif isinstance(data, dict):
+            raw = data.get("scope")
+            if isinstance(raw, str):
+                data["scope"] = json.loads(raw)
+        return data
+
 
 class ApiKeyCreateResponse(ApiKeyResponse):
     key: str  # 只在创建时返回一次

@@ -292,7 +292,7 @@ async def seed():
             print('state_changes: 15')
 
             # 18. API KEYS (3) — id,name,key_prefix,key_hash,user_id,scope,expires_at,status,last_used_at,created_at
-            for i, scope in enumerate(['read_only','read_write','admin']):
+            for i, scope in enumerate(['["read_only"]','["read_write"]','["admin"]']):
                 prefix = f'ak{i}_{uid()[:4]}'
                 await cur.execute(
                     'INSERT INTO api_keys (id,name,key_prefix,key_hash,user_id,scope,expires_at,status,last_used_at,created_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
