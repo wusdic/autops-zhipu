@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 
 from fastapi import APIRouter, Depends, Request
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.response import Response, paginate, success
@@ -174,3 +175,21 @@ async def revoke_api_key(key_id: str, token: str, auth: AuthService = Depends(_g
     svc = ApiKeyService(auth.session)
     await svc.revoke_key(key_id, user.id)
     return success(message="API Key 已撤销")
+
+
+class ApiKeyPatch(BaseModel):
+    name: str | None = None
+    scope: list[str] | None = None
+    expires_days: int | None = None
+
+
+@apikey_router.patch("/{key_id}")
+async def patch_api_key(
+    key_id: str, data: ApiKeyPatch,
+    token: str, auth: AuthService = Depends(_get_auth),
+):
+    """部分更新 API Key."""
+    user = await auth.get_current_user(token)
+    svc = ApiKeyService(auth.session)
+    updated = await svc.update_key(key_id, user.id, **data.model_dump(exclude_unset=True))
+    return success(ApiKeyResponse.model_validate(updated).model_dump())

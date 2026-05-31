@@ -68,3 +68,14 @@ class KnowledgeService:
         await self.session.flush()
         await self.session.refresh(a)
         return a
+
+    async def get_related(self, article_id: str, limit: int = 5) -> list[KnowledgeArticle]:
+        """获取相关文章（按类型和标签匹配）."""
+        article = await self.get_article(article_id)
+        stmt = select(KnowledgeArticle).where(
+            KnowledgeArticle.id != article_id,
+            KnowledgeArticle.status == "published",
+            KnowledgeArticle.article_type == article.article_type,
+        ).order_by(KnowledgeArticle.created_at.desc()).limit(limit)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())

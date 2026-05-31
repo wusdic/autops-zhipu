@@ -930,7 +930,7 @@ async function exportTickets() {
   try {
     const params: Record<string, any> = {
       page: 1,
-      page_size: 10000,
+      page_size: 100,
       export: true,
     }
     if (filters.status) params.status = filters.status

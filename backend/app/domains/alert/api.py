@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,6 +18,27 @@ from app.infra.database import get_db
 
 router = APIRouter(prefix="/alerts", tags=["告警中心"])
 rule_router = APIRouter(prefix="/alert-rules", tags=["告警规则"])
+
+
+class AlertRuleUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    event_types: str | None = None
+    conditions: str | None = None
+    severity: str | None = None
+    suppress_duration: int | None = None
+    enabled: bool | None = None
+
+
+class AlertRulePatch(BaseModel):
+    enabled: bool | None = None
+    severity: str | None = None
+    suppress_duration: int | None = None
+
+
+class AlertEscalateBody(BaseModel):
+    escalate_to: str | None = None
+    reason: str | None = None
 
 
 def _get_svc(db: AsyncSession = Depends(get_db)) -> AlertService:
@@ -31,6 +55,25 @@ async def list_rules(enabled: bool | None = None, svc: AlertService = Depends(_g
 async def create_rule(data: AlertRuleCreate, svc: AlertService = Depends(_get_svc)):
     rule = await svc.create_rule(**data.model_dump())
     return success(model_to_dict(rule))
+
+
+@rule_router.put("/{rule_id}")
+async def update_rule(rule_id: str, data: AlertRuleUpdate, svc: AlertService = Depends(_get_svc)):
+    rule = await svc.update_rule(rule_id, **data.model_dump(exclude_unset=True))
+    return success(model_to_dict(rule))
+
+
+@rule_router.patch("/{rule_id}")
+async def patch_rule(rule_id: str, data: AlertRulePatch, svc: AlertService = Depends(_get_svc)):
+    rule = await svc.update_rule(rule_id, **data.model_dump(exclude_unset=True))
+    return success(model_to_dict(rule))
+
+
+@rule_router.post("/{rule_id}/test")
+async def test_rule(rule_id: str, svc: AlertService = Depends(_get_svc)):
+    """测试告警规则（模拟触发）."""
+    result = await svc.test_rule(rule_id)
+    return success(result)
 
 
 @router.get("")
@@ -83,4 +126,10 @@ async def resolve_alert(alert_id: str, svc: AlertService = Depends(_get_svc)):
     return success(model_to_dict(alert))
 
 
-
+@router.post("/{alert_id}/escalate")
+async def escalate_alert(
+    alert_id: str, body: AlertEscalateBody, svc: AlertService = Depends(_get_svc)
+):
+    """升级告警."""
+    alert = await svc.escalate(alert_id, body.escalate_to, body.reason)
+    return success(model_to_dict(alert))

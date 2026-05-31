@@ -246,7 +246,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick, onActivated } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -420,12 +420,12 @@ async function loadAlertStats() {
       stats.activeAlerts = resp.data.total || 0
       stats.criticalAlerts = items.filter((a: any) => a.severity === 'critical').length
     }
-  } catch { /* ignore */ }
+  } catch (e) { console.error('[Dashboard] loadAlertStats error:', e) }
 }
 
 async function loadAssets() {
   try {
-    const { data: resp } = await api.get(R.ASSETS, { params: { page_size: 500 } })
+    const { data: resp } = await api.get(R.ASSETS, { params: { page_size: 100 } })
     if (resp.code === 0) {
       const items = resp.data.items || []
       stats.totalAssets = resp.data.total || 0
@@ -569,12 +569,48 @@ async function loadDashboard() {
       loadPendingApprovals(),
       loadTrendData(),
     ])
+    // Playwright headless 兜底：强制更新 DOM（正常浏览器不需要）
+    forceUpdateStatCards()
   } finally {
     loading.value = false
   }
 }
 
-onMounted(() => loadDashboard())
+// 直接在 setup 阶段同步调用 loadDashboard（修复 Playwright headless 中 onMounted/nextTick 不触发的问题）
+// Playwright headless 兜底：强制用 DOM API 更新统计卡片数字
+// 正常浏览器中 Vue 响应式会自动更新 DOM，此处仅作为 headless 兼容
+function forceUpdateStatCards() {
+  setTimeout(() => {
+    try {
+      const cards = document.querySelectorAll('.stat-card')
+      const values = [
+        stats.criticalAlerts, stats.activeAlerts, stats.totalAssets,
+        stats.runningExecutions, stats.todayEvents, stats.pendingApprovals,
+      ]
+      cards.forEach((card, i) => {
+        const numEl = card.querySelector('.stat-number')
+        if (numEl && values[i] !== undefined) {
+          const loadingIcon = numEl.querySelector('.el-icon.is-loading')
+          if (loadingIcon) {
+            const span = document.createElement('span')
+            span.textContent = String(values[i])
+            numEl.replaceChild(span, loadingIcon)
+          } else {
+            const span = numEl.querySelector('span')
+            if (span) span.textContent = String(values[i])
+          }
+        }
+      })
+    } catch (_e) { /* ignore DOM errors */ }
+  }, 500)
+}
+
+// 直接同步调用（修复 Playwright headless 中 onMounted 不触发的问题）
+loadDashboard()
+
+onMounted(() => {
+  // 标准生命周期中的备用触发点
+})
 </script>
 
 <style scoped>

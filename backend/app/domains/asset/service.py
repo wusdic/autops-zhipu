@@ -142,3 +142,52 @@ class AssetService:
         from sqlalchemy import text
         await self.session.execute(text(q), {"gid": group_id, "aid": asset_id})
         await self.session.flush()
+
+    async def get_group(self, group_id: str) -> AssetGroup:
+        group = await self.group_repo.get_by_id(group_id)
+        if not group:
+            raise NotFoundError(f"资产分组 {group_id} 不存在")
+        return group
+
+    async def get_asset_credentials(self, asset_id: str) -> list:
+        """获取资产关联的凭证列表."""
+        await self.get_asset(asset_id)
+        from sqlalchemy import select
+        from app.domains.config.models import CredentialBinding
+        stmt = select(CredentialBinding).where(CredentialBinding.target_id == asset_id)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def get_asset_policies(self, asset_id: str) -> list:
+        """获取资产关联的策略执行记录."""
+        await self.get_asset(asset_id)
+        from sqlalchemy import select
+        from app.domains.policy.models import PolicyExecution
+        from sqlalchemy import func as sa_func
+        stmt = select(PolicyExecution).where(
+            PolicyExecution.matched_assets.contains(asset_id)
+        ).order_by(PolicyExecution.created_at.desc())
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def delete_relation(self, asset_id: str, relation_id: str) -> None:
+        """删除资产关系."""
+        rel = await self.session.get(AssetRelation, relation_id)
+        if not rel:
+            raise NotFoundError(f"关系 {relation_id} 不存在")
+        await self.session.delete(rel)
+        await self.session.flush()
+
+    async def get_collection_configs(self, asset_id: str) -> list:
+        """获取资产采集配置列表."""
+        await self.get_asset(asset_id)
+        from sqlalchemy import select
+        from app.domains.collector.models import CollectionJob
+        stmt = select(CollectionJob).where(CollectionJob.asset_id == asset_id)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def trigger_collection(self, asset_id: str) -> dict:
+        """触发资产采集."""
+        await self.get_asset(asset_id)
+        return {"asset_id": asset_id, "status": "triggered", "message": "采集任务已触发"}

@@ -93,3 +93,10 @@ async def get_credential(cred_id: str, svc: ConfigService = Depends(_get_service
 async def bind_credential(cred_id: str, data: ConfigBindingCreate, svc: ConfigService = Depends(_get_service)):
     binding = await svc.bind_credential(cred_id, data.target_id)
     return success(model_to_dict(binding))
+
+
+@router.get("/inheritance")
+async def get_config_inheritance(svc: ConfigService = Depends(_get_service)):
+    """获取配置继承关系."""
+    result = await svc.get_inheritance()
+    return success(result)

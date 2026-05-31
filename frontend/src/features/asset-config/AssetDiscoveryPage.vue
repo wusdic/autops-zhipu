@@ -322,7 +322,7 @@ const showNewCredDialog = ref(false)
 // === 加载函数 ===
 async function loadStats() {
   try {
-    const res = await api.get(API.DISCOVERY_TASKS, { params: { page_size: 1000 } })
+    const res = await api.get(API.DISCOVERY_TASKS, { params: { page_size: 100 } })
     if (res.data?.code === 0) {
       const all = res.data.data?.items || res.data.data || []
       stats.total_discovered = all.length
@@ -330,7 +330,7 @@ async function loadStats() {
     }
   } catch {}
   try {
-    const res = await api.get(API.DISCOVERY_RESULTS, { params: { page_size: 1000 } })
+    const res = await api.get(API.DISCOVERY_RESULTS, { params: { page_size: 100 } })
     if (res.data?.code === 0) {
       const all = res.data.data?.items || res.data.data || []
       stats.onboarded = all.filter((r: any) => r.status === 'managed').length

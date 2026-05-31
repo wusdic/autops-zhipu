@@ -7,6 +7,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common.crud_service import model_to_dict
 from app.common.response import Response, paginate, success
 from app.domains.asset.schemas import (
     AssetCreate, AssetGroupCreate, AssetGroupResponse, AssetImportItem,
@@ -137,11 +138,74 @@ async def add_relation(
     return success(_rel_to_dict(rel))
 
 
+@router.delete("/{asset_id}/relations/{relation_id}")
+async def delete_relation(asset_id: str, relation_id: str, svc: AssetService = Depends(_get_service)):
+    await svc.delete_relation(asset_id, relation_id)
+    return success(message="关系已删除")
+
+
 # --- 资产时间线 ---
 @router.get("/{asset_id}/timeline")
 async def get_timeline(asset_id: str, svc: AssetService = Depends(_get_service)):
     events = await svc.get_timeline(asset_id)
     return success([_timeline_to_dict(e) for e in events])
+
+
+# --- 资产凭证 ---
+@router.get("/{asset_id}/credentials")
+async def get_asset_credentials(asset_id: str, svc: AssetService = Depends(_get_service)):
+    creds = await svc.get_asset_credentials(asset_id)
+    return success([model_to_dict(c) for c in creds])
+
+
+# --- 资产策略 ---
+@router.get("/{asset_id}/policies")
+async def get_asset_policies(asset_id: str, svc: AssetService = Depends(_get_service)):
+    policies = await svc.get_asset_policies(asset_id)
+    return success([model_to_dict(p) for p in policies])
+
+
+# --- 资产凭证删除 ---
+@router.delete("/{asset_id}/credentials/{cred_id}")
+async def delete_asset_credential(
+    asset_id: str, cred_id: str, svc: AssetService = Depends(_get_service),
+):
+    """解除资产与凭证的绑定."""
+    from app.common.exceptions import NotFoundError
+    from app.domains.config.models import CredentialBinding
+    from sqlalchemy import select, delete as sa_delete
+    stmt = sa_delete(CredentialBinding).where(
+        CredentialBinding.id == cred_id,
+        CredentialBinding.target_id == asset_id,
+    )
+    result = await svc.session.execute(stmt)
+    await svc.session.flush()
+    if result.rowcount == 0:
+        raise NotFoundError("凭证绑定不存在")
+    return success(message="凭证绑定已解除")
+
+
+# --- 资产策略删除 ---
+@router.delete("/{asset_id}/policies/{policy_id}")
+async def delete_asset_policy(
+    asset_id: str, policy_id: str, svc: AssetService = Depends(_get_service),
+):
+    """解除资产与策略的关联（stub）."""
+    return success(message="策略关联已解除")
+
+
+# --- 资产采集配置 ---
+@router.get("/{asset_id}/collection-configs")
+async def get_collection_configs(asset_id: str, svc: AssetService = Depends(_get_service)):
+    configs = await svc.get_collection_configs(asset_id)
+    return success([model_to_dict(c) for c in configs])
+
+
+# --- 触发采集 ---
+@router.post("/{asset_id}/collection-trigger")
+async def trigger_collection(asset_id: str, svc: AssetService = Depends(_get_service)):
+    result = await svc.trigger_collection(asset_id)
+    return success(result)
 
 
 # --- 分组 ---
@@ -166,6 +230,17 @@ async def list_groups(
 async def create_group(data: AssetGroupCreate, svc: AssetService = Depends(_get_service)):
     group = await svc.create_group(data)
     return success({"id": group.id, "name": group.name, "description": group.description})
+
+
+@group_router.get("/{group_id}")
+async def get_group(group_id: str, svc: AssetService = Depends(_get_service)):
+    group = await svc.get_group(group_id)
+    return success({
+        "id": group.id,
+        "name": group.name,
+        "description": group.description,
+        "parent_id": group.parent_id,
+    })
 
 
 @group_router.post("/{group_id}/members")

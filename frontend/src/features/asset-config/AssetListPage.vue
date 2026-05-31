@@ -487,14 +487,14 @@ async function loadAssets() {
 
 async function loadCredentialOptions() {
   try {
-    const { data } = await api.get(R.CREDENTIALS, { params: { page_size: 200 } })
+    const { data } = await api.get(R.CREDENTIALS, { params: { page_size: 100 } })
     if (data.code === 0) credentialOptions.value = data.data.items || []
   } catch { /* ignore */ }
 }
 
 async function loadGroupOptions() {
   try {
-    const { data } = await api.get(R.ASSET_GROUPS, { params: { page_size: 200 } })
+    const { data } = await api.get(R.ASSET_GROUPS, { params: { page_size: 100 } })
     if (data.code === 0) groupOptions.value = data.data.items || []
   } catch { /* ignore */ }
 }

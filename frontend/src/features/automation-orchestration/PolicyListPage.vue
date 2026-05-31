@@ -257,7 +257,7 @@ function computeStats() {
 
 async function loadGroups() {
   try {
-    const res = await api.get(API.ASSET_GROUPS, { params: { page_size: 200 } })
+    const res = await api.get(API.ASSET_GROUPS, { params: { page_size: 100 } })
     if (res.data?.code === 0) groups.value = res.data.data?.items || res.data.data || []
   } catch {}
 }

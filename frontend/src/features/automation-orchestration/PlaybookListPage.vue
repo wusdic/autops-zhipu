@@ -214,7 +214,7 @@ function computeStats() {
 
 async function loadScripts() {
   try {
-    const res = await api.get(API.SCRIPTS, { params: { page_size: 200 } })
+    const res = await api.get(API.SCRIPTS, { params: { page_size: 100 } })
     if (res.data?.code === 0) scripts.value = res.data.data?.items || res.data.data || []
   } catch {}
 }

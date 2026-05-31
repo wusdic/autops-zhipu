@@ -64,3 +64,14 @@ async def append_log(
 ):
     log = await svc.append_log(execution_id, stream_type, content, step_id, offset)
     return success(model_to_dict(log))
+
+
+@router.get("/execution/{exec_id}/step/{step_id}")
+async def get_step_logs(
+    exec_id: str, step_id: str,
+    page: int = Query(1, ge=1), page_size: int = Query(50, ge=1, le=200),
+    svc: LogService = Depends(_get_svc),
+):
+    """获取执行任务指定步骤的日志."""
+    items, total = await svc.get_logs(exec_id, step_id, page, page_size)
+    return paginate([model_to_dict(i) for i in items], total, page, page_size)

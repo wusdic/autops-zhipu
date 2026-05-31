@@ -176,3 +176,20 @@ class ApiKeyService:
             raise NotFoundError("API Key 不存在")
         key.status = "revoked"
         await self.session.flush()
+
+    async def update_key(self, key_id: str, user_id: str, **kwargs) -> ApiKey:
+        """部分更新 API Key."""
+        key = await self.session.get(ApiKey, key_id)
+        if key is None or key.user_id != user_id:
+            raise NotFoundError("API Key 不存在")
+        if key.status != "active":
+            raise PermissionDeniedError("只能更新活跃状态的 API Key")
+        for k, v in kwargs.items():
+            if v is not None:
+                if k == "scope":
+                    setattr(key, k, json.dumps(v))
+                else:
+                    setattr(key, k, v)
+        await self.session.flush()
+        await self.session.refresh(key)
+        return key

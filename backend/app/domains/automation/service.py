@@ -160,3 +160,60 @@ class AutomationService:
         if not exe:
             raise NotFoundError(f"执行任务 {exec_id} 不存在")
         return exe
+
+    async def update_script(self, script_id: str, **kwargs) -> Script:
+        script = await self.script_repo.get_by_id(script_id)
+        if not script:
+            raise NotFoundError(f"脚本 {script_id} 不存在")
+        content = kwargs.get("content")
+        if content and self._check_blocked(content):
+            kwargs["is_blocked"] = True
+        for key, value in kwargs.items():
+            if value is not None and hasattr(script, key):
+                setattr(script, key, value)
+        await self.session.flush()
+        await self.session.refresh(script)
+        return script
+
+    async def delete_script(self, script_id: str) -> None:
+        script = await self.script_repo.get_by_id(script_id)
+        if not script:
+            raise NotFoundError(f"脚本 {script_id} 不存在")
+        await self.session.delete(script)
+        await self.session.flush()
+
+    async def get_playbook(self, playbook_id: str) -> Playbook:
+        pb = await self.playbook_repo.get_by_id(playbook_id)
+        if not pb:
+            raise NotFoundError(f"Playbook {playbook_id} 不存在")
+        return pb
+
+    async def update_playbook(self, playbook_id: str, **kwargs) -> Playbook:
+        pb = await self.playbook_repo.get_by_id(playbook_id)
+        if not pb:
+            raise NotFoundError(f"Playbook {playbook_id} 不存在")
+        for key, value in kwargs.items():
+            if value is not None and hasattr(pb, key):
+                setattr(pb, key, value)
+        await self.session.flush()
+        await self.session.refresh(pb)
+        return pb
+
+    async def delete_playbook(self, playbook_id: str) -> None:
+        pb = await self.playbook_repo.get_by_id(playbook_id)
+        if not pb:
+            raise NotFoundError(f"Playbook {playbook_id} 不存在")
+        await self.session.delete(pb)
+        await self.session.flush()
+
+    async def cancel_execution(self, exec_id: str) -> Execution:
+        exe = await self.exec_repo.get_by_id(exec_id)
+        if not exe:
+            raise NotFoundError(f"执行任务 {exec_id} 不存在")
+        if exe.status not in ("pending", "awaiting_approval", "approved", "running"):
+            raise ValueError("当前状态不允许取消")
+        exe.status = "cancelled"
+        exe.completed_at = datetime.now(timezone.utc)
+        await self.session.flush()
+        await self.session.refresh(exe)
+        return exe

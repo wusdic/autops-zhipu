@@ -2,15 +2,20 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.crud_service import model_to_dict
+from app.common.exceptions import NotFoundError
 from app.common.response import paginate, success
 from app.domains.automation.schemas import (
     ExecutionCreate,
     PlaybookCreate,
+    PlaybookUpdate,
     ScriptCreate,
+    ScriptUpdate,
 )
 from app.domains.automation.service import AutomationService
 from app.infra.database import get_db
@@ -41,6 +46,20 @@ async def create_script(data: ScriptCreate, svc: AutomationService = Depends(_ge
     return success(model_to_dict(s))
 
 
+@router.put("/{script_id}")
+async def update_script(
+    script_id: str, data: ScriptUpdate, svc: AutomationService = Depends(_get_svc)
+):
+    s = await svc.update_script(script_id, **data.model_dump(exclude_unset=True))
+    return success(model_to_dict(s))
+
+
+@router.delete("/{script_id}")
+async def delete_script(script_id: str, svc: AutomationService = Depends(_get_svc)):
+    await svc.delete_script(script_id)
+    return success(message="脚本已删除")
+
+
 @playbook_router.get("")
 async def list_playbooks(
     page: int = Query(1, ge=1),
@@ -57,6 +76,26 @@ async def create_playbook(
 ):
     pb = await svc.create_playbook(**data.model_dump())
     return success(model_to_dict(pb))
+
+
+@playbook_router.get("/{playbook_id}")
+async def get_playbook(playbook_id: str, svc: AutomationService = Depends(_get_svc)):
+    pb = await svc.get_playbook(playbook_id)
+    return success(model_to_dict(pb))
+
+
+@playbook_router.put("/{playbook_id}")
+async def update_playbook(
+    playbook_id: str, data: PlaybookUpdate, svc: AutomationService = Depends(_get_svc)
+):
+    pb = await svc.update_playbook(playbook_id, **data.model_dump(exclude_unset=True))
+    return success(model_to_dict(pb))
+
+
+@playbook_router.delete("/{playbook_id}")
+async def delete_playbook(playbook_id: str, svc: AutomationService = Depends(_get_svc)):
+    await svc.delete_playbook(playbook_id)
+    return success(message="Playbook 已删除")
 
 
 @exec_router.get("")
@@ -88,3 +127,22 @@ async def get_execution(exec_id: str, svc: AutomationService = Depends(_get_svc)
 async def approve_execution(exec_id: str, svc: AutomationService = Depends(_get_svc)):
     exe = await svc.approve_execution(exec_id)
     return success(model_to_dict(exe))
+
+
+@exec_router.post("/{exec_id}/cancel")
+async def cancel_execution(exec_id: str, svc: AutomationService = Depends(_get_svc)):
+    exe = await svc.cancel_execution(exec_id)
+    return success(model_to_dict(exe))
+
+
+@exec_router.get("/{exec_id}/verification")
+async def get_execution_verification(exec_id: str, svc: AutomationService = Depends(_get_svc)):
+    """获取执行任务验证信息."""
+    exe = await svc.get_execution(exec_id)
+    return success({
+        "execution_id": exe.id,
+        "status": exe.status,
+        "risk_level": exe.risk_level,
+        "is_dry_run": exe.is_dry_run,
+        "verified": exe.status in ("approved", "completed", "running"),
+    })

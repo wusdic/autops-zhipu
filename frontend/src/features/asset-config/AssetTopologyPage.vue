@@ -155,14 +155,14 @@ function typeColor(t: string) {
 async function loadTopology() {
   try {
     const assetId = route.params.id as string
-    const res = await api.get(assetId ? API.ASSET_RELATIONS(assetId) : API.ASSETS, { params: { page_size: 200 } })
+    const res = await api.get(assetId ? API.ASSET_RELATIONS(assetId) : API.ASSETS, { params: { page_size: 100 } })
     if (res.data?.code === 0) {
       const data = res.data.data
       if (assetId && data?.relations) {
         edges.value = data.relations || []
         const nodeIds = new Set<string>()
         edges.value.forEach((e: any) => { nodeIds.add(e.source_id); nodeIds.add(e.target_id) })
-        const assetsRes = await api.get(API.ASSETS, { params: { page_size: 200 } })
+        const assetsRes = await api.get(API.ASSETS, { params: { page_size: 100 } })
         const allAssets = assetsRes.data?.data?.items || assetsRes.data?.data || []
         nodes.value = allAssets.filter((a: any) => nodeIds.has(a.id)).map((a: any, i: number) => ({
           ...a, x: a.x || (200 + (i % 5) * 200), y: a.y || (150 + Math.floor(i / 5) * 120),

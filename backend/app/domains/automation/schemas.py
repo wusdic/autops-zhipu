@@ -15,11 +15,28 @@ class ScriptCreate(BaseModel):
     risk_level: str = "low"
 
 
+class ScriptUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    script_type: str | None = None
+    content: str | None = None
+    parameters: str | None = None
+    timeout: int | None = None
+    risk_level: str | None = None
+
+
 class PlaybookCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=128)
     description: str | None = None
     steps: str = Field(..., description="""JSON array of steps""")
     risk_level: str = "low"
+
+
+class PlaybookUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    steps: str | None = None
+    risk_level: str | None = None
 
 
 class ExecutionCreate(BaseModel):

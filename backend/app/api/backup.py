@@ -63,3 +63,51 @@ async def restore_backup(backup_id: str):
         "backup_id": backup_id,
         "message": "恢复任务已启动",
     })
+
+
+@router.get("/{backup_id}")
+async def get_backup(backup_id: str):
+    """获取备份详情."""
+    backup = next((b for b in _mock_backups if b["id"] == backup_id), None)
+    if not backup:
+        from app.common.exceptions import NotFoundError
+        raise NotFoundError("备份记录不存在")
+    return success(backup)
+
+
+@router.get("/{backup_id}/download")
+async def download_backup(backup_id: str):
+    """下载备份文件（返回下载信息）."""
+    backup = next((b for b in _mock_backups if b["id"] == backup_id), None)
+    if not backup:
+        from app.common.exceptions import NotFoundError
+        raise NotFoundError("备份记录不存在")
+    return success({
+        "backup_id": backup_id,
+        "download_url": f"/api/v1/backups/{backup_id}/file",
+        "size": backup.get("size", 0),
+        "expires_in": 3600,
+    })
+
+
+@router.get("/settings")
+async def get_backup_settings():
+    """获取备份配置."""
+    return success({
+        "auto_backup": True,
+        "schedule": "0 2 * * *",
+        "retention_days": 30,
+        "storage_type": "local",
+        "compression": True,
+    })
+
+
+@router.get("/storage")
+async def get_backup_storage():
+    """获取备份存储信息."""
+    return success({
+        "total_size": 157286400,
+        "used_size": 52428800,
+        "backup_count": len(_mock_backups),
+        "storage_path": "/data/backups",
+    })

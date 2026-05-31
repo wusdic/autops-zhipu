@@ -55,3 +55,38 @@ async def add_comment(ticket_id: str, data: TicketCommentCreate, svc: TicketServ
 async def get_comments(ticket_id: str, svc: TicketService = Depends(_get_svc)):
     comments = await svc.get_comments(ticket_id)
     return success([model_to_dict(c) for c in comments])
+
+
+@router.get("/{ticket_id}/attachments")
+async def get_attachments(ticket_id: str, svc: TicketService = Depends(_get_svc)):
+    """获取工单附件列表."""
+    await svc.get_ticket(ticket_id)
+    # Stub: return empty list until attachment model is implemented
+    return success([])
+
+
+from pydantic import BaseModel as _BaseModel
+
+
+class AttachmentUpload(_BaseModel):
+    filename: str
+    content_type: str | None = None
+    size: int | None = None
+
+
+@router.post("/{ticket_id}/attachments")
+async def upload_attachment(
+    ticket_id: str, body: AttachmentUpload, svc: TicketService = Depends(_get_svc),
+):
+    """上传工单附件（stub）."""
+    await svc.get_ticket(ticket_id)
+    import uuid as _uuid
+    from datetime import datetime as _dt
+    return success({
+        "id": str(_uuid.uuid4()),
+        "ticket_id": ticket_id,
+        "filename": body.filename,
+        "content_type": body.content_type,
+        "size": body.size,
+        "uploaded_at": _dt.utcnow().isoformat(),
+    })

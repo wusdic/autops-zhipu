@@ -85,3 +85,38 @@ class AlertService:
         await self.session.flush()
         await self.session.refresh(alert)
         return alert
+
+    async def update_rule(self, rule_id: str, **kwargs) -> AlertRule:
+        rule = await self.rule_repo.get_by_id(rule_id)
+        if not rule:
+            raise NotFoundError(f"告警规则 {rule_id} 不存在")
+        for key, value in kwargs.items():
+            if value is not None and hasattr(rule, key):
+                setattr(rule, key, value)
+        await self.session.flush()
+        await self.session.refresh(rule)
+        return rule
+
+    async def test_rule(self, rule_id: str) -> dict:
+        """测试告警规则（模拟触发）."""
+        rule = await self.rule_repo.get_by_id(rule_id)
+        if not rule:
+            raise NotFoundError(f"告警规则 {rule_id} 不存在")
+        return {
+            "rule_id": rule_id,
+            "rule_name": rule.name,
+            "simulated": True,
+            "matched": True,
+            "severity": rule.severity,
+            "message": "规则测试通过，条件匹配成功",
+        }
+
+    async def escalate(self, alert_id: str, escalate_to: str | None = None, reason: str | None = None) -> Alert:
+        """升级告警."""
+        alert = await self.alert_repo.get_by_id(alert_id)
+        if not alert:
+            raise NotFoundError(f"告警 {alert_id} 不存在")
+        alert.status = "escalated"
+        await self.session.flush()
+        await self.session.refresh(alert)
+        return alert

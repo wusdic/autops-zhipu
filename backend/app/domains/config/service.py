@@ -130,3 +130,38 @@ class ConfigService:
         await self.session.flush()
         await self.session.refresh(binding)
         return binding
+
+    async def get_inheritance(self) -> dict:
+        """获取配置继承关系."""
+        # Get all definitions with their versions and bindings
+        defn_result = await self.session.execute(
+            select(ConfigDefinition).where(ConfigDefinition.is_deleted == False)
+        )
+        definitions = defn_result.scalars().all()
+        inheritance = []
+        for d in definitions:
+            ver_result = await self.session.execute(
+                select(ConfigVersion).where(ConfigVersion.definition_id == d.id)
+            )
+            versions = ver_result.scalars().all()
+            bindings_for_def = []
+            for v in versions:
+                binding_result = await self.session.execute(
+                    select(ConfigBinding).where(ConfigBinding.version_id == v.id)
+                )
+                bindings = binding_result.scalars().all()
+                for b in bindings:
+                    bindings_for_def.append({
+                        "id": b.id,
+                        "version_id": b.version_id,
+                        "target_type": b.target_type,
+                        "target_id": b.target_id,
+                    })
+            inheritance.append({
+                "definition_id": d.id,
+                "name": d.name,
+                "config_type": d.config_type,
+                "versions": [{"id": v.id, "version": v.version, "status": v.status} for v in versions],
+                "bindings": bindings_for_def,
+            })
+        return {"inheritance": inheritance}

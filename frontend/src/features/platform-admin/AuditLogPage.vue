@@ -219,7 +219,7 @@ async function loadLogs() {
 async function exportLogs() {
   exporting.value = true
   try {
-    const params: any = { page: 1, page_size: 10000, export: true }
+    const params: any = { page: 1, page_size: 100, export: true }
     if (filters.user) params.username = filters.user
     if (filters.action) params.action = filters.action
     if (filters.resource_type) params.resource_type = filters.resource_type
