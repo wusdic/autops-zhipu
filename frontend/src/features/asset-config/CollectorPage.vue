@@ -95,7 +95,7 @@ function viewCollector(row: any) { ElMessage.info(`采集器: ${row.name} (${row
 
 async function deleteCollector(id: string) {
   await ElMessageBox.confirm('确定删除此采集器？', '确认', { type: 'warning' })
-  const { data } = await api.delete(`/api/v1/collectors/${id}`)
+    const { data } = await api.delete(R.COLLECTORS + '/' + id)
   if (data.code === 0) { ElMessage.success('已删除'); loadCollectors() }
 }
 

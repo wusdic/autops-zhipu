@@ -49,6 +49,9 @@ async def test_auth_me(client):
     })
     token = resp.json()["data"]["access_token"]
 
-    resp = await client.get(f"/api/v1/auth/me?token={token}")
+    resp = await client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert resp.status_code == 200
     assert resp.json()["code"] == 0

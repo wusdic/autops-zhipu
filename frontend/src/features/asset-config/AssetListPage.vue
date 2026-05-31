@@ -248,7 +248,7 @@ async function saveAsset() {
   saving.value = true
   try {
     if (isEditing.value) {
-      const { data } = await api.put(`/api/v1/assets/${editingId.value}`, formData)
+      const { data } = await api.put(R.ASSET_DETAIL(editingId.value), formData)
       if (data.code === 0) {
         ElMessage.success('保存成功')
         showFormDialog.value = false
@@ -281,7 +281,7 @@ function viewAsset(row: any) {
 
 async function deleteAsset(id: string) {
   try {
-    await api.delete(`/api/v1/assets/${id}`)
+    await api.delete(R.ASSET_DETAIL(id))
     ElMessage.success('删除成功')
     loadAssets()
   } catch (e: any) {

@@ -67,3 +67,28 @@ async def acknowledge_alert(alert_id: str, svc: AlertService = Depends(_get_svc)
 async def resolve_alert(alert_id: str, svc: AlertService = Depends(_get_svc)):
     alert = await svc.resolve(alert_id)
     return success(model_to_dict(alert))
+
+
+@router.get("/stats/overview")
+async def alert_stats(db: AsyncSession = Depends(get_db)):
+    """告警统计概览."""
+    from sqlalchemy import select, func, case
+    from app.domains.alert.models import Alert
+
+    base = select(Alert)
+    total_q = select(func.count()).select_from(Alert)
+    firing_q = select(func.count()).select_from(Alert).where(Alert.status == "firing")
+    ack_q = select(func.count()).select_from(Alert).where(Alert.status == "acknowledged")
+    resolved_q = select(func.count()).select_from(Alert).where(Alert.status == "resolved")
+
+    total = (await db.execute(total_q)).scalar() or 0
+    firing = (await db.execute(firing_q)).scalar() or 0
+    acknowledged = (await db.execute(ack_q)).scalar() or 0
+    resolved = (await db.execute(resolved_q)).scalar() or 0
+
+    return success({
+        "total": total,
+        "firing": firing,
+        "acknowledged": acknowledged,
+        "resolved": resolved,
+    })

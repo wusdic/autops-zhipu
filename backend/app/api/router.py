@@ -20,13 +20,22 @@ from app.domains.log.api import router as log_router
 from app.domains.ticket.api import router as ticket_router
 from app.domains.knowledge.api import router as knowledge_router
 from app.domains.aiops.api import router as aiops_router
-from app.domains.governance.api import router as governance_router
+from app.domains.governance.api import (
+    apikey_router as governance_apikey_router,
+    role_router as governance_role_router,
+    router as governance_router,
+    user_router as governance_user_router,
+)
 from app.api.audit import router as audit_router
+from app.api.health import platform_router
 
 api_router = APIRouter()
 
-# Governance (auth, users, roles)
+# Governance (auth, users, roles, api-keys)
 api_router.include_router(governance_router)
+api_router.include_router(governance_user_router)
+api_router.include_router(governance_role_router)
+api_router.include_router(governance_apikey_router)
 
 # Asset
 api_router.include_router(asset_router)
@@ -72,3 +81,6 @@ api_router.include_router(aiops_router)
 
 # Audit
 api_router.include_router(audit_router)
+
+# Platform
+api_router.include_router(platform_router)

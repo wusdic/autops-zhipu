@@ -174,18 +174,18 @@ async function loadExecutions() {
 function viewScript(row: any) { currentScript.value = row; showScriptDetail.value = true }
 
 async function simulatePolicy(row: any) {
-  const { data } = await api.post(`/api/v1/policies/${row.id}/simulate`, { trigger_event: 'test', asset_ids: [] })
+const { data } = await api.post(R.POLICY_DETAIL(row.id) + '/simulate', { trigger_context: {} })
   if (data.code === 0) { simResult.value = data.data; showSimResult.value = true }
 }
 
 async function togglePolicy(row: any) {
-  const { data } = await api.put(`/api/v1/policies/${row.id}`, { enabled: row.enabled })
+  const { data } = await api.put(R.POLICY_DETAIL(row.id), { enabled: row.enabled })
   if (data.code === 0) ElMessage.success(row.enabled ? '已启用' : '已禁用')
 }
 
 async function deletePolicy(row: any) {
   await ElMessageBox.confirm(`确定删除策略 "${row.name}"？`, '确认', { type: 'warning' })
-  const { data } = await api.delete(`/api/v1/policies/${row.id}`)
+  const { data } = await api.delete(R.POLICY_DETAIL(row.id))
   if (data.code === 0) { ElMessage.success('已删除'); loadPolicies() }
 }
 

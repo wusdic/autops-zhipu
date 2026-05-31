@@ -38,3 +38,26 @@ async def get_state_changes(
 ):
     items, total = await svc.get_changes(asset_id, state_type, page, page_size)
     return paginate([model_to_dict(i) for i in items], total, page, page_size)
+
+
+@router.get("/changes")
+async def list_all_state_changes(
+    state_type: str | None = None,
+    page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    """所有状态变更列表."""
+    from sqlalchemy import select, func
+    from app.domains.state.models import StateChange
+
+    q = select(StateChange).order_by(StateChange.created_at.desc())
+    count_q = select(func.count()).select_from(StateChange)
+    if state_type:
+        q = q.where(StateChange.state_type == state_type)
+        count_q = count_q.where(StateChange.state_type == state_type)
+
+    total = (await db.execute(count_q)).scalar() or 0
+    q = q.offset((page - 1) * page_size).limit(page_size)
+    result = await db.execute(q)
+    items = result.scalars().all()
+    return paginate([model_to_dict(i) for i in items], total, page, page_size)

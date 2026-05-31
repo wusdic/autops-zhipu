@@ -20,9 +20,13 @@ def _get_svc(db: AsyncSession = Depends(get_db)) -> CollectorService:
 
 
 @router.get("")
-async def list_collectors(svc: CollectorService = Depends(_get_svc)):
+async def list_collectors(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=100),
+    svc: CollectorService = Depends(_get_svc),
+):
     items = await svc.list_collectors()
-    return success([model_to_dict(i) for i in items])
+    return paginate([model_to_dict(i) for i in items], len(items), page, page_size)
 
 
 @router.post("")

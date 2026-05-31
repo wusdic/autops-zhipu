@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+import json
+
+from pydantic import BaseModel, Field, model_validator
 
 
 class LoginRequest(BaseModel):
@@ -67,6 +69,20 @@ class RoleResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+    @model_validator(mode="before")
+    @classmethod
+    def parse_permissions(cls, data):
+        if hasattr(data, "permissions"):
+            # SQLAlchemy model instance
+            raw = data.permissions
+            if isinstance(raw, str):
+                object.__setattr__(data, "permissions", json.loads(raw))
+        elif isinstance(data, dict):
+            raw = data.get("permissions")
+            if isinstance(raw, str):
+                data["permissions"] = json.loads(raw)
+        return data
 
 
 class ApiKeyCreate(BaseModel):

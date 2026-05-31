@@ -104,7 +104,7 @@ async function loadAlertCount() {
 }
 
 function logout() {
-  localStorage.removeItem('token')
+  localStorage.removeItem('autops_token')
   localStorage.removeItem('username')
   router.push('/login')
 }

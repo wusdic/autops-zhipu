@@ -58,6 +58,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const loading = ref(false)
 const alerts = ref<any[]>([])
@@ -83,7 +84,7 @@ async function loadAlerts() {
   try {
     const params: any = { page: pagination.page, page_size: pagination.pageSize }
     if (filters.status) params.status = filters.status
-    const { data } = await api.get(`/api/v1/alerts`, { params })
+    const { data } = await api.get(R.ALERTS, { params })
     if (data.code === 0) {
       alerts.value = data.data.items || []
       pagination.total = data.data.total || 0
@@ -97,7 +98,7 @@ async function loadAlerts() {
 
 async function ackAlert(id: string) {
   try {
-    const { data } = await api.post(`/api/v1/alerts/${id}/acknowledge`)
+    const { data } = await api.post(R.ALERT_ACKNOWLEDGE(id))
     if (data.code === 0) {
       ElMessage.success('告警已确认')
       loadAlerts()
@@ -109,7 +110,7 @@ async function ackAlert(id: string) {
 
 async function resolveAlert(id: string) {
   try {
-    const { data } = await api.post(`/api/v1/alerts/${id}/resolve`)
+    const { data } = await api.post(R.ALERT_RESOLVE(id))
     if (data.code === 0) {
       ElMessage.success('告警已恢复')
       loadAlerts()
@@ -126,7 +127,7 @@ async function createTicket(alert: any) {
       cancelButtonText: '取消',
       inputPlaceholder: '请输入工单描述',
     }).then(async ({ value }) => {
-      const { data } = await api.post(`/api/v1/tickets`, {
+      const { data } = await api.post(R.TICKETS, {
         title: `[告警] ${alert.title}`,
         ticket_type: 'incident',
         priority: alert.severity === 'critical' ? 'high' : 'medium',

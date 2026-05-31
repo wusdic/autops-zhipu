@@ -188,12 +188,12 @@ function buildTimeline(alert: any) {
 }
 
 async function acknowledgeAlert(id: string) {
-  const { data } = await api.post(`/api/v1/alerts/${id}/acknowledge`)
+  const { data } = await api.post(R.ALERT_ACKNOWLEDGE(id))
   if (data.code === 0) { ElMessage.success('已确认'); loadAlerts() }
 }
 
 async function resolveAlert(id: string) {
-  const { data } = await api.post(`/api/v1/alerts/${id}/resolve`)
+  const { data } = await api.post(R.ALERT_RESOLVE(id))
   if (data.code === 0) { ElMessage.success('已关闭'); loadAlerts() }
 }
 
@@ -217,7 +217,7 @@ async function matchPolicy() {
 
 async function executeDryRun() {
   if (!matchedPolicy.value) return
-  const { data } = await api.post(`/api/v1/policies/${matchedPolicy.value.id}/simulate`, {
+  const { data } = await api.post(R.POLICY_DETAIL(matchedPolicy.value.id) + '/simulate', {
     trigger_event: 'disk_usage_high', asset_ids: [selectedAlert.value?.asset_id || 'test']
   })
   if (data.code === 0) {

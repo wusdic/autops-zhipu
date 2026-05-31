@@ -49,7 +49,12 @@ async def refresh(token: str, svc: AuthService = Depends(_get_auth)):
 
 
 @router.get("/auth/me")
-async def me(token: str, svc: AuthService = Depends(_get_auth)):
+async def me(request: Request, svc: AuthService = Depends(_get_auth)):
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.replace("Bearer ", "") if auth_header.startswith("Bearer ") else ""
+    if not token:
+        from app.common.exceptions import ValidationError
+        raise ValidationError("缺少认证 Token")
     user = await svc.get_current_user(token)
     return success(UserResponse.model_validate(user).model_dump())
 
@@ -106,13 +111,21 @@ async def delete_user(user_id: str, svc: UserService = Depends(_get_user_svc)):
 
 # --- 角色 ---
 @role_router.get("")
-async def list_roles(db: AsyncSession = Depends(get_db)):
-    from sqlalchemy import select
+async def list_roles(
+    page: int = 1,
+    page_size: int = 20,
+    db: AsyncSession = Depends(get_db),
+):
+    from sqlalchemy import select, func
     from app.domains.governance.models import Role
     q = select(Role).order_by(Role.created_at)
     result = await db.execute(q)
     roles = result.scalars().all()
-    return success([RoleResponse.model_validate(r).model_dump() for r in roles])
+    data = []
+    for r in roles:
+        d = RoleResponse.model_validate(r)
+        data.append(d.model_dump())
+    return paginate(data, len(data), page, page_size)
 
 
 @role_router.post("")

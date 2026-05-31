@@ -89,6 +89,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import api from '@/shared/api/client'
+import { API as R } from '@/shared/api/routes'
 
 const stats = reactive({ criticalAlerts: 0, totalAlerts: 0, totalAssets: 0, runningExecutions: 0 })
 const recentAlerts = ref<any[]>([])
@@ -108,7 +109,7 @@ const healthPercent = computed(() => {
 async function loadDashboard() {
   // Load alerts
   try {
-    const { data: alertData } = await api.get(`/api/v1/alerts`, { params: { page_size: 10 } })
+    const { data: alertData } = await api.get(R.ALERTS, { params: { page_size: 10 } })
     if (alertData.code === 0) {
       recentAlerts.value = alertData.data.items || []
       stats.totalAlerts = alertData.data.total || 0
@@ -118,7 +119,7 @@ async function loadDashboard() {
 
   // Load assets
   try {
-    const { data: assetData } = await api.get(`/api/v1/assets`, { params: { page_size: 100 } })
+    const { data: assetData } = await api.get(R.ASSETS, { params: { page_size: 100 } })
     if (assetData.code === 0) {
       const items = assetData.data.items || []
       stats.totalAssets = assetData.data.total || 0
@@ -128,7 +129,7 @@ async function loadDashboard() {
 
   // Load executions
   try {
-    const { data: execData } = await api.get(`/api/v1/executions`, { params: { status: 'running', page_size: 1 } })
+    const { data: execData } = await api.get(R.EXECUTIONS, { params: { status: 'running', page_size: 1 } })
     if (execData.code === 0) {
       stats.runningExecutions = execData.data.total || 0
     }

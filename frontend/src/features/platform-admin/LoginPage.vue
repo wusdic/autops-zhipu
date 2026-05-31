@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { API as APIRoutes } from '@/shared/api/routes'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
