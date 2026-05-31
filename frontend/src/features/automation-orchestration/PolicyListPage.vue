@@ -1,276 +1,352 @@
 <template>
-  <div class="policy-list">
-    <el-card>
-      <template #header>
-        <div class="card-header">
-          <span>策略管理</span>
-          <el-button type="primary" @click="openCreateDialog">
-            <el-icon><Plus /></el-icon> 新建策略
-          </el-button>
+  <div class="page-container">
+    <el-row :gutter="16" class="stat-row">
+      <el-col :span="6"><el-card shadow="hover" class="stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">策略总数</div></el-card></el-col>
+      <el-col :span="6"><el-card shadow="hover" class="stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已激活</div></el-card></el-col>
+      <el-col :span="6"><el-card shadow="hover" class="stat-card danger"><div class="stat-value">{{ stats.highRisk }}</div><div class="stat-label">高风险</div></el-card></el-col>
+      <el-col :span="6"><el-card shadow="hover" class="stat-card warning"><div class="stat-value">{{ stats.pendingApproval }}</div><div class="stat-label">待审批</div></el-card></el-col>
+    </el-row>
+
+    <div class="toolbar">
+      <el-input v-model="filters.keyword" placeholder="搜索策略" clearable style="width:200px;margin-right:8px" @clear="load" @keyup.enter="load" />
+      <el-select v-model="filters.status" placeholder="状态" clearable style="width:120px;margin-right:8px">
+        <el-option label="草稿" value="draft" /><el-option label="已激活" value="active" /><el-option label="已废弃" value="deprecated" />
+      </el-select>
+      <el-select v-model="filters.risk_level" placeholder="风险等级" clearable style="width:120px;margin-right:8px">
+        <el-option label="低" value="low" /><el-option label="中" value="medium" /><el-option label="高" value="high" /><el-option label="严重" value="critical" />
+      </el-select>
+      <el-select v-model="filters.trigger_source" placeholder="触发源" clearable style="width:130px;margin-right:8px">
+        <el-option label="事件" value="event" /><el-option label="告警" value="alert" /><el-option label="状态变更" value="state_change" /><el-option label="手动" value="manual" /><el-option label="定时" value="schedule" />
+      </el-select>
+      <el-button type="primary" @click="load"><el-icon><Search /></el-icon> 搜索</el-button>
+      <el-button @click="resetFilters">重置</el-button>
+      <div style="flex:1" />
+      <el-button type="primary" @click="openCreate"><el-icon><Plus /></el-icon> 新建策略</el-button>
+    </div>
+
+    <el-table :data="items" v-loading="loading" stripe>
+      <el-table-column prop="name" label="名称" min-width="160">
+        <template #default="{ row }"><el-link type="primary" @click="viewDetail(row)">{{ row.name }}</el-link></template>
+      </el-table-column>
+      <el-table-column prop="trigger_source" label="触发源" width="100">
+        <template #default="{ row }"><el-tag size="small">{{ triggerLabel(row.trigger_source) }}</el-tag></template>
+      </el-table-column>
+      <el-table-column prop="risk_level" label="风险" width="80">
+        <template #default="{ row }"><el-tag :type="riskType(row.risk_level)" size="small">{{ row.risk_level }}</el-tag></template>
+      </el-table-column>
+      <el-table-column prop="status" label="状态" width="90">
+        <template #default="{ row }"><el-tag :type="row.status==='active'?'success':'info'" size="small">{{ statusLabel(row.status) }}</el-tag></template>
+      </el-table-column>
+      <el-table-column label="范围" min-width="140" show-overflow-tooltip>
+        <template #default="{ row }">{{ row.scope_description || '-' }}</template>
+      </el-table-column>
+      <el-table-column label="动作数" width="80" align="center">
+        <template #default="{ row }">{{ row.actions?.length || 0 }}</template>
+      </el-table-column>
+      <el-table-column prop="created_at" label="创建时间" width="170">
+        <template #default="{ row }">{{ fmt(row.created_at) }}</template>
+      </el-table-column>
+      <el-table-column label="操作" width="260" fixed="right">
+        <template #default="{ row }">
+          <el-button size="small" @click="viewDetail(row)">详情</el-button>
+          <el-button size="small" type="primary" @click="openEdit(row)">编辑</el-button>
+          <el-button size="small" type="warning" @click="simulate(row)">模拟</el-button>
+          <el-button size="small" @click="duplicate(row)">复制</el-button>
+          <el-button size="small" :type="row.status==='active'?'info':'success'" @click="toggleStatus(row)">{{ row.status==='active'?'停用':'激活' }}</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination v-if="total > pageSize" class="pagination" :current-page="page" :page-size="pageSize" :total="total" @current-change="(p:number)=>{page=p;load()}" layout="total, prev, pager, next" />
+
+    <!-- 创建/编辑对话框 -->
+    <el-dialog v-model="showDialog" :title="editing?'编辑策略':'新建策略'" width="950px" top="5vh">
+      <el-form :model="form" label-width="110px">
+        <el-row :gutter="16">
+          <el-col :span="12"><el-form-item label="策略名称" required><el-input v-model="form.name" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="触发源">
+            <el-select v-model="form.trigger_source" style="width:100%">
+              <el-option label="事件" value="event" /><el-option label="告警" value="alert" /><el-option label="状态变更" value="state_change" /><el-option label="手动" value="manual" /><el-option label="定时" value="schedule" />
+            </el-select>
+          </el-form-item></el-col>
+        </el-row>
+        <el-form-item label="描述"><el-input v-model="form.description" type="textarea" :rows="2" /></el-form-item>
+
+        <!-- 触发条件可视化编辑 -->
+        <el-divider content-position="left">触发条件</el-divider>
+        <div class="condition-builder">
+          <el-radio-group v-model="form.condition_logic" size="small" style="margin-bottom:8px">
+            <el-radio-button value="AND">全部满足(AND)</el-radio-button>
+            <el-radio-button value="OR">任一满足(OR)</el-radio-button>
+          </el-radio-group>
+          <div v-for="(cond, idx) in form.conditions" :key="idx" class="condition-row">
+            <el-select v-model="cond.field" placeholder="字段" style="width:180px" size="small">
+              <el-option label="CPU使用率" value="cpu_usage" /><el-option label="内存使用率" value="memory_usage" />
+              <el-option label="磁盘使用率" value="disk_usage" /><el-option label="响应时间" value="response_time" />
+              <el-option label="状态码" value="status_code" /><el-option label="事件类型" value="event_type" />
+              <el-option label="告警级别" value="alert_severity" /><el-option label="端口状态" value="port_status" />
+              <el-option label="进程状态" value="process_status" /><el-option label="自定义" value="custom" />
+            </el-select>
+            <el-select v-model="cond.operator" style="width:100px" size="small">
+              <el-option label=">" value="gt" /><el-option label=">=" value="gte" />
+              <el-option label="<" value="lt" /><el-option label="<=" value="lte" />
+              <el-option label="=" value="eq" /><el-option label="!=" value="neq" />
+              <el-option label="包含" value="contains" /><el-option label="匹配" value="matches" />
+            </el-select>
+            <el-input v-model="cond.value" placeholder="值" style="width:150px" size="small" />
+            <el-input v-model="cond.duration" placeholder="持续时间(可选)" style="width:130px" size="small" />
+            <el-button size="small" type="danger" @click="form.conditions.splice(idx,1)"><el-icon><Delete /></el-icon></el-button>
+          </div>
+          <el-button type="primary" plain size="small" @click="addCondition" style="margin-top:4px"><el-icon><Plus /></el-icon> 添加条件</el-button>
         </div>
-      </template>
 
-      <!-- Filters -->
-      <el-form :inline="true" class="filter-form">
-        <el-form-item label="搜索">
-          <el-input v-model="filters.search" placeholder="策略名称搜索" clearable @clear="loadPolicies" />
-        </el-form-item>
-        <el-form-item label="风险等级">
-          <el-select v-model="filters.risk_level" placeholder="全部" clearable @change="loadPolicies">
-            <el-option label="低" value="low" />
-            <el-option label="中" value="medium" />
-            <el-option label="高" value="high" />
-            <el-option label="严重" value="critical" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="启用状态">
-          <el-select v-model="filters.enabled" placeholder="全部" clearable @change="loadPolicies">
-            <el-option label="已启用" :value="true" />
-            <el-option label="已禁用" :value="false" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="loadPolicies">查询</el-button>
-        </el-form-item>
-      </el-form>
+        <!-- 适用范围 -->
+        <el-divider content-position="left">适用范围</el-divider>
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="资产分组">
+              <el-select v-model="form.scope_groups" multiple placeholder="选择分组" style="width:100%">
+                <el-option v-for="g in groups" :key="g.id" :label="g.name" :value="g.id" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="资产类型">
+              <el-select v-model="form.scope_asset_types" multiple placeholder="类型筛选" style="width:100%">
+                <el-option label="Linux" value="linux_server" /><el-option label="Windows" value="windows_server" />
+                <el-option label="网络设备" value="network_device" /><el-option label="数据库" value="database" />
+                <el-option label="Web服务" value="web_service" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-      <!-- Table -->
-      <el-table :data="policies" v-loading="loading" stripe>
-        <el-table-column prop="name" label="名称" min-width="160" />
-        <el-table-column prop="trigger_condition" label="触发条件" min-width="220" show-overflow-tooltip />
-        <el-table-column prop="risk_level" label="风险等级" width="110" align="center">
-          <template #default="{ row }">
-            <el-tag :type="riskTagType(row.risk_level)" size="small">{{ riskLabel(row.risk_level) }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="enabled" label="启用状态" width="100" align="center">
-          <template #default="{ row }">
-            <el-switch
-              v-model="row.enabled"
-              @change="(val: boolean) => togglePolicy(row, val)"
-              :loading="row._toggling"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column prop="created_at" label="创建时间" width="180" />
-        <el-table-column label="操作" width="200" fixed="right">
-          <template #default="{ row }">
-            <el-button size="small" @click="openEditDialog(row)">编辑</el-button>
-            <el-button size="small" type="success" @click="goSimulate(row)">模拟</el-button>
-            <el-popconfirm title="确认删除该策略?" @confirm="deletePolicy(row.id)">
-              <template #reference>
-                <el-button size="small" type="danger">删除</el-button>
-              </template>
-            </el-popconfirm>
-          </template>
-        </el-table-column>
-      </el-table>
+        <!-- 动作链 -->
+        <el-divider content-position="left">动作链</el-divider>
+        <div class="action-chain">
+          <div v-for="(act, idx) in form.actions" :key="idx" class="action-item">
+            <span class="action-num">{{ idx+1 }}</span>
+            <el-select v-model="act.type" style="width:130px" size="small">
+              <el-option label="执行脚本" value="script" /><el-option label="执行Playbook" value="playbook" />
+              <el-option label="发送通知" value="notification" /><el-option label="创建工单" value="ticket" />
+              <el-option label="抑制告警" value="suppress" />
+            </el-select>
+            <el-input v-model="act.target" placeholder="目标(脚本/Playbook ID)" style="width:200px" size="small" />
+            <el-input v-model="act.params_json" placeholder="参数 JSON" style="width:200px" size="small" />
+            <el-button size="small" type="danger" @click="form.actions.splice(idx,1)"><el-icon><Delete /></el-icon></el-button>
+          </div>
+          <el-button type="primary" plain size="small" @click="addAction"><el-icon><Plus /></el-icon> 添加动作</el-button>
+        </div>
 
-      <el-pagination
-        v-model:current-page="pagination.page"
-        v-model:page-size="pagination.pageSize"
-        :total="pagination.total"
-        :page-sizes="[10, 20, 50]"
-        layout="total, sizes, prev, pager, next"
-        @change="loadPolicies"
-        style="margin-top: 16px; justify-content: flex-end"
-      />
-    </el-card>
-
-    <!-- Create/Edit Dialog -->
-    <el-dialog v-model="showFormDialog" :title="isEditing ? '编辑策略' : '新建策略'" width="650px">
-      <el-form :model="formData" label-width="90px">
-        <el-form-item label="名称" required>
-          <el-input v-model="formData.name" placeholder="请输入策略名称" />
-        </el-form-item>
-        <el-form-item label="触发条件" required>
-          <el-input
-            v-model="formData.trigger_condition"
-            type="textarea"
-            :rows="4"
-            placeholder="请输入触发条件表达式，例如: alert.severity >= 'high' AND asset.type == 'linux_server'"
-            style="font-family: monospace"
-          />
-        </el-form-item>
-        <el-form-item label="风险等级" required>
-          <el-select v-model="formData.risk_level" style="width: 100%">
-            <el-option label="低" value="low" />
-            <el-option label="中" value="medium" />
-            <el-option label="高" value="high" />
-            <el-option label="严重" value="critical" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="关联Playbook">
-          <el-input v-model="formData.playbook_id" placeholder="关联的 Playbook ID（可选）" />
-        </el-form-item>
-        <el-form-item label="描述">
-          <el-input v-model="formData.description" type="textarea" :rows="3" placeholder="策略用途说明" />
-        </el-form-item>
-        <el-form-item label="启用">
-          <el-switch v-model="formData.enabled" />
-        </el-form-item>
+        <el-row :gutter="16" style="margin-top:16px">
+          <el-col :span="8"><el-form-item label="风险等级"><el-select v-model="form.risk_level" style="width:100%">
+            <el-option label="低" value="low" /><el-option label="中" value="medium" /><el-option label="高" value="high" /><el-option label="严重" value="critical" />
+          </el-select></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="需要审批"><el-switch v-model="form.requires_approval" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="最大影响面"><el-input-number v-model="form.max_impact" :min="1" :max="1000" style="width:100%" /></el-form-item></el-col>
+        </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="showFormDialog = false">取消</el-button>
-        <el-button type="primary" @click="savePolicy" :loading="saving">{{ isEditing ? '保存' : '创建' }}</el-button>
+        <el-button @click="showDialog=false">取消</el-button>
+        <el-button type="primary" @click="save">保存</el-button>
       </template>
     </el-dialog>
+
+    <!-- 详情抽屉 -->
+    <el-drawer v-model="showDetail" :title="detail?.name || '策略详情'" size="620px">
+      <template v-if="detail">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="名称">{{ detail.name }}</el-descriptions-item>
+          <el-descriptions-item label="触发源"><el-tag size="small">{{ triggerLabel(detail.trigger_source) }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="风险等级"><el-tag :type="riskType(detail.risk_level)" size="small">{{ detail.risk_level }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="状态"><el-tag :type="detail.status==='active'?'success':'info'" size="small">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="需要审批">{{ detail.requires_approval ? '是' : '否' }}</el-descriptions-item>
+          <el-descriptions-item label="最大影响面">{{ detail.max_impact || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="描述" :span="2">{{ detail.description || '-' }}</el-descriptions-item>
+        </el-descriptions>
+
+        <h4 style="margin:16px 0 8px">触发条件</h4>
+        <div v-if="detail.conditions?.length">
+          <div v-for="(c,i) in detail.conditions" :key="i" class="cond-display">
+            <el-tag size="small" type="info">{{ c.field }}</el-tag>
+            <span class="cond-op">{{ c.operator }}</span>
+            <el-tag size="small">{{ c.value }}</el-tag>
+            <span v-if="c.duration" class="cond-dur">持续 {{ c.duration }}</span>
+          </div>
+          <div class="cond-logic">逻辑: <strong>{{ detail.condition_logic || 'AND' }}</strong></div>
+        </div>
+        <el-empty v-else description="无条件" :image-size="40" />
+
+        <h4 style="margin:16px 0 8px">适用范围</h4>
+        <el-tag v-for="g in detail.scope_groups" :key="g" style="margin-right:4px">{{ getGroupName(g) }}</el-tag>
+        <el-tag v-for="t in detail.scope_asset_types" :key="t" type="info" style="margin-right:4px">{{ t }}</el-tag>
+
+        <h4 style="margin:16px 0 8px">动作链</h4>
+        <el-timeline v-if="detail.actions?.length">
+          <el-timeline-item v-for="(a,i) in detail.actions" :key="i" :timestamp="`步骤 ${i+1}`" placement="top">
+            <el-tag>{{ actionTypeLabel(a.type) }}</el-tag> → {{ a.target || '-' }}
+          </el-timeline-item>
+        </el-timeline>
+        <el-empty v-else description="无动作" :image-size="40" />
+
+        <div style="margin-top:16px;display:flex;gap:8px">
+          <el-button type="primary" @click="openEdit(detail);showDetail=false">编辑</el-button>
+          <el-button type="warning" @click="simulate(detail);showDetail=false">模拟执行</el-button>
+          <el-button @click="duplicate(detail);showDetail=false">复制</el-button>
+        </div>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Search, Delete } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
 const router = useRouter()
-
+const stats = reactive({ total: 0, active: 0, highRisk: 0, pendingApproval: 0 })
+const filters = reactive({ keyword: '', status: '', risk_level: '', trigger_source: '' })
+const items = ref<any[]>([])
 const loading = ref(false)
-const saving = ref(false)
-const policies = ref<any[]>([])
-const showFormDialog = ref(false)
-const isEditing = ref(false)
-const editingId = ref('')
+const page = ref(1)
+const pageSize = 20
+const total = ref(0)
+const groups = ref<any[]>([])
 
-const filters = reactive({ search: '', risk_level: '', enabled: '' as string | boolean | number })
-const pagination = reactive({ page: 1, pageSize: 20, total: 0 })
+const showDialog = ref(false)
+const editing = ref(false)
+const editId = ref('')
+const form = reactive({
+  name: '', description: '', trigger_source: 'event', condition_logic: 'AND',
+  conditions: [] as any[], scope_groups: [] as string[], scope_asset_types: [] as string[],
+  actions: [] as any[], risk_level: 'low', requires_approval: false, max_impact: 10,
+})
 
-const defaultForm = {
-  name: '',
-  trigger_condition: '',
-  risk_level: 'medium',
-  playbook_id: '',
-  description: '',
-  enabled: true,
-}
-const formData = reactive({ ...defaultForm })
+const showDetail = ref(false)
+const detail = ref<any>(null)
 
-function riskTagType(level: string) {
-  const map: Record<string, string> = { low: 'info', medium: 'warning', high: 'danger', critical: 'danger' }
-  return map[level] || 'info'
-}
+function resetFilters() { Object.assign(filters, { keyword:'', status:'', risk_level:'', trigger_source:'' }); load() }
 
-function riskLabel(level: string) {
-  const map: Record<string, string> = { low: '低', medium: '中', high: '高', critical: '严重' }
-  return map[level] || level
-}
-
-async function loadPolicies() {
+async function load() {
   loading.value = true
   try {
-    const params: any = { page: pagination.page, page_size: pagination.pageSize }
-    if (filters.search) params.search = filters.search
+    const params: any = { page: page.value, page_size: pageSize }
+    if (filters.keyword) params.keyword = filters.keyword
+    if (filters.status) params.status = filters.status
     if (filters.risk_level) params.risk_level = filters.risk_level
-    if (filters.enabled !== '' && filters.enabled !== null) params.enabled = filters.enabled
-    const { data } = await api.get(API.POLICIES, { params })
-    if (data.code === 0) {
-      policies.value = (data.data.items || []).map((p: any) => ({ ...p, _toggling: false }))
-      pagination.total = data.data.total || 0
+    if (filters.trigger_source) params.trigger_source = filters.trigger_source
+    const res = await api.get(API.POLICIES, { params })
+    if (res.data?.code === 0) {
+      items.value = res.data.data?.items || res.data.data || []
+      total.value = res.data.data?.total || items.value.length
     }
-  } catch (e: any) {
-    ElMessage.error('加载策略失败: ' + (e.message || e))
-  } finally {
-    loading.value = false
-  }
+    computeStats()
+  } catch { ElMessage.error('加载失败') }
+  finally { loading.value = false }
 }
 
-function openCreateDialog() {
-  isEditing.value = false
-  editingId.value = ''
-  Object.assign(formData, { ...defaultForm })
-  showFormDialog.value = true
+function computeStats() {
+  stats.total = items.value.length
+  stats.active = items.value.filter(i => i.status === 'active').length
+  stats.highRisk = items.value.filter(i => ['high','critical'].includes(i.risk_level)).length
+  stats.pendingApproval = items.value.filter(i => i.requires_approval && i.status === 'draft').length
 }
 
-function openEditDialog(row: any) {
-  isEditing.value = true
-  editingId.value = row.id
-  Object.assign(formData, {
-    name: row.name,
-    trigger_condition: row.trigger_condition || '',
-    risk_level: row.risk_level || 'medium',
-    playbook_id: row.playbook_id || '',
-    description: row.description || '',
-    enabled: row.enabled ?? true,
+async function loadGroups() {
+  try {
+    const res = await api.get(API.ASSET_GROUPS, { params: { page_size: 200 } })
+    if (res.data?.code === 0) groups.value = res.data.data?.items || res.data.data || []
+  } catch {}
+}
+
+function addCondition() { form.conditions.push({ field: '', operator: 'gt', value: '', duration: '' }) }
+function addAction() { form.actions.push({ type: 'script', target: '', params_json: '' }) }
+
+function openCreate() {
+  editing.value = false; editId.value = ''
+  Object.assign(form, { name:'', description:'', trigger_source:'event', condition_logic:'AND', conditions:[], scope_groups:[], scope_asset_types:[], actions:[], risk_level:'low', requires_approval:false, max_impact:10 })
+  showDialog.value = true
+}
+
+function openEdit(row: any) {
+  editing.value = true; editId.value = row.id
+  Object.assign(form, {
+    name: row.name, description: row.description||'', trigger_source: row.trigger_source||'event',
+    condition_logic: row.condition_logic||'AND', conditions: row.conditions?.length ? [...row.conditions] : [],
+    scope_groups: row.scope_groups||[], scope_asset_types: row.scope_asset_types||[],
+    actions: row.actions?.length ? [...row.actions] : [], risk_level: row.risk_level||'low',
+    requires_approval: !!row.requires_approval, max_impact: row.max_impact||10,
   })
-  showFormDialog.value = true
+  showDialog.value = true
 }
 
-async function savePolicy() {
-  if (!formData.name || !formData.trigger_condition) {
-    ElMessage.warning('名称和触发条件为必填项')
-    return
-  }
-  saving.value = true
+async function save() {
+  if (!form.name) return ElMessage.warning('请输入名称')
   try {
-    const payload: any = { ...formData }
-    if (!payload.playbook_id) delete payload.playbook_id
-
-    if (isEditing.value) {
-      const { data } = await api.put(API.POLICY_DETAIL(editingId.value), payload)
-      if (data.code === 0) {
-        ElMessage.success('保存成功')
-        showFormDialog.value = false
-        loadPolicies()
-      } else {
-        ElMessage.error(data.message || '保存失败')
-      }
-    } else {
-      const { data } = await api.post(API.POLICIES, payload)
-      if (data.code === 0) {
-        ElMessage.success('创建成功')
-        showFormDialog.value = false
-        Object.assign(formData, { ...defaultForm })
-        loadPolicies()
-      } else {
-        ElMessage.error(data.message || '创建失败')
-      }
-    }
-  } catch (e: any) {
-    ElMessage.error((isEditing.value ? '保存' : '创建') + '失败: ' + (e.message || e))
-  } finally {
-    saving.value = false
-  }
+    if (editing.value) await api.put(API.POLICY_DETAIL(editId.value), form)
+    else await api.post(API.POLICIES, form)
+    ElMessage.success('保存成功'); showDialog.value = false; load()
+  } catch (e: any) { ElMessage.error(e?.message || '保存失败') }
 }
 
-async function togglePolicy(row: any, val: boolean) {
-  row._toggling = true
+async function viewDetail(row: any) {
   try {
-    const { data } = await api.patch(API.POLICY_DETAIL(row.id), { enabled: val })
-    if (data.code === 0) {
-      ElMessage.success(val ? '已启用' : '已禁用')
-    } else {
-      row.enabled = !val
-      ElMessage.error(data.message || '操作失败')
-    }
-  } catch (e: any) {
-    row.enabled = !val
-    ElMessage.error('操作失败: ' + (e.message || e))
-  } finally {
-    row._toggling = false
-  }
+    const res = await api.get(API.POLICY_DETAIL(row.id))
+    if (res.data?.code === 0) detail.value = res.data.data
+    else detail.value = row
+  } catch { detail.value = row }
+  showDetail.value = true
 }
 
-function goSimulate(row: any) {
-  router.push({ name: 'policy-simulate', params: { id: row.id } })
-}
+function simulate(row: any) { router.push(`/policies/${row.id}/simulate`) }
 
-async function deletePolicy(id: string) {
+async function duplicate(row: any) {
   try {
-    await api.delete(API.POLICY_DETAIL(id))
-    ElMessage.success('删除成功')
-    loadPolicies()
-  } catch (e: any) {
-    ElMessage.error('删除失败: ' + (e.message || e))
-  }
+    const payload = { ...row, name: `${row.name} (副本)`, status: 'draft', id: undefined }
+    await api.post(API.POLICIES, payload)
+    ElMessage.success('复制成功'); load()
+  } catch { ElMessage.error('复制失败') }
 }
 
-onMounted(() => loadPolicies())
+async function toggleStatus(row: any) {
+  const newStatus = row.status === 'active' ? 'draft' : 'active'
+  try {
+    await api.patch(API.POLICY_DETAIL(row.id), { status: newStatus })
+    ElMessage.success(newStatus === 'active' ? '已激活' : '已停用'); load()
+  } catch { ElMessage.error('操作失败') }
+}
+
+function getGroupName(id: string) { return groups.value.find(g => g.id === id)?.name || id }
+function triggerLabel(s: string) { return ({ event:'事件', alert:'告警', state_change:'状态变更', manual:'手动', schedule:'定时' })[s] || s }
+function actionTypeLabel(t: string) { return ({ script:'脚本', playbook:'Playbook', notification:'通知', ticket:'工单', suppress:'抑制' })[t] || t }
+function statusLabel(s: string) { return ({ draft:'草稿', active:'已激活', deprecated:'已废弃' })[s] || s }
+function riskType(r: string) { return ({ low:'info', medium:'warning', high:'danger', critical:'danger' })[r] || 'info' }
+function fmt(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '-' }
+
+onMounted(() => { load(); loadGroups() })
 </script>
 
 <style scoped>
-.card-header { display: flex; justify-content: space-between; align-items: center; }
-.filter-form { margin-bottom: 16px; }
+.page-container { padding: 20px; }
+.stat-row { margin-bottom: 20px; }
+.stat-card { text-align: center; }
+.stat-card .stat-value { font-size: 28px; font-weight: bold; }
+.stat-card.success .stat-value { color: #67c23a; }
+.stat-card.danger .stat-value { color: #f56c6c; }
+.stat-card.warning .stat-value { color: #e6a23c; }
+.stat-card .stat-label { font-size: 13px; color: #909399; margin-top: 4px; }
+.toolbar { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pagination { margin-top: 16px; display: flex; justify-content: flex-end; }
+.condition-builder { background: #f5f7fa; padding: 12px; border-radius: 4px; }
+.condition-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.action-chain { background: #f5f7fa; padding: 12px; border-radius: 4px; }
+.action-item { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.action-num { width: 22px; height: 22px; background: #e6a23c; color: #fff; border-radius: 50%; text-align: center; line-height: 22px; font-size: 11px; }
+.cond-display { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.cond-op { color: #909399; font-weight: bold; }
+.cond-dur { color: #409eff; font-size: 12px; }
+.cond-logic { margin-top: 6px; color: #606266; font-size: 13px; }
 </style>

@@ -108,9 +108,7 @@
             <div v-if="searchResults.length === 0" class="search-empty">无结果</div>
           </div>
 
-          <el-badge :value="alertCount" :max="99" class="alert-badge" :hidden="alertCount === 0">
-            <el-icon :size="20" @click="$router.push('/alerts')" style="cursor:pointer"><Bell /></el-icon>
-          </el-badge>
+          <NotificationBell />
           <el-dropdown>
             <span class="user-info">
               <el-avatar :size="28" icon="UserFilled" />
@@ -141,6 +139,8 @@ import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import { useAuthStore } from '@/app/store/auth'
 import { clearToken } from '@/app/router/guards'
+import NotificationBell from '@/shared/components/NotificationBell.vue'
+import { wsService } from '@/shared/api/websocket'
 
 const router = useRouter()
 const route = useRoute()
@@ -268,6 +268,9 @@ async function logout() {
 onMounted(() => {
   loadAlertCount()
   window.addEventListener('keydown', handleKeydown)
+  // Initialize WebSocket
+  const token = localStorage.getItem('token')
+  if (token) wsService.connect(token)
 })
 </script>
 

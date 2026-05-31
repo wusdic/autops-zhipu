@@ -1,311 +1,254 @@
 <template>
-  <div class="asset-topology">
-    <!-- 顶部导航 -->
-    <div class="topology-header">
-      <el-button :icon="ArrowLeft" @click="$router.back()">返回</el-button>
-      <h2 style="margin: 0 0 0 12px">{{ asset?.hostname || '资产拓扑' }} - 关系拓扑图</h2>
-      <div style="margin-left: auto; display: flex; gap: 8px">
-        <el-button size="small" @click="refreshTopology" :loading="loading">
-          <el-icon><Refresh /></el-icon> 刷新
-        </el-button>
-      </div>
+  <div class="page-container">
+    <div class="toolbar">
+      <el-select v-model="relationFilter" placeholder="关系类型" clearable style="width:150px;margin-right:8px">
+        <el-option label="依赖" value="depends_on" /><el-option label="包含" value="contains" />
+        <el-option label="连接" value="connected_to" /><el-option label="承载" value="hosts" />
+        <el-option label="备份" value="backs_up" />
+      </el-select>
+      <el-select v-model="typeFilter" placeholder="资产类型" clearable style="width:150px;margin-right:8px">
+        <el-option label="Linux" value="linux_server" /><el-option label="Windows" value="windows_server" />
+        <el-option label="数据库" value="database" /><el-option label="Web服务" value="web_service" />
+        <el-option label="网络设备" value="network_device" />
+      </el-select>
+      <el-button type="primary" @click="loadTopology"><el-icon><Search /></el-icon> 加载拓扑</el-button>
+      <el-button @click="toggleImpactMode" :type="impactMode?'warning':''">
+        <el-icon><Warning /></el-icon> {{ impactMode ? '退出影响分析' : '影响分析模式' }}
+      </el-button>
+      <div style="flex:1" />
+      <el-button @click="zoomIn">放大</el-button>
+      <el-button @click="zoomOut">缩小</el-button>
+      <el-button @click="resetView">重置</el-button>
     </div>
 
-    <div v-loading="loading" style="margin-top: 16px">
-      <!-- 拓扑图区域 -->
-      <div class="topology-container">
-        <div v-if="nodes.length === 0 && !loading" class="empty-topology">
-          <el-empty description="暂无拓扑关系数据">
-            <el-button type="primary" @click="showAddRelation = true">添加关系</el-button>
-          </el-empty>
-        </div>
-        <div v-else class="topology-canvas" ref="canvasRef">
-          <!-- SVG拓扑图 -->
-          <svg width="100%" height="100%" class="topology-svg">
-            <!-- 连线 -->
-            <g v-for="(edge, idx) in edges" :key="'e-' + idx">
-              <line
-                :x1="getNodePosition(edge.source).x"
-                :y1="getNodePosition(edge.source).y"
-                :x2="getNodePosition(edge.target).x"
-                :y2="getNodePosition(edge.target).y"
-                :stroke="edge.relation_type === 'depends_on' ? '#E6A23C' : '#409EFF'"
-                stroke-width="2"
-                stroke-dasharray="5,5"
-              />
-              <text
-                :x="(getNodePosition(edge.source).x + getNodePosition(edge.target).x) / 2"
-                :y="(getNodePosition(edge.source).y + getNodePosition(edge.target).y) / 2 - 8"
-                text-anchor="middle"
-                fill="#999"
-                font-size="12"
-              >{{ edge.relation_type }}</text>
-            </g>
-            <!-- 节点 -->
-            <g v-for="node in nodes" :key="node.id" class="topology-node" @click="onNodeClick(node)">
-              <rect
-                :x="node.x - 50" :y="node.y - 20"
-                width="100" height="40" rx="8"
-                :fill="node.id === assetId ? '#409EFF' : '#fff'"
-                :stroke="node.id === assetId ? '#409EFF' : '#ddd'"
-                stroke-width="2"
-              />
-              <text
-                :x="node.x" :y="node.y + 5"
-                text-anchor="middle"
-                :fill="node.id === assetId ? '#fff' : '#333'"
-                font-size="13"
-              >{{ node.label }}</text>
-            </g>
-          </svg>
-        </div>
-      </div>
+    <!-- 影响分析面板 -->
+    <el-alert v-if="impactMode && selectedNode" type="warning" :closable="false" style="margin-bottom:12px">
+      <template #title>影响分析: {{ selectedNode.name }} ({{ selectedNode.asset_type }})</template>
+      <div>直接依赖: <strong>{{ impactAnalysis.directDeps }}</strong> 个 | 间接依赖: <strong>{{ impactAnalysis.indirectDeps }}</strong> 个 | 影响服务: <strong>{{ impactAnalysis.affectedServices }}</strong> 个</div>
+    </el-alert>
 
-      <!-- 节点详情面板 -->
-      <el-drawer v-model="nodeDrawerVisible" title="节点详情" size="400px">
-        <el-descriptions :column="1" border v-if="selectedNode">
-          <el-descriptions-item label="名称">{{ selectedNode.label }}</el-descriptions-item>
-          <el-descriptions-item label="类型">{{ selectedNode.asset_type }}</el-descriptions-item>
-          <el-descriptions-item label="IP">{{ selectedNode.ip }}</el-descriptions-item>
+    <!-- SVG 拓扑画布 -->
+    <div class="topology-canvas" ref="canvasRef" @mousedown="startDrag" @mousemove="onDrag" @mouseup="endDrag" @mouseleave="endDrag" @wheel="onWheel">
+      <svg :width="canvasW" :height="canvasH" :viewBox="`${viewX} ${viewY} ${canvasW/zoom} ${canvasH/zoom}`" style="background:#fafbfc">
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#c0c4cc" /></marker>
+          <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f56c6c" /></marker>
+        </defs>
+
+        <!-- 连线 -->
+        <g v-for="(edge, i) in filteredEdges" :key="'e'+i">
+          <line :x1="getNode(edge.source_id)?.x||0" :y1="getNode(edge.source_id)?.y||0"
+                :x2="getNode(edge.target_id)?.x||0" :y2="getNode(edge.target_id)?.y||0"
+                :stroke="isImpactEdge(edge)?'#f56c6c':'#c0c4cc'" stroke-width="2"
+                :marker-end="isImpactEdge(edge)?'url(#arrow-red)':'url(#arrow)'" />
+          <text :x="(getNode(edge.source_id)?.x+getNode(edge.target_id)?.x)/2"
+                :y="(getNode(edge.source_id)?.y+getNode(edge.target_id)?.y)/2 - 5"
+                font-size="10" fill="#909399" text-anchor="middle">{{ edge.relation_type }}</text>
+        </g>
+
+        <!-- 节点 -->
+        <g v-for="node in filteredNodes" :key="node.id" :transform="`translate(${node.x},${node.y})`" @click.stop="selectNode(node)" style="cursor:pointer">
+          <rect :x="-60" :y="-25" width="120" height="50" rx="8"
+                :fill="node.id===selectedNode?.id?'#409eff':isImpactNode(node)?'#f56c6c':typeColor(node.asset_type)"
+                :stroke="node.id===selectedNode?.id?'#2d7de6':'#ddd'" stroke-width="2" />
+          <text x="0" y="-5" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">{{ node.name?.substring(0,10) }}</text>
+          <text x="0" y="12" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">{{ node.asset_type }}</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- 节点详情面板 -->
+    <el-drawer v-model="showNodeDetail" :title="selectedNode?.name||'节点详情'" size="420px" direction="rtl">
+      <template v-if="selectedNode">
+        <el-descriptions :column="1" border size="small">
+          <el-descriptions-item label="名称">{{ selectedNode.name }}</el-descriptions-item>
+          <el-descriptions-item label="类型"><el-tag size="small">{{ selectedNode.asset_type }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="IP">{{ selectedNode.ip_address || '-' }}</el-descriptions-item>
           <el-descriptions-item label="状态">
-            <StatusBadge :status="selectedNode.status" size="small" show-icon />
+            <el-tag :type="selectedNode.status==='healthy'?'success':selectedNode.status==='warning'?'warning':'danger'" size="small">
+              {{ selectedNode.status || 'unknown' }}
+            </el-tag>
           </el-descriptions-item>
         </el-descriptions>
-        <div style="margin-top: 16px">
-          <el-button type="primary" @click="goToAsset(selectedNode?.id)">查看资产详情</el-button>
-        </div>
-      </el-drawer>
 
-      <!-- 关系列表 -->
-      <div style="margin-top: 16px">
-        <el-divider content-position="left">关系列表</el-divider>
-        <el-table :data="relations" stripe>
-          <el-table-column label="源资产" min-width="140">
-            <template #default="{ row }">{{ row.source_asset?.hostname || row.source_asset_id }}</template>
+        <h4 style="margin:12px 0 8px">关联关系 ({{ nodeRelations.length }})</h4>
+        <el-table :data="nodeRelations" stripe size="small">
+          <el-table-column prop="relation_type" label="类型" width="90" />
+          <el-table-column label="目标" min-width="120">
+            <template #default="{ row }">{{ row.source_id===selectedNode.id ? getTargetName(row.target_id) : getTargetName(row.source_id) }}</template>
           </el-table-column>
-          <el-table-column prop="relation_type" label="关系类型" width="140" />
-          <el-table-column label="目标资产" min-width="140">
-            <template #default="{ row }">{{ row.target_asset?.hostname || row.target_asset_id }}</template>
-          </el-table-column>
-          <el-table-column label="操作" width="120">
-            <template #default="{ row }">
-              <el-popconfirm title="确认删除该关系？" @confirm="deleteRelation(row.id)">
-                <template #reference>
-                  <el-button text type="danger" size="small">删除</el-button>
-                </template>
-              </el-popconfirm>
-            </template>
+          <el-table-column label="方向" width="70">
+            <template #default="{ row }">{{ row.source_id===selectedNode.id ? '→出' : '←入' }}</template>
           </el-table-column>
         </el-table>
-      </div>
-    </div>
 
-    <!-- 添加关系对话框 -->
-    <el-dialog v-model="showAddRelation" title="添加资产关系" width="500px">
-      <el-form :model="newRelation" label-width="100px">
-        <el-form-item label="关系类型">
-          <el-select v-model="newRelation.relation_type" style="width: 100%">
-            <el-option label="依赖 (depends_on)" value="depends_on" />
-            <el-option label="连接 (connected_to)" value="connected_to" />
-            <el-option label="包含 (contains)" value="contains" />
-            <el-option label="运行于 (runs_on)" value="runs_on" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="目标资产">
-          <el-select v-model="newRelation.target_asset_id" filterable style="width: 100%" placeholder="选择目标资产">
-            <el-option v-for="a in allAssets" :key="a.id" :label="`${a.hostname} (${a.ip})`" :value="a.id" />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="showAddRelation = false">取消</el-button>
-        <el-button type="primary" @click="addRelation" :loading="submitting">确认</el-button>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <el-button size="small" type="primary" @click="viewAsset">查看资产详情</el-button>
+          <el-button size="small" type="warning" @click="startImpact">影响分析</el-button>
+        </div>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft, Refresh } from '@element-plus/icons-vue'
+import { Search, Warning } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
-import { API as R } from '@/shared/api/routes'
-import StatusBadge from '@/shared/components/StatusBadge.vue'
+import { API } from '@/shared/api/routes'
 
-const route = useRoute()
 const router = useRouter()
-const assetId = computed(() => route.params.id as string)
+const route = useRoute()
 
-const loading = ref(false)
-const asset = ref<any>(null)
-const relations = ref<any[]>([])
-const allAssets = ref<any[]>([])
-const showAddRelation = ref(false)
-const submitting = ref(false)
-const nodeDrawerVisible = ref(false)
-const selectedNode = ref<any>(null)
-
-const newRelation = ref({ relation_type: 'depends_on', target_asset_id: '' })
-
-// 拓扑节点和边
 const nodes = ref<any[]>([])
 const edges = ref<any[]>([])
+const selectedNode = ref<any>(null)
+const showNodeDetail = ref(false)
+const relationFilter = ref('')
+const typeFilter = ref('')
+const impactMode = ref(false)
 
-function computeLayout(rels: any[], currentAsset: any, allAssetsMap: Record<string, any>) {
-  const nodeMap = new Map<string, { id: string; label: string; x: number; y: number; asset_type: string; ip: string; status: string }>()
-  // 中心节点
-  const cx = 500, cy = 300
-  nodeMap.set(currentAsset.id, {
-    id: currentAsset.id,
-    label: currentAsset.hostname || currentAsset.ip,
-    x: cx, y: cy,
-    asset_type: currentAsset.asset_type,
-    ip: currentAsset.ip,
-    status: currentAsset.status,
-  })
+const canvasRef = ref<HTMLElement>()
+const canvasW = ref(1200)
+const canvasH = ref(600)
+const viewX = ref(-100)
+const viewY = ref(-50)
+const zoom = ref(1)
+const dragging = ref(false)
+const dragStart = reactive({ x: 0, y: 0 })
+const impactAnalysis = reactive({ directDeps: 0, indirectDeps: 0, affectedServices: 0 })
+const impactNodes = ref<Set<string>>(new Set())
+const impactEdges = ref<Set<number>>(new Set())
 
-  // 周围节点
-  let angle = 0
-  const radius = 180
-  for (const rel of rels) {
-    const otherId = rel.source_asset_id === currentAsset.id ? rel.target_asset_id : rel.source_asset_id
-    const other = allAssetsMap[otherId]
-    if (!nodeMap.has(otherId)) {
-      const a = allAssetsMap[otherId]
-      nodeMap.set(otherId, {
-        id: otherId,
-        label: a?.hostname || a?.ip || otherId.slice(0, 8),
-        x: cx + radius * Math.cos(angle),
-        y: cy + radius * Math.sin(angle),
-        asset_type: a?.asset_type || '',
-        ip: a?.ip || '',
-        status: a?.status || '',
-      })
-      angle += (2 * Math.PI) / Math.max(rels.length, 6)
-    }
+const filteredNodes = computed(() => {
+  let result = nodes.value
+  if (typeFilter.value) result = result.filter(n => n.asset_type === typeFilter.value)
+  if (impactMode.value && impactNodes.value.size) result = result.filter(n => impactNodes.value.has(n.id) || n.id === selectedNode.value?.id)
+  return result
+})
+
+const filteredEdges = computed(() => {
+  let result = edges.value
+  if (relationFilter.value) result = result.filter(e => e.relation_type === relationFilter.value)
+  if (impactMode.value && impactNodes.value.size) {
+    result = result.filter(e => impactNodes.value.has(e.source_id) && impactNodes.value.has(e.target_id))
   }
-  nodes.value = Array.from(nodeMap.values())
-  edges.value = rels.map(r => ({
-    source: r.source_asset_id,
-    target: r.target_asset_id,
-    relation_type: r.relation_type,
-  }))
+  return result
+})
+
+const nodeRelations = computed(() => {
+  if (!selectedNode.value) return []
+  return edges.value.filter(e => e.source_id === selectedNode.value.id || e.target_id === selectedNode.value.id)
+})
+
+function getNode(id: string) { return nodes.value.find(n => n.id === id) }
+function getTargetName(id: string) { const n = getNode(id); return n?.name || id }
+function isImpactEdge(edge: any) { return impactMode.value && impactEdges.value.has(edges.value.indexOf(edge)) }
+function isImpactNode(node: any) { return impactMode.value && impactNodes.value.has(node.id) && node.id !== selectedNode.value?.id }
+
+function typeColor(t: string) {
+  return ({ linux_server:'#67c23a', windows_server:'#409eff', database:'#e6a23c', web_service:'#909399', network_device:'#9b59b6', security_device:'#f56c6c' })[t] || '#606266'
 }
 
-function getNodePosition(id: string) {
-  const n = nodes.value.find(n => n.id === id)
-  return n ? { x: n.x, y: n.y } : { x: 0, y: 0 }
-}
-
-async function loadAsset() {
-  const id = assetId.value
-  if (!id) return
-  loading.value = true
+async function loadTopology() {
   try {
-    const [assetRes, relRes, allRes] = await Promise.all([
-      api.get(R.ASSET_DETAIL(id)),
-      api.get(R.ASSET_RELATIONS(id)),
-      api.get(R.ASSETS, { params: { page: 1, page_size: 200 } }),
-    ])
-    if (assetRes.data.code === 0) asset.value = assetRes.data.data
-    const relData = relRes.data.code === 0 ? (relRes.data.data?.items || relRes.data.data || []) : []
-    relations.value = Array.isArray(relData) ? relData : []
-
-    const allItems = allRes.data.code === 0 ? (allRes.data.data?.items || allRes.data.data || []) : []
-    allAssets.value = allItems
-    const assetsMap: Record<string, any> = {}
-    for (const a of allItems) assetsMap[a.id] = a
-
-    computeLayout(relations.value, asset.value || { id }, assetsMap)
-  } catch {
-    ElMessage.error('加载拓扑数据失败')
-  } finally {
-    loading.value = false
-  }
+    const assetId = route.params.id as string
+    const res = await api.get(assetId ? API.ASSET_RELATIONS(assetId) : API.ASSETS, { params: { page_size: 200 } })
+    if (res.data?.code === 0) {
+      const data = res.data.data
+      if (assetId && data?.relations) {
+        edges.value = data.relations || []
+        const nodeIds = new Set<string>()
+        edges.value.forEach((e: any) => { nodeIds.add(e.source_id); nodeIds.add(e.target_id) })
+        const assetsRes = await api.get(API.ASSETS, { params: { page_size: 200 } })
+        const allAssets = assetsRes.data?.data?.items || assetsRes.data?.data || []
+        nodes.value = allAssets.filter((a: any) => nodeIds.has(a.id)).map((a: any, i: number) => ({
+          ...a, x: a.x || (200 + (i % 5) * 200), y: a.y || (150 + Math.floor(i / 5) * 120),
+        }))
+      } else {
+        const items = data?.items || data || []
+        nodes.value = items.map((a: any, i: number) => ({
+          ...a, x: a.x || (150 + (i % 6) * 180), y: a.y || (120 + Math.floor(i / 6) * 110),
+        }))
+        const relPromises = items.slice(0, 30).map((a: any) => api.get(API.ASSET_RELATIONS(a.id)).catch(() => null))
+        const relResults = await Promise.all(relPromises)
+        edges.value = relResults.filter(Boolean).flatMap((r: any) => r.data?.data?.relations || r.data?.data || [])
+        const seen = new Set<string>()
+        edges.value = edges.value.filter((e: any) => {
+          const key = `${e.source_id}-${e.target_id}-${e.relation_type}`
+          if (seen.has(key)) return false; seen.add(key); return true
+        })
+      }
+    }
+  } catch { ElMessage.error('加载拓扑失败') }
 }
 
-function refreshTopology() { loadAsset() }
-
-function onNodeClick(node: any) {
+function selectNode(node: any) {
   selectedNode.value = node
-  nodeDrawerVisible.value = true
+  showNodeDetail.value = true
 }
 
-function goToAsset(id?: string) {
-  if (id) router.push(`/assets/${id}`)
+function viewAsset() {
+  if (selectedNode.value?.id) router.push(`/assets/${selectedNode.value.id}`)
 }
 
-async function addRelation() {
-  if (!newRelation.value.target_asset_id) {
-    ElMessage.warning('请选择目标资产')
-    return
-  }
-  submitting.value = true
-  try {
-    const { data } = await api.post(R.ASSET_RELATIONS(assetId.value), {
-      source_asset_id: assetId.value,
-      target_asset_id: newRelation.value.target_asset_id,
-      relation_type: newRelation.value.relation_type,
+function startImpact() {
+  impactMode.value = true
+  showNodeDetail.value = false
+  computeImpact()
+}
+
+function toggleImpactMode() {
+  impactMode.value = !impactMode.value
+  if (impactMode.value && selectedNode.value) computeImpact()
+  else { impactNodes.value = new Set(); impactEdges.value = new Set() }
+}
+
+function computeImpact() {
+  if (!selectedNode.value) return
+  const visited = new Set<string>()
+  const queue = [selectedNode.value.id]
+  visited.add(selectedNode.value.id)
+  const impactedEdges = new Set<number>()
+  while (queue.length) {
+    const current = queue.shift()!
+    edges.value.forEach((e: any, idx: number) => {
+      if (e.source_id === current && !visited.has(e.target_id)) {
+        visited.add(e.target_id); queue.push(e.target_id); impactedEdges.add(idx)
+      } else if (e.target_id === current && !visited.has(e.source_id)) {
+        visited.add(e.source_id); queue.push(e.source_id); impactedEdges.add(idx)
+      }
     })
-    if (data.code === 0) {
-      ElMessage.success('关系已添加')
-      showAddRelation.value = false
-      newRelation.value = { relation_type: 'depends_on', target_asset_id: '' }
-      loadAsset()
-    }
-  } catch {
-    ElMessage.error('添加关系失败')
-  } finally {
-    submitting.value = false
   }
+  impactNodes.value = visited
+  impactEdges.value = impactedEdges
+  impactAnalysis.directDeps = edges.value.filter((e: any) => e.source_id === selectedNode.value.id || e.target_id === selectedNode.value.id).length
+  impactAnalysis.indirectDeps = visited.size - 1 - impactAnalysis.directDeps
+  impactAnalysis.affectedServices = nodes.value.filter(n => visited.has(n.id) && ['web_service','database'].includes(n.asset_type)).length
 }
 
-async function deleteRelation(id: string) {
-  try {
-    await api.delete(R.ASSET_RELATION_DELETE(assetId.value, id))
-    ElMessage.success('关系已删除')
-    loadAsset()
-  } catch {
-    ElMessage.error('删除失败')
-  }
+// Canvas interactions
+function startDrag(e: MouseEvent) { dragging.value = true; dragStart.x = e.clientX; dragStart.y = e.clientY }
+function onDrag(e: MouseEvent) {
+  if (!dragging.value) return
+  viewX.value -= (e.clientX - dragStart.x) / zoom.value
+  viewY.value -= (e.clientY - dragStart.y) / zoom.value
+  dragStart.x = e.clientX; dragStart.y = e.clientY
 }
+function endDrag() { dragging.value = false }
+function onWheel(e: WheelEvent) { e.preventDefault(); zoom.value = Math.max(0.3, Math.min(3, zoom.value + (e.deltaY > 0 ? -0.1 : 0.1))) }
+function zoomIn() { zoom.value = Math.min(3, zoom.value + 0.2) }
+function zoomOut() { zoom.value = Math.max(0.3, zoom.value - 0.2) }
+function resetView() { zoom.value = 1; viewX.value = -100; viewY.value = -50 }
 
-onMounted(() => loadAsset())
-watch(() => route.params.id, () => { if (route.params.id) loadAsset() })
+onMounted(() => { loadTopology() })
 </script>
 
 <style scoped>
-.topology-header {
-  display: flex;
-  align-items: center;
-}
-.topology-container {
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
-  min-height: 500px;
-  position: relative;
-  background: #fafafa;
-}
-.topology-canvas {
-  width: 100%;
-  height: 500px;
-}
-.topology-svg {
-  width: 100%;
-  height: 100%;
-}
-.topology-node {
-  cursor: pointer;
-}
-.topology-node:hover rect {
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-}
-.empty-topology {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 400px;
-}
+.page-container { padding: 20px; }
+.toolbar { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.topology-canvas { border: 1px solid #e4e7ed; border-radius: 8px; overflow: hidden; cursor: grab; user-select: none; }
+.topology-canvas:active { cursor: grabbing; }
 </style>
