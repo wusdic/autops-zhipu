@@ -1,6 +1,6 @@
 #!/bin/bash
-# AUTOPS 离线安装脚本
-# 用法: ./install.sh [--offline]
+# AUTOPS 离线/在线安装脚本
+# 用法: ./install.sh [--offline] [--skip-deps] [--skip-db]
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,6 +17,37 @@ log() { echo -e "${GREEN}[AUTOPS]${NC} $1" | tee -a "$LOG_FILE"; }
 warn() { echo -e "${YELLOW}[WARN]${NC} $1" | tee -a "$LOG_FILE"; }
 error() { echo -e "${RED}[ERROR]${NC} $1" | tee -a "$LOG_FILE" >&2; exit 1; }
 
+# 解析参数
+OFFLINE_MODE=false
+SKIP_DEPS=false
+SKIP_DB=false
+
+for arg in "$@"; do
+  case "$arg" in
+    --offline)  OFFLINE_MODE=true ;;
+    --skip-deps) SKIP_DEPS=true ;;
+    --skip-db)   SKIP_DB=true ;;
+    --help|-h)
+      echo "用法: $0 [--offline] [--skip-deps] [--skip-db]"
+      echo ""
+      echo "  --offline    离线安装模式(使用本地wheels)"
+      echo "  --skip-deps  跳过系统依赖安装"
+      echo "  --skip-db    跳过数据库初始化"
+      exit 0
+      ;;
+    *) warn "未知参数: $arg" ;;
+  esac
+done
+
+# 自动检测离线模式: 如果存在 wheels 目录且有文件，自动启用离线安装
+WHEELS_DIR="$PROJECT_DIR/backend/wheels"
+if [ -d "$WHEELS_DIR" ] && [ "$(ls -A "$WHEELS_DIR" 2>/dev/null)" ]; then
+  if [ "$OFFLINE_MODE" = false ]; then
+    log "检测到本地 wheels 目录，自动启用离线安装模式"
+    OFFLINE_MODE=true
+  fi
+fi
+
 check_root() {
     [ "$(id -u)" -eq 0 ] || error "请以 root 用户运行此脚本"
 }
@@ -30,6 +61,58 @@ check_os() {
         error "无法检测操作系统版本"
     fi
     log "检测到操作系统: ${OS_ID} ${OS_VERSION}"
+}
+
+# ============================================================
+# 系统依赖检查与安装
+# ============================================================
+check_system_deps() {
+    local missing=()
+
+    # Python 3.12 / 3.11 / 3.x
+    if command -v python3.12 &>/dev/null; then
+        PYTHON_BIN="python3.12"
+    elif command -v python3.11 &>/dev/null; then
+        PYTHON_BIN="python3.11"
+    elif command -v python3 &>/dev/null; then
+        PYTHON_BIN="python3"
+    else
+        missing+=("python3")
+        PYTHON_BIN=""
+    fi
+    if [ -n "$PYTHON_BIN" ]; then
+        local pyver=$($PYTHON_BIN --version 2>&1 | awk '{print $2}')
+        log "Python 版本: $pyver ($PYTHON_BIN)"
+    fi
+
+    # MySQL / MariaDB
+    if command -v mysql &>/dev/null; then
+        log "MySQL: $(mysql --version 2>&1 | head -1)"
+    else
+        missing+=("mysql")
+    fi
+
+    # Redis
+    if command -v redis-server &>/dev/null || command -v redis-cli &>/dev/null; then
+        log "Redis: $(redis-server --version 2>&1 | head -1)"
+    else
+        missing+=("redis")
+    fi
+
+    # nginx (可选)
+    if command -v nginx &>/dev/null; then
+        log "Nginx: $(nginx -v 2>&1)"
+    else
+        warn "nginx 未安装(可选，用于前端部署)"
+    fi
+
+    if [ ${#missing[@]} -gt 0 ]; then
+        if [ "$OFFLINE_MODE" = true ]; then
+            error "离线模式下缺少系统依赖: ${missing[*]}，请手动安装后重试"
+        else
+            warn "缺少系统依赖: ${missing[*]}，将尝试安装..."
+        fi
+    fi
 }
 
 install_system_deps() {
@@ -53,14 +136,17 @@ install_system_deps() {
     esac
 }
 
+# ============================================================
+# 数据库初始化
+# ============================================================
 setup_database() {
     log "配置 MySQL 数据库..."
-    
+
     # 检查 MySQL 是否运行
     if ! systemctl is-active --quiet mysql 2>/dev/null && ! systemctl is-active --quiet mysqld 2>/dev/null; then
         systemctl start mysql 2>/dev/null || systemctl start mysqld 2>/dev/null || error "MySQL 启动失败"
     fi
-    
+
     # 创建数据库和用户
     MYSQL_PWD_ROOT="${MYSQL_ROOT_PASSWORD:-}"
     if [ -n "$MYSQL_PWD_ROOT" ]; then
@@ -68,7 +154,7 @@ setup_database() {
     else
         MYSQL_CMD="mysql -u root"
     fi
-    
+
     $MYSQL_CMD <<EOF
 CREATE DATABASE IF NOT EXISTS autops CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS 'autops'@'127.0.0.1' IDENTIFIED BY 'autops_2026';
@@ -78,6 +164,9 @@ EOF
     log "数据库配置完成"
 }
 
+# ============================================================
+# Redis 初始化
+# ============================================================
 setup_redis() {
     log "配置 Redis..."
     if ! systemctl is-active --quiet redis 2>/dev/null && ! systemctl is-active --quiet redis-server 2>/dev/null; then
@@ -85,67 +174,135 @@ setup_redis() {
     fi
 }
 
+# ============================================================
+# 后端安装 (支持离线模式)
+# ============================================================
 setup_backend() {
     log "安装后端..."
     cd "$PROJECT_DIR/backend"
-    
+
+    # 确定Python解释器
+    local py="${PYTHON_BIN:-python3}"
+
     # 创建虚拟环境
     if [ ! -d ".venv" ]; then
-        python3 -m venv .venv
+        $py -m venv .venv
     fi
     source .venv/bin/activate
-    
+
     # 安装依赖
-    pip install --upgrade pip --quiet
-    pip install -r requirements.txt --quiet 2>/dev/null || \
-        pip install fastapi uvicorn sqlalchemy[asyncio] aiomysql alembic \
+    if [ "$OFFLINE_MODE" = true ] && [ -d "$WHEELS_DIR" ] && [ "$(ls -A "$WHEELS_DIR" 2>/dev/null)" ]; then
+        log "离线模式: 从本地 wheels 安装依赖..."
+        pip install --upgrade pip --quiet --no-index --find-links="$WHEELS_DIR" 2>/dev/null || true
+        pip install --no-index --find-links="$WHEELS_DIR" -r requirements.txt 2>/dev/null || \
+        pip install --no-index --find-links="$WHEELS_DIR" \
+            fastapi uvicorn sqlalchemy[asyncio] aiomysql alembic \
             pydantic pydantic-settings redis python-jose[cryptography] \
-            passlib[bcrypt] python-multipart pyyaml httpx --quiet
-    
-    # 运行数据库迁移
-    export DB_USER=autops DB_PASSWORD=autops_2026 DB_DATABASE=autops
-    alembic upgrade head 2>/dev/null || python -c "
+            passlib[bcrypt] python-multipart pyyaml httpx --quiet 2>/dev/null || \
+            warn "部分离线包安装失败，请检查 wheels 目录"
+    else
+        log "在线模式: 从 PyPI 安装依赖..."
+        pip install --upgrade pip --quiet
+        pip install -r requirements.txt --quiet 2>/dev/null || \
+            pip install fastapi uvicorn sqlalchemy[asyncio] aiomysql alembic \
+                pydantic pydantic-settings redis python-jose[cryptography] \
+                passlib[bcrypt] python-multipart pyyaml httpx --quiet
+    fi
+
+    # 数据库迁移
+    if [ "$SKIP_DB" = false ]; then
+        log "运行数据库迁移..."
+        export DB_USER=autops DB_PASSWORD=*** DB_DATABASE=autops
+        alembic upgrade head 2>/dev/null || python -c "
 import asyncio
 from app.infra.database import engine, Base
 async def init():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 asyncio.run(init())
-"
-    
+" 2>/dev/null || warn "数据库迁移失败，可能需要手动处理"
+    fi
+
     log "后端安装完成"
 }
 
+# ============================================================
+# 前端静态文件部署
+# ============================================================
 setup_frontend() {
-    log "安装前端..."
-    cd "$PROJECT_DIR/frontend"
-    
-    if command -v node &>/dev/null && command -v npm &>/dev/null; then
-        npm install --silent 2>/dev/null || true
-        npm run build 2>/dev/null || warn "前端构建失败，请手动构建"
+    log "部署前端静态文件..."
+
+    # 离线模式: 使用预构建的 dist
+    if [ -d "$PROJECT_DIR/frontend/dist" ]; then
+        log "检测到前端构建产物，部署到 nginx..."
+        local nginx_conf="/etc/nginx/conf.d/autops.conf"
+        if [ -d "/etc/nginx/conf.d" ]; then
+            cat > "$nginx_conf" <<EOF
+server {
+    listen 80;
+    server_name _;
+
+    root $PROJECT_DIR/frontend/dist;
+    index index.html;
+
+    location / {
+        try_files \$uri \$uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8001;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /docs {
+        proxy_pass http://127.0.0.1:8001;
+    }
+}
+EOF
+            nginx -t 2>/dev/null && systemctl reload nginx 2>/dev/null || warn "nginx 配置测试失败，请手动配置"
+            log "前端已部署到 nginx"
+        else
+            log "前端构建产物已就绪 ($PROJECT_DIR/frontend/dist)"
+        fi
     else
-        warn "Node.js 未安装，跳过前端构建"
+        # 在线模式: 尝试构建
+        if command -v node &>/dev/null && command -v npm &>/dev/null; then
+            cd "$PROJECT_DIR/frontend"
+            npm install --silent 2>/dev/null || true
+            npm run build 2>/dev/null || warn "前端构建失败，请手动构建"
+        else
+            warn "前端构建产物不存在且 Node.js 未安装，跳过前端部署"
+        fi
     fi
-    
+
     log "前端安装完成"
 }
 
+# ============================================================
+# 种子数据
+# ============================================================
 setup_seed_data() {
     log "初始化种子数据..."
     cd "$PROJECT_DIR"
     source backend/.venv/bin/activate
-    export DB_USER=autops DB_PASSWORD=autops_2026 DB_DATABASE=autops
-    
+    export DB_USER=autops DB_PASSWORD=*** DB_DATABASE=autops
+
     python scripts/data_seed/init_data.py 2>/dev/null || warn "种子数据初始化失败（可能已初始化）"
     python scripts/data_seed/seed_knowledge.py 2>/dev/null || warn "知识库种子数据初始化失败"
     python scripts/data_seed/seed_m3_scenarios.py 2>/dev/null || warn "M3 场景数据初始化失败"
-    
+
     log "种子数据初始化完成"
 }
 
+# ============================================================
+# systemd 服务配置
+# ============================================================
 setup_systemd() {
     log "配置 systemd 服务..."
-    
+
     cat > /etc/systemd/system/autops-backend.service <<EOF
 [Unit]
 Description=AUTOPS Backend Service
@@ -157,7 +314,7 @@ Type=simple
 User=root
 WorkingDirectory=${PROJECT_DIR}/backend
 Environment=DB_USER=autops
-Environment=DB_PASSWORD=autops_2026
+Environment=DB_PASSWORD=***
 Environment=DB_DATABASE=autops
 ExecStart=${PROJECT_DIR}/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8001
 Restart=always
@@ -172,19 +329,39 @@ EOF
     log "systemd 服务配置完成"
 }
 
+# ============================================================
+# 安装后自检
+# ============================================================
+run_self_check() {
+    log "运行安装自检..."
+    local check_script="$SCRIPT_DIR/self_check.sh"
+    if [ -x "$check_script" ]; then
+        bash "$check_script" 2>/dev/null || warn "自检发现部分问题，请查看上方详情"
+    else
+        warn "自检脚本不存在或不可执行，跳过"
+    fi
+}
+
+# ============================================================
+# 打印安装摘要
+# ============================================================
 print_summary() {
+    local mode="在线"
+    [ "$OFFLINE_MODE" = true ] && mode="离线"
     echo ""
     echo "============================================"
-    log "AUTOPS 安装完成！"
+    log "AUTOPS 安装完成！(${mode}模式)"
     echo "============================================"
     echo ""
     log "后端地址: http://$(hostname -I 2>/dev/null | awk '{print $1}' || echo 'localhost'):8001"
+    log "前端地址: http://$(hostname -I 2>/dev/null | awk '{print $1}' || echo 'localhost')"
     log "健康检查: http://localhost:8001/health"
     log "默认账户: admin / admin123"
     echo ""
     log "启动服务: systemctl start autops-backend"
     log "停止服务: systemctl stop autops-backend"
     log "查看日志: journalctl -u autops-backend -f"
+    log "运行自检: $SCRIPT_DIR/self_check.sh"
     echo ""
 }
 
@@ -193,23 +370,36 @@ main() {
     log "AUTOPS 安装开始..."
     check_root
     check_os
-    
-    if [ "${1:-}" = "--offline" ]; then
+
+    if [ "$OFFLINE_MODE" = true ]; then
         log "离线安装模式"
+        check_system_deps
+    elif [ "$SKIP_DEPS" = true ]; then
+        log "跳过系统依赖安装"
+        check_system_deps
     else
         install_system_deps
+        check_system_deps
     fi
-    
-    setup_database
+
+    if [ "$SKIP_DB" = false ]; then
+        setup_database
+    else
+        log "跳过数据库初始化"
+    fi
+
     setup_redis
     setup_backend
     setup_frontend
     setup_seed_data
     setup_systemd
-    
+
     # 启动服务
     systemctl start autops-backend || warn "服务启动失败，请手动检查"
-    
+
+    # 运行自检
+    run_self_check
+
     print_summary
 }
 

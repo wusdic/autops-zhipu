@@ -1,14 +1,100 @@
-"""LLM客户端 — OpenAI兼容接口."""
+"""LLM客户端 — OpenAI兼容接口 (增强版: 重试/缓存/超时/流式)."""
 from __future__ import annotations
+
+import asyncio
+import hashlib
+import json
 import logging
+from collections import OrderedDict
+from typing import Any, AsyncIterator
+
 import httpx
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# 内存 LRU 缓存 (Redis 不可用时的降级方案)
+# ---------------------------------------------------------------------------
+_MAX_LRU_SIZE = 100
+_lru_cache: OrderedDict[str, str] = OrderedDict()
 
+
+def _lru_get(key: str) -> str | None:
+    if key in _lru_cache:
+        _lru_cache.move_to_end(key)
+        return _lru_cache[key]
+    return None
+
+
+def _lru_set(key: str, value: str) -> None:
+    if key in _lru_cache:
+        _lru_cache.move_to_end(key)
+    _lru_cache[key] = value
+    while len(_lru_cache) > _MAX_LRU_SIZE:
+        _lru_cache.popitem(last=False)
+
+
+# ---------------------------------------------------------------------------
+# Redis 缓存辅助 (可选依赖, 失败自动降级)
+# ---------------------------------------------------------------------------
+async def _redis_get(key: str) -> str | None:
+    """尝试从 Redis 读取缓存, 失败返回 None."""
+    try:
+        from app.infra.redis_client import get_redis
+        redis = await get_redis()
+        return await redis.get(key)
+    except Exception:
+        return None
+
+
+async def _redis_set(key: str, value: str, ttl: int = 300) -> None:
+    """尝试写入 Redis 缓存, 失败静默忽略."""
+    try:
+        from app.infra.redis_client import get_redis
+        redis = await get_redis()
+        await redis.setex(key, ttl, value)
+    except Exception:
+        pass
+
+
+# ---------------------------------------------------------------------------
+# LLM 配置加载辅助
+# ---------------------------------------------------------------------------
+def _load_llm_timeout() -> int:
+    """从 configs/llm.yaml 读取 timeout, 默认 30s."""
+    try:
+        from app.infra.config import _load_yaml
+        cfg = _load_yaml("llm.yaml")
+        return int(cfg.get("llm", {}).get("timeout", 30))
+    except Exception:
+        return 30
+
+
+def _load_llm_max_tokens() -> int:
+    """从 configs/llm.yaml 读取 max_tokens, 默认 2048."""
+    try:
+        from app.infra.config import _load_yaml
+        cfg = _load_yaml("llm.yaml")
+        return int(cfg.get("llm", {}).get("max_tokens", 2048))
+    except Exception:
+        return 2048
+
+
+def _cache_key(messages: list[dict[str, str]]) -> str:
+    """根据 messages 列表生成缓存 key."""
+    raw = json.dumps(messages, sort_keys=True, ensure_ascii=False)
+    return f"llm:cache:{hashlib.md5(raw.encode()).hexdigest()}"
+
+
+# ---------------------------------------------------------------------------
+# LLMClient
+# ---------------------------------------------------------------------------
 class LLMClient:
-    """OpenAI兼容LLM客户端."""
+    """OpenAI兼容LLM客户端 (增强版)."""
+
+    # 重试配置
+    MAX_RETRIES = 3
+    BACKOFF_BASE = 1.0  # 指数退避基数(秒)
 
     def __init__(self):
         from app.infra.config import get_config
@@ -19,35 +105,93 @@ class LLMClient:
             self.base_url = getattr(llm_cfg, 'base_url', '') or 'http://127.0.0.1:8000/v1'
             self.model = getattr(llm_cfg, 'model_name', '') or 'qwen3.5-0.8b'
             self.api_key = getattr(llm_cfg, 'api_key', '') or 'EMPTY'
-            self.timeout = 60
         else:
             self.base_url = getattr(config, 'llm_base_url', 'http://127.0.0.1:8000/v1')
             self.model = getattr(config, 'llm_model_name', getattr(config, 'llm_model', 'qwen3.5-0.8b'))
             self.api_key = getattr(config, 'llm_api_key', 'EMPTY')
-            self.timeout = getattr(config, 'llm_timeout', 60)
 
+        # timeout 从 llm.yaml 读取, 保持向后兼容
+        self.timeout = _load_llm_timeout()
+        self.max_tokens = _load_llm_max_tokens()
+
+    # ------------------------------------------------------------------
+    # 公共 API
+    # ------------------------------------------------------------------
     async def chat(self, messages: list[dict[str, str]]) -> str:
-        """调用LLM，返回文本响应."""
+        """调用LLM，返回文本响应 (带重试+缓存+超时降级)."""
+        # 1) 尝试缓存
+        cache_k = _cache_key(messages)
+        cached = await self._get_cache(cache_k)
+        if cached is not None:
+            logger.debug("LLM cache hit: %s", cache_k[:24])
+            return cached
+
+        # 2) 带重试的调用
+        last_exc: Exception | None = None
+        for attempt in range(1, self.MAX_RETRIES + 1):
+            try:
+                result = await self._do_chat(messages)
+                # 写入缓存
+                await self._set_cache(cache_k, result)
+                return result
+            except httpx.TimeoutException as exc:
+                logger.warning("LLM timeout (attempt %d/%d): %s", attempt, self.MAX_RETRIES, exc)
+                last_exc = exc
+                if attempt < self.MAX_RETRIES:
+                    await asyncio.sleep(self.BACKOFF_BASE * (2 ** (attempt - 1)))
+            except Exception as exc:
+                logger.warning("LLM error (attempt %d/%d): %s", attempt, self.MAX_RETRIES, exc)
+                last_exc = exc
+                if attempt < self.MAX_RETRIES:
+                    await asyncio.sleep(self.BACKOFF_BASE * (2 ** (attempt - 1)))
+
+        # 全部重试耗尽 — 超时降级
+        if isinstance(last_exc, httpx.TimeoutException):
+            logger.error("LLM调用超时, 已重试 %d 次", self.MAX_RETRIES)
+            return "LLM调用超时"
+        raise last_exc  # type: ignore[misc]
+
+    async def stream(self, messages: list[dict[str, str]]) -> AsyncIterator[str]:
+        """流式调用LLM, 逐块yield SSE chunk内容."""
         headers: dict[str, str] = {"Content-Type": "application/json"}
         if self.api_key and self.api_key != "EMPTY":
             headers["Authorization"] = f"Bearer {self.api_key}"
 
+        payload = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": 0.3,
+            "max_tokens": self.max_tokens,
+            "stream": True,
+        }
+
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            resp = await client.post(
+            async with client.stream(
+                "POST",
                 f"{self.base_url}/chat/completions",
-                json={
-                    "model": self.model,
-                    "messages": messages,
-                    "temperature": 0.3,
-                    "max_tokens": 2048,
-                },
+                json=payload,
                 headers=headers,
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                return data["choices"][0]["message"]["content"]
-            logger.error(f"LLM error: {resp.status_code} {resp.text[:200]}")
-            raise Exception(f"LLM returned status {resp.status_code}")
+            ) as resp:
+                if resp.status_code != 200:
+                    error_text = await resp.aread()
+                    logger.error("LLM stream error: %s %s", resp.status_code, error_text[:200])
+                    raise Exception(f"LLM stream returned status {resp.status_code}")
+
+                async for line in resp.aiter_lines():
+                    # SSE 格式: "data: {...}" 或 "data: [DONE]"
+                    if not line.startswith("data: "):
+                        continue
+                    data = line[6:]
+                    if data.strip() == "[DONE]":
+                        break
+                    try:
+                        chunk = json.loads(data)
+                        delta = chunk.get("choices", [{}])[0].get("delta", {})
+                        content = delta.get("content", "")
+                        if content:
+                            yield content
+                    except json.JSONDecodeError:
+                        continue
 
     async def is_available(self) -> bool:
         """检查LLM服务是否可用."""
@@ -62,3 +206,41 @@ class LLMClient:
                 return resp.status_code == 200
         except Exception:
             return False
+
+    # ------------------------------------------------------------------
+    # 内部方法
+    # ------------------------------------------------------------------
+    async def _do_chat(self, messages: list[dict[str, str]]) -> str:
+        """单次 LLM HTTP 调用."""
+        headers: dict[str, str] = {"Content-Type": "application/json"}
+        if self.api_key and self.api_key != "EMPTY":
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.post(
+                f"{self.base_url}/chat/completions",
+                json={
+                    "model": self.model,
+                    "messages": messages,
+                    "temperature": 0.3,
+                    "max_tokens": self.max_tokens,
+                },
+                headers=headers,
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return data["choices"][0]["message"]["content"]
+            logger.error("LLM error: %s %s", resp.status_code, resp.text[:200])
+            raise Exception(f"LLM returned status {resp.status_code}")
+
+    async def _get_cache(self, key: str) -> str | None:
+        """优先 Redis → 降级 LRU."""
+        val = await _redis_get(key)
+        if val is not None:
+            return val
+        return _lru_get(key)
+
+    async def _set_cache(self, key: str, value: str) -> None:
+        """写入 Redis + LRU."""
+        await _redis_set(key, value, ttl=300)
+        _lru_set(key, value)
