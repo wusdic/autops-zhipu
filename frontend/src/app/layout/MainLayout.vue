@@ -6,39 +6,67 @@
         <span v-else style="font-size:20px;color:#fff;font-weight:bold">A</span>
         <div v-if="!isCollapsed" class="subtitle">自治运维操作系统</div>
       </div>
-      <el-menu :default-active="$route.path" router class="sidebar-menu" :collapse="isCollapsed" background-color="#304156" text-color="#bfcbd9" active-text-color="#409eff">
-        <el-menu-item-group v-if="!isCollapsed" title="指挥中心">
-          <el-menu-item index="/"><el-icon><Monitor /></el-icon><span>运维指挥台</span></el-menu-item>
-          <el-menu-item index="/incident"><el-icon><Warning /></el-icon><span>故障处置</span></el-menu-item>
-          <el-menu-item index="/aiops"><el-icon><MagicStick /></el-icon><span>AI 诊断</span></el-menu-item>
-        </el-menu-item-group>
-        <el-menu-item-group v-if="!isCollapsed" title="资产配置">
-          <el-menu-item index="/assets"><el-icon><Grid /></el-icon><span>资产管理</span></el-menu-item>
-          <el-menu-item index="/collectors"><el-icon><Connection /></el-icon><span>采集器管理</span></el-menu-item>
-          <el-menu-item index="/config"><el-icon><Setting /></el-icon><span>配置管理</span></el-menu-item>
-        </el-menu-item-group>
-        <el-menu-item-group v-if="!isCollapsed" title="监控事件">
-          <el-menu-item index="/events"><el-icon><InfoFilled /></el-icon><span>事件列表</span></el-menu-item>
-          <el-menu-item index="/alerts"><el-icon><Bell /></el-icon><span>告警中心</span></el-menu-item>
-          <el-menu-item index="/tickets"><el-icon><Tickets /></el-icon><span>工单中心</span></el-menu-item>
-        </el-menu-item-group>
-        <el-menu-item-group v-if="!isCollapsed" title="自动化">
-          <el-menu-item index="/automation"><el-icon><VideoPlay /></el-icon><span>自动化编排</span></el-menu-item>
-          <el-menu-item index="/knowledge"><el-icon><Collection /></el-icon><span>知识库</span></el-menu-item>
-        </el-menu-item-group>
-        <el-menu-item-group v-if="!isCollapsed" title="管理">
-          <el-menu-item index="/admin/users"><el-icon><User /></el-icon><span>用户管理</span></el-menu-item>
-          <el-menu-item index="/audit"><el-icon><Document /></el-icon><span>审计日志</span></el-menu-item>
-        </el-menu-item-group>
+      <el-menu :default-active="activeMenu" router class="sidebar-menu" :collapse="isCollapsed" background-color="#304156" text-color="#bfcbd9" active-text-color="#409eff">
+        <!-- 指挥中心 -->
+        <el-sub-menu v-if="!isCollapsed" index="cmd">
+          <template #title><el-icon><Monitor /></el-icon><span>指挥中心</span></template>
+          <el-menu-item index="/"><span>运维指挥台</span></el-menu-item>
+          <el-menu-item index="/incident"><span>故障处置</span></el-menu-item>
+          <el-menu-item index="/aiops"><span>AI 诊断</span></el-menu-item>
+        </el-sub-menu>
+        <!-- 资产配置 -->
+        <el-sub-menu v-if="!isCollapsed" index="asset">
+          <template #title><el-icon><Grid /></el-icon><span>资产配置</span></template>
+          <el-menu-item index="/assets"><span>资产列表</span></el-menu-item>
+          <el-menu-item index="/asset-groups"><span>资产分组</span></el-menu-item>
+          <el-menu-item index="/credentials"><span>凭证管理</span></el-menu-item>
+          <el-menu-item index="/config"><span>配置管理</span></el-menu-item>
+          <el-menu-item index="/collectors"><span>采集器管理</span></el-menu-item>
+        </el-sub-menu>
+        <!-- 监控事件 -->
+        <el-sub-menu v-if="!isCollapsed" index="monitor">
+          <template #title><el-icon><Bell /></el-icon><span>监控事件</span></template>
+          <el-menu-item index="/monitoring"><span>监控总览</span></el-menu-item>
+          <el-menu-item index="/events"><span>事件列表</span></el-menu-item>
+          <el-menu-item index="/alerts"><span>告警中心</span></el-menu-item>
+          <el-menu-item index="/alert-rules"><span>告警规则</span></el-menu-item>
+          <el-menu-item index="/tickets"><span>工单中心</span></el-menu-item>
+        </el-sub-menu>
+        <!-- 自动化 -->
+        <el-sub-menu v-if="!isCollapsed" index="auto">
+          <template #title><el-icon><VideoPlay /></el-icon><span>自动化</span></template>
+          <el-menu-item index="/scripts"><span>脚本库</span></el-menu-item>
+          <el-menu-item index="/playbooks"><span>Playbook</span></el-menu-item>
+          <el-menu-item index="/policies"><span>策略管理</span></el-menu-item>
+          <el-menu-item index="/executions"><span>执行历史</span></el-menu-item>
+        </el-sub-menu>
+        <!-- 知识 -->
+        <el-sub-menu v-if="!isCollapsed" index="kb">
+          <template #title><el-icon><Collection /></el-icon><span>知识</span></template>
+          <el-menu-item index="/knowledge"><span>知识库</span></el-menu-item>
+        </el-sub-menu>
+        <!-- 管理 -->
+        <el-sub-menu v-if="!isCollapsed" index="admin">
+          <template #title><el-icon><User /></el-icon><span>平台管理</span></template>
+          <el-menu-item index="/admin/users"><span>用户管理</span></el-menu-item>
+          <el-menu-item index="/admin/roles"><span>角色管理</span></el-menu-item>
+          <el-menu-item index="/admin/api-keys"><span>API Key</span></el-menu-item>
+          <el-menu-item index="/admin/config"><span>系统配置</span></el-menu-item>
+          <el-menu-item index="/admin/status"><span>平台状态</span></el-menu-item>
+          <el-menu-item index="/admin/backup"><span>备份恢复</span></el-menu-item>
+          <el-menu-item index="/audit"><span>审计日志</span></el-menu-item>
+        </el-sub-menu>
         <!-- Collapsed mode -->
         <template v-if="isCollapsed">
           <el-menu-item index="/"><el-icon><Monitor /></el-icon></el-menu-item>
           <el-menu-item index="/incident"><el-icon><Warning /></el-icon></el-menu-item>
           <el-menu-item index="/assets"><el-icon><Grid /></el-icon></el-menu-item>
+          <el-menu-item index="/monitoring"><el-icon><DataLine /></el-icon></el-menu-item>
           <el-menu-item index="/alerts"><el-icon><Bell /></el-icon></el-menu-item>
-          <el-menu-item index="/automation"><el-icon><VideoPlay /></el-icon></el-menu-item>
-          <el-menu-item index="/audit"><el-icon><Document /></el-icon></el-menu-item>
+          <el-menu-item index="/scripts"><el-icon><VideoPlay /></el-icon></el-menu-item>
+          <el-menu-item index="/knowledge"><el-icon><Collection /></el-icon></el-menu-item>
           <el-menu-item index="/admin/users"><el-icon><User /></el-icon></el-menu-item>
+          <el-menu-item index="/audit"><el-icon><Document /></el-icon></el-menu-item>
         </template>
       </el-menu>
     </el-aside>
@@ -78,7 +106,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Monitor, Grid, Bell, Tickets, Collection, Setting, Warning, Connection,
-  InfoFilled, VideoPlay, MagicStick, User, Document, Expand, Fold } from '@element-plus/icons-vue'
+  InfoFilled, VideoPlay, MagicStick, User, Document, Expand, Fold, DataLine } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import { useAuthStore } from '@/app/store/auth'
@@ -90,14 +118,44 @@ const isCollapsed = ref(false)
 const alertCount = ref(0)
 const username = ref(localStorage.getItem('username') || 'admin')
 
+// Active menu: use base path for dynamic routes
+const activeMenu = computed(() => {
+  const path = route.path
+  // For dynamic routes, match the base path
+  if (path.startsWith('/assets/') && path !== '/assets/discovery') return '/assets'
+  if (path.startsWith('/alerts/')) return '/alerts'
+  if (path.startsWith('/incident/')) return '/incident'
+  if (path.startsWith('/policies/')) return '/policies'
+  if (path.startsWith('/executions/')) return '/executions'
+  if (path.startsWith('/knowledge/')) return '/knowledge'
+  return path
+})
+
 const pageTitle = computed(() => {
   const map: Record<string, string> = {
-    '/': '运维指挥台', '/assets': '资产管理', '/config': '配置管理', '/collectors': '采集器管理',
-    '/events': '事件列表', '/alerts': '告警中心', '/tickets': '工单中心',
-    '/incident': '故障处置', '/automation': '自动化编排', '/aiops': 'AI 诊断',
-    '/knowledge': '知识库', '/audit': '审计日志', '/admin/users': '用户管理',
+    '/': '运维指挥台',
+    '/assets': '资产列表', '/asset-groups': '资产分组', '/credentials': '凭证管理',
+    '/config': '配置管理', '/collectors': '采集器管理',
+    '/monitoring': '监控总览', '/events': '事件列表', '/alerts': '告警中心',
+    '/alert-rules': '告警规则', '/tickets': '工单中心',
+    '/incident': '故障处置', '/aiops': 'AI 诊断',
+    '/scripts': '脚本库', '/playbooks': 'Playbook', '/policies': '策略管理',
+    '/executions': '执行历史', '/automation': '自动化编排',
+    '/knowledge': '知识库',
+    '/admin/users': '用户管理', '/admin/roles': '角色管理',
+    '/admin/api-keys': 'API Key', '/admin/config': '系统配置',
+    '/admin/status': '平台状态', '/admin/backup': '备份恢复',
+    '/audit': '审计日志',
   }
-  return map[route.path] || ''
+  // For dynamic routes, show parent title + context
+  if (route.path.match(/^\/assets\/.+/)) return '资产详情'
+  if (route.path.match(/^\/alerts\/.+/)) return '告警详情'
+  if (route.path.match(/^\/incident\/.+/)) return '故障处置'
+  if (route.path.match(/^\/policies\/.+\/simulate/)) return '策略模拟'
+  if (route.path.match(/^\/executions\/.+/)) return '执行详情'
+  if (route.path.match(/^\/knowledge\/.+\/edit/)) return '知识编辑'
+  if (route.path.match(/^\/knowledge\/.+/)) return '知识详情'
+  return map[route.path] || 'AUTOPS'
 })
 
 async function loadAlertCount() {
@@ -132,6 +190,8 @@ onMounted(() => loadAlertCount())
 .sidebar-menu .el-menu-item { background-color: #304156 !important; }
 .sidebar-menu .el-menu-item:hover { background-color: #263445 !important; }
 .sidebar-menu .el-menu-item.is-active { background-color: #263445 !important; }
+.sidebar-menu .el-sub-menu__title { background-color: #304156 !important; }
+.sidebar-menu .el-sub-menu__title:hover { background-color: #263445 !important; }
 .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e6e6e6; background: #fff; padding: 0 20px; height: 56px; }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .collapse-btn { cursor: pointer; color: #606266; }
