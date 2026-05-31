@@ -10,8 +10,8 @@ class TicketCreate(BaseModel):
     ticket_type: str = Field(..., max_length=32)
     priority: str = "medium"
     description: str | None = None
-    context: str | None = None
-    alert_ids: str | None = None
+    context: dict | None = None
+    alert_ids: list[str] | None = None
     execution_ids: str | None = None
     assigned_to: str | None = None
 

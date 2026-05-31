@@ -94,6 +94,89 @@ class ConfigService:
         )
         return list(result.scalars().all())
 
+    async def diff_versions(self, definition_id: str, version_id_a: str, version_id_b: str) -> dict:
+        """对比两个配置版本的差异."""
+        import difflib
+        va = await self.session.get(ConfigVersion, version_id_a)
+        vb = await self.session.get(ConfigVersion, version_id_b)
+        if not va or not vb:
+            raise NotFoundError("配置版本不存在")
+        try:
+            content_a = json.loads(va.content) if isinstance(va.content, str) else va.content
+            content_b = json.loads(vb.content) if isinstance(vb.content, str) else vb.content
+        except Exception:
+            content_a = va.content
+            content_b = vb.content
+        # 对比
+        lines_a = json.dumps(content_a, indent=2, ensure_ascii=False).splitlines(keepends=True)
+        lines_b = json.dumps(content_b, indent=2, ensure_ascii=False).splitlines(keepends=True)
+        diff = difflib.unified_diff(lines_a, lines_b, fromfile=f"v{va.version}", tofile=f"v{vb.version}")
+        return {
+            "definition_id": definition_id,
+            "version_a": {"id": str(va.id), "version": va.version, "status": va.status},
+            "version_b": {"id": str(vb.id), "version": vb.version, "status": vb.status},
+            "diff": "".join(diff),
+            "has_changes": content_a != content_b,
+        }
+
+    async def rollback_version(self, definition_id: str, target_version_id: str, user_id: str = "") -> ConfigVersion:
+        """回滚配置到指定版本（创建新版本并自动发布）."""
+        target = await self.session.get(ConfigVersion, target_version_id)
+        if not target or str(target.definition_id) != definition_id:
+            raise NotFoundError("目标版本不存在或不属于该配置定义")
+        # 获取当前最大版本号
+        from sqlalchemy import func
+        result = await self.session.execute(
+            select(func.max(ConfigVersion.version)).where(ConfigVersion.definition_id == definition_id)
+        )
+        max_ver = result.scalar() or 0
+        # 创建新版本（内容从目标版本复制）
+        new_version = ConfigVersion(
+            definition_id=definition_id,
+            version=max_ver + 1,
+            content=target.content,
+            status="published",
+        )
+        self.session.add(new_version)
+        await self.session.flush()
+        await self.session.refresh(new_version)
+        return new_version
+
+    async def detect_drift(self, definition_id: str) -> dict:
+        """检测配置漂移."""
+        # 获取最新发布的版本
+        result = await self.session.execute(
+            select(ConfigVersion)
+            .where(ConfigVersion.definition_id == definition_id, ConfigVersion.status == "published")
+            .order_by(ConfigVersion.version.desc())
+            .limit(1)
+        )
+        latest = result.scalar_one_or_none()
+        if not latest:
+            return {"definition_id": definition_id, "has_drift": False, "message": "无已发布版本"}
+        # 获取所有绑定
+        result = await self.session.execute(
+            select(ConfigBinding).where(ConfigBinding.version_id == latest.id)
+        )
+        bindings = result.scalars().all()
+        # 检查是否有绑定指向非最新版本（即存在漂移）
+        drifted = []
+        for binding in bindings:
+            if str(binding.version_id) != str(latest.id):
+                drifted.append({
+                    "binding_id": str(binding.id),
+                    "target_type": binding.target_type,
+                    "target_id": binding.target_id,
+                    "bound_version": str(binding.version_id),
+                    "latest_version": str(latest.id),
+                })
+        return {
+            "definition_id": definition_id,
+            "latest_version": {"id": str(latest.id), "version": latest.version},
+            "has_drift": len(drifted) > 0,
+            "drifted_bindings": drifted,
+        }
+
     # Credential
     async def create_credential(self, name: str, cred_type: str, data: str, **kw) -> Credential:
         existing = await self.session.execute(

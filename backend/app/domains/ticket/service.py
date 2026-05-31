@@ -13,6 +13,18 @@ from app.domains.ticket.models import Ticket, TicketComment
 from app.domains.ticket.schemas import TicketCreate, TicketUpdate
 
 
+# 工单状态机：定义合法的状态转换
+TICKET_TRANSITIONS = {
+    "open": ["assigned", "closed"],
+    "assigned": ["in_progress", "closed"],
+    "in_progress": ["pending_approval", "resolved", "closed"],
+    "pending_approval": ["resolved", "rejected", "in_progress"],
+    "resolved": ["closed"],
+    "closed": [],  # 终态
+    "rejected": ["in_progress", "closed"],
+}
+
+
 class TicketService:
     """工单业务逻辑."""
 
@@ -26,6 +38,41 @@ class TicketService:
         await self.session.flush()
         await self.session.refresh(ticket)
         return ticket
+
+    async def transition_ticket(self, ticket_id: str, new_status: str, user_id: str = "") -> Ticket:
+        """验证状态转换是否合法并执行转换."""
+        ticket = await self.get_ticket(ticket_id)
+        current = ticket.status
+        allowed = TICKET_TRANSITIONS.get(current, [])
+        if new_status not in allowed:
+            raise ValueError(f"不允许的状态转换: {current} → {new_status}")
+        return await self.update_ticket(ticket_id, TicketUpdate(status=new_status), user_id=user_id)
+
+    async def create_from_alert(self, alert_id: str, title: str, severity: str, context: dict = None, user_id: str = "") -> Ticket:
+        """从告警自动创建工单."""
+        priority_map = {"critical": "critical", "warning": "high", "info": "medium"}
+        priority = priority_map.get(severity, "medium")
+        ticket = await self.create_ticket(TicketCreate(
+            title=title,
+            ticket_type="incident",
+            priority=priority,
+            context=context or {},
+            alert_ids=[alert_id],
+        ), user_id=user_id or "system")
+        return ticket
+
+    async def convert_to_knowledge_draft(self, ticket_id: str) -> dict:
+        """工单关闭时转知识草稿."""
+        ticket = await self.get_ticket(ticket_id)
+        if ticket.status != "closed":
+            raise ValueError("只有已关闭的工单才能转为知识草稿")
+        return {
+            "title": f"工单总结: {ticket.title}",
+            "article_type": "incident_summary",
+            "source": "ticket_closure",
+            "source_id": str(ticket.id),
+            "context": ticket.context or {},
+        }
 
     async def list_tickets(
         self, status: str | None = None, ticket_type: str | None = None,

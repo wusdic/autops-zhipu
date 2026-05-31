@@ -10,7 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import api_router
 from app.api.health import router as health_router
 from app.common.exceptions import AppError, app_error_handler, generic_error_handler
+from app.common.event_handlers import register_all_handlers
 from app.common.trace import TraceIdMiddleware
+from app.api.websocket import register_ws_event_bridges
 from app.infra.config import get_config
 from app.infra.database import init_db_engine
 from app.infra.redis_client import close_redis
@@ -22,6 +24,8 @@ async def lifespan(app: FastAPI):
     # Startup
     config = get_config()
     init_db_engine()
+    register_all_handlers()
+    register_ws_event_bridges()
     yield
     # Shutdown
     await close_redis()

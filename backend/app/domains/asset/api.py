@@ -129,6 +129,17 @@ async def get_relations(asset_id: str, svc: AssetService = Depends(_get_service)
     return success([_rel_to_dict(r) for r in rels])
 
 
+@router.get("/{asset_id}/topology")
+async def get_asset_topology(
+    asset_id: str,
+    depth: int = Query(default=2, ge=1, le=5),
+    svc: AssetService = Depends(_get_service),
+):
+    """获取资产拓扑关系图."""
+    topology = await svc.get_topology(asset_id, depth)
+    return success(topology)
+
+
 @router.post("/{asset_id}/relations")
 async def add_relation(
     asset_id: str, data: AssetRelationCreate,

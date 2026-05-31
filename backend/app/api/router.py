@@ -31,6 +31,7 @@ from app.api.backup import router as backup_router
 from app.api.health import platform_router
 from app.domains.asset.discovery_api import router as discovery_router
 from app.domains.notification.api import router as notification_router
+from app.api.websocket import router as ws_router
 
 api_router = APIRouter()
 
@@ -93,6 +94,9 @@ api_router.include_router(backup_router)
 
 # Notifications
 api_router.include_router(notification_router)
+
+# WebSocket
+api_router.include_router(ws_router)
 
 # Platform
 api_router.include_router(platform_router)

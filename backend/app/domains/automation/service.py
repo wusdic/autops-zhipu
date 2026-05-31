@@ -108,6 +108,10 @@ class AutomationService:
         elif risk in ("high", "critical"):
             status = "awaiting_approval"
 
+        if not data.is_dry_run and data.asset_ids:
+            if await self._check_concurrent_lock(data.asset_ids):
+                raise ValueError("目标资产有正在运行的执行任务，请等待完成后再试")
+
         exec_obj = await self.exec_repo.create(
             execution_type=data.execution_type,
             target_id=data.target_id,
@@ -206,6 +210,21 @@ class AutomationService:
         await self.session.delete(pb)
         await self.session.flush()
 
+    async def _check_concurrent_lock(self, asset_ids: list[str]) -> bool:
+        """检查资产是否有正在运行的执行（并发锁）."""
+        from sqlalchemy import select, and_
+        result = await self.session.execute(
+            select(Execution).where(
+                Execution.status.in_(["pending", "approved", "running"]),
+            )
+        )
+        running = result.scalars().all()
+        for exe in running:
+            exe_assets = exe.asset_ids if isinstance(exe.asset_ids, list) else []
+            if any(aid in exe_assets for aid in asset_ids):
+                return True  # 有并发锁
+        return False
+
     async def cancel_execution(self, exec_id: str) -> Execution:
         exe = await self.exec_repo.get_by_id(exec_id)
         if not exe:
@@ -217,3 +236,17 @@ class AutomationService:
         await self.session.flush()
         await self.session.refresh(exe)
         return exe
+
+    async def rollback_execution(self, exec_id: str, user_id: str = "") -> Execution:
+        """回滚自动化执行."""
+        execution = await self.get_execution(exec_id)
+        if execution.status not in ("completed", "failed"):
+            raise ValueError("只能回滚已完成或失败的执行")
+        execution.status = "rolling_back"
+        await self.session.flush()
+        # 如果有回滚动作（从playbook的rollback_steps），执行它们
+        # 这里简化为标记状态
+        execution.status = "rolled_back"
+        await self.session.flush()
+        await self.session.refresh(execution)
+        return execution

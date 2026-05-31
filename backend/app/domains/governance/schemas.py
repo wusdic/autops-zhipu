@@ -108,11 +108,25 @@ class ApiKeyResponse(BaseModel):
         if hasattr(data, "scope"):
             raw = data.scope
             if isinstance(raw, str):
-                object.__setattr__(data, "scope", json.loads(raw))
+                try:
+                    parsed = json.loads(raw)
+                    if isinstance(parsed, list):
+                        object.__setattr__(data, "scope", parsed)
+                    else:
+                        object.__setattr__(data, "scope", [str(parsed)])
+                except (json.JSONDecodeError, ValueError):
+                    object.__setattr__(data, "scope", [raw])
         elif isinstance(data, dict):
             raw = data.get("scope")
             if isinstance(raw, str):
-                data["scope"] = json.loads(raw)
+                try:
+                    parsed = json.loads(raw)
+                    if isinstance(parsed, list):
+                        data["scope"] = parsed
+                    else:
+                        data["scope"] = [str(parsed)]
+                except (json.JSONDecodeError, ValueError):
+                    data["scope"] = [raw]
         return data
 
 

@@ -191,3 +191,52 @@ class AssetService:
         """触发资产采集."""
         await self.get_asset(asset_id)
         return {"asset_id": asset_id, "status": "triggered", "message": "采集任务已触发"}
+
+    async def get_topology(self, asset_id: str, depth: int = 2) -> dict:
+        """获取资产拓扑关系图（递归查询关联资产）."""
+        from sqlalchemy import select
+        nodes = {}
+        edges = []
+        visited = set()
+
+        async def _traverse(aid: str, current_depth: int):
+            if current_depth > depth or aid in visited:
+                return
+            visited.add(aid)
+
+            # 获取资产信息
+            asset = await self.session.get(Asset, aid)
+            if not asset:
+                return
+            nodes[aid] = {
+                "id": str(asset.id),
+                "name": asset.name,
+                "type": asset.asset_type,
+                "status": asset.status,
+                "health": asset.health_status,
+                "ip": asset.ip,
+            }
+
+            # 获取关联关系
+            result = await self.session.execute(
+                select(AssetRelation).where(
+                    (AssetRelation.source_asset_id == aid) | (AssetRelation.target_asset_id == aid)
+                )
+            )
+            relations = result.scalars().all()
+            for rel in relations:
+                target_id = str(rel.target_asset_id if str(rel.source_asset_id) == aid else rel.source_asset_id)
+                edges.append({
+                    "source": str(rel.source_asset_id),
+                    "target": str(rel.target_asset_id),
+                    "type": rel.relation_type,
+                })
+                await _traverse(target_id, current_depth + 1)
+
+        await _traverse(asset_id, 0)
+        return {
+            "center": asset_id,
+            "nodes": list(nodes.values()),
+            "edges": edges,
+            "depth": depth,
+        }

@@ -63,6 +63,38 @@ async def publish_version(version_id: str, svc: ConfigService = Depends(_get_ser
     return success(model_to_dict(ver))
 
 
+@router.get("/definitions/{def_id}/diff")
+async def diff_versions(
+    def_id: str,
+    v_a: str = Query(..., description="版本A的ID"),
+    v_b: str = Query(..., description="版本B的ID"),
+    svc: ConfigService = Depends(_get_service),
+):
+    """对比两个配置版本的差异."""
+    result = await svc.diff_versions(def_id, v_a, v_b)
+    return success(result)
+
+
+@router.post("/definitions/{def_id}/rollback")
+async def rollback_version(
+    def_id: str,
+    data: dict,
+    svc: ConfigService = Depends(_get_service),
+):
+    """回滚配置到指定版本."""
+    target_version_id = data.get("target_version_id", "")
+    user_id = data.get("user_id", "")
+    ver = await svc.rollback_version(def_id, target_version_id, user_id)
+    return success(model_to_dict(ver))
+
+
+@router.get("/definitions/{def_id}/drift")
+async def detect_drift(def_id: str, svc: ConfigService = Depends(_get_service)):
+    """检测配置漂移."""
+    result = await svc.detect_drift(def_id)
+    return success(result)
+
+
 @cred_router.get("")
 async def list_credentials(
     cred_type: str | None = None,

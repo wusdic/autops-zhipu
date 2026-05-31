@@ -135,6 +135,12 @@ async def cancel_execution(exec_id: str, svc: AutomationService = Depends(_get_s
     return success(model_to_dict(exe))
 
 
+@exec_router.post("/{exec_id}/rollback")
+async def rollback_execution(exec_id: str, svc: AutomationService = Depends(_get_svc)):
+    exe = await svc.rollback_execution(exec_id)
+    return success(model_to_dict(exe))
+
+
 @exec_router.get("/{exec_id}/verification")
 async def get_execution_verification(exec_id: str, svc: AutomationService = Depends(_get_svc)):
     """获取执行任务验证信息."""
