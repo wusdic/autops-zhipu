@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.crud_service import model_to_dict
@@ -42,6 +43,19 @@ async def list_alerts(
     return paginate([model_to_dict(i) for i in items], total, page, page_size)
 
 
+@router.get("/stats/overview")
+async def alert_stats(db: AsyncSession = Depends(get_db)):
+    """告警统计概览."""
+    from sqlalchemy import func
+    from app.domains.alert.models import Alert
+
+    total = (await db.execute(select(func.count()).select_from(Alert))).scalar() or 0
+    firing = (await db.execute(select(func.count()).select_from(Alert).where(Alert.status == "firing"))).scalar() or 0
+    acknowledged = (await db.execute(select(func.count()).select_from(Alert).where(Alert.status == "acknowledged"))).scalar() or 0
+    resolved = (await db.execute(select(func.count()).select_from(Alert).where(Alert.status == "resolved"))).scalar() or 0
+    return success({"total": total, "firing": firing, "acknowledged": acknowledged, "resolved": resolved})
+
+
 @router.get("/{alert_id}")
 async def get_alert(alert_id: str, svc: AlertService = Depends(_get_svc)):
     alert = await svc.get_alert(alert_id)
@@ -69,26 +83,4 @@ async def resolve_alert(alert_id: str, svc: AlertService = Depends(_get_svc)):
     return success(model_to_dict(alert))
 
 
-@router.get("/stats/overview")
-async def alert_stats(db: AsyncSession = Depends(get_db)):
-    """告警统计概览."""
-    from sqlalchemy import select, func, case
-    from app.domains.alert.models import Alert
 
-    base = select(Alert)
-    total_q = select(func.count()).select_from(Alert)
-    firing_q = select(func.count()).select_from(Alert).where(Alert.status == "firing")
-    ack_q = select(func.count()).select_from(Alert).where(Alert.status == "acknowledged")
-    resolved_q = select(func.count()).select_from(Alert).where(Alert.status == "resolved")
-
-    total = (await db.execute(total_q)).scalar() or 0
-    firing = (await db.execute(firing_q)).scalar() or 0
-    acknowledged = (await db.execute(ack_q)).scalar() or 0
-    resolved = (await db.execute(resolved_q)).scalar() or 0
-
-    return success({
-        "total": total,
-        "firing": firing,
-        "acknowledged": acknowledged,
-        "resolved": resolved,
-    })

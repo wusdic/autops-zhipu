@@ -144,8 +144,12 @@ async def create_role(data: RoleCreate, db: AsyncSession = Depends(get_db)):
 
 # --- API Key ---
 @apikey_router.get("")
-async def list_api_keys(token: str, auth: AuthService = Depends(_get_auth)):
-    import json
+async def list_api_keys(request: Request, auth: AuthService = Depends(_get_auth)):
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.replace("Bearer ", "") if auth_header.startswith("Bearer ") else ""
+    if not token:
+        from app.common.exceptions import ValidationError
+        raise ValidationError("缺少认证 Token")
     user = await auth.get_current_user(token)
     svc = ApiKeyService(auth.session)
     keys = await svc.list_keys(user.id)

@@ -81,6 +81,7 @@ class AssetService:
         for key, value in updates.items():
             setattr(asset, key, value)
         await self.session.flush()
+        await self.session.refresh(asset)
 
         await self.timeline_repo.create(
             asset_id=asset_id, event_type="updated",

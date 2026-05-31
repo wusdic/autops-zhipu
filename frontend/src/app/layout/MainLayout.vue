@@ -27,6 +27,7 @@
           <el-menu-item index="/knowledge"><el-icon><Collection /></el-icon><span>知识库</span></el-menu-item>
         </el-menu-item-group>
         <el-menu-item-group v-if="!isCollapsed" title="管理">
+          <el-menu-item index="/admin/users"><el-icon><User /></el-icon><span>用户管理</span></el-menu-item>
           <el-menu-item index="/audit"><el-icon><Document /></el-icon><span>审计日志</span></el-menu-item>
         </el-menu-item-group>
         <!-- Collapsed mode -->
@@ -37,6 +38,7 @@
           <el-menu-item index="/alerts"><el-icon><Bell /></el-icon></el-menu-item>
           <el-menu-item index="/automation"><el-icon><VideoPlay /></el-icon></el-menu-item>
           <el-menu-item index="/audit"><el-icon><Document /></el-icon></el-menu-item>
+          <el-menu-item index="/admin/users"><el-icon><User /></el-icon></el-menu-item>
         </template>
       </el-menu>
     </el-aside>
@@ -79,6 +81,8 @@ import { Monitor, Grid, Bell, Tickets, Collection, Setting, Warning, Connection,
   InfoFilled, VideoPlay, MagicStick, User, Document, Expand, Fold } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
+import { useAuthStore } from '@/app/store/auth'
+import { clearToken } from '@/app/router/guards'
 
 const router = useRouter()
 const route = useRoute()
@@ -91,7 +95,7 @@ const pageTitle = computed(() => {
     '/': '运维指挥台', '/assets': '资产管理', '/config': '配置管理', '/collectors': '采集器管理',
     '/events': '事件列表', '/alerts': '告警中心', '/tickets': '工单中心',
     '/incident': '故障处置', '/automation': '自动化编排', '/aiops': 'AI 诊断',
-    '/knowledge': '知识库', '/audit': '审计日志',
+    '/knowledge': '知识库', '/audit': '审计日志', '/admin/users': '用户管理',
   }
   return map[route.path] || ''
 })
@@ -103,8 +107,13 @@ async function loadAlertCount() {
   } catch { /* ignore */ }
 }
 
-function logout() {
-  localStorage.removeItem('autops_token')
+async function logout() {
+  try {
+    await api.post(R.AUTH.LOGOUT)
+  } catch { /* ignore */ }
+  const authStore = useAuthStore()
+  authStore.clearAuth()
+  clearToken()
   localStorage.removeItem('username')
   router.push('/login')
 }

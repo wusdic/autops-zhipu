@@ -17,6 +17,8 @@ const router = createRouter({
     { path: '/tickets', name: 'tickets', component: () => import('@/features/monitoring-event/TicketPage.vue') },
     { path: '/knowledge', name: 'knowledge', component: () => import('@/features/asset-config/KnowledgePage.vue') },
     { path: '/audit', name: 'audit', component: () => import('@/features/platform-admin/AuditLogPage.vue') },
+    { path: '/admin/users', name: 'admin-users', component: () => import('@/features/platform-admin/UserManagementPage.vue') },
+    { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/features/command-center/CommandCenterPage.vue') },
   ],
 })
 

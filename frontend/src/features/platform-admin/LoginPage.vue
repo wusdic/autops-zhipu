@@ -26,10 +26,13 @@ import { API as APIRoutes } from '@/shared/api/routes'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { setToken } from '@/app/router/guards'
+import { useAuthStore } from '@/app/store/auth'
+import apiClient from '@/shared/api/client'
 
 const router = useRouter()
 const loading = ref(false)
 const form = reactive({ username: '', password: '' })
+const authStore = useAuthStore()
 
 async function handleLogin() {
   if (!form.username || !form.password) {
@@ -38,14 +41,16 @@ async function handleLogin() {
   }
   loading.value = true
   try {
-    const res = await fetch(APIRoutes.AUTH.LOGIN, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+    const { data } = await apiClient.post(APIRoutes.AUTH.LOGIN, {
+      username: form.username,
+      password: form.password,
     })
-    const data = await res.json()
-    if (data.code === 0 && data.data?.access_token) {
+    if (data.data?.access_token) {
       setToken(data.data.access_token)
+      authStore.setToken(data.data.access_token)
+      if (data.data.user) {
+        authStore.user = data.data.user
+      }
       localStorage.setItem('username', form.username)
       ElMessage.success('登录成功')
       const redirect = (router.currentRoute.value.query.redirect as string) || '/'
@@ -54,7 +59,7 @@ async function handleLogin() {
       ElMessage.error(data.message || '登录失败')
     }
   } catch (e: any) {
-    ElMessage.error('网络错误: ' + e.message)
+    ElMessage.error(e.response?.data?.message || '登录失败')
   } finally {
     loading.value = false
   }
