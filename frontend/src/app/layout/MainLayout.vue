@@ -1,12 +1,18 @@
 <template>
   <el-container class="main-layout">
     <el-aside :width="isCollapsed ? '64px' : '220px'" class="sidebar">
-      <div class="logo" @click="$router.push('/')" style="cursor:pointer">
+      <div class="logo" @click="navigateTo('/')" style="cursor:pointer">
         <h2 v-if="!isCollapsed">AUTOPS</h2>
         <span v-else style="font-size:20px;color:#fff;font-weight:bold">A</span>
         <div v-if="!isCollapsed" class="subtitle">自治运维操作系统</div>
       </div>
-      <el-menu :default-active="activeMenu" router class="sidebar-menu" :collapse="isCollapsed" background-color="#304156" text-color="#bfcbd9" active-text-color="#409eff">
+      <el-menu
+        :default-active="activeMenu"
+        :default-openeds="defaultOpeneds"
+        class="sidebar-menu"
+        :collapse="isCollapsed"
+        @select="handleMenuSelect"
+      >
         <!-- 指挥中心 -->
         <el-sub-menu index="cmd">
           <template #title><el-icon><Monitor /></el-icon><span>指挥中心</span></template>
@@ -104,7 +110,7 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="$router.push('/admin/config')">系统设置</el-dropdown-item>
+                <el-dropdown-item @click="navigateTo('/admin/config')">系统设置</el-dropdown-item>
                 <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -119,22 +125,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Monitor, Grid, Bell, Tickets, Collection, Setting, Warning, Connection,
-  InfoFilled, VideoPlay, MagicStick, User, Document, Expand, Fold, DataLine, Search } from '@element-plus/icons-vue'
+import { Monitor, Grid, Bell, Collection, VideoPlay, User, Expand, Fold, Search } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import { useAuthStore } from '@/app/store/auth'
 import { clearToken } from '@/app/router/guards'
 import NotificationBell from '@/shared/components/NotificationBell.vue'
 import { wsService } from '@/shared/api/websocket'
+import { APP_CONFIG } from '@/shared/config'
 
 const router = useRouter()
 const route = useRoute()
 const isCollapsed = ref(false)
 const alertCount = ref(0)
 const username = ref(localStorage.getItem('username') || 'admin')
+
+// Default open all submenus
+const defaultOpeneds = ref(['cmd', 'asset', 'monitor', 'auto', 'kb', 'admin'])
+
+// ─── Menu Navigation ───
+function handleMenuSelect(index: string) {
+  if (index && index.startsWith('/')) {
+    // Use router.push for SPA navigation
+    router.push(index).catch(() => {
+      // Fallback: full page navigation if SPA router fails
+      window.location.href = index
+    })
+  }
+}
+
+function navigateTo(path: string) {
+  router.push(path)
+}
 
 // ─── Global Search ───
 const searchQuery = ref('')
@@ -152,21 +176,18 @@ async function doSearch() {
   showSearchResults.value = true
   const results: typeof searchResults.value = []
   try {
-    // Search assets
     const { data: aData } = await api.get(R.ASSETS, { params: { search: q, page_size: 5 } })
     if (aData.code === 0) {
       (aData.data.items || []).forEach((a: any) => results.push({ type: 'asset', typeLabel: '资产', id: a.id, title: a.name || a.hostname, sub: a.ip, path: `/assets/${a.id}` }))
     }
   } catch {}
   try {
-    // Search alerts
     const { data: alData } = await api.get(R.ALERTS, { params: { search: q, page_size: 5 } })
     if (alData.code === 0) {
       (alData.data.items || []).forEach((a: any) => results.push({ type: 'alert', typeLabel: '告警', id: a.id, title: a.title, sub: a.severity, path: `/alerts/${a.id}` }))
     }
   } catch {}
   try {
-    // Search tickets
     const { data: tData } = await api.get(R.TICKETS, { params: { search: q, page_size: 5 } })
     if (tData.code === 0) {
       (tData.data.items || []).forEach((t: any) => results.push({ type: 'ticket', typeLabel: '工单', id: t.id, title: t.title, sub: t.status, path: `/tickets/${t.id}` }))
@@ -197,7 +218,6 @@ function handleKeydown(e: KeyboardEvent) {
 // Active menu: use base path for dynamic routes
 const activeMenu = computed(() => {
   const path = route.path
-  // For dynamic routes, match the base path
   if (path.startsWith('/assets/') && path !== '/assets/discovery') return '/assets'
   if (path.startsWith('/alerts/')) return '/alerts'
   if (path.startsWith('/incident/')) return '/incident'
@@ -211,6 +231,7 @@ const pageTitle = computed(() => {
   const map: Record<string, string> = {
     '/': '运维指挥台',
     '/assets': '资产列表', '/assets/discovery': '资产发现', '/asset-groups': '资产分组', '/credentials': '凭证管理',
+    '/config': '配置管理', '/collectors': '采集器管理',
     '/incident': '故障处置', '/aiops': 'AI 诊断',
     '/monitoring': '监控总览', '/events': '事件列表', '/alerts': '告警中心',
     '/alert-rules': '告警规则', '/tickets': '工单中心',
@@ -222,7 +243,6 @@ const pageTitle = computed(() => {
     '/admin/status': '平台状态', '/admin/backup': '备份恢复',
     '/audit': '审计日志',
   }
-  // For dynamic routes, show parent title + context
   if (route.path.match(/^\/assets\/.+\/topology/)) return '资产拓扑图'
   if (route.path.match(/^\/assets\/.+/) && !route.path.endsWith('/discovery')) return '资产详情'
   if (route.path.match(/^\/alerts\/.+/)) return '告警详情'
@@ -256,9 +276,13 @@ async function logout() {
 onMounted(() => {
   loadAlertCount()
   window.addEventListener('keydown', handleKeydown)
-  // Initialize WebSocket
-  const token = localStorage.getItem('token')
+  // Initialize WebSocket with correct token key
+  const token = localStorage.getItem(APP_CONFIG.TOKEN_KEY)
   if (token) wsService.connect(token)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
 })
 </script>
 
@@ -286,7 +310,6 @@ onMounted(() => {
 .page-title { font-size: 16px; font-weight: 600; color: #303133; }
 .header-right { display: flex; align-items: center; gap: 12px; position: relative; }
 .user-info { display: flex; align-items: center; cursor: pointer; }
-.alert-badge { margin-right: 4px; }
 .search-dropdown {
   position: absolute; top: 40px; right: 200px; width: 400px;
   background: #fff; border: 1px solid #dcdfe6; border-radius: 4px;
