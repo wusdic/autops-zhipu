@@ -1,7 +1,14 @@
 <template>
   <div class="page-container">
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">策略模拟</div>
+        <div class="autops-page-subtitle">在沙箱中验证策略匹配结果</div>
+      </div>
+    </div>
+
     <!-- 顶部导航 -->
-    <div class="toolbar">
+    <div class="autops-toolbar">
       <el-button @click="$router.back()"><el-icon><ArrowLeft /></el-icon> 返回策略列表</el-button>
       <div style="flex:1" />
       <el-tag v-if="policyDetail" :type="riskTagType(policyDetail.risk_level)" size="large">
@@ -10,7 +17,7 @@
     </div>
 
     <!-- 策略概要卡片 -->
-    <el-card v-if="policyDetail" shadow="hover" class="summary-card">
+    <div class="autops-card summary-card" v-if="policyDetail">
       <div class="summary-grid">
         <div class="summary-item">
           <div class="summary-label">策略名称</div>
@@ -37,13 +44,13 @@
           <div class="summary-value">{{ policyDetail.requires_approval ? '是' : '否' }}</div>
         </div>
       </div>
-    </el-card>
+    </div>
 
     <el-row :gutter="16" style="margin-top:16px">
       <!-- 左侧：模拟参数 -->
       <el-col :span="10">
-        <el-card shadow="hover">
-          <template #header><span style="font-weight:bold">模拟参数</span></template>
+        <div class="autops-card">
+          <span style="font-weight:bold">模拟参数</span>
           <el-form :model="simParams" label-width="90px">
             <!-- 资产选择器 -->
             <el-form-item label="目标资产" required>
@@ -133,33 +140,33 @@
               <el-button @click="resetParams">重置参数</el-button>
             </el-form-item>
           </el-form>
-        </el-card>
+        </div>
       </el-col>
 
       <!-- 右侧：模拟结果 -->
       <el-col :span="14">
         <!-- 等待模拟 -->
-        <el-card v-if="!simulateResult && !simulating" shadow="hover" class="result-placeholder">
+        <div class="autops-card result-placeholder" v-if="!simulateResult && !simulating">
           <el-empty description="配置模拟参数后点击「执行模拟」查看结果" :image-size="100">
             <template #image>
               <el-icon :size="80" color="#c0c4cc"><VideoPlay /></el-icon>
             </template>
           </el-empty>
-        </el-card>
+        </div>
 
         <!-- 模拟中 -->
-        <el-card v-if="simulating" shadow="hover" class="result-placeholder">
+        <div class="autops-card result-placeholder" v-if="simulating">
           <div class="simulating-box">
             <el-icon :size="48" class="rotating"><Loading /></el-icon>
             <p style="margin-top:16px;font-size:16px">正在模拟策略执行...</p>
             <p style="color:#909399">分析条件匹配、计算影响范围、生成执行计划</p>
           </div>
-        </el-card>
+        </div>
 
         <!-- 模拟结果 -->
         <template v-if="simulateResult && !simulating">
           <!-- 匹配结果总览 -->
-          <el-card shadow="hover" class="result-card" :class="simulateResult.matched ? 'matched' : 'unmatched'">
+          <div class="autops-card result-card" :class="simulateResult.matched ? 'matched' : 'unmatched'">
             <div class="result-header">
               <el-icon :size="32" :color="simulateResult.matched ? '#67c23a' : '#909399'">
                 <component :is="simulateResult.matched ? 'SuccessFilled' : 'CircleCloseFilled'" />
@@ -189,11 +196,11 @@
                 </div>
               </el-col>
             </el-row>
-          </el-card>
+          </div>
 
           <!-- 条件匹配详情 -->
-          <el-card v-if="simulateResult.condition_details?.length" shadow="hover" style="margin-top:16px">
-            <template #header><span style="font-weight:bold">条件匹配详情</span></template>
+          <div class="autops-card" v-if="simulateResult.condition_details?.length" style="margin-top:16px">
+            <span style="font-weight:bold">条件匹配详情</span>
             <el-table :data="simulateResult.condition_details" stripe>
               <el-table-column prop="field" label="条件字段" min-width="140">
                 <template #default="{ row }">
@@ -228,11 +235,11 @@
               条件逻辑: <strong>{{ simulateResult.condition_logic }}</strong>
               ({{ simulateResult.matched_count || 0 }}/{{ simulateResult.total_conditions || simulateResult.condition_details.length }} 条件满足)
             </div>
-          </el-card>
+          </div>
 
           <!-- 命中解释 -->
-          <el-card v-if="simulateResult.explanation" shadow="hover" style="margin-top:16px">
-            <template #header><span style="font-weight:bold">命中解释</span></template>
+          <div class="autops-card" v-if="simulateResult.explanation" style="margin-top:16px">
+            <span style="font-weight:bold">命中解释</span>
             <div class="explanation-box">
               <el-alert :title="simulateResult.explanation" :type="simulateResult.matched ? 'success' : 'info'" show-icon :closable="false" />
               <div v-if="simulateResult.hit_reasons?.length" style="margin-top:12px">
@@ -245,11 +252,11 @@
                 </ul>
               </div>
             </div>
-          </el-card>
+          </div>
 
           <!-- 执行动作预览 -->
-          <el-card v-if="simulateResult.actions?.length" shadow="hover" style="margin-top:16px">
-            <template #header><span style="font-weight:bold">预期执行动作链</span></template>
+          <div class="autops-card" v-if="simulateResult.actions?.length" style="margin-top:16px">
+            <span style="font-weight:bold">预期执行动作链</span>
             <el-timeline>
               <el-timeline-item v-for="(act, idx) in simulateResult.actions" :key="idx"
                 :type="getActionColor(act.type)" :hollow="false" size="large"
@@ -286,11 +293,11 @@
                 </div>
               </div>
             </div>
-          </el-card>
+          </div>
 
           <!-- 影响分析 -->
-          <el-card v-if="simulateResult.impact" shadow="hover" style="margin-top:16px">
-            <template #header><span style="font-weight:bold">影响分析</span></template>
+          <div class="autops-card" v-if="simulateResult.impact" style="margin-top:16px">
+            <span style="font-weight:bold">影响分析</span>
             <el-descriptions :column="2" border>
               <el-descriptions-item label="影响资产数">{{ simulateResult.impact.affected_assets || 1 }}</el-descriptions-item>
               <el-descriptions-item label="预估影响时间">{{ simulateResult.impact.estimated_duration || '未知' }}</el-descriptions-item>
@@ -302,7 +309,7 @@
               <el-descriptions-item label="可回滚">{{ simulateResult.impact.rollbackable ? '是' : '否' }}</el-descriptions-item>
               <el-descriptions-item label="说明" :span="2">{{ simulateResult.impact.description || '-' }}</el-descriptions-item>
             </el-descriptions>
-          </el-card>
+          </div>
         </template>
       </el-col>
     </el-row>

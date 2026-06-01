@@ -1,11 +1,13 @@
 <template>
   <div class="knowledge-page">
-    <!-- Page Header -->
-    <div class="page-top">
-      <span class="page-title">
-        <el-icon style="margin-right: 6px"><Reading /></el-icon>
-        知识库管理
-      </span>
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">
+          <el-icon style="margin-right: 6px"><Reading /></el-icon>
+          知识库管理
+        </div>
+        <div class="autops-page-subtitle">运维知识沉淀与检索</div>
+      </div>
       <div class="top-actions">
         <el-button type="primary" :icon="Plus" @click="goCreate">新建知识</el-button>
         <el-button :icon="Upload" @click="goImport">导入</el-button>
@@ -16,45 +18,45 @@
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row">
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <div class="autops-card stat-card">
           <div class="stat-content">
             <div class="stat-value">{{ stats.total }}</div>
             <div class="stat-label">知识总数</div>
           </div>
           <el-icon class="stat-icon" :size="40" color="#409EFF"><Document /></el-icon>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <div class="autops-card stat-card">
           <div class="stat-content">
             <div class="stat-value">{{ stats.published }}</div>
             <div class="stat-label">已发布</div>
           </div>
           <el-icon class="stat-icon" :size="40" color="#67C23A"><CircleCheck /></el-icon>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <div class="autops-card stat-card">
           <div class="stat-content">
             <div class="stat-value">{{ stats.draft }}</div>
             <div class="stat-label">草稿</div>
           </div>
           <el-icon class="stat-icon" :size="40" color="#E6A23C"><EditPen /></el-icon>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <div class="autops-card stat-card">
           <div class="stat-content">
             <div class="stat-value">{{ stats.total - stats.published - stats.draft }}</div>
             <div class="stat-label">其他状态</div>
           </div>
           <el-icon class="stat-icon" :size="40" color="#909399"><InfoFilled /></el-icon>
-        </el-card>
+        </div>
       </el-col>
     </el-row>
 
     <!-- Filters & Search -->
-    <el-card shadow="hover" class="filter-card">
+    <div class="autops-card filter-card">
       <el-row :gutter="16" align="middle">
         <el-col :span="8">
           <el-input
@@ -96,10 +98,10 @@
           </el-select>
         </el-col>
       </el-row>
-    </el-card>
+    </div>
 
     <!-- Knowledge Table -->
-    <el-card shadow="hover" style="margin-top: 16px">
+    <div class="autops-card" style="margin-top: 16px">
       <el-table
         v-loading="loading"
         :data="knowledgeList"
@@ -168,7 +170,7 @@
           @current-change="loadList"
         />
       </div>
-    </el-card>
+    </div>
   </div>
 </template>
 

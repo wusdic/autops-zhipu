@@ -1,6 +1,13 @@
 <template>
   <div class="page-container">
-    <div class="toolbar">
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">编辑知识</div>
+        <div class="autops-page-subtitle">编辑知识条目内容</div>
+      </div>
+    </div>
+
+    <div class="autops-toolbar">
       <el-button @click="goBack"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
       <div style="flex:1" />
       <el-button type="primary" @click="save" :loading="saving"><el-icon><Check /></el-icon> 保存</el-button>
@@ -135,7 +142,7 @@
 
       <!-- 预览 -->
       <el-tab-pane label="预览" name="preview">
-        <el-card>
+        <div class="autops-card">
           <h2>{{ form.title || '(未命名)' }}</h2>
           <div style="margin:8px 0">
             <el-tag v-for="t in form.tags" :key="t" size="small" style="margin-right:4px">{{ t }}</el-tag>
@@ -167,7 +174,7 @@
           </template>
 
           <div v-if="form.content" v-html="form.content" style="margin-top:16px" />
-        </el-card>
+        </div>
       </el-tab-pane>
     </el-tabs>
   </div>

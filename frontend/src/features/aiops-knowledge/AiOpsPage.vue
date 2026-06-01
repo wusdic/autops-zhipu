@@ -1,15 +1,16 @@
 <template>
   <div class="aiops-page">
-    <!-- Page Header -->
-    <div class="page-top">
-      <span class="page-title">
-        <el-icon style="margin-right: 6px"><MagicStick /></el-icon>
-        AI 智能诊断
-      </span>
-      <span class="page-subtitle">
-        <template v-if="activeMode === 'analysis'">选择告警，由 AI 自动构建上下文并进行根因分析</template>
-        <template v-else>输入运维任务，Agent 自主规划并执行多步骤排查</template>
-      </span>
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">
+          <el-icon style="margin-right: 6px"><MagicStick /></el-icon>
+          AI 智能诊断
+        </div>
+        <div class="autops-page-subtitle">
+          <template v-if="activeMode === 'analysis'">选择告警，由 AI 自动构建上下文并进行根因分析</template>
+          <template v-else>输入运维任务，Agent 自主规划并执行多步骤排查</template>
+        </div>
+      </div>
     </div>
 
     <!-- Mode Tab Switch -->
@@ -39,10 +40,10 @@
       <!-- Left Column: Analysis Workflow -->
       <el-col :span="16">
         <!-- Step 1: Alert Selection -->
-        <el-card shadow="hover" class="workflow-card">
-          <template #header>
-            <div class="card-header">
-              <span class="card-header-title">
+        <div class="autops-card workflow-card">
+          
+            <div class="autops-card-header">
+              <span class="autops-card-title">
                 <el-icon><Bell /></el-icon>
                 选择告警
               </span>
@@ -50,7 +51,7 @@
                 <el-icon><Refresh /></el-icon>刷新
               </el-button>
             </div>
-          </template>
+          
 
           <div class="alert-selector">
             <el-select
@@ -87,13 +88,13 @@
               开始 AI 分析
             </el-button>
           </div>
-        </el-card>
+        </div>
 
         <!-- Step 2: Context Builder Panel -->
-        <el-card v-if="context" shadow="hover" class="workflow-card">
-          <template #header>
-            <div class="card-header">
-              <span class="card-header-title">
+        <div class="autops-card workflow-card" v-if="context">
+          
+            <div class="autops-card-header">
+              <span class="autops-card-title">
                 <el-icon><FolderOpened /></el-icon>
                 上下文构建
               </span>
@@ -101,7 +102,7 @@
                 已收集 {{ contextSourceCount }} 项上下文
               </el-tag>
             </div>
-          </template>
+          
 
           <el-collapse v-model="expandedContextPanels">
             <!-- Alert Info -->
@@ -203,13 +204,13 @@
               </el-table>
             </el-collapse-item>
           </el-collapse>
-        </el-card>
+        </div>
 
         <!-- Step 3: Analysis Result -->
-        <el-card v-if="analysisResult" shadow="hover" class="workflow-card">
-          <template #header>
-            <div class="card-header">
-              <span class="card-header-title">
+        <div class="autops-card workflow-card" v-if="analysisResult">
+          
+            <div class="autops-card-header">
+              <span class="autops-card-title">
                 <el-icon><MagicStick /></el-icon>
                 AI 分析结果
               </span>
@@ -224,7 +225,7 @@
                 <el-tag type="info" size="small">{{ formatTime(analysisResult.analyzed_at) }}</el-tag>
               </div>
             </div>
-          </template>
+          
 
           <!-- Root Cause -->
           <div class="result-section">
@@ -359,15 +360,15 @@
               提交反馈
             </el-button>
           </div>
-        </el-card>
+        </div>
       </el-col>
 
       <!-- Right Column: History -->
       <el-col :span="8">
-        <el-card shadow="hover" class="history-card">
-          <template #header>
-            <div class="card-header">
-              <span class="card-header-title">
+        <div class="autops-card history-card">
+          
+            <div class="autops-card-header">
+              <span class="autops-card-title">
                 <el-icon><Clock /></el-icon>
                 近期分析记录
               </span>
@@ -375,7 +376,7 @@
                 <el-icon><Refresh /></el-icon>
               </el-button>
             </div>
-          </template>
+          
 
           <div v-loading="historyLoading">
             <el-empty v-if="!historyLoading && (!historyList || !historyList.length)" description="暂无分析记录" :image-size="80" />
@@ -407,7 +408,7 @@
               </div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
     </el-row>
     </template>
@@ -418,15 +419,15 @@
       <!-- Left Column: Agent Task + Process -->
       <el-col :span="16">
         <!-- Task Input -->
-        <el-card shadow="hover" class="workflow-card">
-          <template #header>
-            <div class="card-header">
-              <span class="card-header-title">
+        <div class="autops-card workflow-card">
+          
+            <div class="autops-card-header">
+              <span class="autops-card-title">
                 <el-icon><EditPen /></el-icon>
                 任务输入
               </span>
             </div>
-          </template>
+          
           <el-input
             v-model="agentTask"
             type="textarea"
@@ -452,13 +453,13 @@
               取消运行
             </el-button>
           </div>
-        </el-card>
+        </div>
 
         <!-- Thinking Process (Real-time Steps) -->
-        <el-card v-if="agentSteps.length > 0" shadow="hover" class="workflow-card">
-          <template #header>
-            <div class="card-header">
-              <span class="card-header-title">
+        <div class="autops-card" v-if="agentSteps.length> 0" shadow="hover" class="workflow-card">
+          
+            <div class="autops-card-header">
+              <span class="autops-card-title">
                 <el-icon><Cpu /></el-icon>
                 思考过程
               </span>
@@ -468,7 +469,7 @@
               </el-tag>
               <el-tag v-else type="success" effect="dark" size="small">已完成</el-tag>
             </div>
-          </template>
+          
           <el-timeline>
             <el-timeline-item
               v-for="(step, idx) in agentSteps"
@@ -507,19 +508,19 @@
               </div>
             </el-timeline-item>
           </el-timeline>
-        </el-card>
+        </div>
 
         <!-- Final Conclusion -->
-        <el-card v-if="agentConclusion" shadow="hover" class="workflow-card">
-          <template #header>
-            <div class="card-header">
-              <span class="card-header-title">
+        <div class="autops-card workflow-card" v-if="agentConclusion">
+          
+            <div class="autops-card-header">
+              <span class="autops-card-title">
                 <el-icon><Finished /></el-icon>
                 最终结论
               </span>
               <el-tag type="info" size="small">{{ formatTime(agentConclusion.completed_at) }}</el-tag>
             </div>
-          </template>
+          
           <div class="agent-conclusion-summary">{{ agentConclusion.summary }}</div>
           <div v-if="agentConclusion.actions?.length" class="result-section" style="margin-top: 16px;">
             <div class="section-label">建议操作</div>
@@ -544,15 +545,15 @@
               <JsonViewer :data="agentConclusion" />
             </el-collapse-item>
           </el-collapse>
-        </el-card>
+        </div>
       </el-col>
 
       <!-- Right Column: Agent History -->
       <el-col :span="8">
-        <el-card shadow="hover" class="history-card">
-          <template #header>
-            <div class="card-header">
-              <span class="card-header-title">
+        <div class="autops-card history-card">
+          
+            <div class="autops-card-header">
+              <span class="autops-card-title">
                 <el-icon><Clock /></el-icon>
                 Agent 运行历史
               </span>
@@ -560,7 +561,7 @@
                 <el-icon><Refresh /></el-icon>
               </el-button>
             </div>
-          </template>
+          
           <div v-loading="agentHistoryLoading">
             <el-empty v-if="!agentHistoryLoading && !agentHistoryList.length" description="暂无 Agent 运行记录" :image-size="80" />
             <div v-else class="history-list">
@@ -585,7 +586,7 @@
               </div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
     </el-row>
     </template>

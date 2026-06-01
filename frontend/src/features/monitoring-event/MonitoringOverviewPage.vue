@@ -1,179 +1,195 @@
 <template>
   <div class="monitoring-overview">
+    <!-- ========== Page Header ========== -->
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">监控总览</div>
+        <div class="autops-page-subtitle">实时监控概览，包括事件趋势、告警分布与状态变更</div>
+      </div>
+    </div>
+
     <!-- ===== 顶部统计卡片 ===== -->
-    <el-row :gutter="16" class="stat-cards">
+    <el-row :gutter="16" class="stat-cards mb-lg">
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-events">
-          <div class="stat-card-inner">
-            <el-icon :size="36" color="#E6A23C"><Bell /></el-icon>
-            <div class="stat-card-info">
-              <div class="stat-card-value">{{ overview.activeEvents24h }}</div>
-              <div class="stat-card-label">24h 活跃事件</div>
+        <div class="autops-card stat-card stat-events">
+          <div class="autops-card-body">
+            <div class="stat-card-inner">
+              <el-icon :size="36" color="#E6A23C"><Bell /></el-icon>
+              <div class="stat-card-info">
+                <div class="stat-card-value">{{ overview.activeEvents24h }}</div>
+                <div class="stat-card-label">24h 活跃事件</div>
+              </div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-alerts">
-          <div class="stat-card-inner">
-            <el-icon :size="36" color="#F56C6C"><WarningFilled /></el-icon>
-            <div class="stat-card-info">
-              <div class="stat-card-value">{{ overview.activeAlerts }}</div>
-              <div class="stat-card-label">活跃告警</div>
+        <div class="autops-card stat-card stat-alerts">
+          <div class="autops-card-body">
+            <div class="stat-card-inner">
+              <el-icon :size="36" color="#F56C6C"><WarningFilled /></el-icon>
+              <div class="stat-card-info">
+                <div class="stat-card-value">{{ overview.activeAlerts }}</div>
+                <div class="stat-card-label">活跃告警</div>
+              </div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-assets">
-          <div class="stat-card-inner">
-            <el-icon :size="36" color="#409EFF"><Monitor /></el-icon>
-            <div class="stat-card-info">
-              <div class="stat-card-value">{{ overview.totalAssets }}</div>
-              <div class="stat-card-label">监控资产总数</div>
+        <div class="autops-card stat-card stat-assets">
+          <div class="autops-card-body">
+            <div class="stat-card-inner">
+              <el-icon :size="36" color="#409EFF"><Monitor /></el-icon>
+              <div class="stat-card-info">
+                <div class="stat-card-value">{{ overview.totalAssets }}</div>
+                <div class="stat-card-label">监控资产总数</div>
+              </div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-rate">
-          <div class="stat-card-inner">
-            <el-icon :size="36" color="#67C23A"><CircleCheckFilled /></el-icon>
-            <div class="stat-card-info">
-              <div class="stat-card-value">{{ overview.collectionRate }}<span class="stat-unit">%</span></div>
-              <div class="stat-card-label">采集成功率</div>
+        <div class="autops-card stat-card stat-rate">
+          <div class="autops-card-body">
+            <div class="stat-card-inner">
+              <el-icon :size="36" color="#67C23A"><CircleCheckFilled /></el-icon>
+              <div class="stat-card-info">
+                <div class="stat-card-value">{{ overview.collectionRate }}<span class="stat-unit">%</span></div>
+                <div class="stat-card-label">采集成功率</div>
+              </div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
     </el-row>
 
     <!-- ===== 主内容区 ===== -->
-    <el-row :gutter="16" style="margin-top: 16px">
+    <el-row :gutter="16">
       <!-- 左栏 span=16 -->
       <el-col :span="16">
         <!-- 事件趋势图（24h，按严重级别分组） -->
-        <el-card>
-          <template #header>
-            <div class="card-header">
-              <span>事件趋势（近 24 小时）</span>
-              <el-button text type="primary" @click="loadEventTrend">刷新</el-button>
-            </div>
-          </template>
-          <div v-loading="trendLoading">
-            <MetricChart
-              :multiple="trendSeries"
-              :data="[]"
-              title="每小时事件数"
-              height="320px"
-              unit=" 次"
-            />
+        <div class="autops-card">
+          <div class="autops-card-header">
+            <span class="autops-card-title">事件趋势（近 24 小时）</span>
+            <el-button text type="primary" @click="loadEventTrend">刷新</el-button>
           </div>
-        </el-card>
+          <div class="autops-card-body">
+            <div v-loading="trendLoading">
+              <MetricChart
+                :multiple="trendSeries"
+                :data="[]"
+                title="每小时事件数"
+                height="320px"
+                unit=" 次"
+              />
+            </div>
+          </div>
+        </div>
 
         <!-- 告警严重级别分布饼图 -->
-        <el-card style="margin-top: 16px">
-          <template #header>
-            <div class="card-header">
-              <span>告警严重级别分布</span>
-              <el-button text type="primary" @click="loadSeverityDist">刷新</el-button>
-            </div>
-          </template>
-          <div v-loading="severityLoading">
-            <MetricChart
-              :data="severityData"
-              title=""
-              chart-type="pie"
-              height="300px"
-            />
+        <div class="autops-card" style="margin-top: 16px">
+          <div class="autops-card-header">
+            <span class="autops-card-title">告警严重级别分布</span>
+            <el-button text type="primary" @click="loadSeverityDist">刷新</el-button>
           </div>
-        </el-card>
+          <div class="autops-card-body">
+            <div v-loading="severityLoading">
+              <MetricChart
+                :data="severityData"
+                title=""
+                chart-type="pie"
+                height="300px"
+              />
+            </div>
+          </div>
+        </div>
       </el-col>
 
       <!-- 右栏 span=8 -->
       <el-col :span="8">
         <!-- 最近事件列表 -->
-        <el-card>
-          <template #header>
-            <div class="card-header">
-              <span>最近事件</span>
-              <el-button text type="primary" @click="$router.push('/monitoring/events')">查看全部</el-button>
-            </div>
-          </template>
-          <div v-loading="eventsLoading" class="recent-events-list">
-            <div
-              v-for="item in recentEvents"
-              :key="item.id"
-              class="recent-event-item"
-            >
-              <SeverityBadge :severity="item.severity" size="small" />
-              <div class="recent-event-content">
-                <span class="recent-event-title" :title="item.title">{{ item.title }}</span>
-                <span class="recent-event-time">{{ formatTime(item.created_at) }}</span>
-              </div>
-            </div>
-            <el-empty v-if="!eventsLoading && recentEvents.length === 0" description="暂无事件" :image-size="60" />
+        <div class="autops-card">
+          <div class="autops-card-header">
+            <span class="autops-card-title">最近事件</span>
+            <el-button text type="primary" @click="$router.push('/monitoring/events')">查看全部</el-button>
           </div>
-        </el-card>
+          <div class="autops-card-body">
+            <div v-loading="eventsLoading" class="recent-events-list">
+              <div
+                v-for="item in recentEvents"
+                :key="item.id"
+                class="recent-event-item"
+              >
+                <SeverityBadge :severity="item.severity" size="small" />
+                <div class="recent-event-content">
+                  <span class="recent-event-title" :title="item.title">{{ item.title }}</span>
+                  <span class="recent-event-time">{{ formatTime(item.created_at) }}</span>
+                </div>
+              </div>
+              <el-empty v-if="!eventsLoading && recentEvents.length === 0" description="暂无事件" :image-size="60" />
+            </div>
+          </div>
+        </div>
 
         <!-- 告警最多的资产 -->
-        <el-card style="margin-top: 16px">
-          <template #header>
-            <div class="card-header">
-              <span>告警最多资产 TOP 10</span>
-            </div>
-          </template>
-          <div v-loading="topAssetsLoading" class="top-assets-list">
-            <div
-              v-for="(item, idx) in topAlertAssets"
-              :key="item.asset_id ?? idx"
-              class="top-asset-item"
-            >
-              <span class="top-asset-rank">{{ idx + 1 }}</span>
-              <span class="top-asset-name" :title="item.asset_name">{{ item.asset_name }}</span>
-              <div class="top-asset-bar-wrap">
-                <div
-                  class="top-asset-bar"
-                  :style="{
-                    width: barWidth(item.alert_count),
-                    backgroundColor: barColor(item.alert_count),
-                  }"
-                />
-                <span class="top-asset-count">{{ item.alert_count }}</span>
-              </div>
-            </div>
-            <el-empty v-if="!topAssetsLoading && topAlertAssets.length === 0" description="暂无数据" :image-size="60" />
+        <div class="autops-card" style="margin-top: 16px">
+          <div class="autops-card-header">
+            <span class="autops-card-title">告警最多资产 TOP 10</span>
           </div>
-        </el-card>
+          <div class="autops-card-body">
+            <div v-loading="topAssetsLoading" class="top-assets-list">
+              <div
+                v-for="(item, idx) in topAlertAssets"
+                :key="item.asset_id ?? idx"
+                class="top-asset-item"
+              >
+                <span class="top-asset-rank">{{ idx + 1 }}</span>
+                <span class="top-asset-name" :title="item.asset_name">{{ item.asset_name }}</span>
+                <div class="top-asset-bar-wrap">
+                  <div
+                    class="top-asset-bar"
+                    :style="{
+                      width: barWidth(item.alert_count),
+                      backgroundColor: barColor(item.alert_count),
+                    }"
+                  />
+                  <span class="top-asset-count">{{ item.alert_count }}</span>
+                </div>
+              </div>
+              <el-empty v-if="!topAssetsLoading && topAlertAssets.length === 0" description="暂无数据" :image-size="60" />
+            </div>
+          </div>
+        </div>
       </el-col>
     </el-row>
 
     <!-- ===== 底部：状态变更时间线 ===== -->
-    <el-card style="margin-top: 16px">
-      <template #header>
-        <div class="card-header">
-          <span>最近状态变更</span>
-          <el-button text type="primary" @click="loadChanges">刷新</el-button>
-        </div>
-      </template>
-      <el-table :data="changes" v-loading="changesLoading" stripe>
-        <el-table-column prop="asset_name" label="资产" min-width="140" show-overflow-tooltip />
-        <el-table-column label="变更前" width="120">
-          <template #default="{ row }">
-            <StatusBadge :status="row.old_status" size="small" />
-          </template>
-        </el-table-column>
-        <el-table-column label="变更后" width="120">
-          <template #default="{ row }">
-            <StatusBadge :status="row.new_status" size="small" show-icon />
-          </template>
-        </el-table-column>
-        <el-table-column prop="reason" label="原因" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="changed_at" label="变更时间" width="180">
-          <template #default="{ row }">{{ formatTime(row.changed_at) }}</template>
-        </el-table-column>
-      </el-table>
-    </el-card>
+    <div class="autops-card" style="margin-top: 16px">
+      <div class="autops-card-header">
+        <span class="autops-card-title">最近状态变更</span>
+        <el-button text type="primary" @click="loadChanges">刷新</el-button>
+      </div>
+      <div class="autops-card-body">
+        <el-table :data="changes" v-loading="changesLoading" stripe>
+          <el-table-column prop="asset_name" label="资产" min-width="140" show-overflow-tooltip />
+          <el-table-column label="变更前" width="120">
+            <template #default="{ row }">
+              <StatusBadge :status="row.old_status" size="small" />
+            </template>
+          </el-table-column>
+          <el-table-column label="变更后" width="120">
+            <template #default="{ row }">
+              <StatusBadge :status="row.new_status" size="small" show-icon />
+            </template>
+          </el-table-column>
+          <el-table-column prop="reason" label="原因" min-width="200" show-overflow-tooltip />
+          <el-table-column prop="changed_at" label="变更时间" width="180">
+            <template #default="{ row }">{{ formatTime(row.changed_at) }}</template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
   </div>
 </template>
 

@@ -1,9 +1,17 @@
 <template>
   <div class="alert-list-page">
+    <!-- ========== Page Header ========== -->
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">告警中心</div>
+        <div class="autops-page-subtitle">实时监控告警事件，支持确认、恢复、转工单等操作</div>
+      </div>
+    </div>
+
     <!-- ========== Statistics Row ========== -->
-    <el-row :gutter="16" class="stats-row">
+    <el-row :gutter="16" class="stats-row mb-lg">
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--critical">
+        <div class="autops-card stat-card stat-card--critical">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><WarningFilled /></el-icon>
@@ -13,10 +21,10 @@
               <div class="stat-card__label">严重告警</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--warning">
+        <div class="autops-card stat-card stat-card--warning">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><Warning /></el-icon>
@@ -26,10 +34,10 @@
               <div class="stat-card__label">警告告警</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--active">
+        <div class="autops-card stat-card stat-card--active">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><Bell /></el-icon>
@@ -39,10 +47,10 @@
               <div class="stat-card__label">活跃告警</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--resolved">
+        <div class="autops-card stat-card stat-card--resolved">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><CircleCheckFilled /></el-icon>
@@ -52,21 +60,19 @@
               <div class="stat-card__label">今日已恢复</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
     </el-row>
 
     <!-- ========== Main Card ========== -->
-    <el-card class="main-card">
-      <template #header>
-        <div class="card-header">
-          <span class="card-header__title">告警中心</span>
-          <el-button :icon="Refresh" circle size="small" @click="loadAlerts" />
-        </div>
-      </template>
-
-      <!-- ========== Filters ========== -->
-      <el-form :inline="true" class="filter-form" @submit.prevent="handleSearch">
+    <div class="autops-card main-card">
+      <div class="autops-card-header">
+        <span class="autops-card-title">告警列表</span>
+        <el-button :icon="Refresh" circle size="small" @click="loadAlerts" />
+      </div>
+      <div class="autops-card-body">
+        <!-- ========== Filters ========== -->
+        <el-form :inline="true" class="autops-toolbar filter-form" @submit.prevent="handleSearch">
         <el-form-item label="告警级别">
           <el-select v-model="filters.severity" placeholder="全部级别" clearable style="width: 130px">
             <el-option label="严重" value="critical" />
@@ -212,19 +218,20 @@
         </el-table-column>
       </el-table>
 
-      <!-- ========== Pagination ========== -->
-      <div class="pagination-wrapper">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.pageSize"
-          :total="pagination.total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          background
-          @change="loadAlerts"
-        />
+        <!-- ========== Pagination ========== -->
+        <div class="pagination-wrapper">
+          <el-pagination
+            v-model:current-page="pagination.page"
+            v-model:page-size="pagination.pageSize"
+            :total="pagination.total"
+            :page-sizes="[10, 20, 50, 100]"
+            layout="total, sizes, prev, pager, next, jumper"
+            background
+            @change="loadAlerts"
+          />
+        </div>
       </div>
-    </el-card>
+    </div>
   </div>
 </template>
 

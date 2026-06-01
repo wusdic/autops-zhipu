@@ -1,14 +1,22 @@
 <template>
   <div class="page-container">
-    <el-row :gutter="16" class="stat-row">
-      <el-col :span="6"><el-card shadow="hover" class="stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">规则总数</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已启用</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card warning"><div class="stat-value">{{ stats.triggeredToday }}</div><div class="stat-label">今日触发</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card primary"><div class="stat-value">{{ stats.mostTriggered || '-' }}</div><div class="stat-label">最常触发</div></el-card></el-col>
+    <!-- ========== Page Header ========== -->
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">告警规则</div>
+        <div class="autops-page-subtitle">配置指标阈值与触发条件，实现自动化告警</div>
+      </div>
+    </div>
+
+    <el-row :gutter="16" class="stat-row mb-lg">
+      <el-col :span="6"><div class="autops-card stat-card"><div class="autops-card-body"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">规则总数</div></div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card success"><div class="autops-card-body"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已启用</div></div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card warning"><div class="autops-card-body"><div class="stat-value">{{ stats.triggeredToday }}</div><div class="stat-label">今日触发</div></div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card primary"><div class="autops-card-body"><div class="stat-value">{{ stats.mostTriggered || '-' }}</div><div class="stat-label">最常触发</div></div></div></el-col>
     </el-row>
 
-    <div class="toolbar">
-      <el-input v-model="filters.keyword" placeholder="搜索规则" clearable style="width:200px;margin-right:8px" @clear="load" @keyup.enter="load" />
+    <div class="autops-toolbar">
+      <el-input v-model="filters.keyword" placeholder="搜索规则" clearable style="width:200px;" @clear="load" @keyup.enter="load" />
       <el-select v-model="filters.severity" placeholder="严重度" clearable style="width:120px;margin-right:8px">
         <el-option label="严重" value="critical" /><el-option label="警告" value="warning" /><el-option label="信息" value="info" />
       </el-select>

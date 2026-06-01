@@ -1,12 +1,17 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <h2>用户管理</h2>
-      <el-button type="primary" @click="showCreateDialog">新建用户</el-button>
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">用户管理</div>
+        <div class="autops-page-subtitle">管理系统用户账号</div>
+      </div>
+      <div class="top-actions">
+        <el-button type="primary" @click="showCreateDialog">新建用户</el-button>
+      </div>
     </div>
 
     <!-- Filters -->
-    <div class="filter-bar">
+    <div class="autops-toolbar">
       <el-input
         v-model="filters.search"
         placeholder="搜索用户名/邮箱"

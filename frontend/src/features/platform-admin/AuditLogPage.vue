@@ -1,7 +1,14 @@
 <template>
   <div class="page-container">
-    <el-card>
-      <template #header>
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">审计日志</div>
+        <div class="autops-page-subtitle">查看系统操作审计日志</div>
+      </div>
+    </div>
+
+    <div class="autops-card">
+      
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
           <span style="font-size:18px;font-weight:600">审计日志</span>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -15,10 +22,10 @@
             </el-button>
           </div>
         </div>
-      </template>
+      
 
       <!-- Advanced Filters -->
-      <div class="filter-bar">
+      <div class="autops-toolbar">
         <el-date-picker
           v-model="dateRange"
           type="datetimerange"
@@ -72,7 +79,7 @@
               @click="openDetail(log)"
               style="cursor:pointer"
             >
-              <el-card shadow="hover" class="timeline-card">
+              <div class="autops-card timeline-card">
                 <div class="timeline-header">
                   <el-tag :type="getActionTagType(log.action)" size="small">{{ log.action }}</el-tag>
                   <span class="timeline-user">{{ log.user_id }}</span>
@@ -83,7 +90,7 @@
                   <span>IP: {{ log.ip_address || '—' }}</span>
                   <span v-if="log.trace_id">Trace: {{ log.trace_id }}</span>
                 </div>
-              </el-card>
+              </div>
             </el-timeline-item>
           </el-timeline>
           <el-empty v-else description="暂无审计日志" />
@@ -99,7 +106,7 @@
         @change="loadLogs"
         style="margin-top: 16px; justify-content: flex-end"
       />
-    </el-card>
+    </div>
 
     <!-- Detail Drawer -->
     <el-drawer v-model="drawerVisible" title="审计日志详情" size="520px">

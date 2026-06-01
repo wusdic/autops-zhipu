@@ -1,124 +1,223 @@
 <template>
-  <el-container class="main-layout">
-    <el-aside :width="isCollapsed ? '64px' : '220px'" class="sidebar">
-      <div class="logo" @click="navigateTo('/')" style="cursor:pointer">
-        <h2 v-if="!isCollapsed">AUTOPS</h2>
-        <span v-else style="font-size:20px;color:#fff;font-weight:bold">A</span>
-        <div v-if="!isCollapsed" class="subtitle">自治运维操作系统</div>
+  <el-container class="layout-container">
+    <!-- ─── Sidebar ─── -->
+    <el-aside :width="isCollapsed ? '64px' : '200px'" class="autops-sidebar" :class="{ 'autops-sidebar--collapsed': isCollapsed }">
+      <!-- Logo -->
+      <div class="sidebar-logo" @click="navigateTo('/')">
+        <el-icon size="22" color="#165dff"><Monitor /></el-icon>
+        <span v-show="!isCollapsed" class="logo-text">AUTOPS</span>
       </div>
-      <el-menu
-        :default-active="activeMenu"
-        :default-openeds="defaultOpeneds"
-        class="sidebar-menu"
-        :collapse="isCollapsed"
-        @select="handleMenuSelect"
-      >
-        <!-- 指挥中心 -->
-        <el-sub-menu index="cmd">
-          <template #title><el-icon><Monitor /></el-icon><span>指挥中心</span></template>
-          <el-menu-item index="/"><span>运维指挥台</span></el-menu-item>
-          <el-menu-item index="/incident"><span>故障处置</span></el-menu-item>
-          <el-menu-item index="/aiops"><span>AI 诊断</span></el-menu-item>
-        </el-sub-menu>
-        <!-- 资产配置 -->
-        <el-sub-menu index="asset">
-          <template #title><el-icon><Grid /></el-icon><span>资产配置</span></template>
-          <el-menu-item index="/assets"><span>资产列表</span></el-menu-item>
-          <el-menu-item index="/assets/discovery"><span>资产发现</span></el-menu-item>
-          <el-menu-item index="/asset-groups"><span>资产分组</span></el-menu-item>
-          <el-menu-item index="/credentials"><span>凭证管理</span></el-menu-item>
-          <el-menu-item index="/config"><span>配置管理</span></el-menu-item>
-          <el-menu-item index="/collectors"><span>采集器管理</span></el-menu-item>
-        </el-sub-menu>
-        <!-- 监控事件 -->
-        <el-sub-menu index="monitor">
-          <template #title><el-icon><Bell /></el-icon><span>监控事件</span></template>
-          <el-menu-item index="/monitoring"><span>监控总览</span></el-menu-item>
-          <el-menu-item index="/events"><span>事件列表</span></el-menu-item>
-          <el-menu-item index="/alerts"><span>告警中心</span></el-menu-item>
-          <el-menu-item index="/alert-rules"><span>告警规则</span></el-menu-item>
-          <el-menu-item index="/tickets"><span>工单中心</span></el-menu-item>
-        </el-sub-menu>
-        <!-- 自动化 -->
-        <el-sub-menu index="auto">
-          <template #title><el-icon><VideoPlay /></el-icon><span>自动化</span></template>
-          <el-menu-item index="/scripts"><span>脚本库</span></el-menu-item>
-          <el-menu-item index="/playbooks"><span>Playbook</span></el-menu-item>
-          <el-menu-item index="/policies"><span>策略管理</span></el-menu-item>
-          <el-menu-item index="/executions"><span>执行历史</span></el-menu-item>
-        </el-sub-menu>
-        <!-- 知识 -->
-        <el-sub-menu index="kb">
-          <template #title><el-icon><Collection /></el-icon><span>知识</span></template>
-          <el-menu-item index="/knowledge"><span>知识库</span></el-menu-item>
-          <el-menu-item index="/knowledge/import"><span>知识导入</span></el-menu-item>
-        </el-sub-menu>
-        <!-- 管理 -->
-        <el-sub-menu index="admin">
-          <template #title><el-icon><User /></el-icon><span>平台管理</span></template>
-          <el-menu-item index="/admin/users"><span>用户管理</span></el-menu-item>
-          <el-menu-item index="/admin/roles"><span>角色管理</span></el-menu-item>
-          <el-menu-item index="/admin/api-keys"><span>API Key</span></el-menu-item>
-          <el-menu-item index="/admin/config"><span>系统配置</span></el-menu-item>
-          <el-menu-item index="/admin/status"><span>平台状态</span></el-menu-item>
-          <el-menu-item index="/admin/backup"><span>备份恢复</span></el-menu-item>
-          <el-menu-item index="/audit"><span>审计日志</span></el-menu-item>
-        </el-sub-menu>
-      </el-menu>
+
+      <!-- Menu -->
+      <el-scrollbar>
+        <el-menu
+          :default-active="activeMenu"
+          :collapse="isCollapsed"
+          :collapse-transition="false"
+          :unique-opened="false"
+          background-color="transparent"
+          text-color="#c9cdd4"
+          active-text-color="#ffffff"
+          class="sidebar-menu"
+          @select="handleMenuSelect"
+        >
+          <!-- 指挥中心 -->
+          <el-sub-menu index="cmd">
+            <template #title>
+              <el-icon><Aim /></el-icon>
+              <span>指挥中心</span>
+            </template>
+            <el-menu-item index="/">
+              <el-icon><DataBoard /></el-icon><span>运维指挥台</span>
+            </el-menu-item>
+            <el-menu-item index="/incident">
+              <el-icon><Warning /></el-icon><span>故障处置</span>
+            </el-menu-item>
+            <el-menu-item index="/aiops">
+              <el-icon><MagicStick /></el-icon><span>AI 诊断</span>
+            </el-menu-item>
+          </el-sub-menu>
+
+          <!-- 资产配置 -->
+          <el-sub-menu index="asset">
+            <template #title>
+              <el-icon><Box /></el-icon>
+              <span>资产配置</span>
+            </template>
+            <el-menu-item index="/assets">
+              <el-icon><List /></el-icon><span>资产列表</span>
+            </el-menu-item>
+            <el-menu-item index="/assets/discovery">
+              <el-icon><Search /></el-icon><span>资产发现</span>
+            </el-menu-item>
+            <el-menu-item index="/asset-groups">
+              <el-icon><Folder /></el-icon><span>资产分组</span>
+            </el-menu-item>
+            <el-menu-item index="/credentials">
+              <el-icon><Key /></el-icon><span>凭证管理</span>
+            </el-menu-item>
+            <el-menu-item index="/config">
+              <el-icon><Setting /></el-icon><span>配置管理</span>
+            </el-menu-item>
+            <el-menu-item index="/collectors">
+              <el-icon><Connection /></el-icon><span>采集器管理</span>
+            </el-menu-item>
+          </el-sub-menu>
+
+          <!-- 监控事件 -->
+          <el-sub-menu index="mon">
+            <template #title>
+              <el-icon><Monitor /></el-icon>
+              <span>监控事件</span>
+            </template>
+            <el-menu-item index="/monitoring">
+              <el-icon><TrendCharts /></el-icon><span>监控总览</span>
+            </el-menu-item>
+            <el-menu-item index="/events">
+              <el-icon><Bell /></el-icon><span>事件列表</span>
+            </el-menu-item>
+            <el-menu-item index="/alerts">
+              <el-icon><AlarmClock /></el-icon><span>告警中心</span>
+            </el-menu-item>
+            <el-menu-item index="/alert-rules">
+              <el-icon><Document /></el-icon><span>告警规则</span>
+            </el-menu-item>
+            <el-menu-item index="/tickets">
+              <el-icon><Tickets /></el-icon><span>工单中心</span>
+            </el-menu-item>
+          </el-sub-menu>
+
+          <!-- 自动化 -->
+          <el-sub-menu index="auto">
+            <template #title>
+              <el-icon><Cpu /></el-icon>
+              <span>自动化</span>
+            </template>
+            <el-menu-item index="/scripts">
+              <el-icon><Document /></el-icon><span>脚本库</span>
+            </el-menu-item>
+            <el-menu-item index="/playbooks">
+              <el-icon><Notebook /></el-icon><span>Playbook</span>
+            </el-menu-item>
+            <el-menu-item index="/policies">
+              <el-icon><Strategy /></el-icon><span>策略管理</span>
+            </el-menu-item>
+            <el-menu-item index="/executions">
+              <el-icon><VideoPlay /></el-icon><span>执行历史</span>
+            </el-menu-item>
+          </el-sub-menu>
+
+          <!-- 知识 -->
+          <el-sub-menu index="kb">
+            <template #title>
+              <el-icon><Collection /></el-icon>
+              <span>知识</span>
+            </template>
+            <el-menu-item index="/knowledge">
+              <el-icon><Files /></el-icon><span>知识库</span>
+            </el-menu-item>
+            <el-menu-item index="/knowledge/import">
+              <el-icon><Upload /></el-icon><span>知识导入</span>
+            </el-menu-item>
+          </el-sub-menu>
+
+          <!-- 平台管理 -->
+          <el-sub-menu index="admin">
+            <template #title>
+              <el-icon><Tools /></el-icon>
+              <span>平台管理</span>
+            </template>
+            <el-menu-item index="/users">
+              <el-icon><User /></el-icon><span>用户管理</span>
+            </el-menu-item>
+            <el-menu-item index="/roles">
+              <el-icon><UserFilled /></el-icon><span>角色管理</span>
+            </el-menu-item>
+            <el-menu-item index="/api-keys">
+              <el-icon><Lock /></el-icon><span>API Key</span>
+            </el-menu-item>
+            <el-menu-item index="/system-config">
+              <el-icon><Setting /></el-icon><span>系统配置</span>
+            </el-menu-item>
+            <el-menu-item index="/platform-status">
+              <el-icon><Cpu /></el-icon><span>平台状态</span>
+            </el-menu-item>
+            <el-menu-item index="/backup">
+              <el-icon><FolderOpened /></el-icon><span>备份恢复</span>
+            </el-menu-item>
+            <el-menu-item index="/audit">
+              <el-icon><DocumentChecked /></el-icon><span>审计日志</span>
+            </el-menu-item>
+          </el-sub-menu>
+        </el-menu>
+      </el-scrollbar>
     </el-aside>
+
+    <!-- ─── Main Area ─── -->
     <el-container>
-      <el-header class="header">
-        <div class="header-left">
-          <el-icon class="collapse-btn" @click="isCollapsed = !isCollapsed" :size="20">
-            <component :is="isCollapsed ? 'Expand' : 'Fold'" />
-          </el-icon>
-          <span class="page-title">{{ pageTitle }}</span>
+      <!-- Header -->
+      <el-header class="autops-header">
+        <div class="autops-header-left">
+          <div class="autops-collapse-btn" @click="toggleCollapse">
+            <el-icon size="18"><Fold v-if="!isCollapsed" /><Expand v-else /></el-icon>
+          </div>
+          <el-breadcrumb separator="/" class="breadcrumb">
+            <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path" :to="item.path">
+              {{ item.title }}
+            </el-breadcrumb-item>
+          </el-breadcrumb>
         </div>
-        <div class="header-right">
-          <!-- Global Search -->
+
+        <div class="autops-header-right">
+          <!-- 全局搜索 -->
           <el-input
-            v-model="searchQuery"
-            placeholder="搜索资产/告警/工单/知识... (Ctrl+K)"
-            style="width: 280px"
-            clearable
-            @keyup.enter="doSearch"
-            @focus="showSearchResults = true"
-            @blur="hideSearchResults"
+            v-model="searchKeyword"
+            placeholder="搜索 (Ctrl+K)"
             :prefix-icon="Search"
             size="default"
-          >
-            <template #append>
-              <el-button @click="doSearch" :icon="Search" />
-            </template>
-          </el-input>
-          <!-- Search Results Dropdown -->
-          <div v-if="showSearchResults && searchResults.length" class="search-dropdown">
-            <div v-for="item in searchResults" :key="item.type + item.id"
-              class="search-item" @mousedown.prevent="goSearchResult(item)">
-              <el-tag size="small" :type="searchTagType(item.type)" style="width:50px;text-align:center">{{ item.typeLabel }}</el-tag>
-              <span class="search-item-title">{{ item.title }}</span>
-              <span class="search-item-sub">{{ item.sub || '' }}</span>
-            </div>
-            <div v-if="searchResults.length === 0" class="search-empty">无结果</div>
-          </div>
+            style="width: 240px"
+            clearable
+            @keydown.enter="handleSearch"
+          />
 
-          <NotificationBell />
-          <el-dropdown>
-            <span class="user-info">
-              <el-avatar :size="28" icon="UserFilled" />
-              <span style="margin-left:8px">{{ username }}</span>
-            </span>
+          <!-- 通知 -->
+          <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99">
+            <el-icon size="20" color="#4e5969" style="cursor: pointer;" @click="goToAlerts">
+              <Bell />
+            </el-icon>
+          </el-badge>
+
+          <!-- 用户菜单 -->
+          <el-dropdown trigger="click" @command="handleUserCommand">
+            <div class="user-trigger">
+              <el-avatar :size="32" style="background: #165dff">
+                {{ (username || 'U').charAt(0).toUpperCase() }}
+              </el-avatar>
+              <span class="user-name">{{ username || '用户' }}</span>
+              <el-icon size="12"><ArrowDown /></el-icon>
+            </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="navigateTo('/admin/config')">系统设置</el-dropdown-item>
-                <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item command="profile" :icon="UserFilled">个人信息</el-dropdown-item>
+                <el-dropdown-item command="settings" :icon="Setting">系统设置</el-dropdown-item>
+                <el-dropdown-item divided command="logout" :icon="SwitchButton">
+                  <span style="color: #f53f3f">退出登录</span>
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </div>
       </el-header>
-      <el-main class="main-content">
-        <router-view />
+
+      <!-- Content -->
+      <el-main class="autops-main">
+        <div class="autops-page-container">
+          <router-view v-slot="{ Component, route }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" :key="route.fullPath" />
+            </transition>
+          </router-view>
+        </div>
       </el-main>
     </el-container>
   </el-container>
@@ -127,198 +226,235 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Monitor, Grid, Bell, Collection, VideoPlay, User, Expand, Fold, Search } from '@element-plus/icons-vue'
-import api from '@/shared/api/client'
-import { API as R } from '@/shared/api/routes'
-import { useAuthStore } from '@/app/store/auth'
-import { clearToken } from '@/app/router/guards'
-import NotificationBell from '@/shared/components/NotificationBell.vue'
-import { wsService } from '@/shared/api/websocket'
+import { ElMessageBox, ElMessage } from 'element-plus'
+import { Search, Fold, Expand, Bell, ArrowDown, UserFilled, Setting, SwitchButton } from '@element-plus/icons-vue'
 import { APP_CONFIG } from '@/shared/config'
 
 const router = useRouter()
 const route = useRoute()
+
+// ─── Sidebar ───
 const isCollapsed = ref(false)
-const alertCount = ref(0)
-const username = ref(localStorage.getItem('username') || 'admin')
 
-// Default open all submenus
-const defaultOpeneds = ref(['cmd', 'asset', 'monitor', 'auto', 'kb', 'admin'])
-
-// ─── Menu Navigation ───
-function handleMenuSelect(index: string) {
-  if (index && index.startsWith('/')) {
-    // Use router.push for SPA navigation
-    router.push(index).catch(() => {
-      // Fallback: full page navigation if SPA router fails
-      window.location.href = index
-    })
-  }
+function toggleCollapse() {
+  isCollapsed.value = !isCollapsed.value
 }
 
-function navigateTo(path: string) {
-  router.push(path)
-}
-
-// ─── Global Search ───
-const searchQuery = ref('')
-const showSearchResults = ref(false)
-const searchResults = ref<Array<{type: string; typeLabel: string; id: string; title: string; sub?: string; path: string}>>([])
-
-function searchTagType(type: string) {
-  const m: Record<string, string> = { asset: '', alert: 'danger', ticket: 'warning', knowledge: 'success' }
-  return (m[type] || 'info') as any
-}
-
-async function doSearch() {
-  const q = searchQuery.value.trim()
-  if (!q) { searchResults.value = []; return }
-  showSearchResults.value = true
-  const results: typeof searchResults.value = []
-  try {
-    const { data: aData } = await api.get(R.ASSETS, { params: { search: q, page_size: 5 } })
-    if (aData.code === 0) {
-      (aData.data.items || []).forEach((a: any) => results.push({ type: 'asset', typeLabel: '资产', id: a.id, title: a.name || a.hostname, sub: a.ip, path: `/assets/${a.id}` }))
-    }
-  } catch {}
-  try {
-    const { data: alData } = await api.get(R.ALERTS, { params: { search: q, page_size: 5 } })
-    if (alData.code === 0) {
-      (alData.data.items || []).forEach((a: any) => results.push({ type: 'alert', typeLabel: '告警', id: a.id, title: a.title, sub: a.severity, path: `/alerts/${a.id}` }))
-    }
-  } catch {}
-  try {
-    const { data: tData } = await api.get(R.TICKETS, { params: { search: q, page_size: 5 } })
-    if (tData.code === 0) {
-      (tData.data.items || []).forEach((t: any) => results.push({ type: 'ticket', typeLabel: '工单', id: t.id, title: t.title, sub: t.status, path: `/tickets/${t.id}` }))
-    }
-  } catch {}
-  searchResults.value = results.slice(0, 10)
-}
-
-function goSearchResult(item: typeof searchResults.value[0]) {
-  showSearchResults.value = false
-  searchQuery.value = ''
-  router.push(item.path)
-}
-
-function hideSearchResults() {
-  setTimeout(() => { showSearchResults.value = false }, 200)
-}
-
-// Ctrl+K shortcut
-function handleKeydown(e: KeyboardEvent) {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-    e.preventDefault()
-    const input = document.querySelector('.header-right .el-input__inner') as HTMLInputElement
-    input?.focus()
-  }
-}
-
-// Active menu: use base path for dynamic routes
+// ─── Active Menu ───
 const activeMenu = computed(() => {
+  // 精确匹配 或 前缀匹配（如 /assets/123 → /assets）
   const path = route.path
-  if (path.startsWith('/assets/') && path !== '/assets/discovery') return '/assets'
-  if (path.startsWith('/alerts/')) return '/alerts'
-  if (path.startsWith('/incident/')) return '/incident'
-  if (path.startsWith('/policies/')) return '/policies'
-  if (path.startsWith('/executions/')) return '/executions'
-  if (path.startsWith('/knowledge/')) return '/knowledge'
+  if (path === '/') return '/'
+  // 找最长前缀匹配
+  const segments = path.split('/').filter(Boolean)
+  if (segments.length > 1) {
+    return '/' + segments.slice(0, segments.length === 1 ? 1 : segments[0] === 'admin' ? 2 : 1).join('/')
+  }
   return path
 })
 
-const pageTitle = computed(() => {
-  const map: Record<string, string> = {
-    '/': '运维指挥台',
-    '/assets': '资产列表', '/assets/discovery': '资产发现', '/asset-groups': '资产分组', '/credentials': '凭证管理',
-    '/config': '配置管理', '/collectors': '采集器管理',
-    '/incident': '故障处置', '/aiops': 'AI 诊断',
-    '/monitoring': '监控总览', '/events': '事件列表', '/alerts': '告警中心',
-    '/alert-rules': '告警规则', '/tickets': '工单中心',
-    '/executions': '执行历史',
-    '/scripts': '脚本库', '/playbooks': 'Playbook', '/policies': '策略管理',
-    '/knowledge': '知识库', '/knowledge/import': '知识导入',
-    '/admin/users': '用户管理', '/admin/roles': '角色管理',
-    '/admin/api-keys': 'API Key', '/admin/config': '系统配置',
-    '/admin/status': '平台状态', '/admin/backup': '备份恢复',
-    '/audit': '审计日志',
-  }
-  if (route.path.match(/^\/assets\/.+\/topology/)) return '资产拓扑图'
-  if (route.path.match(/^\/assets\/.+/) && !route.path.endsWith('/discovery')) return '资产详情'
-  if (route.path.match(/^\/alerts\/.+/)) return '告警详情'
-  if (route.path.match(/^\/incident\/.+/)) return '故障处置'
-  if (route.path.match(/^\/tickets\/.+/)) return '工单详情'
-  if (route.path.match(/^\/policies\/.+\/simulate/)) return '策略模拟'
-  if (route.path.match(/^\/executions\/.+/)) return '执行详情'
-  if (route.path.match(/^\/knowledge\/.+\/edit/)) return '知识编辑'
-  if (route.path.match(/^\/knowledge\/.+/) && !route.path.endsWith('/import')) return '知识详情'
-  return map[route.path] || 'AUTOPS'
-})
-
-async function loadAlertCount() {
-  try {
-    const { data } = await api.get(R.ALERTS, { params: { page: 1, page_size: 1, status: 'firing' } })
-    if (data.code === 0) alertCount.value = data.data.total || 0
-  } catch { /* ignore */ }
+// ─── Breadcrumbs ───
+const menuMap: Record<string, string> = {
+  '/': '运维指挥台',
+  '/incident': '故障处置',
+  '/aiops': 'AI 诊断',
+  '/assets': '资产列表',
+  '/assets/discovery': '资产发现',
+  '/asset-groups': '资产分组',
+  '/credentials': '凭证管理',
+  '/config': '配置管理',
+  '/collectors': '采集器管理',
+  '/monitoring': '监控总览',
+  '/events': '事件列表',
+  '/alerts': '告警中心',
+  '/alert-rules': '告警规则',
+  '/tickets': '工单中心',
+  '/scripts': '脚本库',
+  '/playbooks': 'Playbook',
+  '/policies': '策略管理',
+  '/executions': '执行历史',
+  '/knowledge': '知识库',
+  '/knowledge/import': '知识导入',
+  '/admin/users': '用户管理',
+  '/admin/roles': '角色管理',
+  '/admin/api-keys': 'API Key',
+  '/admin/config': '系统配置',
+  '/admin/status': '平台状态',
+  '/admin/backup': '备份恢复',
+  '/audit': '审计日志',
 }
 
-async function logout() {
+const groupMap: Record<string, string> = {
+  '/': '指挥中心', '/incident': '指挥中心', '/aiops': '指挥中心',
+  '/assets': '资产配置', '/assets/discovery': '资产配置', '/asset-groups': '资产配置',
+  '/credentials': '资产配置', '/config': '资产配置', '/collectors': '资产配置',
+  '/monitoring': '监控事件', '/events': '监控事件', '/alerts': '监控事件',
+  '/alert-rules': '监控事件', '/tickets': '监控事件',
+  '/scripts': '自动化', '/playbooks': '自动化', '/policies': '自动化', '/executions': '自动化',
+  '/knowledge': '知识', '/knowledge/import': '知识',
+  '/admin/users': '平台管理', '/admin/roles': '平台管理', '/admin/api-keys': '平台管理',
+  '/admin/config': '平台管理', '/admin/status': '平台管理', '/admin/backup': '平台管理',
+  '/audit': '平台管理',
+}
+
+const breadcrumbs = computed(() => {
+  const path = route.path
+  const group = groupMap[path] || ''
+  const title = menuMap[path] || route.meta?.title || route.name || path
+  const crumbs: { path: string; title: string }[] = []
+  if (group) crumbs.push({ path: '', title: group })
+  crumbs.push({ path, title })
+  return crumbs
+})
+
+// ─── Navigation ───
+function handleMenuSelect(index: string) {
+  if (!index || !index.startsWith('/')) return
+  router.push(index).catch(() => {})
+}
+
+function navigateTo(path: string) {
+  router.push(path).catch(() => {})
+}
+
+function goToAlerts() {
+  router.push('/alerts').catch(() => {})
+}
+
+// ─── User Menu ───
+const username = ref('')
+
+function handleUserCommand(cmd: string) {
+  if (cmd === 'logout') {
+    ElMessageBox.confirm('确定退出登录吗？', '提示', {
+      confirmButtonText: '退出',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(() => {
+      localStorage.removeItem(APP_CONFIG.TOKEN_KEY)
+      localStorage.removeItem('username')
+      ElMessage.success('已退出登录')
+      router.push('/login').catch(() => {})
+    }).catch(() => {})
+  } else if (cmd === 'profile') {
+    ElMessage.info('个人信息功能开发中')
+  } else if (cmd === 'settings') {
+    router.push('/admin/config').catch(() => {})
+  }
+}
+
+// ─── Search ───
+const searchKeyword = ref('')
+
+function handleSearch() {
+  if (!searchKeyword.value.trim()) return
+  // 搜索路由: 先尝试匹配菜单
+  const kw = searchKeyword.value.toLowerCase().trim()
+  for (const [path, title] of Object.entries(menuMap)) {
+    if (title.toLowerCase().includes(kw) || path.includes(kw)) {
+      router.push(path).catch(() => {})
+      searchKeyword.value = ''
+      return
+    }
+  }
+  ElMessage.info('未找到匹配页面')
+}
+
+// ─── Keyboard Shortcut ───
+function handleKeydown(e: KeyboardEvent) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault()
+    const input = document.querySelector('.autops-header-right .el-input__inner') as HTMLInputElement
+    if (input) input.focus()
+  }
+}
+
+// ─── Unread Count ───
+const unreadCount = ref(0)
+
+async function fetchUnread() {
   try {
-    await api.post(R.AUTH.LOGOUT)
+    const token = localStorage.getItem(APP_CONFIG.TOKEN_KEY)
+    if (!token) return
+    const resp = await fetch('/api/v1/alerts?page_size=1&status=active', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (resp.ok) {
+      const data = await resp.json()
+      unreadCount.value = data?.data?.total || 0
+    }
   } catch { /* ignore */ }
-  const authStore = useAuthStore()
-  authStore.clearAuth()
-  clearToken()
-  localStorage.removeItem('username')
-  router.push('/login')
 }
 
 onMounted(() => {
-  loadAlertCount()
-  window.addEventListener('keydown', handleKeydown)
-  // Initialize WebSocket with correct token key
-  const token = localStorage.getItem(APP_CONFIG.TOKEN_KEY)
-  if (token) wsService.connect(token)
+  username.value = localStorage.getItem('username') || 'admin'
+  fetchUnread()
+  document.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
+  document.removeEventListener('keydown', handleKeydown)
 })
 </script>
 
 <style scoped>
-.main-layout { height: 100vh; }
-.sidebar { background: #304156; overflow-y: auto; transition: width 0.3s; }
-.sidebar::-webkit-scrollbar { width: 0; }
-.logo { padding: 20px 16px; text-align: center; color: #fff; min-height: 60px; }
-.logo h2 { margin: 0; font-size: 24px; }
-.logo .subtitle { font-size: 12px; color: #bfcbd9; margin-top: 4px; }
-.sidebar-menu { border-right: none; }
-.sidebar-menu .el-menu-item { background-color: #304156 !important; }
-.sidebar-menu .el-menu-item:hover { background-color: #263445 !important; }
-.sidebar-menu .el-menu-item.is-active { background-color: #263445 !important; }
-.sidebar-menu .el-sub-menu__title { background-color: #304156 !important; }
-.sidebar-menu .el-sub-menu__title:hover { background-color: #263445 !important; }
-.sidebar-menu .el-sub-menu .el-menu { background-color: #1f2d3d !important; }
-.sidebar-menu .el-sub-menu .el-menu .el-menu-item { background-color: #1f2d3d !important; }
-.sidebar-menu .el-sub-menu .el-menu .el-menu-item:hover { background-color: #263445 !important; }
-.sidebar-menu .el-sub-menu .el-menu .el-menu-item.is-active { background-color: #263445 !important; }
-.header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e6e6e6; background: #fff; padding: 0 20px; height: 56px; }
-.header-left { display: flex; align-items: center; gap: 12px; }
-.collapse-btn { cursor: pointer; color: #606266; }
-.collapse-btn:hover { color: #409eff; }
-.page-title { font-size: 16px; font-weight: 600; color: #303133; }
-.header-right { display: flex; align-items: center; gap: 12px; position: relative; }
-.user-info { display: flex; align-items: center; cursor: pointer; }
-.search-dropdown {
-  position: absolute; top: 40px; right: 200px; width: 400px;
-  background: #fff; border: 1px solid #dcdfe6; border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 999; max-height: 320px; overflow-y: auto;
+.layout-container {
+  height: 100vh;
 }
-.search-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
-.search-item:hover { background: #f5f7fa; }
-.search-item-title { flex: 1; font-size: 13px; color: #303133; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.search-item-sub { font-size: 12px; color: #909399; }
-.search-empty { padding: 20px; text-align: center; color: #909399; }
-.main-content { background: #f0f2f5; min-height: calc(100vh - 56px); overflow-y: auto; padding-bottom: 40px; }
+
+.sidebar-logo {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #2a323d;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.sidebar-menu {
+  border-right: none !important;
+}
+
+.breadcrumb {
+  font-size: 14px;
+}
+
+.user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.user-trigger:hover {
+  background: #f2f3f5;
+}
+
+.user-name {
+  font-size: 14px;
+  color: #4e5969;
+}
+
+/* 过渡动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

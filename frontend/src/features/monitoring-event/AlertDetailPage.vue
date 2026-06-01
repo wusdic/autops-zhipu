@@ -1,60 +1,70 @@
 <template>
   <div class="alert-detail">
+    <!-- ─── Page Header ─── -->
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">告警详情</div>
+        <div class="autops-page-subtitle">查看告警详情、影响分析、证据链和处理历史</div>
+      </div>
+    </div>
+
     <!-- ─── Header Bar: title, severity, status, time, duration, quick actions ─── -->
-    <el-card class="detail-header-card" shadow="never">
-      <div class="detail-header">
-        <el-button :icon="ArrowLeft" @click="$router.back()">返回</el-button>
-        <div class="detail-title-area">
-          <SeverityBadge v-if="alert" :severity="alert.severity" size="large" />
-          <h2 style="margin: 0 0 0 12px">{{ alert?.title || '告警详情' }}</h2>
-          <StatusBadge v-if="alert" :status="alert.status" show-icon style="margin-left: 12px" />
+    <div class="autops-card detail-header-card">
+      <div class="autops-card-body">
+        <div class="detail-header">
+          <el-button :icon="ArrowLeft" @click="$router.back()">返回</el-button>
+          <div class="detail-title-area">
+            <SeverityBadge v-if="alert" :severity="alert.severity" size="large" />
+            <h2 style="margin: 0 0 0 12px">{{ alert?.title || '告警详情' }}</h2>
+            <StatusBadge v-if="alert" :status="alert.status" show-icon style="margin-left: 12px" />
+          </div>
+          <div class="header-actions">
+            <el-button
+              v-if="alert && alert.status === 'firing'"
+              type="warning"
+              @click="handleAcknowledge"
+            >
+              确认告警
+            </el-button>
+            <el-button
+              v-if="alert && alert.status !== 'resolved'"
+              type="success"
+              @click="handleResolve"
+            >
+              恢复告警
+            </el-button>
+            <el-button
+              v-if="alert && alert.status !== 'resolved'"
+              type="danger"
+              plain
+              @click="handleEscalate"
+            >
+              升级告警
+            </el-button>
+            <el-button @click="createTicketFromAlert" :disabled="!alert">
+              转工单
+            </el-button>
+            <el-button @click="handleSuppress" :disabled="!alert" type="info" plain>
+              抑制告警
+            </el-button>
+            <el-button type="primary" @click="triggerIncidentResponse" :disabled="!alert">
+              <el-icon style="margin-right: 4px"><Warning /></el-icon>
+              触发应急响应
+            </el-button>
+            <el-button @click="loadAlert" :loading="loading">刷新</el-button>
+          </div>
         </div>
-        <div class="header-actions">
-          <el-button
-            v-if="alert && alert.status === 'firing'"
-            type="warning"
-            @click="handleAcknowledge"
-          >
-            确认告警
-          </el-button>
-          <el-button
-            v-if="alert && alert.status !== 'resolved'"
-            type="success"
-            @click="handleResolve"
-          >
-            恢复告警
-          </el-button>
-          <el-button
-            v-if="alert && alert.status !== 'resolved'"
-            type="danger"
-            plain
-            @click="handleEscalate"
-          >
-            升级告警
-          </el-button>
-          <el-button @click="createTicketFromAlert" :disabled="!alert">
-            转工单
-          </el-button>
-          <el-button @click="handleSuppress" :disabled="!alert" type="info" plain>
-            抑制告警
-          </el-button>
-          <el-button type="primary" @click="triggerIncidentResponse" :disabled="!alert">
-            <el-icon style="margin-right: 4px"><Warning /></el-icon>
-            触发应急响应
-          </el-button>
-          <el-button @click="loadAlert" :loading="loading">刷新</el-button>
+        <!-- Alert meta bar: time, duration, source -->
+        <div v-if="alert" class="header-meta">
+          <el-descriptions :column="4" size="small" border>
+            <el-descriptions-item label="触发时间">{{ formatTime(alert.created_at) }}</el-descriptions-item>
+            <el-descriptions-item label="持续时间">{{ alertDuration }}</el-descriptions-item>
+            <el-descriptions-item label="来源">{{ alert.source || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="确认人">{{ alert.acknowledged_by || '未确认' }}</el-descriptions-item>
+          </el-descriptions>
         </div>
       </div>
-      <!-- Alert meta bar: time, duration, source -->
-      <div v-if="alert" class="header-meta">
-        <el-descriptions :column="4" size="small" border>
-          <el-descriptions-item label="触发时间">{{ formatTime(alert.created_at) }}</el-descriptions-item>
-          <el-descriptions-item label="持续时间">{{ alertDuration }}</el-descriptions-item>
-          <el-descriptions-item label="来源">{{ alert.source || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="确认人">{{ alert.acknowledged_by || '未确认' }}</el-descriptions-item>
-        </el-descriptions>
-      </div>
-    </el-card>
+    </div>
 
     <div v-loading="loading" style="margin-top: 16px">
       <template v-if="alert">
@@ -100,49 +110,49 @@
               <!-- Right: trigger condition + asset info -->
               <el-col :span="10">
                 <!-- Trigger Condition -->
-                <el-card shadow="hover" class="side-card">
-                  <template #header>
-                    <div class="col-header">
-                      <span>🎯 触发条件</span>
+                <div class="autops-card side-card">
+                  <div class="autops-card-header">
+                    <span class="autops-card-title">🎯 触发条件</span>
+                  </div>
+                  <div class="autops-card-body">
+                    <div v-if="parsedTriggerConditions.length">
+                      <div v-for="(cond, i) in parsedTriggerConditions" :key="i" class="trigger-cond">
+                        <el-tag size="small" type="info">{{ cond.metric || cond.field }}</el-tag>
+                        <span style="margin: 0 4px">{{ cond.operator || cond.op }}</span>
+                        <el-tag size="small">{{ cond.value }}</el-tag>
+                      </div>
                     </div>
-                  </template>
-                  <div v-if="parsedTriggerConditions.length">
-                    <div v-for="(cond, i) in parsedTriggerConditions" :key="i" class="trigger-cond">
-                      <el-tag size="small" type="info">{{ cond.metric || cond.field }}</el-tag>
-                      <span style="margin: 0 4px">{{ cond.operator || cond.op }}</span>
-                      <el-tag size="small">{{ cond.value }}</el-tag>
+                    <div v-else style="color: #909399; font-size: 13px">
+                      {{ alert.trigger_condition || alert.condition || '未配置触发条件' }}
                     </div>
                   </div>
-                  <div v-else style="color: #909399; font-size: 13px">
-                    {{ alert.trigger_condition || alert.condition || '未配置触发条件' }}
-                  </div>
-                </el-card>
+                </div>
 
                 <!-- Asset Info -->
-                <el-card shadow="hover" class="side-card" style="margin-top: 12px">
-                  <template #header>
-                    <div class="col-header">
-                      <span>💻 关联资产</span>
-                      <el-tag size="small" type="info">{{ relatedAssets.length }}</el-tag>
-                    </div>
-                  </template>
-                  <el-table :data="relatedAssets" stripe size="small">
-                    <el-table-column prop="hostname" label="主机名" min-width="120" show-overflow-tooltip />
-                    <el-table-column prop="ip" label="IP 地址" width="140" />
-                    <el-table-column prop="asset_type" label="类型" width="100" />
-                    <el-table-column label="状态" width="90">
-                      <template #default="{ row }">
-                        <StatusBadge :status="row.status" size="small" show-icon />
-                      </template>
-                    </el-table-column>
-                    <el-table-column label="操作" width="60">
-                      <template #default="{ row }">
-                        <el-button text type="primary" size="small" @click="$router.push(`/assets/${row.id}`)">详情</el-button>
-                      </template>
-                    </el-table-column>
-                  </el-table>
-                  <el-empty v-if="!relatedAssets.length" description="暂无关联资产" :image-size="60" />
-                </el-card>
+                <div class="autops-card side-card" style="margin-top: 12px">
+                  <div class="autops-card-header">
+                    <span class="autops-card-title">💻 关联资产</span>
+                    <el-tag size="small" type="info">{{ relatedAssets.length }}</el-tag>
+                  </div>
+                  <div class="autops-card-body">
+                    <el-table :data="relatedAssets" stripe size="small">
+                      <el-table-column prop="hostname" label="主机名" min-width="120" show-overflow-tooltip />
+                      <el-table-column prop="ip" label="IP 地址" width="140" />
+                      <el-table-column prop="asset_type" label="类型" width="100" />
+                      <el-table-column label="状态" width="90">
+                        <template #default="{ row }">
+                          <StatusBadge :status="row.status" size="small" show-icon />
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="操作" width="60">
+                        <template #default="{ row }">
+                          <el-button text type="primary" size="small" @click="$router.push(`/assets/${row.id}`)">详情</el-button>
+                        </template>
+                      </el-table-column>
+                    </el-table>
+                    <el-empty v-if="!relatedAssets.length" description="暂无关联资产" :image-size="60" />
+                  </div>
+                </div>
               </el-col>
             </el-row>
           </el-tab-pane>
@@ -239,20 +249,20 @@
           <!-- ─── Tab 4: Timeline ─── -->
           <el-tab-pane label="时间线" name="timeline">
             <div v-loading="timelineLoading">
-              <!-- Alert lifecycle steps -->
-              <el-card shadow="hover" style="margin-bottom: 16px">
-                <template #header>
-                  <div class="col-header">
-                    <span>🔄 告警生命周期</span>
-                  </div>
-                </template>
+            <!-- Alert lifecycle steps -->
+            <div class="autops-card" style="margin-bottom: 16px">
+              <div class="autops-card-header">
+                <span class="autops-card-title">🔄 告警生命周期</span>
+              </div>
+              <div class="autops-card-body">
                 <el-steps :active="lifecycleStep" align-center finish-status="success" :space="200">
                   <el-step title="触发" :description="formatTime(alert.created_at)" />
                   <el-step title="已确认" :description="formatTime(alert.acknowledged_at)" />
                   <el-step title="已升级" :description="formatTime(alert.escalated_at)" />
                   <el-step title="已恢复" :description="formatTime(alert.resolved_at)" />
                 </el-steps>
-              </el-card>
+              </div>
+            </div>
               <!-- Detailed event timeline -->
               <TimelineView :items="timelineItems" />
             </div>
@@ -330,123 +340,123 @@
         </el-tabs>
 
         <!-- ─── Impact Analysis Section ─── -->
-        <el-card shadow="hover" class="section-card" v-if="impactData.affectedAssets > 0 || impactData.relatedServices.length">
-          <template #header>
-            <div class="col-header">
-              <span>💥 影响分析</span>
-            </div>
-          </template>
-          <el-row :gutter="16">
-            <el-col :span="8">
-              <el-statistic title="受影响资产" :value="impactData.affectedAssets">
-                <template #suffix>台</template>
-              </el-statistic>
-            </el-col>
-            <el-col :span="8">
-              <el-statistic title="关联服务" :value="impactData.relatedServices.length" />
-            </el-col>
-            <el-col :span="8">
-              <el-statistic title="影响等级">
-                <template #default>
-                  <el-tag :type="severityType(alert.severity)" effect="dark">{{ alert.severity }}</el-tag>
-                </template>
-              </el-statistic>
-            </el-col>
-          </el-row>
-          <div v-if="impactData.relatedServices.length" style="margin-top: 12px">
-            <span style="font-size: 13px; color: #909399; margin-right: 8px">关联服务:</span>
-            <el-tag
-              v-for="svc in impactData.relatedServices"
-              :key="svc"
-              size="small"
-              style="margin: 2px 4px"
-            >
-              {{ svc }}
-            </el-tag>
+        <div class="autops-card section-card" v-if="impactData.affectedAssets > 0 || impactData.relatedServices.length">
+          <div class="autops-card-header">
+            <span class="autops-card-title">💥 影响分析</span>
           </div>
-        </el-card>
+          <div class="autops-card-body">
+            <el-row :gutter="16">
+              <el-col :span="8">
+                <el-statistic title="受影响资产" :value="impactData.affectedAssets">
+                  <template #suffix>台</template>
+                </el-statistic>
+              </el-col>
+              <el-col :span="8">
+                <el-statistic title="关联服务" :value="impactData.relatedServices.length" />
+              </el-col>
+              <el-col :span="8">
+                <el-statistic title="影响等级">
+                  <template #default>
+                    <el-tag :type="severityType(alert.severity)" effect="dark">{{ alert.severity }}</el-tag>
+                  </template>
+                </el-statistic>
+              </el-col>
+            </el-row>
+            <div v-if="impactData.relatedServices.length" style="margin-top: 12px">
+              <span style="font-size: 13px; color: #909399; margin-right: 8px">关联服务:</span>
+              <el-tag
+                v-for="svc in impactData.relatedServices"
+                :key="svc"
+                size="small"
+                style="margin: 2px 4px"
+              >
+                {{ svc }}
+              </el-tag>
+            </div>
+          </div>
+        </div>
 
         <!-- ─── Evidence Chain Section ─── -->
-        <el-card shadow="hover" class="section-card" v-loading="evidenceChainLoading">
-          <template #header>
-            <div class="col-header">
-              <span>🔗 证据链</span>
-              <el-tag size="small" type="info">{{ evidenceChain.length }}</el-tag>
-            </div>
-          </template>
-          <div v-if="evidenceChain.length">
-            <el-timeline>
-              <el-timeline-item
-                v-for="(ev, idx) in evidenceChain"
-                :key="idx"
-                :timestamp="formatTime(ev.timestamp || ev.created_at)"
-                placement="top"
-                :type="evidenceType(ev.type)"
-              >
-                <div class="evidence-item">
-                  <div class="evidence-header">
-                    <el-tag size="small" :type="evidenceType(ev.type)">{{ ev.type || '事件' }}</el-tag>
-                    <span class="evidence-title">{{ ev.title || ev.source || `证据 ${idx + 1}` }}</span>
-                  </div>
-                  <div class="evidence-desc" v-if="ev.description || ev.detail">
-                    {{ ev.description || ev.detail }}
-                  </div>
-                  <!-- State change specific -->
-                  <div v-if="ev.old_value && ev.new_value" class="evidence-change">
-                    <span class="old-value">{{ ev.old_value }}</span>
-                    <span style="margin: 0 8px">→</span>
-                    <span class="new-value">{{ ev.new_value }}</span>
-                  </div>
-                  <!-- Config change specific -->
-                  <div v-if="ev.config_key" class="evidence-config">
-                    <el-tag size="small" type="info">{{ ev.config_key }}</el-tag>
-                    <span style="margin-left: 8px; font-size: 12px; color: #909399">{{ ev.config_detail }}</span>
-                  </div>
-                </div>
-              </el-timeline-item>
-            </el-timeline>
+        <div class="autops-card section-card" v-loading="evidenceChainLoading">
+          <div class="autops-card-header">
+            <span class="autops-card-title">🔗 证据链</span>
+            <el-tag size="small" type="info">{{ evidenceChain.length }}</el-tag>
           </div>
-          <el-empty v-else description="暂无证据链数据" :image-size="60" />
-        </el-card>
+          <div class="autops-card-body">
+            <div v-if="evidenceChain.length">
+              <el-timeline>
+                <el-timeline-item
+                  v-for="(ev, idx) in evidenceChain"
+                  :key="idx"
+                  :timestamp="formatTime(ev.timestamp || ev.created_at)"
+                  placement="top"
+                  :type="evidenceType(ev.type)"
+                >
+                  <div class="evidence-item">
+                    <div class="evidence-header">
+                      <el-tag size="small" :type="evidenceType(ev.type)">{{ ev.type || '事件' }}</el-tag>
+                      <span class="evidence-title">{{ ev.title || ev.source || `证据 ${idx + 1}` }}</span>
+                    </div>
+                    <div class="evidence-desc" v-if="ev.description || ev.detail">
+                      {{ ev.description || ev.detail }}
+                    </div>
+                    <!-- State change specific -->
+                    <div v-if="ev.old_value && ev.new_value" class="evidence-change">
+                      <span class="old-value">{{ ev.old_value }}</span>
+                      <span style="margin: 0 8px">→</span>
+                      <span class="new-value">{{ ev.new_value }}</span>
+                    </div>
+                    <!-- Config change specific -->
+                    <div v-if="ev.config_key" class="evidence-config">
+                      <el-tag size="small" type="info">{{ ev.config_key }}</el-tag>
+                      <span style="margin-left: 8px; font-size: 12px; color: #909399">{{ ev.config_detail }}</span>
+                    </div>
+                  </div>
+                </el-timeline-item>
+              </el-timeline>
+            </div>
+            <el-empty v-else description="暂无证据链数据" :image-size="60" />
+          </div>
+        </div>
 
         <!-- ─── Comments / Notes Section ─── -->
-        <el-card shadow="hover" class="section-card">
-          <template #header>
-            <div class="col-header">
-              <span>💬 操作备注</span>
-              <el-tag size="small" type="info">{{ comments.length }}</el-tag>
-            </div>
-          </template>
-          <div class="comments-area">
-            <div v-for="(c, idx) in comments" :key="idx" class="comment-item">
-              <div class="comment-header">
-                <span class="comment-author">{{ c.author || c.user || '系统' }}</span>
-                <span class="comment-time">{{ formatTime(c.created_at || c.timestamp) }}</span>
+        <div class="autops-card section-card">
+          <div class="autops-card-header">
+            <span class="autops-card-title">💬 操作备注</span>
+            <el-tag size="small" type="info">{{ comments.length }}</el-tag>
+          </div>
+          <div class="autops-card-body">
+            <div class="comments-area">
+              <div v-for="(c, idx) in comments" :key="idx" class="comment-item">
+                <div class="comment-header">
+                  <span class="comment-author">{{ c.author || c.user || '系统' }}</span>
+                  <span class="comment-time">{{ formatTime(c.created_at || c.timestamp) }}</span>
+                </div>
+                <div class="comment-content">{{ c.content || c.message }}</div>
               </div>
-              <div class="comment-content">{{ c.content || c.message }}</div>
+              <el-empty v-if="!comments.length" description="暂无备注" :image-size="60" />
             </div>
-            <el-empty v-if="!comments.length" description="暂无备注" :image-size="60" />
+            <div class="comment-input">
+              <el-input
+                v-model="newComment"
+                type="textarea"
+                :rows="2"
+                placeholder="添加备注..."
+                maxlength="500"
+                show-word-limit
+              />
+              <el-button
+                type="primary"
+                size="small"
+                style="margin-top: 8px"
+                @click="addComment"
+                :disabled="!newComment.trim()"
+              >
+                提交备注
+              </el-button>
+            </div>
           </div>
-          <div class="comment-input">
-            <el-input
-              v-model="newComment"
-              type="textarea"
-              :rows="2"
-              placeholder="添加备注..."
-              maxlength="500"
-              show-word-limit
-            />
-            <el-button
-              type="primary"
-              size="small"
-              style="margin-top: 8px"
-              @click="addComment"
-              :disabled="!newComment.trim()"
-            >
-              提交备注
-            </el-button>
-          </div>
-        </el-card>
+        </div>
       </template>
 
       <el-empty v-if="!loading && !alert" description="告警不存在或已被删除">

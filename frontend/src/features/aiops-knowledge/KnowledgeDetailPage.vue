@@ -1,19 +1,8 @@
 <template>
   <div class="knowledge-detail">
-    <!-- 顶部导航 -->
-    <div class="page-top">
-      <el-button @click="goBack" :icon="ArrowLeft">返回知识列表</el-button>
-      <div class="knowledge-title" v-if="article">
-        <span class="name">{{ article.title }}</span>
-        <el-tag :type="riskTagType(article.risk_level)" size="small" style="margin-left: 8px">
-          {{ article.risk_level }}
-        </el-tag>
-        <el-tag :type="article.status === 'published' ? 'success' : 'info'" size="small" style="margin-left: 4px">
-          {{ article.status === 'published' ? '已发布' : '草稿' }}
-        </el-tag>
-        <el-tag type="info" size="small" style="margin-left: 4px">
-          👁 {{ article.views || 0 }}
-        </el-tag>
+    <div class="autops-page-header">
+      <div>
+        <el-button @click="goBack" :icon="ArrowLeft">返回知识列表</el-button>
       </div>
       <div class="top-actions" v-if="article">
         <el-button type="primary" :icon="Edit" @click="goEdit">编辑</el-button>
@@ -53,7 +42,7 @@
 
       <template v-if="article">
         <!-- 基本信息 -->
-        <el-card shadow="hover">
+        <div class="autops-card">
           <el-descriptions :column="2" border>
             <el-descriptions-item label="标题" :span="2">{{ article.title }}</el-descriptions-item>
             <el-descriptions-item label="类型">
@@ -72,35 +61,35 @@
             <el-descriptions-item label="创建时间">{{ formatTime(article.created_at) }}</el-descriptions-item>
             <el-descriptions-item label="更新时间">{{ formatTime(article.updated_at) }}</el-descriptions-item>
           </el-descriptions>
-        </el-card>
+        </div>
 
         <!-- 正文内容 -->
-        <el-card v-if="article.content" shadow="hover" style="margin-top: 16px">
-          <template #header><span class="card-header-title">内容</span></template>
+        <div class="autops-card" v-if="article.content" style="margin-top: 16px">
+          <span class="autops-card-title">内容</span>
           <div v-html="renderMarkdown(article.content)" class="markdown-body" />
-        </el-card>
+        </div>
 
         <!-- 诊断步骤 -->
-        <el-card v-if="article.diagnosis_steps" shadow="hover" style="margin-top: 16px">
-          <template #header><span class="card-header-title">诊断步骤</span></template>
+        <div class="autops-card" v-if="article.diagnosis_steps" style="margin-top: 16px">
+          <span class="autops-card-title">诊断步骤</span>
           <div v-html="renderMarkdown(article.diagnosis_steps)" class="markdown-body" />
-        </el-card>
+        </div>
 
         <!-- 处置步骤 -->
-        <el-card v-if="article.resolution_steps" shadow="hover" style="margin-top: 16px">
-          <template #header><span class="card-header-title">处置步骤</span></template>
+        <div class="autops-card" v-if="article.resolution_steps" style="margin-top: 16px">
+          <span class="autops-card-title">处置步骤</span>
           <div v-html="renderMarkdown(article.resolution_steps)" class="markdown-body" />
-        </el-card>
+        </div>
 
         <!-- 验证步骤 -->
-        <el-card v-if="article.verification_steps" shadow="hover" style="margin-top: 16px">
-          <template #header><span class="card-header-title">验证步骤</span></template>
+        <div class="autops-card" v-if="article.verification_steps" style="margin-top: 16px">
+          <span class="autops-card-title">验证步骤</span>
           <div v-html="renderMarkdown(article.verification_steps)" class="markdown-body" />
-        </el-card>
+        </div>
 
         <!-- Rating / Useful Feedback -->
-        <el-card shadow="hover" style="margin-top: 16px">
-          <template #header><span class="card-header-title">评价与反馈</span></template>
+        <div class="autops-card" style="margin-top: 16px">
+          <span class="autops-card-title">评价与反馈</span>
           <div class="feedback-section">
             <div class="feedback-row">
               <span class="feedback-label">该知识是否对您有帮助？</span>
@@ -135,11 +124,11 @@
               </el-button-group>
             </div>
           </div>
-        </el-card>
+        </div>
 
         <!-- Related Articles -->
-        <el-card shadow="hover" style="margin-top: 16px" v-if="relatedArticles.length > 0">
-          <template #header><span class="card-header-title">相关文章</span></template>
+        <div class="autops-card" style="margin-top: 16px" v-if="relatedArticles.length> 0">
+          <span class="autops-card-title">相关文章</span>
           <el-table :data="relatedArticles" stripe size="small" @row-click="goToRelated">
             <el-table-column prop="title" label="标题" min-width="260" show-overflow-tooltip>
               <template #default="{ row }">
@@ -160,7 +149,7 @@
               <template #default="{ row }">{{ row.views || 0 }}</template>
             </el-table-column>
           </el-table>
-        </el-card>
+        </div>
 
         <!-- Version History Dialog -->
         <el-dialog v-model="showVersionHistory" title="版本历史" width="700px">
@@ -171,14 +160,14 @@
               :timestamp="formatTime(ver.created_at)"
               placement="top"
             >
-              <el-card shadow="never" class="version-card">
+              <div class="autops-card version-card">
                 <div class="version-header">
                   <el-tag size="small">v{{ ver.version }}</el-tag>
                   <span class="version-author">{{ ver.author || ver.updated_by || '系统' }}</span>
                   <el-tag v-if="ver.version === article.version" type="success" size="small">当前版本</el-tag>
                 </div>
                 <div class="version-summary">{{ ver.change_summary || ver.summary || '无变更说明' }}</div>
-              </el-card>
+              </div>
             </el-timeline-item>
           </el-timeline>
           <el-empty v-else description="暂无版本历史记录" :image-size="80" />

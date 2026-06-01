@@ -51,12 +51,12 @@ const router = createRouter({
     { path: '/tickets/:id', name: 'ticket-detail', component: () => import('@/features/monitoring-event/TicketDetailPage.vue') },
 
     // 2.8 平台管理台
-    { path: '/admin/users', name: 'admin-users', component: () => import('@/features/platform-admin/UserManagementPage.vue') },
-    { path: '/admin/roles', name: 'admin-roles', component: () => import('@/features/platform-admin/RoleManagementPage.vue') },
-    { path: '/admin/api-keys', name: 'admin-api-keys', component: () => import('@/features/platform-admin/ApiKeyPage.vue') },
-    { path: '/admin/config', name: 'admin-config', component: () => import('@/features/platform-admin/SystemConfigPage.vue') },
-    { path: '/admin/status', name: 'admin-status', component: () => import('@/features/platform-admin/PlatformStatusPage.vue') },
-    { path: '/admin/backup', name: 'admin-backup', component: () => import('@/features/platform-admin/BackupPage.vue') },
+    { path: '/users', name: 'admin-users', component: () => import('@/features/platform-admin/UserManagementPage.vue') },
+    { path: '/roles', name: 'admin-roles', component: () => import('@/features/platform-admin/RoleManagementPage.vue') },
+    { path: '/api-keys', name: 'admin-api-keys', component: () => import('@/features/platform-admin/ApiKeyPage.vue') },
+    { path: '/system-config', name: 'admin-config', component: () => import('@/features/platform-admin/SystemConfigPage.vue') },
+    { path: '/platform-status', name: 'admin-status', component: () => import('@/features/platform-admin/PlatformStatusPage.vue') },
+    { path: '/backup', name: 'admin-backup', component: () => import('@/features/platform-admin/BackupPage.vue') },
     { path: '/audit', name: 'audit', component: () => import('@/features/platform-admin/AuditLogPage.vue') },
 
     // 404

@@ -1,51 +1,58 @@
 <template>
   <div class="script-list-page">
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">脚本库</div>
+        <div class="autops-page-subtitle">管理可复用的自动化脚本</div>
+      </div>
+    </div>
+
     <!-- ========== 统计卡片 ========== -->
     <el-row :gutter="16" class="stat-row">
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card">
+        <div class="autops-card stat-card">
           <div class="stat-value">{{ stats.total }}</div>
           <div class="stat-label">脚本总数</div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card stat-shell">
+        <div class="autops-card stat-card stat-shell">
           <div class="stat-value">{{ stats.shell }}</div>
           <div class="stat-label">Shell</div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card stat-python">
+        <div class="autops-card stat-card stat-python">
           <div class="stat-value">{{ stats.python }}</div>
           <div class="stat-label">Python</div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card stat-powershell">
+        <div class="autops-card stat-card stat-powershell">
           <div class="stat-value">{{ stats.powershell }}</div>
           <div class="stat-label">PowerShell</div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card stat-sql">
+        <div class="autops-card stat-card stat-sql">
           <div class="stat-value">{{ stats.sql }}</div>
           <div class="stat-label">SQL</div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card stat-rest">
+        <div class="autops-card stat-card stat-rest">
           <div class="stat-value">{{ stats.rest_api }}</div>
           <div class="stat-label">REST API</div>
-        </el-card>
+        </div>
       </el-col>
     </el-row>
 
     <!-- ========== 脚本列表 ========== -->
-    <el-card class="section-card">
-      <template #header>
-        <div class="card-header">
-          <span class="section-title">脚本库</span>
-          <div class="header-actions">
+    <div class="autops-card section-card">
+      
+        <div class="autops-card-header">
+          <span class="autops-card-title">脚本库</span>
+          <div class="autops-card-header-actions">
             <el-button type="primary" @click="openCreateDialog">
               <el-icon><Plus /></el-icon> 新建脚本
             </el-button>
@@ -54,7 +61,7 @@
             </el-button>
           </div>
         </div>
-      </template>
+      
 
       <!-- 分类标签页 -->
       <el-tabs v-model="filters.script_type" @tab-change="onCategoryTabChange" class="category-tabs">
@@ -67,6 +74,7 @@
       </el-tabs>
 
       <!-- 高级筛选 -->
+      <div class="autops-toolbar">
       <el-form :inline="true" class="filter-form">
         <el-form-item label="关键字">
           <el-input
@@ -101,6 +109,7 @@
           <el-button @click="resetFilters">重置</el-button>
         </el-form-item>
       </el-form>
+    </div>
 
       <!-- 脚本列表表格 -->
       <el-table :data="scripts" v-loading="loading" stripe row-key="id">
@@ -175,7 +184,7 @@
         class="pagination"
         @change="loadScripts"
       />
-    </el-card>
+    </div>
 
     <!-- ========== 创建/编辑脚本对话框 ========== -->
     <el-dialog

@@ -1,26 +1,30 @@
 <template>
   <div class="collector-page">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <span class="autops-page-title">采集器管理</span>
+    </div>
+
     <!-- ========== Tab 切换：本地采集器 / Edge采集器 ========== -->
     <el-tabs v-model="activeTab" @tab-change="handleTabChange">
       <!-- ========== 本地采集器 Tab ========== -->
       <el-tab-pane label="本地采集器" name="local">
-    <el-card class="section-card">
-      <template #header>
-        <div class="card-header">
-          <span class="section-title">采集器管理</span>
-          <div class="header-actions">
-            <el-button type="primary" @click="openTriggerDialog">
-              <el-icon><VideoPlay /></el-icon> 手动触发采集
-            </el-button>
-            <el-button @click="loadCollectors">
-              <el-icon><Refresh /></el-icon> 刷新
-            </el-button>
-          </div>
+    <div class="autops-card mb-lg">
+      <div class="autops-card-header">
+        <span class="autops-card-title">采集器管理</span>
+        <div class="autops-toolbar-right">
+          <el-button type="primary" @click="openTriggerDialog">
+            <el-icon><VideoPlay /></el-icon> 手动触发采集
+          </el-button>
+          <el-button @click="loadCollectors">
+            <el-icon><Refresh /></el-icon> 刷新
+          </el-button>
         </div>
-      </template>
+      </div>
+      <div class="autops-card-body">
 
       <!-- Filters -->
-      <el-form :inline="true" class="filter-form">
+      <el-form :inline="true" class="autops-toolbar">
         <el-form-item label="搜索">
           <el-input
             v-model="collectorFilters.search"
@@ -110,27 +114,27 @@
         class="pagination"
         @change="loadCollectors"
       />
-    </el-card>
+      </div>
+    </div>
 
     <!-- ========== 采集任务列表 ========== -->
-    <el-card class="section-card">
-      <template #header>
-        <div class="card-header">
-          <span class="section-title">采集任务</span>
-          <el-select
-            v-model="jobFilters.status"
-            placeholder="全部状态"
-            clearable
-            style="width: 150px"
-            @change="loadJobs"
-          >
-            <el-option label="待执行" value="pending" />
-            <el-option label="运行中" value="running" />
-            <el-option label="成功" value="success" />
-            <el-option label="失败" value="failed" />
-          </el-select>
-        </div>
-      </template>
+    <div class="autops-card">
+      <div class="autops-card-header">
+        <span class="autops-card-title">采集任务</span>
+        <el-select
+          v-model="jobFilters.status"
+          placeholder="全部状态"
+          clearable
+          style="width: 150px"
+          @change="loadJobs"
+        >
+          <el-option label="待执行" value="pending" />
+          <el-option label="运行中" value="running" />
+          <el-option label="成功" value="success" />
+          <el-option label="失败" value="failed" />
+        </el-select>
+      </div>
+      <div class="autops-card-body">
 
       <el-table :data="jobs" v-loading="jobLoading" stripe row-key="id" size="default">
         <el-table-column prop="collector_name" label="采集器" min-width="130" show-overflow-tooltip />
@@ -190,7 +194,8 @@
         class="pagination"
         @change="loadJobs"
       />
-    </el-card>
+      </div>
+    </div>
 
     <!-- ========== 采集器详情对话框 ========== -->
     <el-dialog v-model="showDetailDialog" title="采集器详情" width="700px" destroy-on-close>
@@ -347,19 +352,18 @@
       <!-- ========== Edge 采集器 Tab ========== -->
       <el-tab-pane label="Edge采集器" name="edge">
         <!-- Edge 状态统计 + 刷新 -->
-        <el-card class="section-card">
-          <template #header>
-            <div class="card-header">
-              <span class="section-title">Edge 采集器管理</span>
-              <div class="header-actions">
-                <el-tag type="success" class="edge-stat-tag">在线: {{ edgeOnlineCount }}</el-tag>
-                <el-tag type="danger" class="edge-stat-tag">离线: {{ edgeOfflineCount }}</el-tag>
-                <el-button @click="loadEdgeCollectors">
-                  <el-icon><Refresh /></el-icon> 刷新
-                </el-button>
-              </div>
+        <div class="autops-card">
+          <div class="autops-card-header">
+            <span class="autops-card-title">Edge 采集器管理</span>
+            <div class="autops-toolbar-right">
+              <el-tag type="success" class="edge-stat-tag">在线: {{ edgeOnlineCount }}</el-tag>
+              <el-tag type="danger" class="edge-stat-tag">离线: {{ edgeOfflineCount }}</el-tag>
+              <el-button @click="loadEdgeCollectors">
+                <el-icon><Refresh /></el-icon> 刷新
+              </el-button>
             </div>
-          </template>
+          </div>
+          <div class="autops-card-body">
 
           <!-- Edge 采集器表格 -->
           <el-table :data="edgeCollectors" v-loading="edgeLoading" stripe row-key="collector_id">
@@ -398,7 +402,8 @@
               </template>
             </el-table-column>
           </el-table>
-        </el-card>
+          </div>
+        </div>
       </el-tab-pane>
     </el-tabs>
 

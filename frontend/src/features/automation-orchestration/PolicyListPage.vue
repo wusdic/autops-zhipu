@@ -1,13 +1,20 @@
 <template>
   <div class="page-container">
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">策略管理</div>
+        <div class="autops-page-subtitle">配置自动化触发策略</div>
+      </div>
+    </div>
+
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="6"><el-card shadow="hover" class="stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">策略总数</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已激活</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card danger"><div class="stat-value">{{ stats.highRisk }}</div><div class="stat-label">高风险</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card warning"><div class="stat-value">{{ stats.pendingApproval }}</div><div class="stat-label">待审批</div></el-card></el-col>
+      <el-col :span="6"><div class="autops-card stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">策略总数</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已激活</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card danger"><div class="stat-value">{{ stats.highRisk }}</div><div class="stat-label">高风险</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card warning"><div class="stat-value">{{ stats.pendingApproval }}</div><div class="stat-label">待审批</div></div></el-col>
     </el-row>
 
-    <div class="toolbar">
+    <div class="autops-toolbar">
       <el-input v-model="filters.keyword" placeholder="搜索策略" clearable style="width:200px;margin-right:8px" @clear="load" @keyup.enter="load" />
       <el-select v-model="filters.status" placeholder="状态" clearable style="width:120px;margin-right:8px">
         <el-option label="草稿" value="draft" /><el-option label="已激活" value="active" /><el-option label="已废弃" value="deprecated" />

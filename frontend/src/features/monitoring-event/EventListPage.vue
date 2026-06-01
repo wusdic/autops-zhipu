@@ -1,9 +1,17 @@
 <template>
   <div class="event-list-page">
+    <!-- ========== Page Header ========== -->
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">事件中心</div>
+        <div class="autops-page-subtitle">统一查看与关联分析所有监控事件</div>
+      </div>
+    </div>
+
     <!-- ========== Statistics Row ========== -->
-    <el-row :gutter="16" class="stats-row">
+    <el-row :gutter="16" class="stats-row mb-lg">
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--total">
+        <div class="autops-card stat-card stat-card--total">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><Document /></el-icon>
@@ -13,10 +21,10 @@
               <div class="stat-card__label">事件总数</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--today">
+        <div class="autops-card stat-card stat-card--today">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><Clock /></el-icon>
@@ -26,10 +34,10 @@
               <div class="stat-card__label">今日事件</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--pending">
+        <div class="autops-card stat-card stat-card--pending">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><Warning /></el-icon>
@@ -39,10 +47,10 @@
               <div class="stat-card__label">待处理</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--critical">
+        <div class="autops-card stat-card stat-card--critical">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><WarningFilled /></el-icon>
@@ -52,31 +60,29 @@
               <div class="stat-card__label">严重事件</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
     </el-row>
 
     <!-- ========== Main Card ========== -->
-    <el-card class="main-card">
-      <template #header>
-        <div class="card-header">
-          <span class="card-header__title">事件中心</span>
-          <div class="card-header__actions">
-            <el-switch
-              v-model="autoRefresh"
-              active-text="自动刷新"
-              inactive-text=""
-              style="margin-right: 12px"
-              @change="toggleAutoRefresh"
-            />
-            <el-button :icon="Download" size="small" @click="exportEvents">导出</el-button>
-            <el-button :icon="Refresh" circle size="small" @click="handleSearch" />
-          </div>
+    <div class="autops-card main-card">
+      <div class="autops-card-header">
+        <span class="autops-card-title">事件列表</span>
+        <div class="card-header__actions">
+          <el-switch
+            v-model="autoRefresh"
+            active-text="自动刷新"
+            inactive-text=""
+            style="margin-right: 12px"
+            @change="toggleAutoRefresh"
+          />
+          <el-button :icon="Download" size="small" @click="exportEvents">导出</el-button>
+          <el-button :icon="Refresh" circle size="small" @click="handleSearch" />
         </div>
-      </template>
-
-      <!-- ========== Filters ========== -->
-      <el-form :inline="true" class="filter-form" @submit.prevent="handleSearch">
+      </div>
+      <div class="autops-card-body">
+        <!-- ========== Filters ========== -->
+        <el-form :inline="true" class="autops-toolbar filter-form" @submit.prevent="handleSearch">
         <el-form-item label="事件来源">
           <el-select v-model="filters.source" placeholder="全部来源" clearable style="width: 140px">
             <el-option label="采集器" value="collector" />
@@ -229,19 +235,20 @@
         </el-table-column>
       </el-table>
 
-      <!-- ========== Pagination ========== -->
-      <div class="pagination-wrapper">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.pageSize"
-          :total="pagination.total"
-          :page-sizes="[20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          background
-          @change="loadEvents"
-        />
+        <!-- ========== Pagination ========== -->
+        <div class="pagination-wrapper">
+          <el-pagination
+            v-model:current-page="pagination.page"
+            v-model:page-size="pagination.pageSize"
+            :total="pagination.total"
+            :page-sizes="[20, 50, 100]"
+            layout="total, sizes, prev, pager, next, jumper"
+            background
+            @change="loadEvents"
+          />
+        </div>
       </div>
-    </el-card>
+    </div>
 
     <!-- ========== Event Detail Drawer ========== -->
     <el-drawer

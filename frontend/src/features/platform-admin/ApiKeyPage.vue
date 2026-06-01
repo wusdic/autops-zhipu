@@ -1,13 +1,20 @@
 <template>
   <div class="page-container">
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">API 密钥</div>
+        <div class="autops-page-subtitle">管理系统 API 密钥</div>
+      </div>
+    </div>
+
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="6"><el-card shadow="hover" class="stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">API Key 总数</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">有效 Key</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card danger"><div class="stat-value">{{ stats.expired }}</div><div class="stat-label">已过期</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card warning"><div class="stat-value">{{ stats.expiringSoon }}</div><div class="stat-label">即将过期</div></el-card></el-col>
+      <el-col :span="6"><div class="autops-card stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">API Key 总数</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">有效 Key</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card danger"><div class="stat-value">{{ stats.expired }}</div><div class="stat-label">已过期</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card warning"><div class="stat-value">{{ stats.expiringSoon }}</div><div class="stat-label">即将过期</div></div></el-col>
     </el-row>
 
-    <div class="toolbar">
+    <div class="autops-toolbar">
       <el-input v-model="filters.keyword" placeholder="搜索名称" clearable style="width:200px;margin-right:8px" @clear="load" @keyup.enter="load" />
       <el-select v-model="filters.status" placeholder="状态" clearable style="width:120px;margin-right:8px">
         <el-option label="有效" value="active" /><el-option label="已过期" value="expired" /><el-option label="已禁用" value="disabled" />

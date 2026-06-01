@@ -1,5 +1,12 @@
 <template>
   <div class="page-container">
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">系统配置</div>
+        <div class="autops-page-subtitle">管理平台全局配置参数</div>
+      </div>
+    </div>
+
     <!-- ── System Info Panel ─────────────────────────────── -->
     <div class="system-info-panel" v-loading="infoLoading">
       <div class="info-item" v-for="item in systemInfo" :key="item.label">

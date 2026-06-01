@@ -1,13 +1,20 @@
 <template>
   <div class="page-container">
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">Playbook 管理</div>
+        <div class="autops-page-subtitle">编排自动化步骤流程</div>
+      </div>
+    </div>
+
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="6"><el-card shadow="hover" class="stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">Playbook 总数</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已激活</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card primary"><div class="stat-value">{{ stats.withScripts }}</div><div class="stat-label">关联脚本</div></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card warning"><div class="stat-value">{{ stats.avgSteps }}</div><div class="stat-label">平均步骤数</div></el-card></el-col>
+      <el-col :span="6"><div class="autops-card stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">Playbook 总数</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已激活</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card primary"><div class="stat-value">{{ stats.withScripts }}</div><div class="stat-label">关联脚本</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card warning"><div class="stat-value">{{ stats.avgSteps }}</div><div class="stat-label">平均步骤数</div></div></el-col>
     </el-row>
 
-    <div class="toolbar">
+    <div class="autops-toolbar">
       <el-input v-model="filters.keyword" placeholder="搜索名称/描述" clearable style="width:220px;margin-right:8px" @clear="load" @keyup.enter="load" />
       <el-select v-model="filters.status" placeholder="状态" clearable style="width:130px;margin-right:8px">
         <el-option label="草稿" value="draft" /><el-option label="已激活" value="active" /><el-option label="已废弃" value="deprecated" />

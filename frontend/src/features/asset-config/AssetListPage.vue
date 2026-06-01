@@ -1,22 +1,22 @@
 <template>
   <div class="asset-list">
-    <el-card>
-      <template #header>
-        <div class="card-header">
-          <span>资产列表</span>
-          <div>
-            <el-button type="success" @click="showImportDialog = true">
-              <el-icon><Upload /></el-icon> 批量导入
-            </el-button>
-            <el-button type="primary" @click="openCreateDialog">
-              <el-icon><Plus /></el-icon> 新建资产
-            </el-button>
-          </div>
-        </div>
-      </template>
+    <div class="autops-page-header">
+      <span class="autops-page-title">资产列表</span>
+      <div class="autops-toolbar-right">
+        <el-button type="success" @click="showImportDialog = true">
+          <el-icon><Upload /></el-icon> 批量导入
+        </el-button>
+        <el-button type="primary" @click="openCreateDialog">
+          <el-icon><Plus /></el-icon> 新建资产
+        </el-button>
+      </div>
+    </div>
+
+    <div class="autops-card">
+      <div class="autops-card-body">
 
       <!-- Filters -->
-      <el-form :inline="true" class="filter-form">
+      <el-form :inline="true" class="autops-toolbar">
         <el-form-item label="搜索">
           <el-input v-model="filters.search" placeholder="名称/IP搜索" clearable @clear="loadAssets" />
         </el-form-item>
@@ -152,9 +152,9 @@
         :page-sizes="[10, 20, 50]"
         layout="total, sizes, prev, pager, next"
         @change="loadAssets"
-        style="margin-top: 16px; justify-content: flex-end"
       />
-    </el-card>
+      </div>
+    </div>
 
     <!-- Batch Operation Bar -->
     <transition name="batch-bar">

@@ -1,32 +1,36 @@
 <template>
   <div class="config-page">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <span class="autops-page-title">配置管理</span>
+    </div>
+
     <!-- ========== 配置列表 ========== -->
-    <el-card>
-      <template #header>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span>配置管理</span>
-          <div style="display:flex;gap:8px;align-items:center">
-            <el-input
-              v-model="filters.search"
-              placeholder="搜索配置键"
-              clearable
-              style="width:180px"
-              @clear="loadConfigs"
-              @keyup.enter="loadConfigs"
-            />
-            <el-select
-              v-model="filters.config_type"
-              placeholder="配置类型"
-              clearable
-              style="width:160px"
-              @change="loadConfigs"
-            >
-              <el-option v-for="t in configTypes" :key="t.value" :label="t.label" :value="t.value" />
-            </el-select>
-            <el-button type="primary" @click="openCreateDialog">新建配置</el-button>
-          </div>
+    <div class="autops-card">
+      <div class="autops-card-header">
+        <span class="autops-card-title">配置列表</span>
+        <div class="autops-toolbar-right">
+          <el-input
+            v-model="filters.search"
+            placeholder="搜索配置键"
+            clearable
+            style="width:180px"
+            @clear="loadConfigs"
+            @keyup.enter="loadConfigs"
+          />
+          <el-select
+            v-model="filters.config_type"
+            placeholder="配置类型"
+            clearable
+            style="width:160px"
+            @change="loadConfigs"
+          >
+            <el-option v-for="t in configTypes" :key="t.value" :label="t.label" :value="t.value" />
+          </el-select>
+          <el-button type="primary" @click="openCreateDialog">新建配置</el-button>
         </div>
-      </template>
+      </div>
+      <div class="autops-card-body">
 
       <el-table :data="configs" v-loading="loading" stripe row-key="id">
         <el-table-column prop="config_key" label="配置键" min-width="180" show-overflow-tooltip />
@@ -83,10 +87,10 @@
         :total="pagination.total"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next"
-        style="margin-top:16px;justify-content:flex-end"
         @change="loadConfigs"
       />
-    </el-card>
+      </div>
+    </div>
 
     <!-- ========== 创建/编辑对话框 ========== -->
     <el-dialog

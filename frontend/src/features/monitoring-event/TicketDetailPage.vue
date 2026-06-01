@@ -1,7 +1,17 @@
 <template>
   <div class="ticket-detail">
+    <!-- ─── Page Header ─── -->
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">工单详情</div>
+        <div class="autops-page-subtitle">查看工单信息、关联告警、处理历史与 SLA 跟踪</div>
+      </div>
+    </div>
+
     <!-- 顶部导航 -->
-    <div class="detail-header">
+    <div class="autops-card">
+      <div class="autops-card-body">
+        <div class="detail-header">
       <el-button :icon="ArrowLeft" @click="$router.back()">返回</el-button>
       <div class="detail-title-area">
         <h2 style="margin: 0 0 0 12px">{{ ticket?.title || '工单详情' }}</h2>
@@ -19,6 +29,8 @@
             SLA剩余: {{ slaRemainingText }}
           </el-tag>
         </span>
+      </div>
+        </div>
       </div>
     </div>
 
@@ -146,12 +158,14 @@
                 :timestamp="formatTime(comment.created_at)"
                 placement="top"
               >
-                <el-card shadow="never">
-                  <p style="margin: 0">
-                    <strong>{{ comment.author || '系统' }}</strong>
-                    <span style="color: #999; margin-left: 8px">{{ comment.content }}</span>
-                  </p>
-                </el-card>
+                <div class="autops-card">
+                  <div class="autops-card-body">
+                    <p style="margin: 0">
+                      <strong>{{ comment.author || '系统' }}</strong>
+                      <span style="color: #999; margin-left: 8px">{{ comment.content }}</span>
+                    </p>
+                  </div>
+                </div>
               </el-timeline-item>
             </el-timeline>
             <el-empty v-if="!comments.length" description="暂无评论" />

@@ -1,15 +1,18 @@
 <template>
   <div class="credential-page">
-    <el-card>
-      <template #header>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span>凭证管理</span>
-          <el-button type="primary" @click="openCreateDialog" :icon="Plus">新建凭证</el-button>
-        </div>
-      </template>
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <span class="autops-page-title">凭证管理</span>
+      <div class="autops-toolbar-right">
+        <el-button type="primary" @click="openCreateDialog" :icon="Plus">新建凭证</el-button>
+      </div>
+    </div>
+
+    <div class="autops-card">
+      <div class="autops-card-body">
 
       <!-- 筛选 -->
-      <el-form :inline="true" class="filter-form">
+      <el-form :inline="true" class="autops-toolbar">
         <el-form-item label="类型">
           <el-select v-model="filters.credential_type" placeholder="全部" clearable @change="loadCredentials">
             <el-option label="SSH 密码" value="ssh_password" />
@@ -80,9 +83,9 @@
         :page-sizes="[10, 20, 50]"
         layout="total, sizes, prev, pager, next"
         @change="loadCredentials"
-        style="margin-top: 16px; justify-content: flex-end"
       />
-    </el-card>
+      </div>
+    </div>
 
     <!-- 创建/编辑凭证弹窗 -->
     <el-dialog v-model="showFormDialog" :title="isEditing ? '编辑凭证' : '新建凭证'" width="560px">

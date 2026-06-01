@@ -1,7 +1,12 @@
 <template>
   <div class="page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <span class="autops-page-title">资产发现</span>
+    </div>
+
     <!-- 统计卡片 -->
-    <el-row :gutter="16" class="stat-row">
+    <el-row :gutter="16" class="stat-row mb-lg">
       <el-col :span="6"><el-card shadow="hover" class="stat-card">
         <div class="stat-value">{{ stats.total_discovered }}</div>
         <div class="stat-label">已发现资产</div>
@@ -23,7 +28,7 @@
     <el-tabs v-model="activeTab" class="main-tabs">
       <!-- 发现任务 -->
       <el-tab-pane label="发现任务" name="tasks">
-        <div class="toolbar">
+        <div class="autops-toolbar">
           <el-button type="primary" @click="showCreateDialog = true">
             <el-icon><Plus /></el-icon> 新建发现任务
           </el-button>
@@ -72,7 +77,7 @@
 
       <!-- 发现结果 -->
       <el-tab-pane label="发现结果" name="results">
-        <div class="toolbar">
+        <div class="autops-toolbar">
           <el-select v-model="resultFilter.status" placeholder="状态" clearable style="width:130px;margin-right:8px">
             <el-option label="新发现" value="new" /><el-option label="已纳管" value="managed" />
             <el-option label="已变更" value="changed" /><el-option label="忽略" value="ignored" />

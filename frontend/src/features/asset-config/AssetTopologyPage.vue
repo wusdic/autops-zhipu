@@ -1,7 +1,12 @@
 <template>
   <div class="page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <span class="autops-page-title">资产拓扑</span>
+    </div>
+
     <!-- 统计卡片 -->
-    <el-row :gutter="12" class="stat-row">
+    <el-row :gutter="12" class="stat-row mb-md">
       <el-col :span="4"><el-card shadow="hover" class="stat-card"><div class="stat-value">{{ nodes.length }}</div><div class="stat-label">节点总数</div></el-card></el-col>
       <el-col :span="4"><el-card shadow="hover" class="stat-card success"><div class="stat-value">{{ edges.length }}</div><div class="stat-label">关系总数</div></el-card></el-col>
       <el-col :span="4"><el-card shadow="hover" class="stat-card primary"><div class="stat-value">{{ healthyCount }}</div><div class="stat-label">健康节点</div></el-card></el-col>
@@ -11,7 +16,7 @@
     </el-row>
 
     <!-- 工具栏 -->
-    <div class="toolbar">
+    <div class="autops-toolbar">
       <el-select v-model="relationFilter" placeholder="关系类型" clearable style="width:150px;margin-right:8px">
         <el-option label="依赖" value="depends_on" /><el-option label="包含" value="contains" />
         <el-option label="连接" value="connected_to" /><el-option label="承载" value="hosts" />
@@ -109,8 +114,11 @@
       <!-- 右侧面板 -->
       <el-col :span="6">
         <!-- 图例 -->
-        <el-card shadow="hover" class="legend-card">
-          <template #header><span style="font-weight:bold;font-size:13px">图例</span></template>
+        <div class="autops-card">
+          <div class="autops-card-header">
+            <span class="autops-card-title">图例</span>
+          </div>
+          <div class="autops-card-body legend-card">
           <div class="legend-section">
             <div class="legend-title">资产类型</div>
             <div v-for="(color, type) in typeColors" :key="type" class="legend-item">
@@ -130,16 +138,17 @@
             <div class="legend-item"><span class="legend-line" style="border-top:2px dashed #c0c4cc"></span> 备份</div>
             <div class="legend-item"><span class="legend-line" style="border-top:2px solid #f56c6c"></span> 影响路径</div>
           </div>
-        </el-card>
+          </div>
+          </div>
+        </div>
 
         <!-- 节点快速信息 -->
-        <el-card v-if="selectedNode" shadow="hover" style="margin-top:12px">
-          <template #header>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-weight:bold;font-size:13px">{{ selectedNode.name }}</span>
-              <el-tag :type="healthTagType(selectedNode.health_status || selectedNode.status)" size="small">{{ selectedNode.health_status || selectedNode.status || 'unknown' }}</el-tag>
-            </div>
-          </template>
+        <div v-if="selectedNode" class="autops-card" style="margin-top:12px">
+          <div class="autops-card-header">
+            <span class="autops-card-title">{{ selectedNode.name }}</span>
+            <el-tag :type="healthTagType(selectedNode.health_status || selectedNode.status)" size="small">{{ selectedNode.health_status || selectedNode.status || 'unknown' }}</el-tag>
+          </div>
+          <div class="autops-card-body">
           <el-descriptions :column="1" size="small" border>
             <el-descriptions-item label="类型">{{ typeLabel(selectedNode.asset_type) }}</el-descriptions-item>
             <el-descriptions-item label="IP">{{ selectedNode.ip_address || '-' }}</el-descriptions-item>
@@ -167,11 +176,15 @@
             <el-button size="small" type="primary" @click="viewAsset">查看详情</el-button>
             <el-button size="small" type="warning" @click="startImpact">影响分析</el-button>
           </div>
-        </el-card>
+          </div>
+        </div>
 
         <!-- 小地图 -->
-        <el-card shadow="hover" style="margin-top:12px">
-          <template #header><span style="font-weight:bold;font-size:13px">导航</span></template>
+        <div class="autops-card" style="margin-top:12px">
+          <div class="autops-card-header">
+            <span class="autops-card-title">导航</span>
+          </div>
+          <div class="autops-card-body">
           <div class="minimap" ref="minimapRef">
             <svg width="100%" height="120" :viewBox="minimapViewBox">
               <g v-for="node in filteredNodes" :key="'m'+node.id">
@@ -185,7 +198,8 @@
               </g>
             </svg>
           </div>
-        </el-card>
+          </div>
+        </div>
       </el-col>
     </el-row>
   </div>

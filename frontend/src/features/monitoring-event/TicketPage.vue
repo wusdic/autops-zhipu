@@ -1,9 +1,17 @@
 <template>
   <div class="ticket-list-page">
+    <!-- ========== Page Header ========== -->
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">工单中心</div>
+        <div class="autops-page-subtitle">统一管理事件工单，支持指派、升级、关闭与 SLA 跟踪</div>
+      </div>
+    </div>
+
     <!-- ========== Statistics Row ========== -->
-    <el-row :gutter="16" class="stats-row">
+    <el-row :gutter="16" class="stats-row mb-lg">
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card stat-card--total">
+        <div class="autops-card stat-card stat-card--total">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="28"><Tickets /></el-icon>
@@ -13,10 +21,10 @@
               <div class="stat-card__label">全部工单</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card stat-card--open">
+        <div class="autops-card stat-card stat-card--open">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="28"><Bell /></el-icon>
@@ -26,10 +34,10 @@
               <div class="stat-card__label">待处理</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card stat-card--progress">
+        <div class="autops-card stat-card stat-card--progress">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="28"><Loading /></el-icon>
@@ -39,10 +47,10 @@
               <div class="stat-card__label">处理中</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card stat-card--closed">
+        <div class="autops-card stat-card stat-card--closed">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="28"><CircleCheckFilled /></el-icon>
@@ -52,10 +60,10 @@
               <div class="stat-card__label">已关闭</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card stat-card--overdue">
+        <div class="autops-card stat-card stat-card--overdue">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="28"><WarningFilled /></el-icon>
@@ -65,10 +73,10 @@
               <div class="stat-card__label">SLA超时</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="4">
-        <el-card shadow="hover" class="stat-card stat-card--sla">
+        <div class="autops-card stat-card stat-card--sla">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="28"><Timer /></el-icon>
@@ -78,42 +86,42 @@
               <div class="stat-card__label">SLA达标率</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
     </el-row>
 
     <!-- ========== SLA Summary Bar ========== -->
-    <el-card v-if="stats.total > 0" class="sla-bar-card" shadow="never">
-      <div class="sla-bar">
-        <span class="sla-bar__label">SLA 达标统计</span>
-        <el-progress
-          :percentage="slaPercent"
-          :color="slaPercent >= 90 ? '#67c23a' : slaPercent >= 70 ? '#e6a23c' : '#f56c6c'"
-          :stroke-width="18"
-          :text-inside="true"
-          style="flex: 1; margin: 0 16px"
-        />
-        <span class="sla-bar__detail">
-          达标 <strong>{{ stats.withinSla }}</strong> / {{ stats.total }} 工单
-        </span>
+    <div v-if="stats.total > 0" class="autops-card sla-bar-card mb-lg">
+      <div class="autops-card-body">
+        <div class="sla-bar">
+          <span class="sla-bar__label">SLA 达标统计</span>
+          <el-progress
+            :percentage="slaPercent"
+            :color="slaPercent >= 90 ? '#67c23a' : slaPercent >= 70 ? '#e6a23c' : '#f56c6c'"
+            :stroke-width="18"
+            :text-inside="true"
+            style="flex: 1; margin: 0 16px"
+          />
+          <span class="sla-bar__detail">
+            达标 <strong>{{ stats.withinSla }}</strong> / {{ stats.total }} 工单
+          </span>
+        </div>
       </div>
-    </el-card>
+    </div>
 
     <!-- ========== Main Card ========== -->
-    <el-card class="main-card">
-      <template #header>
-        <div class="card-header">
-          <span class="card-header__title">工单中心</span>
-          <div class="card-header__actions">
-            <el-button type="primary" :icon="Plus" @click="openCreateDialog">新建工单</el-button>
-            <el-button :icon="Download" @click="exportTickets">导出</el-button>
-            <el-button :icon="Refresh" circle size="small" @click="loadTickets" />
-          </div>
+    <div class="autops-card main-card">
+      <div class="autops-card-header">
+        <span class="autops-card-title">工单列表</span>
+        <div class="card-header__actions">
+          <el-button type="primary" :icon="Plus" @click="openCreateDialog">新建工单</el-button>
+          <el-button :icon="Download" @click="exportTickets">导出</el-button>
+          <el-button :icon="Refresh" circle size="small" @click="loadTickets" />
         </div>
-      </template>
-
-      <!-- ========== Filters ========== -->
-      <el-form :inline="true" class="filter-form" @submit.prevent="handleSearch">
+      </div>
+      <div class="autops-card-body">
+        <!-- ========== Filters ========== -->
+        <el-form :inline="true" class="autops-toolbar filter-form" @submit.prevent="handleSearch">
         <el-form-item label="状态">
           <el-select v-model="filters.status" placeholder="全部状态" clearable style="width: 140px">
             <el-option label="待处理" value="open" />
@@ -303,19 +311,20 @@
         </el-table-column>
       </el-table>
 
-      <!-- ========== Pagination ========== -->
-      <div class="pagination-wrapper">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.pageSize"
-          :total="pagination.total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          background
-          @change="loadTickets"
-        />
+        <!-- ========== Pagination ========== -->
+        <div class="pagination-wrapper">
+          <el-pagination
+            v-model:current-page="pagination.page"
+            v-model:page-size="pagination.pageSize"
+            :total="pagination.total"
+            :page-sizes="[10, 20, 50, 100]"
+            layout="total, sizes, prev, pager, next, jumper"
+            background
+            @change="loadTickets"
+          />
+        </div>
       </div>
-    </el-card>
+    </div>
 
     <!-- ========== Create Ticket Dialog ========== -->
     <el-dialog

@@ -1,15 +1,17 @@
 <template>
   <div class="asset-detail">
-    <!-- 顶部导航 -->
-    <div class="page-top">
-      <el-button @click="goBack" :icon="ArrowLeft">返回资产列表</el-button>
-      <el-button v-if="asset" type="primary" link @click="$router.push(`/assets/${asset.id}/topology`)">
-        <el-icon><Connection /></el-icon> 拓扑图
-      </el-button>
-      <div class="asset-title" v-if="asset">
-        <span class="name">{{ asset.name }}</span>
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title" v-if="asset">
+        <el-button @click="goBack" :icon="ArrowLeft">返回资产列表</el-button>
+        <span style="margin-left: 12px">{{ asset.name }}</span>
         <el-tag :type="statusType(asset.status)" size="small" style="margin-left: 8px">{{ asset.status }}</el-tag>
         <el-tag :type="healthType(asset.health_status)" size="small" style="margin-left: 4px">{{ asset.health_status }}</el-tag>
+      </div>
+      <div class="autops-toolbar-right" v-if="asset">
+        <el-button type="primary" link @click="$router.push(`/assets/${asset.id}/topology`)">
+          <el-icon><Connection /></el-icon> 拓扑图
+        </el-button>
       </div>
     </div>
 
@@ -21,7 +23,8 @@
 
       <template v-if="asset">
         <!-- 顶部摘要卡片 -->
-        <el-card class="summary-card" shadow="hover">
+        <div class="autops-card mb-lg">
+          <div class="autops-card-body">
           <el-row :gutter="24">
             <el-col :span="6">
               <div class="summary-item">
@@ -54,10 +57,12 @@
               </div>
             </el-col>
           </el-row>
-        </el-card>
+          </div>
+        </div>
 
         <!-- Tab 切换 -->
-        <el-card style="margin-top: 16px">
+        <div class="autops-card">
+          <div class="autops-card-body">
           <el-tabs v-model="activeTab">
             <!-- 基本信息 -->
             <el-tab-pane label="基本信息" name="info">
@@ -356,7 +361,8 @@
               </el-dialog>
             </el-tab-pane>
           </el-tabs>
-        </el-card>
+          </div>
+        </div>
       </template>
     </div>
   </div>

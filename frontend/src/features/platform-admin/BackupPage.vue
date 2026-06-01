@@ -1,19 +1,21 @@
 <template>
   <div class="page-container">
-    <!-- ── Page Header ────────────────────────────────────── -->
-    <div class="page-header">
-      <h2>备份恢复</h2>
-      <div class="header-actions">
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">备份与恢复</div>
+        <div class="autops-page-subtitle">系统数据备份和恢复</div>
+      </div>
+      <div class="top-actions">
         <el-button @click="loadBackups" :loading="loading">刷新</el-button>
         <el-button type="primary" @click="openCreateDialog">新建备份</el-button>
       </div>
     </div>
 
     <!-- ── Storage Info Card ───────────────────────────────── -->
-    <el-card shadow="never" class="storage-card">
-      <template #header>
+    <div class="autops-card storage-card">
+      
         <div class="card-title">存储空间</div>
-      </template>
+      
       <div class="storage-body">
         <el-progress
           :percentage="storagePercentage"
@@ -27,18 +29,18 @@
           &nbsp;·&nbsp; 共 <strong>{{ storage.count }}</strong> 份备份
         </div>
       </div>
-    </el-card>
+    </div>
 
     <!-- ── Auto-backup Settings Card ───────────────────────── -->
-    <el-card shadow="never" class="settings-card">
-      <template #header>
+    <div class="autops-card settings-card">
+      
         <div style="display:flex;justify-content:space-between;align-items:center">
           <span class="card-title">定时备份</span>
           <el-button size="small" type="primary" :loading="savingSettings" @click="saveSettings">
             保存设置
           </el-button>
         </div>
-      </template>
+      
       <el-form label-width="120px" label-position="right">
         <el-form-item label="启用定时备份">
           <el-switch v-model="settings.enabled" />
@@ -71,7 +73,7 @@
           <span class="form-hint">&nbsp;保留最近 N 份备份</span>
         </el-form-item>
       </el-form>
-    </el-card>
+    </div>
 
     <!-- ── Backup List Table ───────────────────────────────── -->
     <el-table :data="backups" v-loading="loading" stripe border style="width:100%">

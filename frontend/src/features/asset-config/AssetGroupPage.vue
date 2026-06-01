@@ -1,21 +1,25 @@
 <template>
   <div class="asset-group">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <span class="autops-page-title">资产分组</span>
+    </div>
+
     <el-row :gutter="16">
       <!-- 左侧：分组列表 -->
       <el-col :span="10">
-        <el-card>
-          <template #header>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span>资产分组</span>
-              <el-button type="primary" size="small" @click="openCreateDialog" :icon="Plus">新建分组</el-button>
-            </div>
-          </template>
+        <div class="autops-card">
+          <div class="autops-card-header">
+            <span class="autops-card-title">资产分组</span>
+            <el-button type="primary" size="small" @click="openCreateDialog" :icon="Plus">新建分组</el-button>
+          </div>
+          <div class="autops-card-body">
 
           <el-input
             v-model="groupSearch"
             placeholder="搜索分组名称"
             clearable
-            style="margin-bottom: 12px"
+            class="mb-md"
             :prefix-icon="Search"
           />
 
@@ -48,22 +52,22 @@
               </div>
             </div>
           </div>
-        </el-card>
+          </div>
+        </div>
       </el-col>
 
       <!-- 右侧：分组内资产列表 -->
       <el-col :span="14">
-        <el-card>
-          <template #header>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span>{{ currentGroup ? `分组: ${currentGroup.name}` : '分组资产列表' }}</span>
-              <div v-if="currentGroup">
-                <el-button type="primary" size="small" @click="showAddMemberDialog = true" :icon="Plus">
-                  添加资产
-                </el-button>
-              </div>
+        <div class="autops-card">
+          <div class="autops-card-header">
+            <span class="autops-card-title">{{ currentGroup ? `分组: ${currentGroup.name}` : '分组资产列表' }}</span>
+            <div v-if="currentGroup">
+              <el-button type="primary" size="small" @click="showAddMemberDialog = true" :icon="Plus">
+                添加资产
+              </el-button>
             </div>
-          </template>
+          </div>
+          <div class="autops-card-body">
 
           <template v-if="currentGroup">
             <!-- 分组描述 -->
@@ -100,7 +104,8 @@
           </template>
 
           <el-empty v-else description="请在左侧选择一个分组查看资产" />
-        </el-card>
+          </div>
+        </div>
       </el-col>
     </el-row>
 

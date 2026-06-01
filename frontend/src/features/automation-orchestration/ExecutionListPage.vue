@@ -1,9 +1,16 @@
 <template>
   <div class="execution-list-page">
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">执行历史</div>
+        <div class="autops-page-subtitle">查看所有自动化执行记录与状态</div>
+      </div>
+    </div>
+
     <!-- ========== Statistics Row ========== -->
     <el-row :gutter="16" class="stats-row">
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--today">
+        <div class="autops-card stat-card stat-card--today">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><Document /></el-icon>
@@ -13,10 +20,10 @@
               <div class="stat-card__label">今日执行</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--running">
+        <div class="autops-card stat-card stat-card--running">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><Loading /></el-icon>
@@ -26,10 +33,10 @@
               <div class="stat-card__label">执行中</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--success">
+        <div class="autops-card stat-card stat-card--success">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><CircleCheckFilled /></el-icon>
@@ -39,10 +46,10 @@
               <div class="stat-card__label">成功率</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card stat-card--failed">
+        <div class="autops-card stat-card stat-card--failed">
           <div class="stat-card__body">
             <div class="stat-card__icon">
               <el-icon :size="32"><CircleCloseFilled /></el-icon>
@@ -52,30 +59,30 @@
               <div class="stat-card__label">失败数</div>
             </div>
           </div>
-        </el-card>
+        </div>
       </el-col>
     </el-row>
 
     <!-- ========== Trend Chart ========== -->
-    <el-card class="trend-card">
-      <template #header>
-        <div class="card-header">
-          <span class="card-header__title">执行趋势（近 7 天）</span>
+    <div class="autops-card trend-card">
+      
+        <div class="autops-card-header">
+          <span class="autops-card-title">执行趋势（近 7 天）</span>
         </div>
-      </template>
+      
       <MetricChart
         :multiple="trendSeries"
         chart-type="bar"
         height="260px"
       />
-    </el-card>
+    </div>
 
     <!-- ========== Main Card ========== -->
-    <el-card class="main-card">
-      <template #header>
-        <div class="card-header">
-          <span class="card-header__title">执行历史</span>
-          <div class="card-header__actions">
+    <div class="autops-card main-card">
+      
+        <div class="autops-card-header">
+          <span class="autops-card-title">执行历史</span>
+          <div class="autops-card-header-actions">
             <el-switch
               v-model="autoRefresh"
               active-text="自动刷新"
@@ -85,9 +92,10 @@
             <el-button :icon="Refresh" circle size="small" @click="handleSearch" />
           </div>
         </div>
-      </template>
+      
 
       <!-- ========== Filters ========== -->
+      <div class="autops-toolbar">
       <el-form :inline="true" class="filter-form" @submit.prevent="handleSearch">
         <el-form-item label="状态">
           <el-select v-model="filters.status" placeholder="全部状态" clearable style="width: 140px">
@@ -143,6 +151,7 @@
           <el-button :icon="RefreshLeft" @click="resetFilters">重置</el-button>
         </el-form-item>
       </el-form>
+    </div>
 
       <!-- ========== Batch Operations Bar ========== -->
       <transition name="el-fade-in">
@@ -274,7 +283,7 @@
           @change="loadExecutions"
         />
       </div>
-    </el-card>
+    </div>
 
     <!-- ========== Log Drawer ========== -->
     <el-drawer

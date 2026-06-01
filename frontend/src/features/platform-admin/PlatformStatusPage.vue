@@ -1,8 +1,11 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <h2>平台状态</h2>
-      <div style="display:flex;align-items:center;gap:12px">
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">平台状态</div>
+        <div class="autops-page-subtitle">查看平台运行指标与健康度</div>
+      </div>
+      <div class="top-actions" style="display:flex;align-items:center;gap:12px">
         <div class="auto-refresh-control">
           <el-switch v-model="autoRefresh" active-text="自动刷新" @change="toggleAutoRefresh" />
           <span v-if="autoRefresh" class="refresh-countdown">{{ countdown }}s</span>
@@ -31,13 +34,7 @@
 
     <!-- Component Health Cards -->
     <div class="status-grid" v-loading="loading">
-      <el-card
-        v-for="comp in components"
-        :key="comp.key"
-        class="status-card"
-        shadow="hover"
-        :class="{ 'status-card-unhealthy': comp.status === 'unhealthy' }"
-      >
+      <div class="autops-card status-card" v-for="comp in components" :key="comp.key" :class="{ 'status-card-unhealthy': comp.status === 'unhealthy' }">
         <div class="card-header">
           <span class="card-icon">{{ comp.icon }}</span>
           <span class="card-title">{{ comp.label }}</span>
@@ -60,14 +57,14 @@
             {{ comp.latency }}ms
           </span>
         </div>
-      </el-card>
+      </div>
     </div>
 
     <!-- Health Check History Chart -->
-    <el-card style="margin-top: 20px">
-      <template #header>
-        <span style="font-weight:600">健康检查历史</span>
-      </template>
+    <div class="autops-card" style="margin-top: 20px">
+      <div class="autops-card-header">
+                <span style="font-weight:600">健康检查历史</span>
+      </div>
       <div class="chart-container">
         <div class="chart-placeholder" v-if="!historyData.length">
           <span class="text-muted">暂无历史数据，点击「自检」开始记录</span>
@@ -90,7 +87,7 @@
           </div>
         </div>
       </div>
-    </el-card>
+    </div>
 
     <!-- Self-check Result Drawer -->
     <el-drawer v-model="selfCheckVisible" title="自检结果" size="520px">

@@ -1,5 +1,12 @@
 <template>
   <div class="execution-detail">
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">执行详情</div>
+        <div class="autops-page-subtitle">查看单次执行的详细信息、步骤和日志</div>
+      </div>
+    </div>
+
     <!-- Back Button -->
     <el-page-header @back="$router.back()" style="margin-bottom: 16px">
       <template #content>
@@ -8,11 +15,11 @@
     </el-page-header>
 
     <!-- Basic Info -->
-    <el-card v-loading="loading">
-      <template #header>
-        <div class="card-header">
+    <div class="autops-card" v-loading="loading">
+      
+        <div class="autops-card-header">
           <span>基本信息</span>
-          <div class="header-actions">
+          <div class="autops-card-header-actions">
             <el-button
               v-if="execution && (execution.status === 'running' || execution.status === 'pending')"
               type="warning"
@@ -30,7 +37,7 @@
             </el-button>
           </div>
         </div>
-      </template>
+      
       <el-descriptions v-if="execution" :column="3" border>
         <el-descriptions-item label="执行ID">{{ execution.id }}</el-descriptions-item>
         <el-descriptions-item label="策略名称">{{ execution.policy_name || '-' }}</el-descriptions-item>
@@ -47,13 +54,13 @@
           <span v-else>-</span>
         </el-descriptions-item>
       </el-descriptions>
-    </el-card>
+    </div>
 
     <!-- Steps -->
-    <el-card style="margin-top: 16px">
-      <template #header>
-        <span>执行步骤</span>
-      </template>
+    <div class="autops-card" style="margin-top: 16px">
+      <div class="autops-card-header">
+                <span>执行步骤</span>
+      </div>
       <el-table
         :data="steps"
         stripe
@@ -85,30 +92,30 @@
         <el-table-column prop="result" label="结果" min-width="200" show-overflow-tooltip />
       </el-table>
       <el-empty v-else description="暂无步骤数据" />
-    </el-card>
+    </div>
 
     <!-- Realtime Logs -->
-    <el-card style="margin-top: 16px">
-      <template #header>
-        <div class="card-header">
+    <div class="autops-card" style="margin-top: 16px">
+      
+        <div class="autops-card-header">
           <span>实时日志</span>
           <div>
             <el-button size="small" @click="downloadLogs" :disabled="logs.length === 0">下载日志</el-button>
             <el-button size="small" @click="loadLogs" :loading="logsLoading">刷新日志</el-button>
           </div>
         </div>
-      </template>
+      
       <div class="log-container" v-loading="logsLoading">
         <pre v-if="logs.length > 0" class="log-content">{{ logs.join('\n') }}</pre>
         <el-empty v-else description="暂无日志" :image-size="60" />
       </div>
-    </el-card>
+    </div>
 
     <!-- Approve Action -->
-    <el-card v-if="execution && execution.status === 'pending'" style="margin-top: 16px">
-      <template #header>
-        <span>审批操作</span>
-      </template>
+    <div class="autops-card" v-if="execution && execution.status === 'pending'" style="margin-top: 16px">
+      <div class="autops-card-header">
+                <span>审批操作</span>
+      </div>
       <el-form :inline="true">
         <el-form-item label="审批备注">
           <el-input v-model="approveComment" placeholder="可选填写审批意见" style="width: 360px" />
@@ -118,13 +125,13 @@
           <el-button type="danger" @click="approveExecution(false)" :loading="approving">驳回</el-button>
         </el-form-item>
       </el-form>
-    </el-card>
+    </div>
 
     <!-- Execution Result Summary -->
-    <el-card v-if="execution && (execution.status === 'completed' || execution.status === 'failed')" style="margin-top: 16px">
-      <template #header>
-        <span>执行结果</span>
-      </template>
+    <div class="autops-card" v-if="execution && (execution.status === 'completed' || execution.status === 'failed')" style="margin-top: 16px">
+      <div class="autops-card-header">
+                <span>执行结果</span>
+      </div>
       <el-descriptions :column="1" border>
         <el-descriptions-item label="执行结果">
           <el-tag :type="execution.status === 'completed' ? 'success' : 'danger'" size="large">
@@ -138,20 +145,16 @@
           <span style="color: #f56c6c">{{ execution.error_message }}</span>
         </el-descriptions-item>
       </el-descriptions>
-    </el-card>
+    </div>
 
     <!-- Verification Result Section -->
-    <el-card
-      v-if="execution && (execution.status === 'completed' || execution.status === 'failed')"
-      style="margin-top: 16px"
-      v-loading="verificationLoading"
-    >
-      <template #header>
-        <div class="card-header">
+    <div class="autops-card" v-if="execution && (execution.status === 'completed' || execution.status === 'failed')" style="margin-top: 16px" v-loading="verificationLoading">
+      
+        <div class="autops-card-header">
           <span>验证结果</span>
           <el-button size="small" @click="loadVerification" :loading="verificationLoading">刷新验证</el-button>
         </div>
-      </template>
+      
       <template v-if="verification">
         <el-descriptions :column="2" border style="margin-bottom: 16px">
           <el-descriptions-item label="验证状态">
@@ -186,7 +189,7 @@
         <el-empty v-else description="暂无验证检查数据" :image-size="60" />
       </template>
       <el-empty v-else-if="!verificationLoading" description="暂无验证结果" :image-size="60" />
-    </el-card>
+    </div>
 
     <!-- Rollback Dialog -->
     <el-dialog v-model="showRollbackDialog" title="选择回滚脚本/Playbook" width="560px" destroy-on-close>

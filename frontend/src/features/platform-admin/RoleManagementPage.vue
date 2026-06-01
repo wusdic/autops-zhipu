@@ -1,8 +1,13 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <h2>角色管理</h2>
-      <el-button type="primary" @click="showCreateDialog">新建角色</el-button>
+    <div class="autops-page-header">
+      <div>
+        <div class="autops-page-title">角色管理</div>
+        <div class="autops-page-subtitle">管理角色与权限</div>
+      </div>
+      <div class="top-actions">
+        <el-button type="primary" @click="showCreateDialog">新建角色</el-button>
+      </div>
     </div>
 
     <el-table :data="roles" v-loading="loading" stripe border style="width: 100%">
