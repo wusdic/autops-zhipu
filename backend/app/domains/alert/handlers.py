@@ -8,11 +8,41 @@ from app.common.events import (
     get_event_bus,
     EventEvents,
     StateEvents,
+    AlertEvents,
+    AutomationEvents,
+    NotificationEvents,
 )
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Idempotency guard — 防止同一事件被同一处理器重复处理
+# ---------------------------------------------------------------------------
+_processed_events: set[str] = set()
+_MAX_PROCESSED = 50_000  # 防止内存无限增长
 
+
+def idempotent_handler(func):
+    """装饰器: 防止同一事件被同一处理器重复处理."""
+    async def wrapper(event):
+        key = f"{getattr(event, 'event_id', '')}:{func.__name__}"
+        if key in _processed_events:
+            logger.debug("alert: 跳过重复处理 key=%s", key)
+            return
+        if len(_processed_events) > _MAX_PROCESSED:
+            _processed_events.clear()
+        _processed_events.add(key)
+        return await func(event)
+    wrapper.__name__ = func.__name__
+    wrapper.__qualname__ = func.__qualname__
+    return wrapper
+
+
+# ---------------------------------------------------------------------------
+# 原有告警领域处理器
+# ---------------------------------------------------------------------------
+
+@idempotent_handler
 async def on_event_created_match_rules(event: DomainEvent) -> None:
     """事件创建时匹配告警规则."""
     payload = event.payload
@@ -25,7 +55,7 @@ async def on_event_created_match_rules(event: DomainEvent) -> None:
 
         from app.infra.database import async_session_factory
         from app.domains.alert.service import AlertService
-        from app.common.events import AlertEvents
+        from app.common.events import AlertEvents as _AE
 
         async with async_session_factory() as session:
             svc = AlertService(session)
@@ -50,7 +80,7 @@ async def on_event_created_match_rules(event: DomainEvent) -> None:
             bus = get_event_bus()
             for alert_data in matched_alerts:
                 await bus.publish(DomainEvent(
-                    event_type=AlertEvents.ALERT_CREATED,
+                    event_type=_AE.ALERT_CREATED,
                     domain="alert",
                     payload=alert_data,
                     source="alert_engine",
@@ -63,6 +93,7 @@ async def on_event_created_match_rules(event: DomainEvent) -> None:
         logger.error("alert: 事件创建匹配告警规则失败: %s", e)
 
 
+@idempotent_handler
 async def on_state_recovered_auto_resolve(event: DomainEvent) -> None:
     """状态恢复时自动resolve关联告警."""
     payload = event.payload
@@ -101,6 +132,7 @@ async def on_state_recovered_auto_resolve(event: DomainEvent) -> None:
         logger.error("alert: 状态恢复自动resolve告警失败: %s", e)
 
 
+@idempotent_handler
 async def on_event_deduplicated_suppress(event: DomainEvent) -> None:
     """事件去重时抑制重复告警."""
     payload = event.payload
@@ -116,10 +148,110 @@ async def on_event_deduplicated_suppress(event: DomainEvent) -> None:
         logger.error("alert: 事件去重抑制告警失败: %s", e)
 
 
+# ---------------------------------------------------------------------------
+# 从 common/event_handlers.py 迁移的处理器
+# ---------------------------------------------------------------------------
+
+@idempotent_handler
+async def on_alert_notification(event) -> None:
+    """告警/升级 → 发送通知."""
+    payload = event.payload
+    bus = get_event_bus()
+    await bus.publish(DomainEvent(
+        event_type=NotificationEvents.NOTIFICATION_SENT,
+        domain="notification",
+        payload={
+            "type": "alert",
+            "title": payload.get("title", "告警通知"),
+            "message": f"告警: {payload.get('title', '')} 严重度: {payload.get('severity', '')}",
+            "ref_id": payload.get("alert_id"),
+        },
+        source="handler",
+        correlation_id=event.event_id,
+    ))
+
+
+@idempotent_handler
+async def on_execution_completed_resolve(event) -> None:
+    """自动化执行完成 → 更新告警."""
+    payload = event.payload
+    # 更新告警状态为 resolved（如果有关联告警）
+    alert_id = payload.get("alert_id")
+    if alert_id:
+        await _resolve_alert(alert_id, "auto_resolved", event.payload.get("execution_id", ""))
+
+
+@idempotent_handler
+async def on_alert_created_notify_external(event):
+    """告警创建后发送外部通知."""
+    try:
+        from app.integrations.registry import NotificationRegistry
+        from app.integrations.base import NotificationPayload
+        payload = event.payload
+        severity = payload.get("severity", "info")
+        if severity in ("critical", "warning"):
+            registry = NotificationRegistry.get_instance()
+            await registry.broadcast(NotificationPayload(
+                title=payload.get("title", "New Alert"),
+                severity=severity,
+                alert_id=payload.get("alert_id"),
+                asset_name=payload.get("asset_name"),
+                message=payload.get("detail"),
+            ))
+    except Exception as e:
+        logger.error("External notification failed: %s", e)
+
+
+# ---------------------------------------------------------------------------
+# 辅助函数
+# ---------------------------------------------------------------------------
+
+async def _resolve_alert(alert_id: str, reason: str, execution_id: str = "") -> None:
+    """自动解决告警."""
+    try:
+        from app.infra.database import async_session_factory
+        from app.domains.alert.service import AlertService
+        async with async_session_factory() as session:
+            svc = AlertService(session)
+            await svc.resolve(alert_id=alert_id, user_id="system")
+            await session.commit()
+    except Exception as e:
+        logger.error("自动解决告警失败: %s", e)
+
+
+def _register_external_notification_channels() -> None:
+    """注册外部通知渠道."""
+    from app.integrations.registry import NotificationRegistry
+    from app.integrations.webhook import WebhookChannel
+    from app.integrations.dingtalk import DingTalkChannel
+    from app.integrations.email_channel import EmailChannel
+
+    notif_registry = NotificationRegistry.get_instance()
+    notif_registry.register(WebhookChannel(enabled=False))
+    notif_registry.register(DingTalkChannel(enabled=False))
+    notif_registry.register(EmailChannel(enabled=False))
+
+
+# ---------------------------------------------------------------------------
+# 注册入口
+# ---------------------------------------------------------------------------
+
 def register_handlers() -> None:
     """注册告警领域的事件处理器."""
     bus = get_event_bus()
+
+    # 原有handlers
     bus.subscribe(EventEvents.EVENT_CREATED, on_event_created_match_rules)
     bus.subscribe(StateEvents.STATE_RECOVERED, on_state_recovered_auto_resolve)
     bus.subscribe(EventEvents.EVENT_DEDUPLICATED, on_event_deduplicated_suppress)
-    logger.info("alert领域事件处理器已注册 (3个handler)")
+
+    # 从 event_handlers 迁移
+    bus.subscribe(AlertEvents.ALERT_CREATED, on_alert_notification)
+    bus.subscribe(AlertEvents.ALERT_ESCALATED, on_alert_notification)
+    bus.subscribe(AutomationEvents.EXECUTION_COMPLETED, on_execution_completed_resolve)
+
+    # 外部通知
+    _register_external_notification_channels()
+    bus.subscribe(AlertEvents.ALERT_CREATED, on_alert_created_notify_external)
+
+    logger.info("alert领域事件处理器已注册 (含idempotency)")

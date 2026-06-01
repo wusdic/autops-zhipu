@@ -122,14 +122,47 @@ async def on_asset_changed_create_event(event: DomainEvent) -> None:
         logger.error("event: 资产变更创建事件失败: %s", e)
 
 
+async def on_state_recovered_create_event(event: DomainEvent) -> None:
+    """状态恢复 → 创建恢复事件（用于自动resolved告警）."""
+    payload = event.payload
+    try:
+        asset_id = payload.get("asset_id")
+        if not asset_id:
+            return
+
+        from app.infra.database import async_session_factory
+        from app.domains.event.service import EventService
+        import json
+
+        async with async_session_factory() as session:
+            svc = EventService(session)
+            await svc.create_event(
+                event_type="state_recovered",
+                source="state",
+                asset_id=asset_id,
+                severity="info",
+                details={
+                    "state_type": payload.get("state_type", ""),
+                    "old_status": payload.get("old_status", ""),
+                    "new_status": "normal",
+                    "source_event_id": event.event_id,
+                },
+            )
+            await session.commit()
+        logger.info("event: 状态恢复创建事件 asset_id=%s", asset_id)
+    except Exception as e:
+        logger.error("event: 状态恢复创建事件失败: %s", e)
+
+
 def register_handlers() -> None:
     """注册事件领域的事件处理器."""
     bus = get_event_bus()
     bus.subscribe(StateEvents.STATE_CHANGED, on_state_changed_create_event)
     bus.subscribe(StateEvents.STATE_CRITICAL, on_state_critical_create_event)
+    bus.subscribe(StateEvents.STATE_RECOVERED, on_state_recovered_create_event)
     bus.subscribe(AssetEvents.ASSET_CREATED, on_asset_changed_create_event)
     bus.subscribe(AssetEvents.ASSET_UPDATED, on_asset_changed_create_event)
     bus.subscribe(AssetEvents.ASSET_DELETED, on_asset_changed_create_event)
     bus.subscribe(AssetEvents.ASSET_STATUS_CHANGED, on_asset_changed_create_event)
     bus.subscribe(AssetEvents.ASSET_HEALTH_CHANGED, on_asset_changed_create_event)
-    logger.info("event领域事件处理器已注册 (3个handler, 监听7个事件)")
+    logger.info("event领域事件处理器已注册 (4个handler, 监听8个事件)")

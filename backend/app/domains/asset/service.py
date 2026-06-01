@@ -17,6 +17,12 @@ from app.domains.asset.repository import (
 from app.domains.asset.schemas import (
     AssetCreate, AssetGroupCreate, AssetImportItem, AssetRelationCreate, AssetUpdate,
 )
+from app.domains.collector.query_service import (
+    get_collection_jobs_by_asset,
+    create_collection_job_for_asset,
+)
+from app.domains.config.query_service import get_bindings_by_asset
+from app.domains.policy.query_service import get_policy_executions_by_asset
 
 
 class AssetService:
@@ -149,26 +155,15 @@ class AssetService:
             raise NotFoundError(f"资产分组 {group_id} 不存在")
         return group
 
-    async def get_asset_credentials(self, asset_id: str) -> list:
-        """获取资产关联的凭证列表."""
+    async def get_asset_credentials(self, asset_id: str) -> list[dict]:
+        """获取资产关联的凭证列表（通过 config query_service，不直接跨域引用模型）."""
         await self.get_asset(asset_id)
-        from sqlalchemy import select
-        from app.domains.config.models import CredentialBinding
-        stmt = select(CredentialBinding).where(CredentialBinding.target_id == asset_id)
-        result = await self.session.execute(stmt)
-        return list(result.scalars().all())
+        return await get_bindings_by_asset(asset_id, self.session)
 
-    async def get_asset_policies(self, asset_id: str) -> list:
-        """获取资产关联的策略执行记录."""
+    async def get_asset_policies(self, asset_id: str) -> list[dict]:
+        """获取资产关联的策略执行记录（通过 policy query_service，不直接跨域引用模型）."""
         await self.get_asset(asset_id)
-        from sqlalchemy import select
-        from app.domains.policy.models import PolicyExecution
-        from sqlalchemy import func as sa_func
-        stmt = select(PolicyExecution).where(
-            PolicyExecution.matched_assets.contains(asset_id)
-        ).order_by(PolicyExecution.created_at.desc())
-        result = await self.session.execute(stmt)
-        return list(result.scalars().all())
+        return await get_policy_executions_by_asset(asset_id, self.session)
 
     async def delete_relation(self, asset_id: str, relation_id: str) -> None:
         """删除资产关系."""
@@ -178,19 +173,21 @@ class AssetService:
         await self.session.delete(rel)
         await self.session.flush()
 
-    async def get_collection_configs(self, asset_id: str) -> list:
-        """获取资产采集配置列表."""
+    async def get_collection_configs(self, asset_id: str) -> list[dict]:
+        """获取资产采集配置列表（通过 collector query_service，不直接跨域引用模型）."""
         await self.get_asset(asset_id)
-        from sqlalchemy import select
-        from app.domains.collector.models import CollectionJob
-        stmt = select(CollectionJob).where(CollectionJob.asset_id == asset_id)
-        result = await self.session.execute(stmt)
-        return list(result.scalars().all())
+        return await get_collection_jobs_by_asset(asset_id, self.session)
 
     async def trigger_collection(self, asset_id: str) -> dict:
-        """触发资产采集."""
+        """触发资产采集 — 创建真实 CollectionJob 并发布 collector.job_created 事件."""
         await self.get_asset(asset_id)
-        return {"asset_id": asset_id, "status": "triggered", "message": "采集任务已触发"}
+        job_info = await create_collection_job_for_asset(asset_id, self.session)
+        return {
+            "asset_id": asset_id,
+            "job_id": job_info["job_id"],
+            "status": job_info["status"],
+            "message": "采集任务已创建",
+        }
 
     async def get_topology(self, asset_id: str, depth: int = 2) -> dict:
         """获取资产拓扑关系图（递归查询关联资产）."""

@@ -9,11 +9,40 @@ from app.common.events import (
     AlertEvents,
     AutomationEvents,
     TicketEvents,
+    KnowledgeEvents,
+    NotificationEvents,
 )
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Idempotency guard — 防止同一事件被同一处理器重复处理
+# ---------------------------------------------------------------------------
+_processed_events: set[str] = set()
+_MAX_PROCESSED = 50_000
 
+
+def idempotent_handler(func):
+    """装饰器: 防止同一事件被同一处理器重复处理."""
+    async def wrapper(event):
+        key = f"{getattr(event, 'event_id', '')}:{func.__name__}"
+        if key in _processed_events:
+            logger.debug("ticket: 跳过重复处理 key=%s", key)
+            return
+        if len(_processed_events) > _MAX_PROCESSED:
+            _processed_events.clear()
+        _processed_events.add(key)
+        return await func(event)
+    wrapper.__name__ = func.__name__
+    wrapper.__qualname__ = func.__qualname__
+    return wrapper
+
+
+# ---------------------------------------------------------------------------
+# 原有工单领域处理器
+# ---------------------------------------------------------------------------
+
+@idempotent_handler
 async def on_alert_escalated_create_ticket(event: DomainEvent) -> None:
     """告警升级时自动创建工单."""
     payload = event.payload
@@ -69,6 +98,7 @@ async def on_alert_escalated_create_ticket(event: DomainEvent) -> None:
         logger.error("ticket: 告警升级创建工单失败: %s", e)
 
 
+@idempotent_handler
 async def on_execution_failed_create_ticket(event: DomainEvent) -> None:
     """自动化执行失败时自动创建工单."""
     payload = event.payload
@@ -123,6 +153,7 @@ async def on_execution_failed_create_ticket(event: DomainEvent) -> None:
         logger.error("ticket: 自动化失败创建工单失败: %s", e)
 
 
+@idempotent_handler
 async def on_alert_acknowledged_link_ticket(event: DomainEvent) -> None:
     """告警确认时关联到已有工单."""
     payload = event.payload
@@ -154,10 +185,65 @@ async def on_alert_acknowledged_link_ticket(event: DomainEvent) -> None:
         logger.error("ticket: 告警确认关联工单失败: %s", e)
 
 
+# ---------------------------------------------------------------------------
+# 从 common/event_handlers.py 迁移的处理器
+# ---------------------------------------------------------------------------
+
+@idempotent_handler
+async def on_ticket_closed_create_knowledge(event) -> None:
+    """工单关闭 → 生成知识草稿."""
+    payload = event.payload
+    bus = get_event_bus()
+    await bus.publish(DomainEvent(
+        event_type=KnowledgeEvents.DRAFT_CREATED,
+        domain="knowledge",
+        payload={
+            "title": f"工单总结: {payload.get('title', '未知工单')}",
+            "article_type": "incident_summary",
+            "source": "ticket_closure",
+            "source_id": payload.get("ticket_id"),
+            "context": payload.get("context", {}),
+        },
+        source="handler",
+        correlation_id=event.event_id,
+    ))
+
+
+@idempotent_handler
+async def on_ticket_notification(event) -> None:
+    """工单分配 → 发送通知."""
+    payload = event.payload
+    bus = get_event_bus()
+    await bus.publish(DomainEvent(
+        event_type=NotificationEvents.NOTIFICATION_SENT,
+        domain="notification",
+        payload={
+            "type": "ticket",
+            "title": f"工单分配: {payload.get('title', '')}",
+            "message": f"您被分配了工单: {payload.get('title', '')}",
+            "ref_id": payload.get("ticket_id"),
+            "user_id": payload.get("assigned_to"),
+        },
+        source="handler",
+        correlation_id=event.event_id,
+    ))
+
+
+# ---------------------------------------------------------------------------
+# 注册入口
+# ---------------------------------------------------------------------------
+
 def register_handlers() -> None:
     """注册工单领域的事件处理器."""
     bus = get_event_bus()
+
+    # 原有handlers
     bus.subscribe(AlertEvents.ALERT_ESCALATED, on_alert_escalated_create_ticket)
     bus.subscribe(AutomationEvents.EXECUTION_FAILED, on_execution_failed_create_ticket)
     bus.subscribe(AlertEvents.ALERT_ACKNOWLEDGED, on_alert_acknowledged_link_ticket)
-    logger.info("ticket领域事件处理器已注册 (3个handler)")
+
+    # 从 event_handlers 迁移
+    bus.subscribe(TicketEvents.TICKET_CLOSED, on_ticket_closed_create_knowledge)
+    bus.subscribe(TicketEvents.TICKET_ASSIGNED, on_ticket_notification)
+
+    logger.info("ticket领域事件处理器已注册 (含idempotency)")
