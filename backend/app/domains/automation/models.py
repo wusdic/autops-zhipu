@@ -57,8 +57,9 @@ class Execution(Base):
     # JSON array
     parameters: Mapped[str | None] = mapped_column(Text, nullable=True)
     # JSON
-    status: Mapped[str] = mapped_column(String(16), default="pending", nullable=False, index=True)
-    # pending, dry_run, awaiting_approval, approved, running, completed, failed, cancelled, rolling_back, rolled_back
+    status: Mapped[str] = mapped_column(String(32), default="pending", nullable=False, index=True)
+    # pending, dry_running, dry_run_completed, awaiting_approval, approved, running,
+    # verifying, completed, failed, cancelled, rolling_back, rolled_back, rollback_failed
     trigger_source: Mapped[str] = mapped_column(String(32), nullable=False)
     # manual, policy, aiops
     trigger_source_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
@@ -85,8 +86,8 @@ class ExecutionStep(Base):
     script_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     parameters: Mapped[str | None] = mapped_column(Text, nullable=True)
-    status: Mapped[str] = mapped_column(String(16), default="pending")
-    # pending, running, completed, failed, skipped
+    status: Mapped[str] = mapped_column(String(32), default="pending")
+    # pending, running, completed, failed, skipped, rolled_back
     started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     result: Mapped[str | None] = mapped_column(Text, nullable=True)

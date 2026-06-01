@@ -13,7 +13,20 @@ from app.infra.config import get_config
 from app.infra.database import Base
 
 # 导入所有模型以确保 Base.metadata 包含所有表
-# from app.domains.asset.models import *  # noqa: F401,F403
+import app.domains.asset.models          # noqa: F401
+import app.domains.asset.discovery_models  # noqa: F401
+import app.domains.config.models          # noqa: F401
+import app.domains.collector.models       # noqa: F401
+import app.domains.event.models           # noqa: F401
+import app.domains.alert.models           # noqa: F401
+import app.domains.policy.models          # noqa: F401
+import app.domains.automation.models      # noqa: F401
+import app.domains.log.models             # noqa: F401
+import app.domains.knowledge.models       # noqa: F401
+import app.domains.ticket.models          # noqa: F401
+import app.domains.governance.models      # noqa: F401
+import app.domains.state.models           # noqa: F401
+import app.domains.notification.models    # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:
