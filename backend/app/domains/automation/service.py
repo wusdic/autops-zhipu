@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.exceptions import DuplicateError, NotFoundError
 from app.common.repository import BaseRepository
-from app.domains.automation.models import Execution, ExecutionStep, Playbook, Script
+from app.domains.automation.models import Execution, ExecutionStep, Playbook, Script, ExecutionStatus
 from app.domains.automation.schemas import ExecutionCreate
 from app.domains.automation.command_policy import CommandPolicy
 from app.domains.automation.executor.local_dev import LocalDevExecutor
@@ -146,9 +146,9 @@ class AutomationService:
             if pb:
                 risk = pb.risk_level
 
-        status = "pending"
+        status = ExecutionStatus.PENDING
         if not data.is_dry_run and risk in ("high", "critical"):
-            status = "awaiting_approval"
+            status = ExecutionStatus.AWAITING_APPROVAL
 
         if not data.is_dry_run and data.asset_ids:
             if await self._check_concurrent_lock(data.asset_ids):
@@ -173,9 +173,9 @@ class AutomationService:
         exe = await self.exec_repo.get_by_id(exec_id)
         if not exe:
             raise NotFoundError(f"执行任务 {exec_id} 不存在")
-        if exe.status != "awaiting_approval":
+        if exe.status != ExecutionStatus.AWAITING_APPROVAL:
             raise ValueError("当前状态不允许审批")
-        exe.status = "approved"
+        exe.status = ExecutionStatus.APPROVED
         exe.approved_by = user_id
         exe.approved_at = datetime.now(timezone.utc)
         await self.session.flush()
@@ -203,9 +203,9 @@ class AutomationService:
         exe = await self.exec_repo.get_by_id(exec_id)
         if not exe:
             raise NotFoundError(f"执行任务 {exec_id} 不存在")
-        if exe.status not in ("pending", "awaiting_approval", "approved", "running"):
+        if exe.status not in (ExecutionStatus.PENDING, ExecutionStatus.AWAITING_APPROVAL, ExecutionStatus.APPROVED, ExecutionStatus.RUNNING):
             raise ValueError("当前状态不允许取消")
-        exe.status = "cancelled"
+        exe.status = ExecutionStatus.CANCELLED
         exe.completed_at = datetime.now(timezone.utc)
         await self.session.flush()
         await self.session.refresh(exe)
@@ -217,7 +217,7 @@ class AutomationService:
         状态流: rolling_back → 执行回滚步骤 → rolled_back / rollback_failed
         """
         execution = await self.get_execution(exec_id)
-        if execution.status not in ("completed", "failed", "dry_run_completed", "dry_run_failed"):
+        if execution.status not in (ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.DRY_RUN_COMPLETED, ExecutionStatus.DRY_RUN_FAILED):
             raise ValueError("只能回滚已完成或失败的执行")
 
         # 收集回滚步骤
@@ -240,7 +240,7 @@ class AutomationService:
         if not rollback_steps:
             raise ValueError("No rollback plan defined for this execution")
 
-        execution.status = "rolling_back"
+        execution.status = ExecutionStatus.ROLLING_BACK
         await self.session.flush()
 
         from app.domains.automation.executor.base import ExecutionPlan
@@ -267,7 +267,7 @@ class AutomationService:
 
             try:
                 result = await _executor.execute(plan)
-                step_status = "completed" if result.success else "failed"
+                step_status = ExecutionStatus.COMPLETED if result.success else ExecutionStatus.FAILED
                 if not result.success:
                     all_success = False
 
@@ -292,7 +292,7 @@ class AutomationService:
                     },
                 )
 
-        execution.status = "rolled_back" if all_success else "rollback_failed"
+        execution.status = ExecutionStatus.ROLLED_BACK if all_success else ExecutionStatus.ROLLBACK_FAILED
         execution.completed_at = datetime.now(timezone.utc)
         await self.session.flush()
         await self.session.refresh(execution)
@@ -328,13 +328,13 @@ class AutomationService:
         exe = await self.exec_repo.get_by_id(exec_id)
         if not exe:
             raise NotFoundError(f"执行任务 {exec_id} 不存在")
-        if exe.status not in ("pending", "approved"):
+        if exe.status not in (ExecutionStatus.PENDING, ExecutionStatus.APPROVED):
             raise ValueError(f"当前状态 {exe.status} 不允许执行")
 
         is_dry = getattr(exe, "is_dry_run", False)
 
         # Set appropriate intermediate status
-        exe.status = "dry_running" if is_dry else "running"
+        exe.status = ExecutionStatus.DRY_RUNNING if is_dry else ExecutionStatus.RUNNING
         exe.started_at = datetime.now(timezone.utc)
         await self.session.flush()
 
@@ -372,11 +372,14 @@ class AutomationService:
 
         if not result.success:
             if is_dry:
-                exe.status = "dry_run_failed"
+                exe.status = ExecutionStatus.DRY_RUN_FAILED
             else:
-                exe.status = "blocked" if "blocked" in (result.stderr or "") else "failed"
+                # policy 阻断也归为 failed（blocked 不在合法状态枚举中）
+                exe.status = ExecutionStatus.FAILED
+                if "blocked" in (result.stderr or "").lower():
+                    exe.error_message = f"Command blocked by policy: {result.stderr[:4000]}"
         else:
-            exe.status = "dry_run_completed" if is_dry else "completed"
+            exe.status = ExecutionStatus.DRY_RUN_COMPLETED if is_dry else ExecutionStatus.COMPLETED
 
         exe.completed_at = datetime.now(timezone.utc)
         await self.session.flush()
@@ -384,10 +387,10 @@ class AutomationService:
         return exe
 
     async def _check_concurrent_lock(self, asset_ids: list[str]) -> bool:
-        """检查资产是否有正在运行的执行 — 修复JSON解析."""
+        """检查资产是否有正在运行的执行 — 使用 ExecutionStatus.LOCK_HOLDING 统一判断."""
         result = await self.session.execute(
             select(Execution).where(
-                Execution.status.in_(["pending", "approved", "running"]),
+                Execution.status.in_(list(ExecutionStatus.LOCK_HOLDING)),
             )
         )
         running = result.scalars().all()

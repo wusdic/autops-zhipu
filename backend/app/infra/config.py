@@ -153,8 +153,6 @@ class AppConfig(BaseSettings):
     config_dir: str = str(_CONFIG_DIR)
     env: Literal["dev", "test", "prod"] = "dev"
     enable_openapi_ui: bool = True
-    enable_scheduler: bool = False
-    allow_inprocess_events: bool = False
 
     # 子配置
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)

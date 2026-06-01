@@ -42,7 +42,12 @@ class WorkerRunner:
         bus = get_event_bus()
         bus.enable_outbox()
         register_all_handlers()
-        logger.info("WorkerRunner: outbox enabled, all handlers registered")
+
+        # 注册 asset_created → 立即采集（只在 worker 中）
+        from app.common.events import AssetEvents
+        from app.workers.scheduler import on_asset_created_run_collection
+        bus.subscribe(AssetEvents.ASSET_CREATED, on_asset_created_run_collection)
+        logger.info("WorkerRunner: outbox enabled, all handlers registered, asset_created→collection linked")
 
         # 2. 启动 OutboxConsumer
         from app.common.outbox import OutboxConsumer

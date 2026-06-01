@@ -8,6 +8,45 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.infra.database import Base
 
 
+# ─── 执行状态枚举 ───
+class ExecutionStatus:
+    """所有合法的 Execution 状态 — 单一事实源."""
+    PENDING            = "pending"
+    DRY_RUNNING        = "dry_running"
+    DRY_RUN_COMPLETED  = "dry_run_completed"
+    DRY_RUN_FAILED     = "dry_run_failed"
+    AWAITING_APPROVAL  = "awaiting_approval"
+    APPROVED           = "approved"
+    RUNNING            = "running"
+    VERIFYING          = "verifying"
+    COMPLETED          = "completed"
+    FAILED             = "failed"
+    CANCELLED          = "cancelled"
+    ROLLING_BACK       = "rolling_back"
+    ROLLED_BACK        = "rolled_back"
+    ROLLBACK_FAILED    = "rollback_failed"
+
+    # 占用资产锁的状态（并发检查用）
+    LOCK_HOLDING = {
+        PENDING, APPROVED, RUNNING,
+        DRY_RUNNING, VERIFYING, ROLLING_BACK,
+    }
+
+    # 终态（不再变化）
+    TERMINAL = {
+        DRY_RUN_COMPLETED, DRY_RUN_FAILED,
+        COMPLETED, FAILED, CANCELLED,
+        ROLLED_BACK, ROLLBACK_FAILED,
+    }
+
+    ALL = {
+        PENDING, DRY_RUNNING, DRY_RUN_COMPLETED, DRY_RUN_FAILED,
+        AWAITING_APPROVAL, APPROVED, RUNNING, VERIFYING,
+        COMPLETED, FAILED, CANCELLED,
+        ROLLING_BACK, ROLLED_BACK, ROLLBACK_FAILED,
+    }
+
+
 class Script(Base):
     """脚本库表."""
     __tablename__ = "scripts"
