@@ -1,0 +1,237 @@
+"""采集调度器 - 定时+事件驱动采集."""
+from __future__ import annotations
+
+import asyncio
+import json
+import logging
+import uuid
+from datetime import datetime, timezone
+
+from sqlalchemy import select
+
+from app.workers.builtin_collectors import run_collection, COLLECTOR_REGISTRY
+
+logger = logging.getLogger(__name__)
+
+# 全局调度器实例
+_scheduler_instance: "CollectionScheduler | None" = None
+
+# 内置采集器名 → collector_type 映射
+BUILTIN_NAME_TO_TYPE = {
+    "ping-collector": "ping",
+    "tcp-port-collector": "tcp_port",
+    "http-collector": "http",
+    "cert-collector": "certificate",
+    "db-collector": "database",
+}
+
+
+class CollectionScheduler:
+    """采集调度器 — 定期遍历资产执行采集."""
+
+    def __init__(self):
+        self._running = False
+        self._task: asyncio.Task | None = None
+
+    async def start(self, interval: int = 300):
+        """启动定期采集 (默认5分钟)."""
+        if self._running:
+            return
+        self._running = True
+        self._task = asyncio.create_task(self._loop(interval))
+        logger.info("CollectionScheduler started, interval=%ds", interval)
+
+    async def stop(self):
+        self._running = False
+        if self._task:
+            self._task.cancel()
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
+        logger.info("CollectionScheduler stopped")
+
+    async def _loop(self, interval: int):
+        while self._running:
+            try:
+                await self._run_all_assets()
+            except Exception as e:
+                logger.error("CollectionScheduler loop error: %s", e, exc_info=True)
+            await asyncio.sleep(interval)
+
+    async def _run_all_assets(self):
+        """遍历所有在线资产，执行匹配的采集."""
+        from app.infra.database import async_session_factory
+        from app.domains.asset.models import Asset
+        from app.domains.collector.models import CollectionJob, CollectionResult, Collector
+        from app.domains.collector.service import CollectorService
+        from app.common.events import DomainEvent, get_event_bus, StateEvents
+
+        async with async_session_factory() as session:
+            # 获取所有未删除资产
+            result = await session.execute(
+                select(Asset).where(Asset.is_deleted == False)
+            )
+            assets = list(result.scalars().all())
+            if not assets:
+                return
+
+            # 确保内置采集器已注册
+            svc = CollectorService(session)
+            all_collectors = await svc.get_or_create_builtin_collectors()
+            await session.flush()
+
+            # 建立 collector_type → collector UUID 映射
+            type_to_id: dict[str, str] = {}
+            for col in all_collectors:
+                mapped_type = BUILTIN_NAME_TO_TYPE.get(col.name, col.collector_type)
+                type_to_id[mapped_type] = str(col.id)
+
+            logger.info("CollectionScheduler: scanning %d assets, %d collectors", len(assets), len(type_to_id))
+
+            for asset in assets:
+                if not self._running:
+                    break
+                ip = asset.ip
+                if not ip or ip == "0.0.0.0":
+                    continue
+
+                try:
+                    # 对每个资产执行所有内置采集
+                    for ctype, collector in COLLECTOR_REGISTRY.items():
+                        result_data = await run_collection(ctype, ip)
+                        status = result_data.get("status", "error")
+
+                        # 记录采集结果到DB
+                        try:
+                            real_collector_id = type_to_id.get(ctype)
+                            if not real_collector_id:
+                                logger.warning("No DB collector for type=%s, skip", ctype)
+                                continue
+
+                            # 查找或创建Job
+                            existing = await session.execute(
+                                select(CollectionJob).where(
+                                    CollectionJob.asset_id == str(asset.id),
+                                    CollectionJob.collector_id == real_collector_id,
+                                    CollectionJob.status == "running",
+                                ).limit(1)
+                            )
+                            job_obj = existing.scalar_one_or_none()
+                            if not job_obj:
+                                job_obj = CollectionJob(
+                                    name=f"auto_{ctype}_{(asset.hostname or 'unknown')[:20]}",
+                                    collector_id=real_collector_id,
+                                    asset_id=str(asset.id),
+                                    status="running",
+                                )
+                                session.add(job_obj)
+                                await session.flush()
+
+                            # 写采集结果
+                            cr = CollectionResult(
+                                job_id=str(job_obj.id),
+                                asset_id=str(asset.id),
+                                status="success" if status == "success" else "failed",
+                                result_data=json.dumps(result_data, ensure_ascii=False, default=str),
+                                error_message=result_data.get("error"),
+                                started_at=datetime.now(timezone.utc),
+                                completed_at=datetime.now(timezone.utc),
+                                duration_ms=int(result_data.get("latency_ms", 0) or 0),
+                            )
+                            session.add(cr)
+
+                            # 更新job状态
+                            job_obj.status = "completed" if status == "success" else "failed"
+                            job_obj.last_run_at = datetime.now(timezone.utc)
+
+                        except Exception as db_err:
+                            logger.warning("DB write error for %s/%s: %s", ip, ctype, db_err)
+                            await session.rollback()
+                            return
+
+                        # Ping状态变更检测 → 发事件
+                        if ctype == "ping":
+                            was_online = getattr(asset, "status", "") == "online"
+                            is_alive = result_data.get("alive", False)
+                            new_status = "online" if is_alive else "offline"
+
+                            if was_online != is_alive:
+                                old_status = asset.status
+                                asset.status = new_status
+                                await session.flush()
+
+                                bus = get_event_bus()
+                                await bus.publish(DomainEvent(
+                                    domain="state",
+                                    event_type=StateEvents.STATE_CHANGED,
+                                    payload={
+                                        "asset_id": str(asset.id),
+                                        "asset_name": asset.hostname,
+                                        "ip": ip,
+                                        "old_status": old_status,
+                                        "new_status": new_status,
+                                        "source": "collector.ping",
+                                        "metrics": result_data,
+                                    },
+                                ))
+                                logger.info(
+                                    "State change: asset=%s %s → %s",
+                                    asset.hostname, old_status, new_status
+                                )
+
+                    await session.flush()
+                except Exception as e:
+                    logger.warning("Collection error: asset=%s, error=%s", ip, e, exc_info=True)
+
+            await session.commit()
+            logger.info("CollectionScheduler: batch completed for %d assets", len(assets))
+
+
+async def on_asset_created_run_collection(event: DomainEvent) -> None:
+    """资产创建/纳管时立即执行采集."""
+    payload = event.payload
+    asset_id = payload.get("asset_id")
+    ip = payload.get("ip")
+    if not asset_id or not ip:
+        return
+
+    logger.info("Triggering immediate collection for asset=%s ip=%s", asset_id, ip)
+
+    try:
+        from app.infra.database import async_session_factory
+        from app.domains.asset.models import Asset
+
+        async with async_session_factory() as session:
+            result = await session.execute(
+                select(Asset).where(Asset.id == asset_id)
+            )
+            asset = result.scalar_one_or_none()
+            if not asset:
+                return
+
+            # 执行所有内置采集
+            for ctype in COLLECTOR_REGISTRY:
+                try:
+                    result_data = await run_collection(ctype, ip)
+                    status = result_data.get("status", "error")
+
+                    # Ping结果更新资产状态
+                    if ctype == "ping" and status == "success":
+                        alive = result_data.get("alive", False)
+                        asset.status = "online" if alive else "offline"
+
+                except Exception as e:
+                    logger.warning("Collection %s failed for %s: %s", ctype, ip, e)
+
+            await session.commit()
+
+    except Exception as e:
+        logger.error("Immediate collection failed: %s", e, exc_info=True)
+
+
+def get_scheduler() -> CollectionScheduler:
+    global _scheduler_instance
+    if _scheduler_instance is None:
+        _scheduler_instance = CollectionScheduler()
+    return _scheduler_instance

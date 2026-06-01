@@ -52,6 +52,20 @@ async def create_job(data: CollectionJobCreate, svc: CollectorService = Depends(
     return success(model_to_dict(job))
 
 
+@job_router.post("/trigger")
+async def trigger_collection():
+    """手动触发一次全量采集周期（同步等待完成）."""
+    from app.workers.scheduler import get_scheduler
+    scheduler = get_scheduler()
+    try:
+        await scheduler._run_all_assets()
+        return success({"message": "Collection cycle completed"})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return success({"message": f"Error: {e}"})
+
+
 @job_router.get("/{job_id}/results")
 async def get_job_results(
     job_id: str,

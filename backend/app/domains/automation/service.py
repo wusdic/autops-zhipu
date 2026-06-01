@@ -250,3 +250,77 @@ class AutomationService:
         await self.session.flush()
         await self.session.refresh(execution)
         return execution
+
+    async def append_execution_log(self, execution_id: str, log_entry: dict) -> None:
+        """追加执行日志 (供handler调用)."""
+        import json as _json
+        exe = await self.exec_repo.get_by_id(execution_id)
+        if not exe:
+            return
+        step = ExecutionStep(
+            execution_id=execution_id,
+            step_name=log_entry.get("step_id", "unknown"),
+            step_type="log",
+            status=log_entry.get("status", "info"),
+            output=_json.dumps(log_entry, ensure_ascii=False, default=str),
+        )
+        self.session.add(step)
+        await self.session.flush()
+
+    async def run_execution(self, exec_id: str) -> Execution:
+        """真正执行脚本/命令."""
+        import asyncio
+        exe = await self.exec_repo.get_by_id(exec_id)
+        if not exe:
+            raise NotFoundError(f"执行任务 {exec_id} 不存在")
+        if exe.status not in ("pending", "approved"):
+            raise ValueError(f"当前状态 {exe.status} 不允许执行")
+
+        exe.status = "running"
+        exe.started_at = datetime.now(timezone.utc)
+        await self.session.flush()
+
+        # 加载脚本内容
+        content = ""
+        if exe.execution_type == "script":
+            script = await self.script_repo.get_by_id(exe.target_id)
+            content = script.content if script else ""
+        elif exe.execution_type == "playbook":
+            pb = await self.playbook_repo.get_by_id(exe.target_id)
+            content = pb.steps if pb else ""
+
+        if not content:
+            exe.status = "failed"
+            exe.completed_at = datetime.now(timezone.utc)
+            await self.session.flush()
+            return exe
+
+        # 安全检查
+        if self._check_blocked(content if isinstance(content, str) else str(content)):
+            exe.status = "blocked"
+            exe.completed_at = datetime.now(timezone.utc)
+            await self.session.flush()
+            return exe
+
+        try:
+            cmd = content if isinstance(content, str) else str(content)
+            proc = await asyncio.create_subprocess_exec(
+                "/bin/bash", "-c", cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=300)
+            exe.result = (stdout or b"").decode("utf-8", errors="replace")[:10000]
+            exe.error_message = (stderr or b"").decode("utf-8", errors="replace")[:5000] or None
+            exe.status = "completed" if proc.returncode == 0 else "failed"
+        except asyncio.TimeoutError:
+            exe.status = "timeout"
+            exe.error_message = "执行超时(300s)"
+        except Exception as e:
+            exe.status = "failed"
+            exe.error_message = str(e)[:5000]
+        finally:
+            exe.completed_at = datetime.now(timezone.utc)
+            await self.session.flush()
+            await self.session.refresh(exe)
+        return exe
