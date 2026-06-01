@@ -112,7 +112,12 @@ class EventBus:
             ]
 
     async def publish(self, event: DomainEvent) -> None:
-        """发布事件: 先持久化到outbox，再触发handler."""
+        """发布事件.
+
+        两种模式:
+        - _outbox_enabled=False (dev mode): 直接触发handler（in-process dispatch）
+        - _outbox_enabled=True  (prod/API): 仅写入outbox，不触发handler
+        """
         event_dict = event.to_dict()
 
         # 记录到内存日志
@@ -120,19 +125,23 @@ class EventBus:
         if len(self._event_log) > self._max_log_size:
             self._event_log = self._event_log[-self._max_log_size:]
 
-        # 持久化到outbox表
+        logger.info(
+            "EventBus publish: [%s] %s (priority=%s, outbox=%s)",
+            event.domain, event.event_type, event.priority.name, self._outbox_enabled,
+        )
+
         if self._outbox_enabled:
+            # 生产模式: 仅持久化到outbox，不触发handler
             try:
                 await self._persist_to_outbox(event)
             except Exception:
                 logger.exception("EventBus: outbox persist failed for %s", event.event_type)
+        else:
+            # 开发模式: 直接触发handler（无outbox持久化）
+            await self.dispatch_to_handlers(event)
 
-        logger.info(
-            "EventBus publish: [%s] %s (priority=%s)",
-            event.domain, event.event_type, event.priority.name
-        )
-
-        # 触发处理器
+    async def dispatch_to_handlers(self, event: DomainEvent) -> None:
+        """仅触发已注册的处理器（由 OutboxConsumer 调用）."""
         handlers = list(self._handlers.get(event.event_type, []))
         all_handlers = handlers + self._wildcard_handlers
 
@@ -158,9 +167,11 @@ class EventBus:
             await session.execute(
                 text("""
                     INSERT INTO event_outbox
-                        (event_id, event_type, domain, payload, priority, source, status, created_at)
+                        (event_id, event_type, domain, payload, priority, source,
+                         correlation_id, status, created_at)
                     VALUES
-                        (:eid, :etype, :domain, :payload, :priority, :source, 'pending', NOW())
+                        (:eid, :etype, :domain, :payload, :priority, :source,
+                         :corr_id, 'pending', NOW())
                 """),
                 {
                     "eid": event.event_id,
@@ -169,6 +180,7 @@ class EventBus:
                     "payload": json.dumps(event.payload, ensure_ascii=False, default=str),
                     "priority": event.priority.value,
                     "source": event.source,
+                    "corr_id": event.correlation_id or None,
                 },
             )
             await session.commit()

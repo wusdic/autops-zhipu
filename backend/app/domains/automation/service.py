@@ -147,9 +147,7 @@ class AutomationService:
                 risk = pb.risk_level
 
         status = "pending"
-        if data.is_dry_run:
-            status = "dry_run"
-        elif risk in ("high", "critical"):
+        if not data.is_dry_run and risk in ("high", "critical"):
             status = "awaiting_approval"
 
         if not data.is_dry_run and data.asset_ids:
@@ -214,12 +212,88 @@ class AutomationService:
         return exe
 
     async def rollback_execution(self, exec_id: str, user_id: str = "") -> Execution:
+        """回滚执行 — 执行 Playbook 中定义的回滚步骤.
+
+        状态流: rolling_back → 执行回滚步骤 → rolled_back / rollback_failed
+        """
         execution = await self.get_execution(exec_id)
-        if execution.status not in ("completed", "failed"):
+        if execution.status not in ("completed", "failed", "dry_run_completed", "dry_run_failed"):
             raise ValueError("只能回滚已完成或失败的执行")
+
+        # 收集回滚步骤
+        rollback_steps: list[dict] = []
+
+        if execution.execution_type == "playbook":
+            pb = await self.playbook_repo.get_by_id(execution.target_id)
+            if pb:
+                # playbook.steps 是 JSON 字符串, 解析后查找 rollback_steps 或 steps 中含 rollback 的
+                try:
+                    steps_data = json.loads(pb.steps) if isinstance(pb.steps, str) else pb.steps
+                except (json.JSONDecodeError, TypeError):
+                    steps_data = []
+
+                if isinstance(steps_data, list):
+                    for step in steps_data:
+                        if isinstance(step, dict) and step.get("rollback"):
+                            rollback_steps.append(step)
+
+        if not rollback_steps:
+            raise ValueError("No rollback plan defined for this execution")
+
         execution.status = "rolling_back"
         await self.session.flush()
-        execution.status = "rolled_back"
+
+        from app.domains.automation.executor.base import ExecutionPlan
+
+        all_success = True
+        for idx, rb_step in enumerate(rollback_steps):
+            step_name = rb_step.get("name", f"rollback_step_{idx + 1}")
+            command = rb_step.get("rollback", rb_step.get("command", ""))
+
+            await self.append_execution_log(
+                str(execution.id),
+                {
+                    "step_id": step_name,
+                    "status": "running",
+                    "message": f"Executing rollback step {idx + 1}/{len(rollback_steps)}: {step_name}",
+                },
+            )
+
+            plan = ExecutionPlan(
+                execution_id=str(execution.id),
+                command=str(command),
+                timeout_seconds=rb_step.get("timeout", 300),
+            )
+
+            try:
+                result = await _executor.execute(plan)
+                step_status = "completed" if result.success else "failed"
+                if not result.success:
+                    all_success = False
+
+                await self.append_execution_log(
+                    str(execution.id),
+                    {
+                        "step_id": step_name,
+                        "status": step_status,
+                        "stdout": result.stdout[:5000] if result.stdout else "",
+                        "stderr": result.stderr[:2000] if result.stderr else "",
+                        "exit_code": result.exit_code,
+                    },
+                )
+            except Exception as exc:
+                all_success = False
+                await self.append_execution_log(
+                    str(execution.id),
+                    {
+                        "step_id": step_name,
+                        "status": "failed",
+                        "error": str(exc),
+                    },
+                )
+
+        execution.status = "rolled_back" if all_success else "rollback_failed"
+        execution.completed_at = datetime.now(timezone.utc)
         await self.session.flush()
         await self.session.refresh(execution)
         return execution
@@ -245,14 +319,22 @@ class AutomationService:
         await self.session.flush()
 
     async def run_execution(self, exec_id: str) -> Execution:
-        """执行脚本/命令 — 通过 Executor Adapter."""
+        """执行脚本/命令 — 通过 Executor Adapter.
+
+        状态机:
+          Normal:   pending/approved → running → completed / failed
+          Dry-run:  pending/approved → dry_running → dry_run_completed / dry_run_failed
+        """
         exe = await self.exec_repo.get_by_id(exec_id)
         if not exe:
             raise NotFoundError(f"执行任务 {exec_id} 不存在")
         if exe.status not in ("pending", "approved"):
             raise ValueError(f"当前状态 {exe.status} 不允许执行")
 
-        exe.status = "running"
+        is_dry = getattr(exe, "is_dry_run", False)
+
+        # Set appropriate intermediate status
+        exe.status = "dry_running" if is_dry else "running"
         exe.started_at = datetime.now(timezone.utc)
         await self.session.flush()
 
@@ -266,7 +348,7 @@ class AutomationService:
             content = pb.steps if pb else ""
 
         if not content:
-            exe.status = "failed"
+            exe.status = "dry_run_failed" if is_dry else "failed"
             exe.error_message = "无执行内容"
             exe.completed_at = datetime.now(timezone.utc)
             await self.session.flush()
@@ -280,7 +362,7 @@ class AutomationService:
             timeout_seconds=300,
         )
 
-        if exe.is_dry_run:
+        if is_dry:
             result = await _executor.dry_run(plan)
         else:
             result = await _executor.execute(plan)
@@ -289,9 +371,12 @@ class AutomationService:
         exe.error_message = result.stderr[:5000] if result.stderr else None
 
         if not result.success:
-            exe.status = "blocked" if "blocked" in (result.stderr or "") else "failed"
+            if is_dry:
+                exe.status = "dry_run_failed"
+            else:
+                exe.status = "blocked" if "blocked" in (result.stderr or "") else "failed"
         else:
-            exe.status = "completed"
+            exe.status = "dry_run_completed" if is_dry else "completed"
 
         exe.completed_at = datetime.now(timezone.utc)
         await self.session.flush()

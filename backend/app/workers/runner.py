@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import signal
+import uuid
 
 from app.infra.config import get_config
 from app.infra.database import init_db_engine, close_db_engine
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class WorkerRunner:
-    """后台任务运行器."""
+    """后台任务运行器 — 运行 outbox consumer + scheduler + heartbeat."""
 
     def __init__(self):
         self.config = get_config()
@@ -35,8 +36,28 @@ class WorkerRunner:
 
     async def start(self) -> None:
         init_db_engine()
-        register_all_handlers()
 
+        # 1. 启用 outbox 模式并注册 handler
+        from app.common.events import get_event_bus
+        bus = get_event_bus()
+        bus.enable_outbox()
+        register_all_handlers()
+        logger.info("WorkerRunner: outbox enabled, all handlers registered")
+
+        # 2. 启动 OutboxConsumer
+        from app.common.outbox import OutboxConsumer
+        worker_id = f"worker-{uuid.uuid4().hex[:8]}"
+        outbox_consumer = OutboxConsumer(
+            worker_id=worker_id,
+            batch_size=50,
+            lock_seconds=120,
+        )
+        self._tasks.append(asyncio.create_task(
+            outbox_consumer.run_forever(interval=1.0),
+            name="outbox-consumer",
+        ))
+
+        # 3. 启动 Scheduler
         from app.workers.scheduler import get_scheduler
         scheduler = get_scheduler()
         self._tasks.append(asyncio.create_task(
@@ -44,10 +65,32 @@ class WorkerRunner:
             name="collection-scheduler",
         ))
 
-        logger.info("WorkerRunner started with %d tasks", len(self._tasks))
+        # 4. 启动 heartbeat loop
+        self._tasks.append(asyncio.create_task(
+            self._heartbeat_loop(),
+            name="heartbeat",
+        ))
+
+        logger.info("WorkerRunner started with %d tasks: %s",
+                     len(self._tasks), [t.get_name() for t in self._tasks])
         await self.stop_event.wait()
+
+        # Shutdown: stop consumer and scheduler
+        outbox_consumer.stop()
         await scheduler.stop()
         logger.info("WorkerRunner stopped")
+
+    async def _heartbeat_loop(self) -> None:
+        """每 60s 打印一次心跳日志."""
+        while not self.stop_event.is_set():
+            logger.info("WorkerRunner heartbeat: %d tasks running", len(self._tasks))
+            try:
+                await asyncio.wait_for(
+                    asyncio.create_task(self.stop_event.wait()),
+                    timeout=60.0,
+                )
+            except asyncio.TimeoutError:
+                pass
 
     async def shutdown(self) -> None:
         logger.info("WorkerRunner shutting down...")

@@ -5,16 +5,18 @@ services:
     image: mysql:8.0
     container_name: autops-mysql
     restart: always
+    env_file:
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-autops_root_2026}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD must be set}
       MYSQL_DATABASE: autops
       MYSQL_USER: autops
-      MYSQL_PASSWORD: ${DB_PASS:-autops_2026}
+      MYSQL_PASSWORD: ${DB_PASS:?DB_PASS must be set}
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./deploy/docker/mysql/init.sql:/docker-entrypoint-initb.d/init.sql
+      - ./deploy/docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -26,6 +28,8 @@ services:
     image: redis:7-alpine
     container_name: autops-redis
     restart: always
+    env_file:
+      - .env
     ports:
       - "6379:6379"
     volumes:
@@ -36,27 +40,24 @@ services:
       timeout: 3s
       retries: 5
 
-  backend:
+  migrate:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: autops-backend
-    restart: always
-    ports:
-      - "${BACKEND_PORT:-8001}:8001"
+    container_name: autops-migrate
+    env_file:
+      - .env
     environment:
       AUTOPS_ENV: prod
       DB_HOST: mysql
       DB_PORT: 3306
       DB_USER: autops
-      DB_PASS: ${DB_PASS:-autops_2026}
+      DB_PASS: ${DB_PASS:?DB_PASS must be set}
       DB_DATABASE: autops
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
-      LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:8000/v1}
-      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-qwen3.5-0.8b}
-      AUTOPS_ENABLE_SCHEDULER: "false"
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+    entrypoint: ["alembic", "upgrade", "head"]
     depends_on:
       mysql:
         condition: service_healthy
@@ -65,23 +66,64 @@ services:
     volumes:
       - ./configs:/app/configs:ro
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: autops-backend
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${BACKEND_PORT:-8001}:8001"
+    environment:
+      AUTOPS_ENV: prod
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: autops
+      DB_PASS: ${DB_PASS:?DB_PASS must be set}
+      DB_DATABASE: autops
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:8000/v1}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-qwen3.5-0.8b}
+      AUTOPS_ENABLE_SCHEDULER: "false"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - ./configs:/app/configs:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
   worker:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: autops-worker
     restart: always
+    env_file:
+      - .env
     entrypoint: ["python", "-m", "app.workers.runner"]
     environment:
       AUTOPS_ENV: prod
       DB_HOST: mysql
       DB_PORT: 3306
       DB_USER: autops
-      DB_PASS: ${DB_PASS:-autops_2026}
+      DB_PASS: ${DB_PASS:?DB_PASS must be set}
       DB_DATABASE: autops
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:8000/v1}
       LLM_MODEL_NAME: ${LLM_MODEL_NAME:-qwen3.5-0.8b}
       AUTOPS_ENABLE_SCHEDULER: "true"
@@ -90,6 +132,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     volumes:
       - ./configs:/app/configs:ro
 

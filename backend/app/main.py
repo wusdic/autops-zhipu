@@ -54,18 +54,24 @@ async def lifespan(app: FastAPI):
     config = get_config()
     init_db_engine()
 
-    # 注册事件处理器 (本地开发模式; 生产环境应由worker消费outbox)
-    register_all_handlers()
-    register_ws_event_bridges()
-
-    # 启用事件outbox持久化
     from app.common.events import get_event_bus, AssetEvents
-    from app.workers.scheduler import on_asset_created_run_collection
     bus = get_event_bus()
     bus.enable_outbox()
 
-    # 注册资产创建事件 -> 立即采集
-    bus.subscribe(AssetEvents.ASSET_CREATED, on_asset_created_run_collection)
+    if config.allow_inprocess_events:
+        # 开发模式: 注册 handler 并 in-process 分发事件
+        register_all_handlers()
+        register_ws_event_bridges()
+        logger.info("EventBus mode: in-process (allow_inprocess_events=True)")
+
+        # 注册资产创建事件 -> 立即采集
+        from app.workers.scheduler import on_asset_created_run_collection
+        bus.subscribe(AssetEvents.ASSET_CREATED, on_asset_created_run_collection)
+    else:
+        # 生产模式: 仅写入 outbox，handler 由 worker 进程消费
+        logger.info("EventBus mode: outbox-only (allow_inprocess_events=False, worker consumes)")
+        # 仍然注册 WebSocket 桥接（推送事件给前端）
+        register_ws_event_bridges()
 
     # 仅在dev模式且显式启用时启动scheduler (生产环境应使用独立worker)
     scheduler = None

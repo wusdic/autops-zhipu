@@ -11,7 +11,7 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import ClassVar, Literal
 
 import yaml
 from pydantic import Field, field_validator
@@ -56,6 +56,7 @@ class DatabaseConfig(BaseSettings):
     @property
     def url(self) -> str:
         from app.infra.db_dialect import DialectAdapter
+
         adapter = DialectAdapter(self.dialect)
         cred = f":{self.db_pass}" if self.db_pass else ""
         base_url = adapter.build_connection_url(
@@ -85,11 +86,32 @@ class RedisConfig(BaseSettings):
 
 
 class SecurityConfig(BaseSettings):
-    jwt_secret: str = ""
+    """Security / JWT configuration.
+
+    Reads from ``SECURITY_*`` env vars by default, but also accepts the
+    legacy ``JWT_SECRET`` env var for the secret field.
+    """
+
+    INSECURE_SECRETS: ClassVar[set[str]] = {
+        "change-me",
+        "change-me-in-production",
+        "autops-secret-key-change-in-production",
+        "secret",
+        "admin",
+        "password",
+    }
+
+    jwt_secret: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
-    jwt_expire_minutes: int = 480
-    access_token_expire_minutes: int = 480
+    access_token_expire_minutes: int = 1440
     refresh_token_expire_days: int = 7
+
+    def __init__(self, **kwargs):
+        # Support JWT_SECRET env var in addition to SECURITY_JWT_SECRET
+        jwt_env = os.getenv("JWT_SECRET")
+        if jwt_env and "jwt_secret" not in kwargs:
+            kwargs["jwt_secret"] = jwt_env
+        super().__init__(**kwargs)
 
     @field_validator("jwt_secret")
     @classmethod
@@ -97,16 +119,18 @@ class SecurityConfig(BaseSettings):
         env = os.getenv("AUTOPS_ENV", "dev")
         if env == "prod" and not v:
             raise ValueError("JWT_SECRET must be set in production")
-        if env == "prod" and v in {
-            "autops-secret-key-change-in-production",
-            "change-me",
-            "secret",
-        }:
-            raise ValueError("insecure JWT_SECRET in production")
+        if v in cls.INSECURE_SECRETS and env == "prod":
+            raise ValueError(
+                f"insecure JWT_SECRET in production: '{v}' is not allowed"
+            )
+        if env == "prod" and len(v) < 32:
+            raise ValueError(
+                "JWT_SECRET must be at least 32 characters in production"
+            )
         return v
 
     class Config:
-        env_prefix = "JWT_"
+        env_prefix = "SECURITY_"
 
 
 class LLMConfig(BaseSettings):
@@ -130,6 +154,7 @@ class AppConfig(BaseSettings):
     env: Literal["dev", "test", "prod"] = "dev"
     enable_openapi_ui: bool = True
     enable_scheduler: bool = False
+    allow_inprocess_events: bool = False
 
     # 子配置
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
@@ -139,28 +164,32 @@ class AppConfig(BaseSettings):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # 从yaml文件覆盖配置
-        db_yaml = _load_yaml("database.yaml")
-        redis_yaml = _load_yaml("redis.yaml")
-        llm_yaml = _load_yaml("llm.yaml")
-        security_yaml = _load_yaml("security.yaml")
 
-        if db_yaml:
-            for k, v in db_yaml.items():
-                if hasattr(self.database, k):
-                    setattr(self.database, k, v)
-        if redis_yaml:
-            for k, v in redis_yaml.items():
-                if hasattr(self.redis, k):
-                    setattr(self.redis, k, v)
-        if llm_yaml:
-            for k, v in llm_yaml.items():
-                if hasattr(self.llm, k):
-                    setattr(self.llm, k, v)
-        if security_yaml:
-            for k, v in security_yaml.items():
-                if hasattr(self.security, k):
-                    setattr(self.security, k, v)
+        # --- 从yaml文件覆盖配置 (env vars always win) ---
+        yaml_sources = {
+            "database": _load_yaml("database.yaml"),
+            "redis": _load_yaml("redis.yaml"),
+            "llm": _load_yaml("llm.yaml"),
+            "security": _load_yaml("security.yaml"),
+        }
+
+        for attr_name, yaml_data in yaml_sources.items():
+            if not yaml_data:
+                continue
+            obj = getattr(self, attr_name)
+            for k, v in yaml_data.items():
+                if not hasattr(obj, k):
+                    continue
+                # Skip if field was explicitly set from env var — env wins over yaml
+                if k in obj.model_fields_set:
+                    continue
+                setattr(obj, k, v)
+
+        # --- Production hardening (applied after all config sources) ---
+        if self.env == "prod":
+            if self.cors_origins == ["*"]:
+                raise ValueError("cors_origins=['*'] is not allowed in production")
+            self.enable_openapi_ui = False
 
     class Config:
         env_prefix = "AUTOPS_"

@@ -5,8 +5,18 @@
 
 from __future__ import annotations
 
+import os
 import shlex
 from dataclasses import dataclass
+
+from app.infra.config import get_config
+
+
+# Shell metacharacters that must be blocked in all commands
+SHELL_METACHAR_PATTERNS: list[str] = [
+    ";", "&&", "||", "|", ">", "<", ">>", "<<",
+    "$(", "`", "\n", "sudo su", "sudo -i",
+]
 
 
 @dataclass
@@ -63,6 +73,16 @@ class CommandPolicy:
         if not command or not command.strip():
             return CommandPolicyResult(False, "low", "空命令", False)
 
+        # ── Shell metacharacter detection (checked FIRST) ──────────────
+        for pattern in SHELL_METACHAR_PATTERNS:
+            if pattern in command:
+                return CommandPolicyResult(
+                    False,
+                    "critical",
+                    f"Shell metacharacter detected: {pattern!r}",
+                    True,
+                )
+
         # 解析命令
         try:
             tokens = shlex.split(command)
@@ -104,10 +124,12 @@ class CommandPolicy:
             for t in tokens[1:]:
                 if t.startswith("-"):
                     continue
-                if t in self.FORBIDDEN_PATHS or t == "/":
+                # Use realpath to resolve ../../ and symlinks
+                resolved = os.path.realpath(t)
+                if resolved in self.FORBIDDEN_PATHS or resolved == "/":
                     return CommandPolicyResult(
                         False, "critical",
-                        f"禁止递归删除系统路径: {t}",
+                        f"禁止递归删除系统路径: {t} (resolved: {resolved})",
                         True,
                     )
                 has_safe_path = True
@@ -118,21 +140,24 @@ class CommandPolicy:
                     True,
                 )
 
-        # 5. 检查路径是否在允许范围内
+        # 5. 检查路径是否在允许范围内 (with realpath resolution)
         for token in tokens[1:]:
             if token.startswith("/") and token not in ("-",):
-                if token in self.FORBIDDEN_PATHS:
+                resolved = os.path.realpath(token)
+                if resolved in self.FORBIDDEN_PATHS:
                     return CommandPolicyResult(
                         False, "critical",
-                        f"禁止操作系统关键路径: {token}",
+                        f"禁止操作系统关键路径: {token} (resolved: {resolved})",
                         True,
                     )
-                if allowed_paths and not any(token.startswith(p) for p in allowed_paths):
-                    return CommandPolicyResult(
-                        False, "high",
-                        f"路径未授权: {token}",
-                        True,
-                    )
+                if allowed_paths:
+                    resolved_allowed = {os.path.realpath(p) for p in allowed_paths}
+                    if not any(resolved.startswith(p) for p in resolved_allowed):
+                        return CommandPolicyResult(
+                            False, "high",
+                            f"路径未授权: {token} (resolved: {resolved})",
+                            True,
+                        )
 
         # 6. 分类风险等级
         cmd_prefix = command.split()[0].split("/")[-1] if command.split() else ""
@@ -155,5 +180,13 @@ class CommandPolicy:
         elif is_medium:
             return CommandPolicyResult(True, "medium", "中风险命令，需要审批", True)
         else:
-            # 未知命令 — 不自动拒绝，但标记高风险需审批
+            # Unknown command — in production, reject outright
+            if get_config().env == "prod":
+                return CommandPolicyResult(
+                    False,
+                    "critical",
+                    f"未知命令在生产环境被拒绝: {executable}",
+                    True,
+                )
+            # Non-prod: allow but flag high risk requiring approval
             return CommandPolicyResult(True, "high", f"未知命令: {executable}，需要审批", True)

@@ -8,14 +8,22 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
+import shlex
 from datetime import datetime, timezone
 
 from app.domains.automation.command_policy import CommandPolicy
 from app.domains.automation.executor.base import ExecutionPlan, ExecutionResult
+from app.infra.config import get_config
 
 logger = logging.getLogger(__name__)
 
 _policy = CommandPolicy()
+
+# Shell metacharacters that indicate shell-level chaining/redirection
+_SHELL_METACHAR_PATTERN = re.compile(
+    r";|&&|\|\||\||>|<|>>|<<|\$\(|`|\n"
+)
 
 
 class LocalDevExecutor:
@@ -45,6 +53,19 @@ class LocalDevExecutor:
 
     async def execute(self, plan: ExecutionPlan) -> ExecutionResult:
         """真实执行: 先通过命令策略，再运行."""
+        # 0. Production guard — this executor must NEVER run in production
+        if get_config().env == "prod":
+            raise RuntimeError(
+                "LocalDevExecutor is forbidden in production. "
+                "Use SSH or sandbox executor."
+            )
+
+        # 0.5 Shell metacharacter detection — reject shell-level constructs
+        if _SHELL_METACHAR_PATTERN.search(plan.command):
+            raise ValueError(
+                "Shell metacharacters not allowed. Use structured playbook steps."
+            )
+
         # 1. 命令策略校验
         policy_result = _policy.evaluate(plan.command)
         if not policy_result.allowed:
@@ -57,11 +78,12 @@ class LocalDevExecutor:
                 completed_at=datetime.now(timezone.utc).isoformat(),
             )
 
-        # 2. 执行命令
+        # 2. 执行命令 — NO shell wrapper, split via shlex
         started = datetime.now(timezone.utc)
         try:
+            args = shlex.split(plan.command)
             proc = await asyncio.create_subprocess_exec(
-                "/bin/bash", "-c", plan.command,
+                *args,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
