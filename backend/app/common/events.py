@@ -3,8 +3,9 @@
 设计原则：
 - 领域间通过事件总线通信，不直接调用其他领域 service
 - 支持同步和异步两种处理模式
-- 事件持久化到数据库（通过 audit log）
+- 事件持久化到数据库（outbox pattern）
 - 支持事件优先级和过滤
+- 支持重试和死信
 """
 from __future__ import annotations
 
@@ -45,7 +46,7 @@ class DomainEvent:
     )
     priority: EventPriority = EventPriority.NORMAL
     source: str = ""
-    correlation_id: str = ""  # 用于追踪关联事件链
+    correlation_id: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -67,7 +68,7 @@ EventHandler = SyncHandler | AsyncHandler
 
 
 class EventBus:
-    """进程内事件总线.
+    """进程内事件总线 + Outbox持久化.
 
     使用方式：
         bus = get_event_bus()
@@ -84,11 +85,20 @@ class EventBus:
         self._wildcard_handlers: list[EventHandler] = []
         self._event_log: list[dict[str, Any]] = []
         self._max_log_size = 1000
+        self._outbox_enabled = False
+
+    def enable_outbox(self) -> None:
+        """启用outbox持久化（需要DB可用时调用）."""
+        self._outbox_enabled = True
 
     def subscribe(self, event_type: str, handler: EventHandler) -> None:
         """订阅指定类型的事件."""
         self._handlers[event_type].append(handler)
-        logger.debug("EventBus: %s 订阅了事件 %s", handler.__name__ if hasattr(handler, '__name__') else handler, event_type)
+        logger.debug(
+            "EventBus: %s subscribed to %s",
+            handler.__name__ if hasattr(handler, '__name__') else handler,
+            event_type,
+        )
 
     def subscribe_all(self, handler: EventHandler) -> None:
         """订阅所有事件（审计/日志用）."""
@@ -102,23 +112,28 @@ class EventBus:
             ]
 
     async def publish(self, event: DomainEvent) -> None:
-        """发布事件到所有订阅者."""
+        """发布事件: 先持久化到outbox，再触发handler."""
         event_dict = event.to_dict()
 
-        # 记录事件日志
+        # 记录到内存日志
         self._event_log.append(event_dict)
         if len(self._event_log) > self._max_log_size:
             self._event_log = self._event_log[-self._max_log_size:]
 
+        # 持久化到outbox表
+        if self._outbox_enabled:
+            try:
+                await self._persist_to_outbox(event)
+            except Exception:
+                logger.exception("EventBus: outbox persist failed for %s", event.event_type)
+
         logger.info(
-            "EventBus 发布: [%s] %s (priority=%s)",
+            "EventBus publish: [%s] %s (priority=%s)",
             event.domain, event.event_type, event.priority.name
         )
 
-        # 调用特定事件类型的处理器
+        # 触发处理器
         handlers = list(self._handlers.get(event.event_type, []))
-
-        # 也调用通配处理器
         all_handlers = handlers + self._wildcard_handlers
 
         for handler in all_handlers:
@@ -128,13 +143,86 @@ class EventBus:
                     await result
             except Exception:
                 logger.exception(
-                    "EventBus 处理器 %s 处理事件 %s 时出错",
+                    "EventBus handler %s failed for %s",
                     handler.__name__ if hasattr(handler, '__name__') else handler,
                     event.event_type,
                 )
 
+    async def _persist_to_outbox(self, event: DomainEvent) -> None:
+        """将事件持久化到 event_outbox 表."""
+        from app.infra.database import get_session_factory
+
+        session_factory = get_session_factory()
+        async with session_factory() as session:
+            from sqlalchemy import text
+            await session.execute(
+                text("""
+                    INSERT INTO event_outbox
+                        (event_id, event_type, domain, payload, priority, source, status, created_at)
+                    VALUES
+                        (:eid, :etype, :domain, :payload, :priority, :source, 'pending', NOW())
+                """),
+                {
+                    "eid": event.event_id,
+                    "etype": event.event_type,
+                    "domain": event.domain,
+                    "payload": json.dumps(event.payload, ensure_ascii=False, default=str),
+                    "priority": event.priority.value,
+                    "source": event.source,
+                },
+            )
+            await session.commit()
+
+    async def replay_pending(self) -> int:
+        """重放所有 pending 状态的 outbox 事件（启动/恢复时调用）."""
+        from app.infra.database import get_session_factory
+
+        session_factory = get_session_factory()
+        replayed = 0
+        async with session_factory() as session:
+            from sqlalchemy import text
+            result = await session.execute(
+                text("SELECT * FROM event_outbox WHERE status = 'pending' ORDER BY created_at")
+            )
+            rows = result.fetchall()
+            for row in rows:
+                try:
+                    evt = DomainEvent(
+                        event_id=row.event_id,
+                        event_type=row.event_type,
+                        domain=row.domain,
+                        payload=json.loads(row.payload) if row.payload else {},
+                        priority=EventPriority(row.priority),
+                        source=row.source or "",
+                    )
+                    # 直接触发handler（不再重新入outbox）
+                    handlers = list(self._handlers.get(evt.event_type, []))
+                    for handler in handlers:
+                        result = handler(evt)
+                        if asyncio.iscoroutine(result):
+                            await result
+                    # 标记为已完成
+                    await session.execute(
+                        text("UPDATE event_outbox SET status = 'done' WHERE event_id = :eid"),
+                        {"eid": row.event_id},
+                    )
+                    replayed += 1
+                except Exception:
+                    logger.exception("EventBus: replay failed for %s", row.event_id)
+                    await session.execute(
+                        text(
+                            "UPDATE event_outbox SET status = 'dead', error = 'replay_failed' "
+                            "WHERE event_id = :eid"
+                        ),
+                        {"eid": row.event_id},
+                    )
+            await session.commit()
+        if replayed:
+            logger.info("EventBus: replayed %d pending events", replayed)
+        return replayed
+
     def get_recent_events(self, limit: int = 100) -> list[dict[str, Any]]:
-        """获取最近发布的事件（用于调试/审计）."""
+        """获取最近发布的事件."""
         return self._event_log[-limit:]
 
     def clear(self) -> None:

@@ -31,32 +31,6 @@ logger = logging.getLogger(__name__)
 _handlers_registered = False
 
 
-async def on_alert_created_match_policy(event):
-    """告警创建后自动匹配策略（通过 PolicyService.match_and_execute 闭环）."""
-    try:
-        from app.infra.database import async_session_factory
-        from app.domains.policy.service import PolicyService
-
-        payload = event.payload
-        alert_id = payload.get("alert_id", "")
-        event_type = payload.get("event_type", "")
-        severity = payload.get("severity", "info")
-        asset_ids = payload.get("asset_ids", [])
-
-        async with async_session_factory() as session:
-            policy_svc = PolicyService(session)
-            match = await policy_svc.match_and_execute(
-                event_type=event_type,
-                severity=severity,
-                asset_ids=asset_ids,
-                alert_id=alert_id,
-            )
-            if match:
-                logger.info(f"Policy matched and execution created: {match}")
-            await session.commit()
-    except Exception as e:
-        logger.error(f"Failed to match policy for alert: {e}")
-
 
 def register_all_handlers() -> None:
     """注册所有领域事件处理器（幂等，只执行一次）."""

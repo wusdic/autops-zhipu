@@ -43,6 +43,13 @@ def init_db_engine():
     )
 
 
+def get_session_factory() -> async_sessionmaker[AsyncSession]:
+    """获取 session factory（供非 DI 场景使用，如 worker/event outbox）."""
+    if async_session_factory is None:
+        init_db_engine()
+    return async_session_factory
+
+
 async def get_db() -> AsyncSession:
     """FastAPI 依赖注入：获取数据库会话."""
     if async_session_factory is None:
@@ -54,3 +61,11 @@ async def get_db() -> AsyncSession:
         except Exception:
             await session.rollback()
             raise
+
+
+async def close_db_engine() -> None:
+    """关闭数据库引擎（graceful shutdown 用）."""
+    global engine
+    if engine:
+        await engine.dispose()
+        logger.info("DB engine disposed")

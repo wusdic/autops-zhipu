@@ -1,0 +1,19 @@
+# 标准Playbook: 服务重启
+name: 服务重启
+description: 当服务不可用时尝试重启并验证
+risk_level: medium
+requires_approval: true
+steps:
+  - name: 检查服务状态
+    action: check_service
+    command: systemctl status {service_name}
+  - name: 重启服务
+    action: restart_service
+    command: systemctl restart {service_name}
+  - name: 等待启动
+    action: wait
+    sleep: 5
+  - name: 验证服务
+    action: verify
+    command: systemctl is-active {service_name}
+    expect: "active"

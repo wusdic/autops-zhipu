@@ -1,0 +1,15 @@
+id: kb-windows-service-down
+title: Windows 服务未运行处置
+asset_types:
+  - windows_server
+trigger_events:
+  - service_stopped
+diagnosis:
+  - check_service_status
+  - check_event_log
+actions:
+  - restart_service
+verification:
+  - check_service_running
+risk_level: medium
+requires_approval: true

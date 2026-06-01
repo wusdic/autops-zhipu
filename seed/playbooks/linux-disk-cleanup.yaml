@@ -1,0 +1,23 @@
+# 标准Playbook: Linux磁盘清理
+name: Linux磁盘清理
+description: 当Linux磁盘空间不足时自动清理临时文件和日志
+risk_level: low
+requires_approval: false
+steps:
+  - name: 检查磁盘使用率
+    action: check_disk_usage
+    command: df -h / | tail -1 | awk '{print $5}' | tr -d '%'
+    expect: ">80"
+  - name: 查找大文件
+    action: find_large_files
+    command: find /var/log -type f -size +100M -exec ls -lh {} \;
+  - name: 清理旧日志
+    action: compress_old_logs
+    command: find /var/log -name "*.log.*" -mtime +7 -delete
+  - name: 清理临时文件
+    action: cleanup_temp
+    command: find /tmp -type f -mtime +3 -delete
+  - name: 验证磁盘空间
+    action: verify
+    command: df -h / | tail -1 | awk '{print $5}' | tr -d '%'
+    expect: "<80"

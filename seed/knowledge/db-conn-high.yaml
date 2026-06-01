@@ -1,0 +1,17 @@
+id: kb-db-conn-high
+title: 数据库连接数过高处置
+asset_types:
+  - database
+trigger_events:
+  - db_connection_count_high
+diagnosis:
+  - check_active_connections
+  - check_slow_queries
+  - check_connection_leaks
+actions:
+  - kill_idle_connections
+  - optimize_connection_pool
+verification:
+  - check_connection_count_normal
+risk_level: high
+requires_approval: true

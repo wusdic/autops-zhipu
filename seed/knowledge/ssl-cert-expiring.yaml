@@ -1,0 +1,16 @@
+id: kb-ssl-cert-expiring
+title: SSL证书即将过期处置
+asset_types:
+  - web_service
+trigger_events:
+  - ssl_cert_expiring
+diagnosis:
+  - check_cert_expiry
+  - check_cert_chain
+actions:
+  - renew_certificate
+  - reload_web_server
+verification:
+  - check_cert_expiry_extended
+risk_level: medium
+requires_approval: true

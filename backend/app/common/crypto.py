@@ -15,7 +15,7 @@ from app.infra.config import get_config
 def _get_fernet() -> Fernet:
     """根据主密钥获取 Fernet 实例."""
     config = get_config()
-    master_key = config.security.secret_key.encode()
+    master_key = config.security.jwt_secret.encode()
     salt = b"AUTOPS_CREDENTIAL_SALT_v1"
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),

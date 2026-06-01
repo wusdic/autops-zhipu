@@ -31,7 +31,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
         expires_delta or timedelta(minutes=config.security.access_token_expire_minutes)
     )
     to_encode.update({"exp": expire, "type": "access"})
-    return jwt.encode(to_encode, config.security.secret_key, algorithm=config.security.algorithm)
+    return jwt.encode(to_encode, config.security.jwt_secret, algorithm=config.security.jwt_algorithm)
 
 
 def create_refresh_token(data: dict) -> str:
@@ -40,14 +40,14 @@ def create_refresh_token(data: dict) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(days=config.security.refresh_token_expire_days)
     to_encode.update({"exp": expire, "type": "refresh"})
-    return jwt.encode(to_encode, config.security.secret_key, algorithm=config.security.algorithm)
+    return jwt.encode(to_encode, config.security.jwt_secret, algorithm=config.security.jwt_algorithm)
 
 
 def decode_token(token: str) -> dict:
     """解码 Token."""
     config = get_config()
     try:
-        payload = jwt.decode(token, config.security.secret_key, algorithms=[config.security.algorithm])
+        payload = jwt.decode(token, config.security.jwt_secret, algorithms=[config.security.jwt_algorithm])
         return payload
     except JWTError:
         raise UnauthorizedError("Token 无效或已过期")

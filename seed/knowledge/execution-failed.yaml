@@ -1,0 +1,19 @@
+id: kb-execution-failed
+title: 自动化执行失败处置
+asset_types:
+  - linux_server
+  - windows_server
+trigger_events:
+  - automation_execution_failed
+diagnosis:
+  - check_execution_log
+  - check_target_reachability
+  - check_script_validity
+actions:
+  - analyze_error
+  - retry_or_escalate
+  - create_ticket_if_needed
+verification:
+  - check_execution_result
+risk_level: low
+requires_approval: false

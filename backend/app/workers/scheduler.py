@@ -25,6 +25,35 @@ BUILTIN_NAME_TO_TYPE = {
     "db-collector": "database",
 }
 
+# 资产类型 → 适用的采集器类型
+ASSET_TYPE_COLLECTOR_MAP: dict[str, list[str]] = {
+    "linux_server": ["ping", "tcp_port", "http"],
+    "windows_server": ["ping", "tcp_port"],
+    "network_device": ["ping", "tcp_port"],
+    "database": ["ping", "tcp_port", "database"],
+    "web_service": ["ping", "tcp_port", "http", "certificate"],
+    "container": ["ping", "tcp_port"],
+}
+
+# 所有资产类型默认至少跑 Ping
+DEFAULT_COLLECTORS = ["ping"]
+
+
+def _get_applicable_collectors(
+    asset_type: str, ip: str
+) -> dict[str, object]:
+    """根据资产类型返回适用的采集器子集."""
+    types = ASSET_TYPE_COLLECTOR_MAP.get(asset_type, DEFAULT_COLLECTORS)
+    applicable = {}
+    for ctype in types:
+        if ctype in COLLECTOR_REGISTRY:
+            applicable[ctype] = COLLECTOR_REGISTRY[ctype]
+    # 如果 IP 含端口则也做 tcp_port
+    if "tcp_port" not in applicable and ":" in ip:
+        if "tcp_port" in COLLECTOR_REGISTRY:
+            applicable["tcp_port"] = COLLECTOR_REGISTRY["tcp_port"]
+    return applicable
+
 
 class CollectionScheduler:
     """采集调度器 — 定期遍历资产执行采集."""
@@ -97,8 +126,10 @@ class CollectionScheduler:
                     continue
 
                 try:
-                    # 对每个资产执行所有内置采集
-                    for ctype, collector in COLLECTOR_REGISTRY.items():
+                    # 基于资产类型选择匹配的采集器
+                    asset_type = getattr(asset, 'asset_type', 'unknown') or 'unknown'
+                    applicable = _get_applicable_collectors(asset_type, ip)
+                    for ctype, collector in applicable.items():
                         result_data = await run_collection(ctype, ip)
                         status = result_data.get("status", "error")
 

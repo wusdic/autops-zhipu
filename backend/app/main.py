@@ -1,4 +1,14 @@
-"""AUTOPS 后端应用入口."""
+"""AUTOPS 后端应用入口.
+
+职责:
+1. 创建 FastAPI app
+2. 初始化配置和基础设施
+3. 注册中间件、异常处理器、路由
+4. 注册事件处理器 (dev模式)
+5. 可选启动scheduler (dev模式, 通过AUTOPS_ENABLE_SCHEDULER控制)
+
+生产环境应使用独立worker进程运行scheduler和事件消费者。
+"""
 
 from __future__ import annotations
 
@@ -15,7 +25,7 @@ from app.common.event_handlers import register_all_handlers
 from app.common.trace import TraceIdMiddleware
 from app.api.websocket import register_ws_event_bridges
 from app.infra.config import get_config
-from app.infra.database import init_db_engine, Base
+from app.infra.database import init_db_engine
 from app.infra.redis_client import close_redis
 
 # 确保所有模型注册到Base.metadata
@@ -41,32 +51,41 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期."""
-    # Startup
     config = get_config()
     init_db_engine()
-    # 自动建表
-    from app.infra.database import engine as _engine
-    if _engine:
-        async with _engine.begin() as conn:
-            from sqlalchemy import text
-            await conn.run_sync(Base.metadata.create_all)
-        logger.info("Database tables ensured")
+
+    # 注册事件处理器 (本地开发模式; 生产环境应由worker消费outbox)
     register_all_handlers()
     register_ws_event_bridges()
-    # 注册资产创建→立即采集事件
+
+    # 启用事件outbox持久化
     from app.common.events import get_event_bus, AssetEvents
     from app.workers.scheduler import on_asset_created_run_collection
     bus = get_event_bus()
+    bus.enable_outbox()
+
+    # 注册资产创建事件 -> 立即采集
     bus.subscribe(AssetEvents.ASSET_CREATED, on_asset_created_run_collection)
-    # 启动定时采集调度器 (5分钟间隔)
-    from app.workers.scheduler import get_scheduler
-    scheduler = get_scheduler()
-    await scheduler.start(interval=300)
-    logger.info("Scheduler started")
+
+    # 仅在dev模式且显式启用时启动scheduler (生产环境应使用独立worker)
+    scheduler = None
+    if config.enable_scheduler:
+        from app.workers.scheduler import get_scheduler
+        scheduler = get_scheduler()
+        await scheduler.start(interval=300)
+        logger.info("Scheduler started (in-process, dev mode)")
+    else:
+        logger.info("Scheduler NOT started (use AUTOPS_ENABLE_SCHEDULER=true or worker runner)")
+
     yield
+
     # Shutdown
-    await scheduler.stop()
+    if scheduler:
+        await scheduler.stop()
+    from app.infra.database import close_db_engine
+    await close_db_engine()
     await close_redis()
+    logger.info("AUTOPS stopped")
 
 
 def create_app() -> FastAPI:
@@ -76,8 +95,8 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=config.app_name,
         version=config.version,
-        docs_url="/docs",
-        redoc_url="/redoc",
+        docs_url="/docs" if config.enable_openapi_ui else None,
+        redoc_url="/redoc" if config.enable_openapi_ui else None,
         lifespan=lifespan,
     )
 
@@ -96,7 +115,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(Exception, generic_error_handler)
 
     # 路由
-    app.include_router(health_router)  # /health, /ready at root level
+    app.include_router(health_router)
     app.include_router(api_router, prefix=config.api_prefix)
 
     return app

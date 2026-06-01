@@ -85,8 +85,8 @@ class PolicyService:
         p.enabled = False
         await self.session.flush()
 
-    async def match_and_execute(self, event_type: str, severity: str, asset_ids: list, alert_id: str):
-        """根据告警匹配策略并创建执行."""
+    async def match_and_plan(self, event_type: str, severity: str, asset_ids: list, alert_id: str):
+        """根据告警匹配策略并创建执行计划（不直接执行命令）."""
         q = select(Policy).where(Policy.enabled == True, Policy.status == "active")
         result = await self.session.execute(q)
         policies = list(result.scalars().all())

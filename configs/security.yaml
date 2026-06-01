@@ -1,6 +1,4 @@
 # AUTOPS 安全配置
-security:
-  secret_key: change-me-in-production
-  algorithm: HS256
-  access_token_expire_minutes: 60
-  refresh_token_expire_days: 7
+jwt_secret: autops-dev-secret-2026
+jwt_algorithm: HS256
+jwt_expire_minutes: 480

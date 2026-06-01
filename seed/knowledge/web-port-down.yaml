@@ -1,0 +1,17 @@
+id: kb-web-port-down
+title: Web 端口不可达处置
+asset_types:
+  - web_service
+trigger_events:
+  - port_unreachable
+diagnosis:
+  - check_port_connectivity
+  - check_process_status
+  - check_firewall_rules
+actions:
+  - check_service_logs
+  - restart_service_if_down
+verification:
+  - check_port_reachable
+risk_level: medium
+requires_approval: true

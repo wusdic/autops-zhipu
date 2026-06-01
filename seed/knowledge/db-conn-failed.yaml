@@ -1,0 +1,18 @@
+id: kb-db-conn-failed
+title: 数据库连接失败处置
+asset_types:
+  - database
+trigger_events:
+  - db_connection_failed
+diagnosis:
+  - check_db_service_status
+  - check_connection_params
+  - check_network_connectivity
+actions:
+  - restart_db_service
+  - verify_credentials
+  - check_disk_space
+verification:
+  - check_db_connection_ok
+risk_level: high
+requires_approval: true

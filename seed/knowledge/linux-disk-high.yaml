@@ -1,0 +1,18 @@
+id: kb-linux-disk-high
+title: Linux 磁盘空间异常处置
+asset_types:
+  - linux_server
+trigger_events:
+  - disk_usage_high
+diagnosis:
+  - check_disk_usage
+  - check_large_files
+  - check_log_growth
+actions:
+  - dry_run_cleanup
+  - compress_logs
+  - cleanup_temp_files
+verification:
+  - check_disk_usage_below_threshold
+risk_level: low
+requires_approval: false

@@ -1,0 +1,19 @@
+id: kb-collector-offline
+title: 采集器离线处置
+asset_types:
+  - linux_server
+  - windows_server
+trigger_events:
+  - collector_offline
+diagnosis:
+  - check_collector_health
+  - check_network_connectivity
+  - check_system_resources
+actions:
+  - restart_collector
+  - clear_stale_state
+verification:
+  - check_collector_online
+  - check_recent_collection_success
+risk_level: medium
+requires_approval: false
