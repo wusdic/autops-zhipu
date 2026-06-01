@@ -91,7 +91,7 @@
 
         <el-table :data="results" v-loading="resultLoading" stripe @selection-change="(s: any[]) => selectedResults = s">
           <el-table-column type="selection" width="50" />
-          <el-table-column prop="ip_address" label="IP地址" width="150" />
+          <el-table-column prop="ip" label="IP地址" width="150" />
           <el-table-column prop="hostname" label="主机名" min-width="140" />
           <el-table-column prop="asset_type" label="资产类型" width="120">
             <template #default="{ row }">
@@ -115,9 +115,9 @@
           </el-table-column>
           <el-table-column label="操作" width="120" fixed="right">
             <template #default="{ row }">
-              <el-button v-if="row.status === 'new'" size="small" type="primary" @click="startOnboard([row])">纳管</el-button>
-              <el-button v-if="row.status === 'managed'" size="small" @click="viewAsset(row)">查看</el-button>
-              <el-button v-if="row.status === 'new'" size="small" @click="ignoreResult(row)">忽略</el-button>
+              <el-button v-if="row.status === 'discovered' || row.status === 'new'" size="small" type="primary" @click="startOnboard([row])">纳管</el-button>
+              <el-button v-if="row.status === 'managed' || row.status === 'onboarded'" size="small" @click="viewAsset(row)">查看</el-button>
+              <el-button v-if="row.status === 'discovered' || row.status === 'new'" size="small" @click="ignoreResult(row)">忽略</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -134,10 +134,15 @@
         <div v-if="wizardStep === 0" class="wizard-content">
           <el-table :data="wizardAssets" stripe @selection-change="(s: any[]) => wizardSelected = s">
             <el-table-column type="selection" width="50" />
-            <el-table-column prop="ip_address" label="IP地址" width="150" />
+            <el-table-column prop="ip" label="IP地址" width="150" />
             <el-table-column prop="hostname" label="主机名" min-width="140" />
             <el-table-column prop="asset_type" label="类型" width="120" />
-            <el-table-column prop="os_info" label="操作系统" min-width="140" />
+            <el-table-column prop="open_ports" label="开放端口" min-width="120">
+              <template #default="{ row }">
+                <span v-if="row.open_ports">{{ row.open_ports.join(', ') }}</span>
+                <span v-else>-</span>
+              </template>
+            </el-table-column>
           </el-table>
           <div class="wizard-actions">
             <el-button @click="wizardActive = false">取消</el-button>
@@ -164,7 +169,7 @@
           </el-form>
           <div class="wizard-actions">
             <el-button @click="wizardStep = 0">上一步</el-button>
-            <el-button type="primary" :disabled="!wizardCredential" @click="wizardStep = 2">下一步</el-button>
+            <el-button type="primary" @click="wizardStep = 2">下一步</el-button>
           </div>
         </div>
 
@@ -209,7 +214,7 @@
           <div class="wizard-assets-preview">
             <h4>待纳管资产列表</h4>
             <el-table :data="wizardSelected" stripe size="small">
-              <el-table-column prop="ip_address" label="IP" width="150" />
+              <el-table-column prop="ip" label="IP" width="150" />
               <el-table-column prop="hostname" label="主机名" min-width="140" />
               <el-table-column prop="asset_type" label="类型" width="120" />
             </el-table>
@@ -439,7 +444,7 @@ function startOnboard(items: any[]) {
 
 function batchOnboard() {
   if (!selectedResults.value.length) return
-  startOnboard(selectedResults.value.filter(r => r.status === 'new'))
+  startOnboard(selectedResults.value.filter(r => r.status === 'new' || r.status === 'discovered'))
 }
 
 async function ignoreResult(item: any) {
@@ -460,7 +465,7 @@ async function testConnection() {
   try {
     const res = await api.post(`${API.CREDENTIALS}/test`, {
       credential_id: wizardCredential.value,
-      target: wizardSelected.value[0]?.ip_address,
+      target: wizardSelected.value[0]?.ip,
     })
     testResult.value = res.data?.code === 0 ? 'success' : 'failed'
   } catch { testResult.value = 'failed' }
@@ -472,9 +477,9 @@ async function executeOnboard() {
   try {
     for (const item of wizardSelected.value) {
       await api.post(API.ASSETS, {
-        name: item.hostname || item.ip_address,
+        name: item.hostname || item.ip,
         asset_type: item.asset_type || 'linux_server',
-        ip_address: item.ip_address,
+        ip_address: item.ip,
         hostname: item.hostname,
         os_info: item.os_info,
         credential_id: wizardCredential.value || undefined,
@@ -501,11 +506,11 @@ function taskStatusLabel(s: string) {
   return m[s] || s
 }
 function resultStatusType(s: string) {
-  const m: Record<string, string> = { new: 'warning', managed: 'success', changed: 'danger', ignored: 'info' }
+  const m: Record<string, string> = { new: 'warning', discovered: 'warning', managed: 'success', onboarded: 'success', changed: 'danger', ignored: 'info' }
   return m[s] || 'info'
 }
 function resultStatusLabel(s: string) {
-  const m: Record<string, string> = { new: '新发现', managed: '已纳管', changed: '已变更', ignored: '已忽略' }
+  const m: Record<string, string> = { new: '新发现', discovered: '新发现', managed: '已纳管', onboarded: '已纳管', changed: '已变更', ignored: '已忽略' }
   return m[s] || s
 }
 function formatTime(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '-' }

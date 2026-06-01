@@ -100,7 +100,7 @@ async function loadInheritance() {
     if (props.groupId) params.group_id = props.groupId
     if (props.configType) params.config_type = props.configType
 
-    const { data } = await api.get('/api/v1/configs/inheritance', { params })
+    const { data } = await api.get(API.CONFIG_INHERITANCE, { params })
     if (data?.code === 0 && data.data?.levels) {
       levels.value = data.data.levels
       overrides.value = data.data.overrides || {}

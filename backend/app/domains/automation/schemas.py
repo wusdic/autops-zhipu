@@ -42,7 +42,7 @@ class PlaybookUpdate(BaseModel):
 class ExecutionCreate(BaseModel):
     execution_type: str = Field(..., max_length=16)
     target_id: str
-    asset_ids: list[str] = Field(..., min_length=1)
+    asset_ids: list[str] = Field(default_factory=list)
     parameters: str | None = None
     is_dry_run: bool = False
     trigger_source: str = "manual"

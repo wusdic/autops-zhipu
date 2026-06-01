@@ -42,7 +42,7 @@ async def list_jobs(
     page_size: int = Query(20, ge=1, le=100),
     svc: CollectorService = Depends(_get_svc),
 ):
-    items, total = await svc.list_jobs(asset_id, page, page_size)
+    items, total = await svc.list_jobs(asset_id=asset_id, page=page, page_size=page_size)
     return paginate([model_to_dict(i) for i in items], total, page, page_size)
 
 

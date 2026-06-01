@@ -63,6 +63,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Bell, WarningFilled, CircleCheck, InfoFilled } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 import { wsService, WSEvents } from '@/shared/api/websocket'
 
 const router = useRouter()
@@ -98,7 +99,7 @@ function iconColor(type: string) {
 async function loadNotifications() {
   loading.value = true
   try {
-    const { data } = await api.get('/api/v1/notifications', { params: { page_size: 30 } })
+    const { data } = await api.get(API.NOTIFICATIONS, { params: { page_size: 30 } })
     if (data?.code === 0) notifications.value = data.data?.items || data.data || []
   } catch { /* silent */ }
   finally { loading.value = false }
@@ -106,7 +107,7 @@ async function loadNotifications() {
 
 async function markRead(id: string) {
   try {
-    await api.patch(`/api/v1/notifications/${id}/read`)
+    await api.patch(API.NOTIFICATION_READ(id))
     const n = notifications.value.find(n => n.id === id)
     if (n) n.read_at = new Date().toISOString()
   } catch { /* silent */ }
@@ -114,7 +115,7 @@ async function markRead(id: string) {
 
 async function markAllRead() {
   try {
-    await api.post('/api/v1/notifications/read-all')
+    await api.post(API.NOTIFICATION_READ_ALL)
     notifications.value.forEach(n => { if (!n.read_at) n.read_at = new Date().toISOString() })
   } catch { /* silent */ }
 }

@@ -257,12 +257,19 @@ class AutomationService:
         exe = await self.exec_repo.get_by_id(execution_id)
         if not exe:
             return
+        # 获取当前最大 step_number
+        result = await self.session.execute(
+            select(func.count()).select_from(ExecutionStep).where(
+                ExecutionStep.execution_id == execution_id
+            )
+        )
+        step_num = (result.scalar() or 0) + 1
         step = ExecutionStep(
             execution_id=execution_id,
-            step_name=log_entry.get("step_id", "unknown"),
-            step_type="log",
+            step_number=step_num,
+            name=log_entry.get("step_id", "log"),
             status=log_entry.get("status", "info"),
-            output=_json.dumps(log_entry, ensure_ascii=False, default=str),
+            result=_json.dumps(log_entry, ensure_ascii=False, default=str),
         )
         self.session.add(step)
         await self.session.flush()

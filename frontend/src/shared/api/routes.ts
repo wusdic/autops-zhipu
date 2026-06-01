@@ -184,4 +184,9 @@ export const API = {
 
   // 平台
   PLATFORM_STATUS: '/api/v1/platform/status',
+
+  // 通知
+  NOTIFICATIONS: '/api/v1/notifications',
+  NOTIFICATION_READ: (id: string) => `/api/v1/notifications/${id}/read`,
+  NOTIFICATION_READ_ALL: '/api/v1/notifications/read-all',
 } as const

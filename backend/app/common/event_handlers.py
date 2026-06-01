@@ -77,14 +77,16 @@ def register_all_handlers() -> None:
     # 2. 事件 → 触发告警规则匹配
     bus.subscribe(EventEvents.EVENT_CREATED, _on_event_created)
 
-    # 3. 告警 → 触发策略匹配
+    # 3. 告警 → 触发策略匹配 (仅用 _on_alert_created，避免双重匹配)
     bus.subscribe(AlertEvents.ALERT_CREATED, _on_alert_created)
-    bus.subscribe(AlertEvents.ALERT_CREATED, on_alert_created_match_policy)
     bus.subscribe(AlertEvents.ALERT_ESCALATED, _on_alert_escalated)
 
     # 4. 策略触发 → 创建自动化执行
     bus.subscribe(PolicyEvents.POLICY_TRIGGERED, _on_policy_triggered)
     bus.subscribe(PolicyEvents.POLICY_APPROVED, _on_policy_approved)
+
+    # 4b. EXECUTION_CREATED → 创建DB执行记录并运行
+    bus.subscribe(AutomationEvents.EXECUTION_CREATED, _on_execution_created)
 
     # 5. 自动化执行完成 → 更新告警/工单
     bus.subscribe(AutomationEvents.EXECUTION_COMPLETED, _on_execution_completed)
@@ -262,6 +264,16 @@ async def _on_policy_triggered(event) -> None:
     bus = get_event_bus()
 
     requires_approval = payload.get("requires_approval", False)
+    # 安全解析 action_chain: 可能是 [[{...}]], [{...}], 或空
+    action_chain = payload.get("action_chain", [])
+    first_action = {}
+    if isinstance(action_chain, list) and len(action_chain) > 0:
+        first = action_chain[0]
+        if isinstance(first, list) and len(first) > 0:
+            first_action = first[0] if isinstance(first[0], dict) else {}
+        elif isinstance(first, dict):
+            first_action = first
+
     if requires_approval:
         await bus.publish(DomainEvent(
             event_type=PolicyEvents.POLICY_APPROVAL_REQUIRED,
@@ -275,8 +287,8 @@ async def _on_policy_triggered(event) -> None:
             event_type=AutomationEvents.EXECUTION_CREATED,
             domain="automation",
             payload={
-                "execution_type": payload.get("action_chain", [{}])[0].get("type", "script"),
-                "target_id": payload.get("action_chain", [{}])[0].get("target_id"),
+                "execution_type": first_action.get("type", "script"),
+                "target_id": first_action.get("target_id", ""),
                 "asset_ids": payload.get("matched_assets", []),
                 "trigger_source": "policy",
                 "policy_id": payload.get("policy_id"),
@@ -293,12 +305,21 @@ async def _on_policy_approved(event) -> None:
     from app.common.events import DomainEvent
     payload = event.payload
     bus = get_event_bus()
+    # 安全解析 action_chain
+    action_chain = payload.get("action_chain", [])
+    first_action = {}
+    if isinstance(action_chain, list) and len(action_chain) > 0:
+        first = action_chain[0]
+        if isinstance(first, list) and len(first) > 0:
+            first_action = first[0] if isinstance(first[0], dict) else {}
+        elif isinstance(first, dict):
+            first_action = first
     await bus.publish(DomainEvent(
         event_type=AutomationEvents.EXECUTION_CREATED,
         domain="automation",
         payload={
-            "execution_type": payload.get("action_chain", [{}])[0].get("type", "script"),
-            "target_id": payload.get("action_chain", [{}])[0].get("target_id"),
+            "execution_type": first_action.get("type", "script"),
+            "target_id": first_action.get("target_id", ""),
             "asset_ids": payload.get("matched_assets", []),
             "trigger_source": "policy",
             "policy_id": payload.get("policy_id"),
@@ -308,6 +329,79 @@ async def _on_policy_approved(event) -> None:
         source="handler",
         correlation_id=event.event_id,
     ))
+
+
+async def _on_execution_created(event) -> None:
+    """EXECUTION_CREATED事件 → 在DB创建执行记录并运行."""
+    payload = event.payload
+    try:
+        from app.infra.database import async_session_factory
+        from app.domains.automation.service import AutomationService
+        from app.domains.automation.schemas import ExecutionCreate
+
+        async with async_session_factory() as session:
+            svc = AutomationService(session)
+            import json as _json
+
+            asset_ids = payload.get("asset_ids", [])
+            if isinstance(asset_ids, str):
+                asset_ids = _json.loads(asset_ids)
+
+            exec_create = ExecutionCreate(
+                execution_type=payload.get("execution_type", "script"),
+                target_id=payload.get("target_id", ""),
+                asset_ids=asset_ids,
+                parameters=_json.dumps(payload.get("parameters", {})),
+                trigger_source=payload.get("trigger_source", "policy"),
+                trigger_source_id=payload.get("policy_id") or payload.get("alert_id"),
+                is_dry_run=payload.get("is_dry_run", False),
+            )
+            execution = await svc.create_execution(exec_create)
+            await session.commit()
+
+            # 创建成功后立即运行
+            if execution.status in ("pending", "approved"):
+                execution = await svc.run_execution(str(execution.id))
+                await session.commit()
+
+            logger.info(
+                "Execution %s created and run: status=%s",
+                execution.id, execution.status
+            )
+
+            # 运行完成后发布完成/失败事件
+            from app.common.events import DomainEvent
+            bus = get_event_bus()
+            if execution.status == "completed":
+                await bus.publish(DomainEvent(
+                    event_type=AutomationEvents.EXECUTION_COMPLETED,
+                    domain="automation",
+                    payload={
+                        "execution_id": str(execution.id),
+                        "alert_id": payload.get("alert_id"),
+                        "policy_id": payload.get("policy_id"),
+                        "result": execution.result,
+                        "status": "completed",
+                    },
+                    source="automation",
+                    correlation_id=event.event_id,
+                ))
+            elif execution.status in ("failed", "blocked", "timeout"):
+                await bus.publish(DomainEvent(
+                    event_type=AutomationEvents.EXECUTION_FAILED,
+                    domain="automation",
+                    payload={
+                        "execution_id": str(execution.id),
+                        "alert_id": payload.get("alert_id"),
+                        "policy_id": payload.get("policy_id"),
+                        "error_message": execution.error_message,
+                        "status": execution.status,
+                    },
+                    source="automation",
+                    correlation_id=event.event_id,
+                ))
+    except Exception as e:
+        logger.error("创建/运行执行失败: %s", e, exc_info=True)
 
 
 async def _on_execution_completed(event) -> None:
@@ -488,6 +582,7 @@ async def _match_alert_rules(event_payload: dict) -> list[dict]:
 
 async def _match_policies(alert_payload: dict) -> list[dict]:
     """匹配策略，返回匹配到的策略数据列表."""
+    import json as _json
     try:
         from app.infra.database import async_session_factory
         from app.domains.policy.service import PolicyService
@@ -499,21 +594,36 @@ async def _match_policies(alert_payload: dict) -> list[dict]:
             for policy in policies:
                 trigger_type = policy.trigger_type
                 matched = False
+                # 解析 trigger_condition (可能是 JSON string 或 dict)
+                tc = policy.trigger_condition or {}
+                if isinstance(tc, str):
+                    try:
+                        tc = _json.loads(tc)
+                    except Exception:
+                        tc = {}
+                # 解析 action_chain (可能是 JSON string 或 list)
+                ac = policy.action_chain or []
+                if isinstance(ac, str):
+                    try:
+                        ac = _json.loads(ac)
+                    except Exception:
+                        ac = []
+
                 if trigger_type == "alert_severity" and severity:
-                    trigger_cond = policy.trigger_condition or {}
-                    target_sev = trigger_cond.get("severity", "")
+                    target_sev = tc.get("severity", "")
                     if target_sev and severity == target_sev:
                         matched = True
                 elif trigger_type == "event_type":
-                    trigger_cond = policy.trigger_condition or {}
-                    target_type = trigger_cond.get("event_type", "")
+                    target_type = tc.get("event_type", "")
                     if target_type and alert_payload.get("event_type") == target_type:
                         matched = True
+                elif trigger_type == "any_alert":
+                    matched = True
                 if matched:
                     results.append({
                         "policy_id": str(policy.id),
                         "policy_name": policy.name,
-                        "action_chain": policy.action_chain or [],
+                        "action_chain": ac,
                         "requires_approval": policy.requires_approval,
                         "risk_level": policy.risk_level,
                         "matched_assets": alert_payload.get("asset_ids", []),
