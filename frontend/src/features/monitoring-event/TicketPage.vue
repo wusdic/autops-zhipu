@@ -579,32 +579,27 @@ function slaCountdown(deadline: string): string {
 // ── Statistics ──────────────────────────────────────────────────────
 async function loadStats() {
   try {
-    const { data } = await api.get(R.TICKETS, {
-      params: { page: 1, page_size: 1 },
-    })
+    const { data } = await api.get(R.TICKET_STATS)
     if (data.code === 0 && data.data) {
-      // If backend provides stats endpoint, use it. Otherwise derive from list query.
-      const summary = data.data.stats || data.data.summary
-      if (summary) {
-        stats.total = summary.total ?? 0
-        stats.open = summary.open_count ?? summary.open ?? 0
-        stats.inProgress = summary.in_progress_count ?? summary.in_progress ?? 0
-        stats.closed = summary.closed_count ?? summary.closed ?? 0
-        stats.overdue = summary.overdue_count ?? summary.overdue ?? 0
-        stats.withinSla = summary.within_sla ?? summary.withinSla ?? stats.total
-      } else {
-        stats.total = data.data.total || 0
-      }
+      const d = data.data
+      stats.total = d.total ?? 0
+      stats.open = d.open ?? 0
+      stats.inProgress = d.in_progress ?? 0
+      stats.closed = (d.closed ?? 0) + (d.resolved ?? 0)
     }
   } catch {
-    // stats are non-critical; silently ignore
+    // Fallback: get total from list
+    try {
+      const { data } = await api.get(R.TICKETS, { params: { page_size: 1 } })
+      if (data.code === 0) stats.total = data.data?.total || 0
+    } catch { /* ignore */ }
   }
 }
 
 async function loadFullStats() {
   try {
     // Try a dedicated stats endpoint first
-    const { data } = await api.get('/api/v1/tickets/stats/overview')
+    const { data } = await api.get(R.TICKET_STATS)
     if (data.code === 0 && data.data) {
       const s = data.data
       stats.total = s.total ?? 0

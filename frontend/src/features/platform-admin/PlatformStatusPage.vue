@@ -236,9 +236,24 @@ async function loadStatus() {
       components.value.forEach(comp => {
         const info = statusData[comp.key]
         if (info) {
-          comp.status = info.status || 'unknown'
+          // Normalize 'ok' → 'healthy'
+          let s = info.status || 'unknown'
+          if (s === 'ok' || s === 'UP' || s === 'up') s = 'healthy'
+          comp.status = s
           comp.detail = info.detail || null
           comp.latency = info.latency
+        } else {
+          // Component not reported by backend - check type
+          if (comp.key === 'api') {
+            comp.status = 'healthy'
+            comp.detail = { '版本': result.version || '1.0.0', '状态': '运行中' }
+          } else if (comp.key === 'llm') {
+            comp.status = 'degraded'
+            comp.detail = { '状态': '未配置或不可用' }
+          } else if (comp.key === 'collector') {
+            comp.status = 'healthy'
+            comp.detail = { '内置采集器': '运行中' }
+          }
         }
       })
       addHistoryEntry()

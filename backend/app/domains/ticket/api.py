@@ -17,6 +17,24 @@ def _get_svc(db: AsyncSession = Depends(get_db)) -> TicketService:
     return TicketService(db)
 
 
+@router.get("/stats/overview")
+async def ticket_stats(db: AsyncSession = Depends(get_db)):
+    """工单统计概览."""
+    from sqlalchemy import select, func
+    from app.domains.ticket.models import Ticket
+    stmt = select(Ticket.status, func.count(Ticket.id)).group_by(Ticket.status)
+    result = await db.execute(stmt)
+    status_counts = dict(result.all())
+    total = sum(status_counts.values())
+    return success({
+        "total": total,
+        "open": status_counts.get("open", 0),
+        "in_progress": status_counts.get("in_progress", 0),
+        "resolved": status_counts.get("resolved", 0),
+        "closed": status_counts.get("closed", 0),
+    })
+
+
 @router.get("")
 async def list_tickets(
     status: str | None = None, ticket_type: str | None = None,

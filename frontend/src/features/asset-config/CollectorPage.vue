@@ -830,7 +830,7 @@ async function loadEdgeCollectors() {
   edgeLoading.value = true
   try {
     // 调用 Edge 状态列表接口
-    const { data } = await api.get('/api/v1/collectors/edge')
+    const { data } = await api.get(R.COLLECTOR_EDGE)
     if (data.code === 0) {
       edgeCollectors.value = data.data?.items || data.data || []
     }
@@ -873,7 +873,7 @@ async function viewEdgeTasks(row: EdgeCollector) {
 
 async function deleteEdgeCollector(collectorId: string) {
   try {
-    const { data } = await api.delete(`/api/v1/collectors/edge/${collectorId}`)
+    const { data } = await api.delete(R.COLLECTOR_EDGE_DETAIL(collectorId))
     if (data.code === 0) {
       ElMessage.success('Edge 采集器已删除')
       loadEdgeCollectors()

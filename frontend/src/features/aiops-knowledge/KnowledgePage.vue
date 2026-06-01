@@ -27,26 +27,26 @@
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-value">{{ stats.incident_summary }}</div>
-            <div class="stat-label">事件总结</div>
+            <div class="stat-value">{{ stats.published }}</div>
+            <div class="stat-label">已发布</div>
           </div>
-          <el-icon class="stat-icon" :size="40" color="#E6A23C"><Warning /></el-icon>
+          <el-icon class="stat-icon" :size="40" color="#67C23A"><CircleCheck /></el-icon>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-value">{{ stats.runbook }}</div>
-            <div class="stat-label">Runbook</div>
+            <div class="stat-value">{{ stats.draft }}</div>
+            <div class="stat-label">草稿</div>
           </div>
-          <el-icon class="stat-icon" :size="40" color="#67C23A"><Notebook /></el-icon>
+          <el-icon class="stat-icon" :size="40" color="#E6A23C"><EditPen /></el-icon>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-value">{{ stats.standard_solution + stats.faq }}</div>
-            <div class="stat-label">标准方案 / FAQ</div>
+            <div class="stat-value">{{ stats.total - stats.published - stats.draft }}</div>
+            <div class="stat-label">其他状态</div>
           </div>
           <el-icon class="stat-icon" :size="40" color="#909399"><InfoFilled /></el-icon>
         </el-card>
@@ -176,8 +176,8 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  Reading, Plus, Upload, Download, Search, Document, Warning,
-  Notebook, InfoFilled,
+  Reading, Plus, Upload, Download, Search, Document,
+  CircleCheck, EditPen, InfoFilled,
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
@@ -208,6 +208,8 @@ const pagination = reactive({
 
 const stats = reactive({
   total: 0,
+  published: 0,
+  draft: 0,
   incident_summary: 0,
   runbook: 0,
   standard_solution: 0,
@@ -283,7 +285,11 @@ async function loadStats() {
     const { data } = await api.get(API.KNOWLEDGE_STATS)
     if (data.code === 0) {
       const d = data.data
+      // Backend returns: { total, published, draft }
       stats.total = d.total || 0
+      stats.published = d.published || 0
+      stats.draft = d.draft || 0
+      // Type breakdown not available from stats API, set defaults
       stats.incident_summary = d.incident_summary || 0
       stats.runbook = d.runbook || 0
       stats.standard_solution = d.standard_solution || 0

@@ -351,7 +351,7 @@ async function viewDetail(row: any) {
 async function loadAudit(keyId: string) {
   auditLoading.value = true
   try {
-    const { data } = await api.get('/api/v1/audit-logs', { params: { api_key_id: keyId, page_size: 20 } })
+    const { data } = await api.get(R.AUDIT, { params: { api_key_id: keyId, page_size: 20 } })
     auditLogs.value = data?.data?.items || data?.data || []
   } catch { auditLogs.value = [] }
   finally { auditLoading.value = false }

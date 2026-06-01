@@ -89,12 +89,12 @@
         <el-table-column prop="ip" label="IP" width="140" />
         <el-table-column prop="status" label="状态" width="90">
           <template #default="{ row }">
-            <el-tag :type="statusType(row.status)" size="small">{{ row.status }}</el-tag>
+            <el-tag :type="statusType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="health_status" label="健康" width="90">
           <template #default="{ row }">
-            <el-tag :type="healthType(row.health_status)" size="small">{{ row.health_status }}</el-tag>
+            <el-tag :type="healthType(row.health_status)" size="small">{{ healthLabel(row.health_status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="lifecycle_status" label="生命周期" width="110">
@@ -104,8 +104,16 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="os_type" label="系统" width="90" />
-        <el-table-column prop="environment" label="环境" width="90" />
+        <el-table-column prop="os_type" label="系统" width="90">
+          <template #default="{ row }">
+            <span>{{ formatOs(row.os_type) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="environment" label="环境" width="90">
+          <template #default="{ row }">
+            <el-tag size="small" :type="envType(row.environment)" effect="plain">{{ formatEnv(row.environment) }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="viewAsset(row)">详情</el-button>
@@ -431,7 +439,9 @@ const formData = reactive({ ...defaultForm })
 function formatType(t: string) {
   const map: Record<string, string> = {
     linux_server: 'Linux', windows_server: 'Windows', database: '数据库',
-    network_device: '网络', web_service: 'Web',
+    network_device: '网络', web_service: 'Web', server: '服务器',
+    container: '容器', virtual_machine: '虚拟机', storage: '存储',
+    Linux: 'Linux', Windows: 'Windows', Server: '服务器',
   }
   return map[t] || t
 }
@@ -439,9 +449,15 @@ function formatType(t: string) {
 function statusType(s: string) {
   return s === 'active' ? 'success' : s === 'inactive' ? 'danger' : 'warning'
 }
+function statusLabel(s: string) {
+  return ({ active: '活跃', inactive: '停用', maintenance: '维护', provisioning: '配置中' })[s] ?? s ?? '-'
+}
 
 function healthType(h: string) {
   return h === 'healthy' ? 'success' : h === 'warning' ? 'warning' : h === 'critical' ? 'danger' : 'info'
+}
+function healthLabel(h: string) {
+  return ({ healthy: '健康', warning: '警告', critical: '严重', unknown: '未知' })[h] ?? h ?? '-'
 }
 
 function lifecycleType(ls: string) {
@@ -456,6 +472,24 @@ function formatLifecycle(ls: string) {
     managed: '纳管', online: '在线', maintenance: '维护中', retired: '退役',
   }
   return map[ls] || ls || '-'
+}
+
+function formatOs(o: string) {
+  if (!o) return '-'
+  const map: Record<string, string> = { linux: 'Linux', windows: 'Windows', centos: 'CentOS', ubuntu: 'Ubuntu', redhat: 'RHEL' }
+  return map[o.toLowerCase()] || o
+}
+
+function formatEnv(e: string) {
+  if (!e) return '-'
+  const map: Record<string, string> = { production: '生产', prod: '生产', staging: '预发布', testing: '测试', test: '测试', development: '开发', dev: '开发' }
+  return map[e.toLowerCase()] || e
+}
+
+function envType(e: string) {
+  if (!e) return 'info'
+  const map: Record<string, string> = { production: 'danger', prod: 'danger', staging: 'warning', testing: '', test: '', development: 'success', dev: 'success' }
+  return map[e.toLowerCase()] || 'info'
 }
 
 // ---------- Load ----------

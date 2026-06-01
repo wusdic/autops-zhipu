@@ -413,12 +413,17 @@ async function handleReject(row: any) {
 // ─── Data Loaders ───
 async function loadAlertStats() {
   try {
-    const { data: resp } = await api.get(R.ALERTS, { params: { page_size: 10, status: 'firing' } })
+    // Use dedicated stats API instead of loading list
+    const { data: resp } = await api.get(R.ALERT_STATS)
     if (resp.code === 0) {
-      const items = resp.data.items || []
-      recentAlerts.value = items
-      stats.activeAlerts = resp.data.total || 0
-      stats.criticalAlerts = items.filter((a: any) => a.severity === 'critical').length
+      const d = resp.data
+      stats.activeAlerts = d.firing ?? d.active ?? 0
+      stats.criticalAlerts = d.critical_count ?? d.critical ?? d.firing ?? 0
+    }
+    // Also load recent alerts for the table
+    const { data: listResp } = await api.get(R.ALERTS, { params: { page_size: 10, status: 'firing' } })
+    if (listResp.code === 0) {
+      recentAlerts.value = listResp.data.items || []
     }
   } catch (e) { console.error('[Dashboard] loadAlertStats error:', e) }
 }

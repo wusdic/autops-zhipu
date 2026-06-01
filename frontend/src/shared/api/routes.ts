@@ -46,6 +46,11 @@ export const API = {
   ASSET_GROUP_MEMBERS: (groupId: string) => `/api/v1/asset-groups/${groupId}/members`,
   ASSET_GROUP_MEMBER: (groupId: string, assetId: string) => `/api/v1/asset-groups/${groupId}/members/${assetId}`,
 
+  // 告警规则
+  ALERT_RULES: '/api/v1/alert-rules',
+  ALERT_RULE_DETAIL: (id: string) => `/api/v1/alert-rules/${id}`,
+  ALERT_RULE_TEST: (id: string) => `/api/v1/alert-rules/${id}/test`,
+
   // 告警
   ALERTS: '/api/v1/alerts',
   ALERT_DETAIL: (id: string) => `/api/v1/alerts/${id}`,
@@ -53,7 +58,6 @@ export const API = {
   ALERT_ESCALATE: (id: string) => `/api/v1/alerts/${id}/escalate`,
   ALERT_RESOLVE: (id: string) => `/api/v1/alerts/${id}/resolve`,
   ALERT_STATS: '/api/v1/alerts/stats/overview',
-  ALERT_RULES: '/api/v1/alert-rules',
 
   // 事件
   EVENTS: '/api/v1/events',
@@ -62,6 +66,7 @@ export const API = {
   // 工单
   TICKETS: '/api/v1/tickets',
   TICKET_DETAIL: (id: string) => `/api/v1/tickets/${id}`,
+  TICKET_STATS: '/api/v1/tickets/stats/overview',
   TICKET_COMMENTS: (id: string) => `/api/v1/tickets/${id}/comments`,
   TICKET_ATTACHMENTS: (id: string) => `/api/v1/tickets/${id}/attachments`,
   TICKET_ATTACHMENT: (ticketId: string, attachmentId: string) => `/api/v1/tickets/${ticketId}/attachments/${attachmentId}`,
@@ -82,10 +87,13 @@ export const API = {
   EXECUTION_DETAIL: (id: string) => `/api/v1/executions/${id}`,
   EXECUTION_APPROVE: (id: string) => `/api/v1/executions/${id}/approve`,
   EXECUTION_CANCEL: (id: string) => `/api/v1/executions/${id}/cancel`,
+  EXECUTION_ROLLBACK: (id: string) => `/api/v1/executions/${id}/rollback`,
   EXECUTION_VERIFICATION: (id: string) => `/api/v1/executions/${id}/verification`,
 
   // 采集器
   COLLECTORS: '/api/v1/collectors',
+  COLLECTOR_EDGE: '/api/v1/collectors/edge',
+  COLLECTOR_EDGE_DETAIL: (id: string) => `/api/v1/collectors/edge/${id}`,
   COLLECTION_JOBS: '/api/v1/collection-jobs',
   COLLECTION_JOB_RESULTS: (id: string) => `/api/v1/collection-jobs/${id}/results`,
 
@@ -93,6 +101,10 @@ export const API = {
   CONFIGS: '/api/v1/configs/definitions',
   CONFIG_DETAIL: (id: string) => `/api/v1/configs/definitions/${id}`,
   CONFIG_VERSIONS: (defId: string) => `/api/v1/configs/definitions/${defId}/versions`,
+  CONFIG_DIFF: (defId: string) => `/api/v1/configs/definitions/${defId}/diff`,
+  CONFIG_DRIFT: (defId: string) => `/api/v1/configs/definitions/${defId}/drift`,
+  CONFIG_ROLLBACK: (defId: string) => `/api/v1/configs/definitions/${defId}/rollback`,
+  CONFIG_INHERITANCE: '/api/v1/configs/inheritance',
   CONFIG_PUBLISH: (versionId: string) => `/api/v1/configs/versions/${versionId}/publish`,
 
   // 凭证

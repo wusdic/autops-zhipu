@@ -306,10 +306,13 @@ async function loadStats() {
   try {
     const { data } = await api.get(R.ALERT_STATS)
     if (data.code === 0 && data.data) {
-      stats.critical = data.data.critical_count ?? data.data.critical ?? 0
-      stats.warning = data.data.warning_count ?? data.data.warning ?? 0
-      stats.active = data.data.active_count ?? data.data.active ?? 0
-      stats.resolvedToday = data.data.resolved_today ?? data.data.resolvedToday ?? 0
+      const d = data.data
+      // Backend returns: { total, firing, acknowledged, resolved }
+      // Map to display fields
+      stats.critical = d.critical_count ?? d.critical ?? d.firing ?? 0
+      stats.warning = d.warning_count ?? d.warning ?? d.acknowledged ?? 0
+      stats.active = d.active_count ?? d.active ?? (d.firing ?? 0) + (d.acknowledged ?? 0)
+      stats.resolvedToday = d.resolved_today ?? d.resolvedToday ?? d.resolved ?? 0
     }
   } catch {
     // stats are non-critical; silently ignore

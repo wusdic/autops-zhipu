@@ -8,14 +8,14 @@
       </div>
       <el-menu :default-active="activeMenu" router class="sidebar-menu" :collapse="isCollapsed" background-color="#304156" text-color="#bfcbd9" active-text-color="#409eff">
         <!-- 指挥中心 -->
-        <el-sub-menu v-if="!isCollapsed" index="cmd">
+        <el-sub-menu index="cmd">
           <template #title><el-icon><Monitor /></el-icon><span>指挥中心</span></template>
           <el-menu-item index="/"><span>运维指挥台</span></el-menu-item>
           <el-menu-item index="/incident"><span>故障处置</span></el-menu-item>
           <el-menu-item index="/aiops"><span>AI 诊断</span></el-menu-item>
         </el-sub-menu>
         <!-- 资产配置 -->
-        <el-sub-menu v-if="!isCollapsed" index="asset">
+        <el-sub-menu index="asset">
           <template #title><el-icon><Grid /></el-icon><span>资产配置</span></template>
           <el-menu-item index="/assets"><span>资产列表</span></el-menu-item>
           <el-menu-item index="/assets/discovery"><span>资产发现</span></el-menu-item>
@@ -25,7 +25,7 @@
           <el-menu-item index="/collectors"><span>采集器管理</span></el-menu-item>
         </el-sub-menu>
         <!-- 监控事件 -->
-        <el-sub-menu v-if="!isCollapsed" index="monitor">
+        <el-sub-menu index="monitor">
           <template #title><el-icon><Bell /></el-icon><span>监控事件</span></template>
           <el-menu-item index="/monitoring"><span>监控总览</span></el-menu-item>
           <el-menu-item index="/events"><span>事件列表</span></el-menu-item>
@@ -34,7 +34,7 @@
           <el-menu-item index="/tickets"><span>工单中心</span></el-menu-item>
         </el-sub-menu>
         <!-- 自动化 -->
-        <el-sub-menu v-if="!isCollapsed" index="auto">
+        <el-sub-menu index="auto">
           <template #title><el-icon><VideoPlay /></el-icon><span>自动化</span></template>
           <el-menu-item index="/scripts"><span>脚本库</span></el-menu-item>
           <el-menu-item index="/playbooks"><span>Playbook</span></el-menu-item>
@@ -42,13 +42,13 @@
           <el-menu-item index="/executions"><span>执行历史</span></el-menu-item>
         </el-sub-menu>
         <!-- 知识 -->
-        <el-sub-menu v-if="!isCollapsed" index="kb">
+        <el-sub-menu index="kb">
           <template #title><el-icon><Collection /></el-icon><span>知识</span></template>
           <el-menu-item index="/knowledge"><span>知识库</span></el-menu-item>
           <el-menu-item index="/knowledge/import"><span>知识导入</span></el-menu-item>
         </el-sub-menu>
         <!-- 管理 -->
-        <el-sub-menu v-if="!isCollapsed" index="admin">
+        <el-sub-menu index="admin">
           <template #title><el-icon><User /></el-icon><span>平台管理</span></template>
           <el-menu-item index="/admin/users"><span>用户管理</span></el-menu-item>
           <el-menu-item index="/admin/roles"><span>角色管理</span></el-menu-item>
@@ -58,18 +58,6 @@
           <el-menu-item index="/admin/backup"><span>备份恢复</span></el-menu-item>
           <el-menu-item index="/audit"><span>审计日志</span></el-menu-item>
         </el-sub-menu>
-        <!-- Collapsed mode -->
-        <template v-if="isCollapsed">
-          <el-menu-item index="/"><el-icon><Monitor /></el-icon></el-menu-item>
-          <el-menu-item index="/incident"><el-icon><Warning /></el-icon></el-menu-item>
-          <el-menu-item index="/assets"><el-icon><Grid /></el-icon></el-menu-item>
-          <el-menu-item index="/monitoring"><el-icon><DataLine /></el-icon></el-menu-item>
-          <el-menu-item index="/alerts"><el-icon><Bell /></el-icon></el-menu-item>
-          <el-menu-item index="/scripts"><el-icon><VideoPlay /></el-icon></el-menu-item>
-          <el-menu-item index="/knowledge"><el-icon><Collection /></el-icon></el-menu-item>
-          <el-menu-item index="/admin/users"><el-icon><User /></el-icon></el-menu-item>
-          <el-menu-item index="/audit"><el-icon><Document /></el-icon></el-menu-item>
-        </template>
       </el-menu>
     </el-aside>
     <el-container>
@@ -287,6 +275,10 @@ onMounted(() => {
 .sidebar-menu .el-menu-item.is-active { background-color: #263445 !important; }
 .sidebar-menu .el-sub-menu__title { background-color: #304156 !important; }
 .sidebar-menu .el-sub-menu__title:hover { background-color: #263445 !important; }
+.sidebar-menu .el-sub-menu .el-menu { background-color: #1f2d3d !important; }
+.sidebar-menu .el-sub-menu .el-menu .el-menu-item { background-color: #1f2d3d !important; }
+.sidebar-menu .el-sub-menu .el-menu .el-menu-item:hover { background-color: #263445 !important; }
+.sidebar-menu .el-sub-menu .el-menu .el-menu-item.is-active { background-color: #263445 !important; }
 .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e6e6e6; background: #fff; padding: 0 20px; height: 56px; }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .collapse-btn { cursor: pointer; color: #606266; }
@@ -305,5 +297,5 @@ onMounted(() => {
 .search-item-title { flex: 1; font-size: 13px; color: #303133; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .search-item-sub { font-size: 12px; color: #909399; }
 .search-empty { padding: 20px; text-align: center; color: #909399; }
-.main-content { background: #f0f2f5; min-height: calc(100vh - 56px); overflow-y: auto; }
+.main-content { background: #f0f2f5; min-height: calc(100vh - 56px); overflow-y: auto; padding-bottom: 40px; }
 </style>

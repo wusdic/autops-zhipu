@@ -10,12 +10,13 @@ defineProps<{ severity: string; size?: 'large' | 'default' | 'small' }>()
 const typeMap: Record<string, string> = {
   critical: 'danger', severe: 'danger',
   high: 'warning', major: 'warning',
-  medium: '', minor: '',
-  low: 'info', info: 'info',
+  warning: 'warning', medium: '', minor: '',
+  low: 'info', info: 'info', normal: 'success',
 }
 
 const labelMap: Record<string, string> = {
-  critical: '严重', severe: '严重', high: '高', major: '重要',
-  medium: '中', minor: '次要', low: '低', info: '信息',
+  critical: '严重', severe: '严重', high: '高危', major: '重要',
+  warning: '警告', medium: '中', minor: '次要',
+  low: '低', info: '信息', normal: '正常',
 }
 </script>
