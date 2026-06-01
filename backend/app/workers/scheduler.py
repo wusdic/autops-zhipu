@@ -156,12 +156,21 @@ class CollectionScheduler:
                             is_alive = result_data.get("alive", False)
                             new_status = "online" if is_alive else "offline"
 
+                            logger.info(
+                                "Ping check: asset=%s was_online=%s is_alive=%s",
+                                asset.hostname, was_online, is_alive
+                            )
+
                             if was_online != is_alive:
                                 old_status = asset.status
                                 asset.status = new_status
                                 await session.flush()
 
+                                # 先commit当前session，避免嵌套session冲突
+                                await session.commit()
+
                                 bus = get_event_bus()
+                                logger.info("Publishing STATE_CHANGED: %s → %s", old_status, new_status)
                                 await bus.publish(DomainEvent(
                                     domain="state",
                                     event_type=StateEvents.STATE_CHANGED,
@@ -176,7 +185,7 @@ class CollectionScheduler:
                                     },
                                 ))
                                 logger.info(
-                                    "State change: asset=%s %s → %s",
+                                    "State change published: asset=%s %s → %s",
                                     asset.hostname, old_status, new_status
                                 )
 

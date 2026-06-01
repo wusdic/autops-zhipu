@@ -183,12 +183,33 @@ async def _on_state_recovered(event) -> None:
 
 
 async def _on_event_created(event) -> None:
-    """事件创建 → 匹配告警规则."""
+    """事件创建 → 匹配告警规则 → 创建告警记录 → 发布告警事件."""
     from app.common.events import DomainEvent
     payload = event.payload
     matched_alerts = await _match_alert_rules(payload)
     bus = get_event_bus()
     for alert_data in matched_alerts:
+        # 先创建alert DB记录
+        try:
+            from app.infra.database import async_session_factory
+            from app.domains.alert.service import AlertService
+            async with async_session_factory() as session:
+                svc = AlertService(session)
+                import json
+                alert = await svc.create_alert(
+                    title=alert_data.get("title", "告警"),
+                    severity=alert_data.get("severity", "warning"),
+                    rule_id=alert_data.get("rule_id"),
+                    asset_ids=json.dumps(alert_data.get("asset_ids", [])),
+                    event_ids=json.dumps(alert_data.get("event_ids", [])),
+                    context=json.dumps(alert_data.get("context", {}), ensure_ascii=False, default=str)[:2000] if alert_data.get("context") else None,
+                    status="firing",
+                )
+                await session.commit()
+                alert_data["alert_id"] = str(alert.id)
+        except Exception as e:
+            logger.error("创建告警记录失败: %s", e, exc_info=True)
+
         await bus.publish(DomainEvent(
             event_type=AlertEvents.ALERT_CREATED,
             domain="alert",
@@ -412,16 +433,18 @@ async def _create_event_record(event) -> None:
         from app.domains.event.service import EventService
         async with async_session_factory() as session:
             svc = EventService(session)
+            import json
             await svc.create_event(
                 event_type=event.payload.get("event_type") or event.event_type,
                 source=event.source or event.domain,
                 asset_id=event.payload.get("asset_id"),
                 severity=event.payload.get("severity", "info"),
-                details=event.payload,
+                title=event.payload.get("title") or f"{event.event_type}: {event.payload.get('asset_id', 'N/A')}",
+                detail=json.dumps(event.payload, ensure_ascii=False, default=str)[:2000],
             )
             await session.commit()
     except Exception as e:
-        logger.error("创建事件记录失败: %s", e)
+        logger.error("创建事件记录失败: %s", e, exc_info=True)
 
 
 async def _match_alert_rules(event_payload: dict) -> list[dict]:
@@ -431,13 +454,23 @@ async def _match_alert_rules(event_payload: dict) -> list[dict]:
         from app.domains.alert.service import AlertService
         async with async_session_factory() as session:
             svc = AlertService(session)
-            rules = await svc.list_rules(enabled_only=True)
+            rules = await svc.list_rules(enabled=True)
             results = []
             event_type = event_payload.get("event_type", "")
             asset_id = event_payload.get("asset_id")
             for rule in rules:
-                # 简单匹配: 检查event_type是否在rule的event_types中
-                rule_types = rule.event_types if isinstance(rule.event_types, list) else []
+                # 解析rule.event_types (JSON string → list)
+                import json as _json
+                raw_types = rule.event_types
+                if isinstance(raw_types, str):
+                    try:
+                        rule_types = _json.loads(raw_types)
+                    except Exception:
+                        rule_types = []
+                elif isinstance(raw_types, list):
+                    rule_types = raw_types
+                else:
+                    rule_types = []
                 if event_type in rule_types or not rule_types:
                     results.append({
                         "title": f"[规则触发] {rule.name}",
