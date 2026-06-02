@@ -1,7 +1,7 @@
 <template>
   <el-container class="layout-container">
     <!-- ─── Sidebar ─── -->
-    <el-aside :width="isCollapsed ? '64px' : '200px'" class="autops-sidebar" :class="{ 'autops-sidebar--collapsed': isCollapsed }">
+    <el-aside :width="isCollapsed ? '64px' : '220px'" class="autops-sidebar" :class="{ 'autops-sidebar--collapsed': isCollapsed }">
       <!-- Logo -->
       <div class="sidebar-logo" @click="navigateTo('/')">
         <el-icon size="22" color="#165dff"><Monitor /></el-icon>
@@ -21,133 +21,136 @@
           class="sidebar-menu"
           @select="handleMenuSelect"
         >
-          <!-- 指挥中心 -->
-          <el-sub-menu index="cmd">
+          <!-- M1 首页指挥台 -->
+          <el-menu-item index="/">
+            <el-icon><DataBoard /></el-icon><span>首页指挥台</span>
+          </el-menu-item>
+
+          <!-- M2 资源中心 -->
+          <el-sub-menu index="m2">
             <template #title>
-              <el-icon><Aim /></el-icon>
-              <span>指挥中心</span>
+              <el-icon><Box /></el-icon><span>资源中心</span>
             </template>
-            <el-menu-item index="/">
-              <el-icon><DataBoard /></el-icon><span>运维指挥台</span>
-            </el-menu-item>
-            <el-menu-item index="/incident">
-              <el-icon><Warning /></el-icon><span>故障处置</span>
-            </el-menu-item>
-            <el-menu-item index="/aiops">
-              <el-icon><MagicStick /></el-icon><span>AI 诊断</span>
-            </el-menu-item>
+            <el-menu-item index="/resources">资源总览</el-menu-item>
+            <el-menu-item index="/resources/discovery">资源发现任务</el-menu-item>
+            <el-menu-item index="/resources/discovery-results">发现结果</el-menu-item>
+            <el-menu-item index="/assets">资源列表</el-menu-item>
+            <el-menu-item index="/business-systems">业务系统</el-menu-item>
+            <el-menu-item index="/topology">拓扑视图</el-menu-item>
+            <el-menu-item index="/resources/import">资源导入</el-menu-item>
+            <el-menu-item index="/asset-groups">资源分组</el-menu-item>
+            <el-menu-item index="/credentials">凭证管理</el-menu-item>
+            <el-menu-item index="/agents">Agent 管理</el-menu-item>
           </el-sub-menu>
 
-          <!-- 资产配置 -->
-          <el-sub-menu index="asset">
+          <!-- M3 巡检中心 -->
+          <el-sub-menu index="m3">
             <template #title>
-              <el-icon><Box /></el-icon>
-              <span>资产配置</span>
+              <el-icon><Checked /></el-icon><span>巡检中心</span>
             </template>
-            <el-menu-item index="/assets">
-              <el-icon><List /></el-icon><span>资产列表</span>
-            </el-menu-item>
-            <el-menu-item index="/assets/discovery">
-              <el-icon><Search /></el-icon><span>资产发现</span>
-            </el-menu-item>
-            <el-menu-item index="/asset-groups">
-              <el-icon><Folder /></el-icon><span>资产分组</span>
-            </el-menu-item>
-            <el-menu-item index="/credentials">
-              <el-icon><Key /></el-icon><span>凭证管理</span>
-            </el-menu-item>
-            <el-menu-item index="/config">
-              <el-icon><Setting /></el-icon><span>配置管理</span>
-            </el-menu-item>
-            <el-menu-item index="/collectors">
-              <el-icon><Connection /></el-icon><span>采集器管理</span>
-            </el-menu-item>
+            <el-menu-item index="/inspections">巡检总览</el-menu-item>
+            <el-menu-item index="/inspection/templates">巡检模板</el-menu-item>
+            <el-menu-item index="/inspection/plans">巡检计划</el-menu-item>
+            <el-menu-item index="/inspection/tasks">巡检任务</el-menu-item>
+            <el-menu-item index="/inspection/results">巡检结果</el-menu-item>
+            <el-menu-item index="/inspection/page-check">页面巡检</el-menu-item>
+            <el-menu-item index="/inspection/config-check">配置巡检</el-menu-item>
+            <el-menu-item index="/inspection/log-check">日志巡检</el-menu-item>
+            <el-menu-item index="/inspection/baseline-check">基线巡检</el-menu-item>
+            <el-menu-item index="/inspection/reports">巡检报告</el-menu-item>
           </el-sub-menu>
 
-          <!-- 监控事件 -->
-          <el-sub-menu index="mon">
+          <!-- M4 监控中心 -->
+          <el-sub-menu index="m4">
             <template #title>
-              <el-icon><Monitor /></el-icon>
-              <span>监控事件</span>
+              <el-icon><TrendCharts /></el-icon><span>监控中心</span>
             </template>
-            <el-menu-item index="/monitoring">
-              <el-icon><TrendCharts /></el-icon><span>监控总览</span>
-            </el-menu-item>
-            <el-menu-item index="/events">
-              <el-icon><Bell /></el-icon><span>事件列表</span>
-            </el-menu-item>
-            <el-menu-item index="/alerts">
-              <el-icon><AlarmClock /></el-icon><span>告警中心</span>
-            </el-menu-item>
-            <el-menu-item index="/alert-rules">
-              <el-icon><Document /></el-icon><span>告警规则</span>
-            </el-menu-item>
-            <el-menu-item index="/tickets">
+            <el-menu-item index="/monitoring">监控总览</el-menu-item>
+            <el-menu-item index="/monitoring/collectors">采集任务</el-menu-item>
+            <el-menu-item index="/monitoring/collection-results">采集结果</el-menu-item>
+            <el-menu-item index="/monitoring/metrics">指标趋势</el-menu-item>
+            <el-menu-item index="/monitoring/states">状态快照</el-menu-item>
+            <el-menu-item index="/monitoring/state-changes">状态变化</el-menu-item>
+            <el-menu-item index="/events">事件流</el-menu-item>
+            <el-menu-item index="/monitoring/log-sources">日志接入</el-menu-item>
+            <el-menu-item index="/monitoring/collector-health">采集器健康</el-menu-item>
+            <el-menu-item index="/monitoring/config-facts">配置事实</el-menu-item>
+          </el-sub-menu>
+
+          <!-- M5 处置中心 -->
+          <el-sub-menu index="m5">
+            <template #title>
+              <el-icon><Warning /></el-icon><span>处置中心</span>
+            </template>
+            <el-menu-item index="/anomalies">异常总览</el-menu-item>
+            <el-menu-item index="/anomaly/list">异常列表</el-menu-item>
+            <el-menu-item index="/alerts">告警列表</el-menu-item>
+            <el-menu-item index="/alert-rules">告警规则</el-menu-item>
+            <el-menu-item index="/incident">故障工作台</el-menu-item>
+          </el-sub-menu>
+
+          <!-- M6 自动化中心 -->
+          <el-sub-menu index="m6">
+            <template #title>
+              <el-icon><Cpu /></el-icon><span>自动化中心</span>
+            </template>
+            <el-menu-item index="/automation">自动化总览</el-menu-item>
+            <el-menu-item index="/policies">策略列表</el-menu-item>
+            <el-menu-item index="/scripts">脚本库</el-menu-item>
+            <el-menu-item index="/playbooks">剧本库</el-menu-item>
+            <el-menu-item index="/approvals">审批中心</el-menu-item>
+            <el-menu-item index="/executions">执行历史</el-menu-item>
+          </el-sub-menu>
+
+          <!-- M7 智能知识库 -->
+          <el-sub-menu index="m7">
+            <template #title>
+              <el-icon><MagicStick /></el-icon><span>智能知识库</span>
+            </template>
+            <el-menu-item index="/aiops">AI 诊断</el-menu-item>
+            <el-menu-item index="/knowledge">知识列表</el-menu-item>
+            <el-menu-item index="/knowledge/import">知识导入</el-menu-item>
+          </el-sub-menu>
+
+          <!-- M8 工单中心 -->
+          <el-sub-menu index="m8">
+            <template #title>
               <el-icon><Tickets /></el-icon><span>工单中心</span>
-            </el-menu-item>
+            </template>
+            <el-menu-item index="/tickets">工单列表</el-menu-item>
           </el-sub-menu>
 
-          <!-- 自动化 -->
-          <el-sub-menu index="auto">
+          <!-- M9 报表审计中心 -->
+          <el-sub-menu index="m9">
             <template #title>
-              <el-icon><Cpu /></el-icon>
-              <span>自动化</span>
+              <el-icon><Document /></el-icon><span>报表审计</span>
             </template>
-            <el-menu-item index="/scripts">
-              <el-icon><Document /></el-icon><span>脚本库</span>
-            </el-menu-item>
-            <el-menu-item index="/playbooks">
-              <el-icon><Notebook /></el-icon><span>Playbook</span>
-            </el-menu-item>
-            <el-menu-item index="/policies">
-              <el-icon><Strategy /></el-icon><span>策略管理</span>
-            </el-menu-item>
-            <el-menu-item index="/executions">
-              <el-icon><VideoPlay /></el-icon><span>执行历史</span>
-            </el-menu-item>
+            <el-menu-item index="/reports">报表总览</el-menu-item>
+            <el-menu-item index="/report/templates">报告模板</el-menu-item>
+            <el-menu-item index="/report/generate">报告生成</el-menu-item>
+            <el-menu-item index="/report/tasks">报告任务</el-menu-item>
+            <el-menu-item index="/report/archive">报告归档</el-menu-item>
+            <el-menu-item index="/audit">审计查询</el-menu-item>
+            <el-menu-item index="/logs/search">日志检索</el-menu-item>
+            <el-menu-item index="/evidence">证据归档</el-menu-item>
           </el-sub-menu>
 
-          <!-- 知识 -->
-          <el-sub-menu index="kb">
+          <!-- M10 平台管理 -->
+          <el-sub-menu index="m10">
             <template #title>
-              <el-icon><Collection /></el-icon>
-              <span>知识</span>
+              <el-icon><Tools /></el-icon><span>平台管理</span>
             </template>
-            <el-menu-item index="/knowledge">
-              <el-icon><Files /></el-icon><span>知识库</span>
-            </el-menu-item>
-            <el-menu-item index="/knowledge/import">
-              <el-icon><Upload /></el-icon><span>知识导入</span>
-            </el-menu-item>
-          </el-sub-menu>
-
-          <!-- 平台管理 -->
-          <el-sub-menu index="admin">
-            <template #title>
-              <el-icon><Tools /></el-icon>
-              <span>平台管理</span>
-            </template>
-            <el-menu-item index="/users">
-              <el-icon><User /></el-icon><span>用户管理</span>
-            </el-menu-item>
-            <el-menu-item index="/roles">
-              <el-icon><UserFilled /></el-icon><span>角色管理</span>
-            </el-menu-item>
-            <el-menu-item index="/api-keys">
-              <el-icon><Lock /></el-icon><span>API Key</span>
-            </el-menu-item>
-            <el-menu-item index="/system-config">
-              <el-icon><Setting /></el-icon><span>系统配置</span>
-            </el-menu-item>
-            <el-menu-item index="/platform-status">
-              <el-icon><Cpu /></el-icon><span>平台状态</span>
-            </el-menu-item>
-            <el-menu-item index="/backup">
-              <el-icon><FolderOpened /></el-icon><span>备份恢复</span>
-            </el-menu-item>
-            <el-menu-item index="/audit">
-              <el-icon><DocumentChecked /></el-icon><span>审计日志</span>
-            </el-menu-item>
+            <el-menu-item index="/users">用户管理</el-menu-item>
+            <el-menu-item index="/roles">角色管理</el-menu-item>
+            <el-menu-item index="/tenants">租户管理</el-menu-item>
+            <el-menu-item index="/api-keys">API Key</el-menu-item>
+            <el-menu-item index="/system-config">系统配置</el-menu-item>
+            <el-menu-item index="/dictionaries">字典管理</el-menu-item>
+            <el-menu-item index="/integrations">集成管理</el-menu-item>
+            <el-menu-item index="/platform-status">平台健康</el-menu-item>
+            <el-menu-item index="/task-queue">任务队列</el-menu-item>
+            <el-menu-item index="/backup">备份恢复</el-menu-item>
+            <el-menu-item index="/system-check">系统自检</el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-scrollbar>
@@ -162,7 +165,7 @@
             <el-icon size="18"><Fold v-if="!isCollapsed" /><Expand v-else /></el-icon>
           </div>
           <el-breadcrumb separator="/" class="breadcrumb">
-            <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path" :to="item.path">
+            <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path || item.title" :to="item.path || undefined">
               {{ item.title }}
             </el-breadcrumb-item>
           </el-breadcrumb>
@@ -198,7 +201,7 @@
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="profile" :icon="UserFilled">个人信息</el-dropdown-item>
+                <el-dropdown-item command="profile" :icon="UserFilled">个人中心</el-dropdown-item>
                 <el-dropdown-item command="settings" :icon="Setting">系统设置</el-dropdown-item>
                 <el-dropdown-item divided command="logout" :icon="SwitchButton">
                   <span style="color: #f53f3f">退出登录</span>
@@ -227,7 +230,13 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { Search, Fold, Expand, Bell, ArrowDown, UserFilled, Setting, SwitchButton } from '@element-plus/icons-vue'
+import {
+  Search, Fold, Expand, Bell, ArrowDown, UserFilled, Setting, SwitchButton,
+  Monitor, DataBoard, Box, TrendCharts, Warning, Cpu, MagicStick, Tickets,
+  Document, Tools, Checked
+} from '@element-plus/icons-vue'
+import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 import { APP_CONFIG } from '@/shared/config'
 
 const router = useRouter()
@@ -243,91 +252,151 @@ function toggleCollapse() {
 // ─── Active Menu ───
 const activeMenu = computed(() => {
   const path = route.path
-  // Exact match first
   const allMenus = Object.keys(menuMap)
   if (allMenus.includes(path)) return path
-  // Prefix match: longest first
   const sorted = allMenus.filter(m => m !== '/' && path.startsWith(m + '/')).sort((a, b) => b.length - a.length)
   if (sorted.length > 0) return sorted[0]
-  // Fallback: first segment
   const seg = path.split('/').filter(Boolean)
   if (seg.length > 0) return '/' + seg[0]
   return path
 })
 
-// ─── Breadcrumbs ───
+// ─── V3 菜单映射 ───
 const menuMap: Record<string, string> = {
-  '/': '运维指挥台',
-  '/incident': '故障处置',
-  '/aiops': 'AI 诊断',
-  '/assets': '资产列表',
-  '/assets/discovery': '资产发现',
-  '/asset-groups': '资产分组',
+  '/': '首页指挥台',
+  // M2 资源中心
+  '/resources': '资源总览',
+  '/resources/discovery': '资源发现任务',
+  '/resources/discovery-results': '发现结果',
+  '/assets': '资源列表',
+  '/business-systems': '业务系统',
+  '/topology': '拓扑视图',
+  '/resources/import': '资源导入',
+  '/asset-groups': '资源分组',
   '/credentials': '凭证管理',
-  '/config': '配置管理',
-  '/collectors': '采集器管理',
+  '/agents': 'Agent 管理',
+  // M3 巡检中心
+  '/inspections': '巡检总览',
+  '/inspection/templates': '巡检模板',
+  '/inspection/plans': '巡检计划',
+  '/inspection/tasks': '巡检任务',
+  '/inspection/results': '巡检结果',
+  '/inspection/page-check': '页面巡检',
+  '/inspection/config-check': '配置巡检',
+  '/inspection/log-check': '日志巡检',
+  '/inspection/baseline-check': '基线巡检',
+  '/inspection/reports': '巡检报告',
+  // M4 监控中心
   '/monitoring': '监控总览',
-  '/events': '事件列表',
-  '/alerts': '告警中心',
+  '/monitoring/collectors': '采集任务',
+  '/monitoring/collection-results': '采集结果',
+  '/monitoring/metrics': '指标趋势',
+  '/monitoring/states': '状态快照',
+  '/monitoring/state-changes': '状态变化',
+  '/events': '事件流',
+  '/monitoring/log-sources': '日志接入',
+  '/monitoring/collector-health': '采集器健康',
+  '/monitoring/config-facts': '配置事实',
+  // M5 处置中心
+  '/anomalies': '异常总览',
+  '/anomaly/list': '异常列表',
+  '/alerts': '告警列表',
   '/alert-rules': '告警规则',
-  '/tickets': '工单中心',
+  '/incident': '故障工作台',
+  // M6 自动化中心
+  '/automation': '自动化总览',
+  '/policies': '策略列表',
   '/scripts': '脚本库',
-  '/playbooks': 'Playbook',
-  '/policies': '策略管理',
+  '/playbooks': '剧本库',
+  '/approvals': '审批中心',
   '/executions': '执行历史',
-  '/knowledge': '知识库',
+  // M7 智能知识库
+  '/aiops': 'AI 诊断',
+  '/knowledge': '知识列表',
   '/knowledge/import': '知识导入',
+  // M8 工单中心
+  '/tickets': '工单列表',
+  // M9 报表审计中心
+  '/reports': '报表总览',
+  '/report/templates': '报告模板',
+  '/report/generate': '报告生成',
+  '/report/tasks': '报告任务',
+  '/report/archive': '报告归档',
+  '/audit': '审计查询',
+  '/logs/search': '日志检索',
+  '/evidence': '证据归档',
+  // M10 平台管理
   '/users': '用户管理',
   '/roles': '角色管理',
+  '/tenants': '租户管理',
   '/api-keys': 'API Key',
   '/system-config': '系统配置',
-  '/platform-status': '平台状态',
+  '/dictionaries': '字典管理',
+  '/integrations': '集成管理',
+  '/platform-status': '平台健康',
+  '/task-queue': '任务队列',
   '/backup': '备份恢复',
-  '/audit': '审计日志',
+  '/system-check': '系统自检',
+  '/profile': '个人中心',
 }
 
 const groupMap: Record<string, string> = {
-  '/': '指挥中心', '/incident': '指挥中心', '/aiops': '指挥中心',
-  '/assets': '资产配置', '/assets/discovery': '资产配置', '/asset-groups': '资产配置',
-  '/credentials': '资产配置', '/config': '资产配置', '/collectors': '资产配置',
-  '/monitoring': '监控事件', '/events': '监控事件', '/alerts': '监控事件',
-  '/alert-rules': '监控事件', '/tickets': '监控事件',
-  '/scripts': '自动化', '/playbooks': '自动化', '/policies': '自动化', '/executions': '自动化',
-  '/knowledge': '知识', '/knowledge/import': '知识',
-  '/users': '平台管理', '/roles': '平台管理', '/api-keys': '平台管理',
-  '/system-config': '平台管理', '/platform-status': '平台管理', '/backup': '平台管理',
-  '/audit': '平台管理',
+  '/': '首页指挥台',
+  '/resources': '资源中心', '/resources/discovery': '资源中心', '/resources/discovery-results': '资源中心',
+  '/assets': '资源中心', '/business-systems': '资源中心', '/topology': '资源中心',
+  '/resources/import': '资源中心', '/asset-groups': '资源中心', '/credentials': '资源中心', '/agents': '资源中心',
+  '/inspections': '巡检中心', '/inspection/templates': '巡检中心', '/inspection/plans': '巡检中心',
+  '/inspection/tasks': '巡检中心', '/inspection/results': '巡检中心', '/inspection/page-check': '巡检中心',
+  '/inspection/config-check': '巡检中心', '/inspection/log-check': '巡检中心',
+  '/inspection/baseline-check': '巡检中心', '/inspection/reports': '巡检中心',
+  '/monitoring': '监控中心', '/monitoring/collectors': '监控中心', '/monitoring/collection-results': '监控中心',
+  '/monitoring/metrics': '监控中心', '/monitoring/states': '监控中心', '/monitoring/state-changes': '监控中心',
+  '/events': '监控中心', '/monitoring/log-sources': '监控中心', '/monitoring/collector-health': '监控中心',
+  '/monitoring/config-facts': '监控中心',
+  '/anomalies': '处置中心', '/anomaly/list': '处置中心', '/alerts': '处置中心',
+  '/alert-rules': '处置中心', '/incident': '处置中心',
+  '/automation': '自动化中心', '/policies': '自动化中心', '/scripts': '自动化中心',
+  '/playbooks': '自动化中心', '/approvals': '自动化中心', '/executions': '自动化中心',
+  '/aiops': '智能知识库', '/knowledge': '智能知识库', '/knowledge/import': '智能知识库',
+  '/tickets': '工单中心',
+  '/reports': '报表审计', '/report/templates': '报表审计', '/report/generate': '报表审计',
+  '/report/tasks': '报表审计', '/report/archive': '报表审计', '/audit': '报表审计',
+  '/logs/search': '报表审计', '/evidence': '报表审计',
+  '/users': '平台管理', '/roles': '平台管理', '/tenants': '平台管理', '/api-keys': '平台管理',
+  '/system-config': '平台管理', '/dictionaries': '平台管理', '/integrations': '平台管理',
+  '/platform-status': '平台管理', '/task-queue': '平台管理', '/backup': '平台管理',
+  '/system-check': '平台管理', '/profile': '个人中心',
 }
 
 const breadcrumbs = computed(() => {
   const path = route.path
-
-  // Exact match
   let group = groupMap[path] || ''
   let title = menuMap[path] || ''
 
-  // For detail pages, find parent menu item by prefix
+  // For detail pages
   if (!title) {
     const allMenus = Object.keys(menuMap)
     const parent = allMenus.filter(m => m !== '/' && path.startsWith(m + '/')).sort((a, b) => b.length - a.length)[0]
     if (parent) {
       group = groupMap[parent] || ''
-      const parentTitle = menuMap[parent] || ''
-      // Detail page title
-      if (path.startsWith('/alerts/')) title = '告警详情'
-      else if (path.startsWith('/assets/') && path.includes('/topology')) title = '拓扑图'
-      else if (path.startsWith('/assets/')) title = '资产详情'
-      else if (path.startsWith('/executions/')) title = '执行详情'
-      else if (path.startsWith('/tickets/')) title = '工单详情'
-      else if (path.startsWith('/knowledge/') && path.includes('/edit')) title = '编辑知识'
-      else if (path.startsWith('/knowledge/')) title = '知识详情'
-      else if (path.startsWith('/incident/')) title = '故障处置'
-      else if (path.startsWith('/policies/') && path.includes('/simulate')) title = '策略模拟'
-      else title = parentTitle + '详情'
+      if (path.match(/\/alerts\/[\w-]+$/)) title = '告警详情'
+      else if (path.match(/\/assets\/[\w-]+\/topology/)) title = '拓扑图'
+      else if (path.match(/\/assets\/[\w-]+$/)) title = '资源详情'
+      else if (path.match(/\/executions\/[\w-]+$/)) title = '执行详情'
+      else if (path.match(/\/tickets\/[\w-]+$/)) title = '工单详情'
+      else if (path.match(/\/knowledge\/[\w-]+\/edit/)) title = '编辑知识'
+      else if (path.match(/\/knowledge\/[\w-]+$/)) title = '知识详情'
+      else if (path.match(/\/incident\//)) title = '故障处置详情'
+      else if (path.match(/\/policies\/[\w-]+\/simulate/)) title = '策略模拟'
+      else if (path.match(/\/policies\/[\w-]+\/edit/)) title = '策略编辑'
+      else if (path.match(/\/anomaly\/[\w-]+$/)) title = '异常详情'
+      else if (path.match(/\/dry-run\//)) title = 'Dry-run 详情'
+      else if (path.match(/\/report\/[\w-]+\/preview/)) title = '报告预览'
+      else title = (menuMap[parent] || '') + '详情'
     }
   }
 
-  if (!title) title = route.meta?.title || route.name || path
+  if (!title) title = (route.meta?.title as string) || (route.name as string) || path
 
   const crumbs: { path: string; title: string }[] = []
   if (group) crumbs.push({ path: '', title: group })
@@ -365,9 +434,9 @@ function handleUserCommand(cmd: string) {
       router.push('/login').catch(() => {})
     }).catch(() => {})
   } else if (cmd === 'profile') {
-    ElMessage.info('个人信息功能开发中')
+    router.push('/profile').catch(() => {})
   } else if (cmd === 'settings') {
-    router.push('/admin/config').catch(() => {})
+    router.push('/system-config').catch(() => {})
   }
 }
 
@@ -376,7 +445,6 @@ const searchKeyword = ref('')
 
 function handleSearch() {
   if (!searchKeyword.value.trim()) return
-  // 搜索路由: 先尝试匹配菜单
   const kw = searchKeyword.value.toLowerCase().trim()
   for (const [path, title] of Object.entries(menuMap)) {
     if (title.toLowerCase().includes(kw) || path.includes(kw)) {
@@ -402,14 +470,9 @@ const unreadCount = ref(0)
 
 async function fetchUnread() {
   try {
-    const token = localStorage.getItem(APP_CONFIG.TOKEN_KEY)
-    if (!token) return
-    const resp = await fetch('/api/v1/alerts?page_size=1&status=active', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    if (resp.ok) {
-      const data = await resp.json()
-      unreadCount.value = data?.data?.total || 0
+    const resp = await api.get(API.ALERTS, { params: { page_size: 1, status: 'active' } })
+    if (resp.data?.code === 0) {
+      unreadCount.value = resp.data?.data?.total || 0
     }
   } catch { /* ignore */ }
 }
@@ -475,7 +538,6 @@ onUnmounted(() => {
   color: #4e5969;
 }
 
-/* 过渡动画 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.15s ease;

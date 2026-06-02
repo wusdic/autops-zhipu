@@ -189,4 +189,107 @@ export const API = {
   NOTIFICATIONS: '/api/v1/notifications',
   NOTIFICATION_READ: (id: string) => `/api/v1/notifications/${id}/read`,
   NOTIFICATION_READ_ALL: '/api/v1/notifications/read-all',
+
+  // ============================================================
+  // V3 新增模块 API 常量
+  // ============================================================
+
+  // M1 首页指挥台
+  DASHBOARD: {
+    STATS: '/api/v1/dashboard/stats',
+    ASSET_DISCOVERY_SUMMARY: '/api/v1/dashboard/asset-discovery',
+    INSPECTION_SUMMARY: '/api/v1/dashboard/inspection',
+    ANOMALY_SUMMARY: '/api/v1/dashboard/anomaly',
+    AUTOMATION_SUMMARY: '/api/v1/dashboard/automation',
+    REPORT_SUMMARY: '/api/v1/dashboard/report',
+    PLATFORM_HEALTH: '/api/v1/dashboard/platform-health',
+    MY_PENDING: '/api/v1/dashboard/my-pending',
+  },
+
+  // M2 资源中心
+  BUSINESS_SYSTEMS: '/api/v1/business-systems',
+  BUSINESS_SYSTEM_DETAIL: (id: string) => `/api/v1/business-systems/${id}`,
+  AGENTS: '/api/v1/agents',
+  AGENT_DETAIL: (id: string) => `/api/v1/agents/${id}`,
+  RESOURCE_IMPORT: '/api/v1/resources/import',
+
+  // M3 巡检中心
+  INSPECTION: {
+    TEMPLATES: '/api/v1/inspection/templates',
+    TEMPLATE_DETAIL: (id: string) => `/api/v1/inspection/templates/${id}`,
+    PLANS: '/api/v1/inspection/plans',
+    PLAN_DETAIL: (id: string) => `/api/v1/inspection/plans/${id}`,
+    TASKS: '/api/v1/inspection/tasks',
+    TASK_DETAIL: (id: string) => `/api/v1/inspection/tasks/${id}`,
+    RESULTS: '/api/v1/inspection/results',
+    RESULT_DETAIL: (id: string) => `/api/v1/inspection/results/${id}`,
+    REPORTS: '/api/v1/inspection/reports',
+    REPORT_DETAIL: (id: string) => `/api/v1/inspection/reports/${id}`,
+    PAGE_CHECKS: '/api/v1/inspection/page-checks',
+    CONFIG_CHECKS: '/api/v1/inspection/config-checks',
+    LOG_CHECKS: '/api/v1/inspection/log-checks',
+    BASELINE_CHECKS: '/api/v1/inspection/baseline-checks',
+    STATS: '/api/v1/inspection/stats',
+  },
+
+  // M4 监控中心
+  MONITORING: {
+    COLLECTION_RESULTS: '/api/v1/collection-results',
+    METRICS_TREND: (assetId: string) => `/api/v1/metrics/trend/${assetId}`,
+    STATE_SNAPSHOTS: '/api/v1/states/snapshots',
+    LOG_SOURCES: '/api/v1/log-sources',
+    COLLECTOR_HEALTH: '/api/v1/collectors/health',
+  },
+
+  // M5 处置中心
+  ANOMALY: {
+    LIST: '/api/v1/anomalies',
+    DETAIL: (id: string) => `/api/v1/anomalies/${id}`,
+    STATS: '/api/v1/anomalies/stats',
+    ACKNOWLEDGE: (id: string) => `/api/v1/anomalies/${id}/acknowledge`,
+    ASSIGN: (id: string) => `/api/v1/anomalies/${id}/assign`,
+    CLOSE: (id: string) => `/api/v1/anomalies/${id}/close`,
+    ESCALATE: (id: string) => `/api/v1/anomalies/${id}/escalate`,
+    CONVERT_TICKET: (id: string) => `/api/v1/anomalies/${id}/convert-ticket`,
+    IMPACT_ANALYSIS: (id: string) => `/api/v1/anomalies/${id}/impact-analysis`,
+  },
+
+  // M6 自动化中心
+  AUTOMATION: {
+    STATS: '/api/v1/automation/stats',
+    APPROVALS: '/api/v1/approvals',
+    APPROVAL_DETAIL: (id: string) => `/api/v1/approvals/${id}`,
+    APPROVAL_APPROVE: (id: string) => `/api/v1/approvals/${id}/approve`,
+    APPROVAL_REJECT: (id: string) => `/api/v1/approvals/${id}/reject`,
+    DRY_RUN: '/api/v1/dry-run',
+    DRY_RUN_DETAIL: (id: string) => `/api/v1/dry-run/${id}`,
+  },
+
+  // M9 报表审计中心
+  REPORT: {
+    TEMPLATES: '/api/v1/report/templates',
+    TEMPLATE_DETAIL: (id: string) => `/api/v1/report/templates/${id}`,
+    GENERATE: '/api/v1/report/generate',
+    TASKS: '/api/v1/report/tasks',
+    TASK_DETAIL: (id: string) => `/api/v1/report/tasks/${id}`,
+    PREVIEW: (id: string) => `/api/v1/report/tasks/${id}/preview`,
+    DOWNLOAD: (id: string) => `/api/v1/report/tasks/${id}/download`,
+    ARCHIVE: '/api/v1/report/archive',
+    ARCHIVE_DETAIL: (id: string) => `/api/v1/report/archive/${id}`,
+    STATS: '/api/v1/report/stats',
+  },
+
+  // M10 平台管理
+  PLATFORM: {
+    DICTIONARIES: '/api/v1/dictionaries',
+    INTEGRATIONS: '/api/v1/integrations',
+    INTEGRATION_TEST: (name: string) => `/api/v1/integrations/${name}/test`,
+    TASK_QUEUE: '/api/v1/task-queue',
+    SELF_CHECK: '/api/v1/platform/self-check',
+    TENANTS: '/api/v1/tenants',
+    TENANT_DETAIL: (id: string) => `/api/v1/tenants/${id}`,
+  },
+
+  // G0 全局搜索
+  GLOBAL_SEARCH: '/api/v1/search',
 } as const

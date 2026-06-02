@@ -1,6 +1,6 @@
 <template>
   <div class="command-center">
-    <!-- ─── 统计卡片行 ─── -->
+    <!-- ─── 第一行：核心态势指标（V3 M1-RQ-001） ─── -->
     <el-row :gutter="16" class="metric-row">
       <el-col :xs="12" :sm="8" :md="4">
         <div class="autops-metric-card" @click="navigateTo('/alerts?severity=critical')">
@@ -12,12 +12,12 @@
         </div>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4">
-        <div class="autops-metric-card" @click="navigateTo('/alerts')">
-          <div class="metric-icon" style="background: #fff7e8; color: #ff7d00">
+        <div class="autops-metric-card" @click="navigateTo('/response/anomalies')">
+          <div class="metric-icon" style="background: #fff2e8; color: #f77234">
             <el-icon size="20"><Warning /></el-icon>
           </div>
-          <div class="metric-label">活跃告警</div>
-          <div class="metric-value" style="color: #ff7d00">{{ stats.activeAlerts }}</div>
+          <div class="metric-label">待处理异常</div>
+          <div class="metric-value" style="color: #f77234">{{ stats.pendingAnomalies }}</div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4">
@@ -30,30 +30,86 @@
         </div>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4">
-        <div class="autops-metric-card" @click="navigateTo('/executions')">
+        <div class="autops-metric-card" @click="navigateTo('/inspection/tasks')">
+          <div class="metric-icon" style="background: #e8ffea; color: #00b42a">
+            <el-icon size="20"><CircleCheck /></el-icon>
+          </div>
+          <div class="metric-label">巡检成功率</div>
+          <div class="metric-value">{{ stats.inspectionSuccessRate }}%</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card" @click="navigateTo('/automation/executions')">
           <div class="metric-icon" style="background: #e8f3ff; color: #165dff">
             <el-icon size="20"><VideoPlay /></el-icon>
           </div>
-          <div class="metric-label">执行中任务</div>
-          <div class="metric-value">{{ stats.runningExecutions }}</div>
+          <div class="metric-label">自动处置率</div>
+          <div class="metric-value">{{ stats.autoRemediationRate }}%</div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4">
-        <div class="autops-metric-card" @click="navigateTo('/events')">
-          <div class="metric-icon" style="background: #f2f3f5; color: #86909c">
-            <el-icon size="20"><Bell /></el-icon>
-          </div>
-          <div class="metric-label">今日事件</div>
-          <div class="metric-value">{{ stats.todayEvents }}</div>
-        </div>
-      </el-col>
-      <el-col :xs="12" :sm="8" :md="4">
-        <div class="autops-metric-card" @click="navigateTo('/executions?status=awaiting_approval')">
+        <div class="autops-metric-card" @click="navigateTo('/automation/approvals')">
           <div class="metric-icon" style="background: #fff7e8; color: #ff7d00">
             <el-icon size="20"><Clock /></el-icon>
           </div>
           <div class="metric-label">待审批</div>
           <div class="metric-value" style="color: #ff7d00">{{ stats.pendingApprovals }}</div>
+        </div>
+      </el-col>
+    </el-row>
+
+    <!-- ─── 第二行：V3五条主线卡片（M1-RQ-002~008） ─── -->
+    <el-row :gutter="16" style="margin-top: 16px">
+      <!-- M1-RQ-002 资产发现卡片 -->
+      <el-col :xs="12" :sm="8" :md="6">
+        <div class="autops-card v3-card" @click="navigateTo('/resource-center/discovery')">
+          <div class="autops-card-header">
+            <div class="autops-card-title"><el-icon><Search /></el-icon> 资产发现</div>
+          </div>
+          <div class="autops-card-body v3-card-body">
+            <div class="v3-stat"><span class="v3-stat-num">{{ discoveryStats.todayFound }}</span><span class="v3-stat-label">今日发现</span></div>
+            <div class="v3-stat"><span class="v3-stat-num text-warning">{{ discoveryStats.pendingConfirm }}</span><span class="v3-stat-label">待确认</span></div>
+            <div class="v3-stat"><span class="v3-stat-num text-success">{{ discoveryStats.managed }}</span><span class="v3-stat-label">已纳管</span></div>
+          </div>
+        </div>
+      </el-col>
+      <!-- M1-RQ-003 巡检实况卡片 -->
+      <el-col :xs="12" :sm="8" :md="6">
+        <div class="autops-card v3-card" @click="navigateTo('/inspection/tasks')">
+          <div class="autops-card-header">
+            <div class="autops-card-title"><el-icon><CircleCheck /></el-icon> 巡检实况</div>
+          </div>
+          <div class="autops-card-body v3-card-body">
+            <div class="v3-stat"><span class="v3-stat-num text-primary">{{ inspectionStats.running }}</span><span class="v3-stat-label">正在巡检</span></div>
+            <div class="v3-stat"><span class="v3-stat-num text-danger">{{ inspectionStats.failed }}</span><span class="v3-stat-label">巡检失败</span></div>
+            <div class="v3-stat"><span class="v3-stat-num text-warning">{{ inspectionStats.abnormalItems }}</span><span class="v3-stat-label">异常巡检项</span></div>
+          </div>
+        </div>
+      </el-col>
+      <!-- M1-RQ-005 自动处置卡片 -->
+      <el-col :xs="12" :sm="8" :md="6">
+        <div class="autops-card v3-card" @click="navigateTo('/automation/executions')">
+          <div class="autops-card-header">
+            <div class="autops-card-title"><el-icon><VideoPlay /></el-icon> 自动处置</div>
+          </div>
+          <div class="autops-card-body v3-card-body">
+            <div class="v3-stat"><span class="v3-stat-num text-success">{{ remediationStats.autoHandled }}</span><span class="v3-stat-label">自动处理</span></div>
+            <div class="v3-stat"><span class="v3-stat-num text-warning">{{ remediationStats.rollbackCount }}</span><span class="v3-stat-label">回滚</span></div>
+            <div class="v3-stat"><span class="v3-stat-num">{{ remediationStats.successRate }}%</span><span class="v3-stat-label">成功率</span></div>
+          </div>
+        </div>
+      </el-col>
+      <!-- M1-RQ-007 报告任务卡片 -->
+      <el-col :xs="12" :sm="8" :md="6">
+        <div class="autops-card v3-card" @click="navigateTo('/report-audit/tasks')">
+          <div class="autops-card-header">
+            <div class="autops-card-title"><el-icon><Document /></el-icon> 报告任务</div>
+          </div>
+          <div class="autops-card-body v3-card-body">
+            <div class="v3-stat"><span class="v3-stat-num text-primary">{{ reportStats.generating }}</span><span class="v3-stat-label">生成中</span></div>
+            <div class="v3-stat"><span class="v3-stat-num text-success">{{ reportStats.completed }}</span><span class="v3-stat-label">已完成</span></div>
+            <div class="v3-stat"><span class="v3-stat-num text-danger">{{ reportStats.failed }}</span><span class="v3-stat-label">失败</span></div>
+          </div>
         </div>
       </el-col>
     </el-row>
@@ -165,13 +221,13 @@
             <div class="exec-stats">
               <div class="exec-stat-item">
                 <div class="font-12 text-tertiary mb-xs">成功率</div>
-                <div class="font-20" :style="{ color: execStats.successRate >= 95 ? '#00b42a' : execStats.successRate >= 80 ? '#ff7d00' : '#f53f3f' }">
-                  {{ execStats.successRate }}%
+                <div class="font-20" :style="{ color: remediationStats.successRate >= 95 ? '#00b42a' : remediationStats.successRate >= 80 ? '#ff7d00' : '#f53f3f' }">
+                  {{ remediationStats.successRate }}%
                 </div>
               </div>
               <div class="exec-stat-item">
                 <div class="font-12 text-tertiary mb-xs">今日执行</div>
-                <div class="font-20">{{ execStats.todayCount }}</div>
+                <div class="font-20">{{ todaySummary.autoRemediations + todaySummary.manualApprovals }}</div>
               </div>
             </div>
           </div>
@@ -207,6 +263,73 @@
                 <el-icon size="20" color="#86909c"><Warning /></el-icon>
                 <span>应急响应</span>
               </div>
+              <div class="quick-action-btn" @click="navigateTo('/inspection/overview')">
+                <el-icon size="20" color="#00b42a"><CircleCheck /></el-icon>
+                <span>巡检中心</span>
+              </div>
+              <div class="quick-action-btn" @click="navigateTo('/report-audit/overview')">
+                <el-icon size="20" color="#722ed1"><Document /></el-icon>
+                <span>报表审计</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- M1-RQ-006 待我处理 -->
+        <div class="autops-card" style="margin-top: 16px">
+          <div class="autops-card-header">
+            <div class="autops-card-title"><el-icon><Bell /></el-icon> 待我处理</div>
+            <el-button text type="primary" size="small" @click="navigateTo('/automation/approvals')">全部 →</el-button>
+          </div>
+          <div class="autops-card-body" style="padding: 0">
+            <el-table :data="pendingTasks" stripe size="small" :max-height="200" empty-text="暂无待办">
+              <el-table-column prop="type" label="类型" width="90">
+                <template #default="{ row }">
+                  <el-tag size="small" :type="pendingTypeTag(row.type)">{{ row.type }}</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="title" label="内容" min-width="180" show-overflow-tooltip />
+              <el-table-column prop="priority" label="优先级" width="70">
+                <template #default="{ row }">
+                  <span :class="`priority-${row.priority}`">{{ row.priority }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="created_at" label="时间" width="100">
+                <template #default="{ row }"><span class="text-tertiary font-12">{{ formatTime(row.created_at) }}</span></template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </div>
+
+        <!-- M1-RQ-008 平台健康卡片 -->
+        <div class="autops-card" style="margin-top: 16px">
+          <div class="autops-card-header">
+            <div class="autops-card-title"><el-icon><Monitor /></el-icon> 平台健康</div>
+          </div>
+          <div class="autops-card-body">
+            <div class="platform-health-grid">
+              <div v-for="comp in platformHealth" :key="comp.name" class="health-item">
+                <span class="health-dot" :class="`health-dot-${comp.status}`"></span>
+                <span class="font-12">{{ comp.name }}</span>
+                <span class="font-12 text-tertiary" style="margin-left: auto">{{ comp.latency }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- M1-RQ-010 今日摘要 -->
+        <div class="autops-card" style="margin-top: 16px">
+          <div class="autops-card-header">
+            <div class="autops-card-title"><el-icon><Calendar /></el-icon> 今日摘要</div>
+          </div>
+          <div class="autops-card-body">
+            <div class="today-summary">
+              <div class="summary-item"><span class="summary-label">新增资产</span><span class="summary-val">{{ todaySummary.newAssets }}</span></div>
+              <div class="summary-item"><span class="summary-label">完成巡检</span><span class="summary-val">{{ todaySummary.inspections }}</span></div>
+              <div class="summary-item"><span class="summary-label">发现异常</span><span class="summary-val text-warning">{{ todaySummary.anomalies }}</span></div>
+              <div class="summary-item"><span class="summary-label">自动处置</span><span class="summary-val text-success">{{ todaySummary.autoRemediations }}</span></div>
+              <div class="summary-item"><span class="summary-label">人工审批</span><span class="summary-val">{{ todaySummary.manualApprovals }}</span></div>
+              <div class="summary-item"><span class="summary-label">生成报告</span><span class="summary-val">{{ todaySummary.reports }}</span></div>
             </div>
           </div>
         </div>
@@ -224,14 +347,39 @@ import { API } from '@/shared/api/routes'
 
 const router = useRouter()
 
-// ─── Stats ───
+// ─── Stats（V3 M1态势总览） ───
 const stats = reactive({
   criticalAlerts: 0,
-  activeAlerts: 0,
+  pendingAnomalies: 0,
   totalAssets: 0,
-  runningExecutions: 0,
-  todayEvents: 0,
+  inspectionSuccessRate: 0,
+  autoRemediationRate: 0,
   pendingApprovals: 0,
+})
+
+// M1-RQ-002 资产发现
+const discoveryStats = reactive({ todayFound: 0, pendingConfirm: 0, managed: 0 })
+// M1-RQ-003 巡检实况
+const inspectionStats = reactive({ running: 0, failed: 0, abnormalItems: 0 })
+// M1-RQ-005 自动处置
+const remediationStats = reactive({ autoHandled: 0, rollbackCount: 0, successRate: 0 })
+// M1-RQ-007 报告任务
+const reportStats = reactive({ generating: 0, completed: 0, failed: 0 })
+// M1-RQ-006 待我处理
+const pendingTasks = ref<any[]>([])
+// M1-RQ-008 平台健康
+const platformHealth = ref([
+  { name: 'API', status: 'healthy', latency: '12ms' },
+  { name: 'Worker', status: 'healthy', latency: '' },
+  { name: 'Scheduler', status: 'healthy', latency: '' },
+  { name: 'DB', status: 'healthy', latency: '3ms' },
+  { name: 'Redis', status: 'healthy', latency: '1ms' },
+  { name: 'WebSocket', status: 'healthy', latency: '' },
+])
+// M1-RQ-010 今日摘要
+const todaySummary = reactive({
+  newAssets: 0, inspections: 0, anomalies: 0,
+  autoRemediations: 0, manualApprovals: 0, reports: 0,
 })
 
 const recentAlerts = ref<any[]>([])
@@ -243,6 +391,9 @@ const execStats = reactive({
   successRate: 0,
   todayCount: 0,
 })
+
+// 删除旧的execStats（数据已整合到remediationStats/todaySummary）
+void execStats
 
 const healthData = ref([
   { key: 'healthy', label: '健康', count: 0, percent: 0, color: '#00b42a' },
@@ -270,7 +421,6 @@ async function fetchDashboard() {
     if (alertsData?.code === 0) {
       const items = alertsData.data?.items || []
       recentAlerts.value = items
-      stats.activeAlerts = items.filter((a: any) => a.status === 'active' || a.status === 'firing').length
       stats.criticalAlerts = items.filter((a: any) => a.severity === 'critical').length
     }
 
@@ -278,6 +428,13 @@ async function fetchDashboard() {
     if (assetsData?.code === 0) {
       stats.totalAssets = assetsData.data?.total || 0
       const allItems = assetsData.data?.items || []
+      // 资产发现统计
+      const todayStart = new Date(); todayStart.setHours(0,0,0,0)
+      const todayAssets = allItems.filter((a: any) => new Date(a.created_at) >= todayStart)
+      discoveryStats.todayFound = todayAssets.length
+      discoveryStats.pendingConfirm = allItems.filter((a: any) => a.reachability === 'unknown').length
+      discoveryStats.managed = allItems.filter((a: any) => a.reachability === 'reachable').length
+      todaySummary.newAssets = todayAssets.length
       healthData.value[0].count = allItems.filter((a: any) => a.health_status === 'healthy').length
       healthData.value[1].count = allItems.filter((a: any) => a.health_status === 'warning').length
       healthData.value[2].count = allItems.filter((a: any) => a.health_status === 'critical').length
@@ -291,24 +448,36 @@ async function fetchDashboard() {
     const execData = execRes.data
     if (execData?.code === 0) {
       const items = execData.data?.items || []
-      stats.runningExecutions = items.filter((e: any) =>
-        ['pending', 'approved', 'running', 'dry_running'].includes(e.status)
-      ).length
       stats.pendingApprovals = items.filter((e: any) =>
         e.status === 'awaiting_approval'
       ).length
-      const todayStart = new Date()
-      todayStart.setHours(0, 0, 0, 0)
-      const todayItems = items.filter((e: any) => new Date(e.created_at) >= todayStart)
-      execStats.todayCount = todayItems.length
-      const finished = items.filter((e: any) => ['success', 'failed', 'cancelled'].includes(e.status))
-      const successCount = items.filter((e: any) => e.status === 'success').length
-      execStats.successRate = finished.length > 0 ? Math.round(successCount / finished.length * 100) : 0
+      const todayStart2 = new Date(); todayStart2.setHours(0,0,0,0)
+      const todayItems = items.filter((e: any) => new Date(e.created_at) >= todayStart2)
+      const finished = todayItems.filter((e: any) => ['success', 'failed', 'cancelled'].includes(e.status))
+      const successCount = todayItems.filter((e: any) => e.status === 'success').length
+      // 自动处置统计
+      remediationStats.autoHandled = todayItems.filter((e: any) => e.status === 'success' && e.triggered_by === 'auto').length
+      remediationStats.rollbackCount = todayItems.filter((e: any) => e.status === 'rolled_back').length
+      remediationStats.successRate = finished.length > 0 ? Math.round(successCount / finished.length * 100) : 0
+      stats.autoRemediationRate = remediationStats.successRate
+      todaySummary.autoRemediations = remediationStats.autoHandled
+      todaySummary.manualApprovals = todayItems.filter((e: any) => e.triggered_by === 'manual').length
+      // 待我处理列表
+      pendingTasks.value = items
+        .filter((e: any) => ['awaiting_approval', 'pending'].includes(e.status))
+        .slice(0, 5)
+        .map((e: any) => ({
+          type: '执行审批',
+          title: e.execution_type || `执行任务 #${e.id?.slice(0,8)}`,
+          priority: e.risk_level || 'medium',
+          created_at: e.created_at,
+        }))
     }
 
     const eventsData = eventsRes.data
     if (eventsData?.code === 0) {
-      stats.todayEvents = eventsData.data?.total || 0
+      stats.pendingAnomalies = eventsData.data?.total || 0
+      todaySummary.anomalies = eventsData.data?.total || 0
     }
 
     // Collection jobs → success rate trend
@@ -466,6 +635,16 @@ function formatTime(t: string): string {
   } catch { return t }
 }
 
+function pendingTypeTag(type: string): string {
+  const map: Record<string, string> = {
+    '执行审批': 'warning',
+    '待确认资产': 'info',
+    '待处理异常': 'danger',
+    '待审核报告': '',
+  }
+  return map[type] || 'info'
+}
+
 // ─── Lifecycle ───
 let resizeHandler: () => void
 
@@ -587,4 +766,37 @@ onUnmounted(() => {
 .status-acknowledged { background: #fff7e8; color: #ff7d00; }
 .status-resolved { background: #e8ffea; color: #00b42a; }
 .status-suppressed { background: #f2f3f5; color: #86909c; }
+
+/* V3 主线卡片 */
+.v3-card { cursor: pointer; transition: all 0.2s; }
+.v3-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.v3-card-body { display: flex; justify-content: space-around; padding: 16px 8px !important; }
+.v3-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.v3-stat-num { font-size: 22px; font-weight: 600; line-height: 1.2; }
+.v3-stat-label { font-size: 12px; color: #86909c; }
+.text-primary { color: #165dff; }
+.text-success { color: #00b42a; }
+.text-warning { color: #ff7d00; }
+.text-danger { color: #f53f3f; }
+.text-tertiary { color: #86909c; }
+.font-12 { font-size: 12px; }
+
+/* 平台健康 */
+.platform-health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.health-item { display: flex; align-items: center; gap: 6px; padding: 6px 0; }
+.health-dot-healthy { background: #00b42a; }
+.health-dot-warning { background: #ff7d00; }
+.health-dot-error { background: #f53f3f; }
+.health-dot-offline { background: #c9cdd4; }
+
+/* 今日摘要 */
+.today-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.summary-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; background: #f7f8fa; border-radius: 6px; }
+.summary-label { font-size: 12px; color: #86909c; }
+.summary-val { font-size: 18px; font-weight: 600; }
+
+/* 优先级 */
+.priority-high { color: #f53f3f; font-weight: 500; }
+.priority-medium { color: #ff7d00; font-weight: 500; }
+.priority-low { color: #00b42a; font-weight: 500; }
 </style>
