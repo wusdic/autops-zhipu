@@ -429,7 +429,7 @@ async function createTicket(alert: any) {
 }
 
 function viewDetail(row: any) {
-  router.push({ name: 'AlertDetail', params: { id: row.id } })
+  router.push({ name: 'alert-detail', params: { id: row.id } })
 }
 
 // ── Batch Operations ────────────────────────────────────────────────

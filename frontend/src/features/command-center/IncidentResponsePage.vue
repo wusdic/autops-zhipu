@@ -84,26 +84,7 @@
                 <span>📊 关键指标</span>
               </div>
             </template>
-            <el-row :gutter="12">
-              <el-col :span="12">
-                <MetricChart
-                  :data="metricData"
-                  title="CPU 使用率"
-                  height="180px"
-                  color="#E6A23C"
-                  unit="%"
-                />
-              </el-col>
-              <el-col :span="12">
-                <MetricChart
-                  :data="memMetricData"
-                  title="内存使用率"
-                  height="180px"
-                  color="#F56C6C"
-                  unit="%"
-                />
-              </el-col>
-            </el-row>
+            <el-empty description="暂无指标数据" :image-size="80" />
           </el-card>
 
           <!-- AI 分析结果 -->
@@ -490,7 +471,6 @@ import TimelineView from '@/shared/components/TimelineView.vue'
 import LogStream from '@/shared/components/LogStream.vue'
 import AiAnalysisCard from '@/shared/components/AiAnalysisCard.vue'
 import ApprovalDialog from '@/shared/components/ApprovalDialog.vue'
-import MetricChart from '@/shared/components/MetricChart.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 
 // ─── Router ───
@@ -527,18 +507,6 @@ const channelsLoading = ref(false)
 const testingChannel = ref('')
 const channelTestResult = ref('')
 const channelTestSuccess = ref(false)
-
-// ─── Mock Metric Data (demonstrates MetricChart usage) ───
-const metricData = computed(() => generateMockMetric(70, 95))
-const memMetricData = computed(() => generateMockMetric(60, 90))
-
-function generateMockMetric(min: number, max: number) {
-  const now = Date.now()
-  return Array.from({ length: 30 }, (_, i) => ({
-    time: new Date(now - (30 - i) * 60000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
-    value: Math.floor(min + Math.random() * (max - min)),
-  }))
-}
 
 // ─── Timeline ───
 const timelineItems = computed(() => {
@@ -707,7 +675,7 @@ async function loadExecutions(alertId: string) {
 }
 
 function loadAlertMetrics(_alertId: string) {
-  // Metric data is currently mock; placeholder for future real metric API
+  // No metrics API available — metrics tab shows empty state
 }
 
 async function loadRelatedAlerts(alertId: string) {

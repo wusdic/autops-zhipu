@@ -216,7 +216,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 
@@ -250,6 +250,9 @@ const healthData = ref([
 ])
 
 // ─── API ───
+const chartRawData = ref<{ time: string; success: number; total: number }[]>([])
+let allJobs: any[] = []
+
 async function fetchDashboard() {
   try {
     const token = localStorage.getItem('autops_token')
@@ -257,17 +260,18 @@ async function fetchDashboard() {
     const H = { Authorization: `Bearer ${token}` }
 
     // 并发请求
-    const [alertsRes, assetsRes, execRes] = await Promise.all([
+    const [alertsRes, assetsRes, execRes, eventsRes, jobsRes] = await Promise.all([
       fetch('/api/v1/alerts?page_size=5', { headers: H }),
-      fetch('/api/v1/assets?page_size=1', { headers: H }),
-      fetch('/api/v1/executions?page_size=1', { headers: H }),
+      fetch('/api/v1/assets?page_size=100', { headers: H }),
+      fetch('/api/v1/executions?page_size=100', { headers: H }),
+      fetch('/api/v1/events?page_size=1', { headers: H }),
+      fetch('/api/v1/collection-jobs?page_size=100', { headers: H }),
     ])
 
     if (alertsRes.ok) {
       const d = await alertsRes.json()
       const items = d?.data?.items || []
       recentAlerts.value = items
-      const all = d?.data?.total || 0
       stats.activeAlerts = items.filter((a: any) => a.status === 'active').length
       stats.criticalAlerts = items.filter((a: any) => a.severity === 'critical').length
     }
@@ -275,7 +279,7 @@ async function fetchDashboard() {
     if (assetsRes.ok) {
       const d = await assetsRes.json()
       stats.totalAssets = d?.data?.total || 0
-      // Health distribution
+      // Health distribution — use actual items
       const allItems = d?.data?.items || []
       healthData.value[0].count = allItems.filter((a: any) => a.health_status === 'healthy').length
       healthData.value[1].count = allItems.filter((a: any) => a.health_status === 'warning').length
@@ -289,42 +293,102 @@ async function fetchDashboard() {
 
     if (execRes.ok) {
       const d = await execRes.json()
-      stats.runningExecutions = (d?.data?.items || []).filter((e: any) =>
+      const items = d?.data?.items || []
+      stats.runningExecutions = items.filter((e: any) =>
         ['pending', 'approved', 'running', 'dry_running'].includes(e.status)
       ).length
-      stats.pendingApprovals = (d?.data?.items || []).filter((e: any) =>
+      stats.pendingApprovals = items.filter((e: any) =>
         e.status === 'awaiting_approval'
       ).length
+      // Exec stats
+      const todayStart = new Date()
+      todayStart.setHours(0, 0, 0, 0)
+      const todayItems = items.filter((e: any) => new Date(e.created_at) >= todayStart)
+      execStats.todayCount = todayItems.length
+      const finished = items.filter((e: any) => ['success', 'failed', 'cancelled'].includes(e.status))
+      const successCount = items.filter((e: any) => e.status === 'success').length
+      execStats.successRate = finished.length > 0 ? Math.round(successCount / finished.length * 100) : 0
+    }
+
+    if (eventsRes.ok) {
+      const d = await eventsRes.json()
+      stats.todayEvents = d?.data?.total || 0
+    }
+
+    // Collection jobs → success rate trend
+    if (jobsRes.ok) {
+      const d = await jobsRes.json()
+      const jobs = d?.data?.items || []
+      allJobs = jobs
+      computeTrendData(jobs)
     }
   } catch (e) {
     console.error('Dashboard fetch error:', e)
   }
 }
 
+function computeTrendData(jobs: any[]) {
+  const is24h = trendRange.value === '24h'
+  const buckets = is24h ? 24 : 7
+  const bucketMs = is24h ? 3600000 : 86400000
+  const now = Date.now()
+
+  const bucketMap: Record<string, { success: number; total: number }> = {}
+  for (let i = buckets - 1; i >= 0; i--) {
+    const bucketStart = now - i * bucketMs
+    const d = new Date(bucketStart)
+    const label = is24h ? `${d.getHours()}:00` : `${d.getMonth()+1}/${d.getDate()}`
+    bucketMap[label] = { success: 0, total: 0 }
+  }
+
+  for (const job of jobs) {
+    const ts = job.last_run_at || job.updated_at || job.created_at
+    if (!ts) continue
+    const t = new Date(ts).getTime()
+    const age = now - t
+    if (age > buckets * bucketMs) continue
+
+    const d = new Date(t)
+    const label = is24h ? `${d.getHours()}:00` : `${d.getMonth()+1}/${d.getDate()}`
+    if (bucketMap[label]) {
+      bucketMap[label].total++
+      if (job.status === 'completed') bucketMap[label].success++
+    }
+  }
+
+  chartRawData.value = Object.entries(bucketMap).map(([time, v]) => ({
+    time,
+    success: v.total > 0 ? Math.round(v.success / v.total * 100) : 0,
+    total: v.total,
+  }))
+}
+
 // ─── Chart ───
 function initChart() {
   if (!chartRef.value) return
   chartInstance = echarts.init(chartRef.value)
+  renderChart()
+}
 
-  const hours = trendRange.value === '24h' ? 24 : 7
-  const xData: string[] = []
-  const yData: number[] = []
-  if (trendRange.value === '24h') {
-    for (let i = hours - 1; i >= 0; i--) {
-      const d = new Date(Date.now() - i * 3600000)
-      xData.push(`${d.getHours()}:00`)
-      yData.push(Math.round(92 + Math.random() * 7))
-    }
-  } else {
-    for (let i = hours - 1; i >= 0; i--) {
-      const d = new Date(Date.now() - i * 86400000)
-      xData.push(`${d.getMonth()+1}/${d.getDate()}`)
-      yData.push(Math.round(90 + Math.random() * 9))
-    }
-  }
+function renderChart() {
+  if (!chartInstance) return
+
+  const xData = chartRawData.value.map(d => d.time)
+  const yData = chartRawData.value.map(d => d.success)
+
+  // If no real data at all, show empty state
+  const hasData = chartRawData.value.some(d => d.total > 0)
 
   chartInstance.setOption({
-    tooltip: { trigger: 'axis' },
+    tooltip: {
+      trigger: 'axis',
+      formatter: (params: any) => {
+        const idx = params[0]?.dataIndex
+        if (idx == null || idx >= chartRawData.value.length) return ''
+        const d = chartRawData.value[idx]
+        return `${d.time}<br/>成功率: ${d.total > 0 ? d.success + '%' : '无数据'}<br/>任务数: ${d.total}`
+      },
+    },
     grid: { left: 40, right: 20, top: 16, bottom: 30 },
     xAxis: {
       type: 'category',
@@ -334,7 +398,7 @@ function initChart() {
     },
     yAxis: {
       type: 'value',
-      min: 80,
+      min: 0,
       max: 100,
       axisLabel: { color: '#86909c', fontSize: 11, formatter: '{value}%' },
       splitLine: { lineStyle: { color: '#f2f3f5' } },
@@ -352,6 +416,16 @@ function initChart() {
           { offset: 0, color: 'rgba(22,93,255,0.2)' },
           { offset: 1, color: 'rgba(22,93,255,0)' },
         ]),
+      },
+    }],
+    graphic: hasData ? [] : [{
+      type: 'text',
+      left: 'center',
+      top: 'middle',
+      style: {
+        text: '暂无采集数据',
+        fontSize: 14,
+        fill: '#c9cdd4',
       },
     }],
   })
@@ -398,6 +472,13 @@ function formatTime(t: string): string {
 
 // ─── Lifecycle ───
 let resizeHandler: () => void
+
+watch(trendRange, () => {
+  if (allJobs.length > 0) {
+    computeTrendData(allJobs)
+    renderChart()
+  }
+})
 
 onMounted(async () => {
   await fetchDashboard()

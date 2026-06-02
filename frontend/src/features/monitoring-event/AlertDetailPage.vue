@@ -160,57 +160,7 @@
           <!-- ─── Tab 2: Metrics ─── -->
           <el-tab-pane label="指标趋势" name="metrics">
             <div class="metrics-grid">
-              <el-row :gutter="16">
-                <el-col :span="12">
-                  <MetricChart
-                    :data="cpuMetricData"
-                    title="CPU 使用率（近 24h）"
-                    height="240px"
-                    color="#E6A23C"
-                    unit="%"
-                  />
-                </el-col>
-                <el-col :span="12">
-                  <MetricChart
-                    :data="memMetricData"
-                    title="内存使用率（近 24h）"
-                    height="240px"
-                    color="#F56C6C"
-                    unit="%"
-                  />
-                </el-col>
-              </el-row>
-              <el-row :gutter="16" style="margin-top: 16px">
-                <el-col :span="12">
-                  <MetricChart
-                    :data="diskMetricData"
-                    title="磁盘使用率（近 24h）"
-                    height="240px"
-                    color="#409EFF"
-                    unit="%"
-                  />
-                </el-col>
-                <el-col :span="12">
-                  <MetricChart
-                    :data="netMetricData"
-                    title="网络流量（近 24h）"
-                    height="240px"
-                    color="#67C23A"
-                    unit="MB/s"
-                  />
-                </el-col>
-              </el-row>
-              <el-row :gutter="16" style="margin-top: 16px">
-                <el-col :span="24">
-                  <MetricChart
-                    :data="alertFreqData"
-                    title="告警频率趋势（近 24h）"
-                    height="200px"
-                    color="#909399"
-                    unit="次"
-                  />
-                </el-col>
-              </el-row>
+              <el-empty description="暂无指标数据（需要部署指标采集器）" :image-size="120" />
             </div>
           </el-tab-pane>
 
@@ -477,7 +427,6 @@ import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import TimelineView from '@/shared/components/TimelineView.vue'
 import AiAnalysisCard from '@/shared/components/AiAnalysisCard.vue'
-import MetricChart from '@/shared/components/MetricChart.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -567,21 +516,6 @@ const parsedTriggerConditions = computed(() => {
     return []
   }
 })
-
-// ─── Metric Data (24h mock, placeholder for real metric API) ───
-const cpuMetricData = computed(() => generateMockMetric(40, 95, 48))
-const memMetricData = computed(() => generateMockMetric(50, 90, 48))
-const diskMetricData = computed(() => generateMockMetric(30, 80, 48))
-const netMetricData = computed(() => generateMockMetric(10, 200, 48))
-const alertFreqData = computed(() => generateMockMetric(0, 15, 48))
-
-function generateMockMetric(min: number, max: number, points: number) {
-  const now = Date.now()
-  return Array.from({ length: points }, (_, i) => ({
-    time: new Date(now - (points - i) * 1800000).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
-    value: Math.floor(min + Math.random() * (max - min)),
-  }))
-}
 
 // ─── Filtered Logs ───
 const filteredLogs = computed(() => {

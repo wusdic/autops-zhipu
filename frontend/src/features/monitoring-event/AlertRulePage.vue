@@ -269,10 +269,7 @@ async function viewDetail(row: any) {
     if (res.data?.code === 0) detail.value = res.data.data
     else detail.value = row
   } catch { detail.value = row }
-  triggerHistory.value = Array.from({ length: 5 }, (_, i) => ({
-    triggered_at: new Date(Date.now() - i * 3600000).toISOString(),
-    asset_name: `资产-${i+1}`, actual_value: `${85 + Math.floor(Math.random()*15)}%`,
-  }))
+  triggerHistory.value = []
   showDetail.value = true
 }
 

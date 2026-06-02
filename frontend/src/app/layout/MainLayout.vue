@@ -242,14 +242,16 @@ function toggleCollapse() {
 
 // ─── Active Menu ───
 const activeMenu = computed(() => {
-  // 精确匹配 或 前缀匹配（如 /assets/123 → /assets）
   const path = route.path
-  if (path === '/') return '/'
-  // 找最长前缀匹配
-  const segments = path.split('/').filter(Boolean)
-  if (segments.length > 1) {
-    return '/' + segments.slice(0, segments.length === 1 ? 1 : segments[0] === 'admin' ? 2 : 1).join('/')
-  }
+  // Exact match first
+  const allMenus = Object.keys(menuMap)
+  if (allMenus.includes(path)) return path
+  // Prefix match: longest first
+  const sorted = allMenus.filter(m => m !== '/' && path.startsWith(m + '/')).sort((a, b) => b.length - a.length)
+  if (sorted.length > 0) return sorted[0]
+  // Fallback: first segment
+  const seg = path.split('/').filter(Boolean)
+  if (seg.length > 0) return '/' + seg[0]
   return path
 })
 
@@ -275,12 +277,12 @@ const menuMap: Record<string, string> = {
   '/executions': '执行历史',
   '/knowledge': '知识库',
   '/knowledge/import': '知识导入',
-  '/admin/users': '用户管理',
-  '/admin/roles': '角色管理',
-  '/admin/api-keys': 'API Key',
-  '/admin/config': '系统配置',
-  '/admin/status': '平台状态',
-  '/admin/backup': '备份恢复',
+  '/users': '用户管理',
+  '/roles': '角色管理',
+  '/api-keys': 'API Key',
+  '/system-config': '系统配置',
+  '/platform-status': '平台状态',
+  '/backup': '备份恢复',
   '/audit': '审计日志',
 }
 
@@ -292,15 +294,41 @@ const groupMap: Record<string, string> = {
   '/alert-rules': '监控事件', '/tickets': '监控事件',
   '/scripts': '自动化', '/playbooks': '自动化', '/policies': '自动化', '/executions': '自动化',
   '/knowledge': '知识', '/knowledge/import': '知识',
-  '/admin/users': '平台管理', '/admin/roles': '平台管理', '/admin/api-keys': '平台管理',
-  '/admin/config': '平台管理', '/admin/status': '平台管理', '/admin/backup': '平台管理',
+  '/users': '平台管理', '/roles': '平台管理', '/api-keys': '平台管理',
+  '/system-config': '平台管理', '/platform-status': '平台管理', '/backup': '平台管理',
   '/audit': '平台管理',
 }
 
 const breadcrumbs = computed(() => {
   const path = route.path
-  const group = groupMap[path] || ''
-  const title = menuMap[path] || route.meta?.title || route.name || path
+
+  // Exact match
+  let group = groupMap[path] || ''
+  let title = menuMap[path] || ''
+
+  // For detail pages, find parent menu item by prefix
+  if (!title) {
+    const allMenus = Object.keys(menuMap)
+    const parent = allMenus.filter(m => m !== '/' && path.startsWith(m + '/')).sort((a, b) => b.length - a.length)[0]
+    if (parent) {
+      group = groupMap[parent] || ''
+      const parentTitle = menuMap[parent] || ''
+      // Detail page title
+      if (path.startsWith('/alerts/')) title = '告警详情'
+      else if (path.startsWith('/assets/') && path.includes('/topology')) title = '拓扑图'
+      else if (path.startsWith('/assets/')) title = '资产详情'
+      else if (path.startsWith('/executions/')) title = '执行详情'
+      else if (path.startsWith('/tickets/')) title = '工单详情'
+      else if (path.startsWith('/knowledge/') && path.includes('/edit')) title = '编辑知识'
+      else if (path.startsWith('/knowledge/')) title = '知识详情'
+      else if (path.startsWith('/incident/')) title = '故障处置'
+      else if (path.startsWith('/policies/') && path.includes('/simulate')) title = '策略模拟'
+      else title = parentTitle + '详情'
+    }
+  }
+
+  if (!title) title = route.meta?.title || route.name || path
+
   const crumbs: { path: string; title: string }[] = []
   if (group) crumbs.push({ path: '', title: group })
   crumbs.push({ path, title })
