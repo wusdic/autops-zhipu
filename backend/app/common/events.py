@@ -87,6 +87,10 @@ class EventBus:
         self._max_log_size = 1000
         self._outbox_enabled = False
 
+    @property
+    def outbox_enabled(self) -> bool:
+        return self._outbox_enabled
+
     def enable_outbox(self) -> None:
         """启用outbox持久化（需要DB可用时调用）."""
         self._outbox_enabled = True

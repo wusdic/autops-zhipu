@@ -1,3 +1,11 @@
+# DEPRECATED — 此文件已废弃
+#
+# 生产部署请使用 backend/Dockerfile（在项目根目录 docker-compose.yml 中引用）。
+# 此文件仍使用 requirements.txt（已切换到 pyproject.toml）且内嵌 alembic upgrade，
+# 与 migrate 容器职责冲突。仅保留作为历史参考。
+#
+# 如需迁移，请参考 docs/06-operations/DEPLOYMENT.md
+
 FROM python:3.12-slim
 
 WORKDIR /app

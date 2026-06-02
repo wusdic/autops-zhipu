@@ -154,6 +154,13 @@ class AppConfig(BaseSettings):
     env: Literal["dev", "test", "prod"] = "dev"
     enable_openapi_ui: bool = True
 
+    # API进程是否允许注册业务handler（生产必须false）
+    allow_inprocess_events: bool = False
+    # API进程是否启动scheduler（生产必须false，由worker负责）
+    enable_scheduler: bool = False
+    # 进程角色: api / worker（用于决定上述开关的合法性）
+    process_role: Literal["api", "worker"] = "api"
+
     # 子配置
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     redis: RedisConfig = Field(default_factory=RedisConfig)
@@ -188,6 +195,12 @@ class AppConfig(BaseSettings):
             if self.cors_origins == ["*"]:
                 raise ValueError("cors_origins=['*'] is not allowed in production")
             self.enable_openapi_ui = False
+            # 只对 API 进程检查：不允许注册业务 handler 和 scheduler
+            if self.process_role == "api":
+                if self.allow_inprocess_events:
+                    raise ValueError("allow_inprocess_events is not allowed in API process (production)")
+                if self.enable_scheduler:
+                    raise ValueError("enable_scheduler is not allowed in API process (production); use worker")
 
     class Config:
         env_prefix = "AUTOPS_"

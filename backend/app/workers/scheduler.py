@@ -180,9 +180,7 @@ async def run_collection_for_asset(
                 asset.status = new_status
                 await session.flush()
 
-                # 先 commit 当前 session，避免嵌套 session 冲突
-                await session.commit()
-
+                # 在同一事务中写 outbox（不单独 commit）
                 bus = get_event_bus()
                 logger.info("Publishing STATE_CHANGED: %s → %s (trigger=%s)", old_status, new_status, trigger)
                 await bus.publish(DomainEvent(

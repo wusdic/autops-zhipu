@@ -78,6 +78,9 @@ services:
       - "${BACKEND_PORT:-8001}:8001"
     environment:
       AUTOPS_ENV: prod
+      AUTOPS_PROCESS_ROLE: api
+      AUTOPS_ALLOW_INPROCESS_EVENTS: "false"
+      AUTOPS_ENABLE_SCHEDULER: "false"
       DB_HOST: mysql
       DB_PORT: 3306
       DB_USER: autops
@@ -116,6 +119,8 @@ services:
     entrypoint: ["python", "-m", "app.workers.runner"]
     environment:
       AUTOPS_ENV: prod
+      AUTOPS_PROCESS_ROLE: worker
+      AUTOPS_ALLOW_INPROCESS_EVENTS: "true"
       DB_HOST: mysql
       DB_PORT: 3306
       DB_USER: autops

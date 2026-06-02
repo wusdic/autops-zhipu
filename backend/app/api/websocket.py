@@ -147,7 +147,7 @@ async def websocket_endpoint(
                         "timestamp": datetime.now(timezone.utc).isoformat(),
                     })
 
-                elif msg_type == "ping":
+                elif msg_type in ("ping", "_ping"):
                     await websocket.send_json({
                         "type": "_pong",
                         "payload": {},
@@ -232,18 +232,61 @@ async def _on_ticket_event(event: DomainEvent) -> None:
 
 
 def register_ws_event_bridges() -> None:
-    """注册事件总线到 WebSocket 的桥接处理器."""
+    """注册实时事件 → WebSocket 推送桥接。
+
+    生产模式（outbox enabled）: 启动 Redis subscriber，接收 Worker 进程发布的事件。
+    开发模式（outbox disabled）: 直接注册进程内 EventBus handler。
+    """
     bus = get_event_bus()
-    bus.subscribe(AlertEvents.ALERT_CREATED, _on_alert_event)
-    bus.subscribe(AlertEvents.ALERT_ESCALATED, _on_alert_event)
-    bus.subscribe(AlertEvents.ALERT_RESOLVED, _on_alert_event)
-    bus.subscribe(AutomationEvents.EXECUTION_STARTED, _on_execution_event)
-    bus.subscribe(AutomationEvents.EXECUTION_COMPLETED, _on_execution_event)
-    bus.subscribe(AutomationEvents.EXECUTION_FAILED, _on_execution_event)
-    bus.subscribe(AutomationEvents.EXECUTION_STEP_COMPLETED, _on_execution_event)
-    bus.subscribe(AutomationEvents.EXECUTION_STEP_FAILED, _on_execution_event)
-    bus.subscribe(EventEvents.EVENT_CREATED, _on_event_event)
-    bus.subscribe(NotificationEvents.NOTIFICATION_SENT, _on_notification_event)
-    bus.subscribe(TicketEvents.TICKET_CREATED, _on_ticket_event)
-    bus.subscribe(TicketEvents.TICKET_UPDATED, _on_ticket_event)
-    logger.info("WebSocket事件桥接已注册")
+
+    if bus.outbox_enabled:
+        # 生产模式: 通过 Redis Pub/Sub 接收 Worker 的事件
+        import asyncio
+        from app.common.realtime import start_api_realtime_subscriber
+
+        async def _on_realtime_message(data: dict) -> None:
+            """Redis realtime 消息 → WebSocket 广播."""
+            event_type = data.get("type", "")
+            payload = data.get("payload", {})
+
+            # 根据事件类型路由到对应频道
+            if event_type.startswith("alert."):
+                await manager.broadcast("alerts", data)
+            elif event_type.startswith("automation.") or event_type.startswith("execution."):
+                await manager.broadcast("executions", data)
+            elif event_type.startswith("event.") or event_type.startswith("state."):
+                await manager.broadcast("events", data)
+            elif event_type.startswith("notification."):
+                user_id = payload.get("user_id", "")
+                if user_id:
+                    await manager.send_to_user(user_id, data)
+                else:
+                    await manager.broadcast("notifications", data)
+            elif event_type.startswith("ticket."):
+                await manager.broadcast("notifications", data)
+            else:
+                # 广播到所有未设置订阅的客户端（通用频道）
+                await manager.broadcast("", data)
+
+        # 需要在运行中的 event loop 内启动 subscriber
+        loop = asyncio.get_event_loop()
+        loop.create_task(
+            start_api_realtime_subscriber(_on_realtime_message),
+            name="realtime-ws-bridge",
+        )
+        logger.info("WebSocket realtime bridge: Redis subscriber mode (cross-process)")
+    else:
+        # 开发模式: 直接注册进程内 handler
+        bus.subscribe(AlertEvents.ALERT_CREATED, _on_alert_event)
+        bus.subscribe(AlertEvents.ALERT_ESCALATED, _on_alert_event)
+        bus.subscribe(AlertEvents.ALERT_RESOLVED, _on_alert_event)
+        bus.subscribe(AutomationEvents.EXECUTION_STARTED, _on_execution_event)
+        bus.subscribe(AutomationEvents.EXECUTION_COMPLETED, _on_execution_event)
+        bus.subscribe(AutomationEvents.EXECUTION_FAILED, _on_execution_event)
+        bus.subscribe(AutomationEvents.EXECUTION_STEP_COMPLETED, _on_execution_event)
+        bus.subscribe(AutomationEvents.EXECUTION_STEP_FAILED, _on_execution_event)
+        bus.subscribe(EventEvents.EVENT_CREATED, _on_event_event)
+        bus.subscribe(NotificationEvents.NOTIFICATION_SENT, _on_notification_event)
+        bus.subscribe(TicketEvents.TICKET_CREATED, _on_ticket_event)
+        bus.subscribe(TicketEvents.TICKET_UPDATED, _on_ticket_event)
+        logger.info("WebSocket event bridges: in-process mode (dev only)")

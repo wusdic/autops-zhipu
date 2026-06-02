@@ -1,7 +1,8 @@
 /**
  * WebSocket 实时推送服务
- * 支持自动重连、心跳检测、事件分发
+ * 支持自动重连、心跳检测、事件分发、订阅恢复
  */
+import { APP_CONFIG } from '@/shared/config'
 
 export interface WSMessage {
   type: string
@@ -14,10 +15,12 @@ export type WSHandler = (msg: WSMessage) => void
 class WebSocketService {
   private ws: WebSocket | null = null
   private url = ''
+  private token = ''
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null
   private handlers = new Map<string, Set<WSHandler>>()
   private globalHandlers = new Set<WSHandler>()
+  private subscriptions = new Set<string>()
   private _connected = false
   private reconnectAttempts = 0
   private maxReconnectAttempts = 10
@@ -30,12 +33,18 @@ class WebSocketService {
   connect(token?: string) {
     if (this.ws?.readyState === WebSocket.OPEN) return
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const host = window.location.hostname
-    const port = import.meta.env.VITE_WS_PORT || import.meta.env.VITE_API_PORT || '8001'
-    this.url = `${protocol}//${host}:${port}/api/v1/ws`
+    // 保留 token，重连时复用
+    if (token) this.token = token
+    if (!this.token) {
+      this.token = localStorage.getItem(APP_CONFIG.TOKEN_KEY) || ''
+    }
 
-    if (token) this.url += `?token=${token}`
+    // 从 APP_CONFIG 统一获取 WS URL
+    this.url = APP_CONFIG.WS_URL
+    if (this.token) {
+      const sep = this.url.includes('?') ? '&' : '?'
+      this.url += `${sep}token=${encodeURIComponent(this.token)}`
+    }
 
     try {
       this.ws = new WebSocket(this.url)
@@ -44,7 +53,13 @@ class WebSocketService {
         this._connected = true
         this.reconnectAttempts = 0
         this.startHeartbeat()
-        this.emit({ type: '_connected', payload: { url: this.url } })
+
+        // 重连后恢复之前的订阅
+        this.subscriptions.forEach(type => {
+          this.send('subscribe', { channels: [type] })
+        })
+
+        this.emit({ type: '_connected', payload: { url: this.url.split('?')[0] } })
       }
 
       this.ws.onmessage = (event) => {
@@ -93,6 +108,18 @@ class WebSocketService {
     return () => this.globalHandlers.delete(handler)
   }
 
+  /** 订阅频道 */
+  subscribeChannel(channel: string) {
+    this.subscriptions.add(channel)
+    this.send('subscribe', { channels: [channel] })
+  }
+
+  /** 取消订阅频道 */
+  unsubscribeChannel(channel: string) {
+    this.subscriptions.delete(channel)
+    this.send('unsubscribe', { channels: [channel] })
+  }
+
   /** 发送消息 */
   send(type: string, payload: any) {
     if (this.ws?.readyState === WebSocket.OPEN) {
@@ -120,14 +147,18 @@ class WebSocketService {
   }
 
   private scheduleReconnect() {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) return
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      this.emit({ type: '_reconnect_failed', payload: { attempts: this.maxReconnectAttempts } })
+      return
+    }
     if (this.reconnectTimer) return
 
     const delay = this.reconnectDelay * Math.min(this.reconnectAttempts + 1, 5)
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null
       this.reconnectAttempts++
-      this.connect()
+      // 重连时保留 token
+      this.connect(this.token)
     }, delay)
   }
 }

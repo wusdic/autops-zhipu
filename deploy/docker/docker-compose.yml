@@ -1,67 +1,7 @@
-version: "3.8"
-
-services:
-  mysql:
-    image: mysql:8.0
-    container_name: autops-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-autops_root_2026}
-      MYSQL_DATABASE: autops
-      MYSQL_USER: autops
-      MYSQL_PASSWORD: ${DB_PASSWORD:-autops_2026}
-    ports:
-      - "${DB_PORT:-3306}:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: autops-redis
-    restart: unless-stopped
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      retries: 5
-
-  backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-    container_name: autops-backend
-    restart: unless-stopped
-    env_file: ../.env
-    ports:
-      - "${APP_PORT:-8000}:8000"
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - backend_data:/opt/autops/data
-
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    container_name: autops-frontend
-    restart: unless-stopped
-    ports:
-      - "${FRONTEND_PORT:-80}:80"
-    depends_on:
-      - backend
-
-volumes:
-  mysql_data:
-  redis_data:
-  backend_data:
+# DEPRECATED — 此文件已废弃
+#
+# 生产部署请使用项目根目录的 docker-compose.yml
+# 该文件保留了旧版部署口径（端口8000、弱密码、无worker/migrate），
+# 仅作为历史参考。请勿用于实际部署。
+#
+# 如需迁移到根目录 docker-compose.yml，请参考 docs/06-operations/DEPLOYMENT.md

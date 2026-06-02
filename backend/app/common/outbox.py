@@ -49,6 +49,19 @@ class OutboxConsumer:
         processed = 0
 
         async with session_factory() as session:
+            # 0. Recover expired processing leases
+            await session.execute(
+                text("""
+                    UPDATE event_outbox
+                    SET status = 'pending',
+                        locked_by = NULL,
+                        locked_until = NULL
+                    WHERE status = 'processing'
+                      AND locked_until < NOW()
+                """),
+            )
+            await session.commit()
+
             # 1. Claim pending events with row lock
             result = await session.execute(
                 text("""
@@ -70,8 +83,9 @@ class OutboxConsumer:
 
             lock_until = datetime.now(timezone.utc) + timedelta(seconds=self.lock_seconds)
 
-            # Mark claimed rows as processing
+            # Mark claimed rows as processing — use expanding bindparam for IN clause
             row_ids = [row.id for row in rows]
+            from sqlalchemy import bindparam
             await session.execute(
                 text("""
                     UPDATE event_outbox
@@ -79,12 +93,12 @@ class OutboxConsumer:
                         locked_by = :worker_id,
                         locked_until = :lock_until
                     WHERE id IN :ids
-                """),
-                {
-                    "worker_id": self.worker_id,
-                    "lock_until": lock_until,
-                    "ids": tuple(row_ids),
-                },
+                """).bindparams(
+                    bindparam("worker_id", value=self.worker_id),
+                    bindparam("lock_until", value=lock_until),
+                    bindparam("ids", expanding=True),
+                ),
+                {"ids": row_ids},
             )
             await session.commit()
 
@@ -116,6 +130,10 @@ class OutboxConsumer:
 
                     # Dispatch to handlers only (NOT bus.publish)
                     await bus.dispatch_to_handlers(event)
+
+                    # Publish to Redis for cross-process WS bridge
+                    from app.common.realtime import publish_realtime
+                    await publish_realtime(event.event_type, event.payload)
 
                     # 3a. Success → mark done
                     await session.execute(
