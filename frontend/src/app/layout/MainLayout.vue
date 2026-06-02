@@ -25,6 +25,12 @@
           <el-menu-item index="/">
             <el-icon><DataBoard /></el-icon><span>首页指挥台</span>
           </el-menu-item>
+          <el-menu-item index="/business-health-map">
+            <el-icon><MapLocation /></el-icon><span>业务健康地图</span>
+          </el-menu-item>
+          <el-menu-item index="/daily-summary">
+            <el-icon><Calendar /></el-icon><span>今日摘要</span>
+          </el-menu-item>
 
           <!-- M2 资源中心 -->
           <el-sub-menu index="m2">
@@ -39,6 +45,7 @@
             <el-menu-item index="/topology">拓扑视图</el-menu-item>
             <el-menu-item index="/resources/import">资源导入</el-menu-item>
             <el-menu-item index="/asset-groups">资源分组</el-menu-item>
+            <el-menu-item index="/lifecycle">生命周期</el-menu-item>
             <el-menu-item index="/credentials">凭证管理</el-menu-item>
             <el-menu-item index="/agents">Agent 管理</el-menu-item>
           </el-sub-menu>
@@ -86,7 +93,12 @@
             <el-menu-item index="/anomaly/list">异常列表</el-menu-item>
             <el-menu-item index="/alerts">告警列表</el-menu-item>
             <el-menu-item index="/alert-rules">告警规则</el-menu-item>
+            <el-menu-item index="/alert-correlation">告警收敛</el-menu-item>
             <el-menu-item index="/incident">故障工作台</el-menu-item>
+            <el-menu-item index="/ai-diagnosis">AI 判断</el-menu-item>
+            <el-menu-item index="/impact-analysis">影响分析</el-menu-item>
+            <el-menu-item index="/response-suggestion">处置建议</el-menu-item>
+            <el-menu-item index="/closure-verification">关闭验证</el-menu-item>
           </el-sub-menu>
 
           <!-- M6 自动化中心 -->
@@ -100,6 +112,8 @@
             <el-menu-item index="/playbooks">剧本库</el-menu-item>
             <el-menu-item index="/approvals">审批中心</el-menu-item>
             <el-menu-item index="/executions">执行历史</el-menu-item>
+            <el-menu-item index="/rollback-center">回滚中心</el-menu-item>
+            <el-menu-item index="/execution-locks">执行锁</el-menu-item>
           </el-sub-menu>
 
           <!-- M7 智能知识库 -->
@@ -107,9 +121,15 @@
             <template #title>
               <el-icon><MagicStick /></el-icon><span>智能知识库</span>
             </template>
+            <el-menu-item index="/knowledge-overview">知识总览</el-menu-item>
             <el-menu-item index="/aiops">AI 诊断</el-menu-item>
             <el-menu-item index="/knowledge">知识列表</el-menu-item>
             <el-menu-item index="/knowledge/import">知识导入</el-menu-item>
+            <el-menu-item index="/knowledge-review">知识审核</el-menu-item>
+            <el-menu-item index="/similar-cases">相似案例</el-menu-item>
+            <el-menu-item index="/rule-gap">规则缺口</el-menu-item>
+            <el-menu-item index="/prompt-templates">Prompt 模板</el-menu-item>
+            <el-menu-item index="/ai-tool-policy">AI 工具策略</el-menu-item>
           </el-sub-menu>
 
           <!-- M8 工单中心 -->
@@ -117,7 +137,13 @@
             <template #title>
               <el-icon><Tickets /></el-icon><span>工单中心</span>
             </template>
+            <el-menu-item index="/ticket-overview">工单总览</el-menu-item>
             <el-menu-item index="/tickets">工单列表</el-menu-item>
+            <el-menu-item index="/ticket-create">新建工单</el-menu-item>
+            <el-menu-item index="/assignment-rules">派单规则</el-menu-item>
+            <el-menu-item index="/sla-management">SLA 管理</el-menu-item>
+            <el-menu-item index="/postmortem">复盘总结</el-menu-item>
+            <el-menu-item index="/ticket-report">工单报告</el-menu-item>
           </el-sub-menu>
 
           <!-- M9 报表审计中心 -->
@@ -130,6 +156,10 @@
             <el-menu-item index="/report/generate">报告生成</el-menu-item>
             <el-menu-item index="/report/tasks">报告任务</el-menu-item>
             <el-menu-item index="/report/archive">报告归档</el-menu-item>
+            <el-menu-item index="/ops-report">运维报告</el-menu-item>
+            <el-menu-item index="/automation-report">自动化报告</el-menu-item>
+            <el-menu-item index="/asset-report">资产报告</el-menu-item>
+            <el-menu-item index="/inspection-report">巡检报告</el-menu-item>
             <el-menu-item index="/audit">审计查询</el-menu-item>
             <el-menu-item index="/logs/search">日志检索</el-menu-item>
             <el-menu-item index="/evidence">证据归档</el-menu-item>
@@ -143,6 +173,7 @@
             <el-menu-item index="/users">用户管理</el-menu-item>
             <el-menu-item index="/roles">角色管理</el-menu-item>
             <el-menu-item index="/tenants">租户管理</el-menu-item>
+            <el-menu-item index="/permission-policy">权限策略</el-menu-item>
             <el-menu-item index="/api-keys">API Key</el-menu-item>
             <el-menu-item index="/system-config">系统配置</el-menu-item>
             <el-menu-item index="/dictionaries">字典管理</el-menu-item>
@@ -150,6 +181,9 @@
             <el-menu-item index="/platform-status">平台健康</el-menu-item>
             <el-menu-item index="/task-queue">任务队列</el-menu-item>
             <el-menu-item index="/backup">备份恢复</el-menu-item>
+            <el-menu-item index="/upgrade-maintenance">升级维护</el-menu-item>
+            <el-menu-item index="/license">授权许可</el-menu-item>
+            <el-menu-item index="/security-baseline">安全基线</el-menu-item>
             <el-menu-item index="/system-check">系统自检</el-menu-item>
           </el-sub-menu>
         </el-menu>
@@ -233,7 +267,7 @@ import { ElMessageBox, ElMessage } from 'element-plus'
 import {
   Search, Fold, Expand, Bell, ArrowDown, UserFilled, Setting, SwitchButton,
   Monitor, DataBoard, Box, TrendCharts, Warning, Cpu, MagicStick, Tickets,
-  Document, Tools, Checked
+  Document, Tools, Checked, MapLocation, Calendar
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
@@ -264,6 +298,8 @@ const activeMenu = computed(() => {
 // ─── V3 菜单映射 ───
 const menuMap: Record<string, string> = {
   '/': '首页指挥台',
+  '/business-health-map': '业务健康地图',
+  '/daily-summary': '今日摘要',
   // M2 资源中心
   '/resources': '资源总览',
   '/resources/discovery': '资源发现任务',
@@ -273,6 +309,7 @@ const menuMap: Record<string, string> = {
   '/topology': '拓扑视图',
   '/resources/import': '资源导入',
   '/asset-groups': '资源分组',
+  '/lifecycle': '生命周期',
   '/credentials': '凭证管理',
   '/agents': 'Agent 管理',
   // M3 巡检中心
@@ -302,7 +339,12 @@ const menuMap: Record<string, string> = {
   '/anomaly/list': '异常列表',
   '/alerts': '告警列表',
   '/alert-rules': '告警规则',
+  '/alert-correlation': '告警收敛',
   '/incident': '故障工作台',
+  '/ai-diagnosis': 'AI 判断',
+  '/impact-analysis': '影响分析',
+  '/response-suggestion': '处置建议',
+  '/closure-verification': '关闭验证',
   // M6 自动化中心
   '/automation': '自动化总览',
   '/policies': '策略列表',
@@ -310,18 +352,36 @@ const menuMap: Record<string, string> = {
   '/playbooks': '剧本库',
   '/approvals': '审批中心',
   '/executions': '执行历史',
+  '/rollback-center': '回滚中心',
+  '/execution-locks': '执行锁',
   // M7 智能知识库
+  '/knowledge-overview': '知识总览',
   '/aiops': 'AI 诊断',
   '/knowledge': '知识列表',
   '/knowledge/import': '知识导入',
+  '/knowledge-review': '知识审核',
+  '/similar-cases': '相似案例',
+  '/rule-gap': '规则缺口',
+  '/prompt-templates': 'Prompt 模板',
+  '/ai-tool-policy': 'AI 工具策略',
   // M8 工单中心
+  '/ticket-overview': '工单总览',
   '/tickets': '工单列表',
+  '/ticket-create': '新建工单',
+  '/assignment-rules': '派单规则',
+  '/sla-management': 'SLA 管理',
+  '/postmortem': '复盘总结',
+  '/ticket-report': '工单报告',
   // M9 报表审计中心
   '/reports': '报表总览',
   '/report/templates': '报告模板',
   '/report/generate': '报告生成',
   '/report/tasks': '报告任务',
   '/report/archive': '报告归档',
+  '/ops-report': '运维报告',
+  '/automation-report': '自动化报告',
+  '/asset-report': '资产报告',
+  '/inspection-report': '巡检报告',
   '/audit': '审计查询',
   '/logs/search': '日志检索',
   '/evidence': '证据归档',
@@ -329,6 +389,7 @@ const menuMap: Record<string, string> = {
   '/users': '用户管理',
   '/roles': '角色管理',
   '/tenants': '租户管理',
+  '/permission-policy': '权限策略',
   '/api-keys': 'API Key',
   '/system-config': '系统配置',
   '/dictionaries': '字典管理',
@@ -336,15 +397,20 @@ const menuMap: Record<string, string> = {
   '/platform-status': '平台健康',
   '/task-queue': '任务队列',
   '/backup': '备份恢复',
+  '/upgrade-maintenance': '升级维护',
+  '/license': '授权许可',
+  '/security-baseline': '安全基线',
   '/system-check': '系统自检',
   '/profile': '个人中心',
 }
 
 const groupMap: Record<string, string> = {
   '/': '首页指挥台',
+  '/business-health-map': '首页指挥台', '/daily-summary': '首页指挥台',
   '/resources': '资源中心', '/resources/discovery': '资源中心', '/resources/discovery-results': '资源中心',
   '/assets': '资源中心', '/business-systems': '资源中心', '/topology': '资源中心',
-  '/resources/import': '资源中心', '/asset-groups': '资源中心', '/credentials': '资源中心', '/agents': '资源中心',
+  '/resources/import': '资源中心', '/asset-groups': '资源中心', '/credentials': '资源中心',
+  '/agents': '资源中心', '/lifecycle': '资源中心',
   '/inspections': '巡检中心', '/inspection/templates': '巡检中心', '/inspection/plans': '巡检中心',
   '/inspection/tasks': '巡检中心', '/inspection/results': '巡检中心', '/inspection/page-check': '巡检中心',
   '/inspection/config-check': '巡检中心', '/inspection/log-check': '巡检中心',
@@ -354,18 +420,27 @@ const groupMap: Record<string, string> = {
   '/events': '监控中心', '/monitoring/log-sources': '监控中心', '/monitoring/collector-health': '监控中心',
   '/monitoring/config-facts': '监控中心',
   '/anomalies': '处置中心', '/anomaly/list': '处置中心', '/alerts': '处置中心',
-  '/alert-rules': '处置中心', '/incident': '处置中心',
+  '/alert-rules': '处置中心', '/alert-correlation': '处置中心', '/incident': '处置中心',
+  '/ai-diagnosis': '处置中心', '/impact-analysis': '处置中心', '/response-suggestion': '处置中心',
+  '/closure-verification': '处置中心',
   '/automation': '自动化中心', '/policies': '自动化中心', '/scripts': '自动化中心',
   '/playbooks': '自动化中心', '/approvals': '自动化中心', '/executions': '自动化中心',
-  '/aiops': '智能知识库', '/knowledge': '智能知识库', '/knowledge/import': '智能知识库',
-  '/tickets': '工单中心',
+  '/rollback-center': '自动化中心', '/execution-locks': '自动化中心',
+  '/knowledge-overview': '智能知识库', '/aiops': '智能知识库', '/knowledge': '智能知识库',
+  '/knowledge/import': '智能知识库', '/knowledge-review': '智能知识库', '/similar-cases': '智能知识库',
+  '/rule-gap': '智能知识库', '/prompt-templates': '智能知识库', '/ai-tool-policy': '智能知识库',
+  '/ticket-overview': '工单中心', '/tickets': '工单中心', '/ticket-create': '工单中心',
+  '/assignment-rules': '工单中心', '/sla-management': '工单中心', '/postmortem': '工单中心',
+  '/ticket-report': '工单中心',
   '/reports': '报表审计', '/report/templates': '报表审计', '/report/generate': '报表审计',
-  '/report/tasks': '报表审计', '/report/archive': '报表审计', '/audit': '报表审计',
-  '/logs/search': '报表审计', '/evidence': '报表审计',
+  '/report/tasks': '报表审计', '/report/archive': '报表审计', '/ops-report': '报表审计',
+  '/automation-report': '报表审计', '/asset-report': '报表审计', '/inspection-report': '报表审计',
+  '/audit': '报表审计', '/logs/search': '报表审计', '/evidence': '报表审计',
   '/users': '平台管理', '/roles': '平台管理', '/tenants': '平台管理', '/api-keys': '平台管理',
-  '/system-config': '平台管理', '/dictionaries': '平台管理', '/integrations': '平台管理',
-  '/platform-status': '平台管理', '/task-queue': '平台管理', '/backup': '平台管理',
-  '/system-check': '平台管理', '/profile': '个人中心',
+  '/permission-policy': '平台管理', '/system-config': '平台管理', '/dictionaries': '平台管理',
+  '/integrations': '平台管理', '/platform-status': '平台管理', '/task-queue': '平台管理',
+  '/backup': '平台管理', '/upgrade-maintenance': '平台管理', '/license': '平台管理',
+  '/security-baseline': '平台管理', '/system-check': '平台管理', '/profile': '个人中心',
 }
 
 const breadcrumbs = computed(() => {

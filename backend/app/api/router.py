@@ -28,13 +28,16 @@ from app.domains.governance.api import (
     router as governance_router,
     user_router as governance_user_router,
 )
+from app.api.anomaly_router import router as anomaly_router
 from app.api.audit import router as audit_router
 from app.api.backup import router as backup_router
 from app.api.health import platform_router
+from app.api.report_router import router as report_router
 from app.domains.asset.discovery_api import router as discovery_router
 from app.domains.notification.api import router as notification_router
 from app.integrations.api import router as channel_router
 from app.api.websocket import router as ws_router
+from app.api.inspection_router import router as inspection_router
 
 api_router = APIRouter()
 
@@ -88,6 +91,9 @@ api_router.include_router(knowledge_router)
 api_router.include_router(aiops_router)
 api_router.include_router(agent_router, prefix="/aiops")
 
+# Anomalies
+api_router.include_router(anomaly_router)
+
 # Audit
 api_router.include_router(audit_router)
 
@@ -105,6 +111,12 @@ api_router.include_router(channel_router)
 
 # WebSocket
 api_router.include_router(ws_router)
+
+# Report
+api_router.include_router(report_router)
+
+# Inspection
+api_router.include_router(inspection_router)
 
 # Platform
 api_router.include_router(platform_router)

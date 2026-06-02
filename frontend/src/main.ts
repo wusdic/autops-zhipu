@@ -6,11 +6,16 @@ import './shared/styles/global.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from './app/router'
 import App from './App.vue'
+import { permission, role } from './shared/directives'
 
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(ElementPlus)
+
+// Register directives
+app.directive('permission', permission)
+app.directive('role', role)
 
 // Register all icons globally
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

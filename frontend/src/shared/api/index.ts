@@ -1,0 +1,24 @@
+/**
+ * AUTOPS API Service Layer — Barrel Export
+ * 
+ * Usage: import { assetService, alertService } from '@/shared/api'
+ */
+
+export { authService } from './auth'
+export { assetService } from './asset'
+export { configService } from './config'
+export { collectorService } from './collector'
+export { eventService } from './event'
+export { alertService } from './alert'
+export { policyService } from './policy'
+export { automationService } from './automation'
+export { knowledgeService } from './knowledge'
+export { ticketService } from './ticket'
+export { reportService } from './report'
+export { auditService } from './audit'
+export { governanceService } from './governance'
+export { inspectionService } from './inspection'
+export { anomalyService } from './anomaly'
+export { aiopsService } from './aiops'
+export { API } from './routes'
+export { default as client } from './client'
