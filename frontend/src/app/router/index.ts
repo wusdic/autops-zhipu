@@ -16,6 +16,8 @@ const router = createRouter({
     // M1 首页指挥台
     // ============================================================
     { path: '/', name: 'dashboard', component: () => import('@/features/command-dashboard/CommandDashboardPage.vue'), meta: { module: 'M1', title: '首页指挥台' } },
+    { path: '/business-health-map', name: 'business-health-map', component: () => import('@/features/command-dashboard/BusinessHealthMapPage.vue'), meta: { module: 'M1', title: '业务健康地图' } },
+    { path: '/daily-summary', name: 'daily-summary', component: () => import('@/features/command-dashboard/DailySummaryPage.vue'), meta: { module: 'M1', title: '今日摘要' } },
 
     // ============================================================
     // M2 资源中心
@@ -71,6 +73,12 @@ const router = createRouter({
     { path: '/alerts', name: 'alerts', component: () => import('@/features/monitoring-center/AlertListPage.vue'), meta: { module: 'M5', title: '告警列表' } },
     { path: '/alerts/:id', name: 'alert-detail', component: () => import('@/features/monitoring-center/AlertDetailPage.vue'), meta: { module: 'M5', title: '告警详情' } },
     { path: '/alert-rules', name: 'alert-rules', component: () => import('@/features/monitoring-center/AlertRulePage.vue'), meta: { module: 'M5', title: '告警规则' } },
+    { path: '/incident-workspace', name: 'incident-workspace', component: () => import('@/features/response-center/IncidentWorkspacePage.vue'), meta: { module: 'M5', title: '故障工作台' } },
+    { path: '/ai-diagnosis', name: 'ai-diagnosis-panel', component: () => import('@/features/response-center/AiDiagnosisPanelPage.vue'), meta: { module: 'M5', title: 'AI 判断' } },
+    { path: '/impact-analysis', name: 'impact-analysis', component: () => import('@/features/response-center/ImpactAnalysisPage.vue'), meta: { module: 'M5', title: '影响分析' } },
+    { path: '/response-suggestion', name: 'response-suggestion', component: () => import('@/features/response-center/ResponseSuggestionPage.vue'), meta: { module: 'M5', title: '处置建议' } },
+    { path: '/alert-correlation', name: 'alert-correlation', component: () => import('@/features/response-center/AlertCorrelationPage.vue'), meta: { module: 'M5', title: '告警收敛' } },
+    { path: '/closure-verification', name: 'closure-verification', component: () => import('@/features/response-center/ClosureVerificationPage.vue'), meta: { module: 'M5', title: '关闭验证' } },
 
     // ============================================================
     // M6 自动化中心
@@ -86,6 +94,8 @@ const router = createRouter({
     { path: '/approvals', name: 'approvals', component: () => import('@/features/automation-center/ApprovalCenterPage.vue'), meta: { module: 'M6', title: '审批中心' } },
     { path: '/executions', name: 'executions', component: () => import('@/features/automation-center/ExecutionListPage.vue'), meta: { module: 'M6', title: '执行历史' } },
     { path: '/executions/:id', name: 'execution-detail', component: () => import('@/features/automation-center/ExecutionDetailPage.vue'), meta: { module: 'M6', title: '执行详情' } },
+    { path: '/rollback-center', name: 'rollback-center', component: () => import('@/features/automation-center/RollbackCenterPage.vue'), meta: { module: 'M6', title: '回滚中心' } },
+    { path: '/execution-locks', name: 'execution-locks', component: () => import('@/features/automation-center/ExecutionLockPage.vue'), meta: { module: 'M6', title: '执行锁' } },
 
     // ============================================================
     // M7 智能知识库
@@ -95,12 +105,24 @@ const router = createRouter({
     { path: '/knowledge/:id', name: 'knowledge-detail', component: () => import('@/features/knowledge-center/KnowledgeDetailPage.vue'), meta: { module: 'M7', title: '知识详情' } },
     { path: '/knowledge/:id/edit', name: 'knowledge-edit', component: () => import('@/features/knowledge-center/KnowledgeEditPage.vue'), meta: { module: 'M7', title: '知识编辑' } },
     { path: '/knowledge/import', name: 'knowledge-import', component: () => import('@/features/knowledge-center/KnowledgeImportPage.vue'), meta: { module: 'M7', title: '知识导入' } },
+    { path: '/knowledge-overview', name: 'knowledge-overview', component: () => import('@/features/knowledge-center/KnowledgeOverviewPage.vue'), meta: { module: 'M7', title: '知识总览' } },
+    { path: '/knowledge-review', name: 'knowledge-review', component: () => import('@/features/knowledge-center/KnowledgeReviewPage.vue'), meta: { module: 'M7', title: '知识审核' } },
+    { path: '/similar-cases', name: 'similar-cases', component: () => import('@/features/knowledge-center/SimilarCasePage.vue'), meta: { module: 'M7', title: '相似案例' } },
+    { path: '/rule-gap', name: 'rule-gap', component: () => import('@/features/knowledge-center/RuleGapPage.vue'), meta: { module: 'M7', title: '规则缺口' } },
+    { path: '/prompt-templates', name: 'prompt-templates', component: () => import('@/features/knowledge-center/PromptTemplatePage.vue'), meta: { module: 'M7', title: 'Prompt 模板' } },
+    { path: '/ai-tool-policy', name: 'ai-tool-policy', component: () => import('@/features/knowledge-center/AIToolPolicyPage.vue'), meta: { module: 'M7', title: 'AI 工具策略' } },
 
     // ============================================================
     // M8 工单中心
     // ============================================================
     { path: '/tickets', name: 'tickets', component: () => import('@/features/ticket-center/TicketListPage.vue'), meta: { module: 'M8', title: '工单列表' } },
     { path: '/tickets/:id', name: 'ticket-detail', component: () => import('@/features/ticket-center/TicketDetailPage.vue'), meta: { module: 'M8', title: '工单详情' } },
+    { path: '/ticket-overview', name: 'ticket-overview', component: () => import('@/features/ticket-center/TicketOverviewPage.vue'), meta: { module: 'M8', title: '工单总览' } },
+    { path: '/ticket-create', name: 'ticket-create', component: () => import('@/features/ticket-center/TicketCreatePage.vue'), meta: { module: 'M8', title: '创建工单' } },
+    { path: '/assignment-rules', name: 'assignment-rules', component: () => import('@/features/ticket-center/AssignmentRulePage.vue'), meta: { module: 'M8', title: '分派规则' } },
+    { path: '/sla-management', name: 'sla-management', component: () => import('@/features/ticket-center/SlaManagementPage.vue'), meta: { module: 'M8', title: 'SLA 管理' } },
+    { path: '/postmortem', name: 'postmortem', component: () => import('@/features/ticket-center/PostmortemPage.vue'), meta: { module: 'M8', title: '故障复盘' } },
+    { path: '/ticket-report', name: 'ticket-report', component: () => import('@/features/ticket-center/TicketReportPage.vue'), meta: { module: 'M8', title: '工单报告' } },
 
     // ============================================================
     // M9 报表审计中心
@@ -114,6 +136,11 @@ const router = createRouter({
     { path: '/audit', name: 'audit', component: () => import('@/features/platform-management/AuditLogPage.vue'), meta: { module: 'M9', title: '审计查询' } },
     { path: '/logs/search', name: 'log-search', component: () => import('@/features/report-audit-center/LogSearchPage.vue'), meta: { module: 'M9', title: '日志检索' } },
     { path: '/evidence', name: 'evidence-archive', component: () => import('@/features/report-audit-center/EvidenceArchivePage.vue'), meta: { module: 'M9', title: '证据归档' } },
+    { path: '/ops-report', name: 'ops-report', component: () => import('@/features/report-audit-center/OpsReportPage.vue'), meta: { module: 'M9', title: '运维报告' } },
+    { path: '/automation-report', name: 'automation-report', component: () => import('@/features/report-audit-center/AutomationReportPage.vue'), meta: { module: 'M9', title: '自动化报告' } },
+    { path: '/asset-report', name: 'asset-report', component: () => import('@/features/report-audit-center/AssetReportPage.vue'), meta: { module: 'M9', title: '资产报告' } },
+    { path: '/audit-query', name: 'audit-query', component: () => import('@/features/report-audit-center/AuditQueryPage.vue'), meta: { module: 'M9', title: '审计查询' } },
+    { path: '/inspection-report', name: 'inspection-report-center', component: () => import('@/features/report-audit-center/InspectionReportPage.vue'), meta: { module: 'M9', title: '巡检报告' } },
 
     // ============================================================
     // M10 平台管理
@@ -129,6 +156,10 @@ const router = createRouter({
     { path: '/task-queue', name: 'admin-tasks', component: () => import('@/features/platform-management/TaskQueuePage.vue'), meta: { module: 'M10', title: '任务队列' } },
     { path: '/backup', name: 'admin-backup', component: () => import('@/features/platform-management/BackupPage.vue'), meta: { module: 'M10', title: '备份恢复' } },
     { path: '/system-check', name: 'admin-self-check', component: () => import('@/features/platform-management/SelfCheckPage.vue'), meta: { module: 'M10', title: '系统自检' } },
+    { path: '/permission-policy', name: 'permission-policy', component: () => import('@/features/platform-management/PermissionPolicyPage.vue'), meta: { module: 'M10', title: '权限策略' } },
+    { path: '/upgrade-maintenance', name: 'upgrade-maintenance', component: () => import('@/features/platform-management/UpgradeMaintenancePage.vue'), meta: { module: 'M10', title: '升级维护' } },
+    { path: '/license', name: 'license', component: () => import('@/features/platform-management/LicensePage.vue'), meta: { module: 'M10', title: '授权许可' } },
+    { path: '/security-baseline', name: 'security-baseline', component: () => import('@/features/platform-management/SecurityBaselinePage.vue'), meta: { module: 'M10', title: '安全基线' } },
 
     // 404
     { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/app/NotFoundPage.vue') },
