@@ -161,21 +161,22 @@
           </template>
         </el-table-column>
         <el-table-column prop="title" label="告警标题" min-width="220" show-overflow-tooltip />
-        <el-table-column prop="asset_name" label="关联资产" min-width="140" show-overflow-tooltip>
-          <template #default="{ row }">
-            {{ row.asset_name || row.asset?.name || '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" width="100" align="center">
-          <template #default="{ row }">
-            <StatusBadge :status="row.status" size="small" show-icon />
-          </template>
-        </el-table-column>
-        <el-table-column prop="triggered_at" label="触发时间" width="175">
-          <template #default="{ row }">
-            {{ formatTime(row.triggered_at || row.created_at) }}
-          </template>
-        </el-table-column>
+        <el-table-column prop="asset_ids" label="关联资产" min-width="140" show-overflow-tooltip>
+            <template #default="{ row }">
+              <span v-if="row.asset_ids && row.asset_ids.length">{{ row.asset_ids.length }} 个资产</span>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="状态" width="100" align="center">
+            <template #default="{ row }">
+              <StatusBadge :status="row.status" size="small" show-icon />
+            </template>
+          </el-table-column>
+          <el-table-column prop="created_at" label="触发时间" width="175">
+            <template #default="{ row }">
+              {{ formatTime(row.created_at) }}
+            </template>
+          </el-table-column>
         <el-table-column prop="acknowledged_at" label="确认时间" width="175">
           <template #default="{ row }">
             {{ row.acknowledged_at ? formatTime(row.acknowledged_at) : '-' }}
@@ -183,8 +184,8 @@
         </el-table-column>
         <el-table-column label="持续时间" width="120" align="center">
           <template #default="{ row }">
-            <span v-if="row.status === 'resolved'">{{ computeDuration(row.triggered_at || row.created_at, row.resolved_at) }}</span>
-            <span v-else>{{ computeDuration(row.triggered_at || row.created_at) }}</span>
+            <span v-if="row.status === 'resolved'">{{ computeDuration(row.created_at, row.resolved_at) }}</span>
+            <span v-else>{{ computeDuration(row.created_at) }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="240" fixed="right" align="center">

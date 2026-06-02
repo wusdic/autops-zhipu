@@ -518,7 +518,7 @@ function simulateRestoreProgress() {
       loadBackups()
       return
     }
-    restoreProgress.percent = Math.min(restoreProgress.percent + Math.floor(Math.random() * 15) + 5, 100)
+    restoreProgress.percent = Math.min(restoreProgress.percent + 10, 100)
   }, 800)
 }
 

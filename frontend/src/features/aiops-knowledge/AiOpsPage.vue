@@ -456,7 +456,7 @@
         </div>
 
         <!-- Thinking Process (Real-time Steps) -->
-        <div class="autops-card" v-if="agentSteps.length> 0" shadow="hover" class="workflow-card">
+        <div class="autops-card workflow-card" v-if="agentSteps.length > 0">
           
             <div class="autops-card-header">
               <span class="autops-card-title">

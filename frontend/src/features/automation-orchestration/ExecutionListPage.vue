@@ -181,11 +181,16 @@
         class="execution-table"
       >
         <el-table-column type="selection" width="45" fixed="left" />
-        <el-table-column prop="execution_id" label="执行ID" width="180" show-overflow-tooltip>
+        <el-table-column prop="id" label="执行ID" width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <el-button link type="primary" @click="goDetail(row)">
-              {{ truncateId(row.execution_id || row.id) }}
+              {{ truncateId(row.id) }}
             </el-button>
+          </template>
+        </el-table-column>
+        <el-table-column prop="execution_type" label="类型" width="110" align="center">
+          <template #default="{ row }">
+            <el-tag size="small" effect="plain">{{ row.execution_type || '-' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="trigger_source" label="触发来源" width="110" align="center">
@@ -195,20 +200,18 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="target_assets" label="目标资产" min-width="160" show-overflow-tooltip>
+        <el-table-column prop="asset_ids" label="目标资产" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
-            <span v-if="row.target_assets && row.target_assets.length">
-              {{ row.target_assets.join(', ') }}
-            </span>
-            <span v-else-if="row.target_asset_names">
-              {{ row.target_asset_names }}
+            <span v-if="row.asset_ids && row.asset_ids.length">
+              {{ row.asset_ids.length }} 个资产
             </span>
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="playbook_name" label="Playbook / 脚本" min-width="180" show-overflow-tooltip>
+        <el-table-column prop="is_dry_run" label="Dry-run" width="80" align="center">
           <template #default="{ row }">
-            {{ row.playbook_name || row.script_name || row.policy_name || '-' }}
+            <el-tag v-if="row.is_dry_run" size="small" type="warning">模拟</el-tag>
+            <span v-else>-</span>
           </template>
         </el-table-column>
         <el-table-column prop="risk_level" label="风险等级" width="100" align="center">

@@ -212,19 +212,19 @@
             <SeverityBadge :severity="row.severity" size="small" />
           </template>
         </el-table-column>
-        <el-table-column prop="asset_name" label="关联资产" min-width="140" show-overflow-tooltip>
+        <el-table-column prop="asset_id" label="关联资产" min-width="140" show-overflow-tooltip>
           <template #default="{ row }">
-            {{ row.asset_name || row.asset?.name || row.asset_id || '-' }}
+            <span style="font-family:monospace;font-size:12px">{{ row.asset_id?.substring(0,8) || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="description" label="描述" min-width="220" show-overflow-tooltip>
+        <el-table-column prop="detail" label="描述" min-width="220" show-overflow-tooltip>
           <template #default="{ row }">
-            {{ row.description || row.title || '-' }}
+            {{ row.detail || row.title || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="event_type" label="类型" width="120" align="center">
           <template #default="{ row }">
-            <StatusBadge :status="row.status" size="small" show-icon />
+            <el-tag size="small" type="info">{{ row.event_type || '-' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="140" fixed="right" align="center">

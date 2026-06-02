@@ -172,7 +172,16 @@
       </div>
       <div class="autops-card-body">
         <el-table :data="changes" v-loading="changesLoading" stripe>
-          <el-table-column prop="asset_name" label="资产" min-width="140" show-overflow-tooltip />
+          <el-table-column label="资产" min-width="140" show-overflow-tooltip>
+            <template #default="{ row }">
+              <span style="font-family:monospace;font-size:12px">{{ row.asset_id?.substring(0,8) || '-' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="state_type" label="类型" width="100">
+            <template #default="{ row }">
+              <el-tag size="small" type="info">{{ row.state_type || '-' }}</el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="变更前" width="120">
             <template #default="{ row }">
               <StatusBadge :status="row.old_status" size="small" />
@@ -183,9 +192,10 @@
               <StatusBadge :status="row.new_status" size="small" show-icon />
             </template>
           </el-table-column>
-          <el-table-column prop="reason" label="原因" min-width="200" show-overflow-tooltip />
-          <el-table-column prop="changed_at" label="变更时间" width="180">
-            <template #default="{ row }">{{ formatTime(row.changed_at) }}</template>
+          <el-table-column prop="old_value" label="旧值" width="80" show-overflow-tooltip />
+          <el-table-column prop="new_value" label="新值" width="80" show-overflow-tooltip />
+          <el-table-column prop="created_at" label="变更时间" width="180">
+            <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
           </el-table-column>
         </el-table>
       </div>

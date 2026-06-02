@@ -97,10 +97,10 @@
             <el-tag :type="healthType(row.health_status)" size="small">{{ healthLabel(row.health_status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="lifecycle_status" label="生命周期" width="110">
+        <el-table-column prop="reachability" label="可达性" width="90">
           <template #default="{ row }">
-            <el-tag :type="lifecycleType(row.lifecycle_status)" size="small" effect="dark">
-              {{ formatLifecycle(row.lifecycle_status) }}
+            <el-tag :type="row.reachability === 'reachable' ? 'success' : 'danger'" size="small">
+              {{ row.reachability === 'reachable' ? '可达' : (row.reachability || '-') }}
             </el-tag>
           </template>
         </el-table-column>
@@ -239,9 +239,9 @@
           <el-descriptions-item label="健康状态">
             <el-tag :type="healthType(currentAsset.health_status)">{{ currentAsset.health_status }}</el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="生命周期">
-            <el-tag :type="lifecycleType(currentAsset.lifecycle_status)" effect="dark">
-              {{ formatLifecycle(currentAsset.lifecycle_status) }}
+          <el-descriptions-item label="可达性">
+            <el-tag :type="currentAsset.reachability === 'reachable' ? 'success' : 'danger'">
+              {{ currentAsset.reachability || '-' }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="操作系统">{{ currentAsset.os_type || '-' }}</el-descriptions-item>

@@ -35,8 +35,8 @@
       <el-table-column prop="name" label="名称" min-width="160">
         <template #default="{ row }"><el-link type="primary" @click="viewDetail(row)">{{ row.name }}</el-link></template>
       </el-table-column>
-      <el-table-column prop="trigger_source" label="触发源" width="100">
-        <template #default="{ row }"><el-tag size="small">{{ triggerLabel(row.trigger_source) }}</el-tag></template>
+      <el-table-column prop="trigger_type" label="触发类型" width="100">
+        <template #default="{ row }"><el-tag size="small">{{ triggerLabel(row.trigger_type) }}</el-tag></template>
       </el-table-column>
       <el-table-column prop="risk_level" label="风险" width="80">
         <template #default="{ row }"><el-tag :type="riskType(row.risk_level)" size="small">{{ row.risk_level }}</el-tag></template>
@@ -48,7 +48,7 @@
         <template #default="{ row }">{{ row.scope_description || '-' }}</template>
       </el-table-column>
       <el-table-column label="动作数" width="80" align="center">
-        <template #default="{ row }">{{ row.actions?.length || 0 }}</template>
+        <template #default="{ row }">{{ row.action_chain?.length || 0 }}</template>
       </el-table-column>
       <el-table-column prop="created_at" label="创建时间" width="170">
         <template #default="{ row }">{{ fmt(row.created_at) }}</template>

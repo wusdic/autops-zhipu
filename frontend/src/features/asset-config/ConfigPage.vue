@@ -12,7 +12,7 @@
         <div class="autops-toolbar-right">
           <el-input
             v-model="filters.search"
-            placeholder="搜索配置键"
+            placeholder="搜索配置名称"
             clearable
             style="width:180px"
             @clear="loadConfigs"
@@ -33,10 +33,10 @@
       <div class="autops-card-body">
 
       <el-table :data="configs" v-loading="loading" stripe row-key="id">
-        <el-table-column prop="config_key" label="配置键" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="config_value" label="配置值" min-width="200" show-overflow-tooltip>
+        <el-table-column prop="name" label="配置名称" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="schema_def" label="Schema定义" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
-            <code style="font-size:12px">{{ truncate(row.config_value, 60) }}</code>
+            <code style="font-size:12px">{{ truncate(row.schema_def, 60) }}</code>
           </template>
         </el-table-column>
         <el-table-column prop="config_type" label="类型" width="120">
@@ -51,10 +51,10 @@
             <span style="font-family:monospace">v{{ row.version }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="is_active" label="状态" width="90" align="center">
+        <el-table-column prop="is_deleted" label="状态" width="90" align="center">
           <template #default="{ row }">
             <el-switch
-              :model-value="row.is_active"
+              :model-value="!row.is_deleted"
               size="small"
               active-text="激活"
               inactive-text="停用"
@@ -100,16 +100,16 @@
       destroy-on-close
     >
       <el-form :model="formData" :rules="formRules" ref="formRef" label-width="90px">
-        <el-form-item label="配置键" prop="config_key">
+        <el-form-item label="配置名称" prop="name">
           <el-input
-            v-model="formData.config_key"
+            v-model="formData.name"
             placeholder="例如: collector.ssh.timeout"
             :disabled="isEditing"
           />
         </el-form-item>
-        <el-form-item label="配置值" prop="config_value">
+        <el-form-item label="Schema定义" prop="schema_def">
           <el-input
-            v-model="formData.config_value"
+            v-model="formData.schema_def"
             type="textarea"
             :rows="8"
             placeholder="支持 JSON / 纯文本"
@@ -138,7 +138,7 @@
     <!-- ========== 版本历史对话框 ========== -->
     <el-dialog
       v-model="showHistoryDialog"
-      :title="`版本历史 - ${historyConfigKey}`"
+      :title="`版本历史 - ${historyConfigName}`"
       width="900px"
       destroy-on-close
     >
@@ -171,7 +171,7 @@
             <span style="font-family:monospace;font-weight:600">v{{ row.version }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="config_value" label="值预览" min-width="220" show-overflow-tooltip>
+        <el-table-column prop="schema_def" label="值预览" min-width="220" show-overflow-tooltip>
           <template #default="{ row }">
             <code style="font-size:12px">{{ truncate(row.config_value, 50) }}</code>
           </template>
@@ -240,7 +240,7 @@
     <!-- ========== 配置绑定对话框 ========== -->
     <el-dialog
       v-model="showBindingDialog"
-      :title="`配置绑定 - ${bindingConfigKey}`"
+      :title="`配置绑定 - ${bindingConfigName}`"
       width="700px"
       destroy-on-close
     >
@@ -291,11 +291,11 @@ import JsonViewer from '@/shared/components/JsonViewer.vue'
 // ──────────────── Types ────────────────
 interface ConfigItem {
   id: string
-  config_key: string
-  config_value: string
+  name: string
+  schema_def: string
   config_type: string
   version: number
-  is_active: boolean
+  is_deleted: boolean
   description?: string
   updated_at: string
   created_at: string
@@ -305,10 +305,10 @@ interface ConfigVersion {
   id: string
   config_definition_id: string
   version: number
-  config_value: string
+  schema_def: string
   version_note?: string
   operator?: string
-  is_active: boolean
+  is_deleted: boolean
   created_at: string
 }
 
@@ -340,8 +340,8 @@ const editingId = ref('')
 const saving = ref(false)
 
 const defaultForm = {
-  config_key: '',
-  config_value: '',
+  name: '',
+  schema_def: '',
   config_type: 'system',
   description: '',
   version_note: '',
@@ -349,15 +349,15 @@ const defaultForm = {
 const formData = reactive({ ...defaultForm })
 
 const formRules = {
-  config_key: [{ required: true, message: '请输入配置键', trigger: 'blur' }],
-  config_value: [{ required: true, message: '请输入配置值', trigger: 'blur' }],
+  name: [{ required: true, message: '请输入配置名称', trigger: 'blur' }],
+  schema_def: [{ required: true, message: '请输入Schema定义', trigger: 'blur' }],
   config_type: [{ required: true, message: '请选择类型', trigger: 'change' }],
 }
 
 // ──────────────── Version History State ────────────────
 const showHistoryDialog = ref(false)
 const historyConfigId = ref('')
-const historyConfigKey = ref('')
+const historyConfigName = ref('')
 const versions = ref<ConfigVersion[]>([])
 const versionsLoading = ref(false)
 const selectedVersions = ref<ConfigVersion[]>([])
@@ -371,7 +371,7 @@ const diffRight = ref<ConfigVersion | null>(null)
 // ──────────────── Binding State ────────────────
 const showBindingDialog = ref(false)
 const bindingConfigId = ref('')
-const bindingConfigKey = ref('')
+const bindingConfigName = ref('')
 const boundAssets = ref<any[]>([])
 const boundPolicies = ref<any[]>([])
 const bindingLoading = ref(false)
@@ -438,8 +438,8 @@ function openEditDialog(row: ConfigItem) {
   isEditing.value = true
   editingId.value = row.id
   Object.assign(formData, {
-    config_key: row.config_key,
-    config_value: row.config_value,
+    name: row.name,
+    schema_def: row.schema_def,
     config_type: row.config_type,
     description: row.description || '',
     version_note: '',
@@ -452,7 +452,7 @@ async function saveConfig() {
   try {
     if (isEditing.value) {
       const payload = {
-        config_value: formData.config_value,
+        schema_def: formData.schema_def,
         config_type: formData.config_type,
         description: formData.description,
         version_note: formData.version_note,
@@ -467,8 +467,8 @@ async function saveConfig() {
       }
     } else {
       const payload = {
-        config_key: formData.config_key,
-        config_value: formData.config_value,
+        name: formData.name,
+        schema_def: formData.schema_def,
         config_type: formData.config_type,
         description: formData.description,
       }
@@ -508,7 +508,7 @@ async function toggleActive(row: ConfigItem, val: boolean) {
     const endpoint = val
       ? R.CONFIG_PUBLISH(row.id)
       : R.CONFIG_DETAIL(row.id)
-    const payload = val ? {} : { is_active: false }
+    const payload = val ? {} : { is_deleted: true }
     const { data } = val
       ? await api.post(endpoint, payload)
       : await api.patch(endpoint, payload)
@@ -526,7 +526,7 @@ async function toggleActive(row: ConfigItem, val: boolean) {
 // ──────────────── Version History ────────────────
 async function openHistoryDialog(row: ConfigItem) {
   historyConfigId.value = row.id
-  historyConfigKey.value = row.config_key
+  historyConfigName.value = row.name
   previewData.value = null
   selectedVersions.value = []
   showHistoryDialog.value = true
@@ -598,7 +598,7 @@ function openDiffView() {
 // ──────────────── Config Binding ────────────────
 async function openBindingDialog(row: ConfigItem) {
   bindingConfigId.value = row.id
-  bindingConfigKey.value = row.config_key
+  bindingConfigName.value = row.name
   boundAssets.value = []
   boundPolicies.value = []
   showBindingDialog.value = true

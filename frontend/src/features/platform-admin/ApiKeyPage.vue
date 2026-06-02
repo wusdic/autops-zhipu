@@ -265,9 +265,11 @@ const getDetailScopeGroups = computed(() => {
 const usageBars = computed(() => {
   if (!detailData.value?.use_count) return Array.from({ length: 7 }, (_, i) => ({ label: `${7 - i}天前`, height: 0 }))
   const count = detailData.value.use_count || 0
+  // 均匀分布，不使用随机数
+  const avg = Math.max(5, Math.round(count / 7))
   return Array.from({ length: 7 }, (_, i) => ({
     label: `${7 - i}天前`,
-    height: Math.min(100, Math.max(5, Math.round((count / 7) * (1 + Math.random() * 0.5) * (i < 3 ? 0.3 : 1))))
+    height: avg
   }))
 })
 
@@ -317,7 +319,7 @@ function computeStats() {
 async function load() {
   loading.value = true
   try {
-    const { data } = await api.get(API.API_KEYS, { params: { page: page.value, page_size: pageSize } })
+    const { data } = await api.get(API.GOVERNANCE.API_KEYS, { params: { page: page.value, page_size: pageSize } })
     if (data?.code === 0) { apiKeys.value = data.data?.items || data.data || []; total.value = data.data?.total || apiKeys.value.length }
     computeStats()
   } catch { ElMessage.error('加载失败') }
@@ -340,7 +342,7 @@ async function handleCreate() {
   try {
     const payload: any = { name: formData.name, scopes }
     if (formData.expires_at) payload.expires_at = formData.expires_at
-    const { data } = await api.post(API.API_KEYS, payload)
+    const { data } = await api.post(API.GOVERNANCE.API_KEYS, payload)
     dialogVisible.value = false
     const result = data?.data || data
     createdKey.name = formData.name; createdKey.key_id = result.key_id || result.id || ''; createdKey.secret = result.secret || result.key || ''

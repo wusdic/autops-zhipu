@@ -219,6 +219,8 @@
 import { ref, reactive, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
+import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 const router = useRouter()
 
@@ -255,32 +257,27 @@ let allJobs: any[] = []
 
 async function fetchDashboard() {
   try {
-    const token = localStorage.getItem('autops_token')
-    if (!token) return
-    const H = { Authorization: `Bearer ${token}` }
-
-    // 并发请求
+    // 并发请求（使用统一api client + routes常量）
     const [alertsRes, assetsRes, execRes, eventsRes, jobsRes] = await Promise.all([
-      fetch('/api/v1/alerts?page_size=5', { headers: H }),
-      fetch('/api/v1/assets?page_size=100', { headers: H }),
-      fetch('/api/v1/executions?page_size=100', { headers: H }),
-      fetch('/api/v1/events?page_size=1', { headers: H }),
-      fetch('/api/v1/collection-jobs?page_size=100', { headers: H }),
+      api.get(API.ALERTS, { params: { page_size: 5 } }),
+      api.get(API.ASSETS, { params: { page_size: 100 } }),
+      api.get(API.EXECUTIONS, { params: { page_size: 100 } }),
+      api.get(API.EVENTS, { params: { page_size: 1 } }),
+      api.get(API.COLLECTION_JOBS, { params: { page_size: 100 } }),
     ])
 
-    if (alertsRes.ok) {
-      const d = await alertsRes.json()
-      const items = d?.data?.items || []
+    const alertsData = alertsRes.data
+    if (alertsData?.code === 0) {
+      const items = alertsData.data?.items || []
       recentAlerts.value = items
-      stats.activeAlerts = items.filter((a: any) => a.status === 'active').length
+      stats.activeAlerts = items.filter((a: any) => a.status === 'active' || a.status === 'firing').length
       stats.criticalAlerts = items.filter((a: any) => a.severity === 'critical').length
     }
 
-    if (assetsRes.ok) {
-      const d = await assetsRes.json()
-      stats.totalAssets = d?.data?.total || 0
-      // Health distribution — use actual items
-      const allItems = d?.data?.items || []
+    const assetsData = assetsRes.data
+    if (assetsData?.code === 0) {
+      stats.totalAssets = assetsData.data?.total || 0
+      const allItems = assetsData.data?.items || []
       healthData.value[0].count = allItems.filter((a: any) => a.health_status === 'healthy').length
       healthData.value[1].count = allItems.filter((a: any) => a.health_status === 'warning').length
       healthData.value[2].count = allItems.filter((a: any) => a.health_status === 'critical').length
@@ -291,16 +288,15 @@ async function fetchDashboard() {
       })
     }
 
-    if (execRes.ok) {
-      const d = await execRes.json()
-      const items = d?.data?.items || []
+    const execData = execRes.data
+    if (execData?.code === 0) {
+      const items = execData.data?.items || []
       stats.runningExecutions = items.filter((e: any) =>
         ['pending', 'approved', 'running', 'dry_running'].includes(e.status)
       ).length
       stats.pendingApprovals = items.filter((e: any) =>
         e.status === 'awaiting_approval'
       ).length
-      // Exec stats
       const todayStart = new Date()
       todayStart.setHours(0, 0, 0, 0)
       const todayItems = items.filter((e: any) => new Date(e.created_at) >= todayStart)
@@ -310,15 +306,15 @@ async function fetchDashboard() {
       execStats.successRate = finished.length > 0 ? Math.round(successCount / finished.length * 100) : 0
     }
 
-    if (eventsRes.ok) {
-      const d = await eventsRes.json()
-      stats.todayEvents = d?.data?.total || 0
+    const eventsData = eventsRes.data
+    if (eventsData?.code === 0) {
+      stats.todayEvents = eventsData.data?.total || 0
     }
 
     // Collection jobs → success rate trend
-    if (jobsRes.ok) {
-      const d = await jobsRes.json()
-      const jobs = d?.data?.items || []
+    const jobsData = jobsRes.data
+    if (jobsData?.code === 0) {
+      const jobs = jobsData.data?.items || []
       allJobs = jobs
       computeTrendData(jobs)
     }
