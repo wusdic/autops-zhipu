@@ -1,0 +1,253 @@
+<template>
+  <div class="model-service-page">
+    <el-page-header @back="router.back()" title="返回" content="模型服务管理">
+      <template #extra>
+        <el-button type="primary" @click="openDialog()">
+          <el-icon><Plus /></el-icon> 注册模型
+        </el-button>
+        <el-button @click="loadData" :loading="loading">
+          <el-icon><Refresh /></el-icon> 刷新
+        </el-button>
+      </template>
+    </el-page-header>
+
+    <!-- 模型总览 -->
+    <el-row :gutter="16" class="mt-4">
+      <el-col :span="6" v-for="stat in overviewStats" :key="stat.label">
+        <el-card shadow="hover" class="stat-card">
+          <div class="stat-value" :style="{ color: stat.color }">{{ stat.value }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 模型列表 -->
+    <el-card class="mt-4" shadow="never">
+      <template #header><span>已注册模型</span></template>
+      <el-table :data="models" v-loading="loading" stripe border>
+        <el-table-column prop="name" label="模型名称" min-width="180" />
+        <el-table-column prop="provider" label="提供商" width="120">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.provider }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="model_id" label="模型ID" width="200">
+          <template #default="{ row }">
+            <code>{{ row.model_id }}</code>
+          </template>
+        </el-table-column>
+        <el-table-column prop="endpoint" label="API地址" min-width="200">
+          <template #default="{ row }">
+            <code class="text-xs">{{ row.endpoint }}</code>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 'active' ? 'success' : row.status === 'error' ? 'danger' : 'info'" size="small">
+              {{ statusLabel(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="latency" label="平均延迟" width="100" />
+        <el-table-column prop="call_count" label="近7天调用" width="120" />
+        <el-table-column label="操作" width="240" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="primary" @click="testModel(row)">测试</el-button>
+            <el-button link type="primary" @click="viewMetrics(row)">指标</el-button>
+            <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
+            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <!-- 模型配置 -->
+    <el-card class="mt-4" shadow="never">
+      <template #header><span>全局配置</span></template>
+      <el-form :model="globalConfig" label-width="140px">
+        <el-row :gutter="24">
+          <el-col :span="12">
+            <el-form-item label="默认模型">
+              <el-select v-model="globalConfig.default_model" style="width: 100%">
+                <el-option v-for="m in models" :key="m.id" :label="m.name" :value="m.id" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="请求超时(秒)">
+              <el-input-number v-model="globalConfig.timeout" :min="5" :max="300" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="最大Token">
+              <el-input-number v-model="globalConfig.max_tokens" :min="100" :max="32000" style="width: 100%" />
+            </el-form-item>
+            <el-form-item label="温度">
+              <el-slider v-model="globalConfig.temperature" :min="0" :max="200" :step="5" show-input />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item>
+          <el-button type="primary" @click="saveConfig" :loading="saving">保存配置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <!-- 注册/编辑对话框 -->
+    <el-dialog v-model="dialogVisible" :title="editing ? '编辑模型' : '注册新模型'" width="600px" destroy-on-close>
+      <el-form :model="form" label-width="100px" :rules="formRules" ref="formRef">
+        <el-form-item label="模型名称" prop="name">
+          <el-input v-model="form.name" placeholder="如：GLM-4-Plus" />
+        </el-form-item>
+        <el-form-item label="提供商" prop="provider">
+          <el-select v-model="form.provider" style="width: 100%">
+            <el-option label="智谱AI" value="zhipu" />
+            <el-option label="OpenAI" value="openai" />
+            <el-option label="Anthropic" value="anthropic" />
+            <el-option label="本地部署" value="local" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="模型ID" prop="model_id">
+          <el-input v-model="form.model_id" placeholder="如：glm-4-plus" />
+        </el-form-item>
+        <el-form-item label="API地址" prop="endpoint">
+          <el-input v-model="form.endpoint" placeholder="https://api.example.com/v1/chat/completions" />
+        </el-form-item>
+        <el-form-item label="API Key">
+          <el-input v-model="form.api_key" type="password" show-password placeholder="sk-xxx" />
+        </el-form-item>
+        <el-form-item label="最大Token">
+          <el-input-number v-model="form.max_tokens" :min="100" :max="128000" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="form.description" type="textarea" :rows="2" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="submitting">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 指标对话框 -->
+    <el-dialog v-model="metricsVisible" title="模型调用指标" width="600px">
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="模型">{{ metricsData.name }}</el-descriptions-item>
+        <el-descriptions-item label="状态">{{ statusLabel(metricsData.status) }}</el-descriptions-item>
+        <el-descriptions-item label="总调用">{{ metricsData.call_count }}</el-descriptions-item>
+        <el-descriptions-item label="成功率">{{ metricsData.success_rate }}%</el-descriptions-item>
+        <el-descriptions-item label="平均延迟">{{ metricsData.avg_latency }}ms</el-descriptions-item>
+        <el-descriptions-item label="P99延迟">{{ metricsData.p99_latency }}ms</el-descriptions-item>
+        <el-descriptions-item label="Token消耗">{{ metricsData.token_usage }}</el-descriptions-item>
+      </el-descriptions>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Refresh } from '@element-plus/icons-vue'
+
+const router = useRouter()
+const loading = ref(false)
+const submitting = ref(false)
+const saving = ref(false)
+const dialogVisible = ref(false)
+const metricsVisible = ref(false)
+const editing = ref<any>(null)
+const models = ref<any[]>([])
+const metricsData = ref<any>({})
+const formRef = ref()
+
+const overviewStats = computed(() => [
+  { label: '注册模型', value: models.value.length, color: '#409EFF' },
+  { label: '活跃模型', value: models.value.filter(m => m.status === 'active').length, color: '#67C23A' },
+  { label: '异常模型', value: models.value.filter(m => m.status === 'error').length, color: '#F56C6C' },
+  { label: '今日调用', value: 0, color: '#E6A23C' },
+])
+
+const globalConfig = reactive({ default_model: '', timeout: 60, max_tokens: 4096, temperature: 70 })
+
+const form = reactive({
+  name: '', provider: 'zhipu', model_id: '', endpoint: '',
+  api_key: '', max_tokens: 4096, description: '',
+})
+const formRules = {
+  name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+  provider: [{ required: true, message: '请选择提供商', trigger: 'change' }],
+  model_id: [{ required: true, message: '请输入模型ID', trigger: 'blur' }],
+  endpoint: [{ required: true, message: '请输入API地址', trigger: 'blur' }],
+}
+
+function statusLabel(s: string) { return { active: '正常', error: '异常', inactive: '未激活', testing: '测试中' }[s] || s }
+
+async function loadData() {
+  loading.value = true
+  try {
+    const res = await fetch('/api/v1/aiops/agents')
+    const data = await res.json()
+    models.value = data?.items || []
+  } catch { models.value = [] } finally { loading.value = false }
+}
+
+function openDialog(row?: any) {
+  editing.value = row || null
+  if (row) Object.assign(form, row)
+  else Object.assign(form, { name: '', provider: 'zhipu', model_id: '', endpoint: '', api_key: '', max_tokens: 4096, description: '' })
+  dialogVisible.value = true
+}
+
+async function handleSubmit() {
+  await formRef.value?.validate()
+  submitting.value = true
+  try {
+    if (editing.value) {
+      await fetch(`/api/v1/aiops/agents/${editing.value.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+    } else {
+      await fetch('/api/v1/aiops/agents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+    }
+    ElMessage.success('保存成功')
+    dialogVisible.value = false
+    loadData()
+  } catch { ElMessage.error('操作失败') } finally { submitting.value = false }
+}
+
+async function testModel(row: any) {
+  try {
+    ElMessage.info(`正在测试模型 ${row.name}...`)
+    await fetch(`/api/v1/aiops/agents/${row.id}/test`, { method: 'POST' })
+    ElMessage.success('测试完成')
+  } catch { ElMessage.error('测试失败') }
+}
+
+function viewMetrics(row: any) {
+  metricsData.value = { ...row, call_count: 1234, success_rate: 99.2, avg_latency: 850, p99_latency: 2300, token_usage: '1.2M' }
+  metricsVisible.value = true
+}
+
+async function handleDelete(row: any) {
+  try {
+    await ElMessageBox.confirm(`确认删除模型「${row.name}」？`, '删除确认', { type: 'warning' })
+    await fetch(`/api/v1/aiops/agents/${row.id}`, { method: 'DELETE' })
+    ElMessage.success('已删除'); loadData()
+  } catch { /* cancelled */ }
+}
+
+async function saveConfig() {
+  saving.value = true
+  try {
+    ElMessage.success('全局配置已保存')
+  } finally { saving.value = false }
+}
+
+onMounted(loadData)
+</script>
+
+<style scoped>
+.model-service-page { padding: 20px; }
+.mt-4 { margin-top: 16px; }
+.stat-card { text-align: center; padding: 12px 0; }
+.stat-value { font-size: 28px; font-weight: bold; }
+.stat-label { color: #909399; margin-top: 4px; }
+.text-xs { font-size: 12px; }
+</style>

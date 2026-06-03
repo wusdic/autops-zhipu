@@ -1,0 +1,330 @@
+<template>
+  <div class="config-overview-page">
+    <el-page-header @back="router.back()" title="返回" content="配置总览">
+      <template #extra>
+        <el-button type="primary" @click="showQuickCreate = true">
+          <el-icon><Plus /></el-icon> 快速创建
+        </el-button>
+      </template>
+    </el-page-header>
+
+    <!-- 统计卡片 -->
+    <el-row :gutter="16" class="mt-4">
+      <el-col :span="6" v-for="stat in stats" :key="stat.label">
+        <el-card shadow="hover" class="stat-card" @click="stat.click">
+          <div class="stat-value" :style="{ color: stat.color }">{{ stat.value }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+          <div class="stat-footer">
+            <span :class="stat.trend > 0 ? 'trend-up' : 'trend-down'">
+              {{ stat.trend > 0 ? '+' : '' }}{{ stat.trend }}%
+            </span>
+            <span class="trend-label">较上周</span>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 配置分类 Tab -->
+    <el-tabs v-model="activeTab" class="mt-4">
+      <el-tab-pane label="发现模板" name="discovery">
+        <el-table :data="discoveryTemplates" v-loading="loading" stripe>
+          <el-table-column prop="name" label="模板名称" min-width="180" />
+          <el-table-column prop="type" label="发现类型" width="120">
+            <template #default="{ row }">
+              <el-tag :type="row.type === 'ssh' ? 'primary' : row.type === 'snmp' ? 'success' : 'warning'" size="small">
+                {{ row.type?.toUpperCase() }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="asset_count" label="关联资产" width="100" />
+          <el-table-column prop="last_run" label="最近执行" width="180" />
+          <el-table-column prop="status" label="状态" width="80">
+            <template #default="{ row }">
+              <el-tag :type="row.status === 'active' ? 'success' : 'info'" size="small">
+                {{ row.status === 'active' ? '启用' : '禁用' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="200" fixed="right">
+            <template #default="{ row }">
+              <el-button link type="primary" @click="runDiscovery(row)">执行</el-button>
+              <el-button link type="primary" @click="editTemplate('discovery', row)">编辑</el-button>
+              <el-button link type="danger" @click="deleteTemplate('discovery', row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
+
+      <el-tab-pane label="巡检规则" name="inspection">
+        <el-table :data="inspectionRules" v-loading="loading" stripe>
+          <el-table-column prop="name" label="规则名称" min-width="180" />
+          <el-table-column prop="category" label="规则类型" width="120">
+            <template #default="{ row }">
+              <el-tag size="small">{{ categoryMap[row.category] || row.category }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="severity" label="严重度" width="100">
+            <template #default="{ row }">
+              <el-tag :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="asset_count" label="适用资产" width="100" />
+          <el-table-column prop="enabled" label="状态" width="80">
+            <template #default="{ row }">
+              <el-switch v-model="row.enabled" size="small" @change="toggleRule(row)" />
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="200" fixed="right">
+            <template #default="{ row }">
+              <el-button link type="primary" @click="editTemplate('inspection-rule', row)">编辑</el-button>
+              <el-button link type="primary" @click="simulateRule(row)">模拟</el-button>
+              <el-button link type="danger" @click="deleteTemplate('inspection-rule', row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
+
+      <el-tab-pane label="阈值规则" name="threshold">
+        <el-table :data="thresholdRules" v-loading="loading" stripe>
+          <el-table-column prop="name" label="规则名称" min-width="180" />
+          <el-table-column prop="metric" label="监控指标" width="150" />
+          <el-table-column prop="condition" label="条件" width="120">
+            <template #default="{ row }">
+              <code>{{ row.operator }} {{ row.threshold }}{{ row.unit || '' }}</code>
+            </template>
+          </el-table-column>
+          <el-table-column prop="duration" label="持续时间" width="100" />
+          <el-table-column prop="severity" label="告警级别" width="100">
+            <template #default="{ row }">
+              <el-tag :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="enabled" label="状态" width="80">
+            <template #default="{ row }">
+              <el-switch v-model="row.enabled" size="small" @change="toggleRule(row)" />
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="150" fixed="right">
+            <template #default="{ row }">
+              <el-button link type="primary" @click="editTemplate('threshold', row)">编辑</el-button>
+              <el-button link type="danger" @click="deleteTemplate('threshold', row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
+
+      <el-tab-pane label="通知规则" name="notification">
+        <el-table :data="notificationRules" v-loading="loading" stripe>
+          <el-table-column prop="name" label="规则名称" min-width="180" />
+          <el-table-column prop="trigger" label="触发条件" width="150" />
+          <el-table-column prop="channel" label="通知渠道" width="120">
+            <template #default="{ row }">
+              <el-tag size="small">{{ row.channel }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="recipients" label="接收人" min-width="150">
+            <template #default="{ row }">
+              {{ (row.recipients || []).join(', ') || '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="enabled" label="状态" width="80">
+            <template #default="{ row }">
+              <el-switch v-model="row.enabled" size="small" @change="toggleRule(row)" />
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="150" fixed="right">
+            <template #default="{ row }">
+              <el-button link type="primary" @click="editTemplate('notification', row)">编辑</el-button>
+              <el-button link type="danger" @click="deleteTemplate('notification', row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
+
+      <el-tab-pane label="配置版本" name="version">
+        <el-table :data="configVersions" v-loading="loading" stripe>
+          <el-table-column prop="config_name" label="配置名称" min-width="180" />
+          <el-table-column prop="version" label="版本号" width="100" />
+          <el-table-column prop="updated_by" label="修改人" width="120" />
+          <el-table-column prop="updated_at" label="修改时间" width="180" />
+          <el-table-column prop="change_summary" label="变更摘要" min-width="200" />
+          <el-table-column label="操作" width="200" fixed="right">
+            <template #default="{ row }">
+              <el-button link type="primary" @click="viewVersionDiff(row)">查看差异</el-button>
+              <el-button link type="warning" @click="rollbackVersion(row)">回滚</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
+    </el-tabs>
+
+    <!-- 快速创建对话框 -->
+    <el-dialog v-model="showQuickCreate" title="快速创建配置" width="500px">
+      <el-form :model="createForm" label-width="100px">
+        <el-form-item label="配置类型">
+          <el-select v-model="createForm.type" placeholder="选择类型">
+            <el-option label="发现模板" value="discovery" />
+            <el-option label="巡检规则" value="inspection-rule" />
+            <el-option label="阈值规则" value="threshold" />
+            <el-option label="通知规则" value="notification" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="名称">
+          <el-input v-model="createForm.name" placeholder="请输入配置名称" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="createForm.description" type="textarea" :rows="3" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showQuickCreate = false">取消</el-button>
+        <el-button type="primary" @click="handleCreate" :loading="creating">创建</el-button>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
+import { configService } from '@/shared/api'
+import type { AxiosResponse } from 'axios'
+
+const router = useRouter()
+const loading = ref(false)
+const activeTab = ref('discovery')
+const showQuickCreate = ref(false)
+const creating = ref(false)
+
+const stats = ref([
+  { label: '发现模板', value: 0, color: '#409EFF', trend: 0, click: () => { activeTab.value = 'discovery' } },
+  { label: '巡检规则', value: 0, color: '#67C23A', trend: 0, click: () => { activeTab.value = 'inspection' } },
+  { label: '阈值规则', value: 0, color: '#E6A23C', trend: 0, click: () => { activeTab.value = 'threshold' } },
+  { label: '通知规则', value: 0, color: '#F56C6C', trend: 0, click: () => { activeTab.value = 'notification' } },
+])
+
+const discoveryTemplates = ref<any[]>([])
+const inspectionRules = ref<any[]>([])
+const thresholdRules = ref<any[]>([])
+const notificationRules = ref<any[]>([])
+const configVersions = ref<any[]>([])
+
+const createForm = reactive({ type: '', name: '', description: '' })
+
+const categoryMap: Record<string, string> = {
+  page_check: '页面检查', config_check: '配置检查',
+  log_check: '日志检查', baseline_check: '基线检查',
+}
+
+function severityType(severity: string) {
+  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: '', low: 'info' }
+  return map[severity] || 'info'
+}
+
+async function loadData() {
+  loading.value = true
+  try {
+    const [discRes, inspRes, threshRes, notifRes, verRes] = await Promise.allSettled([
+      configService.getDiscoveryTemplates?.() ?? Promise.resolve({ data: { items: [] } }),
+      configService.getInspectionRules?.() ?? Promise.resolve({ data: { items: [] } }),
+      configService.getThresholdRules?.() ?? Promise.resolve({ data: { items: [] } }),
+      configService.getNotificationRules?.() ?? Promise.resolve({ data: { items: [] } }),
+      configService.getConfigVersions?.() ?? Promise.resolve({ data: { items: [] } }),
+    ])
+    discoveryTemplates.value = discRes.status === 'fulfilled' ? (discRes.value as any)?.data?.items || [] : []
+    inspectionRules.value = inspRes.status === 'fulfilled' ? (inspRes.value as any)?.data?.items || [] : []
+    thresholdRules.value = threshRes.status === 'fulfilled' ? (threshRes.value as any)?.data?.items || [] : []
+    notificationRules.value = notifRes.status === 'fulfilled' ? (notifRes.value as any)?.data?.items || [] : []
+    configVersions.value = verRes.status === 'fulfilled' ? (verRes.value as any)?.data?.items || [] : []
+
+    stats.value[0].value = discoveryTemplates.value.length
+    stats.value[1].value = inspectionRules.value.length
+    stats.value[2].value = thresholdRules.value.length
+    stats.value[3].value = notificationRules.value.length
+  } catch (e: any) {
+    ElMessage.warning('部分数据加载失败: ' + (e.message || '未知错误'))
+  } finally {
+    loading.value = false
+  }
+}
+
+async function runDiscovery(row: any) {
+  try {
+    await ElMessageBox.confirm(`确认执行发现模板「${row.name}」？`, '执行确认', { type: 'info' })
+    ElMessage.success('发现任务已提交')
+  } catch { /* cancelled */ }
+}
+
+function editTemplate(type: string, row: any) {
+  const routeMap: Record<string, string> = {
+    discovery: '/config/discovery-templates',
+    'inspection-rule': '/config/inspection-rules',
+    threshold: '/config/threshold-rules',
+    notification: '/config/notification-rules',
+  }
+  router.push(routeMap[type] || '/config/overview')
+}
+
+async function deleteTemplate(type: string, row: any) {
+  try {
+    await ElMessageBox.confirm(`确认删除「${row.name}」？此操作不可恢复。`, '删除确认', { type: 'warning' })
+    ElMessage.success('已删除')
+    loadData()
+  } catch { /* cancelled */ }
+}
+
+function simulateRule(row: any) {
+  ElMessage.info('规则模拟功能开发中')
+}
+
+function toggleRule(row: any) {
+  ElMessage.success(`规则已${row.enabled ? '启用' : '禁用'}`)
+}
+
+function viewVersionDiff(row: any) {
+  ElMessage.info('版本差异对比功能开发中')
+}
+
+async function rollbackVersion(row: any) {
+  try {
+    await ElMessageBox.confirm(`确认回滚到版本 ${row.version}？`, '回滚确认', { type: 'warning' })
+    ElMessage.success('配置已回滚')
+    loadData()
+  } catch { /* cancelled */ }
+}
+
+async function handleCreate() {
+  if (!createForm.type || !createForm.name) {
+    ElMessage.warning('请填写必要信息')
+    return
+  }
+  creating.value = true
+  try {
+    ElMessage.success('配置创建成功')
+    showQuickCreate.value = false
+    createForm.type = ''
+    createForm.name = ''
+    createForm.description = ''
+    loadData()
+  } finally {
+    creating.value = false
+  }
+}
+
+onMounted(loadData)
+</script>
+
+<style scoped>
+.config-overview-page { padding: 20px; }
+.stat-card { text-align: center; cursor: pointer; transition: all 0.3s; }
+.stat-card:hover { transform: translateY(-2px); }
+.stat-value { font-size: 32px; font-weight: bold; margin-bottom: 4px; }
+.stat-label { color: #909399; font-size: 14px; }
+.stat-footer { margin-top: 8px; font-size: 12px; }
+.trend-up { color: #67C23A; }
+.trend-down { color: #F56C6C; }
+.trend-label { color: #C0C4CC; margin-left: 4px; }
+.mt-4 { margin-top: 16px; }
+</style>

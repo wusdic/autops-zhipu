@@ -1,0 +1,171 @@
+<template>
+  <div class="manual-handling-page">
+    <el-page-header @back="router.back()" title="返回" content="人工处置台">
+      <template #extra>
+        <el-button type="primary" @click="openCreateDialog">
+          <el-icon><Plus /></el-icon> 新建处置工单
+        </el-button>
+        <el-button @click="loadData" :loading="loading">
+          <el-icon><Refresh /></el-icon> 刷新
+        </el-button>
+      </template>
+    </el-page-header>
+
+    <!-- 统计卡片 -->
+    <el-row :gutter="16" class="mt-4">
+      <el-col :span="6"><el-card shadow="hover"><el-statistic title="待处置" :value="stats.pending" /></el-card></el-col>
+      <el-col :span="6"><el-card shadow="hover"><el-statistic title="进行中" :value="stats.in_progress" /></el-card></el-col>
+      <el-col :span="6"><el-card shadow="hover"><el-statistic title="今日完成" :value="stats.completed_today" /></el-card></el-col>
+      <el-col :span="6"><el-card shadow="hover"><el-statistic title="平均处置时长" :value="stats.avg_duration" suffix="分钟" /></el-col></el-col>
+    </el-row>
+
+    <!-- 筛选 -->
+    <el-card class="mt-4" shadow="never">
+      <el-form :inline="true" :model="filters">
+        <el-form-item label="状态">
+          <el-select v-model="filters.status" placeholder="全部" clearable @change="loadData">
+            <el-option label="待处置" value="pending" />
+            <el-option label="进行中" value="in_progress" />
+            <el-option label="已完成" value="completed" />
+            <el-option label="已关闭" value="closed" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="优先级">
+          <el-select v-model="filters.priority" placeholder="全部" clearable @change="loadData">
+            <el-option label="紧急" value="urgent" />
+            <el-option label="高" value="high" />
+            <el-option label="中" value="medium" />
+            <el-option label="低" value="low" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="处置人">
+          <el-input v-model="filters.handler" placeholder="处置人" clearable />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="loadData">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <!-- 工单列表 -->
+    <el-card class="mt-4" shadow="never">
+      <el-table :data="items" v-loading="loading" stripe border>
+        <el-table-column prop="id" label="工单号" width="120" />
+        <el-table-column prop="title" label="处置标题" min-width="250" />
+        <el-table-column prop="priority" label="优先级" width="90">
+          <template #default="{ row }">
+            <el-tag :type="priorityType(row.priority)" size="small">{{ priorityLabel(row.priority) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="statusType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="handler" label="处置人" width="100" />
+        <el-table-column prop="asset_name" label="关联资产" width="140" />
+        <el-table-column prop="source" label="来源" width="100">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.source }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="sla_remaining" label="SLA剩余" width="120">
+          <template #default="{ row }">
+            <span :class="{ 'sla-warning': row.sla_remaining && row.sla_remaining < 30 }">
+              {{ row.sla_remaining ? row.sla_remaining + '分钟' : '-' }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="created_at" label="创建时间" width="180" />
+        <el-table-column label="操作" width="200" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="primary" @click="viewDetail(row)">详情</el-button>
+            <el-button link type="primary" @click="startHandle(row)" v-if="row.status === 'pending'">接单</el-button>
+            <el-button link type="success" @click="completeHandle(row)" v-if="row.status === 'in_progress'">完成</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination class="mt-4" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+        :total="pagination.total" :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next"
+        @size-change="loadData" @current-change="loadData" />
+    </el-card>
+
+    <!-- 详情 -->
+    <el-dialog v-model="detailVisible" title="处置详情" width="800px">
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="工单号">{{ detailData.id }}</el-descriptions-item>
+        <el-descriptions-item label="优先级">{{ detailData.priority }}</el-descriptions-item>
+        <el-descriptions-item label="处置人">{{ detailData.handler || '未分配' }}</el-descriptions-item>
+        <el-descriptions-item label="状态">{{ detailData.status }}</el-descriptions-item>
+        <el-descriptions-item label="描述" :span="2">{{ detailData.description }}</el-descriptions-item>
+      </el-descriptions>
+      <el-divider>处置记录</el-divider>
+      <el-timeline>
+        <el-timeline-item v-for="log in detailData.logs" :key="log.time" :timestamp="log.time" placement="top">
+          {{ log.content }}
+        </el-timeline-item>
+      </el-timeline>
+      <el-empty v-if="!detailData.logs?.length" description="暂无处置记录" />
+    </el-dialog>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { Plus, Refresh } from '@element-plus/icons-vue'
+
+const router = useRouter()
+const loading = ref(false)
+const detailVisible = ref(false)
+const items = ref<any[]>([])
+const detailData = ref<any>({})
+
+const stats = reactive({ pending: 0, in_progress: 0, completed_today: 0, avg_duration: 0 })
+const filters = reactive({ status: '', priority: '', handler: '' })
+const pagination = reactive({ page: 1, size: 20, total: 0 })
+
+function priorityType(p: string) { return { urgent: 'danger', high: 'warning', medium: '', low: 'info' }[p] || 'info' }
+function priorityLabel(p: string) { return { urgent: '紧急', high: '高', medium: '中', low: '低' }[p] || p }
+function statusType(s: string) { return { pending: 'warning', in_progress: 'primary', completed: 'success', closed: 'info' }[s] || 'info' }
+function statusLabel(s: string) { return { pending: '待处置', in_progress: '进行中', completed: '已完成', closed: '已关闭' }[s] || s }
+
+async function loadData() {
+  loading.value = true
+  try {
+    const params = new URLSearchParams({ page: String(pagination.page), page_size: String(pagination.size) })
+    if (filters.status) params.set('status', filters.status)
+    if (filters.priority) params.set('priority', filters.priority)
+    const res = await fetch(`/api/v1/tickets?${params}`)
+    const data = await res.json()
+    items.value = data?.items || []
+    pagination.total = data?.total || 0
+  } catch { items.value = [] } finally { loading.value = false }
+}
+
+function openCreateDialog() { router.push('/tickets/new') }
+function viewDetail(row: any) { detailData.value = row; detailVisible.value = true }
+
+async function startHandle(row: any) {
+  try {
+    await fetch(`/api/v1/tickets/${row.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'in_progress', handler: 'current_user' }) })
+    ElMessage.success('已接单'); loadData()
+  } catch { ElMessage.error('操作失败') }
+}
+
+async function completeHandle(row: any) {
+  try {
+    await fetch(`/api/v1/tickets/${row.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'completed' }) })
+    ElMessage.success('已完成'); loadData()
+  } catch { ElMessage.error('操作失败') }
+}
+
+onMounted(loadData)
+</script>
+
+<style scoped>
+.manual-handling-page { padding: 20px; }
+.mt-4 { margin-top: 16px; }
+.sla-warning { color: #F56C6C; font-weight: bold; }
+</style>

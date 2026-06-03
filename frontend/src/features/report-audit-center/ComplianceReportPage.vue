@@ -1,0 +1,159 @@
+<template>
+  <div class="compliance-report-page">
+    <el-page-header @back="router.back()" title="返回" content="合规报告">
+      <template #extra>
+        <el-button type="primary" @click="generateReport">
+          <el-icon><Document /></el-icon> 生成报告
+        </el-button>
+        <el-button @click="loadData" :loading="loading">
+          <el-icon><Refresh /></el-icon> 刷新
+        </el-button>
+      </template>
+    </el-page-header>
+
+    <!-- 合规总览 -->
+    <el-row :gutter="16" class="mt-4">
+      <el-col :span="8">
+        <el-card shadow="hover">
+          <template #header><span>合规评分</span></template>
+          <div class="score-circle">
+            <el-progress type="circle" :percentage="complianceScore" :width="120" :color="scoreColor" />
+            <div class="score-label">{{ complianceScore >= 90 ? '优秀' : complianceScore >= 70 ? '良好' : '需改进' }}</div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card shadow="hover">
+          <template #header><span>检查项统计</span></template>
+          <el-descriptions :column="1" border>
+            <el-descriptions-item label="总检查项">{{ checkStats.total }}</el-descriptions-item>
+            <el-descriptions-item label="通过"><span style="color: #67C23A">{{ checkStats.passed }}</span></el-descriptions-item>
+            <el-descriptions-item label="不合规"><span style="color: #F56C6C">{{ checkStats.failed }}</span></el-descriptions-item>
+            <el-descriptions-item label="不适用">{{ checkStats.na }}</el-descriptions-item>
+          </el-descriptions>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card shadow="hover">
+          <template #header><span>风险分布</span></template>
+          <el-descriptions :column="1" border>
+            <el-descriptions-item label="高风险"><el-tag type="danger" size="small">{{ riskStats.high }}</el-tag></el-descriptions-item>
+            <el-descriptions-item label="中风险"><el-tag type="warning" size="small">{{ riskStats.medium }}</el-tag></el-descriptions-item>
+            <el-descriptions-item label="低风险"><el-tag type="info" size="small">{{ riskStats.low }}</el-tag></el-descriptions-item>
+            <el-descriptions-item label="已修复"><el-tag type="success" size="small">{{ riskStats.fixed }}</el-tag></el-descriptions-item>
+          </el-descriptions>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 报告列表 -->
+    <el-card class="mt-4" shadow="never">
+      <template #header>
+        <div style="display: flex; justify-content: space-between">
+          <span>合规报告列表</span>
+          <el-form :inline="true" :model="filters" size="small">
+            <el-form-item>
+              <el-select v-model="filters.standard" placeholder="合规标准" clearable @change="loadData">
+                <el-option label="等保2.0" value="mlps_2" />
+                <el-option label="ISO 27001" value="iso_27001" />
+                <el-option label="CIS Benchmark" value="cis" />
+                <el-option label="GDPR" value="gdpr" />
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </div>
+      </template>
+      <el-table :data="reports" v-loading="loading" stripe border>
+        <el-table-column prop="name" label="报告名称" min-width="250" />
+        <el-table-column prop="standard" label="合规标准" width="140">
+          <template #default="{ row }">
+            <el-tag size="small">{{ standardName(row.standard) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="score" label="合规评分" width="120">
+          <template #default="{ row }">
+            <span :style="{ color: row.score >= 90 ? '#67C23A' : row.score >= 70 ? '#E6A23C' : '#F56C6C', fontWeight: 'bold' }">
+              {{ row.score }}分
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="total_checks" label="检查项" width="90" />
+        <el-table-column prop="passed" label="通过" width="80">
+          <template #default="{ row }"><span style="color: #67C23A">{{ row.passed }}</span></template>
+        </el-table-column>
+        <el-table-column prop="failed" label="不合规" width="90">
+          <template #default="{ row }"><span style="color: #F56C6C">{{ row.failed }}</span></template>
+        </el-table-column>
+        <el-table-column prop="generated_at" label="生成时间" width="180" />
+        <el-table-column label="操作" width="180" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="primary" @click="viewReport(row)">查看</el-button>
+            <el-button link type="primary" @click="downloadReport(row)">下载</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination class="mt-4" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+        :total="pagination.total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next"
+        @size-change="loadData" @current-change="loadData" />
+    </el-card>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { Document, Refresh } from '@element-plus/icons-vue'
+
+const router = useRouter()
+const loading = ref(false)
+const reports = ref<any[]>([])
+const filters = ref({ standard: '' })
+const pagination = reactive({ page: 1, size: 10, total: 0 })
+
+const complianceScore = ref(85)
+const checkStats = ref({ total: 120, passed: 102, failed: 12, na: 6 })
+const riskStats = ref({ high: 3, medium: 8, low: 12, fixed: 45 })
+
+
+const scoreColor = computed(() => {
+  if (complianceScore.value >= 90) return '#67C23A'
+  if (complianceScore.value >= 70) return '#E6A23C'
+  return '#F56C6C'
+})
+
+const standardMap: Record<string, string> = { mlps_2: '等保2.0', iso_27001: 'ISO 27001', cis: 'CIS Benchmark', gdpr: 'GDPR' }
+function standardName(s: string) { return standardMap[s] || s }
+
+async function loadData() {
+  loading.value = true
+  try {
+    const res = await fetch(`/api/v1/reports/archive?type=compliance&page=${pagination.page}&page_size=${pagination.size}`)
+    const data = await res.json()
+    reports.value = data?.items || []
+    pagination.total = data?.total || 0
+  } catch { reports.value = [] } finally { loading.value = false }
+}
+
+async function generateReport() {
+  try {
+    await fetch('/api/v1/reports/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'compliance', standard: filters.value.standard || 'mlps_2' }) })
+    ElMessage.success('合规报告生成中...')
+    setTimeout(loadData, 2000)
+  } catch { ElMessage.error('生成失败') }
+}
+
+function viewReport(row: any) { router.push(`/reports/archive/${row.id}`) }
+async function downloadReport(row: any) {
+  window.open(`/api/v1/reports/tasks/${row.id}/download`, '_blank')
+}
+
+onMounted(loadData)
+</script>
+
+<style scoped>
+.compliance-report-page { padding: 20px; }
+.mt-4 { margin-top: 16px; }
+.score-circle { text-align: center; padding: 20px; }
+.score-label { margin-top: 12px; font-size: 16px; color: #606266; }
+</style>

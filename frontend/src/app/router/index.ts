@@ -31,37 +31,43 @@ const router = createRouter({
     { path: '/topology', name: 'topology', component: () => import('@/features/resource-center/AssetTopologyPage.vue'), meta: { module: 'M2', title: '拓扑视图' } },
     { path: '/resources/import', name: 'resource-import', component: () => import('@/features/resource-center/ResourceImportPage.vue'), meta: { module: 'M2', title: '资源导入' } },
     { path: '/asset-groups', name: 'asset-groups', component: () => import('@/features/resource-center/AssetGroupPage.vue'), meta: { module: 'M2', title: '资源分组' } },
-    { path: '/credentials', name: 'credentials', component: () => import('@/features/resource-center/CredentialPage.vue'), meta: { module: 'M2', title: '凭证管理' } },
-    { path: '/agents', name: 'agents', component: () => import('@/features/resource-center/AgentManagementPage.vue'), meta: { module: 'M2', title: 'Agent 管理' } },
     { path: '/lifecycle', name: 'lifecycle', component: () => import('@/features/resource-center/LifecyclePage.vue'), meta: { module: 'M2', title: '生命周期' } },
 
     // ============================================================
-    // M3 巡检中心
+    // M3 配置中心
     // ============================================================
-    { path: '/inspections', name: 'inspections-overview', component: () => import('@/features/inspection-center/InspectionOverviewPage.vue'), meta: { module: 'M3', title: '巡检总览' } },
+    { path: '/config/overview', name: 'config-overview', component: () => import('@/features/config-center/ConfigOverviewPage.vue'), meta: { module: 'M3', title: '配置总览' } },
+    { path: '/credentials', name: 'credentials', component: () => import('@/features/resource-center/CredentialPage.vue'), meta: { module: 'M3', title: '凭证库' } },
+    { path: '/config/discovery-templates', name: 'discovery-templates', component: () => import('@/features/config-center/DiscoveryTemplatePage.vue'), meta: { module: 'M3', title: '发现模板' } },
     { path: '/inspection/templates', name: 'inspection-templates', component: () => import('@/features/inspection-center/InspectionTemplatePage.vue'), meta: { module: 'M3', title: '巡检模板' } },
-    { path: '/inspection/plans', name: 'inspection-plans', component: () => import('@/features/inspection-center/InspectionPlanPage.vue'), meta: { module: 'M3', title: '巡检计划' } },
-    { path: '/inspection/tasks', name: 'inspection-tasks', component: () => import('@/features/inspection-center/InspectionTaskPage.vue'), meta: { module: 'M3', title: '巡检任务' } },
-    { path: '/inspection/results', name: 'inspection-results', component: () => import('@/features/inspection-center/InspectionResultPage.vue'), meta: { module: 'M3', title: '巡检结果' } },
-    { path: '/inspection/:id', name: 'inspection-detail', component: () => import('@/features/inspection-center/InspectionDetailPage.vue'), meta: { module: 'M3', title: '巡检详情' } },
-    { path: '/inspection/page-check', name: 'page-inspection', component: () => import('@/features/inspection-center/PageInspectionPage.vue'), meta: { module: 'M3', title: '页面巡检' } },
-    { path: '/inspection/config-check', name: 'config-inspection', component: () => import('@/features/inspection-center/ConfigInspectionPage.vue'), meta: { module: 'M3', title: '配置巡检' } },
-    { path: '/inspection/log-check', name: 'log-inspection', component: () => import('@/features/inspection-center/LogInspectionPage.vue'), meta: { module: 'M3', title: '日志巡检' } },
-    { path: '/inspection/baseline-check', name: 'baseline-inspection', component: () => import('@/features/inspection-center/BaselineInspectionPage.vue'), meta: { module: 'M3', title: '基线巡检' } },
-    { path: '/inspection/reports', name: 'inspection-reports', component: () => import('@/features/inspection-center/InspectionReportPage.vue'), meta: { module: 'M3', title: '巡检报告' } },
+    { path: '/config/inspection-rules', name: 'inspection-rules', component: () => import('@/features/config-center/InspectionRulesPage.vue'), meta: { module: 'M3', title: '巡检规则' } },
+    { path: '/config/threshold-rules', name: 'threshold-rules', component: () => import('@/features/config-center/ThresholdRulePage.vue'), meta: { module: 'M3', title: '阈值规则' } },
+    { path: '/config/notification-rules', name: 'notification-rules', component: () => import('@/features/config-center/NotificationRulePage.vue'), meta: { module: 'M3', title: '通知规则' } },
+    { path: '/report/templates', name: 'report-templates', component: () => import('@/features/report-audit-center/ReportTemplatePage.vue'), meta: { module: 'M3', title: '报告模板' } },
+    { path: '/config/versions', name: 'config-versions', component: () => import('@/features/config-center/ConfigVersionPage.vue'), meta: { module: 'M3', title: '配置版本' } },
 
     // ============================================================
-    // M4 监控中心
+    // M4 巡检中心 (含原监控中心采集能力)
     // ============================================================
-    { path: '/monitoring', name: 'monitoring', component: () => import('@/features/monitoring-center/MonitoringOverviewPage.vue'), meta: { module: 'M4', title: '监控总览' } },
+    { path: '/inspections', name: 'inspections-overview', component: () => import('@/features/inspection-center/InspectionOverviewPage.vue'), meta: { module: 'M4', title: '巡检总览' } },
+    { path: '/inspection/plans', name: 'inspection-plans', component: () => import('@/features/inspection-center/InspectionPlanPage.vue'), meta: { module: 'M4', title: '巡检计划' } },
+    { path: '/inspection/tasks', name: 'inspection-tasks', component: () => import('@/features/inspection-center/InspectionTaskPage.vue'), meta: { module: 'M4', title: '巡检任务' } },
+    { path: '/inspection/results', name: 'inspection-results', component: () => import('@/features/inspection-center/InspectionResultPage.vue'), meta: { module: 'M4', title: '巡检结果' } },
+    { path: '/inspection/:id', name: 'inspection-detail', component: () => import('@/features/inspection-center/InspectionDetailPage.vue'), meta: { module: 'M4', title: '巡检详情' } },
+    { path: '/inspection/page-check', name: 'page-inspection', component: () => import('@/features/inspection-center/PageInspectionPage.vue'), meta: { module: 'M4', title: '页面巡检' } },
+    { path: '/inspection/config-check', name: 'config-inspection', component: () => import('@/features/inspection-center/ConfigInspectionPage.vue'), meta: { module: 'M4', title: '配置巡检' } },
+    { path: '/inspection/log-check', name: 'log-inspection', component: () => import('@/features/inspection-center/LogInspectionPage.vue'), meta: { module: 'M4', title: '日志巡检' } },
+    { path: '/inspection/baseline-check', name: 'baseline-inspection', component: () => import('@/features/inspection-center/BaselineInspectionPage.vue'), meta: { module: 'M4', title: '基线巡检' } },
+    { path: '/inspection/reports', name: 'inspection-reports', component: () => import('@/features/inspection-center/InspectionReportPage.vue'), meta: { module: 'M4', title: '巡检报告入口' } },
     { path: '/monitoring/collectors', name: 'collectors', component: () => import('@/features/monitoring-center/CollectorPage.vue'), meta: { module: 'M4', title: '采集任务' } },
     { path: '/monitoring/collection-results', name: 'collection-results', component: () => import('@/features/monitoring-center/CollectionResultPage.vue'), meta: { module: 'M4', title: '采集结果' } },
-    { path: '/monitoring/metrics', name: 'metrics-trend', component: () => import('@/features/monitoring-center/MetricsTrendPage.vue'), meta: { module: 'M4', title: '指标趋势' } },
+    { path: '/monitoring/metrics', name: 'metrics-trend', component: () => import('@/features/monitoring-center/MetricsTrendPage.vue'), meta: { module: 'M4', title: '指标巡检' } },
     { path: '/monitoring/states', name: 'state-snapshot', component: () => import('@/features/monitoring-center/StateSnapshotPage.vue'), meta: { module: 'M4', title: '状态快照' } },
     { path: '/monitoring/state-changes', name: 'state-changes', component: () => import('@/features/monitoring-center/StateChangePage.vue'), meta: { module: 'M4', title: '状态变化' } },
     { path: '/events', name: 'events', component: () => import('@/features/monitoring-center/EventListPage.vue'), meta: { module: 'M4', title: '事件流' } },
-    { path: '/monitoring/log-sources', name: 'log-sources', component: () => import('@/features/monitoring-center/LogSourcePage.vue'), meta: { module: 'M4', title: '日志接入' } },
     { path: '/monitoring/collector-health', name: 'collector-health', component: () => import('@/features/monitoring-center/CollectorHealthPage.vue'), meta: { module: 'M4', title: '采集器健康' } },
+    { path: '/monitoring', name: 'monitoring', component: () => import('@/features/monitoring-center/MonitoringOverviewPage.vue'), meta: { module: 'M4', title: '监控总览' } },
+    { path: '/monitoring/log-sources', name: 'log-sources', component: () => import('@/features/monitoring-center/LogSourcePage.vue'), meta: { module: 'M4', title: '日志接入' } },
     { path: '/monitoring/config-facts', name: 'config-facts', component: () => import('@/features/monitoring-center/ConfigPage.vue'), meta: { module: 'M4', title: '配置事实' } },
 
     // ============================================================
@@ -82,6 +88,7 @@ const router = createRouter({
     { path: '/alert-correlation', name: 'alert-correlation', component: () => import('@/features/response-center/AlertCorrelationPage.vue'), meta: { module: 'M5', title: '告警收敛' } },
     { path: '/closure-verification', name: 'closure-verification', component: () => import('@/features/response-center/ClosureVerificationPage.vue'), meta: { module: 'M5', title: '关闭验证' } },
     { path: '/risk-grading', name: 'risk-grading', component: () => import('@/features/response-center/RiskGradingPage.vue'), meta: { module: 'M5', title: '风险分级' } },
+    { path: '/manual-confirm', name: 'manual-confirm', component: () => import('@/features/response-center/ManualConfirmPage.vue'), meta: { module: 'M5', title: '人工确认台' } },
 
     // ============================================================
     // M6 自动化中心
@@ -99,6 +106,7 @@ const router = createRouter({
     { path: '/executions/:id', name: 'execution-detail', component: () => import('@/features/automation-center/ExecutionDetailPage.vue'), meta: { module: 'M6', title: '执行详情' } },
     { path: '/rollback-center', name: 'rollback-center', component: () => import('@/features/automation-center/RollbackCenterPage.vue'), meta: { module: 'M6', title: '回滚中心' } },
     { path: '/execution-locks', name: 'execution-locks', component: () => import('@/features/automation-center/ExecutionLockPage.vue'), meta: { module: 'M6', title: '执行锁' } },
+    { path: '/remediation-templates', name: 'remediation-templates', component: () => import('@/features/automation-center/RemediationTemplatePage.vue'), meta: { module: 'M6', title: '处置模板' } },
 
     // ============================================================
     // M7 智能知识库
@@ -122,6 +130,7 @@ const router = createRouter({
     { path: '/tickets/:id', name: 'ticket-detail', component: () => import('@/features/ticket-center/TicketDetailPage.vue'), meta: { module: 'M8', title: '工单详情' } },
     { path: '/ticket-overview', name: 'ticket-overview', component: () => import('@/features/ticket-center/TicketOverviewPage.vue'), meta: { module: 'M8', title: '工单总览' } },
     { path: '/ticket-create', name: 'ticket-create', component: () => import('@/features/ticket-center/TicketCreatePage.vue'), meta: { module: 'M8', title: '创建工单' } },
+    { path: '/manual-handling', name: 'manual-handling', component: () => import('@/features/ticket-center/ManualHandlingPage.vue'), meta: { module: 'M8', title: '人工处置台' } },
     { path: '/assignment-rules', name: 'assignment-rules', component: () => import('@/features/ticket-center/AssignmentRulePage.vue'), meta: { module: 'M8', title: '分派规则' } },
     { path: '/sla-management', name: 'sla-management', component: () => import('@/features/ticket-center/SlaManagementPage.vue'), meta: { module: 'M8', title: 'SLA 管理' } },
     { path: '/postmortem', name: 'postmortem', component: () => import('@/features/ticket-center/PostmortemPage.vue'), meta: { module: 'M8', title: '故障复盘' } },
@@ -144,6 +153,7 @@ const router = createRouter({
     { path: '/asset-report', name: 'asset-report', component: () => import('@/features/report-audit-center/AssetReportPage.vue'), meta: { module: 'M9', title: '资产报告' } },
     { path: '/audit-query', name: 'audit-query', component: () => import('@/features/report-audit-center/AuditQueryPage.vue'), meta: { module: 'M9', title: '审计查询' } },
     { path: '/inspection-report', name: 'inspection-report-center', component: () => import('@/features/report-audit-center/InspectionReportPage.vue'), meta: { module: 'M9', title: '巡检报告' } },
+    { path: '/compliance-report', name: 'compliance-report', component: () => import('@/features/report-audit-center/ComplianceReportPage.vue'), meta: { module: 'M9', title: '合规报告' } },
 
     // ============================================================
     // M10 平台管理
@@ -163,6 +173,8 @@ const router = createRouter({
     { path: '/upgrade-maintenance', name: 'upgrade-maintenance', component: () => import('@/features/platform-management/UpgradeMaintenancePage.vue'), meta: { module: 'M10', title: '升级维护' } },
     { path: '/license', name: 'license', component: () => import('@/features/platform-management/LicensePage.vue'), meta: { module: 'M10', title: '授权许可' } },
     { path: '/security-baseline', name: 'security-baseline', component: () => import('@/features/platform-management/SecurityBaselinePage.vue'), meta: { module: 'M10', title: '安全基线' } },
+    { path: '/model-service', name: 'model-service', component: () => import('@/features/platform-management/ModelServicePage.vue'), meta: { module: 'M10', title: '模型服务' } },
+    { path: '/agents', name: 'agents', component: () => import('@/features/resource-center/AgentManagementPage.vue'), meta: { module: 'M10', title: 'Agent 管理' } },
 
     // 404
     { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/app/NotFoundPage.vue') },

@@ -46,17 +46,30 @@
             <el-menu-item index="/resources/import">资源导入</el-menu-item>
             <el-menu-item index="/asset-groups">资源分组</el-menu-item>
             <el-menu-item index="/lifecycle">生命周期</el-menu-item>
-            <el-menu-item index="/credentials">凭证管理</el-menu-item>
-            <el-menu-item index="/agents">Agent 管理</el-menu-item>
           </el-sub-menu>
 
-          <!-- M3 巡检中心 -->
+          <!-- M3 配置中心 -->
           <el-sub-menu index="m3">
+            <template #title>
+              <el-icon><Setting /></el-icon><span>配置中心</span>
+            </template>
+            <el-menu-item index="/config/overview">配置总览</el-menu-item>
+            <el-menu-item index="/credentials">凭证库</el-menu-item>
+            <el-menu-item index="/config/discovery-templates">发现模板</el-menu-item>
+            <el-menu-item index="/inspection/templates">巡检模板</el-menu-item>
+            <el-menu-item index="/config/inspection-rules">巡检规则</el-menu-item>
+            <el-menu-item index="/config/threshold-rules">阈值规则</el-menu-item>
+            <el-menu-item index="/config/notification-rules">通知规则</el-menu-item>
+            <el-menu-item index="/report/templates">报告模板</el-menu-item>
+            <el-menu-item index="/config/versions">配置版本</el-menu-item>
+          </el-sub-menu>
+
+          <!-- M4 巡检中心 -->
+          <el-sub-menu index="m4">
             <template #title>
               <el-icon><Checked /></el-icon><span>巡检中心</span>
             </template>
             <el-menu-item index="/inspections">巡检总览</el-menu-item>
-            <el-menu-item index="/inspection/templates">巡检模板</el-menu-item>
             <el-menu-item index="/inspection/plans">巡检计划</el-menu-item>
             <el-menu-item index="/inspection/tasks">巡检任务</el-menu-item>
             <el-menu-item index="/inspection/results">巡检结果</el-menu-item>
@@ -64,24 +77,13 @@
             <el-menu-item index="/inspection/config-check">配置巡检</el-menu-item>
             <el-menu-item index="/inspection/log-check">日志巡检</el-menu-item>
             <el-menu-item index="/inspection/baseline-check">基线巡检</el-menu-item>
-            <el-menu-item index="/inspection/reports">巡检报告</el-menu-item>
-          </el-sub-menu>
-
-          <!-- M4 监控中心 -->
-          <el-sub-menu index="m4">
-            <template #title>
-              <el-icon><TrendCharts /></el-icon><span>监控中心</span>
-            </template>
-            <el-menu-item index="/monitoring">监控总览</el-menu-item>
+            <el-menu-item index="/monitoring/metrics">指标巡检</el-menu-item>
             <el-menu-item index="/monitoring/collectors">采集任务</el-menu-item>
             <el-menu-item index="/monitoring/collection-results">采集结果</el-menu-item>
-            <el-menu-item index="/monitoring/metrics">指标趋势</el-menu-item>
             <el-menu-item index="/monitoring/states">状态快照</el-menu-item>
-            <el-menu-item index="/monitoring/state-changes">状态变化</el-menu-item>
             <el-menu-item index="/events">事件流</el-menu-item>
-            <el-menu-item index="/monitoring/log-sources">日志接入</el-menu-item>
             <el-menu-item index="/monitoring/collector-health">采集器健康</el-menu-item>
-            <el-menu-item index="/monitoring/config-facts">配置事实</el-menu-item>
+            <el-menu-item index="/inspection/reports">巡检报告入口</el-menu-item>
           </el-sub-menu>
 
           <!-- M5 处置中心 -->
@@ -99,6 +101,8 @@
             <el-menu-item index="/impact-analysis">影响分析</el-menu-item>
             <el-menu-item index="/response-suggestion">处置建议</el-menu-item>
             <el-menu-item index="/closure-verification">关闭验证</el-menu-item>
+            <el-menu-item index="/risk-grading">风险分级</el-menu-item>
+            <el-menu-item index="/manual-confirm">人工确认台</el-menu-item>
           </el-sub-menu>
 
           <!-- M6 自动化中心 -->
@@ -114,6 +118,7 @@
             <el-menu-item index="/executions">执行历史</el-menu-item>
             <el-menu-item index="/rollback-center">回滚中心</el-menu-item>
             <el-menu-item index="/execution-locks">执行锁</el-menu-item>
+            <el-menu-item index="/remediation-templates">处置模板</el-menu-item>
           </el-sub-menu>
 
           <!-- M7 智能知识库 -->
@@ -140,6 +145,7 @@
             <el-menu-item index="/ticket-overview">工单总览</el-menu-item>
             <el-menu-item index="/tickets">工单列表</el-menu-item>
             <el-menu-item index="/ticket-create">新建工单</el-menu-item>
+            <el-menu-item index="/manual-handling">人工处置台</el-menu-item>
             <el-menu-item index="/assignment-rules">派单规则</el-menu-item>
             <el-menu-item index="/sla-management">SLA 管理</el-menu-item>
             <el-menu-item index="/postmortem">复盘总结</el-menu-item>
@@ -160,6 +166,7 @@
             <el-menu-item index="/automation-report">自动化报告</el-menu-item>
             <el-menu-item index="/asset-report">资产报告</el-menu-item>
             <el-menu-item index="/inspection-report">巡检报告</el-menu-item>
+            <el-menu-item index="/compliance-report">合规报告</el-menu-item>
             <el-menu-item index="/audit">审计查询</el-menu-item>
             <el-menu-item index="/logs/search">日志检索</el-menu-item>
             <el-menu-item index="/evidence">证据归档</el-menu-item>
@@ -183,6 +190,8 @@
             <el-menu-item index="/backup">备份恢复</el-menu-item>
             <el-menu-item index="/upgrade-maintenance">升级维护</el-menu-item>
             <el-menu-item index="/license">授权许可</el-menu-item>
+            <el-menu-item index="/model-service">模型服务</el-menu-item>
+            <el-menu-item index="/agents">Agent 管理</el-menu-item>
             <el-menu-item index="/security-baseline">安全基线</el-menu-item>
             <el-menu-item index="/system-check">系统自检</el-menu-item>
           </el-sub-menu>
@@ -310,11 +319,17 @@ const menuMap: Record<string, string> = {
   '/resources/import': '资源导入',
   '/asset-groups': '资源分组',
   '/lifecycle': '生命周期',
-  '/credentials': '凭证管理',
-  '/agents': 'Agent 管理',
-  // M3 巡检中心
-  '/inspections': '巡检总览',
+  // M3 配置中心
+  '/config/overview': '配置总览',
+  '/credentials': '凭证库',
+  '/config/discovery-templates': '发现模板',
   '/inspection/templates': '巡检模板',
+  '/config/inspection-rules': '巡检规则',
+  '/config/threshold-rules': '阈值规则',
+  '/config/notification-rules': '通知规则',
+  '/config/versions': '配置版本',
+  // M4 巡检中心
+  '/inspections': '巡检总览',
   '/inspection/plans': '巡检计划',
   '/inspection/tasks': '巡检任务',
   '/inspection/results': '巡检结果',
@@ -322,18 +337,13 @@ const menuMap: Record<string, string> = {
   '/inspection/config-check': '配置巡检',
   '/inspection/log-check': '日志巡检',
   '/inspection/baseline-check': '基线巡检',
-  '/inspection/reports': '巡检报告',
-  // M4 监控中心
-  '/monitoring': '监控总览',
+  '/monitoring/metrics': '指标巡检',
   '/monitoring/collectors': '采集任务',
   '/monitoring/collection-results': '采集结果',
-  '/monitoring/metrics': '指标趋势',
   '/monitoring/states': '状态快照',
-  '/monitoring/state-changes': '状态变化',
   '/events': '事件流',
-  '/monitoring/log-sources': '日志接入',
   '/monitoring/collector-health': '采集器健康',
-  '/monitoring/config-facts': '配置事实',
+  '/inspection/reports': '巡检报告入口',
   // M5 处置中心
   '/anomalies': '异常总览',
   '/anomaly/list': '异常列表',
@@ -345,6 +355,8 @@ const menuMap: Record<string, string> = {
   '/impact-analysis': '影响分析',
   '/response-suggestion': '处置建议',
   '/closure-verification': '关闭验证',
+  '/risk-grading': '风险分级',
+  '/manual-confirm': '人工确认台',
   // M6 自动化中心
   '/automation': '自动化总览',
   '/policies': '策略列表',
@@ -354,6 +366,7 @@ const menuMap: Record<string, string> = {
   '/executions': '执行历史',
   '/rollback-center': '回滚中心',
   '/execution-locks': '执行锁',
+  '/remediation-templates': '处置模板',
   // M7 智能知识库
   '/knowledge-overview': '知识总览',
   '/aiops': 'AI 诊断',
@@ -368,11 +381,12 @@ const menuMap: Record<string, string> = {
   '/ticket-overview': '工单总览',
   '/tickets': '工单列表',
   '/ticket-create': '新建工单',
+  '/manual-handling': '人工处置台',
   '/assignment-rules': '派单规则',
   '/sla-management': 'SLA 管理',
   '/postmortem': '复盘总结',
   '/ticket-report': '工单报告',
-  // M9 报表审计中心
+  // M9 报表中心
   '/reports': '报表总览',
   '/report/templates': '报告模板',
   '/report/generate': '报告生成',
@@ -382,6 +396,7 @@ const menuMap: Record<string, string> = {
   '/automation-report': '自动化报告',
   '/asset-report': '资产报告',
   '/inspection-report': '巡检报告',
+  '/compliance-report': '合规报告',
   '/audit': '审计查询',
   '/logs/search': '日志检索',
   '/evidence': '证据归档',
@@ -396,6 +411,8 @@ const menuMap: Record<string, string> = {
   '/integrations': '集成管理',
   '/platform-status': '平台健康',
   '/task-queue': '任务队列',
+  '/model-service': '模型服务',
+  '/agents': 'Agent 管理',
   '/backup': '备份恢复',
   '/upgrade-maintenance': '升级维护',
   '/license': '授权许可',
@@ -409,36 +426,39 @@ const groupMap: Record<string, string> = {
   '/business-health-map': '首页指挥台', '/daily-summary': '首页指挥台',
   '/resources': '资源中心', '/resources/discovery': '资源中心', '/resources/discovery-results': '资源中心',
   '/assets': '资源中心', '/business-systems': '资源中心', '/topology': '资源中心',
-  '/resources/import': '资源中心', '/asset-groups': '资源中心', '/credentials': '资源中心',
-  '/agents': '资源中心', '/lifecycle': '资源中心',
-  '/inspections': '巡检中心', '/inspection/templates': '巡检中心', '/inspection/plans': '巡检中心',
-  '/inspection/tasks': '巡检中心', '/inspection/results': '巡检中心', '/inspection/page-check': '巡检中心',
+  '/resources/import': '资源中心', '/asset-groups': '资源中心', '/lifecycle': '资源中心',
+  '/config/overview': '配置中心', '/credentials': '配置中心', '/config/discovery-templates': '配置中心',
+  '/inspection/templates': '配置中心', '/config/inspection-rules': '配置中心',
+  '/config/threshold-rules': '配置中心', '/config/notification-rules': '配置中心',
+  '/report/templates': '配置中心', '/config/versions': '配置中心',
+  '/inspections': '巡检中心', '/inspection/plans': '巡检中心', '/inspection/tasks': '巡检中心',
+  '/inspection/results': '巡检中心', '/inspection/page-check': '巡检中心',
   '/inspection/config-check': '巡检中心', '/inspection/log-check': '巡检中心',
   '/inspection/baseline-check': '巡检中心', '/inspection/reports': '巡检中心',
-  '/monitoring': '监控中心', '/monitoring/collectors': '监控中心', '/monitoring/collection-results': '监控中心',
-  '/monitoring/metrics': '监控中心', '/monitoring/states': '监控中心', '/monitoring/state-changes': '监控中心',
-  '/events': '监控中心', '/monitoring/log-sources': '监控中心', '/monitoring/collector-health': '监控中心',
-  '/monitoring/config-facts': '监控中心',
+  '/monitoring/collectors': '巡检中心', '/monitoring/collection-results': '巡检中心',
+  '/monitoring/metrics': '巡检中心', '/monitoring/states': '巡检中心',
+  '/events': '巡检中心', '/monitoring/collector-health': '巡检中心',
   '/anomalies': '处置中心', '/anomaly/list': '处置中心', '/alerts': '处置中心',
   '/alert-rules': '处置中心', '/alert-correlation': '处置中心', '/incident': '处置中心',
   '/ai-diagnosis': '处置中心', '/impact-analysis': '处置中心', '/response-suggestion': '处置中心',
-  '/closure-verification': '处置中心',
+  '/closure-verification': '处置中心', '/risk-grading': '处置中心', '/manual-confirm': '处置中心',
   '/automation': '自动化中心', '/policies': '自动化中心', '/scripts': '自动化中心',
   '/playbooks': '自动化中心', '/approvals': '自动化中心', '/executions': '自动化中心',
-  '/rollback-center': '自动化中心', '/execution-locks': '自动化中心',
+  '/rollback-center': '自动化中心', '/execution-locks': '自动化中心', '/remediation-templates': '自动化中心',
   '/knowledge-overview': '智能知识库', '/aiops': '智能知识库', '/knowledge': '智能知识库',
   '/knowledge/import': '智能知识库', '/knowledge-review': '智能知识库', '/similar-cases': '智能知识库',
   '/rule-gap': '智能知识库', '/prompt-templates': '智能知识库', '/ai-tool-policy': '智能知识库',
   '/ticket-overview': '工单中心', '/tickets': '工单中心', '/ticket-create': '工单中心',
-  '/assignment-rules': '工单中心', '/sla-management': '工单中心', '/postmortem': '工单中心',
-  '/ticket-report': '工单中心',
-  '/reports': '报表审计', '/report/templates': '报表审计', '/report/generate': '报表审计',
-  '/report/tasks': '报表审计', '/report/archive': '报表审计', '/ops-report': '报表审计',
-  '/automation-report': '报表审计', '/asset-report': '报表审计', '/inspection-report': '报表审计',
-  '/audit': '报表审计', '/logs/search': '报表审计', '/evidence': '报表审计',
+  '/manual-handling': '工单中心', '/assignment-rules': '工单中心', '/sla-management': '工单中心',
+  '/postmortem': '工单中心', '/ticket-report': '工单中心',
+  '/reports': '报表中心', '/report/generate': '报表中心', '/report/tasks': '报表中心',
+  '/report/archive': '报表中心', '/ops-report': '报表中心', '/automation-report': '报表中心',
+  '/asset-report': '报表中心', '/inspection-report': '报表中心', '/compliance-report': '报表中心',
+  '/audit': '报表中心', '/logs/search': '报表中心', '/evidence': '报表中心',
   '/users': '平台管理', '/roles': '平台管理', '/tenants': '平台管理', '/api-keys': '平台管理',
   '/permission-policy': '平台管理', '/system-config': '平台管理', '/dictionaries': '平台管理',
   '/integrations': '平台管理', '/platform-status': '平台管理', '/task-queue': '平台管理',
+  '/model-service': '平台管理', '/agents': '平台管理',
   '/backup': '平台管理', '/upgrade-maintenance': '平台管理', '/license': '平台管理',
   '/security-baseline': '平台管理', '/system-check': '平台管理', '/profile': '个人中心',
 }
