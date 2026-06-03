@@ -194,14 +194,14 @@
 3. **后端缺失服务** — log service + notification service 实现
 4. **全局搜索入口** — MainLayout Header加搜索图标+快捷键
 
-### P1 — 应尽快修复
+### P1 — 应尽快修复 ✅ 已完成 (commit a061788)
 
-5. **InspectionRulesPage增加API巡检规则tab**
-6. **通用范围选择器组件** — 抽离AssetRangeSelector
-7. **通用模板选择器组件** — 抽离TemplateSelector
-8. **通知中心浮层** — Header右上角通知铃铛
-9. **任务进度浮层** — Header右上角任务进度
-10. **anomaly/inspection/report handlers.py实现**
+5. **InspectionRulesPage增加API巡检规则tab** ✅
+6. **通用范围选择器组件** — AssetRangeSelector.vue ✅
+7. **通用模板选择器组件** — TemplateSelector.vue ✅
+8. **通知中心浮层** — NotificationBell集成到Header ✅
+9. **任务进度浮层** — TaskProgressIndicator集成到Header ✅
+10. **anomaly/inspection/report handlers.py实现** ✅ (18域handlers全部就位)
 
 ### P2 — 可延后
 

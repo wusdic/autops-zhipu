@@ -175,6 +175,7 @@ const router = createRouter({
     { path: '/security-baseline', name: 'security-baseline', component: () => import('@/features/platform-management/SecurityBaselinePage.vue'), meta: { module: 'M10', title: '安全基线' } },
     { path: '/model-service', name: 'model-service', component: () => import('@/features/platform-management/ModelServicePage.vue'), meta: { module: 'M10', title: '模型服务' } },
     { path: '/agents', name: 'agents', component: () => import('@/features/resource-center/AgentManagementPage.vue'), meta: { module: 'M10', title: 'Agent 管理' } },
+    { path: '/export-center', name: 'export-center', component: () => import('@/features/report-audit-center/ExportCenterPage.vue'), meta: { module: 'M9', title: '导出中心' } },
 
     // 404
     { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/app/NotFoundPage.vue') },

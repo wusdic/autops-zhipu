@@ -62,6 +62,7 @@
             <el-menu-item index="/config/notification-rules">通知规则</el-menu-item>
             <el-menu-item index="/report/templates">报告模板</el-menu-item>
             <el-menu-item index="/config/versions">配置版本</el-menu-item>
+            <el-menu-item index="/report/templates">报告模板</el-menu-item>
           </el-sub-menu>
 
           <!-- M4 巡检中心 -->
@@ -161,6 +162,7 @@
             <el-menu-item index="/report/templates">报告模板</el-menu-item>
             <el-menu-item index="/report/generate">报告生成</el-menu-item>
             <el-menu-item index="/report/tasks">报告任务</el-menu-item>
+            <el-menu-item index="/export-center">导出中心</el-menu-item>
             <el-menu-item index="/report/archive">报告归档</el-menu-item>
             <el-menu-item index="/ops-report">运维报告</el-menu-item>
             <el-menu-item index="/automation-report">自动化报告</el-menu-item>
@@ -344,6 +346,7 @@ const menuMap: Record<string, string> = {
   '/config/threshold-rules': '阈值规则',
   '/config/notification-rules': '通知规则',
   '/config/versions': '配置版本',
+  '/report/templates': '报告模板',
   // M4 巡检中心
   '/inspections': '巡检总览',
   '/inspection/plans': '巡检计划',
