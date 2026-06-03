@@ -305,6 +305,8 @@ export const API = {
 
   // 发现模板
   DISCOVERY_TEMPLATES: '/api/v1/discovery-templates',
+  INSPECTION_TEMPLATES: '/api/v1/inspection/templates',
+  REPORT_TEMPLATES: '/api/v1/report/templates',
   DISCOVERY_TEMPLATE_DETAIL: (id: string) => \`/api/v1/discovery-templates/\${id}\`,
   DISCOVERY_TEMPLATE_TOGGLE: (id: string) => \`/api/v1/discovery-templates/\${id}/toggle\`,
 } as const

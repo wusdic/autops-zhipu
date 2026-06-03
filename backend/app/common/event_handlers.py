@@ -73,12 +73,21 @@ def register_all_handlers() -> None:
     from app.domains.config.handlers import register_handlers as register_config
     register_config()
 
+    from app.domains.anomaly.handlers import register_handlers as register_anomaly
+    register_anomaly()
+
+    from app.domains.inspection.handlers import register_handlers as register_inspection
+    register_inspection()
+
+    from app.domains.report.handlers import register_handlers as register_report
+    register_report()
+
     # --- 全局审计（通配处理器） ---
 
     bus = get_event_bus()
     bus.subscribe_all(_on_any_event_audit)
 
-    logger.info("EventBus: 所有领域事件处理器已注册 (15个领域 + 全局审计)")
+    logger.info("EventBus: 所有领域事件处理器已注册 (18个领域 + 全局审计)")
 
 
 # ---------------------------------------------------------------------------

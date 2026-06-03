@@ -17,6 +17,7 @@
       <el-tab-pane label="配置检查" name="config_check" />
       <el-tab-pane label="日志检查" name="log_check" />
       <el-tab-pane label="基线检查" name="baseline_check" />
+      <el-tab-pane label="API检查" name="api_check" />
       <el-tab-pane label="阈值规则" name="threshold" />
       <el-tab-pane label="全部" name="all" />
     </el-tabs>
@@ -95,6 +96,7 @@
             <el-option label="配置检查" value="config_check" />
             <el-option label="日志检查" value="log_check" />
             <el-option label="基线检查" value="baseline_check" />
+            <el-option label="API检查" value="api_check" />
           </el-select>
         </el-form-item>
         <el-form-item label="检查对象" prop="check_target">
@@ -185,7 +187,7 @@ const formRules = {
 
 const categoryMap: Record<string, string> = {
   page_check: '页面检查', config_check: '配置检查',
-  log_check: '日志检查', baseline_check: '基线检查',
+  log_check: '日志检查', baseline_check: '基线检查', api_check: 'API检查',
 }
 function severityType(s: string) {
   return { critical: 'danger', high: 'warning', medium: '', low: 'info' }[s] || 'info'

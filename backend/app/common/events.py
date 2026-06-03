@@ -397,3 +397,32 @@ class NotificationEvents:
     """通知中心事件."""
     NOTIFICATION_SENT = "notification.sent"
     NOTIFICATION_READ = "notification.read"
+
+
+class AnomalyEvents:
+    """异常检测中心事件."""
+    ANOMALY_DETECTED = "anomaly.detected"
+    ANOMALY_ACKNOWLEDGED = "anomaly.acknowledged"
+    ANOMALY_RESOLVED = "anomaly.resolved"
+    ANOMALY_ESCALATED = "anomaly.escalated"
+    ANOMALY_ASSIGNED = "anomaly.assigned"
+
+
+class InspectionEvents:
+    """巡检中心事件."""
+    PLAN_CREATED = "inspection.plan_created"
+    PLAN_UPDATED = "inspection.plan_updated"
+    TASK_STARTED = "inspection.task_started"
+    TASK_COMPLETED = "inspection.task_completed"
+    TASK_FAILED = "inspection.task_failed"
+    RESULT_ANOMALY_FOUND = "inspection.result_anomaly_found"
+
+
+class ReportEvents:
+    """报表中心事件."""
+    REPORT_GENERATION_REQUESTED = "report.generation_requested"
+    REPORT_GENERATION_STARTED = "report.generation_started"
+    REPORT_GENERATION_COMPLETED = "report.generation_completed"
+    REPORT_GENERATION_FAILED = "report.generation_failed"
+    REPORT_DOWNLOADED = "report.downloaded"
+    REPORT_SCHEDULE_TRIGGERED = "report.schedule_triggered"

@@ -242,12 +242,10 @@
             </div>
           </div>
 
-          <!-- 通知 -->
-          <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99">
-            <el-icon size="20" color="#4e5969" style="cursor: pointer;" @click="goToAlerts">
-              <Bell />
-            </el-icon>
-          </el-badge>
+          <!-- 后台任务进度 -->
+          <TaskProgressIndicator />
+          <!-- 通知中心 -->
+          <NotificationBell />
 
           <!-- 用户菜单 -->
           <el-dropdown trigger="click" @command="handleUserCommand">
@@ -295,6 +293,8 @@ import {
   Document, Tools, Checked, MapLocation, Calendar
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import NotificationBell from '@/shared/components/NotificationBell.vue'
+import TaskProgressIndicator from '@/shared/components/TaskProgressIndicator.vue'
 import { API } from '@/shared/api/routes'
 import { APP_CONFIG } from '@/shared/config'
 
@@ -523,10 +523,6 @@ function handleMenuSelect(index: string) {
 
 function navigateTo(path: string) {
   router.push(path).catch(() => {})
-}
-
-function goToAlerts() {
-  router.push('/alerts').catch(() => {})
 }
 
 // ─── User Menu ───
