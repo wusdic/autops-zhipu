@@ -38,6 +38,24 @@ from app.domains.notification.api import router as notification_router
 from app.integrations.api import router as channel_router
 from app.api.websocket import router as ws_router
 from app.api.inspection_router import router as inspection_router
+from app.api.dashboard import router as dashboard_router
+from app.api.business_systems import router as business_systems_router
+from app.api.agents import router as agents_router
+from app.api.inspection_subtypes import router as inspection_subtypes_router
+from app.api.monitoring_extra import router as monitoring_extra_router
+from app.api.automation_extra import (
+    router as automation_stats_router,
+    approvals_router,
+    dryrun_router,
+)
+from app.api.platform_extra import (
+    dict_router,
+    integration_router,
+    taskqueue_router,
+    selfcheck_router,
+    tenant_router,
+)
+from app.api.search import router as search_router
 
 api_router = APIRouter()
 
@@ -120,3 +138,33 @@ api_router.include_router(inspection_router)
 
 # Platform
 api_router.include_router(platform_router)
+
+# Dashboard
+api_router.include_router(dashboard_router)
+
+# Business Systems
+api_router.include_router(business_systems_router)
+
+# Agents
+api_router.include_router(agents_router)
+
+# Inspection Subtypes (router has no internal prefix, routes are /page-checks etc.)
+api_router.include_router(inspection_subtypes_router, prefix="/inspection")
+
+# Monitoring Extra
+api_router.include_router(monitoring_extra_router)
+
+# Automation Extra
+api_router.include_router(automation_stats_router)
+api_router.include_router(approvals_router)
+api_router.include_router(dryrun_router)
+
+# Platform Extra
+api_router.include_router(dict_router)
+api_router.include_router(integration_router)
+api_router.include_router(taskqueue_router)
+api_router.include_router(selfcheck_router)
+api_router.include_router(tenant_router)
+
+# Global Search
+api_router.include_router(search_router)

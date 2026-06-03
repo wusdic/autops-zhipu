@@ -1,74 +1,560 @@
 <template>
-  <div class="p-6">
-    <h2 class="page-title">资源导入</h2>
-    <el-row :gutter="24">
-      <el-col :span="12">
-        <div class="autops-card">
-          <div class="autops-card-header"><div class="autops-card-title">上传文件</div></div>
-          <div class="autops-card-body">
-            <el-upload drag accept=".csv,.xlsx,.xls" :auto-upload="false" :on-change="handleFile" :limit="1">
-              <el-icon size="48" color="#c9cdd4"><Upload /></el-icon>
-              <div style="margin-top: 8px">将 Excel/CSV 文件拖到此处，或 <em>点击上传</em></div>
-              <template #tip><div class="el-upload__tip">支持 .xlsx / .csv，最大 10MB</div></template>
-            </el-upload>
-            <el-divider />
-            <el-button type="primary" :disabled="!uploadedFile" @click="startImport" :loading="importing">
-              开始导入
-            </el-button>
-          </div>
+  <div class="resource-import-page">
+    <!-- 上传区域 -->
+    <el-card shadow="never" class="upload-card">
+      <template #header>
+        <div class="card-header">
+          <span class="title">
+            <el-icon><UploadFilled /></el-icon>
+            资产导入
+          </span>
+          <el-button link type="primary" @click="handleDownloadTemplate">
+            <el-icon><Download /></el-icon>
+            下载模板
+          </el-button>
         </div>
-      </el-col>
-      <el-col :span="12">
-        <div class="autops-card">
-          <div class="autops-card-header"><div class="autops-card-title">导入模板</div></div>
-          <div class="autops-card-body">
-            <p class="text-tertiary mb-md">请按以下格式准备导入文件：</p>
-            <el-table :data="templateFields" stripe size="small">
-              <el-table-column prop="field" label="字段名" /><el-table-column prop="required" label="必填" width="60" /><el-table-column prop="example" label="示例" />
-            </el-table>
-            <el-button style="margin-top: 16px" @click="downloadTemplate">下载导入模板</el-button>
-          </div>
+      </template>
+
+      <el-upload
+        ref="uploadRef"
+        class="import-uploader"
+        drag
+        :auto-upload="false"
+        :limit="1"
+        :on-change="handleFileChange"
+        :on-exceed="handleExceed"
+        :on-remove="handleFileRemove"
+        :before-upload="beforeUpload"
+        accept=".csv,.xlsx,.xls"
+      >
+        <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
+        <div class="el-upload__text">
+          将文件拖到此处，或 <em>点击上传</em>
         </div>
-      </el-col>
-    </el-row>
-    <!-- 导入结果 -->
-    <div v-if="importResult" class="autops-card" style="margin-top: 16px">
-      <div class="autops-card-header"><div class="autops-card-title">导入结果</div></div>
-      <div class="autops-card-body">
-        <el-result :icon="importResult.failed === 0 ? 'success' : 'warning'" :title="`成功导入 ${importResult.success} 条，失败 ${importResult.failed} 条`" />
+        <template #tip>
+          <div class="el-upload__tip">
+            支持 CSV / Excel 文件，单次上传不超过 10MB，文件需符合导入模板格式
+          </div>
+        </template>
+      </el-upload>
+
+      <div class="upload-actions">
+        <el-button
+          type="primary"
+          :icon="Upload"
+          :loading="uploading"
+          :disabled="!selectedFile"
+          @click="handleUpload"
+        >
+          开始导入
+        </el-button>
+        <el-button @click="handleClearFile">清除文件</el-button>
       </div>
-    </div>
+
+      <!-- 上传进度 -->
+      <el-progress
+        v-if="uploadProgress > 0 && uploadProgress < 100"
+        :percentage="uploadProgress"
+        :status="uploadStatus"
+        style="margin-top: 16px"
+      />
+    </el-card>
+
+    <!-- 导入结果弹窗 -->
+    <el-dialog v-model="resultDialogVisible" title="导入结果" width="550px" destroy-on-close>
+      <template v-if="importResult">
+        <el-result
+          :icon="importResult.fail_count > 0 ? 'warning' : 'success'"
+          :title="importResult.fail_count > 0 ? '部分导入成功' : '导入完成'"
+          :sub-title="`共 ${importResult.total} 条，成功 ${importResult.success_count} 条，失败 ${importResult.fail_count} 条`"
+        />
+        <el-divider v-if="importResult.errors?.length" content-position="left">错误详情</el-divider>
+        <el-table
+          v-if="importResult.errors?.length"
+          :data="importResult.errors"
+          max-height="300"
+          border
+          size="small"
+        >
+          <el-table-column prop="row" label="行号" width="70" align="center" />
+          <el-table-column prop="field" label="字段" width="120" />
+          <el-table-column prop="message" label="错误信息" show-overflow-tooltip />
+        </el-table>
+      </template>
+      <template #footer>
+        <el-button type="primary" @click="resultDialogVisible = false">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 导入历史 -->
+    <el-card shadow="never" class="history-card">
+      <template #header>
+        <div class="card-header">
+          <span class="title">导入历史</span>
+          <div class="actions">
+            <el-input
+              v-model="historyFilter.keyword"
+              placeholder="搜索文件名"
+              clearable
+              style="width: 200px; margin-right: 8px"
+              :prefix-icon="Search"
+              @clear="fetchHistory"
+              @keyup.enter="fetchHistory"
+            />
+            <el-button :icon="Refresh" @click="fetchHistory">刷新</el-button>
+          </div>
+        </div>
+      </template>
+
+      <el-table v-loading="historyLoading" :data="historyData" border stripe>
+        <el-table-column type="index" label="#" width="50" align="center" />
+        <el-table-column prop="filename" label="文件名" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            <div class="filename-cell">
+              <el-icon :size="16"><Document /></el-icon>
+              <span>{{ row.filename }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="file_size" label="文件大小" width="110" align="center">
+          <template #default="{ row }">
+            {{ formatFileSize(row.file_size) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="total_count" label="记录数" width="90" align="center" />
+        <el-table-column prop="success_count" label="成功" width="90" align="center">
+          <template #default="{ row }">
+            <el-tag type="success" size="small">{{ row.success_count ?? 0 }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="fail_count" label="失败" width="90" align="center">
+          <template #default="{ row }">
+            <el-tag :type="(row.fail_count ?? 0) > 0 ? 'danger' : 'info'" size="small">
+              {{ row.fail_count ?? 0 }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag
+              :type="historyStatusMap[row.status] || 'info'"
+              size="small"
+              effect="dark"
+            >
+              {{ historyStatusLabelMap[row.status] || row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="created_at" label="导入时间" width="170" sortable>
+          <template #default="{ row }">
+            {{ formatTime(row.created_at) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="operator" label="操作人" width="110" />
+        <el-table-column label="操作" width="140" align="center" fixed="right">
+          <template #default="{ row }">
+            <el-button type="primary" link size="small" @click="handleViewDetail(row)">
+              查看详情
+            </el-button>
+            <el-button
+              v-if="row.status === 'completed' || row.status === 'partial'"
+              type="success"
+              link
+              size="small"
+              @click="handleDownloadReport(row)"
+            >
+              下载报告
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="pagination-wrapper">
+        <el-pagination
+          v-model:current-page="historyPagination.page"
+          v-model:page-size="historyPagination.page_size"
+          :page-sizes="[10, 20, 50]"
+          :total="historyPagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          background
+          @size-change="handleHistorySizeChange"
+          @current-change="handleHistoryPageChange"
+        />
+      </div>
+    </el-card>
+
+    <!-- 历史详情弹窗 -->
+    <el-dialog v-model="detailDialogVisible" title="导入详情" width="650px" destroy-on-close>
+      <template v-if="detailData">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="文件名" :span="2">{{ detailData.filename }}</el-descriptions-item>
+          <el-descriptions-item label="文件大小">{{ formatFileSize(detailData.file_size) }}</el-descriptions-item>
+          <el-descriptions-item label="记录数">{{ detailData.total_count }}</el-descriptions-item>
+          <el-descriptions-item label="成功">
+            <el-tag type="success">{{ detailData.success_count ?? 0 }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="失败">
+            <el-tag :type="(detailData.fail_count ?? 0) > 0 ? 'danger' : 'info'">
+              {{ detailData.fail_count ?? 0 }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="导入时间" :span="2">{{ formatTime(detailData.created_at) }}</el-descriptions-item>
+          <el-descriptions-item label="操作人">{{ detailData.operator || '-' }}</el-descriptions-item>
+        </el-descriptions>
+
+        <el-divider v-if="detailData.errors?.length" content-position="left">
+          错误明细 ({{ detailData.errors.length }})
+        </el-divider>
+        <el-table
+          v-if="detailData.errors?.length"
+          :data="detailData.errors.slice(0, 50)"
+          max-height="280"
+          border
+          size="small"
+        >
+          <el-table-column prop="row" label="行号" width="70" align="center" />
+          <el-table-column prop="field" label="字段" width="120" />
+          <el-table-column prop="value" label="值" width="140" show-overflow-tooltip />
+          <el-table-column prop="message" label="错误信息" show-overflow-tooltip />
+        </el-table>
+        <div v-if="detailData.errors?.length > 50" class="more-errors">
+          仅展示前 50 条，共 {{ detailData.errors.length }} 条错误
+        </div>
+      </template>
+      <template #footer>
+        <el-button @click="detailDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
-import { Upload } from "@element-plus/icons-vue"
-import { ElMessage } from "element-plus"
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import type { UploadInstance, UploadRawFile, UploadFile } from 'element-plus'
+import {
+  UploadFilled,
+  Upload,
+  Download,
+  Search,
+  Refresh,
+  Document,
+} from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
-const uploadedFile = ref<File | null>(null)
-const importing = ref(false)
-const importResult = ref<{ success: number; failed: number } | null>(null)
-
-const templateFields = ref([
-  { field: "name", required: "是", example: "web-server-01" },
-  { field: "asset_type", required: "是", example: "linux_server" },
-  { field: "ip", required: "是", example: "192.168.1.100" },
-  { field: "os_info", required: "否", example: "CentOS 7.9" },
-  { field: "environment", required: "否", example: "production" },
-  { field: "tags", required: "否", example: "web,nginx" },
-])
-
-function handleFile(file: any) { uploadedFile.value = file.raw }
-function downloadTemplate() { ElMessage.info("模板下载功能开发中") }
-async function startImport() {
-  importing.value = true
-  try { await new Promise(r => setTimeout(r, 1500)); importResult.value = { success: 0, failed: 0 }; ElMessage.success("导入完成") }
-  finally { importing.value = false }
+// ─── 类型定义 ────────────────────────────────────────
+interface ImportResult {
+  total: number
+  success_count: number
+  fail_count: number
+  errors?: { row: number; field: string; value?: string; message: string }[]
 }
+
+interface ImportHistory {
+  id: number | string
+  filename: string
+  file_size: number
+  total_count: number
+  success_count: number
+  fail_count: number
+  status: string
+  created_at: string
+  operator: string
+  errors?: { row: number; field: string; value?: string; message: string }[]
+  [key: string]: unknown
+}
+
+// ─── 响应式状态 ──────────────────────────────────────
+const uploadRef = ref<UploadInstance>()
+const selectedFile = ref<UploadRawFile | null>(null)
+const uploading = ref(false)
+const uploadProgress = ref(0)
+const uploadStatus = ref<'' | 'success' | 'exception' | 'warning'>('')
+
+const resultDialogVisible = ref(false)
+const importResult = ref<ImportResult | null>(null)
+
+const historyLoading = ref(false)
+const historyData = ref<ImportHistory[]>([])
+const detailDialogVisible = ref(false)
+const detailData = ref<ImportHistory | null>(null)
+
+const historyFilter = reactive({ keyword: '' })
+const historyPagination = reactive({ page: 1, page_size: 10, total: 0 })
+
+// ─── 映射表 ──────────────────────────────────────────
+const historyStatusMap: Record<string, string> = {
+  pending: 'warning',
+  processing: '',
+  completed: 'success',
+  partial: 'warning',
+  failed: 'danger',
+}
+
+const historyStatusLabelMap: Record<string, string> = {
+  pending: '等待中',
+  processing: '处理中',
+  completed: '完成',
+  partial: '部分成功',
+  failed: '失败',
+}
+
+// ─── 文件上传处理 ────────────────────────────────────
+function handleFileChange(file: UploadFile) {
+  if (file.raw) {
+    selectedFile.value = file.raw
+  }
+}
+
+function handleFileRemove() {
+  selectedFile.value = null
+  uploadProgress.value = 0
+}
+
+function handleExceed() {
+  ElMessage.warning('只能上传一个文件，请先移除已选文件')
+}
+
+function handleClearFile() {
+  uploadRef.value?.clearFiles()
+  selectedFile.value = null
+  uploadProgress.value = 0
+  uploadStatus.value = ''
+}
+
+function beforeUpload(rawFile: UploadRawFile): boolean {
+  const validTypes = [
+    'text/csv',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-excel',
+  ]
+  if (!validTypes.includes(rawFile.type) && !rawFile.name.match(/\.(csv|xlsx|xls)$/i)) {
+    ElMessage.error('仅支持 CSV / Excel 文件格式')
+    return false
+  }
+  const maxSize = 10 * 1024 * 1024
+  if (rawFile.size > maxSize) {
+    ElMessage.error('文件大小不能超过 10MB')
+    return false
+  }
+  return true
+}
+
+async function handleUpload() {
+  if (!selectedFile.value) {
+    ElMessage.warning('请先选择文件')
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('file', selectedFile.value)
+
+  uploading.value = true
+  uploadProgress.value = 0
+  uploadStatus.value = ''
+
+  try {
+    const res = await client.post(API.ASSET_IMPORT, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (e: ProgressEvent) => {
+        if (e.total) {
+          uploadProgress.value = Math.round((e.loaded * 100) / e.total)
+        }
+      },
+    })
+
+    const data = res.data?.data ?? res.data
+    importResult.value = {
+      total: data?.total ?? 0,
+      success_count: data?.success_count ?? 0,
+      fail_count: data?.fail_count ?? 0,
+      errors: data?.errors ?? [],
+    }
+    uploadStatus.value = importResult.value.fail_count > 0 ? 'warning' : 'success'
+    uploadProgress.value = 100
+    resultDialogVisible.value = true
+
+    ElMessage.success('文件上传成功，导入处理完成')
+    handleClearFile()
+    fetchHistory()
+  } catch (err: unknown) {
+    uploadStatus.value = 'exception'
+    uploadProgress.value = 100
+    const msg = err instanceof Error ? err.message : '导入失败'
+    ElMessage.error(msg)
+  } finally {
+    uploading.value = false
+  }
+}
+
+// ─── 下载模板 ────────────────────────────────────────
+function handleDownloadTemplate() {
+  const link = document.createElement('a')
+  link.href = '/templates/asset_import_template.xlsx'
+  link.download = 'asset_import_template.xlsx'
+  link.click()
+}
+
+// ─── 导入历史 ────────────────────────────────────────
+async function fetchHistory() {
+  historyLoading.value = true
+  try {
+    const params: Record<string, unknown> = {
+      page: historyPagination.page,
+      page_size: historyPagination.page_size,
+    }
+    if (historyFilter.keyword) params.keyword = historyFilter.keyword
+
+    const res = await client.get(API.ASSET_IMPORT, { params })
+    const data = res.data?.data ?? res.data
+    if (Array.isArray(data)) {
+      historyData.value = data
+      historyPagination.total = data.length
+    } else {
+      historyData.value = data?.items ?? data?.results ?? data?.list ?? []
+      historyPagination.total = data?.total ?? historyData.value.length
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : '获取导入历史失败'
+    ElMessage.error(msg)
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+function handleHistorySizeChange(size: number) {
+  historyPagination.page_size = size
+  historyPagination.page = 1
+  fetchHistory()
+}
+
+function handleHistoryPageChange(page: number) {
+  historyPagination.page = page
+  fetchHistory()
+}
+
+// ─── 查看详情 ────────────────────────────────────────
+function handleViewDetail(row: ImportHistory) {
+  detailData.value = row
+  detailDialogVisible.value = true
+}
+
+// ─── 下载报告 ────────────────────────────────────────
+async function handleDownloadReport(row: ImportHistory) {
+  try {
+    const res = await client.get(`${API.ASSET_IMPORT}/${row.id}/report`, {
+      responseType: 'blob',
+    })
+    const blob = new Blob([res.data])
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `import_report_${row.id}.xlsx`
+    link.click()
+    URL.revokeObjectURL(link.href)
+  } catch {
+    ElMessage.error('下载报告失败')
+  }
+}
+
+// ─── 工具函数 ────────────────────────────────────────
+function formatTime(time: string): string {
+  if (!time) return '-'
+  try {
+    return new Date(time).toLocaleString('zh-CN', { hour12: false })
+  } catch {
+    return time
+  }
+}
+
+function formatFileSize(bytes: number): string {
+  if (!bytes || bytes === 0) return '-'
+  const units = ['B', 'KB', 'MB', 'GB']
+  let i = 0
+  let size = bytes
+  while (size >= 1024 && i < units.length - 1) {
+    size /= 1024
+    i++
+  }
+  return `${size.toFixed(1)} ${units[i]}`
+}
+
+// ─── 初始化 ──────────────────────────────────────────
+onMounted(() => {
+  fetchHistory()
+})
 </script>
 
 <style scoped>
-.page-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1d2129; }
-.text-tertiary { color: #86909c; } .mb-md { margin-bottom: 12px; }
+.resource-import-page {
+  padding: 20px;
+}
+
+.upload-card {
+  margin-bottom: 16px;
+}
+
+.upload-card .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.upload-card .card-header .title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.import-uploader {
+  width: 100%;
+}
+
+.import-uploader :deep(.el-upload-dragger) {
+  width: 100%;
+}
+
+.upload-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.history-card .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.history-card .card-header .title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.history-card .card-header .actions {
+  display: flex;
+  align-items: center;
+}
+
+.filename-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding: 4px 0;
+}
+
+.more-errors {
+  text-align: center;
+  color: #909399;
+  font-size: 12px;
+  margin-top: 8px;
+}
 </style>

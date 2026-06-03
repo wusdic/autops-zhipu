@@ -1,81 +1,175 @@
 <template>
-  <div class="p-6">
-    <h2 class="page-title">运维报告</h2>
-    <div class="autops-card mb-lg">
-      <div class="autops-card-header">
-        <div class="autops-card-title">报告列表</div>
-        <el-button type="primary" @click="createReport"><el-icon><Plus /></el-icon> 生成报告</el-button>
-      </div>
-      <div class="autops-card-body" style="padding:0">
-        <el-table :data="reports" stripe v-loading="loading" empty-text="暂无报告">
-          <el-table-column prop="title" label="报告名称" min-width="200" show-overflow-tooltip />
-          <el-table-column prop="report_type" label="类型" width="100">
-            <template #default="{ row }"><el-tag size="small">{{ row.report_type }}</el-tag></template>
-          </el-table-column>
-          <el-table-column prop="period" label="周期" width="160" />
-          <el-table-column prop="generated_at" label="生成时间" width="160" />
-          <el-table-column prop="status" label="状态" width="80">
-            <template #default="{ row }">
-              <el-tag :type="{ completed:'success', generating:'warning', failed:'danger' }[row.status as string]" size="small">{{ row.status }}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="140" fixed="right">
-            <template #default="{ row }">
-              <el-button text type="primary" size="small" @click="viewReport(row)">查看</el-button>
-              <el-button text size="small" @click="downloadReport(row)">下载</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+  <div class="page-container">
+    <div class="autops-page-header">
+      <h2>运维总览报告</h2>
+      <div>
+        <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
+          end-placeholder="结束日期" value-format="YYYY-MM-DD" style="width: 300px;margin-right:12px" />
+        <el-button type="primary" @click="fetchData" :icon="Refresh">刷新</el-button>
       </div>
     </div>
-    <el-dialog v-model="createDialog" title="生成运维报告" width="500">
-      <el-form label-width="80px">
-        <el-form-item label="报告类型">
-          <el-select v-model="form.report_type" style="width:100%">
-            <el-option label="日报" value="daily" /><el-option label="周报" value="weekly" />
-            <el-option label="月报" value="monthly" /><el-option label="自定义" value="custom" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="时间范围"><el-date-picker v-model="form.dateRange" type="daterange" range-separator="至" style="width:100%" /></el-form-item>
-        <el-form-item label="包含模块">
-          <el-checkbox-group v-model="form.modules">
-            <el-checkbox label="资产" value="asset" /><el-checkbox label="告警" value="alert" />
-            <el-checkbox label="执行" value="execution" /><el-checkbox label="巡检" value="inspection" />
-          </el-checkbox-group>
-        </el-form-item>
-      </el-form>
-      <template #footer><el-button @click="createDialog=false">取消</el-button><el-button type="primary" @click="submitCreate">确定</el-button></template>
-    </el-dialog>
+
+    <!-- 总览统计 -->
+    <el-row :gutter="16" style="margin-bottom: 16px">
+      <el-col :span="4" v-for="card in summaryCards" :key="card.label">
+        <el-card shadow="hover" v-loading="loading">
+          <el-statistic :title="card.label" :value="card.value" :suffix="card.suffix" />
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 资产概况 -->
+    <el-card style="margin-bottom: 16px">
+      <template #header><span>资产概况</span></template>
+      <el-table :data="assetStats" v-loading="loading" stripe size="small">
+        <el-table-column prop="type" label="资产类型" />
+        <el-table-column prop="total" label="总数" width="80" />
+        <el-table-column prop="online" label="在线" width="80" />
+        <el-table-column prop="offline" label="离线" width="80" />
+        <el-table-column prop="alerting" label="告警中" width="80" />
+      </el-table>
+    </el-card>
+
+    <!-- 告警概况 -->
+    <el-card style="margin-bottom: 16px">
+      <template #header><span>告警概况</span></template>
+      <el-table :data="alertList" v-loading="loading" stripe size="small">
+        <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="severity" label="严重度" width="100">
+          <template #default="{ row }">
+            <el-tag size="small" :type="severityType(row.severity)">{{ row.severity }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag size="small" :type="alertStatusType(row.status)">{{ row.status }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="created_at" label="触发时间" width="170">
+          <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <!-- 执行概况 -->
+    <el-card style="margin-bottom: 16px">
+      <template #header><span>自动化执行概况</span></template>
+      <el-table :data="execList" v-loading="loading" stripe size="small">
+        <el-table-column prop="name" label="执行名称" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag size="small" :type="execStatusType(row.status)">{{ row.status }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="trigger_type" label="触发方式" width="100" />
+        <el-table-column prop="started_at" label="开始时间" width="170">
+          <template #default="{ row }">{{ formatTime(row.started_at) }}</template>
+        </el-table-column>
+        <el-table-column prop="finished_at" label="结束时间" width="170">
+          <template #default="{ row }">{{ formatTime(row.finished_at) }}</template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <!-- 工单概况 -->
+    <el-card>
+      <template #header><span>工单概况</span></template>
+      <el-table :data="ticketList" v-loading="loading" stripe size="small">
+        <el-table-column prop="title" label="工单标题" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.status }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="priority" label="优先级" width="100" />
+        <el-table-column prop="created_at" label="创建时间" width="170">
+          <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
+        </el-table-column>
+      </el-table>
+    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue"
-import api from "@/shared/api/client"
-import { API } from "@/shared/api/routes"
-import { Plus } from "@element-plus/icons-vue"
-import { ElMessage } from "element-plus"
+import { ref, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Refresh } from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 const loading = ref(false)
-const reports = ref<any[]>([])
-const createDialog = ref(false)
-const form = reactive({ report_type: "daily", dateRange: [] as any[], modules: ["asset","alert","execution"] })
+const dateRange = ref<string[] | null>(null)
+const dashboardData = ref<Record<string, any>>({})
+const alertList = ref<any[]>([])
+const execList = ref<any[]>([])
+const ticketList = ref<any[]>([])
 
-function createReport() { createDialog.value = true }
-function viewReport(row: any) { ElMessage.info("查看报告") }
-function downloadReport(row: any) { ElMessage.info("下载报告") }
-function submitCreate() { createDialog.value = false; ElMessage.success("报告生成任务已提交") }
+const summaryCards = computed(() => [
+  { label: '资产总数', value: dashboardData.value.assets?.total ?? 0 },
+  { label: '活跃告警', value: dashboardData.value.alerts?.active ?? dashboardData.value.alerts?.total ?? 0 },
+  { label: '异常数', value: dashboardData.value.anomalies?.total ?? 0 },
+  { label: '执行次数', value: dashboardData.value.automation?.total ?? 0 },
+  { label: '工单数', value: dashboardData.value.tickets?.total ?? 0 },
+  { label: '巡检完成率', value: dashboardData.value.inspection?.completion_rate ?? 0, suffix: '%' },
+])
 
-onMounted(async () => {
+const assetStats = computed(() => {
+  const types = dashboardData.value.assets?.by_type ?? {}
+  return Object.entries(types).map(([type, info]: [string, any]) => ({
+    type,
+    total: info.total ?? info ?? 0,
+    online: info.online ?? 0,
+    offline: info.offline ?? 0,
+    alerting: info.alerting ?? 0,
+  }))
+})
+
+function severityType(s: string) {
+  return { critical: 'danger', high: 'danger', warning: 'warning', info: 'info' }[s] || 'info'
+}
+function alertStatusType(s: string) {
+  return { active: 'danger', acknowledged: 'warning', resolved: 'success' }[s] || 'info'
+}
+function execStatusType(s: string) {
+  return { completed: 'success', success: 'success', running: 'warning', failed: 'danger', pending: 'info' }[s] || 'info'
+}
+function formatTime(t: string) {
+  if (!t) return '-'
+  return new Date(t).toLocaleString('zh-CN')
+}
+
+async function fetchData() {
   loading.value = true
   try {
-    const res = await api.get(API.REPORTS, { params: { page_size: 50 } })
-    if (res.data?.code === 0) reports.value = res.data.data?.items || []
-  } catch (e) {} finally { loading.value = false }
-})
-</script>
+    const params: Record<string, any> = {}
+    if (dateRange.value?.length === 2) {
+      params.start_date = dateRange.value[0]
+      params.end_date = dateRange.value[1]
+    }
+    const [dashRes, alertRes, execRes, ticketRes] = await Promise.allSettled([
+      client.get(API.DASHBOARD.STATS, { params }),
+      client.get(API.ALERTS, { params: { page_size: 10, ...params } }),
+      client.get(API.EXECUTIONS, { params: { page_size: 10, ...params } }),
+      client.get(API.TICKETS, { params: { page_size: 10, ...params } }),
+    ])
+    if (dashRes.status === 'fulfilled') {
+      dashboardData.value = dashRes.value.data?.data ?? dashRes.value.data
+    }
+    if (alertRes.status === 'fulfilled') {
+      const d = alertRes.value.data?.data ?? alertRes.value.data
+      alertList.value = d?.items ?? d?.results ?? (Array.isArray(d) ? d : [])
+    }
+    if (execRes.status === 'fulfilled') {
+      const d = execRes.value.data?.data ?? execRes.value.data
+      execList.value = d?.items ?? d?.results ?? (Array.isArray(d) ? d : [])
+    }
+    if (ticketRes.status === 'fulfilled') {
+      const d = ticketRes.value.data?.data ?? ticketRes.value.data
+      ticketList.value = d?.items ?? d?.results ?? (Array.isArray(d) ? d : [])
+    }
+  } catch (e: any) { ElMessage.error('获取报告数据失败') }
+  finally { loading.value = false }
+}
 
-<style scoped>
-.page-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1d2129; }
-.mb-lg { margin-bottom: 16px; }
-</style>
+onMounted(fetchData)
+</script>

@@ -1,40 +1,209 @@
 <template>
-  <div class="p-6">
+  <div class="page-container">
+    <!-- 页面头部 -->
     <div class="page-header">
       <h2 class="page-title">页面巡检</h2>
-      <el-button type="primary" @click="handleCreate"><el-icon><Plus /></el-icon> 新建</el-button>
     </div>
-    <p class="page-desc text-tertiary mb-md">URL可用性、状态码、关键字、响应时间、截图检测</p>
-    <el-table :data="tableData" stripe v-loading="loading" empty-text="暂无数据">
-      <el-table-column prop="url" label="URL地址" min-width="200" show-overflow-tooltip />
-      <el-table-column prop="status_code" label="状态码" width="80"  />
-      <el-table-column prop="response_time" label="响应时间(ms)" min-width="100" show-overflow-tooltip />
-      <el-table-column prop="keyword_match" label="关键字匹配" min-width="100" show-overflow-tooltip />
-      <el-table-column prop="available" label="可用" width="80"  />
-      <el-table-column label="操作" width="120" fixed="right">
-        <template #default>
-          <el-button text type="primary" size="small">查看</el-button>
-          <el-button text type="danger" size="small">删除</el-button>
+    <p class="page-desc">URL可用性、状态码、响应时间、页面关键字检测</p>
+
+    <!-- 搜索栏 -->
+    <div class="page-toolbar">
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索资产名 / URL..."
+        clearable
+        style="width: 280px"
+        @keyup.enter="fetchData"
+        @clear="fetchData"
+      >
+        <template #prefix><el-icon><Search /></el-icon></template>
+      </el-input>
+      <el-select v-model="statusFilter" placeholder="检查状态" clearable style="width: 140px" @change="fetchData">
+        <el-option label="通过" value="pass" />
+        <el-option label="失败" value="fail" />
+        <el-option label="警告" value="warn" />
+      </el-select>
+      <el-button type="default" @click="fetchData">
+        <el-icon><Refresh /></el-icon> 刷新
+      </el-button>
+    </div>
+
+    <!-- 数据表格 -->
+    <el-table :data="tableData" v-loading="loading" stripe empty-text="暂无页面巡检数据">
+      <el-table-column prop="asset_name" label="资产名" min-width="160" show-overflow-tooltip />
+      <el-table-column prop="url" label="URL" min-width="220" show-overflow-tooltip>
+        <template #default="{ row }">
+          <el-link type="primary" :href="row.url" target="_blank" :underline="false">
+            {{ row.url }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column prop="status_code" label="状态码" width="100" align="center">
+        <template #default="{ row }">
+          <span :class="statusCodeClass(row.status_code)">{{ row.status_code ?? '-' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="response_time" label="响应时间(ms)" width="140" align="center">
+        <template #default="{ row }">
+          <span :class="responseTimeClass(row.response_time)">{{ row.response_time ?? '-' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="checked_at" label="检查时间" width="180">
+        <template #default="{ row }">
+          <span class="text-tertiary">{{ row.checked_at || row.created_at || '-' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="status" label="状态" width="100" align="center">
+        <template #default="{ row }">
+          <el-tag :type="statusTagType(row.status)" size="small" effect="light">
+            {{ statusLabel(row.status) }}
+          </el-tag>
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 分页 -->
+    <div class="page-pagination">
+      <el-pagination
+        v-model:current-page="pagination.page"
+        v-model:page-size="pagination.page_size"
+        :total="pagination.total"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        background
+        @size-change="fetchData"
+        @current-change="fetchData"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-import { Plus } from "@element-plus/icons-vue"
-import { ElMessage } from "element-plus"
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Search, Refresh } from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
+// ---------- 状态 ----------
 const loading = ref(false)
 const tableData = ref<any[]>([])
-function handleCreate() { ElMessage.info("功能开发中") }
-onMounted(() => { loading.value = false })
+const searchQuery = ref('')
+const statusFilter = ref('')
+
+const pagination = reactive({
+  page: 1,
+  page_size: 20,
+  total: 0,
+})
+
+// ---------- 工具函数 ----------
+const statusMap: Record<string, { label: string; type: string }> = {
+  pass: { label: '通过', type: 'success' },
+  fail: { label: '失败', type: 'danger' },
+  warn: { label: '警告', type: 'warning' },
+}
+
+function statusTagType(status: string): string {
+  return statusMap[status]?.type ?? 'info'
+}
+
+function statusLabel(status: string): string {
+  return statusMap[status]?.label ?? status ?? '-'
+}
+
+function statusCodeClass(code: number | undefined): string {
+  if (!code) return ''
+  if (code >= 200 && code < 300) return 'status-success'
+  if (code >= 300 && code < 400) return 'status-warning'
+  if (code >= 400) return 'status-danger'
+  return ''
+}
+
+function responseTimeClass(ms: number | undefined): string {
+  if (ms === undefined || ms === null) return ''
+  if (ms < 500) return 'status-success'
+  if (ms < 2000) return 'status-warning'
+  return 'status-danger'
+}
+
+// ---------- API ----------
+async function fetchData() {
+  loading.value = true
+  try {
+    const params: Record<string, any> = {
+      page: pagination.page,
+      page_size: pagination.page_size,
+    }
+    if (searchQuery.value.trim()) {
+      params.keyword = searchQuery.value.trim()
+    }
+    if (statusFilter.value) {
+      params.status = statusFilter.value
+    }
+    const res = await client.get(API.INSPECTION.PAGE_CHECKS, { params })
+    const data = res.data?.data ?? res.data
+    tableData.value = data?.items ?? data ?? []
+    pagination.total = data?.total ?? tableData.value.length
+  } catch (err: any) {
+    ElMessage.error(err.message || '获取页面巡检数据失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// ---------- 初始化 ----------
+onMounted(() => {
+  fetchData()
+})
 </script>
 
 <style scoped>
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.page-title { font-size: 18px; font-weight: 600; color: #1d2129; }
-.page-desc { font-size: 13px; }
-.text-tertiary { color: #86909c; } .mb-md { margin-bottom: 12px; }
+.page-container {
+  padding: 24px;
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d2129;
+  margin: 0;
+}
+.page-desc {
+  font-size: 13px;
+  color: #86909c;
+  margin: 0 0 16px 0;
+}
+.page-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.page-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+.text-tertiary {
+  color: #86909c;
+  font-size: 13px;
+}
+.status-success {
+  color: #00b42a;
+  font-weight: 600;
+}
+.status-warning {
+  color: #ff7d00;
+  font-weight: 600;
+}
+.status-danger {
+  color: #f53f3f;
+  font-weight: 600;
+}
 </style>

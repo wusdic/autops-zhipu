@@ -1,82 +1,460 @@
 <template>
-  <div class="p-6">
-    <div class="page-header">
-      <h2 class="page-title">发现结果</h2>
-      <div class="header-actions">
-        <el-select v-model="filterStatus" placeholder="状态筛选" clearable style="width: 140px; margin-right: 12px">
-          <el-option label="待确认" value="pending" /><el-option label="已纳管" value="managed" /><el-option label="已忽略" value="ignored" /><el-option label="重复" value="duplicate" />
-        </el-select>
-        <el-button type="primary" :disabled="!selectedRows.length" @click="batchManage">批量纳管</el-button>
+  <div class="discovery-result-page">
+    <!-- 搜索与筛选栏 -->
+    <el-card shadow="never" class="filter-card">
+      <el-form :inline="true" :model="filterForm" @submit.prevent="handleSearch">
+        <el-form-item label="关键词">
+          <el-input
+            v-model="filterForm.keyword"
+            placeholder="搜索 IP / 主机名"
+            clearable
+            style="width: 220px"
+            @clear="handleSearch"
+          />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select
+            v-model="filterForm.status"
+            placeholder="全部状态"
+            clearable
+            style="width: 150px"
+            @change="handleSearch"
+          >
+            <el-option label="新增" value="new" />
+            <el-option label="已忽略" value="ignored" />
+            <el-option label="已导入" value="imported" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="资产类型">
+          <el-select
+            v-model="filterForm.asset_type"
+            placeholder="全部类型"
+            clearable
+            style="width: 150px"
+            @change="handleSearch"
+          >
+            <el-option label="服务器" value="server" />
+            <el-option label="网络设备" value="network" />
+            <el-option label="安全设备" value="security" />
+            <el-option label="数据库" value="database" />
+            <el-option label="中间件" value="middleware" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
+          <el-button :icon="Refresh" @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <!-- 操作栏 -->
+    <el-card shadow="never" class="table-card">
+      <template #header>
+        <div class="card-header">
+          <span class="title">发现结果列表</span>
+          <div class="actions">
+            <el-button
+              type="primary"
+              :icon="Download"
+              :disabled="!selectedRows.length"
+              @click="handleBatchImport"
+            >
+              批量导入 ({{ selectedRows.length }})
+            </el-button>
+            <el-button
+              :icon="RefreshRight"
+              :loading="loading"
+              @click="fetchData"
+            >
+              刷新
+            </el-button>
+          </div>
+        </div>
+      </template>
+
+      <!-- 数据表格 -->
+      <el-table
+        v-loading="loading"
+        :data="tableData"
+        border
+        stripe
+        @selection-change="handleSelectionChange"
+        @sort-change="handleSortChange"
+      >
+        <el-table-column type="selection" width="50" align="center" />
+        <el-table-column prop="ip" label="IP 地址" min-width="140" sortable="custom" show-overflow-tooltip />
+        <el-table-column prop="hostname" label="主机名" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="asset_type" label="资产类型" min-width="110">
+          <template #default="{ row }">
+            <el-tag :type="assetTypeTagMap[row.asset_type] || 'info'" size="small">
+              {{ assetTypeLabelMap[row.asset_type] || row.asset_type }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="port" label="端口" min-width="100">
+          <template #default="{ row }">
+            <span>{{ row.ports?.join(', ') || row.port || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" min-width="100">
+          <template #default="{ row }">
+            <el-tag :type="statusTagMap[row.status]" size="small" effect="dark">
+              {{ statusLabelMap[row.status] || row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="discovered_at" label="发现时间" min-width="170" sortable="custom">
+          <template #default="{ row }">
+            {{ formatTime(row.discovered_at) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="os_info" label="操作系统" min-width="140" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.os_info || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="180" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row.status === 'new'">
+              <el-button type="primary" link size="small" @click="handleImport(row)">
+                导入
+              </el-button>
+              <el-button type="warning" link size="small" @click="handleIgnore(row)">
+                忽略
+              </el-button>
+            </template>
+            <template v-else-if="row.status === 'ignored'">
+              <el-button type="primary" link size="small" @click="handleImport(row)">
+                导入
+              </el-button>
+            </template>
+            <template v-else>
+              <el-tag type="success" size="small">已导入</el-tag>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <div class="pagination-wrapper">
+        <el-pagination
+          v-model:current-page="pagination.page"
+          v-model:page-size="pagination.page_size"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="pagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          background
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
+        />
       </div>
-    </div>
-    <el-table :data="filteredResults" stripe v-loading="loading" @selection-change="(v: any) => selectedRows = v" empty-text="暂无发现结果">
-      <el-table-column type="selection" width="50" />
-      <el-table-column prop="ip" label="IP地址" width="150" />
-      <el-table-column prop="hostname" label="主机名" min-width="140" show-overflow-tooltip />
-      <el-table-column prop="asset_type" label="识别类型" width="120">
-        <template #default="{ row }"><el-tag size="small">{{ row.asset_type || "未识别" }}</el-tag></template>
-      </el-table-column>
-      <el-table-column prop="fingerprint" label="指纹证据" min-width="160" show-overflow-tooltip />
-      <el-table-column prop="risk_tags" label="风险标记" width="120">
-        <template #default="{ row }">
-          <el-tag v-for="tag in (row.risk_tags || [])" :key="tag" type="danger" size="small" style="margin-right: 4px">{{ tag }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="status" label="状态" width="90">
-        <template #default="{ row }">
-          <el-tag :type="statusMap[row.status] || 'info'" size="small">{{ statusLabel[row.status] || row.status }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="discovered_at" label="发现时间" width="160">
-        <template #default="{ row }"><span class="text-tertiary">{{ row.discovered_at }}</span></template>
-      </el-table-column>
-      <el-table-column label="操作" width="160" fixed="right">
-        <template #default="{ row }">
-          <el-button v-if="row.status === 'pending'" text type="primary" size="small" @click="manageAsset(row)">纳管</el-button>
-          <el-button v-if="row.status === 'pending'" text type="warning" size="small" @click="ignoreAsset(row)">忽略</el-button>
-          <el-button text type="primary" size="small" @click="viewDetail(row)">详情</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    </el-card>
+
+    <!-- 导入确认弹窗 -->
+    <el-dialog v-model="importDialogVisible" title="导入资产确认" width="500px" destroy-on-close>
+      <el-descriptions :column="1" border>
+        <el-descriptions-item label="IP 地址">{{ currentRow?.ip }}</el-descriptions-item>
+        <el-descriptions-item label="主机名">{{ currentRow?.hostname || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="资产类型">
+          {{ assetTypeLabelMap[currentRow?.asset_type] || currentRow?.asset_type }}
+        </el-descriptions-item>
+        <el-descriptions-item label="端口">{{ currentRow?.ports?.join(', ') || currentRow?.port || '-' }}</el-descriptions-item>
+      </el-descriptions>
+      <el-form :model="importForm" label-width="100px" style="margin-top: 20px">
+        <el-form-item label="资产分组">
+          <el-select v-model="importForm.group_id" placeholder="选择分组（可选）" clearable style="width: 100%">
+            <el-option label="默认分组" :value="0" />
+            <el-option label="服务器组" :value="1" />
+            <el-option label="网络设备组" :value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="importForm.remark" type="textarea" :rows="2" placeholder="备注信息（可选）" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="importDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="importLoading" @click="confirmImport">确认导入</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
-import api from "@/shared/api/client"
-import { API } from "@/shared/api/routes"
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Search, Refresh, RefreshRight, Download } from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
+// ─── 类型定义 ────────────────────────────────────────
+interface DiscoveryResult {
+  id: number | string
+  ip: string
+  hostname: string
+  asset_type: string
+  ports: string[]
+  port?: string
+  status: 'new' | 'ignored' | 'imported'
+  discovered_at: string
+  os_info?: string
+  [key: string]: unknown
+}
+
+// ─── 响应式状态 ──────────────────────────────────────
 const loading = ref(false)
-const results = ref<any[]>([])
-const filterStatus = ref("")
-const selectedRows = ref<any[]>([])
-const statusMap: Record<string, string> = { pending: "warning", managed: "success", ignored: "info", duplicate: "danger" }
-const statusLabel: Record<string, string> = { pending: "待确认", managed: "已纳管", ignored: "已忽略", duplicate: "重复" }
+const importLoading = ref(false)
+const importDialogVisible = ref(false)
+const tableData = ref<DiscoveryResult[]>([])
+const selectedRows = ref<DiscoveryResult[]>([])
+const currentRow = ref<DiscoveryResult | null>(null)
 
-const filteredResults = computed(() => filterStatus.value ? results.value.filter(r => r.status === filterStatus.value) : results.value)
-function manageAsset(row: any) { row.status = "managed" }
-function ignoreAsset(row: any) { row.status = "ignored" }
-function batchManage() { selectedRows.value.forEach(r => { r.status = "managed" }) }
-function viewDetail(row: any) { /* TODO: drawer */ }
+const filterForm = reactive({
+  keyword: '',
+  status: '',
+  asset_type: '',
+})
 
-onMounted(async () => {
+const pagination = reactive({
+  page: 1,
+  page_size: 20,
+  total: 0,
+})
+
+const sortInfo = reactive({
+  sort_by: '',
+  sort_order: '',
+})
+
+const importForm = reactive({
+  group_id: undefined as number | undefined,
+  remark: '',
+})
+
+// ─── 映射表 ──────────────────────────────────────────
+const statusTagMap: Record<string, string> = {
+  new: 'danger',
+  ignored: 'warning',
+  imported: 'success',
+}
+
+const statusLabelMap: Record<string, string> = {
+  new: '新增',
+  ignored: '已忽略',
+  imported: '已导入',
+}
+
+const assetTypeTagMap: Record<string, string> = {
+  server: '',
+  network: 'success',
+  security: 'danger',
+  database: 'warning',
+  middleware: 'info',
+}
+
+const assetTypeLabelMap: Record<string, string> = {
+  server: '服务器',
+  network: '网络设备',
+  security: '安全设备',
+  database: '数据库',
+  middleware: '中间件',
+}
+
+// ─── 数据获取 ────────────────────────────────────────
+async function fetchData() {
   loading.value = true
   try {
-    const res = await api.get(API.ASSETS, { params: { page_size: 100 } })
-    if (res.data?.code === 0) {
-      results.value = (res.data.data?.items || []).map((a: any) => ({
-        ip: a.ip || a.host || "-", hostname: a.name || "-", asset_type: a.asset_type || "unknown",
-        fingerprint: a.os_info || "-", risk_tags: [], status: a.reachability === "unknown" ? "pending" : "managed",
-        discovered_at: a.created_at || "-"
-      }))
+    const params: Record<string, unknown> = {
+      page: pagination.page,
+      page_size: pagination.page_size,
     }
-  } catch (e) { console.error(e) } finally { loading.value = false }
+    if (filterForm.keyword) params.keyword = filterForm.keyword
+    if (filterForm.status) params.status = filterForm.status
+    if (filterForm.asset_type) params.asset_type = filterForm.asset_type
+    if (sortInfo.sort_by) {
+      params.sort_by = sortInfo.sort_by
+      params.sort_order = sortInfo.sort_order
+    }
+    const res = await client.get(API.DISCOVERY_RESULTS, { params })
+    const data = res.data?.data ?? res.data
+    if (Array.isArray(data)) {
+      tableData.value = data
+      pagination.total = data.length
+    } else {
+      tableData.value = data?.items ?? data?.results ?? data?.list ?? []
+      pagination.total = data?.total ?? tableData.value.length
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : '获取发现结果失败'
+    ElMessage.error(msg)
+  } finally {
+    loading.value = false
+  }
+}
+
+// ─── 搜索与筛选 ──────────────────────────────────────
+function handleSearch() {
+  pagination.page = 1
+  fetchData()
+}
+
+function handleReset() {
+  filterForm.keyword = ''
+  filterForm.status = ''
+  filterForm.asset_type = ''
+  sortInfo.sort_by = ''
+  sortInfo.sort_order = ''
+  pagination.page = 1
+  fetchData()
+}
+
+// ─── 排序 ────────────────────────────────────────────
+function handleSortChange({ prop, order }: { prop: string; order: string | null }) {
+  sortInfo.sort_by = order ? prop : ''
+  sortInfo.sort_order = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : ''
+  fetchData()
+}
+
+// ─── 分页 ────────────────────────────────────────────
+function handleSizeChange(size: number) {
+  pagination.page_size = size
+  pagination.page = 1
+  fetchData()
+}
+
+function handlePageChange(page: number) {
+  pagination.page = page
+  fetchData()
+}
+
+// ─── 多选 ────────────────────────────────────────────
+function handleSelectionChange(rows: DiscoveryResult[]) {
+  selectedRows.value = rows
+}
+
+// ─── 导入 ────────────────────────────────────────────
+function handleImport(row: DiscoveryResult) {
+  currentRow.value = row
+  importForm.group_id = undefined
+  importForm.remark = ''
+  importDialogVisible.value = true
+}
+
+async function confirmImport() {
+  if (!currentRow.value) return
+  importLoading.value = true
+  try {
+    const payload = {
+      ...currentRow.value,
+      group_id: importForm.group_id,
+      remark: importForm.remark,
+    }
+    await client.post(API.ASSET_IMPORT, payload)
+    ElMessage.success('导入成功')
+    importDialogVisible.value = false
+    fetchData()
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : '导入失败'
+    ElMessage.error(msg)
+  } finally {
+    importLoading.value = false
+  }
+}
+
+async function handleBatchImport() {
+  const importable = selectedRows.value.filter(r => r.status !== 'imported')
+  if (!importable.length) {
+    ElMessage.warning('没有可导入的记录')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      `确定批量导入选中的 ${importable.length} 条记录？`,
+      '批量导入确认',
+      { type: 'info' }
+    )
+    loading.value = true
+    await client.post(API.ASSET_IMPORT, { items: importable })
+    ElMessage.success(`成功导入 ${importable.length} 条记录`)
+    fetchData()
+  } catch (err: unknown) {
+    if (err !== 'cancel') {
+      const msg = err instanceof Error ? err.message : '批量导入失败'
+      ElMessage.error(msg)
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+// ─── 忽略 ────────────────────────────────────────────
+async function handleIgnore(row: DiscoveryResult) {
+  try {
+    await ElMessageBox.confirm(
+      `确定忽略 ${row.ip} 的发现结果？`,
+      '忽略确认',
+      { type: 'warning' }
+    )
+    await client.patch(`${API.DISCOVERY_RESULTS}/${row.id}/ignore`, {})
+    ElMessage.success('已忽略')
+    fetchData()
+  } catch (err: unknown) {
+    if (err !== 'cancel') {
+      const msg = err instanceof Error ? err.message : '操作失败'
+      ElMessage.error(msg)
+    }
+  }
+}
+
+// ─── 工具函数 ────────────────────────────────────────
+function formatTime(time: string): string {
+  if (!time) return '-'
+  try {
+    return new Date(time).toLocaleString('zh-CN', { hour12: false })
+  } catch {
+    return time
+  }
+}
+
+// ─── 初始化 ──────────────────────────────────────────
+onMounted(() => {
+  fetchData()
 })
 </script>
 
 <style scoped>
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.page-title { font-size: 18px; font-weight: 600; color: #1d2129; }
-.header-actions { display: flex; align-items: center; }
-.text-tertiary { color: #86909c; font-size: 12px; }
+.discovery-result-page {
+  padding: 20px;
+}
+
+.filter-card {
+  margin-bottom: 16px;
+}
+
+.filter-card :deep(.el-card__body) {
+  padding-bottom: 2px;
+}
+
+.table-card .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.table-card .card-header .title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.table-card .card-header .actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding: 4px 0;
+}
 </style>

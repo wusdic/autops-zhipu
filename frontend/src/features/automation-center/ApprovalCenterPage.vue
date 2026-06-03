@@ -1,54 +1,508 @@
 <template>
-  <div class="p-6">
-    <h2 class="page-title">审批中心</h2>
-    <el-tabs v-model="activeTab">
-      <el-tab-pane label="待我审批" name="pending" />
-      <el-tab-pane label="已审批" name="done" />
-    </el-tabs>
-    <el-table :data="approvals" stripe v-loading="loading" empty-text="暂无审批">
-      <el-table-column prop="execution_type" label="执行类型" width="120" />
-      <el-table-column prop="target" label="目标" min-width="160" show-overflow-tooltip />
-      <el-table-column prop="risk_level" label="风险等级" width="90">
-        <template #default="{ row }">
-          <el-tag :type="{ high: 'danger', medium: 'warning', low: 'success' }[row.risk_level as string]" size="small">{{ row.risk_level }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="applicant" label="申请人" width="100" />
-      <el-table-column prop="reason" label="原因" min-width="200" show-overflow-tooltip />
-      <el-table-column prop="created_at" label="申请时间" width="160" />
-      <el-table-column label="操作" width="160" fixed="right">
-        <template #default>
-          <el-button type="success" size="small">批准</el-button>
-          <el-button type="danger" size="small">拒绝</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+  <div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">审批中心</h2>
+        <p class="page-subtitle">审批自动化执行请求，管控操作风险</p>
+      </div>
+    </div>
+
+    <!-- Status Tabs -->
+    <el-card shadow="never" class="tabs-card">
+      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+        <el-tab-pane label="全部" name="all" />
+        <el-tab-pane name="pending">
+          <template #label>
+            <span>待审批 <el-badge v-if="pendingCount > 0" :value="pendingCount" class="tab-badge" /></span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane label="已批准" name="approved" />
+        <el-tab-pane label="已拒绝" name="rejected" />
+      </el-tabs>
+
+      <!-- Filter Row -->
+      <el-row :gutter="16" align="middle" style="margin-bottom: 16px;">
+        <el-col :span="6">
+          <el-input
+            v-model="searchKeyword"
+            placeholder="搜索请求名称、请求人..."
+            clearable
+            @keyup.enter="handleSearch"
+            @clear="handleSearch"
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+          </el-input>
+        </el-col>
+        <el-col :span="4">
+          <el-select v-model="filterRisk" placeholder="风险等级" clearable @change="handleSearch">
+            <el-option label="高风险" value="high" />
+            <el-option label="中风险" value="medium" />
+            <el-option label="低风险" value="low" />
+          </el-select>
+        </el-col>
+        <el-col :span="4">
+          <el-select v-model="filterType" placeholder="请求类型" clearable @change="handleSearch">
+            <el-option label="脚本执行" value="script" />
+            <el-option label="Playbook 执行" value="playbook" />
+            <el-option label="配置变更" value="config" />
+            <el-option label="巡检任务" value="inspection" />
+          </el-select>
+        </el-col>
+        <el-col :span="4">
+          <el-button type="primary" @click="handleSearch">查询</el-button>
+          <el-button @click="resetFilters">重置</el-button>
+        </el-col>
+      </el-row>
+
+      <!-- Data Table -->
+      <el-table
+        :data="approvals"
+        stripe
+        v-loading="loading"
+        empty-text="暂无审批记录"
+        @sort-change="handleSortChange"
+      >
+        <el-table-column prop="name" label="请求名称" min-width="180" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="request-name" @click="viewDetail(row)">{{ row.name || row.title || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="type" label="类型" width="120">
+          <template #default="{ row }">
+            <el-tag size="small" effect="plain">{{ typeLabel(row.type || row.execution_type) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="risk_level" label="风险等级" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="riskTagType(row.risk_level)" size="small" effect="light">
+              {{ riskLabel(row.risk_level) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="requester" label="请求人" width="110">
+          <template #default="{ row }">
+            {{ row.requester || row.applicant || row.created_by || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="reason" label="原因" min-width="160" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span class="text-tertiary">{{ row.reason || row.description || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="created_at" label="请求时间" width="170" sortable="custom">
+          <template #default="{ row }">
+            <span class="text-tertiary">{{ formatTime(row.created_at) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="statusTagType(row.status)" size="small" effect="light">
+              {{ statusLabel(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="180" fixed="right" align="center">
+          <template #default="{ row }">
+            <template v-if="row.status === 'pending'">
+              <el-button text type="success" size="small" @click="openActionDialog(row, 'approve')">
+                批准
+              </el-button>
+              <el-button text type="danger" size="small" @click="openActionDialog(row, 'reject')">
+                拒绝
+              </el-button>
+            </template>
+            <template v-else>
+              <el-button text type="primary" size="small" @click="viewDetail(row)">查看</el-button>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- Pagination -->
+      <div class="pagination-wrap">
+        <el-pagination
+          v-model:current-page="pagination.page"
+          v-model:page-size="pagination.page_size"
+          :total="pagination.total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          background
+          @size-change="fetchApprovals"
+          @current-change="fetchApprovals"
+        />
+      </div>
+    </el-card>
+
+    <!-- Approve / Reject Dialog -->
+    <el-dialog
+      v-model="actionDialogVisible"
+      :title="actionType === 'approve' ? '批准请求' : '拒绝请求'"
+      width="500px"
+      :close-on-click-modal="false"
+      @closed="resetActionForm"
+    >
+      <div class="action-dialog-content">
+        <el-descriptions :column="1" border size="small" style="margin-bottom: 16px;">
+          <el-descriptions-item label="请求名称">{{ currentAction?.name || currentAction?.title || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="类型">{{ typeLabel(currentAction?.type || currentAction?.execution_type) }}</el-descriptions-item>
+          <el-descriptions-item label="风险等级">
+            <el-tag :type="riskTagType(currentAction?.risk_level)" size="small">
+              {{ riskLabel(currentAction?.risk_level) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="请求人">{{ currentAction?.requester || currentAction?.applicant || '-' }}</el-descriptions-item>
+        </el-descriptions>
+
+        <el-form label-position="top">
+          <el-form-item :label="actionType === 'approve' ? '批准备注（可选）' : '拒绝原因'">
+            <el-input
+              v-model="actionComment"
+              type="textarea"
+              :rows="4"
+              :placeholder="actionType === 'approve' ? '请输入批准备注...' : '请输入拒绝原因...'"
+              maxlength="256"
+              show-word-limit
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <template #footer>
+        <el-button @click="actionDialogVisible = false">取消</el-button>
+        <el-button
+          :type="actionType === 'approve' ? 'success' : 'danger'"
+          :loading="actionSubmitting"
+          @click="submitAction"
+        >
+          {{ actionType === 'approve' ? '确认批准' : '确认拒绝' }}
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Detail Drawer -->
+    <el-drawer v-model="drawerVisible" title="审批详情" size="520px">
+      <template v-if="currentDetail">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="请求名称">{{ currentDetail.name || currentDetail.title || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="类型">{{ typeLabel(currentDetail.type || currentDetail.execution_type) }}</el-descriptions-item>
+          <el-descriptions-item label="风险等级">
+            <el-tag :type="riskTagType(currentDetail.risk_level)" size="small">
+              {{ riskLabel(currentDetail.risk_level) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag :type="statusTagType(currentDetail.status)" size="small">
+              {{ statusLabel(currentDetail.status) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="请求人">{{ currentDetail.requester || currentDetail.applicant || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="请求时间">{{ formatTime(currentDetail.created_at) }}</el-descriptions-item>
+          <el-descriptions-item label="原因/说明">{{ currentDetail.reason || currentDetail.description || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="审批人" v-if="currentDetail.reviewer">{{ currentDetail.reviewer }}</el-descriptions-item>
+          <el-descriptions-item label="审批时间" v-if="currentDetail.reviewed_at">{{ formatTime(currentDetail.reviewed_at) }}</el-descriptions-item>
+          <el-descriptions-item label="审批备注" v-if="currentDetail.comment">{{ currentDetail.comment }}</el-descriptions-item>
+        </el-descriptions>
+
+        <!-- Execution Targets -->
+        <div v-if="currentDetail.targets && currentDetail.targets.length" style="margin-top: 20px;">
+          <div class="section-title">执行目标</div>
+          <el-table :data="currentDetail.targets" size="small" border>
+            <el-table-column prop="name" label="名称" min-width="120" />
+            <el-table-column prop="type" label="类型" width="100" />
+            <el-table-column prop="action" label="操作" width="120" />
+          </el-table>
+        </div>
+
+        <!-- Quick Actions for Pending -->
+        <div v-if="currentDetail.status === 'pending'" style="margin-top: 24px; display: flex; gap: 12px;">
+          <el-button type="success" @click="openActionDialog(currentDetail, 'approve'); drawerVisible = false">
+            批准
+          </el-button>
+          <el-button type="danger" @click="openActionDialog(currentDetail, 'reject'); drawerVisible = false">
+            拒绝
+          </el-button>
+        </div>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-import api from "@/shared/api/client"
-import { API } from "@/shared/api/routes"
+import { ref, reactive, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
+import { automationService } from '@/shared/api'
 
-const activeTab = ref("pending")
+// ---------- Types ----------
+interface Approval {
+  id: string
+  name?: string
+  title?: string
+  type?: string
+  execution_type?: string
+  risk_level: 'high' | 'medium' | 'low'
+  status: 'pending' | 'approved' | 'rejected'
+  requester?: string
+  applicant?: string
+  created_by?: string
+  reason?: string
+  description?: string
+  created_at: string
+  reviewed_at?: string
+  reviewer?: string
+  comment?: string
+  targets?: Array<{ name: string; type: string; action: string }>
+}
+
+// ---------- State ----------
 const loading = ref(false)
-const approvals = ref<any[]>([])
+const actionSubmitting = ref(false)
+const approvals = ref<Approval[]>([])
+const activeTab = ref('all')
 
-onMounted(async () => {
+const drawerVisible = ref(false)
+const currentDetail = ref<Approval | null>(null)
+
+const actionDialogVisible = ref(false)
+const actionType = ref<'approve' | 'reject'>('approve')
+const currentAction = ref<Approval | null>(null)
+const actionComment = ref('')
+
+const searchKeyword = ref('')
+const filterRisk = ref('')
+const filterType = ref('')
+const sortField = ref('')
+const sortOrder = ref('')
+
+const pagination = reactive({
+  page: 1,
+  page_size: 20,
+  total: 0,
+})
+
+// ---------- Computed ----------
+const pendingCount = computed(() => approvals.value.filter(a => a.status === 'pending').length)
+
+// ---------- Label Helpers ----------
+function typeLabel(type?: string) {
+  const map: Record<string, string> = {
+    script: '脚本执行',
+    playbook: 'Playbook 执行',
+    config: '配置变更',
+    inspection: '巡检任务',
+  }
+  return map[type || ''] || type || '-'
+}
+
+function riskTagType(level?: string) {
+  const map: Record<string, string> = { high: 'danger', medium: 'warning', low: 'success' }
+  return map[level || ''] || 'info'
+}
+
+function riskLabel(level?: string) {
+  const map: Record<string, string> = { high: '高风险', medium: '中风险', low: '低风险' }
+  return map[level || ''] || '未知'
+}
+
+function statusTagType(status?: string) {
+  const map: Record<string, string> = { pending: 'warning', approved: 'success', rejected: 'danger' }
+  return map[status || ''] || 'info'
+}
+
+function statusLabel(status?: string) {
+  const map: Record<string, string> = { pending: '待审批', approved: '已批准', rejected: '已拒绝' }
+  return map[status || ''] || '未知'
+}
+
+function formatTime(val?: string) {
+  if (!val) return '-'
+  return val.replace('T', ' ').substring(0, 19)
+}
+
+// ---------- Data Fetching ----------
+async function fetchApprovals() {
   loading.value = true
   try {
-    const res = await api.get(API.EXECUTIONS, { params: { page_size: 20, status: "awaiting_approval" } })
-    if (res.data?.code === 0) {
-      approvals.value = (res.data.data?.items || []).map((e: any) => ({
-        execution_type: e.execution_type || "-", target: (e.asset_ids || []).join(", ") || "-",
-        risk_level: e.risk_level || "medium", applicant: "-", reason: "-", created_at: e.created_at || "-"
-      }))
+    const params: Record<string, any> = {
+      page: pagination.page,
+      page_size: pagination.page_size,
     }
-  } catch (e) { console.error(e) } finally { loading.value = false }
+    if (activeTab.value !== 'all') params.status = activeTab.value
+    if (searchKeyword.value) params.keyword = searchKeyword.value
+    if (filterRisk.value) params.risk_level = filterRisk.value
+    if (filterType.value) params.type = filterType.value
+    if (sortField.value) {
+      params.sort_by = sortField.value
+      params.sort_order = sortOrder.value
+    }
+
+    const res = await automationService.listApprovals(params)
+    const data = res.data?.data ?? res.data
+    if (Array.isArray(data?.items)) {
+      approvals.value = data.items
+      pagination.total = data.total ?? data.items.length
+    } else if (Array.isArray(data)) {
+      approvals.value = data
+      pagination.total = data.length
+    }
+  } catch (e: any) {
+    ElMessage.error(e.message || '获取审批列表失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+// ---------- Search & Filter ----------
+function handleTabChange() {
+  pagination.page = 1
+  fetchApprovals()
+}
+
+function handleSearch() {
+  pagination.page = 1
+  fetchApprovals()
+}
+
+function resetFilters() {
+  searchKeyword.value = ''
+  filterRisk.value = ''
+  filterType.value = ''
+  sortField.value = ''
+  sortOrder.value = ''
+  handleSearch()
+}
+
+function handleSortChange({ prop, order }: any) {
+  sortField.value = prop || ''
+  sortOrder.value = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : ''
+  fetchApprovals()
+}
+
+// ---------- Detail ----------
+function viewDetail(row: Approval) {
+  currentDetail.value = row
+  drawerVisible.value = true
+}
+
+// ---------- Approve / Reject ----------
+function openActionDialog(row: Approval, type: 'approve' | 'reject') {
+  currentAction.value = row
+  actionType.value = type
+  actionComment.value = ''
+  actionDialogVisible.value = true
+}
+
+function resetActionForm() {
+  actionComment.value = ''
+  currentAction.value = null
+}
+
+async function submitAction() {
+  if (!currentAction.value) return
+
+  if (actionType.value === 'reject' && !actionComment.value.trim()) {
+    ElMessage.warning('请填写拒绝原因')
+    return
+  }
+
+  actionSubmitting.value = true
+  try {
+    if (actionType.value === 'approve') {
+      await automationService.approve(currentAction.value.id, {
+        approved: true,
+        comment: actionComment.value,
+      })
+      ElMessage.success('已批准')
+    } else {
+      await automationService.reject(currentAction.value.id, {
+        comment: actionComment.value,
+      })
+      ElMessage.success('已拒绝')
+    }
+    actionDialogVisible.value = false
+    fetchApprovals()
+  } catch (e: any) {
+    ElMessage.error(e.message || '操作失败')
+  } finally {
+    actionSubmitting.value = false
+  }
+}
+
+// ---------- Init ----------
+onMounted(() => {
+  fetchApprovals()
 })
 </script>
 
 <style scoped>
-.page-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1d2129; }
+.page-container {
+  padding: 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d2129;
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: #86909c;
+  margin-top: 4px;
+}
+
+.tabs-card :deep(.el-card__body) {
+  padding: 16px 20px;
+}
+
+.request-name {
+  color: #165dff;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.request-name:hover {
+  text-decoration: underline;
+}
+
+.text-tertiary {
+  color: #86909c;
+  font-size: 13px;
+}
+
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 0 0;
+}
+
+.tab-badge {
+  margin-left: 4px;
+}
+
+.tab-badge :deep(.el-badge__content) {
+  top: -2px;
+}
+
+.action-dialog-content {
+  padding: 0 4px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d2129;
+  margin-bottom: 12px;
+}
 </style>

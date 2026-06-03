@@ -1,6 +1,11 @@
 <template>
   <div class="p-6">
-    <h2 class="page-title">业务健康地图</h2>
+    <div class="page-header">
+      <h2 class="page-title">业务健康地图</h2>
+      <el-button @click="fetchSystems" :loading="loading" type="primary" plain size="small">刷新</el-button>
+    </div>
+
+    <!-- 总体健康评分 -->
     <el-row :gutter="16" class="mb-lg">
       <el-col :xs="12" :sm="6" v-for="card in statCards" :key="card.label">
         <div class="autops-metric-card">
@@ -12,32 +17,129 @@
         </div>
       </el-col>
     </el-row>
+
+    <!-- 健康评分条 -->
+    <div class="autops-card mb-lg" v-if="overallHealth !== null">
+      <div class="autops-card-body" style="display: flex; align-items: center; gap: 20px">
+        <span style="font-weight: 600; white-space: nowrap">总体健康评分</span>
+        <el-progress
+          :percentage="overallHealth"
+          :color="healthColor(overallHealth)"
+          :stroke-width="20"
+          style="flex: 1"
+          :format="(p: number) => `${p}分`"
+        />
+        <el-tag :type="healthTagType(overallHealth)" size="large">
+          {{ healthText(overallHealth) }}
+        </el-tag>
+      </div>
+    </div>
+
+    <!-- 搜索过滤 -->
+    <div class="autops-card mb-lg">
+      <div class="autops-card-body">
+        <el-form :inline="true" @submit.prevent="filterSystems">
+          <el-form-item label="搜索">
+            <el-input v-model="searchKeyword" placeholder="业务系统名称" clearable style="width: 240px" @clear="filterSystems" />
+          </el-form-item>
+          <el-form-item label="健康状态">
+            <el-select v-model="filterHealth" placeholder="全部" clearable style="width: 140px" @change="filterSystems">
+              <el-option label="正常" value="healthy" />
+              <el-option label="告警" value="warning" />
+              <el-option label="故障" value="critical" />
+              <el-option label="未知" value="unknown" />
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="filterSystems">筛选</el-button>
+            <el-button @click="resetFilter">重置</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
+
+    <!-- 业务系统健康网格 -->
     <el-row :gutter="16">
       <el-col :span="16">
         <div class="autops-card">
-          <div class="autops-card-header"><div class="autops-card-title">业务系统健康视图</div></div>
+          <div class="autops-card-header">
+            <div class="autops-card-title">业务系统健康视图</div>
+            <span class="text-tertiary">{{ filteredSystems.length }} 个系统</span>
+          </div>
           <div class="autops-card-body">
-            <div class="health-grid">
-              <div v-for="sys in businessSystems" :key="sys.name" class="health-card" :class="sys.health" @click="selectSystem(sys)">
-                <div class="health-name">{{ sys.name }}</div>
+            <div class="health-grid" v-loading="loading">
+              <div
+                v-for="sys in filteredSystems"
+                :key="sys.id || sys.name"
+                class="health-card"
+                :class="sys.health"
+                @click="selectSystem(sys)"
+              >
+                <div class="health-card-header">
+                  <div class="health-indicator" :class="`indicator-${sys.health}`"></div>
+                  <div class="health-name">{{ sys.name }}</div>
+                </div>
                 <div class="health-status">{{ healthLabel(sys.health) }}</div>
-                <div class="health-meta">{{ sys.asset_count }} 资产 · {{ sys.alert_count }} 告警</div>
+                <div class="health-meta">
+                  {{ sys.asset_count ?? 0 }} 资产 · {{ sys.alert_count ?? 0 }} 告警
+                </div>
+                <div class="health-sla" v-if="sys.sla !== undefined">
+                  SLA: {{ sys.sla }}%
+                </div>
               </div>
+              <el-empty v-if="!loading && filteredSystems.length === 0" description="暂无业务系统" :image-size="60" />
             </div>
           </div>
         </div>
       </el-col>
+
+      <!-- 详情面板 -->
       <el-col :span="8">
         <div class="autops-card" v-if="selectedSystem">
-          <div class="autops-card-header"><div class="autops-card-title">{{ selectedSystem.name }} 详情</div></div>
+          <div class="autops-card-header">
+            <div class="autops-card-title">{{ selectedSystem.name }} 详情</div>
+            <el-tag :type="healthTagTypeFromStr(selectedSystem.health)" size="small">
+              {{ healthLabel(selectedSystem.health) }}
+            </el-tag>
+          </div>
           <div class="autops-card-body">
             <el-descriptions :column="1" border size="small">
-              <el-descriptions-item label="健康状态">{{ healthLabel(selectedSystem.health) }}</el-descriptions-item>
-              <el-descriptions-item label="资产数">{{ selectedSystem.asset_count }}</el-descriptions-item>
-              <el-descriptions-item label="活跃告警">{{ selectedSystem.alert_count }}</el-descriptions-item>
-              <el-descriptions-item label="SLA达成率">{{ selectedSystem.sla }}%</el-descriptions-item>
-              <el-descriptions-item label="负责人">{{ selectedSystem.owner }}</el-descriptions-item>
+              <el-descriptions-item label="健康状态">
+                <span :style="{ color: healthColorStr(selectedSystem.health), fontWeight: 600 }">
+                  {{ healthLabel(selectedSystem.health) }}
+                </span>
+              </el-descriptions-item>
+              <el-descriptions-item label="资产数">
+                {{ selectedSystem.asset_count ?? '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item label="活跃告警">
+                <span :style="{ color: (selectedSystem.alert_count ?? 0) > 0 ? '#f53f3f' : '' }">
+                  {{ selectedSystem.alert_count ?? 0 }}
+                </span>
+              </el-descriptions-item>
+              <el-descriptions-item label="SLA达成率">
+                {{ selectedSystem.sla !== undefined ? `${selectedSystem.sla}%` : '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item label="负责人">
+                {{ selectedSystem.owner || '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item label="描述">
+                {{ selectedSystem.description || '-' }}
+              </el-descriptions-item>
             </el-descriptions>
+
+            <!-- 该系统告警列表 -->
+            <div style="margin-top: 12px">
+              <div style="font-weight: 600; margin-bottom: 8px; font-size: 13px">最近告警</div>
+              <el-table :data="systemAlerts" size="small" stripe v-loading="sysAlertLoading" empty-text="暂无告警" max-height="200">
+                <el-table-column prop="title" label="告警" min-width="120" show-overflow-tooltip />
+                <el-table-column prop="severity" label="级别" width="60">
+                  <template #default="{ row }">
+                    <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
           </div>
         </div>
         <el-empty v-else description="点击左侧业务系统查看详情" :image-size="80" />
@@ -47,34 +149,240 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue"
-import { CircleCheck, Warning, CircleClose, QuestionFilled } from "@element-plus/icons-vue"
+import { ref, reactive, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import { CircleCheck, Warning, CircleClose, QuestionFilled } from '@element-plus/icons-vue'
+import { dashboardService, alertService } from '@/shared/api'
+import client from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
-const statCards = reactive([
-  { label: "业务系统", value: 0, icon: QuestionFilled, bg: "#e8f3ff", color: "#165dff" },
-  { label: "正常", value: 0, icon: CircleCheck, bg: "#e8ffea", color: "#00b42a" },
-  { label: "告警", value: 0, icon: Warning, bg: "#fff7e8", color: "#ff7d00" },
-  { label: "故障", value: 0, icon: CircleClose, bg: "#ffece8", color: "#f53f3f" },
-])
-
+const loading = ref(false)
+const sysAlertLoading = ref(false)
 const businessSystems = ref<any[]>([])
 const selectedSystem = ref<any>(null)
+const systemAlerts = ref<any[]>([])
+const searchKeyword = ref('')
+const filterHealth = ref('')
 
-function healthLabel(h: string) { return ({ healthy: "正常", warning: "告警", critical: "故障", unknown: "未知" } as any)[h] || h }
-function selectSystem(sys: any) { selectedSystem.value = sys }
+const statCards = reactive([
+  { label: '业务系统', value: 0, icon: QuestionFilled, bg: '#e8f3ff', color: '#165dff' },
+  { label: '正常', value: 0, icon: CircleCheck, bg: '#e8ffea', color: '#00b42a' },
+  { label: '告警', value: 0, icon: Warning, bg: '#fff7e8', color: '#ff7d00' },
+  { label: '故障', value: 0, icon: CircleClose, bg: '#ffece8', color: '#f53f3f' },
+])
+
+const overallHealth = ref<number | null>(null)
+
+// Filtered systems
+const filteredSystems = computed(() => {
+  let list = businessSystems.value
+  if (searchKeyword.value) {
+    const kw = searchKeyword.value.toLowerCase()
+    list = list.filter(s => (s.name || '').toLowerCase().includes(kw))
+  }
+  if (filterHealth.value) {
+    list = list.filter(s => s.health === filterHealth.value)
+  }
+  return list
+})
+
+// Helpers
+const healthLabelMap: Record<string, string> = { healthy: '正常', warning: '告警', critical: '故障', unknown: '未知' }
+const healthLabel = (h: string) => healthLabelMap[h] || h
+
+const severityMap: Record<string, string> = { critical: '严重', high: '高', medium: '中', low: '低' }
+const severityLabel = (s: string) => severityMap[s] || s
+const severityType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
+  ({ critical: 'danger', high: 'warning', medium: '', low: 'info' } as any)[s] || 'info'
+
+function healthColor(p: number) {
+  if (p >= 90) return '#00b42a'
+  if (p >= 70) return '#165dff'
+  if (p >= 50) return '#ff7d00'
+  return '#f53f3f'
+}
+function healthText(p: number) {
+  if (p >= 90) return '优秀'
+  if (p >= 70) return '良好'
+  if (p >= 50) return '一般'
+  return '较差'
+}
+function healthTagType(p: number): '' | 'success' | 'warning' | 'danger' | 'info' {
+  if (p >= 90) return 'success'
+  if (p >= 70) return ''
+  if (p >= 50) return 'warning'
+  return 'danger'
+}
+function healthTagTypeFromStr(h: string): '' | 'success' | 'warning' | 'danger' | 'info' {
+  return ({ healthy: 'success', warning: 'warning', critical: 'danger', unknown: 'info' } as any)[h] || 'info'
+}
+function healthColorStr(h: string) {
+  return ({ healthy: '#00b42a', warning: '#ff7d00', critical: '#f53f3f', unknown: '#86909c' } as any)[h] || '#86909c'
+}
+
+function filterSystems() { /* computed handles filtering */ }
+function resetFilter() {
+  searchKeyword.value = ''
+  filterHealth.value = ''
+}
+
+async function fetchSystems() {
+  loading.value = true
+  try {
+    const [sysRes, discRes] = await Promise.allSettled([
+      client.get(API.BUSINESS_SYSTEMS),
+      dashboardService.assetDiscovery(),
+    ])
+
+    let systems: any[] = []
+    if (sysRes.status === 'fulfilled') {
+      const data = sysRes.value.data?.data || sysRes.value.data
+      systems = data?.items || data || []
+    }
+
+    // Enrich with discovery data if available
+    if (discRes.status === 'fulfilled') {
+      const discData = discRes.value.data?.data || discRes.value.data
+      if (discData?.systems) {
+        // Merge discovery data into systems
+        discData.systems.forEach((ds: any) => {
+          const existing = systems.find(s => s.name === ds.name || s.id === ds.id)
+          if (existing) {
+            Object.assign(existing, ds)
+          } else {
+            systems.push(ds)
+          }
+        })
+      }
+    }
+
+    businessSystems.value = systems
+    updateStats(systems)
+  } catch (e: any) {
+    ElMessage.error(e.message || '获取业务系统失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+function updateStats(systems: any[]) {
+  statCards[0].value = systems.length
+  statCards[1].value = systems.filter(s => s.health === 'healthy').length
+  statCards[2].value = systems.filter(s => s.health === 'warning').length
+  statCards[3].value = systems.filter(s => s.health === 'critical').length
+
+  // Calculate overall health
+  if (systems.length > 0) {
+    const healthyPct = (statCards[1].value / systems.length) * 100
+    const warningPct = (statCards[2].value / systems.length) * 50
+    overallHealth.value = Math.round(Math.min(healthyPct + warningPct, 100))
+  } else {
+    overallHealth.value = null
+  }
+}
+
+async function selectSystem(sys: any) {
+  selectedSystem.value = sys
+  sysAlertLoading.value = true
+  try {
+    const res = await alertService.list({
+      page_size: 10,
+      business_system: sys.name || sys.id,
+    })
+    const data = res.data?.data || res.data
+    systemAlerts.value = data?.items || data || []
+  } catch {
+    systemAlerts.value = []
+  } finally {
+    sysAlertLoading.value = false
+  }
+}
+
+onMounted(() => fetchSystems())
 </script>
 
 <style scoped>
-.page-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1d2129; }
-.mb-lg { margin-bottom: 16px; }
-.health-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
-.health-card { border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; border: 1px solid #e5e6eb; }
-.health-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-.health-card.healthy { border-left: 4px solid #00b42a; background: #f8fff9; }
-.health-card.warning { border-left: 4px solid #ff7d00; background: #fffbf0; }
-.health-card.critical { border-left: 4px solid #f53f3f; background: #fff5f3; }
-.health-card.unknown { border-left: 4px solid #86909c; background: #fafafa; }
-.health-name { font-weight: 600; color: #1d2129; margin-bottom: 4px; }
-.health-status { font-size: 13px; margin-bottom: 4px; }
-.health-meta { font-size: 12px; color: #86909c; }
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d2129;
+}
+.mb-lg {
+  margin-bottom: 16px;
+}
+.text-tertiary {
+  color: #86909c;
+  font-size: 12px;
+}
+
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+.health-card {
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #e5e6eb;
+}
+.health-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.health-card.healthy {
+  border-left: 4px solid #00b42a;
+  background: #f8fff9;
+}
+.health-card.warning {
+  border-left: 4px solid #ff7d00;
+  background: #fffbf0;
+}
+.health-card.critical {
+  border-left: 4px solid #f53f3f;
+  background: #fff5f3;
+}
+.health-card.unknown {
+  border-left: 4px solid #86909c;
+  background: #fafafa;
+}
+.health-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.health-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.indicator-healthy { background: #00b42a; }
+.indicator-warning { background: #ff7d00; }
+.indicator-critical { background: #f53f3f; }
+.indicator-unknown { background: #86909c; }
+.health-name {
+  font-weight: 600;
+  color: #1d2129;
+}
+.health-status {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.health-meta {
+  font-size: 12px;
+  color: #86909c;
+}
+.health-sla {
+  font-size: 12px;
+  color: #165dff;
+  margin-top: 4px;
+}
 </style>

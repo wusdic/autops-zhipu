@@ -1,99 +1,664 @@
 <template>
-  <div class="p-6">
-    <h2 class="page-title">资源总览</h2>
-    <!-- 统计卡片 -->
-    <el-row :gutter="16" class="mb-lg">
-      <el-col :xs="12" :sm="6" v-for="card in statCards" :key="card.label">
-        <div class="autops-metric-card" @click="card.route && $router.push(card.route)">
-          <div class="metric-icon" :style="{ background: card.bg, color: card.color }">
-            <el-icon size="20"><component :is="card.icon" /></el-icon>
+  <div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h2>资源总览</h2>
+      <p class="page-subtitle">查看资产整体情况，快速访问核心功能</p>
+    </div>
+
+    <!-- Stat Cards -->
+    <el-row :gutter="16" class="stat-row">
+      <el-col :span="6" v-for="stat in statCards" :key="stat.label">
+        <el-card shadow="hover" class="stat-card" v-loading="statsLoading">
+          <div class="stat-card-inner">
+            <div class="stat-icon-wrap" :style="{ background: stat.bgColor }">
+              <el-icon :size="24" :style="{ color: stat.color }">
+                <component :is="stat.icon" />
+              </el-icon>
+            </div>
+            <div class="stat-info">
+              <el-statistic :title="stat.label" :value="stat.value" />
+            </div>
           </div>
-          <div class="metric-label">{{ card.label }}</div>
-          <div class="metric-value" :style="{ color: card.color }">{{ card.value }}</div>
-        </div>
+        </el-card>
       </el-col>
     </el-row>
-    <!-- 类型分布 + 环境分布 -->
-    <el-row :gutter="16">
-      <el-col :span="12">
-        <div class="autops-card">
-          <div class="autops-card-header"><div class="autops-card-title">资产类型分布</div></div>
-          <div class="autops-card-body"><div ref="typeChartRef" style="height: 280px"></div></div>
-        </div>
+
+    <!-- Asset Type Distribution + Status Distribution -->
+    <el-row :gutter="16" class="section-row">
+      <el-col :span="14">
+        <el-card class="main-card" shadow="never">
+          <template #header>
+            <div class="card-header">
+              <span class="card-title">资产类型分布</span>
+            </div>
+          </template>
+          <div class="type-grid" v-loading="statsLoading">
+            <div
+              v-for="item in typeDistribution"
+              :key="item.type"
+              class="type-card"
+            >
+              <div class="type-card-icon" :style="{ background: item.bgColor, color: item.color }">
+                <el-icon :size="20"><component :is="item.icon" /></el-icon>
+              </div>
+              <div class="type-card-info">
+                <div class="type-card-label">{{ item.label }}</div>
+                <div class="type-card-value">{{ item.count }}</div>
+              </div>
+            </div>
+            <el-empty
+              v-if="typeDistribution.length === 0 && !statsLoading"
+              description="暂无资产类型数据"
+              :image-size="60"
+            />
+          </div>
+        </el-card>
       </el-col>
-      <el-col :span="12">
-        <div class="autops-card">
-          <div class="autops-card-header"><div class="autops-card-title">纳管状态分布</div></div>
-          <div class="autops-card-body"><div ref="statusChartRef" style="height: 280px"></div></div>
-        </div>
+
+      <el-col :span="10">
+        <el-card class="main-card" shadow="never">
+          <template #header>
+            <div class="card-header">
+              <span class="card-title">状态概览</span>
+            </div>
+          </template>
+          <div class="status-summary" v-loading="statsLoading">
+            <div v-for="item in statusDistribution" :key="item.label" class="status-row">
+              <div class="status-dot" :style="{ background: item.color }"></div>
+              <span class="status-label">{{ item.label }}</span>
+              <div class="status-bar-wrap">
+                <div class="status-bar" :style="{ width: item.percentage + '%', background: item.color }"></div>
+              </div>
+              <span class="status-value">{{ item.count }}</span>
+            </div>
+            <el-empty
+              v-if="statusDistribution.length === 0 && !statsLoading"
+              description="暂无状态数据"
+              :image-size="60"
+            />
+          </div>
+        </el-card>
       </el-col>
     </el-row>
+
+    <!-- Recent Assets Table -->
+    <el-card class="main-card" shadow="never">
+      <template #header>
+        <div class="card-header">
+          <span class="card-title">最近更新的资产</span>
+          <el-button type="primary" text @click="router.push({ name: 'assets' })">
+            查看全部 <el-icon class="el-icon--right"><ArrowRight /></el-icon>
+          </el-button>
+        </div>
+      </template>
+      <el-table
+        :data="recentAssets"
+        stripe
+        v-loading="tableLoading"
+        empty-text="暂无资产数据"
+        style="width: 100%"
+      >
+        <el-table-column prop="name" label="资产名" min-width="180" show-overflow-tooltip>
+          <template #default="{ row }">
+            <el-link type="primary" @click="router.push(`/assets/${row.id}`)">
+              {{ row.name || row.hostname || '-' }}
+            </el-link>
+          </template>
+        </el-table-column>
+        <el-table-column prop="asset_type" label="类型" width="120">
+          <template #default="{ row }">
+            <el-tag size="small" :type="getAssetTypeTagType(row.asset_type)">
+              {{ getAssetTypeLabel(row.asset_type) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="ip" label="IP 地址" width="160">
+          <template #default="{ row }">
+            <span class="text-muted">{{ row.ip || row.management_ip || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag size="small" :type="getStatusTagType(row.status || row.reachability)">
+              {{ getStatusLabel(row.status || row.reachability) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="updated_at" label="更新时间" width="180">
+          <template #default="{ row }">
+            <span class="text-muted">{{ formatTime(row.updated_at) }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <!-- Quick Links -->
+    <el-card class="main-card" shadow="never">
+      <template #header>
+        <div class="card-header">
+          <span class="card-title">快速访问</span>
+        </div>
+      </template>
+      <el-row :gutter="16">
+        <el-col :span="6" v-for="link in quickLinks" :key="link.name">
+          <div class="quick-link-item" @click="router.push(link.route)">
+            <div class="quick-link-icon" :style="{ background: link.bgColor, color: link.color }">
+              <el-icon :size="22"><component :is="link.icon" /></el-icon>
+            </div>
+            <div class="quick-link-info">
+              <div class="quick-link-title">{{ link.title }}</div>
+              <div class="quick-link-desc">{{ link.description }}</div>
+            </div>
+            <el-icon class="quick-link-arrow"><ArrowRight /></el-icon>
+          </div>
+        </el-col>
+      </el-row>
+    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick, onUnmounted } from "vue"
-import * as echarts from "echarts"
-import api from "@/shared/api/client"
-import { API } from "@/shared/api/routes"
-import { Box, Search, Warning, CircleCheck } from "@element-plus/icons-vue"
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import {
+  Monitor,
+  Connection,
+  Warning,
+  CircleCheck,
+  ArrowRight,
+  Search,
+  SetUp,
+  Box,
+  Key,
+  OfficeBuilding,
+  Grid,
+  Server,
+  Cpu,
+  Coordinate,
+} from '@element-plus/icons-vue'
+import { assetService, dashboardService } from '@/shared/api'
+
+const router = useRouter()
+
+// --- State ---
+const statsLoading = ref(false)
+const tableLoading = ref(false)
+const recentAssets = ref<any[]>([])
+const typeDistribution = ref<TypeDistItem[]>([])
+const statusDistribution = ref<StatusDistItem[]>([])
+
+interface TypeDistItem {
+  type: string
+  label: string
+  count: number
+  color: string
+  bgColor: string
+  icon: any
+}
+
+interface StatusDistItem {
+  label: string
+  key: string
+  count: number
+  percentage: number
+  color: string
+}
 
 const statCards = reactive([
-  { label: "资产总数", value: 0, icon: Box, bg: "#e8f3ff", color: "#165dff", route: "/resource-center/assets" },
-  { label: "巡检覆盖率", value: "0%", icon: CircleCheck, bg: "#e8ffea", color: "#00b42a", route: "/inspection/overview" },
-  { label: "异常资源数", value: 0, icon: Warning, bg: "#ffece8", color: "#f53f3f", route: "/response/anomalies" },
-  { label: "待纳管", value: 0, icon: Search, bg: "#fff7e8", color: "#ff7d00", route: "/resource-center/discovery" },
+  { label: '资产总数', value: 0, icon: Monitor, color: '#165dff', bgColor: '#e8f3ff' },
+  { label: '在线', value: 0, icon: CircleCheck, color: '#00b42a', bgColor: '#e8ffea' },
+  { label: '离线', value: 0, icon: Connection, color: '#86909c', bgColor: '#f2f3f5' },
+  { label: '告警中', value: 0, icon: Warning, color: '#f53f3f', bgColor: '#ffece8' },
 ])
 
-const typeChartRef = ref<HTMLElement>()
-const statusChartRef = ref<HTMLElement>()
-let typeChart: echarts.ECharts | null = null
-let statusChart: echarts.ECharts | null = null
+const quickLinks = [
+  {
+    name: 'asset-list',
+    title: '资产列表',
+    description: '浏览和管理所有资产',
+    icon: Box,
+    color: '#165dff',
+    bgColor: '#e8f3ff',
+    route: { name: 'assets' },
+  },
+  {
+    name: 'asset-discovery',
+    title: '资源发现',
+    description: '自动发现网络中的资产',
+    icon: Search,
+    color: '#00b42a',
+    bgColor: '#e8ffea',
+    route: { name: 'discovery-tasks' },
+  },
+  {
+    name: 'credentials',
+    title: '凭证管理',
+    description: '管理访问资产的凭证',
+    icon: Key,
+    color: '#ff7d00',
+    bgColor: '#fff7e8',
+    route: { name: 'credentials' },
+  },
+  {
+    name: 'business-systems',
+    title: '业务系统',
+    description: '管理业务系统与关联',
+    icon: OfficeBuilding,
+    color: '#722ed1',
+    bgColor: '#f5e8ff',
+    route: { name: 'business-systems' },
+  },
+]
 
-onMounted(async () => {
+// --- Helpers ---
+function formatTime(val: string | number | null | undefined): string {
+  if (!val) return '-'
+  const d = new Date(val)
+  if (isNaN(d.getTime())) return '-'
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function getAssetTypeLabel(type: string): string {
+  const map: Record<string, string> = {
+    server: '服务器',
+    network: '网络设备',
+    storage: '存储设备',
+    database: '数据库',
+    middleware: '中间件',
+    vm: '虚拟机',
+    container: '容器',
+    cloud: '云资源',
+    other: '其他',
+  }
+  return map[type] || type || '未知'
+}
+
+function getAssetTypeTagType(type: string): '' | 'success' | 'warning' | 'danger' | 'info' {
+  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+    server: '',
+    network: 'success',
+    storage: 'warning',
+    database: 'danger',
+    middleware: 'info',
+    vm: '',
+    container: 'success',
+    cloud: 'warning',
+  }
+  return map[type] || 'info'
+}
+
+function getStatusTagType(status: string): '' | 'success' | 'warning' | 'danger' | 'info' {
+  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+    online: 'success',
+    reachable: 'success',
+    running: 'success',
+    offline: 'danger',
+    unreachable: 'danger',
+    unknown: 'info',
+    alarming: 'warning',
+    maintenance: 'warning',
+  }
+  return map[status] || 'info'
+}
+
+function getStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    online: '在线',
+    reachable: '可达',
+    running: '运行中',
+    offline: '离线',
+    unreachable: '不可达',
+    unknown: '未知',
+    alarming: '告警中',
+    maintenance: '维护中',
+  }
+  return map[status] || status || '未知'
+}
+
+function getAssetTypeIcon(type: string): any {
+  const map: Record<string, any> = {
+    server: Server,
+    network: Coordinate,
+    storage: Box,
+    database: Cpu,
+    middleware: SetUp,
+    vm: Monitor,
+    container: Grid,
+    cloud: Connection,
+  }
+  return map[type] || Box
+}
+
+const assetTypeColors: Record<string, { color: string; bgColor: string }> = {
+  server: { color: '#165dff', bgColor: '#e8f3ff' },
+  network: { color: '#0fc6c2', bgColor: '#e8fffb' },
+  storage: { color: '#722ed1', bgColor: '#f5e8ff' },
+  database: { color: '#f53f3f', bgColor: '#ffece8' },
+  middleware: { color: '#ff7d00', bgColor: '#fff7e8' },
+  vm: { color: '#00b42a', bgColor: '#e8ffea' },
+  container: { color: '#3491fa', bgColor: '#e8f3ff' },
+  cloud: { color: '#f77234', bgColor: '#fff3e8' },
+}
+
+// --- Data Fetching ---
+async function fetchStats() {
+  statsLoading.value = true
   try {
-    const res = await api.get(API.ASSETS, { params: { page_size: 100 } })
-    const data = res.data?.data
-    if (data?.items) {
-      const items = data.items
-      statCards[0].value = data.total || items.length
-      statCards[3].value = items.filter((a: any) => a.reachability === "unknown").length
+    const res = await dashboardService.stats()
+    const data = res.data?.data ?? res.data ?? {}
 
-      // 类型分布
-      const typeMap: Record<string, number> = {}
-      items.forEach((a: any) => { const t = a.asset_type || "unknown"; typeMap[t] = (typeMap[t] || 0) + 1 })
-      await nextTick()
-      if (typeChartRef.value) {
-        typeChart = echarts.init(typeChartRef.value)
-        typeChart.setOption({
-          tooltip: { trigger: "item" },
-          series: [{ type: "pie", radius: ["40%", "70%"], data: Object.entries(typeMap).map(([name, value]) => ({ name, value })),
-            emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: "rgba(0,0,0,0.2)" } } }],
-        })
-      }
+    // Populate stat cards
+    const assetStats = data.assets ?? data.asset_stats ?? {}
+    statCards[0].value = assetStats.total ?? data.total_assets ?? 0
+    statCards[1].value = assetStats.online ?? assetStats.reachable ?? data.online_assets ?? 0
+    statCards[2].value = assetStats.offline ?? assetStats.unreachable ?? data.offline_assets ?? 0
+    statCards[3].value = assetStats.alarming ?? data.alarming_assets ?? 0
 
-      // 状态分布
-      const statusMap: Record<string, number> = { reachable: 0, unreachable: 0, unknown: 0 }
-      items.forEach((a: any) => { statusMap[a.reachability || "unknown"] = (statusMap[a.reachability || "unknown"] || 0) + 1 })
-      await nextTick()
-      if (statusChartRef.value) {
-        statusChart = echarts.init(statusChartRef.value)
-        const colorMap: Record<string, string> = { reachable: "#00b42a", unreachable: "#f53f3f", unknown: "#86909c" }
-        const labelMap: Record<string, string> = { reachable: "可达", unreachable: "不可达", unknown: "未知" }
-        statusChart.setOption({
-          tooltip: { trigger: "item" },
-          series: [{ type: "pie", radius: ["40%", "70%"],
-            data: Object.entries(statusMap).map(([k, v]) => ({ name: labelMap[k] || k, value: v, itemStyle: { color: colorMap[k] } })) }],
-        })
-      }
+    // Build type distribution
+    const rawTypes = assetStats.by_type ?? data.asset_type_distribution ?? []
+    if (Array.isArray(rawTypes)) {
+      typeDistribution.value = rawTypes.map((item: any) => {
+        const t = item.type ?? item.asset_type ?? 'other'
+        const colors = assetTypeColors[t] ?? { color: '#86909c', bgColor: '#f2f3f5' }
+        return {
+          type: t,
+          label: getAssetTypeLabel(t),
+          count: item.count ?? 0,
+          color: colors.color,
+          bgColor: colors.bgColor,
+          icon: getAssetTypeIcon(t),
+        }
+      })
     }
-  } catch (e) { console.error("ResourceOverview fetch error:", e) }
-})
 
-onUnmounted(() => { typeChart?.dispose(); statusChart?.dispose() })
+    // Build status distribution
+    const total = statCards[0].value || 1
+    const rawStatus = assetStats.by_status ?? data.asset_status_distribution ?? null
+    if (rawStatus && Array.isArray(rawStatus)) {
+      statusDistribution.value = rawStatus.map((item: any) => ({
+        label: item.label ?? getStatusLabel(item.status ?? item.key),
+        key: item.status ?? item.key ?? '',
+        count: item.count ?? 0,
+        percentage: Math.round(((item.count ?? 0) / total) * 100),
+        color: item.color ?? '#86909c',
+      }))
+    } else {
+      // Build from stat card values
+      const statusData = [
+        { label: '在线', key: 'online', count: statCards[1].value, color: '#00b42a' },
+        { label: '离线', key: 'offline', count: statCards[2].value, color: '#86909c' },
+        { label: '告警中', key: 'alarming', count: statCards[3].value, color: '#f53f3f' },
+      ]
+      statusDistribution.value = statusData.map((s) => ({
+        ...s,
+        percentage: Math.round((s.count / total) * 100),
+      }))
+    }
+  } catch (err: any) {
+    console.error('Failed to fetch dashboard stats:', err)
+    ElMessage.error('获取资源统计信息失败')
+  } finally {
+    statsLoading.value = false
+  }
+}
+
+async function fetchRecentAssets() {
+  tableLoading.value = true
+  try {
+    const res = await assetService.list({ page: 1, page_size: 10 })
+    const data = res.data?.data ?? res.data ?? {}
+    recentAssets.value = data.items ?? data.list ?? []
+  } catch (err: any) {
+    console.error('Failed to fetch recent assets:', err)
+    ElMessage.error('获取最近资产列表失败')
+  } finally {
+    tableLoading.value = false
+  }
+}
+
+// --- Lifecycle ---
+onMounted(() => {
+  fetchStats()
+  fetchRecentAssets()
+})
 </script>
 
 <style scoped>
-.page-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1d2129; }
-.mb-lg { margin-bottom: 16px; }
+.page-container {
+  padding: 24px;
+  background: #f7f8fa;
+  min-height: 100%;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d2129;
+  margin: 0 0 4px 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #86909c;
+  margin: 0;
+}
+
+.stat-row {
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  border-radius: 8px;
+}
+
+.stat-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.section-row {
+  margin-bottom: 16px;
+}
+
+.main-card {
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d2129;
+}
+
+/* Type Distribution Grid */
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  min-height: 180px;
+}
+
+.type-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #fafbfc;
+  border: 1px solid #f2f3f5;
+  transition: all 0.2s;
+}
+
+.type-card:hover {
+  border-color: #e5e6eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.type-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.type-card-info {
+  flex: 1;
+}
+
+.type-card-label {
+  font-size: 12px;
+  color: #86909c;
+  margin-bottom: 2px;
+}
+
+.type-card-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d2129;
+}
+
+/* Status Distribution */
+.status-summary {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  padding: 8px 0;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-label {
+  font-size: 14px;
+  color: #4e5969;
+  width: 50px;
+  flex-shrink: 0;
+}
+
+.status-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: #f2f3f5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.status-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+  min-width: 2px;
+}
+
+.status-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d2129;
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Quick Links */
+.quick-link-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.quick-link-item:hover {
+  background-color: #f2f3f5;
+}
+
+.quick-link-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.quick-link-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-link-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d2129;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-link-desc {
+  font-size: 12px;
+  color: #86909c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-link-arrow {
+  color: #c9cdd4;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.text-muted {
+  color: #86909c;
+  font-size: 13px;
+}
 </style>

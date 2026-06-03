@@ -1,64 +1,410 @@
 <template>
-  <div class="p-6">
+  <div class="page-container">
+    <!-- 页面头部 -->
     <div class="page-header">
       <h2 class="page-title">巡检计划</h2>
-      <el-button type="primary" @click="showDialog = true"><el-icon><Plus /></el-icon> 新建计划</el-button>
+      <el-button type="primary" @click="handleCreate">
+        <el-icon><Plus /></el-icon> 新建计划
+      </el-button>
     </div>
-    <el-table :data="plans" stripe v-loading="loading" empty-text="暂无巡检计划">
+
+    <!-- 搜索栏 -->
+    <div class="page-toolbar">
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索计划名称..."
+        clearable
+        style="width: 260px"
+        @keyup.enter="fetchPlans"
+        @clear="fetchPlans"
+      >
+        <template #prefix><el-icon><Search /></el-icon></template>
+      </el-input>
+      <el-select v-model="enabledFilter" placeholder="状态筛选" clearable style="width: 130px" @change="fetchPlans">
+        <el-option label="已启用" :value="true" />
+        <el-option label="已禁用" :value="false" />
+      </el-select>
+      <el-button type="default" @click="fetchPlans">
+        <el-icon><Refresh /></el-icon> 刷新
+      </el-button>
+    </div>
+
+    <!-- 数据表格 -->
+    <el-table :data="plans" v-loading="loading" stripe empty-text="暂无巡检计划">
       <el-table-column prop="name" label="计划名称" min-width="180" show-overflow-tooltip />
-      <el-table-column prop="template_name" label="巡检模板" width="150" />
-      <el-table-column prop="cron" label="执行周期" width="120" />
-      <el-table-column prop="asset_scope" label="资产范围" min-width="160" show-overflow-tooltip />
-      <el-table-column prop="enabled" label="启用" width="70">
+      <el-table-column prop="template_name" label="关联模板" width="160" show-overflow-tooltip>
         <template #default="{ row }">
-          <el-switch v-model="row.enabled" size="small" />
+          <span>{{ row.template_name || getTemplateName(row.template_id) }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="next_run" label="下次执行" width="160">
-        <template #default="{ row }"><span class="text-tertiary">{{ row.next_run || "-" }}</span></template>
-      </el-table-column>
-      <el-table-column label="操作" width="140" fixed="right">
+      <el-table-column prop="cron" label="执行周期" width="140">
         <template #default="{ row }">
-          <el-button text type="primary" size="small" @click="editPlan(row)">编辑</el-button>
-          <el-button text type="danger" size="small" @click="deletePlan(row)">删除</el-button>
+          <span class="cron-text">{{ row.cron }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="cron_description" label="周期说明" width="130">
+        <template #default="{ row }">
+          <span class="text-tertiary">{{ row.cron_description || parseCron(row.cron) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="next_run" label="下次执行" width="170">
+        <template #default="{ row }">
+          <span class="text-tertiary">{{ row.next_run || '-' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="enabled" label="状态" width="90" align="center">
+        <template #default="{ row }">
+          <el-tag :type="row.enabled ? 'success' : 'info'" size="small">
+            {{ row.enabled ? '已启用' : '已禁用' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="created_at" label="创建时间" width="170">
+        <template #default="{ row }">
+          <span class="text-tertiary">{{ row.created_at || '-' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="160" fixed="right">
+        <template #default="{ row }">
+          <el-button text type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
+          <el-button text type="danger" size="small" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog v-model="showDialog" :title="editing ? '编辑计划' : '新建计划'" width="560px">
-      <el-form :model="form" label-width="90px">
-        <el-form-item label="计划名称"><el-input v-model="form.name" /></el-form-item>
-        <el-form-item label="巡检模板"><el-select v-model="form.template_name"><el-option label="Linux基础巡检" value="linux-basic" /><el-option label="Web服务巡检" value="web-basic" /><el-option label="数据库巡检" value="db-basic" /></el-select></el-form-item>
-        <el-form-item label="执行周期"><el-input v-model="form.cron" placeholder="如: 0 8 * * * (每天8:00)" /></el-form-item>
-        <el-form-item label="资产范围"><el-input v-model="form.asset_scope" placeholder="资产组、标签或IP范围" /></el-form-item>
-        <el-form-item label="失败重试"><el-input-number v-model="form.retry_count" :min="0" :max="3" /></el-form-item>
+
+    <!-- 分页 -->
+    <div class="page-pagination">
+      <el-pagination
+        v-model:current-page="pagination.page"
+        v-model:page-size="pagination.page_size"
+        :total="pagination.total"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        background
+        @size-change="fetchPlans"
+        @current-change="fetchPlans"
+      />
+    </div>
+
+    <!-- 新建/编辑弹窗 -->
+    <el-dialog
+      v-model="dialogVisible"
+      :title="isEditing ? '编辑计划' : '新建计划'"
+      width="600px"
+      :close-on-click-modal="false"
+      @closed="resetForm"
+    >
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="formRules"
+        label-width="100px"
+        label-position="right"
+      >
+        <el-form-item label="计划名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入计划名称" maxlength="100" show-word-limit />
+        </el-form-item>
+        <el-form-item label="关联模板" prop="template_id">
+          <el-select
+            v-model="form.template_id"
+            placeholder="请选择巡检模板"
+            style="width: 100%"
+            filterable
+            :loading="templateLoading"
+          >
+            <el-option
+              v-for="tpl in templateOptions"
+              :key="tpl.id"
+              :label="tpl.name"
+              :value="tpl.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="执行周期" prop="cron">
+          <el-input v-model="form.cron" placeholder="Cron 表达式，如: 0 8 * * *">
+            <template #append>
+              <el-tooltip content="Cron 表达式格式: 分 时 日 月 周&#10;示例:&#10;0 8 * * * 每天 8:00&#10;0 */2 * * * 每 2 小时&#10;0 0 * * 1 每周一 0:00" placement="top">
+                <el-icon><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="周期预览">
+          <span class="cron-preview">{{ parseCron(form.cron) || '请输入 Cron 表达式' }}</span>
+        </el-form-item>
+        <el-form-item label="是否启用" prop="enabled">
+          <el-switch v-model="form.enabled" active-text="启用" inactive-text="禁用" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input
+            v-model="form.description"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入计划描述（可选）"
+            maxlength="500"
+            show-word-limit
+          />
+        </el-form-item>
       </el-form>
-      <template #footer><el-button @click="showDialog=false">取消</el-button><el-button type="primary" @click="savePlan">确定</el-button></template>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">确定</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue"
-import { Plus } from "@element-plus/icons-vue"
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
+import { Plus, Search, Refresh, QuestionFilled } from '@element-plus/icons-vue'
+import { inspectionService } from '@/shared/api'
 
+// ---------- 状态 ----------
 const loading = ref(false)
+const submitLoading = ref(false)
+const templateLoading = ref(false)
+const dialogVisible = ref(false)
+const isEditing = ref(false)
+const editingId = ref<string>('')
 const plans = ref<any[]>([])
-const showDialog = ref(false)
-const editing = ref<any>(null)
-const form = reactive({ name: "", template_name: "", cron: "0 8 * * *", asset_scope: "", retry_count: 1 })
+const searchQuery = ref('')
+const enabledFilter = ref<boolean | string>('')
+const templateOptions = ref<any[]>([])
+const formRef = ref<FormInstance>()
 
-function editPlan(row: any) { editing.value = row; Object.assign(form, row); showDialog.value = true }
-function deletePlan(row: any) { plans.value = plans.value.filter(p => p !== row) }
-function savePlan() {
-  if (editing.value) { Object.assign(editing.value, form) }
-  else { plans.value.push({ ...form, id: Date.now().toString(), enabled: true, next_run: "-" }) }
-  showDialog.value = false; editing.value = null
+const pagination = reactive({
+  page: 1,
+  page_size: 20,
+  total: 0,
+})
+
+const form = reactive({
+  name: '',
+  template_id: '',
+  cron: '0 8 * * *',
+  enabled: true,
+  description: '',
+})
+
+const formRules: FormRules = {
+  name: [{ required: true, message: '请输入计划名称', trigger: 'blur' }],
+  template_id: [{ required: true, message: '请选择关联模板', trigger: 'change' }],
+  cron: [{ required: true, message: '请输入 Cron 表达式', trigger: 'blur' }],
 }
-onMounted(() => { loading.value = false })
+
+// ---------- 工具函数 ----------
+function getTemplateName(templateId: string) {
+  if (!templateId) return '-'
+  const tpl = templateOptions.value.find(t => t.id === templateId)
+  return tpl ? tpl.name : templateId
+}
+
+function parseCron(cron: string) {
+  if (!cron) return ''
+  const parts = cron.trim().split(/\s+/)
+  if (parts.length < 5) return '无效表达式'
+
+  const [minute, hour, dayOfMonth, month, dayOfWeek] = parts
+
+  // 每天
+  if (dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+    if (hour.startsWith('*/')) {
+      return `每 ${hour.slice(2)} 小时执行`
+    }
+    return `每天 ${hour}:${minute.padStart(2, '0')} 执行`
+  }
+  // 每周
+  if (dayOfWeek !== '*' && dayOfMonth === '*' && month === '*') {
+    const weekDayMap: Record<string, string> = {
+      '0': '周日', '1': '周一', '2': '周二', '3': '周三',
+      '4': '周四', '5': '周五', '6': '周六', '7': '周日',
+    }
+    return `每${weekDayMap[dayOfWeek] || '周' + dayOfWeek} ${hour}:${minute.padStart(2, '0')} 执行`
+  }
+  // 每月
+  if (dayOfMonth !== '*' && month === '*' && dayOfWeek === '*') {
+    return `每月 ${dayOfMonth} 日 ${hour}:${minute.padStart(2, '0')} 执行`
+  }
+  return `Cron: ${cron}`
+}
+
+// ---------- API ----------
+async function fetchPlans() {
+  loading.value = true
+  try {
+    const params: Record<string, any> = {
+      page: pagination.page,
+      page_size: pagination.page_size,
+    }
+    if (searchQuery.value.trim()) {
+      params.name = searchQuery.value.trim()
+    }
+    if (enabledFilter.value !== '' && enabledFilter.value !== null) {
+      params.enabled = enabledFilter.value
+    }
+    const res = await inspectionService.listPlans(params)
+    const data = res.data?.data ?? res.data
+    plans.value = data?.items ?? data ?? []
+    pagination.total = data?.total ?? plans.value.length
+  } catch (err: any) {
+    ElMessage.error(err.message || '获取计划列表失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchTemplates() {
+  templateLoading.value = true
+  try {
+    const res = await inspectionService.listTemplates({ page_size: 200 })
+    const data = res.data?.data ?? res.data
+    templateOptions.value = data?.items ?? data ?? []
+  } catch {
+    templateOptions.value = []
+  } finally {
+    templateLoading.value = false
+  }
+}
+
+async function createPlan(data: Record<string, any>) {
+  return inspectionService.createPlan(data)
+}
+
+async function updatePlan(id: string, data: Record<string, any>) {
+  return inspectionService.updatePlan(id, data)
+}
+
+async function deletePlan(id: string) {
+  return inspectionService.deletePlan(id)
+}
+
+// ---------- 操作 ----------
+function handleCreate() {
+  isEditing.value = false
+  editingId.value = ''
+  form.enabled = true
+  form.cron = '0 8 * * *'
+  dialogVisible.value = true
+}
+
+function handleEdit(row: any) {
+  isEditing.value = true
+  editingId.value = row.id
+  form.name = row.name || ''
+  form.template_id = row.template_id || ''
+  form.cron = row.cron || '0 8 * * *'
+  form.enabled = row.enabled !== false
+  form.description = row.description || ''
+  dialogVisible.value = true
+}
+
+async function handleSubmit() {
+  if (!formRef.value) return
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
+
+  submitLoading.value = true
+  try {
+    const payload = {
+      name: form.name,
+      template_id: form.template_id,
+      cron: form.cron,
+      enabled: form.enabled,
+      description: form.description,
+    }
+    if (isEditing.value) {
+      await updatePlan(editingId.value, payload)
+      ElMessage.success('计划更新成功')
+    } else {
+      await createPlan(payload)
+      ElMessage.success('计划创建成功')
+    }
+    dialogVisible.value = false
+    fetchPlans()
+  } catch (err: any) {
+    ElMessage.error(err.message || '操作失败')
+  } finally {
+    submitLoading.value = false
+  }
+}
+
+async function handleDelete(row: any) {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除计划「${row.name}」吗？此操作不可恢复。`,
+      '删除确认',
+      { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' }
+    )
+    await deletePlan(row.id)
+    ElMessage.success('计划已删除')
+    fetchPlans()
+  } catch (err: any) {
+    if (err !== 'cancel') {
+      ElMessage.error(err.message || '删除失败')
+    }
+  }
+}
+
+function resetForm() {
+  form.name = ''
+  form.template_id = ''
+  form.cron = '0 8 * * *'
+  form.enabled = true
+  form.description = ''
+  isEditing.value = false
+  editingId.value = ''
+  formRef.value?.resetFields()
+}
+
+// ---------- 初始化 ----------
+onMounted(() => {
+  fetchPlans()
+  fetchTemplates()
+})
 </script>
 
 <style scoped>
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.page-title { font-size: 18px; font-weight: 600; color: #1d2129; }
-.text-tertiary { color: #86909c; font-size: 12px; }
+.page-container {
+  padding: 24px;
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d2129;
+  margin: 0;
+}
+.page-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.page-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+.text-tertiary {
+  color: #86909c;
+  font-size: 13px;
+}
+.cron-text {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  background: #f2f3f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.cron-preview {
+  color: #86909c;
+  font-size: 13px;
+}
 </style>
