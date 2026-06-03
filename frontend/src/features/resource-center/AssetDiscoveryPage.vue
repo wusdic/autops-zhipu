@@ -36,8 +36,8 @@
         </div>
 
         <el-table :data="tasks" v-loading="loading" stripe>
-          <el-table-column prop="id" label="任务ID" width="80" />
-          <el-table-column prop="name" label="任务名称" min-width="150" />
+          <el-table-column type="index" label="序号" width="60" />
+          <el-table-column prop="name" label="任务名称" min-width="180" show-overflow-tooltip />
           <el-table-column label="IP范围" min-width="180">
             <template #default="{ row }">
               <span v-if="row.ip_range">{{ row.ip_range }}</span>

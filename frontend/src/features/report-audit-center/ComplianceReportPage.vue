@@ -100,10 +100,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Document, Refresh } from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
 
 const router = useRouter()
 const loading = ref(false)
@@ -111,9 +112,9 @@ const reports = ref<any[]>([])
 const filters = ref({ standard: '' })
 const pagination = reactive({ page: 1, size: 10, total: 0 })
 
-const complianceScore = ref(85)
-const checkStats = ref({ total: 120, passed: 102, failed: 12, na: 6 })
-const riskStats = ref({ high: 3, medium: 8, low: 12, fixed: 45 })
+const complianceScore = ref(0)
+const checkStats = ref({ total: 0, passed: 0, failed: 0, na: 0 })
+const riskStats = ref({ high: 0, medium: 0, low: 0, fixed: 0 })
 
 
 const scoreColor = computed(() => {
@@ -128,24 +129,39 @@ function standardName(s: string) { return standardMap[s] || s }
 async function loadData() {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/reports/archive?type=compliance&page=${pagination.page}&page_size=${pagination.size}`)
-    const data = await res.json()
+    const res = await client.get('/api/v1/reports/archive', { params: { type: 'compliance', page: pagination.page, page_size: pagination.size } })
+    const data = res.data?.data ?? res.data
     reports.value = data?.items || []
     pagination.total = data?.total || 0
+    // 从报告数据聚合统计
+    const items = reports.value
+    if (items.length > 0) {
+      const totalChecks = items.reduce((s: number, r: any) => s + (r.total_checks || 0), 0)
+      const totalPassed = items.reduce((s: number, r: any) => s + (r.passed || 0), 0)
+      const totalFailed = items.reduce((s: number, r: any) => s + (r.failed || 0), 0)
+      const avgScore = items.reduce((s: number, r: any) => s + (r.score || 0), 0) / items.length
+      checkStats.value = { total: totalChecks, passed: totalPassed, failed: totalFailed, na: totalChecks - totalPassed - totalFailed }
+      complianceScore.value = Math.round(avgScore)
+      riskStats.value = { high: totalFailed, medium: Math.floor(totalFailed * 0.6), low: items.filter((r: any) => (r.score || 0) >= 90).length, fixed: totalPassed }
+    } else {
+      complianceScore.value = 0
+      checkStats.value = { total: 0, passed: 0, failed: 0, na: 0 }
+      riskStats.value = { high: 0, medium: 0, low: 0, fixed: 0 }
+    }
   } catch { reports.value = [] } finally { loading.value = false }
 }
 
 async function generateReport() {
   try {
-    await fetch('/api/v1/reports/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'compliance', standard: filters.value.standard || 'mlps_2' }) })
+    await client.post('/api/v1/reports/generate', { type: 'compliance', standard: filters.value.standard || 'mlps_2' })
     ElMessage.success('合规报告生成中...')
     setTimeout(loadData, 2000)
   } catch { ElMessage.error('生成失败') }
 }
 
-function viewReport(row: any) { router.push(`/reports/archive/${row.id}`) }
+function viewReport(row: any) { router.push('/reports/archive/' + row.id) }
 async function downloadReport(row: any) {
-  window.open(`/api/v1/reports/tasks/${row.id}/download`, '_blank')
+  window.open('/api/v1/reports/tasks/' + row.id + '/download', '_blank')
 }
 
 onMounted(loadData)

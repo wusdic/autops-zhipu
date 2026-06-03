@@ -62,7 +62,6 @@
             <el-menu-item index="/config/notification-rules">通知规则</el-menu-item>
             <el-menu-item index="/report/templates">报告模板</el-menu-item>
             <el-menu-item index="/config/versions">配置版本</el-menu-item>
-            <el-menu-item index="/report/templates">报告模板</el-menu-item>
           </el-sub-menu>
 
           <!-- M4 巡检中心 -->
@@ -78,12 +77,16 @@
             <el-menu-item index="/inspection/config-check">配置巡检</el-menu-item>
             <el-menu-item index="/inspection/log-check">日志巡检</el-menu-item>
             <el-menu-item index="/inspection/baseline-check">基线巡检</el-menu-item>
+            <el-menu-item index="/monitoring">监控总览</el-menu-item>
             <el-menu-item index="/monitoring/metrics">指标巡检</el-menu-item>
             <el-menu-item index="/monitoring/collectors">采集任务</el-menu-item>
             <el-menu-item index="/monitoring/collection-results">采集结果</el-menu-item>
             <el-menu-item index="/monitoring/states">状态快照</el-menu-item>
             <el-menu-item index="/events">事件流</el-menu-item>
             <el-menu-item index="/monitoring/collector-health">采集器健康</el-menu-item>
+            <el-menu-item index="/monitoring/state-changes">状态变化</el-menu-item>
+            <el-menu-item index="/monitoring/log-sources">日志接入</el-menu-item>
+            <el-menu-item index="/monitoring/config-facts">配置事实</el-menu-item>
             <el-menu-item index="/inspection/reports">巡检报告入口</el-menu-item>
           </el-sub-menu>
 
@@ -362,6 +365,10 @@ const menuMap: Record<string, string> = {
   '/monitoring/states': '状态快照',
   '/events': '事件流',
   '/monitoring/collector-health': '采集器健康',
+  '/monitoring': '监控总览',
+  '/monitoring/state-changes': '状态变化',
+  '/monitoring/log-sources': '日志接入',
+  '/monitoring/config-facts': '配置事实',
   '/inspection/reports': '巡检报告入口',
   // M5 处置中心
   '/anomalies': '异常总览',
@@ -457,6 +464,8 @@ const groupMap: Record<string, string> = {
   '/monitoring/collectors': '巡检中心', '/monitoring/collection-results': '巡检中心',
   '/monitoring/metrics': '巡检中心', '/monitoring/states': '巡检中心',
   '/events': '巡检中心', '/monitoring/collector-health': '巡检中心',
+  '/monitoring': '巡检中心', '/monitoring/state-changes': '巡检中心',
+  '/monitoring/log-sources': '巡检中心', '/monitoring/config-facts': '巡检中心',
   '/anomalies': '处置中心', '/anomaly/list': '处置中心', '/alerts': '处置中心',
   '/alert-rules': '处置中心', '/alert-correlation': '处置中心', '/incident': '处置中心',
   '/ai-diagnosis': '处置中心', '/impact-analysis': '处置中心', '/response-suggestion': '处置中心',

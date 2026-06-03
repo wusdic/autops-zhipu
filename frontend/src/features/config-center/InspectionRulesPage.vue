@@ -160,6 +160,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh } from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
 
 const router = useRouter()
 const loading = ref(false)
@@ -204,13 +205,11 @@ async function loadData() {
       router.push('/config/threshold-rules')
       return
     }
-    const params: any = { page: pagination.page, page_size: pagination.size, ...filters }
-    if (activeCategory.value !== 'all') params.category = activeCategory.value
-    // Use inspection subtypes API
-    const res = await fetch(`/api/v1/inspection/${activeCategory.value !== 'all' ? activeCategory.value + 's' : 'page-checks'}?page=${pagination.page}&page_size=${pagination.size}`)
-    const data = await res.json()
-    rules.value = data?.items || data?.data?.items || []
-    pagination.total = data?.total || data?.data?.total || 0
+    const endpoint = activeCategory.value !== 'all' ? activeCategory.value + 's' : 'page-checks'
+    const res = await client.get('/api/v1/inspection/' + endpoint, { params: { page: pagination.page, page_size: pagination.size } })
+    const data = res.data?.data ?? res.data
+    rules.value = data?.items || []
+    pagination.total = data?.total || 0
   } catch { rules.value = [] } finally { loading.value = false }
 }
 

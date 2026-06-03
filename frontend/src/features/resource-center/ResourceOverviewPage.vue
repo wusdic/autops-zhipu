@@ -174,7 +174,7 @@ import {
   Key,
   OfficeBuilding,
   Grid,
-  Server,
+  Monitor as Server,
   Cpu,
   Coordinate,
 } from '@element-plus/icons-vue'

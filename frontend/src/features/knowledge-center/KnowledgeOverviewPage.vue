@@ -136,7 +136,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Document, Checked, EditPen, StarFilled, ArrowRight, Upload, List, Review, Notebook } from '@element-plus/icons-vue'
+import { Document, Checked, EditPen, StarFilled, ArrowRight, Upload, List, View as Review, Notebook } from '@element-plus/icons-vue'
 import { knowledgeService } from '@/shared/api'
 
 const router = useRouter()

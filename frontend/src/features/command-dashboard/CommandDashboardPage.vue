@@ -306,7 +306,7 @@
           <div class="autops-card-header">
             <div class="autops-card-title"><el-icon><Monitor /></el-icon> 平台健康</div>
           </div>
-          <div class="autops-card-body">
+          <div class="autops-card-body" v-loading="platformHealthLoading">
             <div class="platform-health-grid">
               <div v-for="comp in platformHealth" :key="comp.name" class="health-item">
                 <span class="health-dot" :class="`health-dot-${comp.status}`"></span>
@@ -368,14 +368,31 @@ const reportStats = reactive({ generating: 0, completed: 0, failed: 0 })
 // M1-RQ-006 待我处理
 const pendingTasks = ref<any[]>([])
 // M1-RQ-008 平台健康
-const platformHealth = ref([
-  { name: 'API', status: 'healthy', latency: '12ms' },
-  { name: 'Worker', status: 'healthy', latency: '' },
-  { name: 'Scheduler', status: 'healthy', latency: '' },
-  { name: 'DB', status: 'healthy', latency: '3ms' },
-  { name: 'Redis', status: 'healthy', latency: '1ms' },
-  { name: 'WebSocket', status: 'healthy', latency: '' },
-])
+const platformHealth = ref<{ name: string; status: string; latency: string }[]>([])
+const platformHealthLoading = ref(false)
+
+async function fetchPlatformHealth() {
+  platformHealthLoading.value = true
+  try {
+    const res = await api.get('/api/v1/dashboard/platform-health')
+    const d = res.data?.data ?? res.data
+    if (d?.components) {
+      const nameMap: Record<string, string> = {
+        database: 'DB', redis: 'Redis', api_server: 'API',
+        worker: 'Worker', scheduler: 'Scheduler', websocket: 'WebSocket',
+      }
+      platformHealth.value = Object.entries(d.components).map(([key, val]: [string, any]) => ({
+        name: nameMap[key] || key,
+        status: (val.status === 'ok' || val.status === 'healthy') ? 'healthy' : (val.status === 'degraded' ? 'warning' : 'unhealthy'),
+        latency: val.message || '',
+      }))
+    }
+  } catch {
+    platformHealth.value = [{ name: 'API', status: 'unhealthy', latency: '无法连接' }]
+  } finally {
+    platformHealthLoading.value = false
+  }
+}
 // M1-RQ-010 今日摘要
 const todaySummary = reactive({
   newAssets: 0, inspections: 0, anomalies: 0,
@@ -657,6 +674,7 @@ watch(trendRange, () => {
 
 onMounted(async () => {
   await fetchDashboard()
+  fetchPlatformHealth()
   await nextTick()
   initChart()
   resizeHandler = () => chartInstance?.resize()

@@ -152,7 +152,7 @@ import {
   WarningFilled,
   Monitor,
   Coin,
-  HardDisk,
+  Coin as HardDisk,
   Cpu,
   Connection,
 } from '@element-plus/icons-vue'

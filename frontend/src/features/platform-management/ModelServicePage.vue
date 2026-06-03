@@ -147,6 +147,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh } from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
 
 const router = useRouter()
 const loading = ref(false)
@@ -184,8 +185,8 @@ function statusLabel(s: string) { return { active: '正常', error: '异常', in
 async function loadData() {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/aiops/agents')
-    const data = await res.json()
+    const res = await client.get('/api/v1/aiops/agents')
+    const data = res.data?.data ?? res.data
     models.value = data?.items || []
   } catch { models.value = [] } finally { loading.value = false }
 }
@@ -202,9 +203,9 @@ async function handleSubmit() {
   submitting.value = true
   try {
     if (editing.value) {
-      await fetch(`/api/v1/aiops/agents/${editing.value.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+      await client.put('/api/v1/aiops/agents/' + editing.value.id, form)
     } else {
-      await fetch('/api/v1/aiops/agents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+      await client.post('/api/v1/aiops/agents', form)
     }
     ElMessage.success('保存成功')
     dialogVisible.value = false
@@ -214,21 +215,22 @@ async function handleSubmit() {
 
 async function testModel(row: any) {
   try {
-    ElMessage.info(`正在测试模型 ${row.name}...`)
-    await fetch(`/api/v1/aiops/agents/${row.id}/test`, { method: 'POST' })
+    ElMessage.info('正在测试模型 ' + row.name + '...')
+    await client.post('/api/v1/aiops/agents/' + row.id + '/test')
     ElMessage.success('测试完成')
   } catch { ElMessage.error('测试失败') }
 }
 
 function viewMetrics(row: any) {
-  metricsData.value = { ...row, call_count: 1234, success_rate: 99.2, avg_latency: 850, p99_latency: 2300, token_usage: '1.2M' }
+  // 后端暂无 metrics 端点，展示模型基础信息
+  metricsData.value = { ...row, call_count: row.call_count ?? '-', success_rate: row.success_rate ?? '-', avg_latency: row.avg_latency ?? '-', p99_latency: row.p99_latency ?? '-', token_usage: row.token_usage ?? '-' }
   metricsVisible.value = true
 }
 
 async function handleDelete(row: any) {
   try {
-    await ElMessageBox.confirm(`确认删除模型「${row.name}」？`, '删除确认', { type: 'warning' })
-    await fetch(`/api/v1/aiops/agents/${row.id}`, { method: 'DELETE' })
+    await ElMessageBox.confirm('确认删除模型「' + row.name + '」？', '删除确认', { type: 'warning' })
+    await client.delete('/api/v1/aiops/agents/' + row.id)
     ElMessage.success('已删除'); loadData()
   } catch { /* cancelled */ }
 }

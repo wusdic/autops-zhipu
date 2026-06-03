@@ -114,6 +114,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
 
 const router = useRouter()
 const loading = ref(false)
@@ -134,8 +135,8 @@ function riskType(r: string) { return { high: 'danger', medium: 'warning', low: 
 async function loadData() {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/automation/approvals?status=${filters.status}&page=${pagination.page}&page_size=${pagination.size}`)
-    const data = await res.json()
+    const res = await client.get('/api/v1/automation/approvals', { params: { status: filters.status, page: pagination.page, page_size: pagination.size } })
+    const data = res.data?.data ?? res.data
     items.value = data?.items || []
     pagination.total = data?.total || 0
   } catch { items.value = [] } finally { loading.value = false }
@@ -145,8 +146,8 @@ function viewDetail(row: any) { detailData.value = row; detailVisible.value = tr
 
 async function handleConfirm(row: any) {
   try {
-    await ElMessageBox.confirm(`确认执行该操作？执行后不可撤销。`, '确认执行', { type: 'warning' })
-    await fetch(`/api/v1/automation/approvals/${row.id}/approve`, { method: 'POST' })
+    await ElMessageBox.confirm('确认执行该操作？执行后不可撤销。', '确认执行', { type: 'warning' })
+    await client.post('/api/v1/automation/approvals/' + row.id + '/approve')
     ElMessage.success('已确认执行')
     loadData()
   } catch { /* cancelled */ }
@@ -155,7 +156,7 @@ async function handleConfirm(row: any) {
 async function handleReject(row: any) {
   try {
     const { value } = await ElMessageBox.prompt('请输入拒绝原因', '拒绝确认', { type: 'warning', inputPlaceholder: '拒绝原因' })
-    await fetch(`/api/v1/automation/approvals/${row.id}/reject`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: value }) })
+    await client.post('/api/v1/automation/approvals/' + row.id + '/reject', { reason: value })
     ElMessage.success('已拒绝')
     loadData()
   } catch { /* cancelled */ }

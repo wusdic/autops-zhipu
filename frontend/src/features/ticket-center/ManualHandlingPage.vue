@@ -115,6 +115,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Plus, Refresh } from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
 
 const router = useRouter()
 const loading = ref(false)
@@ -134,11 +135,11 @@ function statusLabel(s: string) { return { pending: '待处置', in_progress: '�
 async function loadData() {
   loading.value = true
   try {
-    const params = new URLSearchParams({ page: String(pagination.page), page_size: String(pagination.size) })
-    if (filters.status) params.set('status', filters.status)
-    if (filters.priority) params.set('priority', filters.priority)
-    const res = await fetch(`/api/v1/tickets?${params}`)
-    const data = await res.json()
+    const params: Record<string, unknown> = { page: pagination.page, page_size: pagination.size }
+    if (filters.status) params.status = filters.status
+    if (filters.priority) params.priority = filters.priority
+    const res = await client.get('/api/v1/tickets', { params })
+    const data = res.data?.data ?? res.data
     items.value = data?.items || []
     pagination.total = data?.total || 0
   } catch { items.value = [] } finally { loading.value = false }
@@ -149,14 +150,14 @@ function viewDetail(row: any) { detailData.value = row; detailVisible.value = tr
 
 async function startHandle(row: any) {
   try {
-    await fetch(`/api/v1/tickets/${row.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'in_progress', handler: 'current_user' }) })
+    await client.put('/api/v1/tickets/' + row.id, { status: 'in_progress', handler: 'current_user' })
     ElMessage.success('已接单'); loadData()
   } catch { ElMessage.error('操作失败') }
 }
 
 async function completeHandle(row: any) {
   try {
-    await fetch(`/api/v1/tickets/${row.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'completed' }) })
+    await client.put('/api/v1/tickets/' + row.id, { status: 'completed' })
     ElMessage.success('已完成'); loadData()
   } catch { ElMessage.error('操作失败') }
 }
