@@ -29,7 +29,10 @@ import app.domains.state.models           # noqa: F401
 import app.domains.notification.models    # noqa: F401
 import app.domains.inspection.models      # noqa: F401
 import app.domains.anomaly.models         # noqa: F401
-import app.domains.report.models          # noqa: F401
+import app.domains.report.models         # noqa: F401
+import app.domains.alert.threshold_models  # noqa: F401
+import app.domains.notification.rule_models  # noqa: F401
+import app.domains.asset.discovery_template_models  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

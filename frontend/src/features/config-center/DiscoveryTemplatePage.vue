@@ -1,272 +1,253 @@
 <template>
-  <div class="discovery-template-page">
-    <el-page-header @back="router.back()" title="返回" content="发现模板管理">
-      <template #extra>
-        <el-button type="primary" @click="openDialog()">
-          <el-icon><Plus /></el-icon> 新建模板
-        </el-button>
-        <el-button @click="loadData" :loading="loading">
-          <el-icon><Refresh /></el-icon> 刷新
-        </el-button>
-      </template>
-    </el-page-header>
+  <div class="page-container">
+    <div class="page-header">
+      <h2>发现模板</h2>
+      <el-button type="primary" @click="openCreateDialog">
+        <el-icon><Plus /></el-icon> 新建模板
+      </el-button>
+    </div>
 
-    <!-- 搜索过滤 -->
-    <el-card class="mt-4" shadow="never">
-      <el-form :inline="true" :model="filters">
-        <el-form-item label="模板名称">
-          <el-input v-model="filters.keyword" placeholder="搜索模板名称" clearable @clear="loadData" />
-        </el-form-item>
-        <el-form-item label="发现类型">
-          <el-select v-model="filters.type" placeholder="全部类型" clearable @change="loadData">
-            <el-option label="SSH发现" value="ssh" />
-            <el-option label="SNMP发现" value="snmp" />
-            <el-option label="ICMP扫描" value="icmp" />
-            <el-option label="端口扫描" value="port_scan" />
+    <!-- Filters -->
+    <el-card class="mb-md">
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-select v-model="filters.protocol" placeholder="协议" clearable @change="fetchData">
+            <el-option label="SSH" value="ssh" />
+            <el-option label="SNMP" value="snmp" />
+            <el-option label="ICMP" value="icmp" />
+            <el-option label="ARP" value="arp" />
+            <el-option label="WMI" value="wmi" />
+            <el-option label="Agent" value="agent" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="filters.status" placeholder="全部" clearable @change="loadData">
-            <el-option label="启用" value="active" />
-            <el-option label="禁用" value="inactive" />
+        </el-col>
+        <el-col :span="8">
+          <el-select v-model="filters.enabled" placeholder="状态" clearable @change="fetchData">
+            <el-option label="启用" :value="true" />
+            <el-option label="禁用" :value="false" />
           </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="loadData">搜索</el-button>
-          <el-button @click="resetFilters">重置</el-button>
-        </el-form-item>
-      </el-form>
+        </el-col>
+      </el-row>
     </el-card>
 
-    <!-- 模板列表 -->
-    <el-card class="mt-4" shadow="never">
-      <el-table :data="templates" v-loading="loading" stripe border style="width: 100%">
-        <el-table-column type="selection" width="50" />
-        <el-table-column prop="name" label="模板名称" min-width="180" sortable />
-        <el-table-column prop="type" label="发现类型" width="120">
+    <!-- Table -->
+    <el-card v-loading="loading">
+      <el-table :data="items" stripe empty-text="暂无发现模板" style="width: 100%">
+        <el-table-column prop="name" label="模板名称" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="protocol" label="协议" width="100">
           <template #default="{ row }">
-            <el-tag :type="typeColor(row.type)" size="small">{{ typeName(row.type) }}</el-tag>
+            <el-tag size="small" type="info">{{ row.protocol?.toUpperCase() }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="target" label="扫描目标" min-width="150">
+        <el-table-column label="目标范围" min-width="200">
           <template #default="{ row }">
-            <code>{{ row.target || row.ip_range || '-' }}</code>
+            <span class="text-tertiary">{{ scopePreview(row.target_scope) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="port_range" label="端口范围" width="120" />
-        <el-table-column prop="credential" label="关联凭证" width="120" />
-        <el-table-column prop="schedule" label="调度周期" width="120" />
-        <el-table-column prop="last_run_at" label="最近执行" width="180" />
-        <el-table-column prop="found_count" label="发现资产" width="100" />
-        <el-table-column prop="status" label="状态" width="80">
+        <el-table-column prop="port_range" label="端口范围" width="140">
+          <template #default="{ row }">{{ row.port_range || '默认' }}</template>
+        </el-table-column>
+        <el-table-column prop="scan_interval" label="扫描间隔" width="100">
+          <template #default="{ row }">{{ formatInterval(row.scan_interval) }}</template>
+        </el-table-column>
+        <el-table-column prop="timeout" label="超时" width="80">
+          <template #default="{ row }">{{ row.timeout }}s</template>
+        </el-table-column>
+        <el-table-column prop="is_builtin" label="内置" width="70">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'active' ? 'success' : 'info'" size="small">
-              {{ row.status === 'active' ? '启用' : '禁用' }}
-            </el-tag>
+            <el-tag v-if="row.is_builtin" size="small" type="info">内置</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="240" fixed="right">
+        <el-table-column prop="enabled" label="状态" width="80">
           <template #default="{ row }">
-            <el-button link type="primary" @click="executeTemplate(row)">执行</el-button>
-            <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
-            <el-button link type="primary" @click="viewHistory(row)">历史</el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-switch :model-value="row.enabled" @change="toggleTemplate(row)" />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="160" fixed="right">
+          <template #default="{ row }">
+            <el-button text type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
+            <el-popconfirm v-if="!row.is_builtin" title="确定删除此模板？" @confirm="deleteTemplate(row)">
+              <template #reference>
+                <el-button text type="danger" size="small">删除</el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
-
       <el-pagination
-        class="mt-4"
-        v-model:current-page="pagination.page"
-        v-model:page-size="pagination.size"
-        :total="pagination.total"
-        :page-sizes="[20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="loadData"
-        @current-change="loadData"
+        v-if="total > pageSize"
+        v-model:current-page="currentPage"
+        :page-size="pageSize"
+        :total="total"
+        layout="total, prev, pager, next"
+        style="margin-top: 16px; justify-content: flex-end"
+        @current-change="fetchData"
       />
     </el-card>
 
-    <!-- 新建/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="editing ? '编辑模板' : '新建模板'" width="650px" destroy-on-close>
-      <el-form :model="form" label-width="100px" :rules="formRules" ref="formRef">
-        <el-form-item label="模板名称" prop="name">
-          <el-input v-model="form.name" placeholder="如：网段SSH发现" />
+    <!-- Create/Edit Dialog -->
+    <el-dialog v-model="dialogVisible" :title="editingItem ? '编辑模板' : '新建模板'" width="600px" destroy-on-close>
+      <el-form :model="formData" label-width="100px">
+        <el-form-item label="模板名称" required>
+          <el-input v-model="formData.name" placeholder="如：SSH标准发现" />
         </el-form-item>
-        <el-form-item label="发现类型" prop="type">
-          <el-select v-model="form.type" placeholder="选择发现类型" style="width: 100%">
-            <el-option label="SSH发现" value="ssh" />
-            <el-option label="SNMP发现" value="snmp" />
-            <el-option label="ICMP扫描" value="icmp" />
-            <el-option label="端口扫描" value="port_scan" />
+        <el-form-item label="协议" required>
+          <el-select v-model="formData.protocol" style="width: 100%">
+            <el-option label="SSH" value="ssh" />
+            <el-option label="SNMP" value="snmp" />
+            <el-option label="ICMP" value="icmp" />
+            <el-option label="ARP" value="arp" />
+            <el-option label="WMI" value="wmi" />
+            <el-option label="Agent" value="agent" />
           </el-select>
         </el-form-item>
-        <el-form-item label="扫描目标" prop="target">
-          <el-input v-model="form.target" placeholder="IP/子网，如 192.168.1.0/24" />
+        <el-form-item label="目标范围" required>
+          <el-input v-model="formData.target_scope" type="textarea" :rows="3" placeholder='{"ip_ranges":["192.168.1.0/24"],"asset_groups":[],"exclude":[]}' />
         </el-form-item>
         <el-form-item label="端口范围">
-          <el-input v-model="form.port_range" placeholder="如 22,80,443 或 1-65535" />
+          <el-input v-model="formData.port_range" placeholder="如：22,80,443 或 1-1024" />
         </el-form-item>
-        <el-form-item label="关联凭证">
-          <el-select v-model="form.credential_id" placeholder="选择凭证" clearable style="width: 100%">
-            <el-option v-for="c in credentials" :key="c.id" :label="c.name" :value="c.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="调度周期">
-          <el-select v-model="form.schedule" placeholder="选择调度" clearable style="width: 100%">
-            <el-option label="手动" value="manual" />
-            <el-option label="每天" value="daily" />
-            <el-option label="每周" value="weekly" />
-            <el-option label="每月" value="monthly" />
-          </el-select>
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="扫描间隔">
+              <el-input-number v-model="formData.scan_interval" :min="60" :step="300" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="超时(秒)">
+              <el-input-number v-model="formData.timeout" :min="30" :step="30" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="类型映射">
+          <el-input v-model="formData.asset_type_mapping" type="textarea" :rows="2" placeholder='自动检测资产类型规则(JSON)' />
         </el-form-item>
         <el-form-item label="描述">
-          <el-input v-model="form.description" type="textarea" :rows="3" placeholder="模板描述" />
+          <el-input v-model="formData.description" type="textarea" :rows="2" />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitting">{{ editing ? '保存' : '创建' }}</el-button>
+        <el-button type="primary" :loading="submitting" @click="submitForm">确定</el-button>
       </template>
-    </el-dialog>
-
-    <!-- 执行历史对话框 -->
-    <el-dialog v-model="historyVisible" title="执行历史" width="700px">
-      <el-table :data="historyList" v-loading="historyLoading" stripe>
-        <el-table-column prop="executed_at" label="执行时间" width="180" />
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="row.status === 'success' ? 'success' : row.status === 'running' ? 'warning' : 'danger'" size="small">
-              {{ row.status }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="found" label="新发现" width="80" />
-        <el-table-column prop="duration" label="耗时" width="100" />
-      </el-table>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh } from '@element-plus/icons-vue'
-import { configService } from '@/shared/api'
+import { ElMessage } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
+import { discoveryTemplateService } from '@/shared/api'
 
-const router = useRouter()
 const loading = ref(false)
-const submitting = ref(false)
-const dialogVisible = ref(false)
-const historyVisible = ref(false)
-const historyLoading = ref(false)
-const editing = ref<any>(null)
-const templates = ref<any[]>([])
-const credentials = ref<any[]>([])
-const historyList = ref<any[]>([])
-const formRef = ref()
+const items = ref<any[]>([])
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = 20
 
-const filters = reactive({ keyword: '', type: '', status: '' })
-const pagination = reactive({ page: 1, size: 20, total: 0 })
-const form = reactive({
-  name: '', type: '', target: '', port_range: '',
-  credential_id: '', schedule: 'manual', description: '',
-})
-const formRules = {
-  name: [{ required: true, message: '请输入模板名称', trigger: 'blur' }],
-  type: [{ required: true, message: '请选择发现类型', trigger: 'change' }],
-  target: [{ required: true, message: '请输入扫描目标', trigger: 'blur' }],
-}
+const filters = reactive({ protocol: '', enabled: null as boolean | null })
 
-function typeName(t: string) {
-  const m: Record<string, string> = { ssh: 'SSH', snmp: 'SNMP', icmp: 'ICMP', port_scan: '端口扫描' }
-  return m[t] || t
-}
-function typeColor(t: string) {
-  const m: Record<string, string> = { ssh: 'primary', snmp: 'success', icmp: 'warning', port_scan: 'danger' }
-  return m[t] || 'info'
-}
-
-async function loadData() {
+async function fetchData() {
   loading.value = true
   try {
-    const res = await configService.list({ ...filters, page: pagination.page, page_size: pagination.size })
-    templates.value = res.data?.items || []
-    pagination.total = res.data?.total || 0
-  } catch (e: any) {
-    ElMessage.error('加载失败: ' + (e.message || ''))
+    const params: Record<string, any> = { page: currentPage.value, page_size: pageSize }
+    if (filters.protocol) params.protocol = filters.protocol
+    if (filters.enabled !== null) params.enabled = filters.enabled
+
+    const resp = await discoveryTemplateService.list(params)
+    if (resp.data?.code === 0) {
+      items.value = resp.data.data?.items || []
+      total.value = resp.data.data?.total || 0
+    }
+  } catch (e) {
+    console.error('Failed to fetch discovery templates:', e)
   } finally {
     loading.value = false
   }
 }
 
-function resetFilters() {
-  filters.keyword = ''; filters.type = ''; filters.status = ''
-  pagination.page = 1
-  loadData()
-}
+const dialogVisible = ref(false)
+const editingItem = ref<any>(null)
+const submitting = ref(false)
+const formData = reactive({
+  name: '', protocol: 'ssh', target_scope: '{"ip_ranges":[],"asset_groups":[],"exclude":[]}',
+  port_range: '', scan_interval: 3600, timeout: 300, asset_type_mapping: '', description: '',
+})
 
-function openDialog(row?: any) {
-  editing.value = row || null
-  if (row) {
-    Object.assign(form, row)
-  } else {
-    Object.assign(form, { name: '', type: '', target: '', port_range: '', credential_id: '', schedule: 'manual', description: '' })
-  }
+function openCreateDialog() {
+  editingItem.value = null
+  Object.assign(formData, { name: '', protocol: 'ssh', target_scope: '{"ip_ranges":[],"asset_groups":[],"exclude":[]}', port_range: '', scan_interval: 3600, timeout: 300, asset_type_mapping: '', description: '' })
   dialogVisible.value = true
 }
 
-async function handleSubmit() {
-  await formRef.value?.validate()
+function openEditDialog(row: any) {
+  editingItem.value = row
+  Object.assign(formData, { name: row.name, protocol: row.protocol, target_scope: row.target_scope, port_range: row.port_range || '', scan_interval: row.scan_interval, timeout: row.timeout, asset_type_mapping: row.asset_type_mapping || '', description: row.description || '' })
+  dialogVisible.value = true
+}
+
+async function submitForm() {
+  if (!formData.name || !formData.protocol) {
+    ElMessage.warning('请填写必填项')
+    return
+  }
   submitting.value = true
   try {
-    if (editing.value) {
-      await configService.update(editing.value.id, form)
-      ElMessage.success('模板更新成功')
+    const data = { ...formData, port_range: formData.port_range || null, asset_type_mapping: formData.asset_type_mapping || null }
+    if (editingItem.value) {
+      await discoveryTemplateService.update(editingItem.value.id, data)
+      ElMessage.success('模板已更新')
     } else {
-      await configService.create(form)
-      ElMessage.success('模板创建成功')
+      await discoveryTemplateService.create(data)
+      ElMessage.success('模板已创建')
     }
     dialogVisible.value = false
-    loadData()
-  } catch (e: any) {
-    ElMessage.error('操作失败: ' + (e.message || ''))
+    fetchData()
+  } catch (e) {
+    console.error('Submit failed:', e)
+    ElMessage.error('操作失败')
   } finally {
     submitting.value = false
   }
 }
 
-async function executeTemplate(row: any) {
+async function toggleTemplate(row: any) {
   try {
-    await ElMessageBox.confirm(`确认执行发现模板「${row.name}」？`, '执行确认', { type: 'info' })
-    await configService.executeDiscovery?.(row.id)
-    ElMessage.success('发现任务已启动')
-  } catch { /* cancelled */ }
+    await discoveryTemplateService.toggle(row.id)
+    fetchData()
+  } catch { ElMessage.error('操作失败') }
 }
 
-async function viewHistory(row: any) {
-  historyVisible.value = true
-  historyLoading.value = true
+async function deleteTemplate(row: any) {
   try {
-    const res = await configService.getDiscoveryHistory?.(row.id) ?? { data: { items: [] } }
-    historyList.value = (res as any).data?.items || []
-  } catch { historyList.value = [] } finally { historyLoading.value = false }
-}
-
-async function handleDelete(row: any) {
-  try {
-    await ElMessageBox.confirm(`确认删除模板「${row.name}」？此操作不可恢复。`, '删除确认', { type: 'warning' })
-    await configService.delete(row.id)
+    await discoveryTemplateService.delete(row.id)
     ElMessage.success('已删除')
-    loadData()
-  } catch { /* cancelled */ }
+    fetchData()
+  } catch { ElMessage.error('删除失败') }
 }
 
-onMounted(() => { loadData() })
+function scopePreview(s: string): string {
+  try {
+    const obj = JSON.parse(s)
+    const parts: string[] = []
+    if (obj.ip_ranges?.length) parts.push(\`IP: \${obj.ip_ranges.slice(0, 2).join(',')}\`)
+    if (obj.asset_groups?.length) parts.push(\`分组: \${obj.asset_groups.length}个\`)
+    return parts.length ? parts.join(' | ') : '未配置'
+  } catch { return s?.slice(0, 50) || '未配置' }
+}
+
+function formatInterval(seconds: number): string {
+  if (seconds >= 86400) return \`\${Math.round(seconds / 86400)}天\`
+  if (seconds >= 3600) return \`\${Math.round(seconds / 3600)}小时\`
+  return \`\${seconds}秒\`
+}
+
+onMounted(fetchData)
 </script>
 
 <style scoped>
-.discovery-template-page { padding: 20px; }
-.mt-4 { margin-top: 16px; }
+.page-container { padding: 20px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.mb-md { margin-bottom: 16px; }
+.text-tertiary { color: #86909c; }
 </style>

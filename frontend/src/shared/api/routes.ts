@@ -292,4 +292,19 @@ export const API = {
 
   // G0 全局搜索
   GLOBAL_SEARCH: '/api/v1/search',
+
+  // 阈值规则
+  THRESHOLD_RULES: '/api/v1/threshold-rules',
+  THRESHOLD_RULE_DETAIL: (id: string) => \`/api/v1/threshold-rules/\${id}\`,
+  THRESHOLD_RULE_TOGGLE: (id: string) => \`/api/v1/threshold-rules/\${id}/toggle\`,
+
+  // 通知规则
+  NOTIFICATION_RULES: '/api/v1/notification-rules',
+  NOTIFICATION_RULE_DETAIL: (id: string) => \`/api/v1/notification-rules/\${id}\`,
+  NOTIFICATION_RULE_TOGGLE: (id: string) => \`/api/v1/notification-rules/\${id}/toggle\`,
+
+  // 发现模板
+  DISCOVERY_TEMPLATES: '/api/v1/discovery-templates',
+  DISCOVERY_TEMPLATE_DETAIL: (id: string) => \`/api/v1/discovery-templates/\${id}\`,
+  DISCOVERY_TEMPLATE_TOGGLE: (id: string) => \`/api/v1/discovery-templates/\${id}/toggle\`,
 } as const

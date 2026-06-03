@@ -1,135 +1,141 @@
 <template>
-  <div class="notification-rule-page">
-    <el-page-header @back="router.back()" title="返回" content="通知规则管理">
-      <template #extra>
-        <el-button type="primary" @click="openDialog()">
-          <el-icon><Plus /></el-icon> 新建通知规则
-        </el-button>
-        <el-button @click="loadData" :loading="loading">
-          <el-icon><Refresh /></el-icon> 刷新
-        </el-button>
-      </template>
-    </el-page-header>
+  <div class="page-container">
+    <div class="page-header">
+      <h2>通知规则</h2>
+      <el-button type="primary" @click="openCreateDialog">
+        <el-icon><Plus /></el-icon> 新建规则
+      </el-button>
+    </div>
 
-    <!-- 搜索 -->
-    <el-card class="mt-4" shadow="never">
-      <el-form :inline="true" :model="filters">
-        <el-form-item label="规则名称">
-          <el-input v-model="filters.keyword" placeholder="搜索" clearable @clear="loadData" />
-        </el-form-item>
-        <el-form-item label="通知渠道">
-          <el-select v-model="filters.channel" placeholder="全部" clearable @change="loadData">
-            <el-option label="邮件" value="email" />
-            <el-option label="短信" value="sms" />
-            <el-option label="钉钉" value="dingtalk" />
-            <el-option label="企业微信" value="wecom" />
-            <el-option label="Webhook" value="webhook" />
+    <!-- Filters -->
+    <el-card class="mb-md">
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-select v-model="filters.event_type" placeholder="事件类型" clearable @change="fetchData">
+            <el-option v-for="e in eventTypes" :key="e" :label="e" :value="e" />
           </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="loadData">搜索</el-button>
-        </el-form-item>
-      </el-form>
+        </el-col>
+        <el-col :span="8">
+          <el-select v-model="filters.target_type" placeholder="目标类型" clearable @change="fetchData">
+            <el-option label="用户" value="user" />
+            <el-option label="角色" value="role" />
+            <el-option label="渠道" value="channel" />
+          </el-select>
+        </el-col>
+        <el-col :span="8">
+          <el-select v-model="filters.enabled" placeholder="状态" clearable @change="fetchData">
+            <el-option label="启用" :value="true" />
+            <el-option label="禁用" :value="false" />
+          </el-select>
+        </el-col>
+      </el-row>
     </el-card>
 
-    <!-- 规则列表 -->
-    <el-card class="mt-4" shadow="never">
-      <el-table :data="rules" v-loading="loading" stripe border>
-        <el-table-column type="selection" width="50" />
-        <el-table-column prop="name" label="规则名称" min-width="200" sortable />
-        <el-table-column prop="trigger_type" label="触发条件" width="150">
+    <!-- Table -->
+    <el-card v-loading="loading">
+      <el-table :data="items" stripe empty-text="暂无通知规则" style="width: 100%">
+        <el-table-column prop="name" label="规则名称" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="event_type" label="事件类型" width="180" show-overflow-tooltip />
+        <el-table-column prop="target_type" label="目标类型" width="100">
           <template #default="{ row }">
-            <el-tag size="small">{{ triggerName(row.trigger_type) }}</el-tag>
+            <el-tag size="small" :type="row.target_type === 'user' ? '' : row.target_type === 'role' ? 'warning' : 'info'">
+              {{ targetText(row.target_type) }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="channel" label="通知渠道" width="120">
+        <el-table-column label="通知渠道" width="200">
           <template #default="{ row }">
-            <el-tag :type="channelType(row.channel)" size="small">{{ channelName(row.channel) }}</el-tag>
+            <template v-if="row.channels">
+              <el-tag v-for="ch in parseJSON(row.channels)" :key="ch" size="small" type="info" style="margin: 2px">{{ ch }}</el-tag>
+            </template>
           </template>
         </el-table-column>
-        <el-table-column prop="recipients" label="接收人" min-width="150">
+        <el-table-column prop="severity_filter" label="严重级别过滤" width="140">
+          <template #default="{ row }">{{ row.severity_filter || '全部' }}</template>
+        </el-table-column>
+        <el-table-column label="静默时段" width="140">
           <template #default="{ row }">
-            <el-tag v-for="r in (row.recipients || []).slice(0, 3)" :key="r" size="small" class="mr-1">{{ r }}</el-tag>
-            <span v-if="(row.recipients || []).length > 3" class="text-muted">+{{ row.recipients.length - 3 }}</span>
+            {{ row.quiet_hours_start && row.quiet_hours_end ? \`\${row.quiet_hours_start}-\${row.quiet_hours_end}\` : '无' }}
           </template>
         </el-table-column>
-        <el-table-column prop="cooldown" label="冷却时间" width="100" />
-        <el-table-column prop="daily_limit" label="日限" width="80" />
-        <el-table-column prop="sent_count" label="近7天" width="90" />
         <el-table-column prop="enabled" label="状态" width="80">
           <template #default="{ row }">
-            <el-switch v-model="row.enabled" size="small" @change="toggleRule(row)" />
+            <el-switch :model-value="row.enabled" @change="toggleRule(row)" />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
-            <el-button link type="primary" @click="testNotify(row)">测试</el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button text type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
+            <el-popconfirm title="确定删除此规则？" @confirm="deleteRule(row)">
+              <template #reference>
+                <el-button text type="danger" size="small">删除</el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="mt-4" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
-        :total="pagination.total" :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next"
-        @size-change="loadData" @current-change="loadData" />
+      <el-pagination
+        v-if="total > pageSize"
+        v-model:current-page="currentPage"
+        :page-size="pageSize"
+        :total="total"
+        layout="total, prev, pager, next"
+        style="margin-top: 16px; justify-content: flex-end"
+        @current-change="fetchData"
+      />
     </el-card>
 
-    <!-- 新建/编辑 -->
-    <el-dialog v-model="dialogVisible" :title="editing ? '编辑通知规则' : '新建通知规则'" width="650px" destroy-on-close>
-      <el-form :model="form" label-width="100px" :rules="formRules" ref="formRef">
-        <el-form-item label="规则名称" prop="name">
-          <el-input v-model="form.name" />
+    <!-- Create/Edit Dialog -->
+    <el-dialog v-model="dialogVisible" :title="editingRule ? '编辑规则' : '新建规则'" width="560px" destroy-on-close>
+      <el-form :model="formData" label-width="100px">
+        <el-form-item label="规则名称" required>
+          <el-input v-model="formData.name" placeholder="如：严重告警通知" />
         </el-form-item>
-        <el-form-item label="触发条件" prop="trigger_type">
-          <el-select v-model="form.trigger_type" style="width: 100%">
-            <el-option label="告警触发" value="alert" />
-            <el-option label="异常触发" value="anomaly" />
-            <el-option label="自动化失败" value="automation_failed" />
-            <el-option label="采集器离线" value="collector_offline" />
-            <el-option label="证书过期" value="cert_expiry" />
-            <el-option label="工单创建" value="ticket_created" />
+        <el-form-item label="事件类型" required>
+          <el-select v-model="formData.event_type" placeholder="选择事件类型" style="width: 100%" filterable>
+            <el-option v-for="e in eventTypes" :key="e" :label="e" :value="e" />
           </el-select>
         </el-form-item>
-        <el-form-item label="告警级别过滤">
-          <el-checkbox-group v-model="form.severity_filter">
-            <el-checkbox label="critical">紧急</el-checkbox>
-            <el-checkbox label="high">高危</el-checkbox>
-            <el-checkbox label="medium">中危</el-checkbox>
-            <el-checkbox label="low">低危</el-checkbox>
+        <el-form-item label="目标类型" required>
+          <el-radio-group v-model="formData.target_type">
+            <el-radio value="user">用户</el-radio>
+            <el-radio value="role">角色</el-radio>
+            <el-radio value="channel">渠道</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="目标ID" required>
+          <el-input v-model="formData.target_ids" placeholder='如：["user-id-1","user-id-2"]' />
+        </el-form-item>
+        <el-form-item label="通知渠道" required>
+          <el-checkbox-group v-model="selectedChannels">
+            <el-checkbox value="in_app">站内</el-checkbox>
+            <el-checkbox value="email">邮件</el-checkbox>
+            <el-checkbox value="sms">短信</el-checkbox>
+            <el-checkbox value="webhook">Webhook</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="通知渠道" prop="channel">
-          <el-select v-model="form.channel" style="width: 100%">
-            <el-option label="邮件" value="email" />
-            <el-option label="短信" value="sms" />
-            <el-option label="钉钉" value="dingtalk" />
-            <el-option label="企业微信" value="wecom" />
-            <el-option label="Webhook" value="webhook" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="接收人" prop="recipients">
-          <el-select v-model="form.recipients" multiple filterable allow-create style="width: 100%" placeholder="输入接收人">
-          </el-select>
-        </el-form-item>
-        <el-form-item label="通知模板">
-          <el-input v-model="form.template" type="textarea" :rows="3" placeholder="支持变量：{alert_name}, {severity}, {asset_name}, {time}" />
+        <el-form-item label="严重级别过滤">
+          <el-input v-model="formData.severity_filter" placeholder='如：["critical","high"] 留空=全部' />
         </el-form-item>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="冷却时间">
-              <el-input-number v-model="form.cooldown" :min="0" :max="1440" style="width: 100%" /> 分钟
+            <el-form-item label="静默开始">
+              <el-time-select v-model="formData.quiet_hours_start" start="00:00" step="00:30" end="23:30" placeholder="开始时间" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="每日上限">
-              <el-input-number v-model="form.daily_limit" :min="0" :max="1000" style="width: 100%" /> 条
+            <el-form-item label="静默结束">
+              <el-time-select v-model="formData.quiet_hours_end" start="00:00" step="00:30" end="23:30" placeholder="结束时间" />
             </el-form-item>
           </el-col>
         </el-row>
+        <el-form-item label="描述">
+          <el-input v-model="formData.description" type="textarea" :rows="2" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitting">保存</el-button>
+        <el-button type="primary" :loading="submitting" @click="submitForm">确定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -137,82 +143,123 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
+import { notificationRuleService } from '@/shared/api'
 
-const router = useRouter()
 const loading = ref(false)
-const submitting = ref(false)
-const dialogVisible = ref(false)
-const editing = ref<any>(null)
-const rules = ref<any[]>([])
-const formRef = ref()
+const items = ref<any[]>([])
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = 20
 
-const filters = reactive({ keyword: '', channel: '' })
-const pagination = reactive({ page: 1, size: 20, total: 0 })
+const filters = reactive({ event_type: '', target_type: '', enabled: null as boolean | null })
 
-const form = reactive({
-  name: '', trigger_type: '', channel: 'email', recipients: [] as string[],
-  template: '', cooldown: 30, daily_limit: 100, severity_filter: ['critical', 'high'] as string[],
-})
-const formRules = {
-  name: [{ required: true, message: '请输入规则名称', trigger: 'blur' }],
-  trigger_type: [{ required: true, message: '请选择触发条件', trigger: 'change' }],
-  channel: [{ required: true, message: '请选择通知渠道', trigger: 'change' }],
-  recipients: [{ type: 'array' as const, required: true, message: '请选择接收人', trigger: 'change' }],
-}
+const eventTypes = [
+  'alert.created', 'alert.escalated', 'alert.resolved',
+  'execution.completed', 'execution.failed', 'execution.approval_required',
+  'ticket.created', 'ticket.assigned', 'ticket.closed',
+  'anomaly.detected', 'inspection.completed', 'inspection.failed',
+  'discovery.completed', 'knowledge.created',
+]
 
-const triggerMap: Record<string, string> = { alert: '告警触发', anomaly: '异常触发', automation_failed: '自动化失败', collector_offline: '采集器离线', cert_expiry: '证书过期', ticket_created: '工单创建' }
-function triggerName(t: string) { return triggerMap[t] || t }
-const channelMap: Record<string, string> = { email: '邮件', sms: '短信', dingtalk: '钉钉', wecom: '企业微信', webhook: 'Webhook' }
-function channelName(c: string) { return channelMap[c] || c }
-function channelType(c: string) { return { email: 'primary', sms: 'warning', dingtalk: 'success', wecom: '', webhook: 'info' }[c] || 'info' }
-
-async function loadData() {
+async function fetchData() {
   loading.value = true
-  try { rules.value = []; pagination.total = 0 } finally { loading.value = false }
+  try {
+    const params: Record<string, any> = { page: currentPage.value, page_size: pageSize }
+    if (filters.event_type) params.event_type = filters.event_type
+    if (filters.target_type) params.target_type = filters.target_type
+    if (filters.enabled !== null) params.enabled = filters.enabled
+
+    const resp = await notificationRuleService.list(params)
+    if (resp.data?.code === 0) {
+      items.value = resp.data.data?.items || []
+      total.value = resp.data.data?.total || 0
+    }
+  } catch (e) {
+    console.error('Failed to fetch notification rules:', e)
+  } finally {
+    loading.value = false
+  }
 }
 
-function openDialog(row?: any) {
-  editing.value = row || null
-  if (row) Object.assign(form, row)
-  else Object.assign(form, { name: '', trigger_type: '', channel: 'email', recipients: [], template: '', cooldown: 30, daily_limit: 100, severity_filter: ['critical', 'high'] })
+const dialogVisible = ref(false)
+const editingRule = ref<any>(null)
+const submitting = ref(false)
+const selectedChannels = ref<string[]>(['in_app'])
+const formData = reactive({
+  name: '', event_type: '', target_type: 'user', target_ids: '[]',
+  channels: '["in_app"]', severity_filter: '', quiet_hours_start: '', quiet_hours_end: '', description: '',
+})
+
+function openCreateDialog() {
+  editingRule.value = null
+  Object.assign(formData, { name: '', event_type: '', target_type: 'user', target_ids: '[]', channels: '["in_app"]', severity_filter: '', quiet_hours_start: '', quiet_hours_end: '', description: '' })
+  selectedChannels.value = ['in_app']
   dialogVisible.value = true
 }
 
-async function handleSubmit() {
-  await formRef.value?.validate()
+function openEditDialog(row: any) {
+  editingRule.value = row
+  Object.assign(formData, { name: row.name, event_type: row.event_type, target_type: row.target_type, target_ids: row.target_ids, channels: row.channels, severity_filter: row.severity_filter || '', quiet_hours_start: row.quiet_hours_start || '', quiet_hours_end: row.quiet_hours_end || '', description: row.description || '' })
+  selectedChannels.value = parseJSON(row.channels)
+  dialogVisible.value = true
+}
+
+async function submitForm() {
+  if (!formData.name || !formData.event_type) {
+    ElMessage.warning('请填写必填项')
+    return
+  }
   submitting.value = true
   try {
-    ElMessage.success(editing.value ? '规则更新成功' : '规则创建成功')
+    const data = { ...formData, channels: JSON.stringify(selectedChannels.value) }
+    if (editingRule.value) {
+      await notificationRuleService.update(editingRule.value.id, data)
+      ElMessage.success('规则已更新')
+    } else {
+      await notificationRuleService.create(data)
+      ElMessage.success('规则已创建')
+    }
     dialogVisible.value = false
-    loadData()
-  } finally { submitting.value = false }
+    fetchData()
+  } catch (e) {
+    console.error('Submit failed:', e)
+    ElMessage.error('操作失败')
+  } finally {
+    submitting.value = false
+  }
 }
 
-async function toggleRule(row: any) { ElMessage.success(`规则已${row.enabled ? '启用' : '禁用'}`) }
-
-async function testNotify(row: any) {
+async function toggleRule(row: any) {
   try {
-    ElMessage.success('测试通知已发送')
-  } catch (e: any) { ElMessage.error('发送失败: ' + e.message) }
+    await notificationRuleService.toggle(row.id)
+    fetchData()
+  } catch { ElMessage.error('操作失败') }
 }
 
-async function handleDelete(row: any) {
+async function deleteRule(row: any) {
   try {
-    await ElMessageBox.confirm(`确认删除「${row.name}」？`, '删除确认', { type: 'warning' })
+    await notificationRuleService.delete(row.id)
     ElMessage.success('已删除')
-    loadData()
-  } catch { /* cancelled */ }
+    fetchData()
+  } catch { ElMessage.error('删除失败') }
 }
 
-onMounted(loadData)
+function targetText(t: string) {
+  const map: Record<string, string> = { user: '用户', role: '角色', channel: '渠道' }
+  return map[t] || t
+}
+
+function parseJSON(s: string): string[] {
+  try { return JSON.parse(s) } catch { return [] }
+}
+
+onMounted(fetchData)
 </script>
 
 <style scoped>
-.notification-rule-page { padding: 20px; }
-.mt-4 { margin-top: 16px; }
-.mr-1 { margin-right: 4px; }
-.text-muted { color: #909399; font-size: 12px; }
+.page-container { padding: 20px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.mb-md { margin-bottom: 16px; }
 </style>

@@ -17,6 +17,7 @@
       <el-tab-pane label="配置检查" name="config_check" />
       <el-tab-pane label="日志检查" name="log_check" />
       <el-tab-pane label="基线检查" name="baseline_check" />
+      <el-tab-pane label="阈值规则" name="threshold" />
       <el-tab-pane label="全部" name="all" />
     </el-tabs>
 
@@ -196,6 +197,11 @@ function severityLabel(s: string) {
 async function loadData() {
   loading.value = true
   try {
+    // 阈值规则tab重定向到独立页面
+    if (activeCategory.value === 'threshold') {
+      router.push('/config/threshold-rules')
+      return
+    }
     const params: any = { page: pagination.page, page_size: pagination.size, ...filters }
     if (activeCategory.value !== 'all') params.category = activeCategory.value
     // Use inspection subtypes API

@@ -216,15 +216,31 @@
 
         <div class="autops-header-right">
           <!-- 全局搜索 -->
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索 (Ctrl+K)"
-            :prefix-icon="Search"
-            size="default"
-            style="width: 240px"
-            clearable
-            @keydown.enter="handleSearch"
-          />
+          <div style="position: relative">
+            <el-input
+              v-model="searchKeyword"
+              placeholder="搜索 (Ctrl+K)"
+              :prefix-icon="Search"
+              size="default"
+              style="width: 240px"
+              clearable
+              :loading="searchLoading"
+              @keydown.enter="handleSearch"
+              @blur="() => setTimeout(() => showSearchDropdown = false, 200)"
+            />
+            <div v-if="showSearchDropdown && searchResults.length" class="search-dropdown">
+              <div
+                v-for="(item, idx) in searchResults"
+                :key="idx"
+                class="search-dropdown-item"
+                @mousedown.prevent="handleSearchSelect(item)"
+              >
+                <el-tag size="small" type="info" style="margin-right: 8px">{{ item.type }}</el-tag>
+                <span class="search-dropdown-title">{{ item.title }}</span>
+                <span v-if="item.description" class="search-dropdown-desc">{{ item.description }}</span>
+              </div>
+            </div>
+          </div>
 
           <!-- 通知 -->
           <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99">
@@ -537,18 +553,65 @@ function handleUserCommand(cmd: string) {
 
 // ─── Search ───
 const searchKeyword = ref('')
+const searchLoading = ref(false)
 
-function handleSearch() {
-  if (!searchKeyword.value.trim()) return
-  const kw = searchKeyword.value.toLowerCase().trim()
+interface SearchResult {
+  type: string
+  title: string
+  path: string
+  description?: string
+}
+const searchResults = ref<SearchResult[]>([])
+const showSearchDropdown = ref(false)
+
+async function handleSearch() {
+  const kw = searchKeyword.value.trim()
+  if (!kw) { showSearchDropdown.value = false; return }
+
+  const kwLower = kw.toLowerCase()
+
+  // 1) 本地菜单匹配
   for (const [path, title] of Object.entries(menuMap)) {
-    if (title.toLowerCase().includes(kw) || path.includes(kw)) {
+    if (title.toLowerCase().includes(kwLower) || path.includes(kwLower)) {
       router.push(path).catch(() => {})
       searchKeyword.value = ''
+      showSearchDropdown.value = false
       return
     }
   }
-  ElMessage.info('未找到匹配页面')
+
+  // 2) 后端全局搜索
+  searchLoading.value = true
+  try {
+    const resp = await api.get(API.GLOBAL_SEARCH, { params: { q: kw, page_size: 10 } })
+    if (resp.data?.code === 0 && resp.data?.data?.items?.length) {
+      searchResults.value = resp.data.data.items.map((item: any) => ({
+        type: item.type || 'unknown',
+        title: item.title || item.name || item.id,
+        path: item.path || '',
+        description: item.description || '',
+      }))
+      if (searchResults.value.length === 1 && searchResults.value[0].path) {
+        router.push(searchResults.value[0].path).catch(() => {})
+        searchKeyword.value = ''
+        showSearchDropdown.value = false
+      } else {
+        showSearchDropdown.value = true
+      }
+    } else {
+      ElMessage.info('未找到匹配结果')
+    }
+  } catch {
+    ElMessage.info('未找到匹配页面')
+  } finally {
+    searchLoading.value = false
+  }
+}
+
+function handleSearchSelect(item: SearchResult) {
+  if (item.path) router.push(item.path).catch(() => {})
+  showSearchDropdown.value = false
+  searchKeyword.value = ''
 }
 
 // ─── Keyboard Shortcut ───
@@ -641,5 +704,55 @@ onUnmounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 360px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 2000;
+  margin-top: 4px;
+}
+
+.search-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid #f2f3f5;
+}
+
+.search-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.search-dropdown-item:hover {
+  background: #f2f3f5;
+}
+
+.search-dropdown-title {
+  font-size: 13px;
+  color: #1d2129;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-dropdown-desc {
+  font-size: 12px;
+  color: #86909c;
+  margin-left: 8px;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

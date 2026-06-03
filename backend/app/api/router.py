@@ -56,6 +56,9 @@ from app.api.platform_extra import (
     tenant_router,
 )
 from app.api.search import router as search_router
+from app.domains.alert.threshold_api import router as threshold_rule_router
+from app.domains.notification.rule_api import router as notification_rule_router
+from app.domains.asset.discovery_template_api import router as discovery_template_router
 
 api_router = APIRouter()
 
@@ -168,3 +171,12 @@ api_router.include_router(tenant_router)
 
 # Global Search
 api_router.include_router(search_router)
+
+# Threshold Rules
+api_router.include_router(threshold_rule_router)
+
+# Notification Rules
+api_router.include_router(notification_rule_router)
+
+# Discovery Templates
+api_router.include_router(discovery_template_router)

@@ -1,262 +1,279 @@
 <template>
-  <div class="threshold-rule-page">
-    <el-page-header @back="router.back()" title="返回" content="阈值规则管理">
-      <template #extra>
-        <el-button type="primary" @click="openDialog()">
-          <el-icon><Plus /></el-icon> 新建阈值规则
-        </el-button>
-        <el-button @click="loadData" :loading="loading">
-          <el-icon><Refresh /></el-icon> 刷新
-        </el-button>
-      </template>
-    </el-page-header>
+  <div class="page-container">
+    <div class="page-header">
+      <h2>阈值规则</h2>
+      <el-button type="primary" @click="openCreateDialog">
+        <el-icon><Plus /></el-icon> 新建规则
+      </el-button>
+    </div>
 
-    <!-- 搜索 -->
-    <el-card class="mt-4" shadow="never">
-      <el-form :inline="true" :model="filters">
-        <el-form-item label="规则名称">
-          <el-input v-model="filters.keyword" placeholder="搜索" clearable @clear="loadData" />
-        </el-form-item>
-        <el-form-item label="指标类型">
-          <el-select v-model="filters.metric_type" placeholder="全部" clearable @change="loadData">
-            <el-option label="CPU使用率" value="cpu_usage" />
-            <el-option label="内存使用率" value="memory_usage" />
-            <el-option label="磁盘使用率" value="disk_usage" />
-            <el-option label="网络流量" value="network_traffic" />
-            <el-option label="响应时间" value="response_time" />
-            <el-option label="连接数" value="connection_count" />
+    <!-- Filters -->
+    <el-card class="mb-md">
+      <el-row :gutter="16">
+        <el-col :span="6">
+          <el-select v-model="filters.metric_name" placeholder="指标名称" clearable @change="fetchData">
+            <el-option v-for="m in metricOptions" :key="m" :label="m" :value="m" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="告警级别">
-          <el-select v-model="filters.severity" placeholder="全部" clearable @change="loadData">
-            <el-option label="紧急" value="critical" />
-            <el-option label="高危" value="high" />
-            <el-option label="中危" value="medium" />
-            <el-option label="低危" value="low" />
+        </el-col>
+        <el-col :span="6">
+          <el-select v-model="filters.severity" placeholder="严重级别" clearable @change="fetchData">
+            <el-option label="严重" value="critical" />
+            <el-option label="高" value="high" />
+            <el-option label="警告" value="warning" />
+            <el-option label="信息" value="info" />
           </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="loadData">搜索</el-button>
-          <el-button @click="resetFilters">重置</el-button>
-        </el-form-item>
-      </el-form>
+        </el-col>
+        <el-col :span="6">
+          <el-select v-model="filters.asset_type" placeholder="资产类型" clearable @change="fetchData">
+            <el-option label="Linux服务器" value="linux_server" />
+            <el-option label="Windows服务器" value="windows_server" />
+            <el-option label="数据库" value="database" />
+            <el-option label="Web服务" value="web_service" />
+          </el-select>
+        </el-col>
+        <el-col :span="6">
+          <el-select v-model="filters.enabled" placeholder="状态" clearable @change="fetchData">
+            <el-option label="启用" :value="true" />
+            <el-option label="禁用" :value="false" />
+          </el-select>
+        </el-col>
+      </el-row>
     </el-card>
 
-    <!-- 规则列表 -->
-    <el-card class="mt-4" shadow="never">
-      <el-table :data="rules" v-loading="loading" stripe border>
-        <el-table-column type="selection" width="50" />
-        <el-table-column prop="name" label="规则名称" min-width="200" sortable />
-        <el-table-column prop="metric" label="监控指标" width="140">
+    <!-- Table -->
+    <el-card v-loading="loading">
+      <el-table :data="items" stripe empty-text="暂无阈值规则" style="width: 100%">
+        <el-table-column prop="name" label="规则名称" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="metric_name" label="指标" width="140" />
+        <el-table-column prop="asset_type" label="资产类型" width="120">
+          <template #default="{ row }">{{ row.asset_type || '全部' }}</template>
+        </el-table-column>
+        <el-table-column label="条件" width="160">
           <template #default="{ row }">
-            <el-tag size="small">{{ metricName(row.metric) }}</el-tag>
+            {{ conditionText(row.condition) }} {{ row.threshold_value }}{{ metricUnit(row.metric_name) }}
           </template>
         </el-table-column>
-        <el-table-column label="阈值条件" width="180">
+        <el-table-column prop="duration_seconds" label="持续时间" width="100">
+          <template #default="{ row }">{{ row.duration_seconds > 0 ? row.duration_seconds + '秒' : '即时' }}</template>
+        </el-table-column>
+        <el-table-column prop="severity" label="严重级别" width="100">
           <template #default="{ row }">
-            <code>{{ row.operator || '>' }} {{ row.threshold }}{{ row.unit || '%' }}</code>
-            <span v-if="row.duration" class="text-muted"> 持续{{ row.duration }}s</span>
+            <el-tag :type="severityTag(row.severity)" size="small">{{ severityText(row.severity) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="severity" label="告警级别" width="100">
-          <template #default="{ row }">
-            <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="asset_count" label="适用资产" width="100" />
-        <el-table-column prop="trigger_count" label="近7天触发" width="110" />
         <el-table-column prop="enabled" label="状态" width="80">
           <template #default="{ row }">
-            <el-switch v-model="row.enabled" size="small" @change="toggleRule(row)" />
+            <el-switch :model-value="row.enabled" @change="toggleRule(row)" />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
-            <el-button link type="primary" @click="simulateThreshold(row)">模拟</el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button text type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
+            <el-popconfirm title="确定删除此规则？" @confirm="deleteRule(row)">
+              <template #reference>
+                <el-button text type="danger" size="small">删除</el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="mt-4" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
-        :total="pagination.total" :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next"
-        @size-change="loadData" @current-change="loadData" />
+      <el-pagination
+        v-if="total > pageSize"
+        v-model:current-page="currentPage"
+        :page-size="pageSize"
+        :total="total"
+        layout="total, prev, pager, next"
+        style="margin-top: 16px; justify-content: flex-end"
+        @current-change="fetchData"
+      />
     </el-card>
 
-    <!-- 新建/编辑 -->
-    <el-dialog v-model="dialogVisible" :title="editing ? '编辑阈值规则' : '新建阈值规则'" width="650px" destroy-on-close>
-      <el-form :model="form" label-width="100px" :rules="formRules" ref="formRef">
-        <el-form-item label="规则名称" prop="name">
-          <el-input v-model="form.name" placeholder="如：CPU使用率告警" />
+    <!-- Create/Edit Dialog -->
+    <el-dialog v-model="dialogVisible" :title="editingRule ? '编辑规则' : '新建规则'" width="560px" destroy-on-close>
+      <el-form :model="formData" label-width="100px">
+        <el-form-item label="规则名称" required>
+          <el-input v-model="formData.name" placeholder="如：CPU高负载告警" />
         </el-form-item>
-        <el-form-item label="监控指标" prop="metric">
-          <el-select v-model="form.metric" style="width: 100%">
-            <el-option v-for="m in metricOptions" :key="m.value" :label="m.label" :value="m.value" />
+        <el-form-item label="指标名称" required>
+          <el-select v-model="formData.metric_name" placeholder="选择指标" style="width: 100%">
+            <el-option v-for="m in metricOptions" :key="m" :label="m" :value="m" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="资产类型">
+          <el-select v-model="formData.asset_type" placeholder="全部" clearable style="width: 100%">
+            <el-option label="Linux服务器" value="linux_server" />
+            <el-option label="Windows服务器" value="windows_server" />
+            <el-option label="数据库" value="database" />
+            <el-option label="Web服务" value="web_service" />
           </el-select>
         </el-form-item>
         <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="比较符">
-              <el-select v-model="form.operator" style="width: 100%">
-                <el-option label="大于" value=">" />
-                <el-option label="小于" value="<" />
-                <el-option label="等于" value="=" />
-                <el-option label="大于等于" value=">=" />
-                <el-option label="小于等于" value="<=" />
+          <el-col :span="12">
+            <el-form-item label="条件" required>
+              <el-select v-model="formData.condition" style="width: 100%">
+                <el-option label="大于 (>)" value="gt" />
+                <el-option label="大于等于 (>=)" value="gte" />
+                <el-option label="小于 (<)" value="lt" />
+                <el-option label="小于等于 (<=)" value="lte" />
+                <el-option label="等于 (=)" value="eq" />
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
-            <el-form-item label="阈值" prop="threshold">
-              <el-input-number v-model="form.threshold" :min="0" :max="99999" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="单位">
-              <el-select v-model="form.unit" style="width: 100%">
-                <el-option label="%" value="%" />
-                <el-option label="ms" value="ms" />
-                <el-option label="MB" value="MB" />
-                <el-option label="次" value="count" />
-              </el-select>
+          <el-col :span="12">
+            <el-form-item label="阈值" required>
+              <el-input-number v-model="formData.threshold_value" :precision="1" :step="0.1" style="width: 100%" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-form-item label="持续时间">
-          <el-input-number v-model="form.duration" :min="0" :max="3600" /> 秒（0为即时触发）
+          <el-input-number v-model="formData.duration_seconds" :min="0" :step="60" style="width: 100%" />
+          <div class="text-tertiary font-12" style="margin-top: 4px">0 表示即时触发</div>
         </el-form-item>
-        <el-form-item label="告警级别" prop="severity">
-          <el-select v-model="form.severity" style="width: 100%">
-            <el-option label="紧急" value="critical" />
-            <el-option label="高危" value="high" />
-            <el-option label="中危" value="medium" />
-            <el-option label="低危" value="low" />
+        <el-form-item label="严重级别" required>
+          <el-select v-model="formData.severity" style="width: 100%">
+            <el-option label="严重" value="critical" />
+            <el-option label="高" value="high" />
+            <el-option label="警告" value="warning" />
+            <el-option label="信息" value="info" />
           </el-select>
         </el-form-item>
-        <el-form-item label="适用资产">
-          <el-select v-model="form.asset_types" multiple style="width: 100%">
-            <el-option label="Linux服务器" value="linux_server" />
-            <el-option label="Windows服务器" value="windows_server" />
-            <el-option label="MySQL数据库" value="mysql" />
-            <el-option label="Web应用" value="web_app" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="通知规则">
-          <el-select v-model="form.notification_rule_id" clearable placeholder="关联通知规则" style="width: 100%">
-            <el-option label="默认通知" value="default" />
-          </el-select>
+        <el-form-item label="描述">
+          <el-input v-model="formData.description" type="textarea" :rows="2" />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitting">保存</el-button>
+        <el-button type="primary" :loading="submitting" @click="submitForm">确定</el-button>
       </template>
-    </el-dialog>
-
-    <!-- 模拟结果 -->
-    <el-dialog v-model="simVisible" title="阈值模拟" width="500px">
-      <el-result v-if="simResult.triggered" icon="warning" title="触发告警" :sub-title="`预计触发 ${simResult.count} 条告警`">
-        <template #extra>
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="匹配资产">{{ simResult.matched }}</el-descriptions-item>
-            <el-descriptions-item label="超限资产">{{ simResult.exceeded }}</el-descriptions-item>
-            <el-descriptions-item label="触发级别">{{ simResult.severity }}</el-descriptions-item>
-          </el-descriptions>
-        </template>
-      </el-result>
-      <el-result v-else icon="success" title="无触发" sub-title="当前阈值条件未匹配到异常资产" />
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
+import { thresholdService } from '@/shared/api'
 
-const router = useRouter()
 const loading = ref(false)
-const submitting = ref(false)
-const dialogVisible = ref(false)
-const simVisible = ref(false)
-const editing = ref<any>(null)
-const rules = ref<any[]>([])
-const formRef = ref()
+const items = ref<any[]>([])
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = 20
 
-const filters = reactive({ keyword: '', metric_type: '', severity: '' })
-const pagination = reactive({ page: 1, size: 20, total: 0 })
-const simResult = ref<any>({})
+const filters = reactive({ metric_name: '', severity: '', asset_type: '', enabled: null as boolean | null })
 
-const form = reactive({
-  name: '', metric: '', operator: '>', threshold: 90, unit: '%',
-  duration: 0, severity: 'high', asset_types: [] as string[], notification_rule_id: '',
-})
-const formRules = {
-  name: [{ required: true, message: '请输入规则名称', trigger: 'blur' }],
-  metric: [{ required: true, message: '请选择监控指标', trigger: 'change' }],
-  threshold: [{ required: true, message: '请输入阈值', trigger: 'blur' }],
-  severity: [{ required: true, message: '请选择告警级别', trigger: 'change' }],
-}
+const metricOptions = ['cpu_usage', 'memory_usage', 'disk_usage', 'disk_io', 'network_in', 'network_out', 'response_time', 'connection_count', 'process_count', 'load_avg']
 
-const metricOptions = [
-  { value: 'cpu_usage', label: 'CPU使用率' }, { value: 'memory_usage', label: '内存使用率' },
-  { value: 'disk_usage', label: '磁盘使用率' }, { value: 'network_traffic', label: '网络流量' },
-  { value: 'response_time', label: '响应时间' }, { value: 'connection_count', label: '连接数' },
-]
-
-function metricName(m: string) { return metricOptions.find(o => o.value === m)?.label || m }
-function severityType(s: string) { return { critical: 'danger', high: 'warning', medium: '', low: 'info' }[s] || 'info' }
-function severityLabel(s: string) { return { critical: '紧急', high: '高危', medium: '中危', low: '低危' }[s] || s }
-
-async function loadData() {
+async function fetchData() {
   loading.value = true
   try {
-    // Will connect to threshold rules API when available
-    rules.value = []
-    pagination.total = 0
-  } finally { loading.value = false }
+    const params: Record<string, any> = { page: currentPage.value, page_size: pageSize }
+    if (filters.metric_name) params.metric_name = filters.metric_name
+    if (filters.severity) params.severity = filters.severity
+    if (filters.asset_type) params.asset_type = filters.asset_type
+    if (filters.enabled !== null) params.enabled = filters.enabled
+
+    const resp = await thresholdService.list(params)
+    if (resp.data?.code === 0) {
+      items.value = resp.data.data?.items || []
+      total.value = resp.data.data?.total || 0
+    }
+  } catch (e) {
+    console.error('Failed to fetch threshold rules:', e)
+  } finally {
+    loading.value = false
+  }
 }
 
-function resetFilters() { filters.keyword = ''; filters.metric_type = ''; filters.severity = ''; pagination.page = 1; loadData() }
+const dialogVisible = ref(false)
+const editingRule = ref<any>(null)
+const submitting = ref(false)
+const formData = reactive({
+  name: '', metric_name: '', asset_type: '', condition: 'gt',
+  threshold_value: 90, duration_seconds: 0, severity: 'warning', description: '',
+})
 
-function openDialog(row?: any) {
-  editing.value = row || null
-  if (row) Object.assign(form, row)
-  else Object.assign(form, { name: '', metric: '', operator: '>', threshold: 90, unit: '%', duration: 0, severity: 'high', asset_types: [], notification_rule_id: '' })
+function openCreateDialog() {
+  editingRule.value = null
+  Object.assign(formData, { name: '', metric_name: '', asset_type: '', condition: 'gt', threshold_value: 90, duration_seconds: 0, severity: 'warning', description: '' })
   dialogVisible.value = true
 }
 
-async function handleSubmit() {
-  await formRef.value?.validate()
+function openEditDialog(row: any) {
+  editingRule.value = row
+  Object.assign(formData, { name: row.name, metric_name: row.metric_name, asset_type: row.asset_type || '', condition: row.condition, threshold_value: row.threshold_value, duration_seconds: row.duration_seconds, severity: row.severity, description: row.description || '' })
+  dialogVisible.value = true
+}
+
+async function submitForm() {
+  if (!formData.name || !formData.metric_name) {
+    ElMessage.warning('请填写必填项')
+    return
+  }
   submitting.value = true
   try {
-    ElMessage.success(editing.value ? '规则更新成功' : '规则创建成功')
+    const data = { ...formData, asset_type: formData.asset_type || null }
+    if (editingRule.value) {
+      await thresholdService.update(editingRule.value.id, data)
+      ElMessage.success('规则已更新')
+    } else {
+      await thresholdService.create(data)
+      ElMessage.success('规则已创建')
+    }
     dialogVisible.value = false
-    loadData()
-  } finally { submitting.value = false }
+    fetchData()
+  } catch (e) {
+    console.error('Submit failed:', e)
+    ElMessage.error('操作失败')
+  } finally {
+    submitting.value = false
+  }
 }
 
-async function toggleRule(row: any) { ElMessage.success(`规则已${row.enabled ? '启用' : '禁用'}`) }
-
-function simulateThreshold(row: any) {
-  simVisible.value = true
-  simResult.value = { triggered: true, matched: 15, exceeded: 3, count: 3, severity: row.severity }
-}
-
-async function handleDelete(row: any) {
+async function toggleRule(row: any) {
   try {
-    await ElMessageBox.confirm(`确认删除「${row.name}」？`, '删除确认', { type: 'warning' })
-    ElMessage.success('已删除')
-    loadData()
-  } catch { /* cancelled */ }
+    await thresholdService.toggle(row.id)
+    fetchData()
+  } catch { ElMessage.error('操作失败') }
 }
 
-onMounted(loadData)
+async function deleteRule(row: any) {
+  try {
+    await thresholdService.delete(row.id)
+    ElMessage.success('已删除')
+    fetchData()
+  } catch { ElMessage.error('删除失败') }
+}
+
+function conditionText(c: string) {
+  const map: Record<string, string> = { gt: '>', gte: '>=', lt: '<', lte: '<=', eq: '=' }
+  return map[c] || c
+}
+
+function metricUnit(m: string) {
+  if (m.includes('usage') || m.includes('cpu') || m.includes('memory') || m.includes('disk_usage')) return '%'
+  if (m.includes('time')) return 'ms'
+  return ''
+}
+
+function severityText(s: string) {
+  const map: Record<string, string> = { critical: '严重', high: '高', warning: '警告', info: '信息' }
+  return map[s] || s
+}
+
+function severityTag(s: string) {
+  const map: Record<string, string> = { critical: 'danger', high: 'warning', warning: '', info: 'info' }
+  return map[s] || 'info'
+}
+
+onMounted(fetchData)
 </script>
 
 <style scoped>
-.threshold-rule-page { padding: 20px; }
-.mt-4 { margin-top: 16px; }
-.text-muted { color: #909399; font-size: 12px; }
+.page-container { padding: 20px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.mb-md { margin-bottom: 16px; }
+.text-tertiary { color: #86909c; }
+.font-12 { font-size: 12px; }
 </style>
