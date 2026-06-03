@@ -12,6 +12,9 @@
         <el-button type="primary" link @click="$router.push(`/assets/${asset.id}/topology`)">
           <el-icon><Connection /></el-icon> 拓扑图
         </el-button>
+        <el-button type="primary" @click="navToInspectionFromAsset(assetId)">
+          <el-icon><Setting /></el-icon> 绑定巡检模板
+        </el-button>
       </div>
     </div>
 
@@ -371,15 +374,18 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Plus, Connection } from '@element-plus/icons-vue'
+import { ArrowLeft, Plus, Connection, Setting } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import TimelineView from '@/shared/components/TimelineView.vue'
+import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 
 const route = useRoute()
 const router = useRouter()
+
+const { navToInspectionFromAsset } = useWorkflowNav()
 
 const assetId = ref(route.params.id as string)
 const loading = ref(false)

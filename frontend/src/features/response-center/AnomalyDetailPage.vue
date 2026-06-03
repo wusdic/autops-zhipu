@@ -177,34 +177,48 @@
               </el-descriptions>
             </div>
           </div>
-        </el-col>
-      </el-row>
-    </div>
+         </div>
+       </el-col>
+     </el-row>
+      <!-- 工作流导航 -->
+      <el-card style="margin-top: 16px" shadow="never">
+        <template #header>
+          <span style="font-weight: 600">工作流导航</span>
+        </template>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap">
+          <el-button type="primary" @click="navToAIFromAnomaly(anomalyId)">AI 诊断</el-button>
+          <el-button type="warning" @click="navToRemediationFromAnomaly(anomalyId)">故障处置</el-button>
+          <el-button type="success" @click="navToTicketFromAnomaly(anomalyId)">创建工单</el-button>
+          <el-button type="info" @click="navToPolicyFromAnomaly(anomalyId)">匹配策略</el-button>
+        </div>
+      </el-card>
 
-    <!-- 分配对话框 -->
-    <el-dialog v-model="showAssignDialog" title="分配处理人" width="460px">
-      <el-form label-width="80px">
-        <el-form-item label="处理人ID">
-          <el-input v-model="assigneeId" placeholder="输入处理人用户ID" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="showAssignDialog = false">取消</el-button>
-        <el-button type="primary" :loading="actionLoading === 'assign'" @click="handleAssign">确定</el-button>
-      </template>
-    </el-dialog>
-  </div>
+   </div>
+   <!-- 分配对话框 -->
+   <el-dialog v-model="showAssignDialog" title="分配处理人" width="460px">
+     <el-form label-width="80px">
+       <el-form-item label="处理人ID">
+         <el-input v-model="assigneeId" placeholder="输入处理人用户ID" />
+       </el-form-item>
+     </el-form>
+     <template #footer>
+       <el-button @click="showAssignDialog = false">取消</el-button>
+       <el-button type="primary" :loading="actionLoading === 'assign'" @click="handleAssign">确定</el-button>
+     </template>
+   </el-dialog>
+ </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { anomalyService, alertService } from '@/shared/api'
-
+import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 const route = useRoute()
 const router = useRouter()
 const anomalyId = route.params.id as string
+
+const { navToAIFromAnomaly, navToRemediationFromAnomaly, navToTicketFromAnomaly, navToPolicyFromAnomaly } = useWorkflowNav()
 
 const loading = ref(false)
 const alertsLoading = ref(false)

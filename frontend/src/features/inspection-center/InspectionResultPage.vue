@@ -263,21 +263,38 @@
         <el-descriptions-item label="实际值">{{ currentResult.actual || '-' }}</el-descriptions-item>
         <el-descriptions-item label="检查时间">{{ formatTime(currentResult.checked_at || currentResult.created_at) }}</el-descriptions-item>
         <el-descriptions-item label="任务ID">{{ currentResult.task_id || '-' }}</el-descriptions-item>
-        <el-descriptions-item v-if="currentResult.suggestion" label="建议" :span="2">
-          <div class="detail-message">{{ currentResult.suggestion }}</div>
-        </el-descriptions-item>
-      </el-descriptions>
-    </el-dialog>
+       <el-descriptions-item v-if="currentResult.suggestion" label="建议" :span="2">
+         <div class="detail-message">{{ currentResult.suggestion }}</div>
+       </el-descriptions-item>
+     </el-descriptions>
+     <template #footer>
+       <el-button @click="detailVisible = false">关闭</el-button>
+       <el-button
+         type="warning"
+         @click="navToAnomalyFromInspection(currentResult?.task_id)"
+       >
+         <el-icon><Warning /></el-icon> 查看异常
+       </el-button>
+       <el-button
+         type="primary"
+         @click="navToReportFromInspection(currentResult?.task_id)"
+       >
+         <el-icon><Document /></el-icon> 生成报告
+       </el-button>
+     </template>
+   </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Search, Refresh, Download, Monitor } from '@element-plus/icons-vue'
+import { Warning, Document } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { API } from '@/shared/api/routes'
 import client from '@/shared/api/client'
 import type { AxiosResponse } from 'axios'
+import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 // ---------- 类型定义 ----------
 interface InspectionResult {
@@ -337,6 +354,7 @@ const total = ref(0)
 const detailVisible = ref(false)
 const currentResult = ref<InspectionResult | null>(null)
 const viewMode = ref<'table' | 'group'>('table')
+const { navToAnomalyFromInspection, navToReportFromInspection } = useWorkflowNav()
 
 const queryParams = reactive<QueryParams>({
   keyword: '',

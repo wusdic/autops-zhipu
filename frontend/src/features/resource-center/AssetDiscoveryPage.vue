@@ -281,10 +281,13 @@ import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, Search } from '@element-plus/icons-vue'
+import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
 const router = useRouter()
+
+const { navToDiscovery } = useWorkflowNav()
 
 // === 统计 ===
 const stats = reactive({ total_discovered: 0, onboarded: 0, pending_review: 0, today: 0 })
@@ -434,9 +437,7 @@ async function deleteTask(task: any) {
 }
 
 function viewResults(task: any) {
-  activeTab.value = 'results'
-  resultFilter.keyword = task.ip_range || task.ip_start || ''
-  loadResults()
+  router.push({ path: '/resource-center/discovery/results', query: { task_id: task.id } })
 }
 
 // === 结果操作 ===

@@ -14,6 +14,9 @@
         <span class="autops-card-title">报告列表</span>
         <div class="card-header__actions">
           <el-button :icon="Refresh" circle size="small" @click="loadReports" />
+          <el-button type="primary" size="small" @click="navToReportFromInspection()">
+            <el-icon><Document /></el-icon> 生成报告
+          </el-button>
         </div>
       </div>
       <div class="autops-card-body">
@@ -147,14 +150,17 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
+import { Document } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
+import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 // ── State ──────────────────────────────────────────────────────────
 const loading = ref(false)
 const reports = ref<any[]>([])
 const detailVisible = ref(false)
 const detailData = ref<any>(null)
+const { navToReportFromInspection } = useWorkflowNav()
 
 const filters = reactive({
   keyword: '',

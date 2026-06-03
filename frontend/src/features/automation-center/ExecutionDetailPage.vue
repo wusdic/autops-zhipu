@@ -21,6 +21,12 @@
           <span>基本信息</span>
           <div class="autops-card-header-actions">
             <el-button
+              type="success"
+              @click="navToReportFromExecution(executionId)"
+            >
+              生成执行报告
+            </el-button>
+            <el-button
               v-if="execution && (execution.status === 'running' || execution.status === 'pending')"
               type="warning"
               @click="handleCancel"
@@ -246,9 +252,12 @@ import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
+import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 const route = useRoute()
 const executionId = route.params.id as string
+
+const { navToReportFromExecution } = useWorkflowNav()
 
 const loading = ref(false)
 const logsLoading = ref(false)

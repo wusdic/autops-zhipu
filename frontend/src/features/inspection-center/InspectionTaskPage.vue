@@ -184,6 +184,8 @@
       </div>
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
+        <el-button type="primary" @click="navToAnomalyFromInspection(taskDetail?.id)">查看异常</el-button>
+        <el-button type="success" @click="navToReportFromInspection(taskDetail?.id)">生成报告</el-button>
       </template>
     </el-dialog>
   </div>
@@ -195,8 +197,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Search, Refresh, VideoPlay, Loading } from '@element-plus/icons-vue'
 import { inspectionService } from '@/shared/api'
+import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 // ---------- 状态 ----------
+const { navToAnomalyFromInspection, navToReportFromInspection } = useWorkflowNav()
 const loading = ref(false)
 const triggerLoading = ref(false)
 const planLoading = ref(false)

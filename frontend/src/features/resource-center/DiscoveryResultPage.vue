@@ -53,15 +53,22 @@
         <div class="card-header">
           <span class="title">发现结果列表</span>
           <div class="actions">
-            <el-button
-              type="primary"
-              :icon="Download"
-              :disabled="!selectedRows.length"
-              @click="handleBatchImport"
-            >
-              批量导入 ({{ selectedRows.length }})
-            </el-button>
-            <el-button
+          <el-button
+             type="primary"
+             :icon="Download"
+             :disabled="!selectedRows.length"
+             @click="handleBatchImport"
+           >
+             批量导入 ({{ selectedRows.length }})
+           </el-button>
+           <el-button
+             type="success"
+             :disabled="!selectedRows.length"
+             @click="handleManageToAssets"
+           >
+             <el-icon><Plus /></el-icon> 纳管到资产
+           </el-button>
+           <el-button
               :icon="RefreshRight"
               :loading="loading"
               @click="fetchData"
@@ -184,8 +191,10 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, RefreshRight, Download } from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
+import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 // ─── 类型定义 ────────────────────────────────────────
 interface DiscoveryResult {
@@ -208,6 +217,7 @@ const importDialogVisible = ref(false)
 const tableData = ref<DiscoveryResult[]>([])
 const selectedRows = ref<DiscoveryResult[]>([])
 const currentRow = ref<DiscoveryResult | null>(null)
+const { navToAssetFromDiscovery } = useWorkflowNav()
 
 const filterForm = reactive({
   keyword: '',
@@ -329,7 +339,14 @@ function handlePageChange(page: number) {
 
 // ─── 多选 ────────────────────────────────────────────
 function handleSelectionChange(rows: DiscoveryResult[]) {
-  selectedRows.value = rows
+ selectedRows.value = rows
+}
+// ─── 纳管到资产工作流 ────────────────────────────────
+const handleManageToAssets = () => {
+  if (selectedRows.value.length > 0) {
+    const ids = selectedRows.value.map(r => String(r.id))
+    navToAssetFromDiscovery(ids)
+  }
 }
 
 // ─── 导入 ────────────────────────────────────────────

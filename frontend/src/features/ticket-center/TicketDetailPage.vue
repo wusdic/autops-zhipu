@@ -85,6 +85,13 @@
               <el-button v-if="ticket.status === 'resolved'" type="info" @click="changeStatus('closed')">
                 关闭工单
               </el-button>
+              <!-- 工作流导航 -->
+              <el-button type="success" @click="navToReportFromTicket(ticketId())">
+                生成报告
+              </el-button>
+              <el-button type="warning" @click="navToKnowledgeFromTicket(ticketId())">
+                转为知识
+              </el-button>
               <!-- 转知识草稿按钮 -->
               <el-button
                 v-if="ticket.status === 'resolved' || ticket.status === 'closed'"
@@ -305,9 +312,12 @@ import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import SeverityBadge from '@/shared/components/SeverityBadge.vue'
+import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 const route = useRoute()
 const ticketId = () => route.params.id as string
+
+const { navToReportFromTicket, navToKnowledgeFromTicket } = useWorkflowNav()
 
 const loading = ref(false)
 const ticket = ref<any>(null)
