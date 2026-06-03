@@ -39,13 +39,11 @@
           </el-button>
         </div>
       </template>
-      <el-table
-        :data="recentAnomalies"
-        v-loading="anomaliesLoading"
-        stripe
-        empty-text="暂无异常记录"
-        style="width: 100%"
-      >
+      <el-table stripe
+ :data="recentAnomalies"
+ v-loading="anomaliesLoading"empty-text="暂无异常记录"
+ style="width: 100%"
+ >
         <el-table-column prop="title" label="异常标题" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
             <el-link type="primary" @click="router.push(`/response/anomaly-list/${row.id}`)">
@@ -77,7 +75,7 @@
             <span class="text-muted">{{ formatTime(row.discovered_at || row.created_at) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" align="center" fixed="right">
+        <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="router.push(`/response/anomaly-list/${row.id}`)">
               详情
@@ -361,21 +359,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
-  background: #f7f8fa;
-  min-height: 100%;
-}
-
 .stat-row {
   margin-bottom: 16px;
 }
-
-.stat-card {
-  cursor: default;
-  transition: transform 0.2s;
-}
-
 .stat-card-clickable {
   cursor: pointer;
 }
@@ -419,19 +405,6 @@ onMounted(() => {
 .main-card {
   margin-bottom: 16px;
 }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1d2129;
-}
-
 .text-muted {
   color: #86909c;
   font-size: 13px;

@@ -29,7 +29,7 @@
     <!-- 模型列表 -->
     <el-card class="mt-4" shadow="never">
       <template #header><span>已注册模型</span></template>
-      <el-table :data="models" v-loading="loading" stripe border>
+      <el-table stripe :data="models" v-loading="loading"border>
         <el-table-column prop="name" label="模型名称" min-width="180" />
         <el-table-column prop="provider" label="提供商" width="120">
           <template #default="{ row }">
@@ -166,10 +166,10 @@ const metricsData = ref<any>({})
 const formRef = ref()
 
 const overviewStats = computed(() => [
-  { label: '注册模型', value: models.value.length, color: '#409EFF' },
-  { label: '活跃模型', value: models.value.filter(m => m.status === 'active').length, color: '#67C23A' },
-  { label: '异常模型', value: models.value.filter(m => m.status === 'error').length, color: '#F56C6C' },
-  { label: '今日调用', value: 0, color: '#E6A23C' },
+  { label: '注册模型', value: models.value.length, color: '#165dff' },
+  { label: '活跃模型', value: models.value.filter(m => m.status === 'active').length, color: '#00b42a' },
+  { label: '异常模型', value: models.value.filter(m => m.status === 'error').length, color: '#f53f3f' },
+  { label: '今日调用', value: 0, color: '#ff7d00' },
 ])
 
 const globalConfig = reactive({ default_model: '', timeout: 60, max_tokens: 4096, temperature: 70 })
@@ -253,8 +253,5 @@ onMounted(loadData)
 <style scoped>
 .model-service-page { padding: 20px; }
 .mt-4 { margin-top: 16px; }
-.stat-card { text-align: center; padding: 12px 0; }
-.stat-value { font-size: 28px; font-weight: bold; }
-.stat-label { color: #909399; margin-top: 4px; }
 .text-xs { font-size: 12px; }
 </style>

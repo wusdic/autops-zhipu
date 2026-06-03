@@ -32,7 +32,7 @@
       </el-form>
 
       <!-- 凭证列表 -->
-      <el-table :data="credentials" v-loading="loading" stripe>
+      <el-table stripe :data="credentials" v-loading="loading">
         <el-table-column prop="name" label="名称" min-width="140" show-overflow-tooltip />
         <el-table-column prop="credential_type" label="类型" width="120">
           <template #default="{ row }">
@@ -60,7 +60,7 @@
         <el-table-column prop="created_at" label="创建时间" width="160">
           <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="220" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="openBindDialog(row)">绑定</el-button>
             <el-button size="small" type="warning" @click="openEditDialog(row)">编辑</el-button>
@@ -88,7 +88,7 @@
     </div>
 
     <!-- 创建/编辑凭证弹窗 -->
-    <el-dialog v-model="showFormDialog" :title="isEditing ? '编辑凭证' : '新建凭证'" width="560px">
+    <el-dialog v-model="showFormDialog" :title="isEditing ? '编辑凭证' : '新建凭证'" width="600px">
       <el-form :model="formData" label-width="90px" ref="formRef" :rules="formRules">
         <el-form-item label="名称" prop="name">
           <el-input v-model="formData.name" placeholder="凭证名称" />
@@ -130,17 +130,17 @@
 
     <!-- 绑定资产弹窗 -->
     <el-dialog v-model="showBindDialog" title="绑定凭证到资产" width="600px">
-      <p style="margin-bottom:12px;color:#606266">
+      <p style="margin-bottom:12px;color:#4e5969">
         将凭证 <strong>{{ bindingCredential?.name }}</strong> 绑定到以下资产:
       </p>
 
       <!-- 已绑定的资产 -->
       <div v-if="boundAssets.length" style="margin-bottom: 16px">
-        <h4 style="font-size:13px;color:#909399;margin-bottom:8px">已绑定资产</h4>
-        <el-table :data="boundAssets" size="small" stripe max-height="200">
+        <h4 style="font-size:13px;color:#86909c;margin-bottom:8px">已绑定资产</h4>
+        <el-table stripe :data="boundAssets" size="small"max-height="200">
           <el-table-column prop="name" label="名称" min-width="130" />
           <el-table-column prop="ip" label="IP" width="140" />
-          <el-table-column label="操作" width="80">
+          <el-table-column label="操作" width="100">
             <template #default="{ row }">
               <el-button size="small" link type="danger" @click="unbindAsset(row.id)">解绑</el-button>
             </template>
@@ -149,7 +149,7 @@
       </div>
 
       <!-- 选择资产绑定 -->
-      <h4 style="font-size:13px;color:#909399;margin-bottom:8px">添加绑定</h4>
+      <h4 style="font-size:13px;color:#86909c;margin-bottom:8px">添加绑定</h4>
       <el-input
         v-model="bindAssetSearch"
         placeholder="搜索资产名称或IP"
@@ -158,7 +158,7 @@
         :prefix-icon="Search"
         @input="searchBindAssets"
       />
-      <el-table
+      <el-table stripe
         :data="bindAvailableAssets"
         v-loading="bindAssetLoading"
         size="small"

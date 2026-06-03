@@ -49,7 +49,7 @@
 
     <!-- 确认列表 -->
     <el-card class="mt-4" shadow="never">
-      <el-table :data="items" v-loading="loading" stripe border>
+      <el-table stripe :data="items" v-loading="loading"border>
         <el-table-column prop="title" label="确认事项" min-width="250">
           <template #default="{ row }">
             <div class="confirm-title">
@@ -72,7 +72,7 @@
         <el-table-column prop="action_summary" label="执行动作摘要" min-width="200" />
         <el-table-column prop="created_at" label="创建时间" width="180" />
         <el-table-column prop="timeout_at" label="超时时间" width="180" />
-        <el-table-column label="操作" width="260" fixed="right">
+        <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
             <template v-if="row.status === 'pending'">
               <el-button link type="primary" @click="viewDetail(row)">详情</el-button>
@@ -91,7 +91,7 @@
     </el-card>
 
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailVisible" title="确认事项详情" width="750px">
+    <el-dialog v-model="detailVisible" title="确认事项详情" width="780px">
       <el-descriptions :column="2" border>
         <el-descriptions-item label="标题" :span="2">{{ detailData.title }}</el-descriptions-item>
         <el-descriptions-item label="来源">{{ sourceName(detailData.source) }}</el-descriptions-item>
@@ -176,6 +176,6 @@ onMounted(loadData)
 .mr-1 { margin-right: 4px; }
 .mr-4 { margin-right: 16px; }
 .confirm-title { display: flex; align-items: center; }
-.action-pre { background: #f5f7fa; padding: 8px; border-radius: 4px; font-size: 13px; white-space: pre-wrap; }
+.action-pre { background: #f7f8fa; padding: 8px; border-radius: 4px; font-size: 13px; white-space: pre-wrap; }
 .ai-analysis { background: #ecf5ff; padding: 8px; border-radius: 4px; font-size: 13px; }
 </style>

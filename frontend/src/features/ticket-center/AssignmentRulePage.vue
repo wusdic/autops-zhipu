@@ -58,7 +58,7 @@
         </div>
       </template>
 
-      <el-table v-loading="loading" :data="tableData" border stripe row-key="id">
+      <el-table stripe v-loading="loading" :data="tableData" borderrow-key="id">
         <el-table-column type="index" label="序号" width="60" align="center" />
         <el-table-column prop="name" label="规则名称" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
@@ -134,7 +134,7 @@
             {{ formatTime(row.updated_at) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="170" align="center" fixed="right">
+        <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleEdit(row)">编辑</el-button>
             <el-button type="info" link size="small" @click="handleDuplicate(row)">复制</el-button>
@@ -161,7 +161,7 @@
     <el-dialog
       v-model="dialogVisible"
       :title="isEditing ? '编辑分派规则' : '新建分派规则'"
-      width="680px"
+      width="780px"
       destroy-on-close
       @closed="resetDialogForm"
     >
@@ -335,7 +335,7 @@
     </el-dialog>
 
     <!-- 优先级排序弹窗 -->
-    <el-dialog v-model="reorderVisible" title="调整规则优先级顺序" width="500px" destroy-on-close>
+    <el-dialog v-model="reorderVisible" title="调整规则优先级顺序" width="600px" destroy-on-close>
       <p class="reorder-tip">拖拽调整规则执行优先级，排在前面的规则优先匹配</p>
       <draggable-container v-model="reorderList" item-key="id" handle=".drag-handle">
         <template #item="{ element }">
@@ -709,22 +709,7 @@ onMounted(() => {
   padding-bottom: 2px;
 }
 
-.table-card .card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.table-card .card-header .title {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.table-card .card-header .actions {
-  display: flex;
-  gap: 8px;
-}
-
+.table-card 
 .condition-tags {
   display: flex;
   flex-wrap: wrap;
@@ -732,7 +717,7 @@ onMounted(() => {
 }
 
 .text-muted {
-  color: #c0c4cc;
+  color: #c9cdd4;
 }
 
 .conditions-editor {
@@ -748,19 +733,19 @@ onMounted(() => {
 
 .condition-tip {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
   margin-top: 4px;
 }
 
 .priority-hint {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
   margin-left: 8px;
 }
 
 .reorder-tip {
   font-size: 13px;
-  color: #909399;
+  color: #86909c;
   margin-bottom: 12px;
 }
 
@@ -769,7 +754,7 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  border: 1px solid #ebeef5;
+  border: 1px solid #e5e6eb;
   border-radius: 4px;
   margin-bottom: 6px;
   background: #fff;
@@ -778,7 +763,7 @@ onMounted(() => {
 
 .reorder-item .drag-handle {
   cursor: grab;
-  color: #c0c4cc;
+  color: #c9cdd4;
 }
 
 .reorder-item .reorder-name {

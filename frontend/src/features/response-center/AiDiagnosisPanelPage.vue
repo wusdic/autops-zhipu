@@ -51,9 +51,9 @@
           <!-- 建议动作 -->
           <div class="autops-card" style="margin-bottom: 16px">
             <div class="autops-card-header"><div class="autops-card-title"><el-icon><VideoPlay /></el-icon> 建议动作</div></div>
-            <el-table :data="diagnosisResult.recommended_actions || []" stripe size="small" style="margin-top: 8px">
+            <el-table stripe :data="diagnosisResult.recommended_actions || []"size="small" style="margin-top: 8px">
               <el-table-column type="index" label="#" width="40" />
-              <el-table-column prop="action" label="动作" min-width="160" show-overflow-tooltip />
+              <el-table-column prop="action" label="动作" min-width="180" show-overflow-tooltip />
               <el-table-column prop="risk" label="风险" width="80">
                 <template #default="{ row }">
                   <el-tag :type="riskTag(row.risk)" size="small">{{ riskLabel(row.risk) }}</el-tag>
@@ -212,5 +212,4 @@ function delay(ms: number) { return new Promise(r => setTimeout(r, ms)) }
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
 </style>

@@ -66,14 +66,12 @@
 
     <!-- 日志表格区 -->
     <el-card class="table-card" shadow="never">
-      <el-table
-        v-loading="loading"
-        :data="logList"
-        stripe
-        border
-        style="width: 100%"
-        @sort-change="handleSortChange"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="logList"border
+ style="width: 100%"
+ @sort-change="handleSortChange"
+ >
         <el-table-column prop="timestamp" label="时间" width="180" sortable="custom" align="center">
           <template #default="{ row }">
             {{ formatTime(row.timestamp) }}
@@ -90,9 +88,9 @@
 
         <el-table-column prop="source" label="来源" width="180" show-overflow-tooltip />
 
-        <el-table-column prop="message" label="消息" min-width="400" show-overflow-tooltip />
+        <el-table-column prop="message" label="消息" min-width="480px" show-overflow-tooltip />
 
-        <el-table-column label="操作" width="80" align="center" fixed="right">
+        <el-table-column label="操作" width="100" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleViewDetail(row)">
               详情
@@ -117,7 +115,7 @@
     </el-card>
 
     <!-- 日志详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="日志详情" width="700px" destroy-on-close>
+    <el-dialog v-model="detailVisible" title="日志详情" width="780px" destroy-on-close>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="时间">{{ formatTime(currentLog?.timestamp) }}</el-descriptions-item>
         <el-descriptions-item label="级别">
@@ -335,7 +333,7 @@ onMounted(() => {
     word-break: break-all;
     font-size: 12px;
     line-height: 1.5;
-    background: #f5f7fa;
+    background: #f7f8fa;
     padding: 8px;
     border-radius: 4px;
     margin: 0;

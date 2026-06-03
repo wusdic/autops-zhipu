@@ -13,7 +13,7 @@
     </template>
     <div v-if="rootCause" :style="{ marginBottom: '12px' }">
       <div :style="{ fontWeight: 600, marginBottom: '4px' }">根因分析</div>
-      <div :style="{ color: '#606266' }">{{ rootCause }}</div>
+      <div :style="{ color: '#4e5969' }">{{ rootCause }}</div>
     </div>
     <div v-if="recommendations?.length">
       <div :style="{ fontWeight: 600, marginBottom: '4px' }">建议操作</div>
@@ -23,7 +23,7 @@
         </el-timeline-item>
       </el-timeline>
     </div>
-    <div v-if="summary" :style="{ marginTop: '12px', padding: '8px', background: '#f5f7fa', borderRadius: '4px', fontSize: '13px' }">{{ summary }}</div>
+    <div v-if="summary" :style="{ marginTop: '12px', padding: '8px', background: '#f7f8fa', borderRadius: '4px', fontSize: '13px' }">{{ summary }}</div>
   </el-card>
 </template>
 

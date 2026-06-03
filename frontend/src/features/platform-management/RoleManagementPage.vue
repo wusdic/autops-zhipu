@@ -10,7 +10,7 @@
       </div>
     </div>
 
-    <el-table :data="roles" v-loading="loading" stripe border style="width: 100%">
+    <el-table stripe :data="roles" v-loading="loading"border style="width: 100%">
       <el-table-column prop="name" label="角色名称" width="160">
         <template #default="{ row }">
           {{ row.name }}
@@ -35,7 +35,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="created_at" label="创建时间" width="180" />
-      <el-table-column label="操作" width="160" fixed="right">
+      <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
           <el-button size="small" @click="editRole(row)">编辑</el-button>
           <el-button size="small" type="danger" @click="handleDelete(row)" :disabled="row.is_system">删除</el-button>
@@ -299,10 +299,9 @@ onMounted(() => { loadRoles() })
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.page-header h2 { margin: 0; font-size: 20px; color: #303133; }
-.text-muted { color: #909399; }
+.page-header h2 { margin: 0; font-size: 20px; color: #1d2129; }
+.text-muted { color: #86909c; }
 
 .permission-tree-wrapper {
   border: 1px solid #dcdfe6;

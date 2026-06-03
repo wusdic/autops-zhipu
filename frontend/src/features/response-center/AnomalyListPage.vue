@@ -39,7 +39,7 @@
     <!-- 表格 -->
     <div class="autops-card">
       <div class="autops-card-body" style="padding: 0">
-        <el-table :data="anomalies" stripe v-loading="loading" empty-text="暂无异常数据">
+        <el-table stripe :data="anomalies"v-loading="loading" empty-text="暂无异常数据">
           <el-table-column prop="title" label="异常标题" min-width="200" show-overflow-tooltip>
             <template #default="{ row }">
               <el-link type="primary" @click="router.push(`/response/anomalies/${row.id}`)">
@@ -81,7 +81,7 @@
               <span class="text-tertiary">{{ row.discovered_at || row.created_at || '-' }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="220" fixed="right">
+          <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
               <el-button text type="primary" size="small" @click="router.push(`/response/anomalies/${row.id}`)">
                 详情

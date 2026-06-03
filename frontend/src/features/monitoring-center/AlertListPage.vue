@@ -144,16 +144,14 @@
       </transition>
 
       <!-- ========== Alert Table ========== -->
-      <el-table
-        ref="tableRef"
-        :data="alerts"
-        v-loading="loading"
-        stripe
-        border
-        row-key="id"
-        @selection-change="handleSelectionChange"
-        class="alert-table"
-      >
+      <el-table stripe
+ ref="tableRef"
+ :data="alerts"
+ v-loading="loading"border
+ row-key="id"
+ @selection-change="handleSelectionChange"
+ class="alert-table"
+ >
         <el-table-column type="selection" width="45" fixed="left" />
         <el-table-column prop="severity" label="级别" width="90" align="center">
           <template #default="{ row }">
@@ -188,7 +186,7 @@
             <span v-else>{{ computeDuration(row.created_at) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="240" fixed="right" align="center">
+        <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button
               v-if="row.status === 'firing'"
@@ -537,12 +535,6 @@ onBeforeUnmount(() => {
 .stats-row {
   margin-bottom: 16px;
 }
-
-.stat-card {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
 .stat-card__body {
   display: flex;
   align-items: center;
@@ -572,63 +564,51 @@ onBeforeUnmount(() => {
 
 .stat-card__label {
   font-size: 13px;
-  color: #909399;
+  color: #86909c;
   margin-top: 4px;
 }
 
 .stat-card--critical .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
-  color: #f56c6c;
+  color: #f53f3f;
 }
 .stat-card--critical .stat-card__value {
-  color: #f56c6c;
+  color: #f53f3f;
 }
 
 .stat-card--warning .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
-  color: #e6a23c;
+  color: #ff7d00;
 }
 .stat-card--warning .stat-card__value {
-  color: #e6a23c;
+  color: #ff7d00;
 }
 
 .stat-card--active .stat-card__icon {
   background: rgba(64, 158, 255, 0.12);
-  color: #409eff;
+  color: #165dff;
 }
 .stat-card--active .stat-card__value {
-  color: #409eff;
+  color: #165dff;
 }
 
 .stat-card--resolved .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
-  color: #67c23a;
+  color: #00b42a;
 }
 .stat-card--resolved .stat-card__value {
-  color: #67c23a;
+  color: #00b42a;
 }
 
 /* ── Main Card ── */
 .main-card {
   border-radius: 8px;
 }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-header__title {
-  font-size: 16px;
-  font-weight: 600;
-}
-
 /* ── Filter Form ── */
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {
@@ -650,7 +630,7 @@ onBeforeUnmount(() => {
 .batch-bar__info {
   margin-right: auto;
   font-size: 14px;
-  color: #606266;
+  color: #4e5969;
 }
 
 /* ── Table ── */

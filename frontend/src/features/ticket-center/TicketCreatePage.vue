@@ -498,13 +498,6 @@ onMounted(() => {
 .ticket-create-page {
   padding: 20px;
 }
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .card-header .title {
   font-size: 18px;
   font-weight: 600;
@@ -516,7 +509,7 @@ onMounted(() => {
 
 .ticket-form :deep(.el-divider__text) {
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
 }
 
 .type-option {
@@ -532,7 +525,7 @@ onMounted(() => {
 }
 
 .priority-desc {
-  color: #909399;
+  color: #86909c;
   font-size: 12px;
 }
 
@@ -543,7 +536,7 @@ onMounted(() => {
 
 .user-role {
   margin-left: auto;
-  color: #909399;
+  color: #86909c;
   font-size: 12px;
 }
 
@@ -561,11 +554,11 @@ onMounted(() => {
 
 .asset-ip {
   font-family: monospace;
-  color: #606266;
+  color: #4e5969;
 }
 
 .asset-name {
-  color: #909399;
+  color: #86909c;
 }
 
 .form-actions {

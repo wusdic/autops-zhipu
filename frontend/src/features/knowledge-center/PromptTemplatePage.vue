@@ -44,12 +44,10 @@
 
     <!-- Template Table -->
     <div class="autops-card" style="margin-top: 16px">
-      <el-table
-        v-loading="loading"
-        :data="tableData"
-        stripe
-        style="width: 100%"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="tableData"style="width: 100%"
+ >
         <el-table-column prop="name" label="名称" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="template-name" @click="openEdit(row)">{{ row.name }}</span>
@@ -73,7 +71,7 @@
         <el-table-column label="版本" width="70" align="center">
           <template #default="{ row }">v{{ row.version || 1 }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="openEdit(row)">编辑</el-button>
             <el-button text size="small" @click="testTemplate(row)">测试</el-button>
@@ -101,7 +99,7 @@
     <el-dialog
       v-model="dialogVisible"
       :title="isEditing ? '编辑模板' : '新建模板'"
-      width="750"
+      width="780px"
       destroy-on-close
       @close="resetForm"
     >
@@ -162,7 +160,7 @@
     </el-dialog>
 
     <!-- Test Dialog -->
-    <el-dialog v-model="testDialogVisible" title="测试 Prompt 模板" width="700" destroy-on-close>
+    <el-dialog v-model="testDialogVisible" title="测试 Prompt 模板" width="780px" destroy-on-close>
       <el-form label-width="100px">
         <el-form-item label="模板名称">
           <el-input :model-value="testTemplateData.name" disabled />
@@ -447,7 +445,7 @@ onMounted(() => {
 .autops-page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   display: flex;
   align-items: center;
 }
@@ -459,7 +457,7 @@ onMounted(() => {
   margin-bottom: 0;
 }
 .template-name {
-  color: #409eff;
+  color: #165dff;
   cursor: pointer;
   font-weight: 500;
 }

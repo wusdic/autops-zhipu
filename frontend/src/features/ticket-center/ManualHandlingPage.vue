@@ -54,7 +54,7 @@
 
     <!-- 工单列表 -->
     <el-card class="mt-4" shadow="never">
-      <el-table :data="items" v-loading="loading" stripe border>
+      <el-table stripe :data="items" v-loading="loading"border>
         <el-table-column prop="id" label="工单号" width="120">
           <template #default="{ row }">
             <span style="font-family:monospace;font-size:12px">{{ row.id && String(row.id).length > 12 ? String(row.id).slice(0, 8) + '...' : (row.id || '-') }}</span>
@@ -86,7 +86,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="created_at" label="创建时间" width="180" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="viewDetail(row)">详情</el-button>
             <el-button link type="primary" @click="startHandle(row)" v-if="row.status === 'pending'">接单</el-button>
@@ -100,7 +100,7 @@
     </el-card>
 
     <!-- 详情 -->
-    <el-dialog v-model="detailVisible" title="处置详情" width="800px">
+    <el-dialog v-model="detailVisible" title="处置详情" width="780px">
       <el-descriptions :column="2" border>
         <el-descriptions-item label="工单号">{{ detailData.id }}</el-descriptions-item>
         <el-descriptions-item label="优先级">{{ detailData.priority }}</el-descriptions-item>
@@ -177,5 +177,5 @@ onMounted(loadData)
 <style scoped>
 .manual-handling-page { padding: 20px; }
 .mt-4 { margin-top: 16px; }
-.sla-warning { color: #F56C6C; font-weight: bold; }
+.sla-warning { color: #f53f3f; font-weight: bold; }
 </style>

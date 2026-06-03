@@ -47,14 +47,12 @@
         </el-form>
 
         <!-- ========== Table ========== -->
-        <el-table
-          :data="tableData"
-          v-loading="loading"
-          stripe
-          border
-          empty-text="暂无数据"
-          class="log-source-table"
-        >
+        <el-table stripe
+ :data="tableData"
+ v-loading="loading"border
+ empty-text="暂无数据"
+ class="log-source-table"
+ >
           <el-table-column prop="name" label="名称" min-width="180" show-overflow-tooltip />
           <el-table-column prop="type" label="类型" width="100" align="center">
             <template #default="{ row }">
@@ -224,7 +222,7 @@ onMounted(() => {
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {

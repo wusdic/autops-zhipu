@@ -17,11 +17,11 @@
     <el-card v-if="slaWarnings.length" style="margin-bottom: 16px">
       <template #header>
         <div style="display:flex;align-items:center;gap:8px">
-          <el-icon color="#e6a23c"><Warning /></el-icon>
+          <el-icon color="#ff7d00"><Warning /></el-icon>
           <span>SLA 临近到期</span>
         </div>
       </template>
-      <el-table :data="slaWarnings" stripe size="small">
+      <el-table stripe :data="slaWarnings"size="small">
         <el-table-column prop="title" label="工单标题" min-width="200" show-overflow-tooltip />
         <el-table-column prop="priority" label="优先级" width="80">
           <template #default="{ row }">
@@ -31,10 +31,10 @@
         <el-table-column prop="assignee_name" label="处理人" width="100" />
         <el-table-column label="SLA剩余" width="120">
           <template #default="{ row }">
-            <span style="color:#e6a23c;font-weight:bold">{{ row.sla_remaining ?? '即将到期' }}</span>
+            <span style="color:#ff7d00;font-weight:bold">{{ row.sla_remaining ?? '即将到期' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="80">
+        <el-table-column label="操作" width="100">
           <template #default="{ row }">
             <el-button link type="primary" size="small" @click="router.push(`/tickets/${row.id}`)">处理</el-button>
           </template>
@@ -72,7 +72,7 @@
           <el-button type="primary" size="small" @click="router.push('/tickets/create')">新建工单</el-button>
         </div>
       </template>
-      <el-table :data="myTickets" v-loading="myLoading" stripe>
+      <el-table stripe :data="myTickets" v-loading="myLoading">
         <el-table-column prop="title" label="工单标题" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
             <el-link type="primary" @click="router.push(`/tickets/${row.id}`)">{{ row.title }}</el-link>
@@ -100,7 +100,7 @@
     <!-- 最近更新 -->
     <el-card>
       <template #header><span>最近更新</span></template>
-      <el-table :data="recentTickets" v-loading="recentLoading" stripe>
+      <el-table stripe :data="recentTickets" v-loading="recentLoading">
         <el-table-column prop="title" label="工单标题" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
             <el-link type="primary" @click="router.push(`/tickets/${row.id}`)">{{ row.title }}</el-link>
@@ -149,10 +149,10 @@ const statCards = computed(() => [
 ])
 
 const statusDistribution = computed(() => [
-  { status: 'open', label: '待处理', count: stats.value.open_count ?? stats.value.open ?? 0, color: '#e6a23c' },
-  { status: 'in_progress', label: '处理中', count: stats.value.in_progress_count ?? stats.value.in_progress ?? 0, color: '#409eff' },
-  { status: 'resolved', label: '已解决', count: stats.value.resolved_count ?? stats.value.resolved ?? 0, color: '#67c23a' },
-  { status: 'closed', label: '已关闭', count: stats.value.closed_count ?? stats.value.closed ?? 0, color: '#909399' },
+  { status: 'open', label: '待处理', count: stats.value.open_count ?? stats.value.open ?? 0, color: '#ff7d00' },
+  { status: 'in_progress', label: '处理中', count: stats.value.in_progress_count ?? stats.value.in_progress ?? 0, color: '#165dff' },
+  { status: 'resolved', label: '已解决', count: stats.value.resolved_count ?? stats.value.resolved ?? 0, color: '#00b42a' },
+  { status: 'closed', label: '已关闭', count: stats.value.closed_count ?? stats.value.closed ?? 0, color: '#86909c' },
 ])
 
 const slaWarnings = computed(() => {

@@ -75,7 +75,7 @@
               <el-text type="info">{{ currentGroup.description }}</el-text>
             </div>
 
-            <el-table :data="members" v-loading="memberLoading" stripe>
+            <el-table stripe :data="members" v-loading="memberLoading">
               <el-table-column prop="name" label="名称" min-width="140" show-overflow-tooltip />
               <el-table-column prop="ip" label="IP" width="140" />
               <el-table-column prop="asset_type" label="类型" width="110">
@@ -89,7 +89,7 @@
                 </template>
               </el-table-column>
               <el-table-column prop="os_type" label="系统" width="80" />
-              <el-table-column label="操作" width="80" fixed="right">
+              <el-table-column label="操作" width="100" fixed="right">
                 <template #default="{ row }">
                   <el-popconfirm title="确认从此分组移除?" @confirm="removeMember(row.id)">
                     <template #reference>
@@ -110,7 +110,7 @@
     </el-row>
 
     <!-- 创建/编辑分组弹窗 -->
-    <el-dialog v-model="showFormDialog" :title="isEditing ? '编辑分组' : '新建分组'" width="500px">
+    <el-dialog v-model="showFormDialog" :title="isEditing ? '编辑分组' : '新建分组'" width="600px">
       <el-form :model="groupForm" label-width="80px" ref="groupFormRef" :rules="groupRules">
         <el-form-item label="名称" prop="name">
           <el-input v-model="groupForm.name" placeholder="输入分组名称" />
@@ -135,13 +135,11 @@
         :prefix-icon="Search"
         @input="searchAssets"
       />
-      <el-table
-        :data="availableAssets"
-        v-loading="assetSearchLoading"
-        stripe
-        max-height="400"
-        @selection-change="handleAssetSelection"
-      >
+      <el-table stripe
+ :data="availableAssets"
+ v-loading="assetSearchLoading"max-height="400"
+ @selection-change="handleAssetSelection"
+ >
         <el-table-column type="selection" width="45" />
         <el-table-column prop="name" label="名称" min-width="140" show-overflow-tooltip />
         <el-table-column prop="ip" label="IP" width="140" />
@@ -387,7 +385,7 @@ onMounted(() => {
   margin-bottom: 4px;
 }
 .group-item:hover {
-  background: #f5f7fa;
+  background: #f7f8fa;
 }
 .group-item.active {
   background: #ecf5ff;
@@ -413,7 +411,7 @@ onMounted(() => {
 .group-desc {
   margin-bottom: 12px;
   padding: 8px 12px;
-  background: #f5f7fa;
+  background: #f7f8fa;
   border-radius: 4px;
 }
 </style>

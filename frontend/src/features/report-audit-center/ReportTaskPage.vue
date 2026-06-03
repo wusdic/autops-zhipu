@@ -44,14 +44,12 @@
         </el-form>
 
         <!-- Table -->
-        <el-table
-          :data="tasks"
-          v-loading="loading"
-          stripe
-          border
-          row-key="id"
-          class="task-table"
-        >
+        <el-table stripe
+ :data="tasks"
+ v-loading="loading"border
+ row-key="id"
+ class="task-table"
+ >
           <el-table-column prop="title" label="报告名" min-width="180" show-overflow-tooltip />
           <el-table-column prop="template_name" label="模板" min-width="120" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="100" align="center">
@@ -75,7 +73,7 @@
           <el-table-column prop="completed_at" label="完成时间" width="170">
             <template #default="{ row }">{{ formatTime(row.completed_at) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="200" fixed="right" align="center">
+          <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
               <el-button
                 v-if="row.status === 'completed'"
@@ -126,7 +124,7 @@
     <el-dialog
       v-model="detailVisible"
       title="任务详情"
-      width="560px"
+      width="600px"
       destroy-on-close
     >
       <el-descriptions v-if="taskDetail" :column="2" border size="small">
@@ -147,7 +145,7 @@
         <el-descriptions-item label="创建时间" :span="2">{{ formatTime(taskDetail.created_at) }}</el-descriptions-item>
         <el-descriptions-item label="完成时间" :span="2">{{ formatTime(taskDetail.completed_at) }}</el-descriptions-item>
         <el-descriptions-item v-if="taskDetail.error_message" label="错误信息" :span="2">
-          <span style="color: #f56c6c">{{ taskDetail.error_message }}</span>
+          <span style="color: #f53f3f">{{ taskDetail.error_message }}</span>
         </el-descriptions-item>
       </el-descriptions>
       <template #footer>
@@ -336,17 +334,10 @@ onBeforeUnmount(() => {
 .main-card {
   border-radius: 8px;
 }
-
-.card-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {

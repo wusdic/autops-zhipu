@@ -57,15 +57,13 @@
     </el-tabs>
 
     <!-- ── Config Table ──────────────────────────────────── -->
-    <el-table
-      :data="filteredConfigs"
-      v-loading="loading"
-      stripe
-      border
-      style="width: 100%"
-      empty-text="暂无配置项"
-      row-key="id"
-    >
+    <el-table stripe
+ :data="filteredConfigs"
+ v-loading="loading"border
+ style="width: 100%"
+ empty-text="暂无配置项"
+ row-key="id"
+ >
       <el-table-column prop="key" label="参数 Key" width="280" sortable>
         <template #default="{ row }">
           <code class="config-key">{{ row.key }}</code>
@@ -115,7 +113,7 @@
 
       <el-table-column label="机密" width="70" align="center">
         <template #default="{ row }">
-          <el-icon v-if="row.is_secret" color="#E6A23C"><Lock /></el-icon>
+          <el-icon v-if="row.is_secret" color="#ff7d00"><Lock /></el-icon>
         </template>
       </el-table-column>
 
@@ -125,7 +123,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" width="160" fixed="right">
+      <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
           <el-button size="small" link type="primary" @click="openEditDialog(row)">编辑</el-button>
           <el-button size="small" link type="danger" @click="confirmDelete(row)">删除</el-button>
@@ -197,11 +195,11 @@
     <el-dialog
       v-model="deleteDialogVisible"
       title="确认删除"
-      width="420px"
+      width="480px"
       @closed="deleteTarget = null"
     >
       <div class="delete-confirm-body">
-        <el-icon :size="20" color="#F56C6C"><WarningFilled /></el-icon>
+        <el-icon :size="20" color="#f53f3f"><WarningFilled /></el-icon>
         <span>确定要删除配置项 <code>{{ deleteTarget?.key }}</code> 吗？此操作不可恢复。</span>
       </div>
       <template #footer>
@@ -519,19 +517,15 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
-}
-
 /* ── System Info Panel ─────────────────────── */
 .system-info-panel {
   display: flex;
   gap: 32px;
   padding: 16px 24px;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  background: linear-gradient(135deg, #f7f8fa 0%, #e8ecf1 100%);
   border-radius: 8px;
-  border: 1px solid #e4e7ed;
+  border: 1px solid #e5e6eb;
   flex-wrap: wrap;
 }
 .info-item {
@@ -542,18 +536,18 @@ onMounted(() => {
 }
 .info-label {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
 }
 .info-value {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   display: flex;
   align-items: center;
   gap: 4px;
 }
-.status-ok { color: #67C23A; }
-.status-warn { color: #E6A23C; }
+.status-ok { color: #00b42a; }
+.status-warn { color: #ff7d00; }
 
 /* ── Action Bar ──────────────────────────── */
 .header-actions {
@@ -584,10 +578,10 @@ onMounted(() => {
 /* ── Table ────────────────────────────────── */
 .config-key {
   font-size: 13px;
-  background: #f5f7fa;
+  background: #f7f8fa;
   padding: 2px 6px;
   border-radius: 3px;
-  color: #303133;
+  color: #1d2129;
 }
 
 /* ── Inline Edit ──────────────────────────── */
@@ -619,7 +613,7 @@ onMounted(() => {
   background: #fef0f0;
   padding: 2px 6px;
   border-radius: 3px;
-  color: #F56C6C;
+  color: #f53f3f;
   font-weight: 600;
 }
 </style>

@@ -17,7 +17,7 @@
         </div>
       </template>
 
-      <el-table :data="exports" v-loading="loading" stripe border>
+      <el-table stripe :data="exports" v-loading="loading"border>
         <el-table-column prop="name" label="导出名称" min-width="180" />
         <el-table-column prop="type" label="导出类型" width="120">
           <template #default="{ row }">
@@ -48,7 +48,7 @@
           <template #default="{ row }">{{ row.file_size ? formatSize(row.file_size) : '-' }}</template>
         </el-table-column>
         <el-table-column prop="created_at" label="创建时间" width="180" />
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button v-if="row.status === 'completed'" link type="primary" @click="downloadExport(row)">下载</el-button>
             <el-button v-if="row.status === 'processing'" link type="danger" @click="cancelExport(row)">取消</el-button>
@@ -63,7 +63,7 @@
     </el-card>
 
     <!-- 新建导出弹窗 -->
-    <el-dialog v-model="dialogVisible" title="新建导出任务" width="500px">
+    <el-dialog v-model="dialogVisible" title="新建导出任务" width="600px">
       <el-form :model="form" label-width="100px">
         <el-form-item label="导出名称">
           <el-input v-model="form.name" placeholder="输入导出任务名称" />

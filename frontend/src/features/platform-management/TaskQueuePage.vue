@@ -51,15 +51,13 @@
     </el-row>
 
     <!-- ── Table ────────────────────────────────────────── -->
-    <el-table
-      :data="tasks"
-      v-loading="loading"
-      stripe
-      border
-      row-key="id"
-      empty-text="暂无任务"
-      style="width: 100%"
-    >
+    <el-table stripe
+ :data="tasks"
+ v-loading="loading"border
+ row-key="id"
+ empty-text="暂无任务"
+ style="width: 100%"
+ >
       <el-table-column prop="name" label="任务名" min-width="180" show-overflow-tooltip>
         <template #default="{ row }">
           <span class="task-name">{{ row.name || row.description }}</span>
@@ -133,7 +131,7 @@
           <span>{{ row.retries ?? 0 }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="160" fixed="right" align="center">
+      <el-table-column label="操作" width="180" fixed="right" align="center">
         <template #default="{ row }">
           <el-button
             v-if="row.status === 'failed'"
@@ -361,9 +359,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
-}
 .autops-page-header {
   display: flex;
   justify-content: space-between;
@@ -414,10 +409,6 @@ onMounted(() => {
   color: #86909c;
   font-size: 12px;
 }
-.text-danger {
-  color: #f53f3f;
-}
-
 .pagination-wrap {
   display: flex;
   justify-content: flex-end;

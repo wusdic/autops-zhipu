@@ -16,7 +16,7 @@ const props = withDefaults(defineProps<{
   multiple?: Array<{ name: string; data: Array<{ time: string; value: number }>; color: string }>
 }>(), {
   height: '300px',
-  color: '#409EFF',
+  color: '#165dff',
   unit: '',
   chartType: 'line',
 })

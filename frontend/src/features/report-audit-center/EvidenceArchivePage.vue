@@ -62,7 +62,7 @@
         </div>
       </template>
 
-      <el-table v-loading="loading" :data="filteredData" stripe border style="width: 100%">
+      <el-table stripe v-loading="loading" :data="filteredData"border style="width: 100%">
         <el-table-column type="index" label="#" width="50" align="center" />
         <el-table-column prop="evidence_type" label="证据类型" width="100" align="center">
           <template #default="{ row }">
@@ -91,7 +91,7 @@
             {{ row.collected_by || '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" align="center" fixed="right">
+        <el-table-column label="操作" width="100" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleViewDetail(row)">查看</el-button>
           </template>
@@ -368,22 +368,22 @@ onMounted(() => {
 }
 .detail-content-section h4 {
   margin-bottom: 8px;
-  color: #303133;
+  color: #1d2129;
   font-size: 14px;
 }
 .summary-box {
-  background: #f5f7fa;
-  border: 1px solid #ebeef5;
+  background: #f7f8fa;
+  border: 1px solid #e5e6eb;
   border-radius: 4px;
   padding: 12px;
   font-size: 13px;
   line-height: 1.6;
-  color: #606266;
+  color: #4e5969;
   word-break: break-all;
 }
 .raw-content {
   background: #1e1e1e;
-  color: #d4d4d4;
+  color: #c9cdd4;
   border-radius: 4px;
   padding: 12px;
   font-size: 12px;

@@ -65,13 +65,11 @@
 
     <!-- Data Table -->
     <el-card shadow="never" class="table-card">
-      <el-table
-        :data="agents"
-        stripe
-        v-loading="loading"
-        empty-text="暂无 Agent 数据"
-        @sort-change="handleSortChange"
-      >
+      <el-table stripe
+ :data="agents"v-loading="loading"
+ empty-text="暂无 Agent 数据"
+ @sort-change="handleSortChange"
+ >
         <el-table-column prop="name" label="Agent 名称" min-width="150" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="agent-name-cell">
@@ -136,7 +134,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="160" fixed="right" align="center">
+        <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="viewDetail(row)">详情</el-button>
             <el-button text type="warning" size="small" @click="restartAgent(row)">重启</el-button>
@@ -354,10 +352,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
-}
-
 .filter-card {
   margin-bottom: 16px;
 }

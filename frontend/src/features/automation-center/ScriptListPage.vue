@@ -112,7 +112,7 @@
     </div>
 
       <!-- 脚本列表表格 -->
-      <el-table :data="scripts" v-loading="loading" stripe row-key="id">
+      <el-table stripe :data="scripts" v-loading="loading"row-key="id">
         <el-table-column prop="name" label="名称" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="script-name-link" @click="openDetailDrawer(row)">{{ row.name }}</span>
@@ -160,7 +160,7 @@
         <el-table-column prop="created_at" label="创建时间" width="170">
           <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="280" fixed="right">
+        <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="openDetailDrawer(row)">详情</el-button>
             <el-button size="small" @click="openEditDialog(row)">编辑</el-button>
@@ -288,7 +288,7 @@
         <!-- 参数定义 -->
         <el-form-item label="参数定义">
           <div class="params-section">
-            <el-table :data="formData.parameters" size="small" border style="width: 100%">
+            <el-table stripe  :data="formData.parameters" size="small" border style="width: 100%">
               <el-table-column prop="name" label="参数名" min-width="120">
                 <template #default="{ row }">
                   <el-input v-model="row.name" size="small" placeholder="参数名" />
@@ -321,7 +321,7 @@
                   <el-input v-model="row.description" size="small" placeholder="参数说明" />
                 </template>
               </el-table-column>
-              <el-table-column label="操作" width="70" align="center">
+              <el-table-column label="操作" width="100" align="center">
                 <template #default="{ $index }">
                   <el-button type="danger" size="small" link @click="removeParam($index)">
                     <el-icon><Delete /></el-icon>
@@ -400,13 +400,11 @@
         <!-- 参数列表 -->
         <div class="detail-section">
           <h4 class="detail-subtitle">参数列表</h4>
-          <el-table
-            v-if="(currentScript.parameters || []).length"
-            :data="currentScript.parameters"
-            size="small"
-            border
-            stripe
-          >
+          <el-table stripe
+ v-if="(currentScript.parameters || []).length"
+ :data="currentScript.parameters"
+ size="small"
+ border>
             <el-table-column prop="name" label="参数名" min-width="120" />
             <el-table-column prop="type" label="类型" width="90" />
             <el-table-column prop="default_value" label="默认值" min-width="100">
@@ -429,15 +427,13 @@
         <!-- 版本历史 -->
         <div class="detail-section">
           <h4 class="detail-subtitle">版本历史</h4>
-          <el-table
-            v-if="versionHistory.length"
-            :data="versionHistory"
-            v-loading="versionLoading"
-            size="small"
-            border
-            stripe
-            max-height="220"
-          >
+          <el-table stripe
+ v-if="versionHistory.length"
+ :data="versionHistory"
+ v-loading="versionLoading"
+ size="small"
+ bordermax-height="220"
+ >
             <el-table-column prop="version" label="版本" width="80" align="center">
               <template #default="{ row }">v{{ row.version }}</template>
             </el-table-column>
@@ -454,15 +450,13 @@
         <!-- 关联 Playbook -->
         <div class="detail-section">
           <h4 class="detail-subtitle">关联 Playbook</h4>
-          <el-table
-            v-if="relatedPlaybooks.length"
-            :data="relatedPlaybooks"
-            v-loading="playbookLoading"
-            size="small"
-            border
-            stripe
-            max-height="220"
-          >
+          <el-table stripe
+ v-if="relatedPlaybooks.length"
+ :data="relatedPlaybooks"
+ v-loading="playbookLoading"
+ size="small"
+ bordermax-height="220"
+ >
             <el-table-column prop="name" label="名称" min-width="180" show-overflow-tooltip />
             <el-table-column prop="status" label="状态" width="100">
               <template #default="{ row }">
@@ -486,7 +480,7 @@
     </el-drawer>
 
     <!-- ========== 删除确认对话框 (带使用检查) ========== -->
-    <el-dialog v-model="showDeleteDialog" title="确认删除" width="500px" destroy-on-close>
+    <el-dialog v-model="showDeleteDialog" title="确认删除" width="600px" destroy-on-close>
       <template v-if="deletingScript">
         <p>确定删除脚本 <strong>{{ deletingScript.name }}</strong> ？</p>
         <div v-if="deleteUsage.playbookCount > 0" class="delete-warning">
@@ -971,46 +965,22 @@ onMounted(() => {
 .stat-row {
   margin-bottom: 16px;
 }
-
-.stat-card {
-  text-align: center;
-  padding: 8px 0;
-}
-
-.stat-card .stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #303133;
-  line-height: 1.3;
-}
-
-.stat-card .stat-label {
-  font-size: 13px;
-  color: #909399;
-  margin-top: 4px;
-}
-
-.stat-shell .stat-value { color: #409eff; }
-.stat-python .stat-value { color: #67c23a; }
-.stat-powershell .stat-value { color: #e6a23c; }
-.stat-sql .stat-value { color: #f56c6c; }
-.stat-rest .stat-value { color: #909399; }
+.stat-card 
+.stat-card 
+.stat-shell .stat-value { color: #165dff; }
+.stat-python .stat-value { color: #00b42a; }
+.stat-powershell .stat-value { color: #ff7d00; }
+.stat-sql .stat-value { color: #f53f3f; }
+.stat-rest .stat-value { color: #86909c; }
 
 /* ---- Section ---- */
 .section-card {
   margin-bottom: 20px;
 }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
 }
 
 .header-actions {
@@ -1029,7 +999,7 @@ onMounted(() => {
 
 /* ---- Table ---- */
 .script-name-link {
-  color: #409eff;
+  color: #165dff;
   cursor: pointer;
   font-weight: 500;
 }
@@ -1041,7 +1011,7 @@ onMounted(() => {
 .version-text {
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 12px;
-  color: #606266;
+  color: #4e5969;
 }
 
 .tag-list {
@@ -1070,11 +1040,11 @@ onMounted(() => {
 }
 
 .script-editor-wrapper:focus-within {
-  border-color: #409eff;
+  border-color: #165dff;
 }
 
 .line-numbers {
-  background: #f5f7fa;
+  background: #f7f8fa;
   padding: 8px 0;
   min-width: 40px;
   text-align: right;
@@ -1087,7 +1057,7 @@ onMounted(() => {
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 13px;
   line-height: 21px;
-  color: #c0c4cc;
+  color: #c9cdd4;
   padding-right: 8px;
 }
 
@@ -1126,10 +1096,10 @@ onMounted(() => {
 .detail-subtitle {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   margin-bottom: 10px;
   padding-bottom: 6px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .code-container {
@@ -1163,7 +1133,7 @@ onMounted(() => {
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 12px;
   line-height: 20px;
-  color: #d4d4d4;
+  color: #c9cdd4;
   margin: 0;
   padding: 12px 16px;
   white-space: pre;
@@ -1172,14 +1142,14 @@ onMounted(() => {
 }
 
 .text-muted {
-  color: #909399;
+  color: #86909c;
   font-size: 13px;
 }
 
 .drawer-footer {
   margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid #ebeef5;
+  border-top: 1px solid #e5e6eb;
   display: flex;
   gap: 8px;
 }

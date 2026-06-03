@@ -61,10 +61,8 @@
       <div class="autops-card-header">
                 <span>执行步骤</span>
       </div>
-      <el-table
-        :data="steps"
-        stripe
-        v-if="steps.length > 0"
+      <el-table stripe
+ :data="steps"v-if="steps.length > 0"
         row-key="id"
         @row-click="toggleStepExpand"
         :row-class-name="stepRowClass"
@@ -142,7 +140,7 @@
           <pre style="margin: 0; font-family: monospace; font-size: 13px; white-space: pre-wrap">{{ execution.result_detail }}</pre>
         </el-descriptions-item>
         <el-descriptions-item label="错误信息" v-if="execution.error_message">
-          <span style="color: #f56c6c">{{ execution.error_message }}</span>
+          <span style="color: #f53f3f">{{ execution.error_message }}</span>
         </el-descriptions-item>
       </el-descriptions>
     </div>
@@ -169,7 +167,7 @@
             {{ verification.checks?.length || 0 }}
           </el-descriptions-item>
         </el-descriptions>
-        <el-table
+        <el-table stripe
           v-if="verification.checks && verification.checks.length > 0"
           :data="verification.checks"
           stripe
@@ -192,7 +190,7 @@
     </div>
 
     <!-- Rollback Dialog -->
-    <el-dialog v-model="showRollbackDialog" title="选择回滚脚本/Playbook" width="560px" destroy-on-close>
+    <el-dialog v-model="showRollbackDialog" title="选择回滚脚本/Playbook" width="600px" destroy-on-close>
       <el-form label-width="100px">
         <el-form-item label="回滚类型">
           <el-radio-group v-model="rollbackType">
@@ -511,11 +509,6 @@ watch(
 </script>
 
 <style scoped>
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 .header-actions {
   display: flex;
   gap: 8px;
@@ -531,7 +524,7 @@ watch(
   margin: 0;
   font-family: 'Courier New', Courier, monospace;
   font-size: 13px;
-  color: #d4d4d4;
+  color: #c9cdd4;
   white-space: pre-wrap;
   word-break: break-all;
 }

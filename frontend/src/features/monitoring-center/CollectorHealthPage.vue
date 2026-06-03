@@ -59,14 +59,12 @@
       </div>
       <div class="autops-card-body">
         <!-- ========== Table ========== -->
-        <el-table
-          :data="tableData"
-          v-loading="loading"
-          stripe
-          border
-          empty-text="暂无数据"
-          class="health-table"
-        >
+        <el-table stripe
+ :data="tableData"
+ v-loading="loading"border
+ empty-text="暂无数据"
+ class="health-table"
+ >
           <el-table-column prop="collector_name" label="采集器名称" min-width="160" show-overflow-tooltip />
           <el-table-column prop="collector_type" label="类型" min-width="120" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="100" align="center">
@@ -118,7 +116,7 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="80" fixed="right" align="center">
+          <el-table-column label="操作" width="100" fixed="right" align="center">
             <template #default="{ row }">
               <el-button size="small" type="primary" link @click="viewDetail(row)">详情</el-button>
             </template>
@@ -267,12 +265,6 @@ onMounted(() => {
 .stats-row {
   margin-bottom: 16px;
 }
-
-.stat-card {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
 .stat-card__body {
   display: flex;
   align-items: center;
@@ -302,32 +294,32 @@ onMounted(() => {
 
 .stat-card__label {
   font-size: 13px;
-  color: #909399;
+  color: #86909c;
   margin-top: 4px;
 }
 
 .stat-card--healthy .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
-  color: #67c23a;
+  color: #00b42a;
 }
 .stat-card--healthy .stat-card__value {
-  color: #67c23a;
+  color: #00b42a;
 }
 
 .stat-card--degraded .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
-  color: #e6a23c;
+  color: #ff7d00;
 }
 .stat-card--degraded .stat-card__value {
-  color: #e6a23c;
+  color: #ff7d00;
 }
 
 .stat-card--down .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
-  color: #f56c6c;
+  color: #f53f3f;
 }
 .stat-card--down .stat-card__value {
-  color: #f56c6c;
+  color: #f53f3f;
 }
 
 /* ── Main Card ── */
@@ -349,19 +341,19 @@ onMounted(() => {
 }
 
 .rate-good {
-  color: #67c23a;
+  color: #00b42a;
 }
 
 .rate-warn {
-  color: #e6a23c;
+  color: #ff7d00;
 }
 
 .rate-bad {
-  color: #f56c6c;
+  color: #f53f3f;
 }
 
 .text-danger {
-  color: #f56c6c;
+  color: #f53f3f;
   font-weight: 500;
 }
 </style>

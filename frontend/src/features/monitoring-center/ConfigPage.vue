@@ -32,7 +32,7 @@
       </div>
       <div class="autops-card-body">
 
-      <el-table :data="configs" v-loading="loading" stripe row-key="id">
+      <el-table stripe :data="configs" v-loading="loading"row-key="id">
         <el-table-column prop="name" label="配置名称" min-width="180" show-overflow-tooltip />
         <el-table-column prop="schema_def" label="Schema定义" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
@@ -66,7 +66,7 @@
         <el-table-column prop="updated_at" label="更新时间" width="170">
           <template #default="{ row }">{{ formatTime(row.updated_at) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="260" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="openEditDialog(row)">编辑</el-button>
             <el-button size="small" type="warning" @click="openHistoryDialog(row)">历史</el-button>
@@ -139,11 +139,11 @@
     <el-dialog
       v-model="showHistoryDialog"
       :title="`版本历史 - ${historyConfigName}`"
-      width="900px"
+      width="780px"
       destroy-on-close
     >
       <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
-        <span style="color:#909399;font-size:13px">点击行查看详情，选择两个版本进行对比</span>
+        <span style="color:#86909c;font-size:13px">点击行查看详情，选择两个版本进行对比</span>
         <el-button
           type="primary"
           size="small"
@@ -154,17 +154,15 @@
         </el-button>
       </div>
 
-      <el-table
-        :data="versions"
-        v-loading="versionsLoading"
-        stripe
-        row-key="id"
-        size="small"
-        @row-click="previewVersion"
-        highlight-current-row
-        @selection-change="handleVersionSelection"
-        ref="versionTableRef"
-      >
+      <el-table stripe
+ :data="versions"
+ v-loading="versionsLoading"row-key="id"
+ size="small"
+ @row-click="previewVersion"
+ highlight-current-row
+ @selection-change="handleVersionSelection"
+ ref="versionTableRef"
+ >
         <el-table-column type="selection" width="45" :selectable="(row: any) => true" />
         <el-table-column prop="version" label="版本" width="80" align="center">
           <template #default="{ row }">
@@ -190,7 +188,7 @@
         <el-table-column prop="created_at" label="创建时间" width="170">
           <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" width="100" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="!row.is_active"
@@ -207,9 +205,9 @@
 
       <!-- 版本详情预览 -->
       <div v-if="previewData" style="margin-top:16px">
-        <h4 style="font-size:13px;color:#606266;margin-bottom:8px">
+        <h4 style="font-size:13px;color:#4e5969;margin-bottom:8px">
           版本详情 - v{{ previewData.version }}
-          <span v-if="previewData.version_note" style="color:#909399;margin-left:8px">
+          <span v-if="previewData.version_note" style="color:#86909c;margin-left:8px">
             {{ previewData.version_note }}
           </span>
         </h4>
@@ -225,7 +223,7 @@
       width="960px"
       destroy-on-close
     >
-      <div v-if="diffLeft && diffRight" style="margin-bottom:12px;color:#909399;font-size:13px">
+      <div v-if="diffLeft && diffRight" style="margin-bottom:12px;color:#86909c;font-size:13px">
         对比: v{{ diffLeft.version }} → v{{ diffRight.version }}
       </div>
       <ConfigDiffView
@@ -241,12 +239,12 @@
     <el-dialog
       v-model="showBindingDialog"
       :title="`配置绑定 - ${bindingConfigName}`"
-      width="700px"
+      width="780px"
       destroy-on-close
     >
       <el-tabs>
         <el-tab-pane label="关联资产">
-          <el-table :data="boundAssets" v-loading="bindingLoading" size="small" stripe max-height="300">
+          <el-table stripe :data="boundAssets" v-loading="bindingLoading" size="small"max-height="300">
             <el-table-column prop="name" label="资产名称" min-width="140" show-overflow-tooltip />
             <el-table-column prop="ip" label="IP" width="140" />
             <el-table-column prop="asset_type" label="类型" width="100">
@@ -258,7 +256,7 @@
           <el-empty v-if="!bindingLoading && !boundAssets.length" description="暂无关联资产" :image-size="60" />
         </el-tab-pane>
         <el-tab-pane label="关联策略">
-          <el-table :data="boundPolicies" v-loading="bindingLoading" size="small" stripe max-height="300">
+          <el-table stripe :data="boundPolicies" v-loading="bindingLoading" size="small"max-height="300">
             <el-table-column prop="name" label="策略名称" min-width="160" show-overflow-tooltip />
             <el-table-column prop="policy_type" label="类型" width="120">
               <template #default="{ row }">
@@ -626,8 +624,8 @@ onMounted(() => loadConfigs())
 
 <style scoped>
 .config-page .value-preview {
-  background: #f5f7fa;
-  border: 1px solid #e4e7ed;
+  background: #f7f8fa;
+  border: 1px solid #e5e6eb;
   border-radius: 4px;
   padding: 12px;
   font-size: 13px;

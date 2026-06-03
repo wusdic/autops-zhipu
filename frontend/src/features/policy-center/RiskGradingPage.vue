@@ -36,7 +36,7 @@
 
     <!-- Data Table -->
     <el-card shadow="never" class="table-card">
-      <el-table v-loading="loading" :data="tableData" stripe border style="width: 100%">
+      <el-table stripe v-loading="loading" :data="tableData"border style="width: 100%">
         <el-table-column prop="name" label="策略名" min-width="180" show-overflow-tooltip />
         <el-table-column prop="action_type" label="动作类型" width="120" align="center">
           <template #default="{ row }">
@@ -97,7 +97,7 @@
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="520px"
+      width="600px"
       destroy-on-close
     >
       <el-form
@@ -119,26 +119,26 @@
           <el-select v-model="dialogForm.risk_level" placeholder="请选择风险等级" style="width: 100%">
             <el-option label="严重 (Critical)" value="critical">
               <div style="display: flex; align-items: center; gap: 8px">
-                <el-tag color="#f56c6c" effect="dark" size="small" style="border-color: transparent">严重</el-tag>
-                <span style="color: #909399; font-size: 12px">需要立即响应</span>
+                <el-tag color="#f53f3f" effect="dark" size="small" style="border-color: transparent">严重</el-tag>
+                <span style="color: #86909c; font-size: 12px">需要立即响应</span>
               </div>
             </el-option>
             <el-option label="高 (High)" value="high">
               <div style="display: flex; align-items: center; gap: 8px">
-                <el-tag color="#e6a23c" effect="dark" size="small" style="border-color: transparent">高</el-tag>
-                <span style="color: #909399; font-size: 12px">需要优先处理</span>
+                <el-tag color="#ff7d00" effect="dark" size="small" style="border-color: transparent">高</el-tag>
+                <span style="color: #86909c; font-size: 12px">需要优先处理</span>
               </div>
             </el-option>
             <el-option label="中 (Medium)" value="medium">
               <div style="display: flex; align-items: center; gap: 8px">
-                <el-tag color="#409eff" effect="dark" size="small" style="border-color: transparent">中</el-tag>
-                <span style="color: #909399; font-size: 12px">需要关注</span>
+                <el-tag color="#165dff" effect="dark" size="small" style="border-color: transparent">中</el-tag>
+                <span style="color: #86909c; font-size: 12px">需要关注</span>
               </div>
             </el-option>
             <el-option label="低 (Low)" value="low">
               <div style="display: flex; align-items: center; gap: 8px">
-                <el-tag color="#909399" effect="dark" size="small" style="border-color: transparent">低</el-tag>
-                <span style="color: #909399; font-size: 12px">常规记录</span>
+                <el-tag color="#86909c" effect="dark" size="small" style="border-color: transparent">低</el-tag>
+                <span style="color: #86909c; font-size: 12px">常规记录</span>
               </div>
             </el-option>
           </el-select>
@@ -272,12 +272,12 @@ function actionLabel(type: string): string {
 
 function riskColor(level: string): string {
   const map: Record<string, string> = {
-    critical: '#f56c6c',
-    high: '#e6a23c',
-    medium: '#409eff',
-    low: '#909399',
+    critical: '#f53f3f',
+    high: '#ff7d00',
+    medium: '#165dff',
+    low: '#86909c',
   }
-  return map[level] || '#909399'
+  return map[level] || '#86909c'
 }
 
 function riskLabel(level: string): string {

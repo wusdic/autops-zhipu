@@ -37,7 +37,7 @@
     </el-card>
 
     <el-card class="mt-4" shadow="never">
-      <el-table :data="templates" v-loading="loading" stripe border>
+      <el-table stripe :data="templates" v-loading="loading"border>
         <el-table-column type="selection" width="50" />
         <el-table-column prop="name" label="模板名称" min-width="200" sortable />
         <el-table-column prop="scenario" label="适用场景" width="140">
@@ -61,7 +61,7 @@
         <el-table-column prop="usage_count" label="使用次数" width="100" />
         <el-table-column prop="success_rate" label="成功率" width="100">
           <template #default="{ row }">
-            <span :style="{ color: row.success_rate >= 90 ? '#67C23A' : row.success_rate >= 70 ? '#E6A23C' : '#F56C6C' }">
+            <span :style="{ color: row.success_rate >= 90 ? '#00b42a' : row.success_rate >= 70 ? '#ff7d00' : '#f53f3f' }">
               {{ row.success_rate ?? '-' }}%
             </span>
           </template>
@@ -81,7 +81,7 @@
     </el-card>
 
     <!-- 新建/编辑 -->
-    <el-dialog v-model="dialogVisible" :title="editing ? '编辑处置模板' : '新建处置模板'" width="750px" destroy-on-close>
+    <el-dialog v-model="dialogVisible" :title="editing ? '编辑处置模板' : '新建处置模板'" width="780px" destroy-on-close>
       <el-form :model="form" label-width="100px" :rules="formRules" ref="formRef">
         <el-form-item label="模板名称" prop="name">
           <el-input v-model="form.name" />
@@ -224,5 +224,5 @@ onMounted(loadData)
 .mt-4 { margin-top: 16px; }
 .step-item { margin-bottom: 8px; }
 .ml-2 { margin-left: 8px; }
-.text-muted { color: #909399; }
+.text-muted { color: #86909c; }
 </style>

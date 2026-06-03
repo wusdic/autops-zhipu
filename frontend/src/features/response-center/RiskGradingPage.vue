@@ -58,7 +58,7 @@
 
     <!-- 风险列表 -->
     <div class="autops-card">
-      <el-table :data="filteredItems" v-loading="loading" stripe class="autops-table">
+      <el-table stripe :data="filteredItems" v-loading="loading"class="autops-table">
         <el-table-column type="selection" width="45" />
         <el-table-column prop="asset_name" label="资产名称" min-width="160" show-overflow-tooltip sortable />
         <el-table-column prop="asset_type" label="资产类型" width="120">
@@ -86,7 +86,7 @@
         <el-table-column prop="assessed_at" label="评估时间" width="170" sortable>
           <template #default="{ row }">{{ formatTime(row.assessed_at) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" width="100" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="showDetail(row)">详情</el-button>
           </template>
@@ -253,7 +253,6 @@ onMounted(fetchData)
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
 .risk-matrix { display: flex; align-items: center; padding: 16px; }
 .matrix-y-label { writing-mode: vertical-lr; text-orientation: mixed; font-size: 12px; color: #86909c; margin-right: 8px; }
 .matrix-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 4px; flex: 1; }

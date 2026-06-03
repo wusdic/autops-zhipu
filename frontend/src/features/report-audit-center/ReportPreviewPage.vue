@@ -64,13 +64,11 @@
 
           <!-- Table Section -->
           <template v-else-if="section.type === 'table'">
-            <el-table
-              :data="section.rows || []"
-              stripe
-              border
-              size="small"
-              class="section-table"
-            >
+            <el-table stripe
+ :data="section.rows || []"border
+ size="small"
+ class="section-table"
+ >
               <el-table-column
                 v-for="(col, ci) in section.columns || []"
                 :key="ci"

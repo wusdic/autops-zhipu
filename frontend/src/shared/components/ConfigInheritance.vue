@@ -41,7 +41,7 @@
         <el-table-column label="覆盖链" min-width="200">
           <template #default="{ row }">
             <span v-for="(s,i) in row.chain" :key="i">
-              {{ s }}<span v-if="i < row.chain.length - 1" style="color:#909399"> → </span>
+              {{ s }}<span v-if="i < row.chain.length - 1" style="color:#86909c"> → </span>
             </span>
           </template>
         </el-table-column>
@@ -74,8 +74,8 @@ const activeLevel = ref(-1)
 const overrides = ref<Record<string, any>>({})
 
 const levelColor = (idx: number) => {
-  const colors = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#9b59b6']
-  return colors[idx] || '#909399'
+  const colors = ['#165dff', '#00b42a', '#ff7d00', '#f53f3f', '#722ed1']
+  return colors[idx] || '#86909c'
 }
 
 function getOverriddenValue(key: string) {
@@ -130,14 +130,14 @@ watch(() => [props.assetId, props.groupId, props.configType], () => { loadInheri
 .config-inheritance { margin-top: 12px; }
 .inheritance-chain { padding-left: 8px; }
 .inheritance-level { display: flex; gap: 12px; margin-bottom: 0; }
-.inheritance-level.active .level-content { border-color: #409eff; }
+.inheritance-level.active .level-content { border-color: #165dff; }
 .level-indicator { display: flex; flex-direction: column; align-items: center; width: 20px; flex-shrink: 0; }
 .level-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #dcdfe6; }
 .level-line { width: 2px; flex: 1; background: #dcdfe6; margin: 4px 0; min-height: 20px; }
-.level-content { flex: 1; padding: 8px 12px; border: 1px solid #ebeef5; border-radius: 4px; margin-bottom: 8px; background: #fff; }
+.level-content { flex: 1; padding: 8px 12px; border: 1px solid #e5e6eb; border-radius: 4px; margin-bottom: 8px; background: #fff; }
 .level-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .level-name { font-weight: 500; font-size: 13px; }
 .level-values { margin-top: 4px; }
-.old-value { color: #f56c6c; text-decoration: line-through; margin-right: 6px; }
-.new-value { color: #67c23a; font-weight: 500; }
+.old-value { color: #f53f3f; text-decoration: line-through; margin-right: 6px; }
+.new-value { color: #00b42a; font-weight: 500; }
 </style>

@@ -4,7 +4,7 @@
       <el-button size="small" @click="copyJson">复制</el-button>
       <el-button size="small" @click="expanded = !expanded">{{ expanded ? '收起' : '展开' }}</el-button>
     </div>
-    <pre :style="{ background: '#f5f7fa', padding: '12px', borderRadius: '6px', fontSize: '13px', maxHeight: expanded ? 'none' : '400px', overflow: 'auto' }">{{ formattedJson }}</pre>
+    <pre :style="{ background: '#f7f8fa', padding: '12px', borderRadius: '6px', fontSize: '13px', maxHeight: expanded ? 'none' : '400px', overflow: 'auto' }">{{ formattedJson }}</pre>
   </div>
 </template>
 

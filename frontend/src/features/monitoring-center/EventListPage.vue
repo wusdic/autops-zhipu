@@ -151,17 +151,15 @@
       </el-form>
 
       <!-- ========== Event Table ========== -->
-      <el-table
-        ref="tableRef"
-        :data="events"
-        v-loading="loading"
-        stripe
-        border
-        row-key="id"
-        class="event-table"
-        @row-click="handleRowClick"
-        :row-class-name="rowClassName"
-      >
+      <el-table stripe
+ ref="tableRef"
+ :data="events"
+ v-loading="loading"border
+ row-key="id"
+ class="event-table"
+ @row-click="handleRowClick"
+ :row-class-name="rowClassName"
+ >
         <el-table-column type="expand">
           <template #default="{ row }">
             <div class="expand-content">
@@ -233,7 +231,7 @@
             <el-tag size="small" :type="eventTypeTagType(row.event_type)">{{ eventTypeLabel(row.event_type) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="140" fixed="right" align="center">
+        <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button size="small" type="primary" link @click.stop="openDetailDrawer(row)">详情</el-button>
             <el-button size="small" link @click.stop="viewRelatedEvents(row)">关联</el-button>
@@ -307,7 +305,7 @@
             <template #label>
               <span>关联告警 <el-badge :value="relatedAlerts.length" :max="99" class="tab-badge" /></span>
             </template>
-            <el-table :data="relatedAlerts" v-loading="relatedLoading" stripe size="small" max-height="400">
+            <el-table stripe :data="relatedAlerts" v-loading="relatedLoading"size="small" max-height="400">
               <el-table-column prop="severity" label="级别" width="80" align="center">
                 <template #default="{ row }">
                   <SeverityBadge :severity="row.severity" size="small" />
@@ -377,13 +375,11 @@
         </el-descriptions>
 
         <h4 style="margin-bottom: 8px">相关事件 (同一资产 / 相似来源)</h4>
-        <el-table
-          :data="correlatedEvents"
-          v-loading="correlationLoading"
-          stripe
-          size="small"
-          max-height="400"
-        >
+        <el-table stripe
+ :data="correlatedEvents"
+ v-loading="correlationLoading"size="small"
+ max-height="400"
+ >
           <el-table-column prop="created_at" label="时间" width="160">
             <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
           </el-table-column>
@@ -886,12 +882,6 @@ onBeforeUnmount(() => {
 .stats-row {
   margin-bottom: 16px;
 }
-
-.stat-card {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
 .stat-card__body {
   display: flex;
   align-items: center;
@@ -921,68 +911,51 @@ onBeforeUnmount(() => {
 
 .stat-card__label {
   font-size: 13px;
-  color: #909399;
+  color: #86909c;
   margin-top: 4px;
 }
 
 .stat-card--total .stat-card__icon {
   background: rgba(64, 158, 255, 0.12);
-  color: #409eff;
+  color: #165dff;
 }
 .stat-card--total .stat-card__value {
-  color: #409eff;
+  color: #165dff;
 }
 
 .stat-card--today .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
-  color: #67c23a;
+  color: #00b42a;
 }
 .stat-card--today .stat-card__value {
-  color: #67c23a;
+  color: #00b42a;
 }
 
 .stat-card--pending .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
-  color: #e6a23c;
+  color: #ff7d00;
 }
 .stat-card--pending .stat-card__value {
-  color: #e6a23c;
+  color: #ff7d00;
 }
 
 .stat-card--critical .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
-  color: #f56c6c;
+  color: #f53f3f;
 }
 .stat-card--critical .stat-card__value {
-  color: #f56c6c;
+  color: #f53f3f;
 }
 
 /* ── Main Card ── */
 .main-card {
   border-radius: 8px;
 }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-header__title {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.card-header__actions {
-  display: flex;
-  align-items: center;
-}
-
 /* ── Filter Form ── */
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {
@@ -1009,7 +982,7 @@ onBeforeUnmount(() => {
 .time-cell {
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 13px;
-  color: #606266;
+  color: #4e5969;
 }
 
 /* ── Expand Content ── */
@@ -1018,12 +991,12 @@ onBeforeUnmount(() => {
 }
 
 .expand-description {
-  background: #f5f7fa;
+  background: #f7f8fa;
   padding: 12px;
   border-radius: 6px;
   font-size: 13px;
   line-height: 1.6;
-  color: #606266;
+  color: #4e5969;
   white-space: pre-wrap;
   word-break: break-all;
 }
@@ -1048,7 +1021,7 @@ onBeforeUnmount(() => {
 }
 
 .log-item {
-  background: #f5f7fa;
+  background: #f7f8fa;
   border-radius: 6px;
   padding: 10px 12px;
 }
@@ -1062,13 +1035,13 @@ onBeforeUnmount(() => {
 
 .log-item__time {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
 }
 
 .log-item__message {
   font-size: 13px;
-  color: #303133;
+  color: #1d2129;
   white-space: pre-wrap;
   word-break: break-all;
   line-height: 1.5;

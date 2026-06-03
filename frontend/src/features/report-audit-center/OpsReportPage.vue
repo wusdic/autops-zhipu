@@ -25,7 +25,7 @@
 
     <!-- 报告列表 -->
     <div class="autops-card">
-      <el-table :data="reports" v-loading="loading" stripe class="autops-table">
+      <el-table stripe :data="reports" v-loading="loading"class="autops-table">
         <el-table-column prop="title" label="报告名称" min-width="200" show-overflow-tooltip sortable />
         <el-table-column prop="report_type" label="类型" width="100">
           <template #default="{ row }">
@@ -55,7 +55,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="created_at" label="生成时间" width="170" sortable />
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="viewReport(row)" :disabled="row.status !== 'completed'">查看</el-button>
             <el-button link type="success" @click="downloadReport(row)" :disabled="row.status !== 'completed'">下载</el-button>
@@ -68,7 +68,7 @@
     </div>
 
     <!-- 生成对话框 -->
-    <el-dialog v-model="genVisible" title="生成运维报告" width="550px" destroy-on-close>
+    <el-dialog v-model="genVisible" title="生成运维报告" width="600px" destroy-on-close>
       <el-form :model="genForm" label-width="90px">
         <el-form-item label="报告类型">
           <el-select v-model="genForm.report_type" style="width: 100%">
@@ -181,9 +181,4 @@ onMounted(fetchData)
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
-.autops-metric-card { padding: 16px; background: #fff; border-radius: 8px; text-align: center; border: 1px solid #e5e6eb; }
-.metric-label { font-size: 13px; color: #86909c; margin-bottom: 4px; }
-.metric-value { font-size: 28px; font-weight: 700; }
-.text-danger { color: #f53f3f; }
 </style>

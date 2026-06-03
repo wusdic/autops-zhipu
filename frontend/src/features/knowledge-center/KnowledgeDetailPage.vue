@@ -25,7 +25,7 @@
               <el-dropdown-item command="version-history" :icon="Clock">
                 版本历史
               </el-dropdown-item>
-              <el-dropdown-item command="delete" :icon="Delete" style="color: #F56C6C">
+              <el-dropdown-item command="delete" :icon="Delete" style="color: #f53f3f">
                 删除
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -129,7 +129,7 @@
         <!-- Related Articles -->
         <div class="autops-card" style="margin-top: 16px" v-if="relatedArticles.length> 0">
           <span class="autops-card-title">相关文章</span>
-          <el-table :data="relatedArticles" stripe size="small" @row-click="goToRelated">
+          <el-table stripe :data="relatedArticles"size="small" @row-click="goToRelated">
             <el-table-column prop="title" label="标题" min-width="260" show-overflow-tooltip>
               <template #default="{ row }">
                 <span class="related-title">{{ row.title }}</span>
@@ -152,7 +152,7 @@
         </div>
 
         <!-- Version History Dialog -->
-        <el-dialog v-model="showVersionHistory" title="版本历史" width="700px">
+        <el-dialog v-model="showVersionHistory" title="版本历史" width="780px">
           <el-timeline v-if="versionHistory.length">
             <el-timeline-item
               v-for="ver in versionHistory"
@@ -479,24 +479,19 @@ onMounted(() => loadArticle())
   display: flex;
   gap: 8px;
 }
-.card-header-title {
-  font-weight: 600;
-  font-size: 15px;
-  color: #303133;
-}
 .markdown-body {
   line-height: 1.8;
 }
 .markdown-body h2 {
   margin: 16px 0 8px;
-  color: #303133;
+  color: #1d2129;
 }
 .markdown-body h3 {
   margin: 12px 0 6px;
-  color: #606266;
+  color: #4e5969;
 }
 .markdown-body code {
-  background: #f5f7fa;
+  background: #f7f8fa;
   padding: 2px 6px;
   border-radius: 3px;
 }
@@ -512,13 +507,13 @@ onMounted(() => loadArticle())
 }
 .feedback-label {
   font-size: 14px;
-  color: #606266;
+  color: #4e5969;
   white-space: nowrap;
 }
 .feedback-stats {
   margin-top: 8px;
   font-size: 13px;
-  color: #909399;
+  color: #86909c;
 }
 .feedback-quick {
   margin-top: 4px;
@@ -526,7 +521,7 @@ onMounted(() => loadArticle())
 
 /* Related Articles */
 .related-title {
-  color: #409EFF;
+  color: #165dff;
   cursor: pointer;
 }
 .related-title:hover {
@@ -548,10 +543,10 @@ onMounted(() => loadArticle())
 }
 .version-author {
   font-size: 13px;
-  color: #606266;
+  color: #4e5969;
 }
 .version-summary {
   font-size: 13px;
-  color: #909399;
+  color: #86909c;
 }
 </style>

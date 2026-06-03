@@ -27,7 +27,7 @@
 
     <!-- Data Table -->
     <el-card shadow="never" class="table-card">
-      <el-table v-loading="loading" :data="tableData" stripe border style="width: 100%">
+      <el-table stripe v-loading="loading" :data="tableData"border style="width: 100%">
         <el-table-column prop="title" label="工单标题" min-width="200" show-overflow-tooltip />
         <el-table-column prop="alert_name" label="关联告警" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
@@ -62,7 +62,7 @@
             {{ formatTime(row.resolved_at) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <template v-if="row.verification_status === 'pending' || !row.verification_status">
               <el-button type="success" link size="small" @click="handleVerify(row, 'verified')">
@@ -328,11 +328,11 @@ onMounted(() => {
   margin-top: 16px;
 }
 .text-muted {
-  color: #c0c4cc;
+  color: #c9cdd4;
 }
 .drawer-actions {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid #ebeef5;
+  border-top: 1px solid #e5e6eb;
 }
 </style>

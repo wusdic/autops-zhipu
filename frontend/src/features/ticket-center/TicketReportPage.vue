@@ -26,7 +26,7 @@
       <el-col :xs="24" :lg="12">
         <div class="autops-card">
           <div class="autops-card-header"><div class="autops-card-title">工单类型分布</div></div>
-          <el-table :data="typeDistribution" stripe size="small">
+          <el-table stripe :data="typeDistribution"size="small">
             <el-table-column prop="type" label="工单类型" min-width="120" />
             <el-table-column prop="count" label="数量" width="80" />
             <el-table-column prop="avg_resolve_hours" label="平均处理时长(h)" width="130" />
@@ -41,7 +41,7 @@
       <el-col :xs="24" :lg="12">
         <div class="autops-card">
           <div class="autops-card-header"><div class="autops-card-title">SLA 达标情况</div></div>
-          <el-table :data="slaData" stripe size="small">
+          <el-table stripe :data="slaData"size="small">
             <el-table-column prop="level" label="优先级" width="100" />
             <el-table-column prop="total" label="总数" width="70" />
             <el-table-column prop="met" label="达标" width="70" />
@@ -84,7 +84,7 @@
     <!-- 处理人员排行 -->
     <div class="autops-card">
       <div class="autops-card-header"><div class="autops-card-title">处理人员排行</div></div>
-      <el-table :data="handlerRanking" stripe size="small">
+      <el-table stripe :data="handlerRanking"size="small">
         <el-table-column type="index" label="排名" width="60" />
         <el-table-column prop="handler" label="处理人" min-width="120" />
         <el-table-column prop="resolved" label="解决数" width="80" sortable />
@@ -224,13 +224,8 @@ onMounted(() => { fetchData(); fetchTrend() })
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
-.autops-metric-card { padding: 16px; background: #fff; border-radius: 8px; text-align: center; border: 1px solid #e5e6eb; }
-.metric-label { font-size: 13px; color: #86909c; margin-bottom: 4px; }
-.metric-value { font-size: 28px; font-weight: 700; }
 .trend-bars { display: flex; align-items: flex-end; gap: 4px; height: 200px; padding: 0 8px; }
 .trend-bar-group { flex: 1; display: flex; gap: 2px; align-items: flex-end; flex-direction: column; position: relative; justify-content: flex-end; align-items: center; }
 .trend-bar { width: 16px; border-radius: 3px 3px 0 0; min-height: 2px; }
 .trend-label { font-size: 10px; color: #86909c; position: absolute; bottom: -18px; white-space: nowrap; }
-.text-danger { color: #f53f3f; }
 </style>

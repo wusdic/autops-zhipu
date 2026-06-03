@@ -42,15 +42,13 @@
         </el-empty>
 
         <!-- ========== Table ========== -->
-        <el-table
-          v-if="!loadFailed"
-          :data="tableData"
-          v-loading="loading"
-          stripe
-          border
-          empty-text="暂无数据"
-          class="snapshot-table"
-        >
+        <el-table stripe
+ v-if="!loadFailed"
+ :data="tableData"
+ v-loading="loading"border
+ empty-text="暂无数据"
+ class="snapshot-table"
+ >
           <el-table-column prop="asset_name" label="资产名" min-width="160" show-overflow-tooltip />
           <el-table-column prop="collected_at" label="采集时间" width="175">
             <template #default="{ row }">
@@ -266,7 +264,7 @@ onMounted(() => {
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {
@@ -278,22 +276,22 @@ onMounted(() => {
 }
 
 .usage-normal {
-  color: #67c23a;
+  color: #00b42a;
   font-weight: 500;
 }
 
 .usage-warning {
-  color: #e6a23c;
+  color: #ff7d00;
   font-weight: 500;
 }
 
 .usage-critical {
-  color: #f56c6c;
+  color: #f53f3f;
   font-weight: 600;
 }
 
 .text-muted {
-  color: #c0c4cc;
+  color: #c9cdd4;
 }
 
 .pagination-wrapper {

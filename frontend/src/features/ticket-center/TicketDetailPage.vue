@@ -110,14 +110,14 @@
             <el-row :gutter="16">
               <el-col :span="12">
                 <h4>关联告警</h4>
-                <el-table :data="relatedAlerts" stripe size="small">
+                <el-table stripe :data="relatedAlerts"size="small">
                   <el-table-column prop="title" label="告警" min-width="160" show-overflow-tooltip />
                   <el-table-column label="严重级别" width="100">
                     <template #default="{ row }">
                       <SeverityBadge :severity="row.severity" size="small" />
                     </template>
                   </el-table-column>
-                  <el-table-column label="操作" width="70">
+                  <el-table-column label="操作" width="100">
                     <template #default="{ row }">
                       <el-button text type="primary" size="small" @click="$router.push(`/alerts/${row.id}`)">查看</el-button>
                     </template>
@@ -127,14 +127,14 @@
               </el-col>
               <el-col :span="12">
                 <h4>关联执行</h4>
-                <el-table :data="relatedExecutions" stripe size="small">
+                <el-table stripe :data="relatedExecutions"size="small">
                   <el-table-column prop="playbook_name" label="Playbook" min-width="160" show-overflow-tooltip />
                   <el-table-column label="状态" width="100">
                     <template #default="{ row }">
                       <StatusBadge :status="row.status" size="small" />
                     </template>
                   </el-table-column>
-                  <el-table-column label="操作" width="70">
+                  <el-table-column label="操作" width="100">
                     <template #default="{ row }">
                       <el-button text type="primary" size="small" @click="$router.push(`/executions/${row.id}`)">查看</el-button>
                     </template>
@@ -193,7 +193,7 @@
                 <el-button type="primary" :icon="Upload">上传附件</el-button>
               </el-upload>
             </div>
-            <el-table :data="attachments" stripe v-loading="attachmentsLoading">
+            <el-table stripe :data="attachments"v-loading="attachmentsLoading">
               <el-table-column prop="filename" label="文件名" min-width="200" show-overflow-tooltip />
               <el-table-column label="大小" width="120">
                 <template #default="{ row }">{{ formatFileSize(row.size) }}</template>
@@ -202,7 +202,7 @@
               <el-table-column label="上传时间" width="180">
                 <template #default="{ row }">{{ formatTime(row.uploaded_at) }}</template>
               </el-table-column>
-              <el-table-column label="操作" width="150" fixed="right">
+              <el-table-column label="操作" width="180" fixed="right">
                 <template #default="{ row }">
                   <el-button text type="primary" size="small" @click="downloadAttachment(row)">下载</el-button>
                   <el-popconfirm title="确认删除此附件？" @confirm="deleteAttachment(row.id)">
@@ -237,7 +237,7 @@
     </div>
 
     <!-- 转知识草稿对话框 -->
-    <el-dialog v-model="knowledgeDialogVisible" title="转知识草稿" width="640px" destroy-on-close>
+    <el-dialog v-model="knowledgeDialogVisible" title="转知识草稿" width="600px" destroy-on-close>
       <el-form :model="knowledgeForm" label-width="80px">
         <el-form-item label="标题">
           <el-input v-model="knowledgeForm.title" placeholder="知识文章标题" />

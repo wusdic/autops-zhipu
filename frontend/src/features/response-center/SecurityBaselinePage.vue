@@ -28,7 +28,7 @@
 
     <!-- Data Table -->
     <el-card shadow="never" class="table-card">
-      <el-table v-loading="loading" :data="tableData" stripe border style="width: 100%">
+      <el-table stripe v-loading="loading" :data="tableData"border style="width: 100%">
         <el-table-column prop="asset_name" label="资产名" min-width="140" show-overflow-tooltip />
         <el-table-column prop="baseline_name" label="基线名称" min-width="160" show-overflow-tooltip />
         <el-table-column prop="check_items" label="检查项数" width="100" align="center">
@@ -98,7 +98,7 @@
         </el-descriptions>
         <div v-if="currentRow.details" class="detail-section">
           <h4>检查详情</h4>
-          <el-table :data="currentRow.details" size="small" border>
+          <el-table stripe  :data="currentRow.details" size="small" border>
             <el-table-column prop="item" label="检查项" />
             <el-table-column prop="result" label="结果" width="100">
               <template #default="{ row }">
@@ -156,9 +156,9 @@ function formatTime(t: string | undefined): string {
 
 function getComplianceColor(rate: number | undefined): string {
   const r = rate ?? 0
-  if (r >= 90) return '#67c23a'
-  if (r >= 70) return '#e6a23c'
-  return '#f56c6c'
+  if (r >= 90) return '#00b42a'
+  if (r >= 70) return '#ff7d00'
+  return '#f53f3f'
 }
 
 function buildParams() {
@@ -227,6 +227,6 @@ onMounted(() => {
 }
 .detail-section h4 {
   margin-bottom: 10px;
-  color: #303133;
+  color: #1d2129;
 }
 </style>

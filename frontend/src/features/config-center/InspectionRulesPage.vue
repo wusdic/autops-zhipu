@@ -49,7 +49,7 @@
 
     <!-- 规则列表 -->
     <el-card class="mt-4" shadow="never">
-      <el-table :data="rules" v-loading="loading" stripe border>
+      <el-table stripe :data="rules" v-loading="loading"border>
         <el-table-column type="selection" width="50" />
         <el-table-column prop="name" label="规则名称" min-width="200" sortable />
         <el-table-column prop="category" label="类型" width="120">
@@ -90,7 +90,7 @@
     </el-card>
 
     <!-- 新建/编辑 -->
-    <el-dialog v-model="dialogVisible" :title="editing ? '编辑规则' : '新建规则'" width="700px" destroy-on-close>
+    <el-dialog v-model="dialogVisible" :title="editing ? '编辑规则' : '新建规则'" width="780px" destroy-on-close>
       <el-form :model="form" label-width="100px" :rules="formRules" ref="formRef">
         <el-form-item label="规则名称" prop="name">
           <el-input v-model="form.name" />
@@ -147,7 +147,7 @@
         <el-descriptions-item label="异常">{{ simResult.failed || 0 }}</el-descriptions-item>
         <el-descriptions-item label="耗时">{{ simResult.duration || '-' }}</el-descriptions-item>
       </el-descriptions>
-      <el-table :data="simResult.details || []" class="mt-4" stripe max-height="300">
+      <el-table stripe :data="simResult.details || []" class="mt-4"max-height="300">
         <el-table-column prop="asset_name" label="资产名称" />
         <el-table-column prop="result" label="检查结果">
           <template #default="{ row }">

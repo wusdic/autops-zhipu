@@ -82,18 +82,16 @@
         </el-button>
       </div>
 
-      <el-table
-        v-loading="loading"
-        :data="suggestions"
-        stripe
-        style="width: 100%"
-        row-key="id"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="suggestions"style="width: 100%"
+ row-key="id"
+ >
         <el-table-column type="index" label="#" width="50" />
         <el-table-column prop="suggestion" label="建议" min-width="280" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="suggestion-text">
-              <el-icon v-if="row.applied" color="#67C23A" style="margin-right: 4px"><CircleCheckFilled /></el-icon>
+              <el-icon v-if="row.applied" color="#00b42a" style="margin-right: 4px"><CircleCheckFilled /></el-icon>
               <span :class="{ 'applied-text': row.applied }">{{ row.suggestion }}</span>
             </div>
           </template>
@@ -112,7 +110,7 @@
         </el-table-column>
         <el-table-column label="置信度" width="100">
           <template #default="{ row }">
-            <span :style="{ color: row.confidence >= 80 ? '#00b42a' : row.confidence >= 50 ? '#ff7d00' : '#909399' }">
+            <span :style="{ color: row.confidence >= 80 ? '#00b42a' : row.confidence >= 50 ? '#ff7d00' : '#86909c' }">
               {{ row.confidence ? `${row.confidence}%` : '-' }}
             </span>
           </template>
@@ -125,7 +123,7 @@
             <span v-else class="text-muted">-</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <template v-if="row.applied">
               <el-tag type="success" size="small">已应用</el-tag>
@@ -318,7 +316,7 @@ onMounted(() => {
 .autops-page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   display: flex;
   align-items: center;
 }
@@ -328,30 +326,10 @@ onMounted(() => {
 .summary-row {
   margin-top: 16px;
 }
-.stat-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-}
 .stat-content {
   display: flex;
   flex-direction: column;
 }
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #303133;
-  line-height: 1.2;
-}
-.stat-label {
-  font-size: 13px;
-  color: #909399;
-  margin-top: 4px;
-}
-.text-danger { color: #f56c6c !important; }
-.text-warning { color: #e6a23c !important; }
-.text-success { color: #67c23a !important; }
 .autops-card-header {
   display: flex;
   align-items: center;
@@ -361,7 +339,7 @@ onMounted(() => {
 .autops-card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
 }
 .suggestion-text {
   display: flex;
@@ -369,21 +347,21 @@ onMounted(() => {
 }
 .applied-text {
   text-decoration: line-through;
-  color: #909399;
+  color: #86909c;
 }
 .basis-text {
-  color: #606266;
+  color: #4e5969;
   font-size: 13px;
 }
 .knowledge-link {
-  color: #409eff;
+  color: #165dff;
   cursor: pointer;
 }
 .knowledge-link:hover {
   text-decoration: underline;
 }
 .text-muted {
-  color: #c0c4cc;
+  color: #c9cdd4;
 }
 .detail-content {
   background: #f7f8fa;

@@ -117,7 +117,7 @@
               <!-- IP 列表 -->
               <div class="section-block" v-if="asset.ips && asset.ips.length">
                 <h4>关联 IP</h4>
-                <el-table :data="asset.ips" size="small" stripe>
+                <el-table stripe :data="asset.ips" size="small">
                   <el-table-column prop="ip" label="IP" />
                   <el-table-column prop="type" label="类型" width="120" />
                   <el-table-column prop="is_primary" label="主IP" width="80">
@@ -135,7 +135,7 @@
             <el-tab-pane label="关系" name="relations">
               <div v-loading="relationsLoading">
                 <el-empty v-if="!relationsLoading && !relations.length" description="暂无关联关系" />
-                <el-table v-else :data="relations" stripe>
+                <el-table stripe v-else :data="relations">
                   <el-table-column prop="relation_type" label="关系类型" width="140">
                     <template #default="{ row }">
                       <el-tag size="small">{{ formatRelationType(row.relation_type) }}</el-tag>
@@ -177,7 +177,7 @@
               </div>
               <div v-loading="credentialsLoading">
                 <el-empty v-if="!credentialsLoading && !boundCredentials.length" description="暂无绑定凭证" />
-                <el-table v-else :data="boundCredentials" stripe size="small">
+                <el-table stripe v-else :data="boundCredentials"size="small">
                   <el-table-column prop="name" label="凭证名称" min-width="140" />
                   <el-table-column prop="type" label="类型" width="120">
                     <template #default="{ row }">
@@ -234,7 +234,7 @@
               </div>
               <div v-loading="collectionLoading">
                 <el-empty v-if="!collectionLoading && !collectionConfigs.length" description="暂无采集配置" />
-                <el-table v-else :data="collectionConfigs" stripe size="small">
+                <el-table stripe v-else :data="collectionConfigs"size="small">
                   <el-table-column prop="config_name" label="配置名称" min-width="140" />
                   <el-table-column prop="type" label="类型" width="120">
                     <template #default="{ row }">
@@ -252,7 +252,7 @@
                       <StatusBadge :status="row.status" />
                     </template>
                   </el-table-column>
-                  <el-table-column label="操作" width="120" fixed="right">
+                  <el-table-column label="操作" width="100" fixed="right">
                     <template #default="{ row }">
                       <el-button type="primary" link size="small" @click="triggerCollection(row.id)">触发采集</el-button>
                     </template>
@@ -308,7 +308,7 @@
               </div>
               <div v-loading="policiesLoading">
                 <el-empty v-if="!policiesLoading && !boundPolicies.length" description="暂无绑定策略" />
-                <el-table v-else :data="boundPolicies" stripe size="small">
+                <el-table stripe v-else :data="boundPolicies"size="small">
                   <el-table-column prop="name" label="策略名称" min-width="140" />
                   <el-table-column prop="trigger_condition" label="触发条件" min-width="160" show-overflow-tooltip />
                   <el-table-column prop="risk_level" label="风险等级" width="100">
@@ -758,20 +758,20 @@ onMounted(async () => {
   font-weight: 600;
 }
 .summary-card {
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e7ed 100%);
+  background: linear-gradient(135deg, #f7f8fa 0%, #e5e6eb 100%);
 }
 .summary-item {
   text-align: center;
 }
 .summary-item .label {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
   margin-bottom: 4px;
 }
 .summary-item .value {
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
 }
 .section-block {
   margin-top: 24px;
@@ -779,8 +779,8 @@ onMounted(async () => {
 .section-block h4 {
   margin-bottom: 12px;
   font-size: 14px;
-  color: #303133;
-  border-left: 3px solid #409eff;
+  color: #1d2129;
+  border-left: 3px solid #165dff;
   padding-left: 8px;
 }
 .tab-toolbar {

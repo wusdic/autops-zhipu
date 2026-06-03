@@ -61,7 +61,7 @@
     </el-card>
 
     <!-- 导入结果弹窗 -->
-    <el-dialog v-model="resultDialogVisible" title="导入结果" width="550px" destroy-on-close>
+    <el-dialog v-model="resultDialogVisible" title="导入结果" width="600px" destroy-on-close>
       <template v-if="importResult">
         <el-result
           :icon="importResult.fail_count > 0 ? 'warning' : 'success'"
@@ -69,7 +69,7 @@
           :sub-title="'共 ' + importResult.total + ' 条，成功 ' + importResult.success_count + ' 条，失败 ' + importResult.fail_count + ' 条'"
         />
         <el-divider v-if="importResult.errors?.length" content-position="left">错误详情</el-divider>
-        <el-table
+        <el-table stripe
           v-if="importResult.errors?.length"
           :data="importResult.errors"
           max-height="300"
@@ -106,7 +106,7 @@
         </div>
       </template>
 
-      <el-table v-loading="historyLoading" :data="historyData" border stripe>
+      <el-table stripe v-loading="historyLoading" :data="historyData" border>
         <el-table-column type="index" label="#" width="50" align="center" />
         <el-table-column prop="filename" label="文件名" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
@@ -151,7 +151,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="operator" label="操作人" width="110" />
-        <el-table-column label="操作" width="140" align="center" fixed="right">
+        <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleViewDetail(row)">
               查看详情
@@ -184,7 +184,7 @@
     </el-card>
 
     <!-- 历史详情弹窗 -->
-    <el-dialog v-model="detailDialogVisible" title="导入详情" width="650px" destroy-on-close>
+    <el-dialog v-model="detailDialogVisible" title="导入详情" width="600px" destroy-on-close>
       <template v-if="detailData">
         <el-descriptions :column="2" border>
           <el-descriptions-item label="文件名" :span="2">{{ detailData.filename }}</el-descriptions-item>
@@ -205,7 +205,7 @@
         <el-divider v-if="detailData.errors?.length" content-position="left">
           错误明细 ({{ detailData.errors.length }})
         </el-divider>
-        <el-table
+        <el-table stripe
           v-if="detailData.errors?.length"
           :data="detailData.errors.slice(0, 50)"
           max-height="280"
@@ -494,20 +494,7 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-.upload-card .card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.upload-card .card-header .title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 16px;
-  font-weight: 600;
-}
-
+.upload-card 
 .import-uploader {
   width: 100%;
 }
@@ -522,17 +509,7 @@ onMounted(() => {
   gap: 8px;
 }
 
-.history-card .card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.history-card .card-header .title {
-  font-size: 16px;
-  font-weight: 600;
-}
-
+.history-card 
 .history-card .card-header .actions {
   display: flex;
   align-items: center;
@@ -553,7 +530,7 @@ onMounted(() => {
 
 .more-errors {
   text-align: center;
-  color: #909399;
+  color: #86909c;
   font-size: 12px;
   margin-top: 8px;
 }

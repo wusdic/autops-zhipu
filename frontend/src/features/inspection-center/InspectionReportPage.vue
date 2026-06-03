@@ -39,14 +39,12 @@
         </el-form>
 
         <!-- Table -->
-        <el-table
-          :data="reports"
-          v-loading="loading"
-          stripe
-          border
-          row-key="id"
-          class="report-table"
-        >
+        <el-table stripe
+ :data="reports"
+ v-loading="loading"border
+ row-key="id"
+ class="report-table"
+ >
           <el-table-column prop="title" label="报告名" min-width="200" show-overflow-tooltip>
             <template #default="{ row }">
               <span class="report-name-link" @click="viewReport(row)">{{ row.title || row.name || '-' }}</span>
@@ -65,7 +63,7 @@
           </el-table-column>
           <el-table-column prop="critical_issues" label="严重问题数" width="110" align="center">
             <template #default="{ row }">
-              <span :style="{ color: (row.critical_issues || row.severe_count || 0) > 0 ? '#f56c6c' : '#67c23a', fontWeight: 600 }">
+              <span :style="{ color: (row.critical_issues || row.severe_count || 0) > 0 ? '#f53f3f' : '#00b42a', fontWeight: 600 }">
                 {{ row.critical_issues || row.severe_count || 0 }}
               </span>
             </template>
@@ -73,7 +71,7 @@
           <el-table-column prop="generated_at" label="生成时间" width="170">
             <template #default="{ row }">{{ formatTime(row.generated_at || row.created_at) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="160" fixed="right" align="center">
+          <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
               <el-button size="small" type="primary" link @click="viewReport(row)">查看</el-button>
               <el-button size="small" link @click="downloadReport(row)">下载</el-button>
@@ -100,7 +98,7 @@
     <el-dialog
       v-model="detailVisible"
       :title="detailData?.title || '报告详情'"
-      width="680px"
+      width="780px"
       destroy-on-close
     >
       <el-descriptions v-if="detailData" :column="2" border size="small">
@@ -118,8 +116,8 @@
 
       <!-- Check Result Summary -->
       <div v-if="detailData?.items && detailData.items.length" style="margin-top: 16px">
-        <h4 style="margin-bottom: 8px; font-size: 14px; color: #303133">检查结果明细</h4>
-        <el-table :data="detailData.items" stripe border size="small" max-height="300">
+        <h4 style="margin-bottom: 8px; font-size: 14px; color: #1d2129">检查结果明细</h4>
+        <el-table stripe :data="detailData.items"border size="small" max-height="300">
           <el-table-column prop="check_item" label="检查项" min-width="160" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="90" align="center">
             <template #default="{ row }">
@@ -182,9 +180,9 @@ function formatTime(val: string | null | undefined): string {
 }
 
 function rateColor(rate: number): string {
-  if (rate >= 90) return '#67c23a'
-  if (rate >= 70) return '#e6a23c'
-  return '#f56c6c'
+  if (rate >= 90) return '#00b42a'
+  if (rate >= 70) return '#ff7d00'
+  return '#f53f3f'
 }
 
 function severityType(severity: string): string {
@@ -276,17 +274,10 @@ onMounted(() => {
 .main-card {
   border-radius: 8px;
 }
-
-.card-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {
@@ -299,7 +290,7 @@ onMounted(() => {
 
 .report-name-link {
   cursor: pointer;
-  color: #409eff;
+  color: #165dff;
 }
 
 .report-name-link:hover {

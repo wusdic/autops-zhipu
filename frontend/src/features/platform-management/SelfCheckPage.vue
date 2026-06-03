@@ -4,7 +4,7 @@
     <div v-if="apiNotAvailable" class="coming-soon-wrapper">
       <el-empty :image-size="160" description=" ">
         <template #image>
-          <el-icon :size="120" color="#c0c4cc"><Monitor /></el-icon>
+          <el-icon :size="120" color="#c9cdd4"><Monitor /></el-icon>
         </template>
         <template #description>
           <div class="coming-soon-title">平台自检功能即将上线</div>
@@ -116,15 +116,13 @@
 
       <!-- ── History Table ─────────────────────────────────── -->
       <div class="section-title" style="margin-top: 24px">历史自检记录</div>
-      <el-table
-        :data="history"
-        v-loading="historyLoading"
-        stripe
-        border
-        size="small"
-        empty-text="暂无历史记录"
-        style="width: 100%"
-      >
+      <el-table stripe
+ :data="history"
+ v-loading="historyLoading"border
+ size="small"
+ empty-text="暂无历史记录"
+ style="width: 100%"
+ >
         <el-table-column prop="checked_at" label="检查时间" width="180">
           <template #default="{ row }">
             {{ formatTime(row.checked_at) }}
@@ -148,7 +146,7 @@
         </el-table-column>
         <el-table-column prop="duration" label="耗时(ms)" width="100" align="center" />
         <el-table-column prop="operator" label="操作人" width="100" />
-        <el-table-column label="操作" width="80" align="center">
+        <el-table-column label="操作" width="100" align="center">
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="viewHistoryDetail(row)">
               详情
@@ -360,9 +358,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
-}
 .autops-page-header {
   display: flex;
   justify-content: space-between;

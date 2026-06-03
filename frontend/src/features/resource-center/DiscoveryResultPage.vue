@@ -80,14 +80,12 @@
       </template>
 
       <!-- 数据表格 -->
-      <el-table
-        v-loading="loading"
-        :data="tableData"
-        border
-        stripe
-        @selection-change="handleSelectionChange"
-        @sort-change="handleSortChange"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="tableData"
+ border@selection-change="handleSelectionChange"
+ @sort-change="handleSortChange"
+ >
         <el-table-column type="selection" width="50" align="center" />
         <el-table-column prop="ip" label="IP 地址" min-width="140" sortable="custom" show-overflow-tooltip />
         <el-table-column prop="hostname" label="主机名" min-width="150" show-overflow-tooltip />
@@ -158,7 +156,7 @@
     </el-card>
 
     <!-- 导入确认弹窗 -->
-    <el-dialog v-model="importDialogVisible" title="导入资产确认" width="500px" destroy-on-close>
+    <el-dialog v-model="importDialogVisible" title="导入资产确认" width="600px" destroy-on-close>
       <el-descriptions :column="1" border>
         <el-descriptions-item label="IP 地址">{{ currentRow?.ip }}</el-descriptions-item>
         <el-descriptions-item label="主机名">{{ currentRow?.hostname || '-' }}</el-descriptions-item>
@@ -452,22 +450,7 @@ onMounted(() => {
   padding-bottom: 2px;
 }
 
-.table-card .card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.table-card .card-header .title {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.table-card .card-header .actions {
-  display: flex;
-  gap: 8px;
-}
-
+.table-card 
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;

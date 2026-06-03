@@ -96,7 +96,7 @@
 
             <!-- 证据列表 -->
             <h4 style="margin-bottom: 8px">关联证据</h4>
-            <el-table :data="evidenceList" stripe size="small" v-if="evidenceList.length > 0" style="margin-bottom: 16px">
+            <el-table stripe :data="evidenceList"size="small" v-if="evidenceList.length > 0" style="margin-bottom: 16px">
               <el-table-column prop="type" label="类型" width="100">
                 <template #default="{ row }">
                   <el-tag size="small">{{ row.type }}</el-tag>
@@ -253,7 +253,6 @@ onMounted(fetchIncidents)
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
 .incident-card {
   padding: 12px; border: 1px solid #e5e6eb; border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;
 }

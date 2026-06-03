@@ -58,19 +58,17 @@
         </div>
       </template>
 
-      <el-table
-        v-loading="loading"
-        :data="policyList"
-        stripe
-        border
-        style="width: 100%"
-        row-key="id"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="policyList"border
+ style="width: 100%"
+ row-key="id"
+ >
         <el-table-column type="expand">
           <template #default="{ row }">
             <div class="expand-content">
               <h4 style="margin: 0 0 12px 0">权限详情</h4>
-              <el-table :data="row.permissions || []" size="small" border>
+              <el-table stripe  :data="row.permissions || []" size="small" border>
                 <el-table-column prop="resource_type" label="资源类型" width="140">
                   <template #default="{ row: perm }">
                     {{ resourceTypeLabel(perm.resource_type) }}
@@ -199,7 +197,7 @@
     <el-dialog
       v-model="dialogVisible"
       :title="isEdit ? '编辑策略' : '新建策略'"
-      width="680px"
+      width="780px"
       destroy-on-close
       @close="resetForm"
     >
@@ -609,15 +607,10 @@ onMounted(() => {
   }
 
   .table-card {
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
+    
     .policy-name {
       font-weight: 500;
-      color: #303133;
+      color: #1d2129;
     }
 
     .expand-content {
@@ -625,7 +618,7 @@ onMounted(() => {
 
       h4 {
         font-size: 14px;
-        color: #606266;
+        color: #4e5969;
       }
     }
 
@@ -637,7 +630,7 @@ onMounted(() => {
   }
 
   .text-muted {
-    color: #c0c4cc;
+    color: #c9cdd4;
     font-size: 13px;
   }
 }

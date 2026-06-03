@@ -1,20 +1,123 @@
-/* AUTOPS Global Design System
-   参照: Ant Design Pro / DataDog / Arco Design
-   唯一事实源: docs/04-frontend/FRONTEND_DESIGN_SYSTEM.md
-*/
+/* ═══════════════════════════════════════════════════════════════
+   AUTOPS Unified Design System v2.0
+   ═══════════════════════════════════════════════════════════════
+   参照: Arco Design Pro / Ant Design Pro / DataDog
+   主色: #165dff（科技蓝）
+   设计原则: 统一色板、统一间距、统一字体、统一组件风格
+   唯一事实源: 本文件 + CSS 变量
+   ═══════════════════════════════════════════════════════════════ */
 
-/* ─── Element Plus 主题覆盖（科技蓝） ─── */
+/* ─── 1. 设计令牌 (Design Tokens) ─── */
 :root {
-  --el-color-primary: #165dff;
-  --el-color-primary-light-3: #5ea5ff;
-  --el-color-primary-light-5: #8cc0ff;
-  --el-color-primary-light-7: #b8d9ff;
-  --el-color-primary-light-8: #cee5ff;
-  --el-color-primary-light-9: #e8f2ff;
-  --el-color-primary-dark-2: #114bcc;
+  /* 主色板 — 只用这一套，禁止混用 Element Plus 默认色 */
+  --autops-primary:         #165dff;
+  --autops-primary-light-1: #3e7bff;
+  --autops-primary-light-2: #6999ff;
+  --autops-primary-light-3: #94b8ff;
+  --autops-primary-light-4: #bdd5ff;
+  --autops-primary-light-5: #e8f2ff;
+  --autops-primary-dark:    #114bcc;
+
+  /* 语义色 */
+  --autops-success:       #00b42a;
+  --autops-success-light: #e8ffea;
+  --autops-warning:       #ff7d00;
+  --autops-warning-light: #fff7e8;
+  --autops-danger:        #f53f3f;
+  --autops-danger-light:  #ffece8;
+  --autops-info:          #86909c;
+  --autops-info-light:    #f2f3f5;
+
+  /* 文字色阶（4级） */
+  --autops-text-1:    #1d2129;   /* 标题、主文字 */
+  --autops-text-2:    #4e5969;   /* 次要文字 */
+  --autops-text-3:    #86909c;   /* 辅助文字、标签 */
+  --autops-text-4:    #c9cdd4;   /* 占位、禁用 */
+
+  /* 背景色 */
+  --autops-bg-1:      #ffffff;   /* 卡片、输入框 */
+  --autops-bg-2:      #f7f8fa;   /* 页面底色 */
+  --autops-bg-3:      #f2f3f5;   /* hover、禁用背景 */
+  --autops-bg-4:      #e5e6eb;   /* 边框、分割线 */
+
+  /* 圆角 */
+  --autops-radius-sm:  4px;
+  --autops-radius-md:  8px;
+  --autops-radius-lg:  12px;
+
+  /* 间距 */
+  --autops-space-xs:  4px;
+  --autops-space-sm:  8px;
+  --autops-space-md:  12px;
+  --autops-space-lg:  16px;
+  --autops-space-xl:  20px;
+  --autops-space-2xl: 24px;
+
+  /* 字号（收敛到6级） */
+  --autops-font-10: 10px;  /* 角标、批注 */
+  --autops-font-12: 12px;  /* 标签、辅助 */
+  --autops-font-13: 13px;  /* 表头、小字 */
+  --autops-font-14: 14px;  /* 正文（默认） */
+  --autops-font-16: 16px;  /* 小标题 */
+  --autops-font-20: 20px;  /* 页面标题 */
+
+  /* Element Plus 主题覆盖 — 全部指向 autops 色板 */
+  --el-color-primary:           #165dff;
+  --el-color-primary-light-3:   #6999ff;
+  --el-color-primary-light-5:   #94b8ff;
+  --el-color-primary-light-7:   #bdd5ff;
+  --el-color-primary-light-8:   #d4e4ff;
+  --el-color-primary-light-9:   #e8f2ff;
+  --el-color-primary-dark-2:    #114bcc;
+
+  --el-color-success:           #00b42a;
+  --el-color-success-light-3:   #4cc76e;
+  --el-color-success-light-5:   #7fd99a;
+  --el-color-success-light-9:   #e8ffea;
+
+  --el-color-warning:           #ff7d00;
+  --el-color-warning-light-3:   #ff9d40;
+  --el-color-warning-light-5:   #ffbd80;
+  --el-color-warning-light-9:   #fff7e8;
+
+  --el-color-danger:            #f53f3f;
+  --el-color-danger-light-3:    #f87171;
+  --el-color-danger-light-5:    #fa9a9a;
+  --el-color-danger-light-9:    #ffece8;
+
+  --el-color-info:              #86909c;
+  --el-color-info-light-9:      #f2f3f5;
+
+  --el-text-color-primary:      #1d2129;
+  --el-text-color-regular:      #4e5969;
+  --el-text-color-secondary:    #86909c;
+  --el-text-color-placeholder:  #c9cdd4;
+
+  --el-border-color:            #e5e6eb;
+  --el-border-color-light:      #f2f3f5;
+  --el-border-color-lighter:    #f7f8fa;
+
+  --el-bg-color:                #ffffff;
+  --el-bg-color-page:           #f7f8fa;
+  --el-bg-color-overlay:        #ffffff;
+
+  --el-border-radius-base:      4px;
+  --el-border-radius-small:     2px;
+  --el-border-radius-round:     20px;
+
+  --el-font-size-extra-large:   20px;
+  --el-font-size-large:         16px;
+  --el-font-size-medium:        14px;
+  --el-font-size-base:          14px;
+  --el-font-size-small:         13px;
+  --el-font-size-extra-small:   12px;
+
+  --el-fill-color-light:        #f2f3f5;
+  --el-fill-color-lighter:      #fafafa;
+  --el-fill-color-extra-light:  #f7f8fa;
 }
 
-/* ─── CSS Reset & Base ─── */
+/* ─── 2. CSS Reset ─── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -31,47 +134,239 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
                'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
                'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   line-height: 1.5715;
-  color: #1d2129;
-  background: #f7f8fa;
+  color: var(--autops-text-1);
+  background: var(--autops-bg-2);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── 间距工具类 ─── */
-.gap-xs { gap: 4px; }
-.gap-sm { gap: 8px; }
-.gap-md { gap: 12px; }
-.gap-lg { gap: 16px; }
-.gap-xl { gap: 20px; }
+/* ─── 3. 通用文字工具类 ─── */
+.text-primary   { color: var(--autops-text-1); }
+.text-secondary { color: var(--autops-text-2); }
+.text-tertiary  { color: var(--autops-text-3); }
+.text-disabled  { color: var(--autops-text-4); }
+.text-brand     { color: var(--autops-primary); }
+.text-success   { color: var(--autops-success); }
+.text-warning   { color: var(--autops-warning); }
+.text-danger    { color: var(--autops-danger); }
 
-.mb-xs { margin-bottom: 4px; }
-.mb-sm { margin-bottom: 8px; }
-.mb-md { margin-bottom: 12px; }
-.mb-lg { margin-bottom: 16px; }
-.mb-xl { margin-bottom: 20px; }
-.mb-2xl { margin-bottom: 24px; }
+/* ─── 4. 间距工具类 ─── */
+.gap-xs  { gap: var(--autops-space-xs); }
+.gap-sm  { gap: var(--autops-space-sm); }
+.gap-md  { gap: var(--autops-space-md); }
+.gap-lg  { gap: var(--autops-space-lg); }
+.gap-xl  { gap: var(--autops-space-xl); }
 
-/* ─── 文字工具类 ─── */
-.text-primary   { color: #1d2129; }
-.text-secondary { color: #4e5969; }
-.text-tertiary  { color: #86909c; }
-.text-disabled  { color: #c9cdd4; }
-.text-brand     { color: #165dff; }
-.text-success   { color: #00b42a; }
-.text-warning   { color: #ff7d00; }
-.text-danger    { color: #f53f3f; }
+.mb-xs  { margin-bottom: var(--autops-space-xs); }
+.mb-sm  { margin-bottom: var(--autops-space-sm); }
+.mb-md  { margin-bottom: var(--autops-space-md); }
+.mb-lg  { margin-bottom: var(--autops-space-lg); }
+.mb-xl  { margin-bottom: var(--autops-space-xl); }
+.mb-2xl { margin-bottom: var(--autops-space-2xl); }
 
-.font-12 { font-size: 12px; }
-.font-14 { font-size: 14px; }
-.font-16 { font-size: 16px; font-weight: 600; }
-.font-20 { font-size: 20px; font-weight: 600; }
-.font-32 { font-size: 32px; font-weight: 700; line-height: 1.2; }
+/* ─── 5. 页面结构 ─── */
+.autops-page-container {
+  padding: var(--autops-space-xl);
+  min-height: 100%;
+}
 
-/* ─── 侧边栏样式覆盖 ─── */
+.autops-page-header {
+  margin-bottom: var(--autops-space-xl);
+}
+
+.autops-page-title {
+  font-size: var(--autops-font-20);
+  font-weight: 600;
+  color: var(--autops-text-1);
+  line-height: 28px;
+}
+
+.autops-page-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--autops-space-sm);
+}
+
+.autops-page-desc {
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-3);
+  margin-top: var(--autops-space-xs);
+  line-height: 20px;
+}
+
+/* ─── 6. 卡片系统 ─── */
+.autops-card {
+  background: var(--autops-bg-1);
+  border-radius: var(--autops-radius-md);
+  border: 1px solid var(--autops-bg-4);
+  overflow: hidden;
+  margin-bottom: var(--autops-space-lg);
+}
+
+.autops-card-header {
+  padding: var(--autops-space-lg) var(--autops-space-xl);
+  border-bottom: 1px solid var(--autops-bg-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+}
+
+.autops-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--autops-text-1);
+  display: flex;
+  align-items: center;
+  gap: var(--autops-space-sm);
+}
+
+.autops-card-body {
+  padding: var(--autops-space-lg) var(--autops-space-xl);
+}
+
+/* ─── 7. 统计指标卡片（唯一标准） ─── */
+.autops-metric-card {
+  background: var(--autops-bg-1);
+  border-radius: var(--autops-radius-md);
+  padding: var(--autops-space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--autops-space-sm);
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+  border: 1px solid var(--autops-bg-4);
+}
+
+.autops-metric-card:hover {
+  box-shadow: 0 4px 12px rgba(22, 93, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.autops-metric-card .metric-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--autops-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.autops-metric-card .metric-label {
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-3);
+  margin-top: var(--autops-space-xs);
+}
+
+.autops-metric-card .metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--autops-text-1);
+  line-height: 1.2;
+}
+
+.autops-metric-card .metric-trend {
+  font-size: var(--autops-font-12);
+  color: var(--autops-text-3);
+  display: flex;
+  align-items: center;
+  gap: var(--autops-space-xs);
+}
+
+/* 图标背景色（统一4种语义 + 2种辅助） */
+.metric-icon.bg-brand   { background: var(--autops-primary-light-5); color: var(--autops-primary); }
+.metric-icon.bg-success  { background: var(--autops-success-light); color: var(--autops-success); }
+.metric-icon.bg-warning  { background: var(--autops-warning-light); color: var(--autops-warning); }
+.metric-icon.bg-danger   { background: var(--autops-danger-light);  color: var(--autops-danger); }
+.metric-icon.bg-info     { background: var(--autops-info-light);    color: var(--autops-info); }
+.metric-icon.bg-purple   { background: #f5e8ff; color: #722ed1; }
+
+/* ─── 8. 工具栏（搜索/过滤/操作按钮区） ─── */
+.autops-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--autops-space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--autops-space-lg);
+}
+
+.autops-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--autops-space-md);
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.autops-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--autops-space-sm);
+  flex-shrink: 0;
+}
+
+/* ─── 9. 状态标签（唯一标准） ─── */
+.autops-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--autops-space-xs);
+  padding: 2px 10px;
+  border-radius: var(--autops-radius-sm);
+  font-size: var(--autops-font-12);
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.autops-status-tag::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.autops-status-tag.status-pending    { background: var(--autops-info-light);    color: var(--autops-info); }
+.autops-status-tag.status-pending::before    { background: var(--autops-info); }
+.autops-status-tag.status-running    { background: var(--autops-primary-light-5); color: var(--autops-primary); }
+.autops-status-tag.status-running::before    { background: var(--autops-primary); }
+.autops-status-tag.status-completed  { background: var(--autops-success-light);  color: var(--autops-success); }
+.autops-status-tag.status-completed::before  { background: var(--autops-success); }
+.autops-status-tag.status-failed     { background: var(--autops-danger-light);   color: var(--autops-danger); }
+.autops-status-tag.status-failed::before     { background: var(--autops-danger); }
+.autops-status-tag.status-warning    { background: var(--autops-warning-light);  color: var(--autops-warning); }
+.autops-status-tag.status-warning::before    { background: var(--autops-warning); }
+.autops-status-tag.status-info       { background: var(--autops-info-light);     color: var(--autops-info); }
+.autops-status-tag.status-info::before       { background: var(--autops-info); }
+
+/* ─── 10. 空状态 ─── */
+.autops-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px var(--autops-space-xl);
+  gap: var(--autops-space-md);
+}
+
+.autops-empty-icon {
+  font-size: 48px;
+  color: var(--autops-text-4);
+}
+
+.autops-empty-text {
+  font-size: var(--autops-font-14);
+  color: var(--autops-text-3);
+}
+
+.autops-empty-action {
+  margin-top: var(--autops-space-xs);
+}
+
+/* ─── 11. 侧边栏 ─── */
 .autops-sidebar {
-  background: #1d2129 !important;
+  background: var(--autops-text-1) !important;
   border-right: none;
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
@@ -86,21 +381,21 @@ body {
 .autops-sidebar .el-sub-menu__title {
   height: 44px !important;
   line-height: 44px !important;
-  font-size: 14px !important;
-  color: #c9cdd4 !important;
+  font-size: var(--autops-font-14) !important;
+  color: var(--autops-text-4) !important;
   background: transparent !important;
 }
 
 .autops-sidebar .el-menu-item:hover,
 .autops-sidebar .el-sub-menu__title:hover {
-  background: #2a323d !important;
+  background: rgba(255,255,255,0.08) !important;
   color: #ffffff !important;
 }
 
 .autops-sidebar .el-menu-item.is-active {
-  background: #2a323d !important;
+  background: rgba(22, 93, 255, 0.15) !important;
   color: #ffffff !important;
-  border-left: 3px solid #165dff;
+  border-left: 3px solid var(--autops-primary);
   padding-left: calc(var(--el-menu-base-level-padding) - 3px) !important;
 }
 
@@ -109,36 +404,26 @@ body {
 }
 
 .autops-sidebar .el-sub-menu .el-menu .el-menu-item {
-  background: #17191e !important;
-  font-size: 13px !important;
+  background: rgba(0,0,0,0.2) !important;
+  font-size: var(--autops-font-13) !important;
   height: 40px !important;
   line-height: 40px !important;
 }
 
 .autops-sidebar .el-sub-menu .el-menu .el-menu-item.is-active {
-  background: #2a323d !important;
+  background: rgba(22, 93, 255, 0.15) !important;
   color: #ffffff !important;
 }
 
-/* 折叠态 tooltip 文字 */
-.autops-sidebar--collapsed .el-menu-item span,
-.autops-sidebar--collapsed .el-sub-menu__title span {
-  display: none !important;
-}
-
-.autops-sidebar--collapsed .el-sub-menu .el-menu {
-  display: none !important;
-}
-
-/* ─── Header 样式 ─── */
+/* ─── 12. Header ─── */
 .autops-header {
   height: 56px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e6eb;
+  background: var(--autops-bg-1);
+  border-bottom: 1px solid var(--autops-bg-4);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 var(--autops-space-xl);
   z-index: 100;
   box-shadow: none;
 }
@@ -146,269 +431,144 @@ body {
 .autops-header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--autops-space-lg);
 }
 
 .autops-header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--autops-space-lg);
 }
 
 .autops-collapse-btn {
   font-size: 20px;
-  color: #4e5969;
+  color: var(--autops-text-2);
   cursor: pointer;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: var(--autops-radius-sm);
   transition: all 0.2s;
 }
 
 .autops-collapse-btn:hover {
-  background: #f2f3f5;
-  color: #165dff;
+  background: var(--autops-bg-3);
+  color: var(--autops-primary);
 }
 
-/* ─── Main Content ─── */
+/* ─── 13. Main Content ─── */
 .autops-main {
-  background: #f7f8fa;
+  background: var(--autops-bg-2);
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-.autops-page-container {
-  padding: 20px;
-  min-height: 100%;
-}
+/* ─── 14. Element Plus 全局覆盖 ─── */
 
-/* ─── 统计卡片 ─── */
-.autops-metric-card {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s;
-  border: 1px solid #e5e6eb;
-}
-
-.autops-metric-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-}
-
-.autops-metric-card .metric-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-}
-
-.autops-metric-card .metric-label {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 4px;
-}
-
-.autops-metric-card .metric-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #1d2129;
-  line-height: 1.2;
-}
-
-.autops-metric-card .metric-trend {
-  font-size: 12px;
-  color: #86909c;
-}
-
-/* ─── 通用卡片 ─── */
-.autops-card {
-  background: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #e5e6eb;
-  overflow: hidden;
-}
-
-.autops-card-header {
-  padding: 16px 20px;
-  border-bottom: 1px solid #f2f3f5;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 48px;
-}
-
-.autops-card-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1d2129;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.autops-card-body {
-  padding: 16px 20px;
-}
-
-/* ─── 状态标签 ─── */
-.autops-status-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 20px;
-}
-
-.autops-status-tag::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.autops-status-tag.status-pending    { background: #f2f3f5; color: #86909c; }
-.autops-status-tag.status-pending::before    { background: #86909c; }
-.autops-status-tag.status-running    { background: #e8f3ff; color: #165dff; }
-.autops-status-tag.status-running::before    { background: #165dff; }
-.autops-status-tag.status-completed  { background: #e8ffea; color: #00b42a; }
-.autops-status-tag.status-completed::before  { background: #00b42a; }
-.autops-status-tag.status-failed     { background: #ffece8; color: #f53f3f; }
-.autops-status-tag.status-failed::before     { background: #f53f3f; }
-.autops-status-tag.status-warning    { background: #fff7e8; color: #ff7d00; }
-.autops-status-tag.status-warning::before    { background: #ff7d00; }
-.autops-status-tag.status-info       { background: #f2f3f5; color: #86909c; }
-.autops-status-tag.status-info::before       { background: #86909c; }
-
-/* ─── 空状态 ─── */
-.autops-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  gap: 12px;
-}
-
-.autops-empty-icon {
-  font-size: 48px;
-  color: #c9cdd4;
-}
-
-.autops-empty-text {
-  font-size: 14px;
-  color: #86909c;
-}
-
-.autops-empty-action {
-  margin-top: 4px;
-}
-
-/* ─── 搜索栏 ─── */
-.autops-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-
-.autops-toolbar-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  flex: 1;
-}
-
-.autops-toolbar-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ─── 页面标题 ─── */
-.autops-page-header {
-  margin-bottom: 20px;
-}
-
-.autops-page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--el-text-color-primary, #1d2129);
-}
-
-.autops-page-title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.autops-page-desc {
-  font-size: 13px;
-  color: var(--el-text-color-secondary, #86909c);
-  margin-top: 4px;
-}
-
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 4px;
-}
-
-/* ─── Element Plus 覆盖 ─── */
-
-/* 表格 */
+/* 表格 — 统一 stripe 风格、表头、行高 */
 .el-table {
-  font-size: 14px !important;
+  font-size: var(--autops-font-14) !important;
+  --el-table-border-color: var(--autops-bg-4);
+  --el-table-header-bg-color: #fafbfc;
+  --el-table-row-hover-bg-color: #f2f7ff;
+  --el-table-header-text-color: var(--autops-text-3);
 }
 
 .el-table th.el-table__cell {
-  background: #fafafa !important;
-  color: #86909c !important;
+  background: #fafbfc !important;
+  color: var(--autops-text-3) !important;
   font-weight: 500 !important;
-  font-size: 13px !important;
+  font-size: var(--autops-font-13) !important;
+  padding: 10px 0 !important;
 }
 
 .el-table .el-table__row {
   height: 48px;
 }
 
-/* 卡片 */
+/* 表格操作列按钮间距统一 */
+.el-table .el-table__cell .el-button + .el-button {
+  margin-left: 4px;
+}
+
+/* 卡片 — 统一圆角和边框 */
 .el-card {
-  border-radius: 8px !important;
-  border: 1px solid #e5e6eb !important;
+  border-radius: var(--autops-radius-md) !important;
+  border: 1px solid var(--autops-bg-4) !important;
   box-shadow: none !important;
 }
 
 .el-card__header {
-  padding: 12px 20px !important;
-  border-bottom: 1px solid #f2f3f5 !important;
+  padding: var(--autops-space-md) var(--autops-space-xl) !important;
+  border-bottom: 1px solid var(--autops-bg-3) !important;
   min-height: 48px;
 }
 
 .el-card__body {
-  padding: 16px 20px !important;
+  padding: var(--autops-space-lg) var(--autops-space-xl) !important;
 }
 
-/* 按钮 — 通过 :root --el-color-primary 统一控制 */
+/* 按钮 — 统一圆角 */
+.el-button {
+  border-radius: var(--autops-radius-sm);
+}
 
-/* 分页 */
+.el-button--small {
+  font-size: var(--autops-font-13);
+}
+
+/* 输入框 — 统一圆角 */
+.el-input__wrapper {
+  border-radius: var(--autops-radius-sm);
+}
+
+/* 对话框 — 统一宽度分级和圆角 */
+.el-dialog {
+  border-radius: var(--autops-radius-lg) !important;
+  overflow: hidden;
+}
+
+.el-dialog__header {
+  padding: var(--autops-space-lg) var(--autops-space-xl) !important;
+  border-bottom: 1px solid var(--autops-bg-3);
+  margin-right: 0 !important;
+}
+
+.el-dialog__body {
+  padding: var(--autops-space-xl) !important;
+}
+
+.el-dialog__footer {
+  padding: var(--autops-space-md) var(--autops-space-xl) !important;
+  border-top: 1px solid var(--autops-bg-3);
+}
+
+/* 抽屉 — 统一 */
+.el-drawer__header {
+  margin-bottom: 0;
+  padding: var(--autops-space-lg) var(--autops-space-xl);
+  border-bottom: 1px solid var(--autops-bg-3);
+}
+
+.el-drawer__body {
+  padding: var(--autops-space-xl);
+}
+
+/* 标签页 — 统一 */
+.el-tabs__header {
+  margin-bottom: var(--autops-space-lg);
+}
+
+/* Tag — 统一 */
+.el-tag {
+  border-radius: var(--autops-radius-sm);
+}
+
+/* 分页 — 统一 */
 .el-pagination {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
   justify-content: flex-end;
 }
 
@@ -419,14 +579,68 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c9cdd4;
+  background: var(--autops-text-4);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #86909c;
+  background: var(--autops-text-3);
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* ─── 15. 对话框宽度标准（3级） ─── */
+/* 用法: <el-dialog width="480px"> 或 width="600px" 或 width="780px" */
+/* 禁止使用其他宽度值 */
+
+/* ─── 16. 卡片 Header 子元素 ─── */
+.card-header__actions,
+.autops-card-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--autops-space-sm);
+}
+
+.card-header__title,
+.autops-card-header__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--autops-text-1);
+  display: flex;
+  align-items: center;
+  gap: var(--autops-space-sm);
+}
+
+/* 表格卡片标题 */
+.table-card .card-header .title,
+.table-card .autops-card-header .title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--autops-text-1);
+}
+
+.table-card .card-header .actions,
+.table-card .autops-card-header .actions {
+  display: flex;
+  gap: var(--autops-space-sm);
+}
+
+/* 上传卡片标题 */
+.upload-card .card-header .title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--autops-text-1);
+}
+
+/* ─── 17. 废弃 class 别名（向后兼容） ─── */
+/* autops-page-subtitle 已废弃，统一使用 autops-page-desc */
+.autops-page-subtitle {
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-3);
+  margin-top: var(--autops-space-xs);
 }

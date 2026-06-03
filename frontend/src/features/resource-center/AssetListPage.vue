@@ -72,13 +72,11 @@
       </el-form>
 
       <!-- Table -->
-      <el-table
-        ref="tableRef"
-        :data="assets"
-        v-loading="loading"
-        stripe
-        @selection-change="handleSelectionChange"
-      >
+      <el-table stripe
+ ref="tableRef"
+ :data="assets"
+ v-loading="loading"@selection-change="handleSelectionChange"
+ >
         <el-table-column type="selection" width="45" />
         <el-table-column prop="name" label="名称" min-width="140" />
         <el-table-column prop="asset_type" label="类型" width="130">
@@ -114,7 +112,7 @@
             <el-tag size="small" :type="envType(row.environment)" effect="plain">{{ formatEnv(row.environment) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="240" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="viewAsset(row)">详情</el-button>
             <el-button size="small" type="warning" @click="openEditDialog(row)">编辑</el-button>
@@ -254,7 +252,7 @@
     </el-drawer>
 
     <!-- Import Dialog -->
-    <el-dialog v-model="showImportDialog" title="批量导入资产" width="750px" destroy-on-close>
+    <el-dialog v-model="showImportDialog" title="批量导入资产" width="780px" destroy-on-close>
       <el-upload
         ref="importUploadRef"
         :auto-upload="false"
@@ -273,7 +271,7 @@
 
       <div v-if="importPreviewData.length > 0" class="import-preview">
         <el-divider>数据预览 (共 {{ importPreviewData.length }} 条)</el-divider>
-        <el-table :data="importPreviewData" stripe max-height="300" size="small">
+        <el-table stripe :data="importPreviewData"max-height="300" size="small">
           <el-table-column prop="name" label="名称" min-width="120" />
           <el-table-column prop="asset_type" label="类型" width="120" />
           <el-table-column prop="ip" label="IP" width="130" />
@@ -297,7 +295,7 @@
     </el-dialog>
 
     <!-- Batch Bind Credential Dialog -->
-    <el-dialog v-model="showBatchCredDialog" title="批量绑定凭证" width="450px">
+    <el-dialog v-model="showBatchCredDialog" title="批量绑定凭证" width="480px">
       <el-form label-width="80px">
         <el-form-item label="选中资产">
           <span>{{ selectedAssets.length }} 项</span>
@@ -320,7 +318,7 @@
     </el-dialog>
 
     <!-- Batch Add to Group Dialog -->
-    <el-dialog v-model="showBatchGroupDialog" title="批量加入分组" width="450px">
+    <el-dialog v-model="showBatchGroupDialog" title="批量加入分组" width="480px">
       <el-form label-width="80px">
         <el-form-item label="选中资产">
           <span>{{ selectedAssets.length }} 项</span>
@@ -343,7 +341,7 @@
     </el-dialog>
 
     <!-- Quick Bind Credential Dialog (single row) -->
-    <el-dialog v-model="showQuickBindDialog" title="绑定凭证" width="400px">
+    <el-dialog v-model="showQuickBindDialog" title="绑定凭证" width="480px">
       <el-form label-width="80px">
         <el-form-item label="资产">
           <span>{{ quickBindAsset?.name }}</span>
@@ -836,11 +834,6 @@ onMounted(() => loadAssets())
 </script>
 
 <style scoped>
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 .filter-form {
   margin-bottom: 16px;
 }
@@ -856,7 +849,7 @@ onMounted(() => loadAssets())
   transform: translateX(-50%);
   z-index: 999;
   background: #fff;
-  border: 1px solid #e4e7ed;
+  border: 1px solid #e5e6eb;
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   padding: 12px 24px;
@@ -865,7 +858,7 @@ onMounted(() => loadAssets())
   gap: 12px;
 }
 .batch-info {
-  color: #606266;
+  color: #4e5969;
   margin-right: 8px;
   white-space: nowrap;
 }

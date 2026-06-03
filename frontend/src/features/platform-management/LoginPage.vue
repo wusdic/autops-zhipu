@@ -84,11 +84,11 @@ async function handleLogin() {
 .login-header h1 {
   margin: 0;
   font-size: 28px;
-  color: #303133;
+  color: #1d2129;
 }
 .login-header p {
   margin: 4px 0 0;
-  color: #909399;
+  color: #86909c;
   font-size: 14px;
 }
 </style>

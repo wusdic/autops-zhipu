@@ -92,13 +92,11 @@
           </el-button>
         </div>
       </template>
-      <el-table
-        :data="recentAssets"
-        stripe
-        v-loading="tableLoading"
-        empty-text="暂无资产数据"
-        style="width: 100%"
-      >
+      <el-table stripe
+ :data="recentAssets"v-loading="tableLoading"
+ empty-text="暂无资产数据"
+ style="width: 100%"
+ >
         <el-table-column prop="name" label="资产名" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <el-link type="primary" @click="router.push(`/assets/${row.id}`)">
@@ -348,7 +346,7 @@ function getAssetTypeIcon(type: string): any {
 const assetTypeColors: Record<string, { color: string; bgColor: string }> = {
   server: { color: '#165dff', bgColor: '#e8f3ff' },
   linux_server: { color: '#165dff', bgColor: '#e8f3ff' },
-  windows_server: { color: '#409eff', bgColor: '#ecf5ff' },
+  windows_server: { color: '#165dff', bgColor: '#ecf5ff' },
   web_server: { color: '#3491fa', bgColor: '#e8f3ff' },
   network: { color: '#0fc6c2', bgColor: '#e8fffb' },
   storage: { color: '#722ed1', bgColor: '#f5e8ff' },
@@ -525,20 +523,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 24px;
-  background: #f7f8fa;
-  min-height: 100%;
-}
-
 .stat-row {
   margin-bottom: 16px;
 }
-
-.stat-card {
-  border-radius: 8px;
-}
-
 .stat-card-inner {
   display: flex;
   align-items: center;
@@ -567,19 +554,6 @@ onMounted(() => {
   margin-bottom: 16px;
   border-radius: 8px;
 }
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1d2129;
-}
-
 /* Type Distribution Grid */
 .type-grid {
   display: grid;

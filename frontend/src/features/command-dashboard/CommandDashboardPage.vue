@@ -147,12 +147,10 @@
             </el-button>
           </div>
           <div class="autops-card-body" style="padding: 0">
-            <el-table
-              :data="recentAlerts"
-              stripe
-              size="default"
-              :max-height="300"
-              @row-click="(row: any) => navigateTo(`/alerts/${row.id}`)"
+            <el-table stripe
+ :data="recentAlerts"size="default"
+ :max-height="300"
+ @row-click="(row: any) => navigateTo(`/alerts/${row.id}`)"
               style="cursor: pointer"
               empty-text="暂无告警"
             >
@@ -282,7 +280,7 @@
             <el-button text type="primary" size="small" @click="navigateTo('/automation/approvals')">全部 →</el-button>
           </div>
           <div class="autops-card-body" style="padding: 0">
-            <el-table :data="pendingTasks" stripe size="small" :max-height="200" empty-text="暂无待办">
+            <el-table stripe :data="pendingTasks"size="small" :max-height="200" empty-text="暂无待办">
               <el-table-column prop="type" label="类型" width="90">
                 <template #default="{ row }">
                   <el-tag size="small" :type="pendingTypeTag(row.type)">{{ row.type }}</el-tag>
@@ -792,10 +790,6 @@ onUnmounted(() => {
 .v3-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .v3-stat-num { font-size: 22px; font-weight: 600; line-height: 1.2; }
 .v3-stat-label { font-size: 12px; color: #86909c; }
-.text-primary { color: #165dff; }
-.text-success { color: #00b42a; }
-.text-warning { color: #ff7d00; }
-.text-danger { color: #f53f3f; }
 .text-tertiary { color: #86909c; }
 .font-12 { font-size: 12px; }
 

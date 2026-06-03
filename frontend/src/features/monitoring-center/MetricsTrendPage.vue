@@ -67,11 +67,11 @@
       </div>
       <div class="autops-card-body chart-placeholder-body">
         <div v-if="!filters.assetId" class="chart-empty">
-          <el-icon :size="48" color="#c0c4cc"><DataAnalysis /></el-icon>
+          <el-icon :size="48" color="#c9cdd4"><DataAnalysis /></el-icon>
           <p class="chart-empty-text">请先选择资产后查询</p>
         </div>
         <div v-else-if="tableData.length === 0 && !loading" class="chart-empty">
-          <el-icon :size="48" color="#c0c4cc"><DataAnalysis /></el-icon>
+          <el-icon :size="48" color="#c9cdd4"><DataAnalysis /></el-icon>
           <p class="chart-empty-text">图表将在此显示</p>
         </div>
         <div v-else class="chart-area">
@@ -87,14 +87,12 @@
         <el-button :icon="Refresh" circle size="small" @click="loadData" :disabled="!filters.assetId" />
       </div>
       <div class="autops-card-body">
-        <el-table
-          :data="tableData"
-          v-loading="loading"
-          stripe
-          border
-          empty-text="暂无数据"
-          class="metrics-table"
-        >
+        <el-table stripe
+ :data="tableData"
+ v-loading="loading"border
+ empty-text="暂无数据"
+ class="metrics-table"
+ >
           <el-table-column prop="metric_name" label="指标名称" min-width="160" show-overflow-tooltip />
           <el-table-column prop="value" label="数值" width="120" align="right">
             <template #default="{ row }">
@@ -274,7 +272,7 @@ onMounted(() => {
 
 .chart-empty-text {
   font-size: 14px;
-  color: #909399;
+  color: #86909c;
 }
 
 .chart-area {
@@ -287,7 +285,7 @@ onMounted(() => {
 
 .chart-placeholder-text {
   font-size: 14px;
-  color: #909399;
+  color: #86909c;
   padding: 40px 0;
 }
 
@@ -298,14 +296,8 @@ onMounted(() => {
 .metrics-table {
   width: 100%;
 }
-
-.metric-value {
-  font-variant-numeric: tabular-nums;
-  font-weight: 500;
-}
-
 .text-muted {
-  color: #909399;
+  color: #86909c;
 }
 
 .pagination-wrapper {

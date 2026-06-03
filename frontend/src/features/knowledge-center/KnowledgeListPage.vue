@@ -23,7 +23,7 @@
             <div class="stat-value">{{ stats.total }}</div>
             <div class="stat-label">知识总数</div>
           </div>
-          <el-icon class="stat-icon" :size="40" color="#409EFF"><Document /></el-icon>
+          <el-icon class="stat-icon" :size="40" color="#165dff"><Document /></el-icon>
         </div>
       </el-col>
       <el-col :span="6">
@@ -32,7 +32,7 @@
             <div class="stat-value">{{ stats.published }}</div>
             <div class="stat-label">已发布</div>
           </div>
-          <el-icon class="stat-icon" :size="40" color="#67C23A"><CircleCheck /></el-icon>
+          <el-icon class="stat-icon" :size="40" color="#00b42a"><CircleCheck /></el-icon>
         </div>
       </el-col>
       <el-col :span="6">
@@ -41,7 +41,7 @@
             <div class="stat-value">{{ stats.draft }}</div>
             <div class="stat-label">草稿</div>
           </div>
-          <el-icon class="stat-icon" :size="40" color="#E6A23C"><EditPen /></el-icon>
+          <el-icon class="stat-icon" :size="40" color="#ff7d00"><EditPen /></el-icon>
         </div>
       </el-col>
       <el-col :span="6">
@@ -50,7 +50,7 @@
             <div class="stat-value">{{ stats.total - stats.published - stats.draft }}</div>
             <div class="stat-label">其他状态</div>
           </div>
-          <el-icon class="stat-icon" :size="40" color="#909399"><InfoFilled /></el-icon>
+          <el-icon class="stat-icon" :size="40" color="#86909c"><InfoFilled /></el-icon>
         </div>
       </el-col>
     </el-row>
@@ -102,13 +102,11 @@
 
     <!-- Knowledge Table -->
     <div class="autops-card" style="margin-top: 16px">
-      <el-table
-        v-loading="loading"
-        :data="knowledgeList"
-        stripe
-        @sort-change="onSortChange"
-        style="width: 100%"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="knowledgeList"@sort-change="onSortChange"
+ style="width: 100%"
+ >
         <el-table-column prop="title" label="标题" min-width="260" show-overflow-tooltip>
           <template #default="{ row }">
             <router-link :to="{ name: 'knowledge-detail', params: { id: row.id } }" class="title-link">
@@ -150,7 +148,7 @@
         <el-table-column prop="updated_at" label="更新时间" width="170" sortable="custom">
           <template #default="{ row }">{{ formatTime(row.updated_at) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="140" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="goDetail(row.id)">查看</el-button>
             <el-button text type="primary" size="small" @click="goEdit(row.id)">编辑</el-button>
@@ -390,7 +388,7 @@ onMounted(() => {
 .page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   display: flex;
   align-items: center;
 }
@@ -401,12 +399,6 @@ onMounted(() => {
 }
 .stats-row {
   margin-bottom: 16px;
-}
-.stat-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
 }
 .stat-card :deep(.el-card__body) {
   display: flex;
@@ -419,17 +411,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
 }
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #303133;
-  line-height: 1.2;
-}
-.stat-label {
-  font-size: 13px;
-  color: #909399;
-  margin-top: 4px;
-}
 .stat-icon {
   opacity: 0.6;
 }
@@ -437,7 +418,7 @@ onMounted(() => {
   margin-bottom: 0;
 }
 .title-link {
-  color: #409EFF;
+  color: #165dff;
   text-decoration: none;
   font-weight: 500;
 }
@@ -450,6 +431,6 @@ onMounted(() => {
   justify-content: flex-end;
 }
 .text-muted {
-  color: #c0c4cc;
+  color: #c9cdd4;
 }
 </style>

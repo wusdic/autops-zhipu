@@ -84,25 +84,23 @@
         <span class="autops-card-title">执行分类统计</span>
       </div>
       <div class="autops-card-body" style="padding: 0">
-        <el-table
-          :data="breakdownData"
-          v-loading="statsLoading"
-          stripe
-          border
-          size="small"
-          empty-text="暂无数据"
-          class="breakdown-table"
-        >
+        <el-table stripe
+ :data="breakdownData"
+ v-loading="statsLoading"border
+ size="small"
+ empty-text="暂无数据"
+ class="breakdown-table"
+ >
           <el-table-column prop="category" label="分类" min-width="160" show-overflow-tooltip />
           <el-table-column prop="total" label="执行总数" width="100" align="center" />
           <el-table-column prop="success" label="成功" width="80" align="center">
             <template #default="{ row }">
-              <span style="color: #67c23a; font-weight: 500">{{ row.success || 0 }}</span>
+              <span style="color: #00b42a; font-weight: 500">{{ row.success || 0 }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="failed" label="失败" width="80" align="center">
             <template #default="{ row }">
-              <span style="color: #f56c6c; font-weight: 500">{{ row.failed || 0 }}</span>
+              <span style="color: #f53f3f; font-weight: 500">{{ row.failed || 0 }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="success_rate" label="成功率" width="100" align="center">
@@ -111,7 +109,7 @@
                 :percentage="Number(row.success_rate || 0)"
                 :stroke-width="14"
                 :text-inside="true"
-                :color="row.success_rate >= 90 ? '#67c23a' : row.success_rate >= 70 ? '#e6a23c' : '#f56c6c'"
+                :color="row.success_rate >= 90 ? '#00b42a' : row.success_rate >= 70 ? '#ff7d00' : '#f53f3f'"
                 style="max-width: 120px"
               />
             </template>
@@ -158,14 +156,12 @@
           </el-form-item>
         </el-form>
 
-        <el-table
-          :data="executions"
-          v-loading="execLoading"
-          stripe
-          border
-          row-key="id"
-          class="exec-table"
-        >
+        <el-table stripe
+ :data="executions"
+ v-loading="execLoading"border
+ row-key="id"
+ class="exec-table"
+ >
           <el-table-column prop="playbook_name" label="Playbook" min-width="180" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="100" align="center">
             <template #default="{ row }">
@@ -377,12 +373,6 @@ onMounted(() => {
 .stats-row {
   margin-bottom: 16px;
 }
-
-.stat-card {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
 .stat-card__body {
   display: flex;
   align-items: center;
@@ -413,29 +403,22 @@ onMounted(() => {
 
 .stat-card__label {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
   margin-top: 2px;
 }
 
-.stat-card--total .stat-card__icon { background: rgba(64, 158, 255, 0.12); color: #409eff; }
-.stat-card--total .stat-card__value { color: #409eff; }
-.stat-card--success .stat-card__icon { background: rgba(103, 194, 58, 0.12); color: #67c23a; }
-.stat-card--success .stat-card__value { color: #67c23a; }
-.stat-card--failed .stat-card__icon { background: rgba(245, 108, 108, 0.12); color: #f56c6c; }
-.stat-card--failed .stat-card__value { color: #f56c6c; }
-.stat-card--duration .stat-card__icon { background: rgba(144, 147, 153, 0.12); color: #909399; }
-.stat-card--duration .stat-card__value { color: #606266; }
-
-.card-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
+.stat-card--total .stat-card__icon { background: rgba(64, 158, 255, 0.12); color: #165dff; }
+.stat-card--total .stat-card__value { color: #165dff; }
+.stat-card--success .stat-card__icon { background: rgba(103, 194, 58, 0.12); color: #00b42a; }
+.stat-card--success .stat-card__value { color: #00b42a; }
+.stat-card--failed .stat-card__icon { background: rgba(245, 108, 108, 0.12); color: #f53f3f; }
+.stat-card--failed .stat-card__value { color: #f53f3f; }
+.stat-card--duration .stat-card__icon { background: rgba(144, 147, 153, 0.12); color: #86909c; }
+.stat-card--duration .stat-card__value { color: #4e5969; }
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {

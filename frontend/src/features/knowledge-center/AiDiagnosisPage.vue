@@ -155,7 +155,7 @@
                   <el-tag size="small" type="success">{{ context.recent_events.length }} 条</el-tag>
                 </div>
               </template>
-              <el-table :data="context.recent_events" size="small" stripe max-height="200">
+              <el-table stripe :data="context.recent_events" size="small"max-height="200">
                 <el-table-column prop="title" label="事件" show-overflow-tooltip />
                 <el-table-column prop="type" label="类型" width="120" />
                 <el-table-column label="时间" width="170">
@@ -193,7 +193,7 @@
                   <el-tag size="small" type="success">{{ context.knowledge.length }} 篇</el-tag>
                 </div>
               </template>
-              <el-table :data="context.knowledge" size="small" stripe max-height="200">
+              <el-table stripe :data="context.knowledge" size="small"max-height="200">
                 <el-table-column prop="title" label="标题" show-overflow-tooltip />
                 <el-table-column prop="article_type" label="类型" width="120" />
                 <el-table-column prop="risk_level" label="风险" width="80">
@@ -1201,7 +1201,7 @@ watch(activeMode, (mode) => {
 .page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   display: flex;
   align-items: center;
 }
@@ -1210,22 +1210,6 @@ watch(activeMode, (mode) => {
 .workflow-card {
   margin-bottom: 16px;
 }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-header-title {
-  font-weight: 600;
-  font-size: 15px;
-  color: #303133;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
 /* Alert Selector */
 .alert-option {
   display: flex;
@@ -1241,7 +1225,7 @@ watch(activeMode, (mode) => {
 }
 
 .alert-option-time {
-  color: #909399;
+  color: #86909c;
   font-size: 12px;
 }
 
@@ -1251,7 +1235,7 @@ watch(activeMode, (mode) => {
   align-items: center;
   gap: 8px;
   font-weight: 500;
-  color: #303133;
+  color: #1d2129;
 }
 
 .log-list {
@@ -1269,13 +1253,13 @@ watch(activeMode, (mode) => {
 }
 
 .log-time {
-  color: #909399;
+  color: #86909c;
   white-space: nowrap;
   min-width: 150px;
 }
 
 .log-msg {
-  color: #606266;
+  color: #4e5969;
   word-break: break-all;
 }
 
@@ -1287,24 +1271,24 @@ watch(activeMode, (mode) => {
 .section-label {
   font-weight: 600;
   font-size: 14px;
-  color: #303133;
+  color: #1d2129;
   margin-bottom: 8px;
   padding-bottom: 4px;
-  border-bottom: 2px solid #409eff;
+  border-bottom: 2px solid #165dff;
   display: inline-block;
 }
 
 .root-cause-content {
-  color: #606266;
+  color: #4e5969;
   line-height: 1.8;
   padding: 8px 12px;
   background: #f0f9eb;
   border-radius: 6px;
-  border-left: 3px solid #67c23a;
+  border-left: 3px solid #00b42a;
 }
 
 .evidence-item {
-  color: #606266;
+  color: #4e5969;
   line-height: 1.6;
 }
 
@@ -1322,7 +1306,7 @@ watch(activeMode, (mode) => {
   padding: 12px;
   background: #fafafa;
   border-radius: 8px;
-  border: 1px solid #ebeef5;
+  border: 1px solid #e5e6eb;
   transition: box-shadow 0.2s;
 }
 
@@ -1343,16 +1327,16 @@ watch(activeMode, (mode) => {
 
 .action-index {
   font-weight: 700;
-  color: #409eff;
+  color: #165dff;
 }
 
 .action-title {
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
 }
 
 .action-desc {
-  color: #909399;
+  color: #86909c;
   font-size: 13px;
   margin-top: 4px;
 }
@@ -1379,7 +1363,7 @@ watch(activeMode, (mode) => {
 
 .raw-toggle {
   font-size: 13px;
-  color: #909399;
+  color: #86909c;
 }
 
 /* Feedback */
@@ -1395,7 +1379,7 @@ watch(activeMode, (mode) => {
 
 .feedback-label {
   font-size: 14px;
-  color: #606266;
+  color: #4e5969;
   font-weight: 500;
 }
 
@@ -1414,20 +1398,20 @@ watch(activeMode, (mode) => {
 .history-item {
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid #ebeef5;
+  border: 1px solid #e5e6eb;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .history-item:hover {
-  border-color: #409eff;
+  border-color: #165dff;
   background: #ecf5ff;
 }
 
 .history-item.active {
-  border-color: #409eff;
+  border-color: #165dff;
   background: #ecf5ff;
-  box-shadow: 0 0 0 1px #409eff;
+  box-shadow: 0 0 0 1px #165dff;
 }
 
 .history-item-header {
@@ -1440,7 +1424,7 @@ watch(activeMode, (mode) => {
 .history-alert-title {
   font-weight: 600;
   font-size: 13px;
-  color: #303133;
+  color: #1d2129;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1450,7 +1434,7 @@ watch(activeMode, (mode) => {
 
 .history-item-summary {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1462,7 +1446,7 @@ watch(activeMode, (mode) => {
 
 .history-item-time {
   font-size: 12px;
-  color: #c0c4cc;
+  color: #c9cdd4;
 }
 
 .history-feedback-badge {
@@ -1474,7 +1458,7 @@ watch(activeMode, (mode) => {
   display: flex;
   gap: 0;
   margin-bottom: 16px;
-  border-bottom: 2px solid #e4e7ed;
+  border-bottom: 2px solid #e5e6eb;
 }
 
 .mode-tab {
@@ -1484,7 +1468,7 @@ watch(activeMode, (mode) => {
   padding: 10px 24px;
   font-size: 14px;
   font-weight: 500;
-  color: #909399;
+  color: #86909c;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
@@ -1493,12 +1477,12 @@ watch(activeMode, (mode) => {
 }
 
 .mode-tab:hover {
-  color: #409eff;
+  color: #165dff;
 }
 
 .mode-tab.active {
-  color: #409eff;
-  border-bottom-color: #409eff;
+  color: #165dff;
+  border-bottom-color: #165dff;
 }
 
 /* ─── Agent Mode ───────────────────────────────────────────────────── */
@@ -1522,37 +1506,37 @@ watch(activeMode, (mode) => {
 
 .agent-step-index {
   font-weight: 700;
-  color: #409eff;
+  color: #165dff;
   font-size: 13px;
   white-space: nowrap;
 }
 
 .agent-step-action {
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   font-size: 14px;
 }
 
 .agent-step-thought {
-  color: #606266;
+  color: #4e5969;
   font-size: 13px;
   line-height: 1.6;
   padding: 6px 10px;
   background: #fdf6ec;
   border-radius: 4px;
   margin: 4px 0;
-  border-left: 3px solid #e6a23c;
+  border-left: 3px solid #ff7d00;
 }
 
 .agent-step-observation {
-  color: #606266;
+  color: #4e5969;
   font-size: 13px;
   line-height: 1.6;
   padding: 6px 10px;
   background: #f0f9eb;
   border-radius: 4px;
   margin: 4px 0;
-  border-left: 3px solid #67c23a;
+  border-left: 3px solid #00b42a;
 }
 
 .agent-step-tool {
@@ -1560,12 +1544,12 @@ watch(activeMode, (mode) => {
 }
 
 .agent-conclusion-summary {
-  color: #303133;
+  color: #1d2129;
   line-height: 1.8;
   padding: 12px 16px;
   background: #ecf5ff;
   border-radius: 8px;
-  border-left: 4px solid #409eff;
+  border-left: 4px solid #165dff;
   font-size: 14px;
   white-space: pre-wrap;
 }

@@ -98,14 +98,12 @@
         <el-button text type="primary" @click="goToTaskPage">查看全部</el-button>
       </div>
       <div class="autops-card-body" style="padding: 0">
-        <el-table
-          :data="recentTasks"
-          v-loading="tasksLoading"
-          stripe
-          border
-          empty-text="暂无生成任务"
-          class="task-table"
-        >
+        <el-table stripe
+ :data="recentTasks"
+ v-loading="tasksLoading"border
+ empty-text="暂无生成任务"
+ class="task-table"
+ >
           <el-table-column prop="title" label="报表名称" min-width="180" show-overflow-tooltip />
           <el-table-column prop="template_name" label="模板" min-width="120" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="110" align="center">
@@ -126,7 +124,7 @@
           <el-table-column prop="created_at" label="创建时间" width="170">
             <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="140" fixed="right" align="center">
+          <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
               <el-button
                 v-if="row.status === 'completed'"

@@ -15,7 +15,7 @@
       </el-select>
       <el-button @click="fetchList" :icon="Refresh">刷新</el-button>
     </div>
-    <el-table :data="list" v-loading="loading" stripe>
+    <el-table stripe :data="list" v-loading="loading">
       <el-table-column prop="title" label="标题" min-width="200" show-overflow-tooltip>
         <template #default="{ row }">
           <el-link type="primary" @click="viewDetail(row)">{{ row.title }}</el-link>
@@ -41,7 +41,7 @@
       <el-table-column prop="updated_at" label="更新时间" width="170">
         <template #default="{ row }">{{ formatTime(row.updated_at) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="150" fixed="right">
+      <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" size="small" @click="viewDetail(row)">查看</el-button>
           <el-button link type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
@@ -94,7 +94,7 @@
       </el-descriptions>
       <div style="margin-top:20px">
         <h4>复盘内容</h4>
-        <div style="white-space:pre-wrap;background:#f5f7fa;padding:16px;border-radius:4px;margin-top:8px">
+        <div style="white-space:pre-wrap;background:#f7f8fa;padding:16px;border-radius:4px;margin-top:8px">
           {{ currentItem?.content || currentItem?.description || '暂无内容' }}
         </div>
       </div>

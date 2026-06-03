@@ -27,16 +27,14 @@
           </el-form-item>
         </el-form>
 
-        <el-table
-          :data="anomalies"
-          stripe
-          size="small"
-          v-loading="anomalyLoading"
-          empty-text="暂无异常"
-          highlight-current-row
-          @current-change="handleAnomalySelect"
-          style="margin-top: 12px"
-        >
+        <el-table stripe
+ :data="anomalies"size="small"
+ v-loading="anomalyLoading"
+ empty-text="暂无异常"
+ highlight-current-row
+ @current-change="handleAnomalySelect"
+ style="margin-top: 12px"
+ >
           <el-table-column prop="title" label="异常标题" min-width="200" show-overflow-tooltip />
           <el-table-column prop="severity" label="级别" width="80">
             <template #default="{ row }">
@@ -83,12 +81,10 @@
             </el-button>
           </div>
           <div class="autops-card-body" style="padding: 0">
-            <el-table
-              :data="affectedAssets"
-              stripe
-              v-loading="analysisLoading"
-              empty-text="选择异常并分析影响"
-            >
+            <el-table stripe
+ :data="affectedAssets"v-loading="analysisLoading"
+ empty-text="选择异常并分析影响"
+ >
               <el-table-column prop="name" label="资产名称" min-width="160" show-overflow-tooltip />
               <el-table-column prop="asset_type" label="资产类型" width="120" />
               <el-table-column prop="impact_type" label="影响类型" width="100">
@@ -176,7 +172,7 @@
             <div class="autops-card-title">业务系统影响</div>
           </div>
           <div class="autops-card-body" style="padding: 0">
-            <el-table :data="businessImpact" size="small" stripe>
+            <el-table stripe :data="businessImpact" size="small">
               <el-table-column prop="name" label="业务系统" min-width="120" show-overflow-tooltip />
               <el-table-column prop="impact" label="影响" width="80">
                 <template #default="{ row }">

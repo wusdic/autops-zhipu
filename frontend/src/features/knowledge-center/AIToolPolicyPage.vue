@@ -49,12 +49,10 @@
 
     <!-- Policy Table -->
     <div class="autops-card" style="margin-top: 16px">
-      <el-table
-        v-loading="loading"
-        :data="tableData"
-        stripe
-        style="width: 100%"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="tableData"style="width: 100%"
+ >
         <el-table-column prop="tool_name" label="工具名" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="tool-name">
@@ -109,7 +107,7 @@
         <el-table-column prop="updated_at" label="更新时间" width="170">
           <template #default="{ row }">{{ formatTime(row.updated_at) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="openEdit(row)">编辑</el-button>
             <el-button text type="danger" size="small" @click="handleDelete(row)">删除</el-button>
@@ -135,7 +133,7 @@
     <el-dialog
       v-model="dialogVisible"
       :title="isEditing ? '编辑策略' : '新增策略'"
-      width="650"
+      width="600px"
       destroy-on-close
       @close="resetForm"
     >
@@ -426,7 +424,7 @@ onMounted(() => {
 .autops-page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   display: flex;
   align-items: center;
 }
@@ -447,7 +445,7 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 .text-muted {
-  color: #c0c4cc;
+  color: #c9cdd4;
 }
 .pagination-wrapper {
   margin-top: 16px;

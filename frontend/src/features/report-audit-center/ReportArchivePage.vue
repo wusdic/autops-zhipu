@@ -45,14 +45,12 @@
         </el-form>
 
         <!-- Table -->
-        <el-table
-          :data="archiveList"
-          v-loading="loading"
-          stripe
-          border
-          row-key="id"
-          class="archive-table"
-        >
+        <el-table stripe
+ :data="archiveList"
+ v-loading="loading"border
+ row-key="id"
+ class="archive-table"
+ >
           <el-table-column prop="title" label="报告名" min-width="200" show-overflow-tooltip />
           <el-table-column prop="type" label="类型" width="120" align="center">
             <template #default="{ row }">
@@ -68,7 +66,7 @@
           <el-table-column prop="file_size" label="文件大小" width="100" align="center">
             <template #default="{ row }">{{ formatSize(row.file_size) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="200" fixed="right" align="center">
+          <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
               <el-button size="small" type="primary" link @click="viewArchive(row)">查看</el-button>
               <el-button size="small" link @click="downloadArchive(row)">下载</el-button>
@@ -291,17 +289,10 @@ onMounted(() => {
 .main-card {
   border-radius: 8px;
 }
-
-.card-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {

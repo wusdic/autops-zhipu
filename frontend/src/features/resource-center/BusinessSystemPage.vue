@@ -45,13 +45,11 @@
 
     <!-- Data Table -->
     <el-card shadow="never" class="table-card">
-      <el-table
-        :data="systems"
-        stripe
-        v-loading="loading"
-        empty-text="暂无业务系统"
-        @sort-change="handleSortChange"
-      >
+      <el-table stripe
+ :data="systems"v-loading="loading"
+ empty-text="暂无业务系统"
+ @sort-change="handleSortChange"
+ >
         <el-table-column prop="name" label="系统名称" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="system-name" @click="viewSystem(row)">{{ row.name }}</span>
@@ -80,7 +78,7 @@
             <span class="text-tertiary">{{ formatTime(row.updated_at) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right" align="center">
+        <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="viewSystem(row)">查看</el-button>
             <el-button text type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
@@ -108,7 +106,7 @@
     <el-dialog
       v-model="dialogVisible"
       :title="isEditing ? '编辑业务系统' : '新建业务系统'"
-      width="560px"
+      width="600px"
       :close-on-click-modal="false"
       @closed="resetForm"
     >
@@ -367,10 +365,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
-}
-
 .filter-card {
   margin-bottom: 16px;
 }

@@ -170,16 +170,14 @@
       </transition>
 
       <!-- ========== Execution Table ========== -->
-      <el-table
-        ref="tableRef"
-        :data="executions"
-        v-loading="loading"
-        stripe
-        border
-        row-key="execution_id"
-        @selection-change="handleSelectionChange"
-        class="execution-table"
-      >
+      <el-table stripe
+ ref="tableRef"
+ :data="executions"
+ v-loading="loading"border
+ row-key="execution_id"
+ @selection-change="handleSelectionChange"
+ class="execution-table"
+ >
         <el-table-column type="selection" width="45" fixed="left" />
         <el-table-column prop="id" label="执行ID" width="180" show-overflow-tooltip>
           <template #default="{ row }">
@@ -243,7 +241,7 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right" align="center">
+        <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button
               size="small"
@@ -299,7 +297,7 @@
       <div class="log-drawer-content">
         <div v-if="logLoading" style="text-align: center; padding: 40px">
           <el-icon :size="24" class="is-loading"><Loading /></el-icon>
-          <span style="margin-left: 8px; color: #909399">加载日志中...</span>
+          <span style="margin-left: 8px; color: #86909c">加载日志中...</span>
         </div>
         <LogStream
           v-else-if="logLines.length > 0"
@@ -502,8 +500,8 @@ async function loadTrend() {
     }
 
     trendSeries.value = [
-      { name: '成功', data: successData, color: '#67C23A' },
-      { name: '失败', data: failData, color: '#F56C6C' },
+      { name: '成功', data: successData, color: '#00b42a' },
+      { name: '失败', data: failData, color: '#f53f3f' },
     ]
   } catch {
     // trend is non-critical
@@ -748,12 +746,6 @@ onBeforeUnmount(() => {
 .stats-row {
   margin-bottom: 16px;
 }
-
-.stat-card {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
 .stat-card__body {
   display: flex;
   align-items: center;
@@ -783,40 +775,40 @@ onBeforeUnmount(() => {
 
 .stat-card__label {
   font-size: 13px;
-  color: #909399;
+  color: #86909c;
   margin-top: 4px;
 }
 
 .stat-card--today .stat-card__icon {
   background: rgba(64, 158, 255, 0.12);
-  color: #409eff;
+  color: #165dff;
 }
 .stat-card--today .stat-card__value {
-  color: #409eff;
+  color: #165dff;
 }
 
 .stat-card--running .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
-  color: #e6a23c;
+  color: #ff7d00;
 }
 .stat-card--running .stat-card__value {
-  color: #e6a23c;
+  color: #ff7d00;
 }
 
 .stat-card--success .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
-  color: #67c23a;
+  color: #00b42a;
 }
 .stat-card--success .stat-card__value {
-  color: #67c23a;
+  color: #00b42a;
 }
 
 .stat-card--failed .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
-  color: #f56c6c;
+  color: #f53f3f;
 }
 .stat-card--failed .stat-card__value {
-  color: #f56c6c;
+  color: #f53f3f;
 }
 
 /* ── Trend Card ── */
@@ -829,28 +821,11 @@ onBeforeUnmount(() => {
 .main-card {
   border-radius: 8px;
 }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-header__title {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.card-header__actions {
-  display: flex;
-  align-items: center;
-}
-
 /* ── Filter Form ── */
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {
@@ -872,7 +847,7 @@ onBeforeUnmount(() => {
 .batch-bar__info {
   margin-right: auto;
   font-size: 14px;
-  color: #606266;
+  color: #4e5969;
 }
 
 /* ── Table ── */

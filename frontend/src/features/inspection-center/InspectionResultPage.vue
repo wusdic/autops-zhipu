@@ -116,15 +116,13 @@
       </template>
 
       <!-- 表格视图 -->
-      <el-table
-        v-if="viewMode === 'table'"
-        v-loading="loading"
-        :data="resultList"
-        stripe
-        border
-        style="width: 100%"
-        @sort-change="handleSortChange"
-      >
+      <el-table stripe
+ v-if="viewMode === 'table'"
+ v-loading="loading"
+ :data="resultList"border
+ style="width: 100%"
+ @sort-change="handleSortChange"
+ >
         <el-table-column prop="asset_name" label="资产名" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="asset-cell">
@@ -168,7 +166,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="120" align="center" fixed="right">
+        <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleViewDetail(row)">
               详情
@@ -202,7 +200,7 @@
               {{ stat.label }}: {{ stat.count }}
             </el-tag>
           </div>
-          <el-table :data="group.items" border size="small" style="margin-bottom: 16px">
+          <el-table stripe  :data="group.items" border size="small" style="margin-bottom: 16px">
             <el-table-column prop="check_type" label="检查类型" width="140" align="center">
               <template #default="{ row }">
                 <el-tag size="small" type="info">{{ checkTypeLabel(row.check_type) }}</el-tag>
@@ -243,7 +241,7 @@
     </el-card>
 
     <!-- 详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="巡检结果详情" width="700px" destroy-on-close>
+    <el-dialog v-model="detailVisible" title="巡检结果详情" width="780px" destroy-on-close>
       <el-descriptions v-if="currentResult" :column="2" border>
         <el-descriptions-item label="资产名">{{ currentResult.asset_name || currentResult.asset?.name }}</el-descriptions-item>
         <el-descriptions-item label="资产IP">{{ currentResult.asset_ip || currentResult.asset?.ip || '-' }}</el-descriptions-item>
@@ -531,37 +529,15 @@ onMounted(() => {
   .stat-row {
     margin-bottom: 16px;
 
-    .stat-card {
-      .stat-content {
-        text-align: center;
-        padding: 8px 0;
-
-        .stat-label {
-          font-size: 13px;
-          color: #909399;
-          margin-bottom: 4px;
-        }
-
-        .stat-value {
-          font-size: 28px;
-          font-weight: 700;
-          color: #303133;
-
-          &.pass { color: #67c23a; }
-          &.warn { color: #e6a23c; }
-          &.fail { color: #f56c6c; }
+    
+          &.fail { color: #f53f3f; }
         }
       }
     }
   }
 
   .table-card {
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
+    
     .asset-cell {
       display: flex;
       align-items: center;
@@ -589,14 +565,8 @@ onMounted(() => {
     }
   }
 
-  .text-danger {
-    color: #f56c6c;
-  }
-
-  .text-warning {
-    color: #e6a23c;
-  }
-
+  
+  
   .detail-message {
     max-height: 200px;
     overflow-y: auto;

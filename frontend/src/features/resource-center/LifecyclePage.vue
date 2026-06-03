@@ -58,7 +58,7 @@
       </el-row>
 
       <!-- 数据表 -->
-      <el-table :data="tableData" stripe class="data-table">
+      <el-table stripe :data="tableData"class="data-table">
         <el-table-column prop="name" label="资产名称" min-width="160">
           <template #default="{ row }">
             <el-link type="primary" @click="$router.push('/assets/' + row.id)">{{ row.name }}</el-link>
@@ -74,7 +74,7 @@
         <el-table-column prop="nextPhaseTime" label="预计下一阶段" width="170" />
         <el-table-column prop="daysInPhase" label="阶段停留天数" width="120" />
         <el-table-column prop="warranty" label="保修到期" width="130" />
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" size="small" @click="viewTimeline(row)">时间线</el-button>
             <el-button link type="warning" size="small" @click="changePhase(row)">变更阶段</el-button>
@@ -93,7 +93,7 @@
     </el-card>
 
     <!-- 阶段变更对话框 -->
-    <el-dialog v-model="phaseDialogVisible" title="变更生命周期阶段" width="500px">
+    <el-dialog v-model="phaseDialogVisible" title="变更生命周期阶段" width="600px">
       <el-form :model="phaseForm" label-width="100px">
         <el-form-item label="资产名称">
           <el-input :model-value="phaseForm.name" disabled />
@@ -123,7 +123,7 @@
     </el-dialog>
 
     <!-- 时间线对话框 -->
-    <el-dialog v-model="timelineVisible" title="资产生命周期时间线" width="700px">
+    <el-dialog v-model="timelineVisible" title="资产生命周期时间线" width="780px">
       <el-timeline>
         <el-timeline-item
           v-for="item in timelineData"
@@ -203,8 +203,6 @@ const showCreateDialog = ref(false)
 </script>
 
 <style scoped>
-.page-container { padding: 16px; }
-.card-header { display: flex; justify-content: space-between; align-items: center; }
 .stat-row { margin-bottom: 20px; }
 .filter-row { margin-bottom: 16px; }
 .data-table { margin-bottom: 16px; }

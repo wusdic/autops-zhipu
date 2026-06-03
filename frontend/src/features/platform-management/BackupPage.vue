@@ -90,7 +90,7 @@
     </div>
 
     <!-- ── Backup List Table ───────────────────────────────── -->
-    <el-table :data="backups" v-loading="loading" stripe border style="width:100%">
+    <el-table stripe :data="backups" v-loading="loading"border style="width:100%">
       <el-table-column prop="id" label="ID" width="100" show-overflow-tooltip>
         <template #default="{ row }">
           <span style="font-family:monospace;font-size:12px">{{ row.id && String(row.id).length > 12 ? String(row.id).slice(0, 8) + '...' : (row.id || '-') }}</span>
@@ -124,7 +124,7 @@
       <el-table-column label="耗时" width="100" align="right">
         <template #default="{ row }">{{ formatDuration(row) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="240" fixed="right" align="center">
+      <el-table-column label="操作" width="180" fixed="right" align="center">
         <template #default="{ row }">
           <el-button
             size="small"
@@ -194,12 +194,12 @@
     </el-dialog>
 
     <!-- ── Restore Confirmation Dialog ─────────────────────── -->
-    <el-dialog v-model="restoreDialogVisible" title="确认恢复" width="500px" destroy-on-close>
+    <el-dialog v-model="restoreDialogVisible" title="确认恢复" width="600px" destroy-on-close>
       <el-alert type="error" :closable="false" show-icon style="margin-bottom:16px">
         <template #title><strong>危险操作</strong></template>
         恢复操作将覆盖当前所有数据，此操作不可逆！
       </el-alert>
-      <p style="margin:12px 0;color:#606266">确定要恢复到以下备份点吗？</p>
+      <p style="margin:12px 0;color:#4e5969">确定要恢复到以下备份点吗？</p>
       <el-descriptions :column="1" border size="small">
         <el-descriptions-item label="备份ID">{{ restoreTarget.id }}</el-descriptions-item>
         <el-descriptions-item label="文件名">{{ restoreTarget.filename || '—' }}</el-descriptions-item>
@@ -215,7 +215,7 @@
           :status="restoreProgress.status"
           :stroke-width="16"
         />
-        <p style="margin-top:8px;color:#909399;font-size:13px">{{ restoreProgress.message }}</p>
+        <p style="margin-top:8px;color:#86909c;font-size:13px">{{ restoreProgress.message }}</p>
       </div>
 
       <div v-if="!restoreProgress.active" style="margin-top:16px">
@@ -312,9 +312,9 @@ const storageText = computed(() => `${storagePercentage.value}%`)
 
 const storageColor = computed(() => {
   const pct = storagePercentage.value
-  if (pct >= 90) return '#F56C6C'
-  if (pct >= 70) return '#E6A23C'
-  return '#67C23A'
+  if (pct >= 90) return '#f53f3f'
+  if (pct >= 70) return '#ff7d00'
+  return '#00b42a'
 })
 
 const cronDescription = computed(() => {
@@ -564,19 +564,17 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.page-header h2 { margin: 0; font-size: 20px; color: #303133; }
+.page-header h2 { margin: 0; font-size: 20px; color: #1d2129; }
 .header-actions { display: flex; gap: 8px; }
 
 .storage-card { margin-bottom: 16px; }
 .storage-body { padding: 4px 0; }
-.storage-detail { margin-top: 12px; color: #606266; font-size: 13px; }
-.storage-detail strong { color: #303133; }
+.storage-detail { margin-top: 12px; color: #4e5969; font-size: 13px; }
+.storage-detail strong { color: #1d2129; }
 
 .settings-card { margin-bottom: 16px; }
-.card-title { font-weight: 600; font-size: 15px; color: #303133; }
-.form-hint { color: #909399; font-size: 13px; }
+.form-hint { color: #86909c; font-size: 13px; }
 
 /* Coming soon */
 .coming-soon-wrapper {

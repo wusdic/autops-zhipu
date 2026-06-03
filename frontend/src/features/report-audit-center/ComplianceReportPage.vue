@@ -32,8 +32,8 @@
           <template #header><span>检查项统计</span></template>
           <el-descriptions :column="1" border>
             <el-descriptions-item label="总检查项">{{ checkStats.total }}</el-descriptions-item>
-            <el-descriptions-item label="通过"><span style="color: #67C23A">{{ checkStats.passed }}</span></el-descriptions-item>
-            <el-descriptions-item label="不合规"><span style="color: #F56C6C">{{ checkStats.failed }}</span></el-descriptions-item>
+            <el-descriptions-item label="通过"><span style="color: #00b42a">{{ checkStats.passed }}</span></el-descriptions-item>
+            <el-descriptions-item label="不合规"><span style="color: #f53f3f">{{ checkStats.failed }}</span></el-descriptions-item>
             <el-descriptions-item label="不适用">{{ checkStats.na }}</el-descriptions-item>
           </el-descriptions>
         </el-card>
@@ -68,7 +68,7 @@
           </el-form>
         </div>
       </template>
-      <el-table :data="reports" v-loading="loading" stripe border>
+      <el-table stripe :data="reports" v-loading="loading"border>
         <el-table-column prop="name" label="报告名称" min-width="250" />
         <el-table-column prop="standard" label="合规标准" width="140">
           <template #default="{ row }">
@@ -77,17 +77,17 @@
         </el-table-column>
         <el-table-column prop="score" label="合规评分" width="120">
           <template #default="{ row }">
-            <span :style="{ color: row.score >= 90 ? '#67C23A' : row.score >= 70 ? '#E6A23C' : '#F56C6C', fontWeight: 'bold' }">
+            <span :style="{ color: row.score >= 90 ? '#00b42a' : row.score >= 70 ? '#ff7d00' : '#f53f3f', fontWeight: 'bold' }">
               {{ row.score }}分
             </span>
           </template>
         </el-table-column>
         <el-table-column prop="total_checks" label="检查项" width="90" />
         <el-table-column prop="passed" label="通过" width="80">
-          <template #default="{ row }"><span style="color: #67C23A">{{ row.passed }}</span></template>
+          <template #default="{ row }"><span style="color: #00b42a">{{ row.passed }}</span></template>
         </el-table-column>
         <el-table-column prop="failed" label="不合规" width="90">
-          <template #default="{ row }"><span style="color: #F56C6C">{{ row.failed }}</span></template>
+          <template #default="{ row }"><span style="color: #f53f3f">{{ row.failed }}</span></template>
         </el-table-column>
         <el-table-column prop="generated_at" label="生成时间" width="180" />
         <el-table-column label="操作" width="180" fixed="right">
@@ -123,9 +123,9 @@ const riskStats = ref({ high: 0, medium: 0, low: 0, fixed: 0 })
 
 
 const scoreColor = computed(() => {
-  if (complianceScore.value >= 90) return '#67C23A'
-  if (complianceScore.value >= 70) return '#E6A23C'
-  return '#F56C6C'
+  if (complianceScore.value >= 90) return '#00b42a'
+  if (complianceScore.value >= 70) return '#ff7d00'
+  return '#f53f3f'
 })
 
 const standardMap: Record<string, string> = { mlps_2: '等保2.0', iso_27001: 'ISO 27001', cis: 'CIS Benchmark', gdpr: 'GDPR' }
@@ -176,5 +176,5 @@ onMounted(loadData)
 .compliance-report-page { padding: 20px; }
 .mt-4 { margin-top: 16px; }
 .score-circle { text-align: center; padding: 20px; }
-.score-label { margin-top: 12px; font-size: 16px; color: #606266; }
+.score-label { margin-top: 12px; font-size: 16px; color: #4e5969; }
 </style>

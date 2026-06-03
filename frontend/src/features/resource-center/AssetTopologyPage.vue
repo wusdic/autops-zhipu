@@ -48,13 +48,13 @@
         <span style="font-weight:bold">影响分析: {{ selectedNode.name }} ({{ selectedNode.asset_type }})</span>
       </template>
       <div style="display:flex;gap:24px;margin-top:4px">
-        <span>直接依赖: <strong style="color:#f56c6c">{{ impactAnalysis.directDeps }}</strong></span>
-        <span>间接依赖: <strong style="color:#e6a23c">{{ impactAnalysis.indirectDeps }}</strong></span>
-        <span>影响服务: <strong style="color:#f56c6c">{{ impactAnalysis.affectedServices }}</strong></span>
+        <span>直接依赖: <strong style="color:#f53f3f">{{ impactAnalysis.directDeps }}</strong></span>
+        <span>间接依赖: <strong style="color:#ff7d00">{{ impactAnalysis.indirectDeps }}</strong></span>
+        <span>影响服务: <strong style="color:#f53f3f">{{ impactAnalysis.affectedServices }}</strong></span>
         <span>影响路径: <strong>{{ impactAnalysis.totalPaths }}</strong> 条</span>
       </div>
       <div v-if="impactAffectedList.length" style="margin-top:8px">
-        <span style="color:#909399;font-size:13px">受影响节点：</span>
+        <span style="color:#86909c;font-size:13px">受影响节点：</span>
         <el-tag v-for="n in impactAffectedList" :key="n.id" :type="n.health_status==='healthy'?'info':'danger'" size="small" style="margin:2px">{{ n.name }}</el-tag>
       </div>
     </el-alert>
@@ -65,9 +65,9 @@
         <div class="topology-canvas" ref="canvasRef" @mousedown="startDrag" @mousemove="onDrag" @mouseup="endDrag" @mouseleave="endDrag" @wheel.prevent="onWheel">
           <svg :width="canvasW" :height="canvasH" :viewBox="`${viewX} ${viewY} ${canvasW/zoom} ${canvasH/zoom}`" style="background:#fafbfc">
             <defs>
-              <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#c0c4cc" /></marker>
-              <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f56c6c" /></marker>
-              <marker id="arrow-highlight" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#409eff" /></marker>
+              <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#c9cdd4" /></marker>
+              <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f53f3f" /></marker>
+              <marker id="arrow-highlight" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#165dff" /></marker>
               <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
               <filter id="shadow"><feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="#00000020" /></filter>
             </defs>
@@ -87,7 +87,7 @@
                     :marker-end="isImpactEdge(edge)?'url(#arrow-red)':isSearchEdge(edge)?'url(#arrow-highlight)':'url(#arrow)'" />
               <text :x="(getNode(edge.source_id)?.x+getNode(edge.target_id)?.x)/2"
                     :y="(getNode(edge.source_id)?.y+getNode(edge.target_id)?.y)/2 - 6"
-                    font-size="9" :fill="isImpactEdge(edge)?'#f56c6c':'#b0b0b0'" text-anchor="middle">
+                    font-size="9" :fill="isImpactEdge(edge)?'#f53f3f':'#b0b0b0'" text-anchor="middle">
                 {{ relationLabel(edge.relation_type) }}
               </text>
             </g>
@@ -127,16 +127,16 @@
           </div>
           <div class="legend-section">
             <div class="legend-title">健康状态</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#67c23a"></span> 健康</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#e6a23c"></span> 告警</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#f56c6c"></span> 故障</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#909399"></span> 未知</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#00b42a"></span> 健康</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#ff7d00"></span> 告警</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f53f3f"></span> 故障</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#86909c"></span> 未知</div>
           </div>
           <div class="legend-section">
             <div class="legend-title">关系类型</div>
             <div class="legend-item"><span class="legend-line"></span> 依赖</div>
-            <div class="legend-item"><span class="legend-line" style="border-top:2px dashed #c0c4cc"></span> 备份</div>
-            <div class="legend-item"><span class="legend-line" style="border-top:2px solid #f56c6c"></span> 影响路径</div>
+            <div class="legend-item"><span class="legend-line" style="border-top:2px dashed #c9cdd4"></span> 备份</div>
+            <div class="legend-item"><span class="legend-line" style="border-top:2px solid #f53f3f"></span> 影响路径</div>
           </div>
           </div>
         </div>
@@ -155,7 +155,7 @@
           </el-descriptions>
 
           <h4 style="margin:10px 0 6px;font-size:13px">关联关系</h4>
-          <el-table :data="nodeRelations" stripe size="small" max-height="200">
+          <el-table stripe :data="nodeRelations"size="small" max-height="200">
             <el-table-column prop="relation_type" label="类型" width="70">
               <template #default="{ row }">{{ relationLabel(row.relation_type) }}</template>
             </el-table-column>
@@ -188,7 +188,7 @@
             <svg width="100%" height="120" :viewBox="minimapViewBox">
               <g v-for="node in filteredNodes" :key="'m'+node.id">
                 <circle :cx="node.x" :cy="node.y" r="4"
-                  :fill="node.id===selectedNode?.id?'#409eff':isImpactNode(node)?'#f56c6c':typeColor(node.asset_type)" />
+                  :fill="node.id===selectedNode?.id?'#165dff':isImpactNode(node)?'#f53f3f':typeColor(node.asset_type)" />
               </g>
               <g v-for="(edge, i) in filteredEdges" :key="'me'+i">
                 <line :x1="getNode(edge.source_id)?.x||0" :y1="getNode(edge.source_id)?.y||0"
@@ -238,8 +238,8 @@ const impactEdges = ref<Set<number>>(new Set())
 const searchMatchNodes = ref<Set<string>>(new Set())
 
 const typeColors: Record<string, string> = {
-  linux_server: '#67c23a', windows_server: '#409eff', database: '#e6a23c',
-  web_service: '#909399', network_device: '#9b59b6', security_device: '#f56c6c',
+  linux_server: '#00b42a', windows_server: '#165dff', database: '#ff7d00',
+  web_service: '#86909c', network_device: '#9b59b6', security_device: '#f53f3f',
 }
 
 const healthyCount = computed(() => nodes.value.filter(n => (n.health_status || n.status) === 'healthy').length)
@@ -283,16 +283,16 @@ function isImpactNode(node: any) { return impactMode.value && impactNodes.value.
 function isHighlighted(node: any) { return searchMatchNodes.value.has(node.id) || node.id === selectedNode?.value?.id }
 function isSearchEdge(edge: any) { return searchMatchNodes.value.has(edge.source_id) && searchMatchNodes.value.has(edge.target_id) }
 
-function typeColor(t: string) { return typeColors[t] || '#606266' }
+function typeColor(t: string) { return typeColors[t] || '#4e5969' }
 function typeLabel(t: string) { return ({ linux_server:'Linux', windows_server:'Windows', database:'数据库', web_service:'Web服务', network_device:'网络设备', security_device:'安全设备' })[t] || t }
 function relationLabel(r: string) { return ({ depends_on:'依赖', contains:'包含', connected_to:'连接', hosts:'承载', backs_up:'备份' })[r] || r }
-function healthColor(s: string) { return ({ healthy:'#67c23a', warning:'#e6a23c', critical:'#f56c6c' })[s] || '#909399' }
+function healthColor(s: string) { return ({ healthy:'#00b42a', warning:'#ff7d00', critical:'#f53f3f' })[s] || '#86909c' }
 function healthTagType(s: string) { return ({ healthy:'success', warning:'warning', critical:'danger' })[s] || 'info' }
 function truncate(s: string, n: number) { return s?.length > n ? s.substring(0, n) + '…' : s || '' }
 
 function getNodeFill(node: any) {
-  if (node.id === selectedNode.value?.id) return '#409eff'
-  if (isImpactNode(node)) return '#f56c6c'
+  if (node.id === selectedNode.value?.id) return '#165dff'
+  if (isImpactNode(node)) return '#f53f3f'
   if (searchMatchNodes.value.has(node.id)) return '#3399ff'
   return typeColor(node.asset_type)
 }
@@ -304,8 +304,8 @@ function getNodeStroke(node: any) {
 }
 
 function getEdgeColor(edge: any) {
-  if (isImpactEdge(edge)) return '#f56c6c'
-  if (isSearchEdge(edge)) return '#409eff'
+  if (isImpactEdge(edge)) return '#f53f3f'
+  if (isSearchEdge(edge)) return '#165dff'
   return '#d0d0d0'
 }
 
@@ -472,28 +472,25 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
 .stat-row { margin-bottom: 16px; }
-.stat-card { text-align: center; }
-.stat-card .stat-value { font-size: 22px; font-weight: bold; }
-.stat-card.success .stat-value { color: #67c23a; }
-.stat-card.primary .stat-value { color: #409eff; }
-.stat-card.warning .stat-value { color: #e6a23c; }
-.stat-card.danger .stat-value { color: #f56c6c; }
-.stat-card .stat-label { font-size: 12px; color: #909399; margin-top: 2px; }
-
+.stat-card 
+.stat-card.success .stat-value { color: #00b42a; }
+.stat-card.primary .stat-value { color: #165dff; }
+.stat-card.warning .stat-value { color: #ff7d00; }
+.stat-card.danger .stat-value { color: #f53f3f; }
+.stat-card 
 .toolbar { margin-bottom: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.topology-canvas { border: 1px solid #e4e7ed; border-radius: 8px; overflow: hidden; cursor: grab; user-select: none; position: relative; }
+.topology-canvas { border: 1px solid #e5e6eb; border-radius: 8px; overflow: hidden; cursor: grab; user-select: none; position: relative; }
 .topology-canvas:active { cursor: grabbing; }
 .zoom-indicator { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.5); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
 
 .legend-card { font-size: 13px; }
 .legend-section { margin-bottom: 10px; }
 .legend-section:last-child { margin-bottom: 0; }
-.legend-title { font-weight: bold; color: #606266; margin-bottom: 4px; font-size: 12px; }
-.legend-item { display: flex; align-items: center; gap: 6px; padding: 2px 0; font-size: 12px; color: #606266; }
+.legend-title { font-weight: bold; color: #4e5969; margin-bottom: 4px; font-size: 12px; }
+.legend-item { display: flex; align-items: center; gap: 6px; padding: 2px 0; font-size: 12px; color: #4e5969; }
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-.legend-line { width: 20px; border-top: 2px solid #c0c4cc; display: inline-block; }
+.legend-line { width: 20px; border-top: 2px solid #c9cdd4; display: inline-block; }
 
-.minimap { background: #f5f7fa; border-radius: 4px; border: 1px solid #ebeef5; }
+.minimap { background: #f7f8fa; border-radius: 4px; border: 1px solid #e5e6eb; }
 </style>

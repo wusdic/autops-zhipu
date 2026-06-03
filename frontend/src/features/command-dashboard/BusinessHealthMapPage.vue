@@ -131,7 +131,7 @@
             <!-- 该系统告警列表 -->
             <div style="margin-top: 12px">
               <div style="font-weight: 600; margin-bottom: 8px; font-size: 13px">最近告警</div>
-              <el-table :data="systemAlerts" size="small" stripe v-loading="sysAlertLoading" empty-text="暂无告警" max-height="200">
+              <el-table stripe :data="systemAlerts" size="small"v-loading="sysAlertLoading" empty-text="暂无告警" max-height="200">
                 <el-table-column prop="title" label="告警" min-width="120" show-overflow-tooltip />
                 <el-table-column prop="severity" label="级别" width="60">
                   <template #default="{ row }">

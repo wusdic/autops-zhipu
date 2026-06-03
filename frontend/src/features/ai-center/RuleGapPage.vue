@@ -73,13 +73,11 @@
         <el-tag v-if="analysisDone" type="info" size="small">共 {{ gapResults.length }} 条缺口</el-tag>
       </div>
 
-      <el-table
-        v-loading="loading"
-        :data="filteredResults"
-        stripe
-        style="width: 100%"
-        :default-sort="{ prop: 'gap_score', order: 'descending' }"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="filteredResults"style="width: 100%"
+ :default-sort="{ prop: 'gap_score', order: 'descending' }"
+ >
         <el-table-column prop="event_type" label="事件类型" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <div class="event-type-cell">
@@ -134,7 +132,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="row.alert_rule_count === 0"
@@ -204,9 +202,9 @@ const coveragePercent = computed(() => {
 })
 
 const coverageColor = computed(() => {
-  if (coveragePercent.value >= 80) return '#67C23A'
-  if (coveragePercent.value >= 50) return '#E6A23C'
-  return '#F56C6C'
+  if (coveragePercent.value >= 80) return '#00b42a'
+  if (coveragePercent.value >= 50) return '#ff7d00'
+  return '#f53f3f'
 })
 
 const filteredResults = computed(() => {
@@ -219,10 +217,10 @@ const filteredResults = computed(() => {
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 function gapSeverityColor(score: number): string {
-  if (score >= 80) return '#f56c6c'
-  if (score >= 50) return '#e6a23c'
-  if (score >= 20) return '#409eff'
-  return '#67c23a'
+  if (score >= 80) return '#f53f3f'
+  if (score >= 50) return '#ff7d00'
+  if (score >= 20) return '#165dff'
+  return '#00b42a'
 }
 
 function applyFilter() {
@@ -348,7 +346,7 @@ onMounted(() => {
 .autops-page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   display: flex;
   align-items: center;
 }
@@ -359,32 +357,11 @@ onMounted(() => {
 .summary-row {
   margin-bottom: 0;
 }
-.stat-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-}
 .stat-content {
   display: flex;
   flex-direction: column;
 }
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #303133;
-  line-height: 1.2;
-}
-.stat-label {
-  font-size: 13px;
-  color: #909399;
-  margin-top: 4px;
-}
-.text-primary { color: #409eff !important; }
-.text-success { color: #67c23a !important; }
-.text-danger { color: #f56c6c !important; }
-.text-warning { color: #e6a23c !important; }
-.text-muted { color: #c0c4cc; }
+.text-muted { color: #c9cdd4; }
 .autops-card-header {
   display: flex;
   align-items: center;
@@ -394,7 +371,7 @@ onMounted(() => {
 .autops-card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
 }
 .event-type-cell {
   display: flex;
@@ -405,12 +382,12 @@ onMounted(() => {
 }
 .suggestion-cell {
   font-size: 13px;
-  color: #606266;
+  color: #4e5969;
 }
 .coverage-legend {
   margin-top: 8px;
   font-size: 13px;
-  color: #909399;
+  color: #86909c;
 }
 .table-filter-row {
   margin-top: 16px;

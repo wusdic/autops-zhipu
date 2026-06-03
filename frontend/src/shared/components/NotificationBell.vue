@@ -93,7 +93,7 @@ function fmtTime(t: string) {
 }
 
 function iconColor(type: string) {
-  return ({ alert: '#f56c6c', approval: '#e6a23c', info: '#409eff', system: '#909399' })[type] || '#909399'
+  return ({ alert: '#f53f3f', approval: '#ff7d00', info: '#165dff', system: '#86909c' })[type] || '#86909c'
 }
 
 async function loadNotifications() {
@@ -159,20 +159,20 @@ onUnmounted(() => { if (unsubscribe) unsubscribe() })
 
 <style scoped>
 .notification-panel { margin: -12px; }
-.notification-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #ebeef5; }
+.notification-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #e5e6eb; }
 .notification-header .title { font-weight: bold; font-size: 15px; }
 .notification-list { max-height: 400px; overflow-y: auto; }
 .notification-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #f2f3f5; cursor: pointer; transition: background 0.2s; }
-.notification-item:hover { background: #f5f7fa; }
+.notification-item:hover { background: #f7f8fa; }
 .notification-item.unread { background: #ecf5ff; }
 .notification-item.unread:hover { background: #d9ecff; }
 .notification-icon { flex-shrink: 0; margin-top: 2px; }
 .notification-content { flex: 1; min-width: 0; }
-.notification-title { font-size: 13px; font-weight: 500; color: #303133; }
-.notification-desc { font-size: 12px; color: #909399; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.notification-time { font-size: 11px; color: #c0c4cc; margin-top: 4px; }
+.notification-title { font-size: 13px; font-weight: 500; color: #1d2129; }
+.notification-desc { font-size: 12px; color: #86909c; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.notification-time { font-size: 11px; color: #c9cdd4; margin-top: 4px; }
 .empty-state { padding: 20px; }
-.notification-footer { padding: 8px 12px; text-align: center; border-top: 1px solid #ebeef5; }
+.notification-footer { padding: 8px 12px; text-align: center; border-top: 1px solid #e5e6eb; }
 .tab-badge { margin-left: 4px; }
 .tab-badge :deep(.el-badge__content) { font-size: 10px; }
 </style>

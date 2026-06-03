@@ -42,13 +42,11 @@
           </el-button>
         </div>
       </template>
-      <el-table
-        :data="recentTasks"
-        v-loading="tasksLoading"
-        stripe
-        empty-text="暂无报告任务"
-        style="width: 100%"
-      >
+      <el-table stripe
+ :data="recentTasks"
+ v-loading="tasksLoading"empty-text="暂无报告任务"
+ style="width: 100%"
+ >
         <el-table-column prop="title" label="报告名" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
             <el-link type="primary" @click="router.push(`/report-audit/tasks/${row.id}`)">
@@ -80,7 +78,7 @@
             <span>{{ formatDuration(row) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="140" align="center" fixed="right">
+        <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="row.status === 'completed' || row.status === 'success'"
@@ -434,21 +432,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
-  background: #f7f8fa;
-  min-height: 100%;
-}
-
 .stat-row {
   margin-bottom: 16px;
 }
-
-.stat-card {
-  cursor: default;
-  transition: transform 0.2s;
-}
-
 .stat-card-clickable {
   cursor: pointer;
 }
@@ -492,19 +478,6 @@ onMounted(() => {
 .main-card {
   margin-bottom: 16px;
 }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1d2129;
-}
-
 .text-muted {
   color: #86909c;
   font-size: 13px;

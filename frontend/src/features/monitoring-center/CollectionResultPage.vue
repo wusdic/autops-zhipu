@@ -41,14 +41,12 @@
         </el-form>
 
         <!-- ========== Table ========== -->
-        <el-table
-          :data="tableData"
-          v-loading="loading"
-          stripe
-          border
-          empty-text="暂无数据"
-          class="result-table"
-        >
+        <el-table stripe
+ :data="tableData"
+ v-loading="loading"border
+ empty-text="暂无数据"
+ class="result-table"
+ >
           <el-table-column prop="asset_name" label="资产名" min-width="160" show-overflow-tooltip />
           <el-table-column prop="collector_type" label="采集器类型" min-width="130" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="100" align="center">
@@ -100,7 +98,7 @@
     <el-dialog
       v-model="detailVisible"
       title="采集结果详情"
-      width="640px"
+      width="600px"
       destroy-on-close
     >
       <el-descriptions :column="2" border v-if="currentRow">
@@ -258,7 +256,7 @@ onMounted(() => {
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {
@@ -274,17 +272,12 @@ onMounted(() => {
   justify-content: flex-end;
   margin-top: 16px;
 }
-
-.text-danger {
-  color: #f56c6c;
-}
-
 .raw-data-pre {
   max-height: 200px;
   overflow: auto;
   margin: 0;
   padding: 8px;
-  background: #f5f7fa;
+  background: #f7f8fa;
   border-radius: 4px;
   font-size: 12px;
   line-height: 1.5;

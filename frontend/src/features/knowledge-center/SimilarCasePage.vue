@@ -92,14 +92,12 @@
         <div class="autops-card-title">搜索结果</div>
         <el-tag type="info" size="small">共 {{ searchResults.length }} 条</el-tag>
       </div>
-      <el-table
-        v-loading="loading"
-        :data="searchResults"
-        stripe
-        style="width: 100%"
-        :default-sort="{ prop: 'similarity', order: 'descending' }"
-        @sort-change="onSortChange"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="searchResults"style="width: 100%"
+ :default-sort="{ prop: 'similarity', order: 'descending' }"
+ @sort-change="onSortChange"
+ >
         <el-table-column prop="title" label="案例标题" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="case-title" @click="viewDetail(row)">{{ row.title }}</span>
@@ -138,7 +136,7 @@
         <el-table-column prop="occurred_at" label="发生时间" width="170">
           <template #default="{ row }">{{ formatTime(row.occurred_at || row.created_at) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="viewDetail(row)">详情</el-button>
             <el-button text type="success" size="small" @click="applySolution(row)">应用</el-button>
@@ -213,9 +211,9 @@ const resolvedCount = computed(() => {
 // ─── Helpers ─────────────────────────────────────────────────────────
 function similarityColor(val: number): string {
   if (val >= 80) return '#00b42a'
-  if (val >= 60) return '#409eff'
+  if (val >= 60) return '#165dff'
   if (val >= 40) return '#ff7d00'
-  return '#909399'
+  return '#86909c'
 }
 
 function formatTime(t: string): string {
@@ -308,7 +306,7 @@ onMounted(() => {
 .autops-page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   display: flex;
   align-items: center;
 }
@@ -318,29 +316,12 @@ onMounted(() => {
 .stats-row {
   margin-top: 16px;
 }
-.stat-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-}
 .stat-content {
   display: flex;
   flex-direction: column;
 }
-.stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #303133;
-  line-height: 1.2;
-}
-.stat-label {
-  font-size: 13px;
-  color: #909399;
-  margin-top: 4px;
-}
 .case-title {
-  color: #409eff;
+  color: #165dff;
   cursor: pointer;
   font-weight: 500;
 }
@@ -359,7 +340,7 @@ onMounted(() => {
 .autops-card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
 }
 .detail-resolution {
   white-space: pre-wrap;

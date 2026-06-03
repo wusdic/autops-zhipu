@@ -14,7 +14,7 @@
         <div class="autops-card stat-card stat-events">
           <div class="autops-card-body">
             <div class="stat-card-inner">
-              <el-icon :size="36" color="#E6A23C"><Bell /></el-icon>
+              <el-icon :size="36" color="#ff7d00"><Bell /></el-icon>
               <div class="stat-card-info">
                 <div class="stat-card-value">{{ overview.activeEvents24h }}</div>
                 <div class="stat-card-label">24h 活跃事件</div>
@@ -27,7 +27,7 @@
         <div class="autops-card stat-card stat-alerts">
           <div class="autops-card-body">
             <div class="stat-card-inner">
-              <el-icon :size="36" color="#F56C6C"><WarningFilled /></el-icon>
+              <el-icon :size="36" color="#f53f3f"><WarningFilled /></el-icon>
               <div class="stat-card-info">
                 <div class="stat-card-value">{{ overview.activeAlerts }}</div>
                 <div class="stat-card-label">活跃告警</div>
@@ -40,7 +40,7 @@
         <div class="autops-card stat-card stat-assets">
           <div class="autops-card-body">
             <div class="stat-card-inner">
-              <el-icon :size="36" color="#409EFF"><Monitor /></el-icon>
+              <el-icon :size="36" color="#165dff"><Monitor /></el-icon>
               <div class="stat-card-info">
                 <div class="stat-card-value">{{ overview.totalAssets }}</div>
                 <div class="stat-card-label">监控资产总数</div>
@@ -53,7 +53,7 @@
         <div class="autops-card stat-card stat-rate">
           <div class="autops-card-body">
             <div class="stat-card-inner">
-              <el-icon :size="36" color="#67C23A"><CircleCheckFilled /></el-icon>
+              <el-icon :size="36" color="#00b42a"><CircleCheckFilled /></el-icon>
               <div class="stat-card-info">
                 <div class="stat-card-value">{{ overview.collectionRate }}<span class="stat-unit">%</span></div>
                 <div class="stat-card-label">采集成功率</div>
@@ -171,7 +171,7 @@
         <el-button text type="primary" @click="loadChanges">刷新</el-button>
       </div>
       <div class="autops-card-body">
-        <el-table :data="changes" v-loading="changesLoading" stripe>
+        <el-table stripe :data="changes" v-loading="changesLoading">
           <el-table-column label="资产" min-width="140" show-overflow-tooltip>
             <template #default="{ row }">
               <span style="font-family:monospace;font-size:12px">{{ row.asset_id?.substring(0,8) || '-' }}</span>
@@ -262,11 +262,11 @@ const trendLoading = ref(false)
 const trendSeries = ref<Array<{ name: string; data: Array<{ time: string; value: number }>; color: string }>>([])
 
 const severityColors: Record<string, string> = {
-  critical: '#F56C6C',
-  high: '#E6A23C',
-  medium: '#409EFF',
-  low: '#67C23A',
-  info: '#909399',
+  critical: '#f53f3f',
+  high: '#ff7d00',
+  medium: '#165dff',
+  low: '#00b42a',
+  info: '#86909c',
 }
 
 async function loadEventTrend() {
@@ -282,7 +282,7 @@ async function loadEventTrend() {
           time: t.time ?? t.hour ?? '',
           value: t.value ?? t.count ?? 0,
         })),
-        color: severityColors[s.severity ?? s.name] ?? '#409EFF',
+        color: severityColors[s.severity ?? s.name] ?? '#165dff',
       }))
     } else if (data.code === 0 && Array.isArray(data.data?.items)) {
       // 降级：接口不按 severity 分组时单线显示
@@ -292,7 +292,7 @@ async function loadEventTrend() {
           time: t.time ?? t.hour ?? '',
           value: t.value ?? t.count ?? 1,
         })),
-        color: '#409EFF',
+        color: '#165dff',
       }]
     }
   } catch {
@@ -378,9 +378,9 @@ function barWidth(count: number) {
 
 function barColor(count: number) {
   const ratio = count / maxAlertCount.value
-  if (ratio > 0.7) return '#F56C6C'
-  if (ratio > 0.4) return '#E6A23C'
-  return '#409EFF'
+  if (ratio > 0.7) return '#f53f3f'
+  if (ratio > 0.4) return '#ff7d00'
+  return '#165dff'
 }
 
 async function loadTopAlertAssets() {
@@ -470,23 +470,17 @@ onMounted(() => {
 .stat-unit {
   font-size: 14px;
   font-weight: 400;
-  color: #909399;
+  color: #86909c;
   margin-left: 2px;
 }
 
 .stat-card-label {
   font-size: 13px;
-  color: #909399;
+  color: #86909c;
   margin-top: 2px;
 }
 
 /* ---- 通用卡片头部 ---- */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 /* ---- 最近事件列表 ---- */
 .recent-events-list {
   max-height: 520px;
@@ -522,7 +516,7 @@ onMounted(() => {
 
 .recent-event-time {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
   margin-top: 4px;
 }
 
@@ -543,8 +537,8 @@ onMounted(() => {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #f5f7fa;
-  color: #606266;
+  background: #f7f8fa;
+  color: #4e5969;
   font-size: 12px;
   font-weight: 600;
   display: flex;
@@ -555,17 +549,17 @@ onMounted(() => {
 
 .top-asset-item:nth-child(1) .top-asset-rank {
   background: #fef0f0;
-  color: #f56c6c;
+  color: #f53f3f;
 }
 
 .top-asset-item:nth-child(2) .top-asset-rank {
   background: #fdf6ec;
-  color: #e6a23c;
+  color: #ff7d00;
 }
 
 .top-asset-item:nth-child(3) .top-asset-rank {
   background: #ecf5ff;
-  color: #409eff;
+  color: #165dff;
 }
 
 .top-asset-name {
@@ -597,7 +591,7 @@ onMounted(() => {
 .top-asset-count {
   font-size: 13px;
   font-weight: 600;
-  color: #606266;
+  color: #4e5969;
   flex-shrink: 0;
 }
 </style>

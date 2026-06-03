@@ -54,13 +54,11 @@
       </el-row>
 
       <!-- Table -->
-      <el-table
-        v-loading="loading"
-        :data="tableData"
-        stripe
-        style="width: 100%"
-        @sort-change="onSortChange"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="tableData"style="width: 100%"
+ @sort-change="onSortChange"
+ >
         <el-table-column prop="title" label="标题" min-width="220" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="title-text" @click="openReview(row)">{{ row.title }}</span>
@@ -84,7 +82,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
             <template v-if="row.status === 'pending_review'">
               <el-button text type="primary" size="small" @click="openReview(row)">审核</el-button>
@@ -117,7 +115,7 @@
     </div>
 
     <!-- Review Dialog -->
-    <el-dialog v-model="reviewDialogVisible" title="知识审核" width="700" destroy-on-close>
+    <el-dialog v-model="reviewDialogVisible" title="知识审核" width="780px" destroy-on-close>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="标题" :span="2">{{ currentItem.title }}</el-descriptions-item>
         <el-descriptions-item label="分类">{{ categoryLabel(currentItem.category) }}</el-descriptions-item>
@@ -396,7 +394,7 @@ onMounted(() => {
 .autops-page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   display: flex;
   align-items: center;
 }
@@ -404,7 +402,7 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 .title-text {
-  color: #409eff;
+  color: #165dff;
   cursor: pointer;
   font-weight: 500;
 }

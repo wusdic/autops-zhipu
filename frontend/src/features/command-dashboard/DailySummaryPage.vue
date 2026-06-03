@@ -58,7 +58,7 @@
             <el-tag type="danger" size="small">{{ alertStats.firing || 0 }} 活跃</el-tag>
           </div>
           <div class="autops-card-body" style="padding: 0">
-            <el-table :data="todayAlerts" stripe size="small" v-loading="alertsLoading" empty-text="今日暂无告警" max-height="300">
+            <el-table stripe :data="todayAlerts"size="small" v-loading="alertsLoading" empty-text="今日暂无告警" max-height="300">
               <el-table-column prop="created_at" label="时间" width="80">
                 <template #default="{ row }">
                   <span class="text-tertiary">{{ formatTime(row.created_at) }}</span>
@@ -85,7 +85,7 @@
             <div class="autops-card-title">今日异常</div>
           </div>
           <div class="autops-card-body" style="padding: 0">
-            <el-table :data="todayAnomalies" stripe size="small" v-loading="anomaliesLoading" empty-text="今日暂无异常" max-height="250">
+            <el-table stripe :data="todayAnomalies"size="small" v-loading="anomaliesLoading" empty-text="今日暂无异常" max-height="250">
               <el-table-column prop="created_at" label="时间" width="80">
                 <template #default="{ row }">
                   <span class="text-tertiary">{{ formatTime(row.created_at) }}</span>
@@ -112,7 +112,7 @@
             <div class="autops-card-title">今日自动化执行</div>
           </div>
           <div class="autops-card-body" style="padding: 0">
-            <el-table :data="todayExecutions" stripe size="small" v-loading="execLoading" empty-text="今日暂无执行" max-height="250">
+            <el-table stripe :data="todayExecutions"size="small" v-loading="execLoading" empty-text="今日暂无执行" max-height="250">
               <el-table-column prop="created_at" label="时间" width="80">
                 <template #default="{ row }">
                   <span class="text-tertiary">{{ formatTime(row.created_at) }}</span>

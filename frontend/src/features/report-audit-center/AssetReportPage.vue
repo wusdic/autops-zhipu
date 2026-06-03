@@ -96,14 +96,12 @@
             <span class="autops-card-title">资产类型分布</span>
           </div>
           <div class="autops-card-body">
-            <el-table
-              :data="typeDistribution"
-              v-loading="statsLoading"
-              stripe
-              size="small"
-              empty-text="暂无数据"
-              max-height="200"
-            >
+            <el-table stripe
+ :data="typeDistribution"
+ v-loading="statsLoading"size="small"
+ empty-text="暂无数据"
+ max-height="200"
+ >
               <el-table-column prop="type" label="类型" min-width="120">
                 <template #default="{ row }">
                   <span>{{ assetTypeLabel(row.type) }}</span>
@@ -168,14 +166,12 @@
           </el-form-item>
         </el-form>
 
-        <el-table
-          :data="assets"
-          v-loading="loading"
-          stripe
-          border
-          row-key="id"
-          class="asset-table"
-        >
+        <el-table stripe
+ :data="assets"
+ v-loading="loading"border
+ row-key="id"
+ class="asset-table"
+ >
           <el-table-column prop="name" label="资产名称" min-width="160" show-overflow-tooltip />
           <el-table-column prop="type" label="类型" width="110" align="center">
             <template #default="{ row }">
@@ -396,12 +392,6 @@ onMounted(() => {
 .stats-row {
   margin-bottom: 16px;
 }
-
-.stat-card {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
 .stat-card__body {
   display: flex;
   align-items: center;
@@ -432,23 +422,23 @@ onMounted(() => {
 
 .stat-card__label {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
   margin-top: 2px;
 }
 
-.stat-card--total .stat-card__icon { background: rgba(64, 158, 255, 0.12); color: #409eff; }
-.stat-card--total .stat-card__value { color: #409eff; }
-.stat-card--online .stat-card__icon { background: rgba(103, 194, 58, 0.12); color: #67c23a; }
-.stat-card--online .stat-card__value { color: #67c23a; }
-.stat-card--offline .stat-card__icon { background: rgba(144, 147, 153, 0.12); color: #909399; }
-.stat-card--offline .stat-card__value { color: #909399; }
-.stat-card--abnormal .stat-card__icon { background: rgba(245, 108, 108, 0.12); color: #f56c6c; }
-.stat-card--abnormal .stat-card__value { color: #f56c6c; }
+.stat-card--total .stat-card__icon { background: rgba(64, 158, 255, 0.12); color: #165dff; }
+.stat-card--total .stat-card__value { color: #165dff; }
+.stat-card--online .stat-card__icon { background: rgba(103, 194, 58, 0.12); color: #00b42a; }
+.stat-card--online .stat-card__value { color: #00b42a; }
+.stat-card--offline .stat-card__icon { background: rgba(144, 147, 153, 0.12); color: #86909c; }
+.stat-card--offline .stat-card__value { color: #86909c; }
+.stat-card--abnormal .stat-card__icon { background: rgba(245, 108, 108, 0.12); color: #f53f3f; }
+.stat-card--abnormal .stat-card__value { color: #f53f3f; }
 
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {

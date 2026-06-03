@@ -4,7 +4,7 @@
     <div v-if="apiNotAvailable" class="coming-soon-wrapper">
       <el-empty :image-size="160" description=" ">
         <template #image>
-          <el-icon :size="120" color="#c0c4cc"><Monitor /></el-icon>
+          <el-icon :size="120" color="#c9cdd4"><Monitor /></el-icon>
         </template>
         <template #description>
           <div class="coming-soon-title">升级维护功能即将上线</div>
@@ -44,7 +44,7 @@
       <!-- 自检结果 -->
       <div class="autops-card" style="margin-bottom: 16px" v-if="selfCheckResult">
         <div class="autops-card-header"><div class="autops-card-title">自检结果</div></div>
-        <el-table :data="selfCheckResult" stripe size="small">
+        <el-table stripe :data="selfCheckResult"size="small">
           <el-table-column prop="item" label="检查项" min-width="160" />
           <el-table-column prop="status" label="状态" width="100">
             <template #default="{ row }">
@@ -61,7 +61,7 @@
       <!-- 升级历史 -->
       <div class="autops-card">
         <div class="autops-card-header"><div class="autops-card-title">升级历史</div></div>
-        <el-table :data="upgradeHistory" v-loading="loading" stripe class="autops-table">
+        <el-table stripe :data="upgradeHistory" v-loading="loading"class="autops-table">
           <el-table-column prop="version" label="版本" width="120" />
           <el-table-column prop="type" label="类型" width="100">
             <template #default="{ row }">
@@ -90,7 +90,7 @@
       </div>
 
       <!-- 升级对话框 -->
-      <el-dialog v-model="upgradeVisible" title="系统升级" width="500px" destroy-on-close>
+      <el-dialog v-model="upgradeVisible" title="系统升级" width="600px" destroy-on-close>
         <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 16px">
           升级过程中系统将暂时不可用，请确保已备份当前版本。
         </el-alert>
@@ -117,7 +117,7 @@
       </el-dialog>
 
       <!-- 回滚对话框 -->
-      <el-dialog v-model="rollbackVisible" title="系统回滚" width="450px">
+      <el-dialog v-model="rollbackVisible" title="系统回滚" width="480px">
         <el-alert type="error" :closable="false" show-icon style="margin-bottom: 16px">
           回滚操作将恢复到上一版本，当前版本数据可能丢失。请确认已备份。
         </el-alert>
@@ -129,7 +129,7 @@
       </el-dialog>
 
       <!-- 日志对话框 -->
-      <el-dialog v-model="logVisible" title="操作日志" width="650px">
+      <el-dialog v-model="logVisible" title="操作日志" width="600px">
         <pre class="op-log" v-if="currentLog">{{ currentLog }}</pre>
         <el-empty v-else description="无日志" />
       </el-dialog>
@@ -269,8 +269,7 @@ fetchHistory()
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
-.op-log { background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 6px; font-size: 12px; max-height: 400px; overflow: auto; white-space: pre-wrap; }
+.op-log { background: #1e1e1e; color: #c9cdd4; padding: 16px; border-radius: 6px; font-size: 12px; max-height: 400px; overflow: auto; white-space: pre-wrap; }
 
 /* Coming soon */
 .coming-soon-wrapper {

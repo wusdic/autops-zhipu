@@ -55,7 +55,7 @@
         </div>
       </template>
 
-      <el-table v-loading="loading" :data="tableData" border stripe>
+      <el-table stripe v-loading="loading" :data="tableData" border>
         <el-table-column type="index" label="#" width="50" align="center" />
         <el-table-column prop="name" label="策略名称" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
@@ -116,7 +116,7 @@
             {{ formatTime(row.updated_at) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" align="center" fixed="right">
+        <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleEdit(row)">编辑</el-button>
             <el-button type="danger" link size="small" @click="handleDelete(row)">删除</el-button>
@@ -581,17 +581,7 @@ onMounted(() => {
   padding-bottom: 2px;
 }
 
-.table-card .card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.table-card .card-header .title {
-  font-size: 16px;
-  font-weight: 600;
-}
-
+.table-card 
 .time-cell {
   font-family: monospace;
   font-weight: 600;
@@ -599,7 +589,7 @@ onMounted(() => {
 
 .form-item-tip {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
   line-height: 1.2;
   margin-top: 2px;
 }

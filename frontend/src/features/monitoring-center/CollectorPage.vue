@@ -53,7 +53,7 @@
       </el-form>
 
       <!-- Table -->
-      <el-table :data="collectors" v-loading="collectorLoading" stripe row-key="id">
+      <el-table stripe :data="collectors" v-loading="collectorLoading"row-key="id">
         <el-table-column prop="name" label="名称" min-width="150" show-overflow-tooltip />
         <el-table-column prop="collector_type" label="类型" width="110">
           <template #default="{ row }">
@@ -92,7 +92,7 @@
         <el-table-column prop="last_seen_at" label="最后上报" width="170">
           <template #default="{ row }">{{ formatTime(row.last_seen_at) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="220" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="openDetailDialog(row)">详情</el-button>
             <el-button size="small" type="warning" @click="triggerSingleCollector(row)">触发</el-button>
@@ -136,7 +136,7 @@
       </div>
       <div class="autops-card-body">
 
-      <el-table :data="jobs" v-loading="jobLoading" stripe row-key="id" size="default">
+      <el-table stripe :data="jobs" v-loading="jobLoading"row-key="id" size="default">
         <el-table-column prop="collector_name" label="采集器" min-width="130" show-overflow-tooltip />
         <el-table-column prop="asset_name" label="资产" min-width="130" show-overflow-tooltip />
         <el-table-column prop="job_type" label="任务类型" width="120">
@@ -167,7 +167,7 @@
             <span v-else class="text-muted">-</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="viewJobResult(row)" :disabled="row.status !== 'success'">
               结果
@@ -198,7 +198,7 @@
     </div>
 
     <!-- ========== 采集器详情对话框 ========== -->
-    <el-dialog v-model="showDetailDialog" title="采集器详情" width="700px" destroy-on-close>
+    <el-dialog v-model="showDetailDialog" title="采集器详情" width="780px" destroy-on-close>
       <template v-if="currentCollector">
         <el-descriptions :column="2" border>
           <el-descriptions-item label="名称">{{ currentCollector.name }}</el-descriptions-item>
@@ -233,13 +233,11 @@
         <!-- Recent Health Checks -->
         <div class="detail-section">
           <h4 class="detail-subtitle">最近健康检查</h4>
-          <el-table
-            v-if="healthChecks.length"
-            :data="healthChecks"
-            size="small"
-            stripe
-            max-height="200"
-          >
+          <el-table stripe
+ v-if="healthChecks.length"
+ :data="healthChecks"
+ size="small"max-height="200"
+ >
             <el-table-column prop="status" label="状态" width="80">
               <template #default="{ row }">
                 <StatusBadge :status="row.status" size="small" />
@@ -266,7 +264,7 @@
     </el-dialog>
 
     <!-- ========== 任务结果对话框 ========== -->
-    <el-dialog v-model="showResultDialog" title="采集结果" width="750px" destroy-on-close>
+    <el-dialog v-model="showResultDialog" title="采集结果" width="780px" destroy-on-close>
       <template v-if="currentJob">
         <el-descriptions :column="2" border size="small" style="margin-bottom: 16px">
           <el-descriptions-item label="采集器">{{ currentJob.collector_name }}</el-descriptions-item>
@@ -288,7 +286,7 @@
     </el-dialog>
 
     <!-- ========== 任务日志对话框 ========== -->
-    <el-dialog v-model="showLogDialog" title="采集日志" width="750px" destroy-on-close>
+    <el-dialog v-model="showLogDialog" title="采集日志" width="780px" destroy-on-close>
       <template v-if="currentJob">
         <el-descriptions :column="2" border size="small" style="margin-bottom: 16px">
           <el-descriptions-item label="采集器">{{ currentJob.collector_name }}</el-descriptions-item>
@@ -302,7 +300,7 @@
     </el-dialog>
 
     <!-- ========== 手动触发对话框 ========== -->
-    <el-dialog v-model="showTriggerDialog" title="手动触发采集" width="550px" destroy-on-close>
+    <el-dialog v-model="showTriggerDialog" title="手动触发采集" width="600px" destroy-on-close>
       <el-form :model="triggerForm" label-width="90px">
         <el-form-item label="采集器" required>
           <el-select
@@ -366,7 +364,7 @@
           <div class="autops-card-body">
 
           <!-- Edge 采集器表格 -->
-          <el-table :data="edgeCollectors" v-loading="edgeLoading" stripe row-key="collector_id">
+          <el-table stripe :data="edgeCollectors" v-loading="edgeLoading"row-key="collector_id">
             <el-table-column prop="collector_id" label="Collector ID" min-width="180" show-overflow-tooltip />
             <el-table-column prop="name" label="名称" min-width="130" show-overflow-tooltip>
               <template #default="{ row }">{{ row.name || '-' }}</template>
@@ -390,7 +388,7 @@
             <el-table-column prop="version" label="版本" width="100">
               <template #default="{ row }">{{ row.version || '-' }}</template>
             </el-table-column>
-            <el-table-column label="操作" width="260" fixed="right">
+            <el-table-column label="操作" width="180" fixed="right">
               <template #default="{ row }">
                 <el-button size="small" @click="viewEdgeStatus(row)">查看状态</el-button>
                 <el-button size="small" type="primary" @click="viewEdgeTasks(row)">查看任务</el-button>
@@ -408,7 +406,7 @@
     </el-tabs>
 
     <!-- ========== Edge 查看状态对话框 ========== -->
-    <el-dialog v-model="showEdgeStatusDialog" title="Edge 采集器状态" width="700px" destroy-on-close>
+    <el-dialog v-model="showEdgeStatusDialog" title="Edge 采集器状态" width="780px" destroy-on-close>
       <div v-if="edgeStatusData" class="detail-section">
         <JsonViewer :data="edgeStatusData" />
       </div>
@@ -416,14 +414,14 @@
     </el-dialog>
 
     <!-- ========== Edge 查看任务对话框 ========== -->
-    <el-dialog v-model="showEdgeTasksDialog" title="Edge 采集器任务" width="800px" destroy-on-close>
+    <el-dialog v-model="showEdgeTasksDialog" title="Edge 采集器任务" width="780px" destroy-on-close>
       <template v-if="currentEdgeCollector">
         <el-descriptions :column="2" border size="small" style="margin-bottom: 16px">
           <el-descriptions-item label="Collector ID">{{ currentEdgeCollector.collector_id }}</el-descriptions-item>
           <el-descriptions-item label="名称">{{ currentEdgeCollector.name || '-' }}</el-descriptions-item>
         </el-descriptions>
       </template>
-      <el-table :data="edgeTasks" v-loading="edgeTasksLoading" stripe size="default">
+      <el-table stripe :data="edgeTasks" v-loading="edgeTasksLoading"size="default">
         <el-table-column prop="task_id" label="任务ID" min-width="160" show-overflow-tooltip />
         <el-table-column prop="task_type" label="类型" width="120">
           <template #default="{ row }">{{ row.task_type || '-' }}</template>
@@ -916,17 +914,10 @@ onMounted(() => {
 .section-card {
   margin-bottom: 20px;
 }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
 }
 
 .header-actions {
@@ -955,12 +946,12 @@ onMounted(() => {
 
 .result-preview {
   font-size: 12px;
-  color: #606266;
+  color: #4e5969;
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
 }
 
 .text-muted {
-  color: #909399;
+  color: #86909c;
   font-size: 13px;
 }
 
@@ -971,10 +962,10 @@ onMounted(() => {
 .detail-subtitle {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
   margin-bottom: 10px;
   padding-bottom: 6px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .capability-list {
@@ -984,7 +975,7 @@ onMounted(() => {
 }
 
 .log-container {
-  background: #f5f7fa;
+  background: #f7f8fa;
   border-radius: 6px;
   padding: 12px;
   max-height: 400px;
@@ -998,7 +989,7 @@ onMounted(() => {
   white-space: pre-wrap;
   word-break: break-all;
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-  color: #303133;
+  color: #1d2129;
 }
 
 /* Element Plus overrides for consistency */

@@ -31,7 +31,7 @@
         </div>
       </div>
       <!-- 告警快速选择条 -->
-      <el-table
+      <el-table stripe
         :data="activeAlerts"
         highlight-current-row
         @current-change="selectAlert"
@@ -91,7 +91,7 @@
           <el-card shadow="hover" class="col-card" style="margin-bottom: 16px" v-if="aiResult || aiLoading">
             <div v-if="aiLoading" style="text-align: center; padding: 32px 0">
               <el-icon class="is-loading" :size="24"><Loading /></el-icon>
-              <div style="margin-top: 8px; color: #909399">AI 正在诊断分析中...</div>
+              <div style="margin-top: 8px; color: #86909c">AI 正在诊断分析中...</div>
             </div>
             <AiAnalysisCard
               v-else
@@ -148,7 +148,7 @@
                 <el-tag size="small" type="info">{{ relatedAlerts.length }}</el-tag>
               </div>
             </template>
-            <el-table :data="relatedAlerts" size="small" max-height="200">
+            <el-table stripe  :data="relatedAlerts" size="small" max-height="200">
               <el-table-column prop="severity" label="级别" width="80">
                 <template #default="{ row }">
                   <el-tag :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag>
@@ -309,7 +309,7 @@
                     <el-tag size="small">{{ cond.value }}</el-tag>
                   </div>
                 </div>
-                <span v-else style="color: #909399">{{ matchedPolicy.trigger_conditions || '未配置' }}</span>
+                <span v-else style="color: #86909c">{{ matchedPolicy.trigger_conditions || '未配置' }}</span>
               </el-descriptions-item>
               <el-descriptions-item label="动作链">
                 <div v-for="(a, i) in parseActionChain(matchedPolicy.action_chain)" :key="i" style="margin: 2px 0">
@@ -409,10 +409,10 @@
     <el-dialog
       v-model="channelDialogVisible"
       title="通知渠道设置"
-      width="640px"
+      width="600px"
       destroy-on-close
     >
-      <el-table :data="channels" v-loading="channelsLoading" size="small" style="width: 100%">
+      <el-table stripe  :data="channels" v-loading="channelsLoading" size="small" style="width: 100%">
         <el-table-column prop="name" label="渠道名称" width="140">
           <template #default="{ row }">
             <span style="font-weight: 600">{{ row.name }}</span>
@@ -1105,7 +1105,7 @@ onMounted(async () => {
 }
 
 .alert-title-text {
-  color: #606266;
+  color: #4e5969;
   max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1118,7 +1118,7 @@ onMounted(async () => {
 }
 
 .alert-quick-bar {
-  border: 1px solid #ebeef5;
+  border: 1px solid #e5e6eb;
   border-radius: 4px;
 }
 
@@ -1166,13 +1166,13 @@ onMounted(async () => {
 }
 
 .exec-time {
-  color: #909399;
+  color: #86909c;
   font-size: 12px;
 }
 
 .exec-detail {
   font-size: 13px;
-  color: #606266;
+  color: #4e5969;
   margin-bottom: 4px;
 }
 
@@ -1205,7 +1205,7 @@ onMounted(async () => {
 }
 
 .log-time {
-  color: #909399;
+  color: #86909c;
   font-size: 12px;
   white-space: nowrap;
 }
@@ -1216,19 +1216,19 @@ onMounted(async () => {
 }
 
 .log-level-error .log-message {
-  color: #f56c6c;
+  color: #f53f3f;
 }
 
 .log-level-warning .log-message {
-  color: #e6a23c;
+  color: #ff7d00;
 }
 
 .log-level-info .log-message {
-  color: #606266;
+  color: #4e5969;
 }
 
 .log-level-debug .log-message {
-  color: #909399;
+  color: #86909c;
 }
 
 .asset-change-item {
@@ -1240,20 +1240,20 @@ onMounted(async () => {
 
 .change-asset {
   font-weight: 600;
-  color: #303133;
+  color: #1d2129;
 }
 
 .change-values {
-  color: #606266;
+  color: #4e5969;
 }
 
 .old-value {
-  color: #f56c6c;
+  color: #f53f3f;
   text-decoration: line-through;
 }
 
 .new-value {
-  color: #67c23a;
+  color: #00b42a;
   font-weight: 600;
 }
 

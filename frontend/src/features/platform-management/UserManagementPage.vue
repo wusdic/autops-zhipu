@@ -33,7 +33,7 @@
       <el-button @click="resetFilters">重置</el-button>
     </div>
 
-    <el-table :data="users" v-loading="loading" stripe border style="width: 100%">
+    <el-table stripe :data="users" v-loading="loading"border style="width: 100%">
       <el-table-column prop="username" label="用户名" width="140" />
       <el-table-column prop="display_name" label="显示名" width="140" />
       <el-table-column prop="email" label="邮箱" width="200" />
@@ -50,7 +50,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="created_at" label="创建时间" width="180" />
-      <el-table-column label="操作" width="320" fixed="right">
+      <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
           <el-button size="small" @click="editUser(row)">编辑</el-button>
           <el-button size="small" @click="handleResetPassword(row)">重置密码</el-button>
@@ -105,7 +105,7 @@
     </el-dialog>
 
     <!-- Reset Password Dialog -->
-    <el-dialog v-model="resetPwdVisible" title="重置密码" width="420px">
+    <el-dialog v-model="resetPwdVisible" title="重置密码" width="480px">
       <el-form :model="resetPwdForm" label-width="80px">
         <el-form-item label="用户">
           <el-input :model-value="resetPwdTarget?.username" disabled />
@@ -291,9 +291,8 @@ onMounted(() => { loadUsers(); loadRoles() })
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.page-header h2 { margin: 0; font-size: 20px; color: #303133; }
+.page-header h2 { margin: 0; font-size: 20px; color: #1d2129; }
 
 .filter-bar {
   display: flex;
@@ -302,7 +301,7 @@ onMounted(() => { loadUsers(); loadRoles() })
   flex-wrap: wrap;
   margin-bottom: 16px;
   padding: 12px 16px;
-  background: #f5f7fa;
+  background: #f7f8fa;
   border-radius: 6px;
 }
 </style>

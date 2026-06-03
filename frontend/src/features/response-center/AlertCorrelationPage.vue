@@ -23,16 +23,14 @@
           </el-form-item>
         </el-form>
 
-        <el-table
-          :data="alerts"
-          stripe
-          size="small"
-          v-loading="alertsLoading"
-          empty-text="暂无告警"
-          highlight-current-row
-          @current-change="handleAlertSelect"
-          style="margin-top: 12px"
-        >
+        <el-table stripe
+ :data="alerts"size="small"
+ v-loading="alertsLoading"
+ empty-text="暂无告警"
+ highlight-current-row
+ @current-change="handleAlertSelect"
+ style="margin-top: 12px"
+ >
           <el-table-column type="index" width="50" />
           <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
           <el-table-column prop="severity" label="级别" width="80">
@@ -115,12 +113,10 @@
             </div>
           </div>
           <div class="autops-card-body" style="padding: 0">
-            <el-table
-              :data="correlatedAlerts"
-              stripe
-              v-loading="corrLoading"
-              empty-text="选择告警并执行收敛分析"
-            >
+            <el-table stripe
+ :data="correlatedAlerts"v-loading="corrLoading"
+ empty-text="选择告警并执行收敛分析"
+ >
               <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
               <el-table-column prop="severity" label="级别" width="80">
                 <template #default="{ row }">

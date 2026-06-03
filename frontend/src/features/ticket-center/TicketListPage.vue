@@ -97,7 +97,7 @@
           <span class="sla-bar__label">SLA 达标统计</span>
           <el-progress
             :percentage="slaPercent"
-            :color="slaPercent >= 90 ? '#67c23a' : slaPercent >= 70 ? '#e6a23c' : '#f56c6c'"
+            :color="slaPercent >= 90 ? '#00b42a' : slaPercent >= 70 ? '#ff7d00' : '#f53f3f'"
             :stroke-width="18"
             :text-inside="true"
             style="flex: 1; margin: 0 16px"
@@ -201,17 +201,15 @@
       </transition>
 
       <!-- ========== Ticket Table ========== -->
-      <el-table
-        ref="tableRef"
-        :data="tickets"
-        v-loading="loading"
-        stripe
-        border
-        row-key="id"
-        @selection-change="handleSelectionChange"
-        @row-click="handleRowClick"
-        class="ticket-table"
-      >
+      <el-table stripe
+ ref="tableRef"
+ :data="tickets"
+ v-loading="loading"border
+ row-key="id"
+ @selection-change="handleSelectionChange"
+ @row-click="handleRowClick"
+ class="ticket-table"
+ >
         <el-table-column type="selection" width="45" fixed="left" />
         <el-table-column prop="id" label="ID" width="90" show-overflow-tooltip>
           <template #default="{ row }">
@@ -270,7 +268,7 @@
                 {{ slaCountdown(row.sla_deadline) }}
               </el-tag>
             </template>
-            <span v-else style="color: #c0c4cc">-</span>
+            <span v-else style="color: #c9cdd4">-</span>
           </template>
         </el-table-column>
         <el-table-column prop="created_at" label="创建时间" width="170">
@@ -278,7 +276,7 @@
             {{ formatTime(row.created_at) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" fixed="right" align="center">
+        <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button
               size="small"
@@ -1027,12 +1025,6 @@ onBeforeUnmount(() => {
 .stats-row {
   margin-bottom: 16px;
 }
-
-.stat-card {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
 .stat-card__body {
   display: flex;
   align-items: center;
@@ -1062,56 +1054,56 @@ onBeforeUnmount(() => {
 
 .stat-card__label {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
   margin-top: 2px;
 }
 
 .stat-card--total .stat-card__icon {
   background: rgba(144, 147, 153, 0.12);
-  color: #909399;
+  color: #86909c;
 }
 .stat-card--total .stat-card__value {
-  color: #606266;
+  color: #4e5969;
 }
 
 .stat-card--open .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
-  color: #e6a23c;
+  color: #ff7d00;
 }
 .stat-card--open .stat-card__value {
-  color: #e6a23c;
+  color: #ff7d00;
 }
 
 .stat-card--progress .stat-card__icon {
   background: rgba(64, 158, 255, 0.12);
-  color: #409eff;
+  color: #165dff;
 }
 .stat-card--progress .stat-card__value {
-  color: #409eff;
+  color: #165dff;
 }
 
 .stat-card--closed .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
-  color: #67c23a;
+  color: #00b42a;
 }
 .stat-card--closed .stat-card__value {
-  color: #67c23a;
+  color: #00b42a;
 }
 
 .stat-card--overdue .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
-  color: #f56c6c;
+  color: #f53f3f;
 }
 .stat-card--overdue .stat-card__value {
-  color: #f56c6c;
+  color: #f53f3f;
 }
 
 .stat-card--sla .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
-  color: #67c23a;
+  color: #00b42a;
 }
 .stat-card--sla .stat-card__value {
-  color: #67c23a;
+  color: #00b42a;
 }
 
 /* ── SLA Summary Bar ── */
@@ -1129,13 +1121,13 @@ onBeforeUnmount(() => {
 .sla-bar__label {
   font-size: 14px;
   font-weight: 500;
-  color: #606266;
+  color: #4e5969;
   white-space: nowrap;
 }
 
 .sla-bar__detail {
   font-size: 13px;
-  color: #909399;
+  color: #86909c;
   white-space: nowrap;
 }
 
@@ -1143,29 +1135,11 @@ onBeforeUnmount(() => {
 .main-card {
   border-radius: 8px;
 }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-header__title {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.card-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 /* ── Filter Form ── */
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {
@@ -1187,7 +1161,7 @@ onBeforeUnmount(() => {
 .batch-bar__info {
   margin-right: auto;
   font-size: 14px;
-  color: #606266;
+  color: #4e5969;
 }
 
 /* ── Table ── */
@@ -1201,7 +1175,7 @@ onBeforeUnmount(() => {
 
 .ticket-title {
   cursor: pointer;
-  color: #409eff;
+  color: #165dff;
 }
 
 .ticket-title:hover {

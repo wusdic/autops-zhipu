@@ -122,7 +122,7 @@
                         <el-tag size="small">{{ cond.value }}</el-tag>
                       </div>
                     </div>
-                    <div v-else style="color: #909399; font-size: 13px">
+                    <div v-else style="color: #86909c; font-size: 13px">
                       {{ alert.trigger_condition || alert.condition || '未配置触发条件' }}
                     </div>
                   </div>
@@ -135,7 +135,7 @@
                     <el-tag size="small" type="info">{{ relatedAssets.length }}</el-tag>
                   </div>
                   <div class="autops-card-body">
-                    <el-table :data="relatedAssets" stripe size="small">
+                    <el-table stripe :data="relatedAssets"size="small">
                       <el-table-column prop="hostname" label="主机名" min-width="120" show-overflow-tooltip />
                       <el-table-column prop="ip" label="IP 地址" width="140" />
                       <el-table-column prop="asset_type" label="类型" width="100" />
@@ -144,7 +144,7 @@
                           <StatusBadge :status="row.status" size="small" show-icon />
                         </template>
                       </el-table-column>
-                      <el-table-column label="操作" width="60">
+                      <el-table-column label="操作" width="100">
                         <template #default="{ row }">
                           <el-button text type="primary" size="small" @click="$router.push(`/assets/${row.id}`)">详情</el-button>
                         </template>
@@ -224,7 +224,7 @@
               <span>关联告警</span>
               <el-badge v-if="relatedAlerts.length" :value="relatedAlerts.length" :max="99" class="tab-badge" />
             </template>
-            <el-table :data="relatedAlerts" stripe v-loading="relatedAlertsLoading">
+            <el-table stripe :data="relatedAlerts"v-loading="relatedAlertsLoading">
               <el-table-column prop="severity" label="级别" width="80">
                 <template #default="{ row }">
                   <SeverityBadge :severity="row.severity" />
@@ -240,7 +240,7 @@
               <el-table-column prop="created_at" label="触发时间" width="170">
                 <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
               </el-table-column>
-              <el-table-column label="操作" width="80">
+              <el-table-column label="操作" width="100">
                 <template #default="{ row }">
                   <el-button text type="primary" size="small" @click="$router.push(`/alerts/${row.id}`)">详情</el-button>
                 </template>
@@ -265,7 +265,7 @@
 
           <!-- ─── Tab 7: Execution History ─── -->
           <el-tab-pane label="执行历史" name="executions">
-            <el-table :data="executions" stripe>
+            <el-table stripe :data="executions">
               <el-table-column prop="id" label="执行ID" width="160" align="center">
                 <template #default="{ row }">
                   <el-button link type="primary" size="small" @click="$router.push('/executions/' + row.id)">
@@ -285,7 +285,7 @@
               <el-table-column prop="finished_at" label="结束时间" width="180">
                 <template #default="{ row }">{{ formatTime(row.finished_at) }}</template>
               </el-table-column>
-              <el-table-column label="操作" width="80">
+              <el-table-column label="操作" width="100">
                 <template #default="{ row }">
                   <el-button text type="primary" size="small" @click="$router.push(`/executions/${row.id}`)">详情</el-button>
                 </template>
@@ -319,7 +319,7 @@
               </el-col>
             </el-row>
             <div v-if="impactData.relatedServices.length" style="margin-top: 12px">
-              <span style="font-size: 13px; color: #909399; margin-right: 8px">关联服务:</span>
+              <span style="font-size: 13px; color: #86909c; margin-right: 8px">关联服务:</span>
               <el-tag
                 v-for="svc in impactData.relatedServices"
                 :key="svc"
@@ -365,7 +365,7 @@
                     <!-- Config change specific -->
                     <div v-if="ev.config_key" class="evidence-config">
                       <el-tag size="small" type="info">{{ ev.config_key }}</el-tag>
-                      <span style="margin-left: 8px; font-size: 12px; color: #909399">{{ ev.config_detail }}</span>
+                      <span style="margin-left: 8px; font-size: 12px; color: #86909c">{{ ev.config_detail }}</span>
                     </div>
                   </div>
                 </el-timeline-item>
@@ -909,14 +909,14 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 }
 
 .log-time {
-  color: #909399;
+  color: #86909c;
   font-size: 12px;
   white-space: nowrap;
   min-width: 160px;
 }
 
 .log-source {
-  color: #409EFF;
+  color: #165dff;
   font-size: 12px;
   margin-right: 4px;
 }
@@ -927,19 +927,19 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 }
 
 .log-level-error .log-message {
-  color: #f56c6c;
+  color: #f53f3f;
 }
 
 .log-level-warning .log-message {
-  color: #e6a23c;
+  color: #ff7d00;
 }
 
 .log-level-info .log-message {
-  color: #606266;
+  color: #4e5969;
 }
 
 .log-level-debug .log-message {
-  color: #909399;
+  color: #86909c;
 }
 
 /* Side cards */
@@ -983,11 +983,11 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 .evidence-title {
   font-weight: 600;
   font-size: 14px;
-  color: #303133;
+  color: #1d2129;
 }
 
 .evidence-desc {
-  color: #606266;
+  color: #4e5969;
   font-size: 13px;
   line-height: 1.5;
 }
@@ -1004,12 +1004,12 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 }
 
 .old-value {
-  color: #f56c6c;
+  color: #f53f3f;
   text-decoration: line-through;
 }
 
 .new-value {
-  color: #67c23a;
+  color: #00b42a;
   font-weight: 600;
 }
 
@@ -1039,17 +1039,17 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 .comment-author {
   font-weight: 600;
   font-size: 13px;
-  color: #303133;
+  color: #1d2129;
 }
 
 .comment-time {
-  color: #909399;
+  color: #86909c;
   font-size: 12px;
 }
 
 .comment-content {
   font-size: 13px;
-  color: #606266;
+  color: #4e5969;
   line-height: 1.5;
   white-space: pre-wrap;
 }

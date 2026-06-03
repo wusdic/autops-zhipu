@@ -32,7 +32,7 @@
     <!-- 配置分类 Tab -->
     <el-tabs v-model="activeTab" class="mt-4">
       <el-tab-pane label="发现模板" name="discovery">
-        <el-table :data="discoveryTemplates" v-loading="loading" stripe>
+        <el-table stripe :data="discoveryTemplates" v-loading="loading">
           <el-table-column prop="name" label="模板名称" min-width="180" />
           <el-table-column prop="type" label="发现类型" width="120">
             <template #default="{ row }">
@@ -50,7 +50,7 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="200" fixed="right">
+          <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
               <el-button link type="primary" @click="runDiscovery(row)">执行</el-button>
               <el-button link type="primary" @click="editTemplate('discovery', row)">编辑</el-button>
@@ -61,7 +61,7 @@
       </el-tab-pane>
 
       <el-tab-pane label="巡检规则" name="inspection">
-        <el-table :data="inspectionRules" v-loading="loading" stripe>
+        <el-table stripe :data="inspectionRules" v-loading="loading">
           <el-table-column prop="name" label="规则名称" min-width="180" />
           <el-table-column prop="category" label="规则类型" width="120">
             <template #default="{ row }">
@@ -79,7 +79,7 @@
               <el-switch v-model="row.enabled" size="small" @change="toggleRule(row)" />
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="200" fixed="right">
+          <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
               <el-button link type="primary" @click="editTemplate('inspection-rule', row)">编辑</el-button>
               <el-button link type="primary" @click="simulateRule(row)">模拟</el-button>
@@ -96,7 +96,7 @@
       </el-tab-pane>
 
       <el-tab-pane label="通知规则" name="notification">
-        <el-table :data="notificationRules" v-loading="loading" stripe>
+        <el-table stripe :data="notificationRules" v-loading="loading">
           <el-table-column prop="name" label="规则名称" min-width="180" />
           <el-table-column prop="trigger" label="触发条件" width="150" />
           <el-table-column prop="channel" label="通知渠道" width="120">
@@ -114,7 +114,7 @@
               <el-switch v-model="row.enabled" size="small" @change="toggleRule(row)" />
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="150" fixed="right">
+          <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
               <el-button link type="primary" @click="editTemplate('notification', row)">编辑</el-button>
               <el-button link type="danger" @click="deleteTemplate('notification', row)">删除</el-button>
@@ -124,13 +124,13 @@
       </el-tab-pane>
 
       <el-tab-pane label="配置版本" name="version">
-        <el-table :data="configVersions" v-loading="loading" stripe>
+        <el-table stripe :data="configVersions" v-loading="loading">
           <el-table-column prop="config_name" label="配置名称" min-width="180" />
           <el-table-column prop="version" label="版本号" width="100" />
           <el-table-column prop="updated_by" label="修改人" width="120" />
           <el-table-column prop="updated_at" label="修改时间" width="180" />
           <el-table-column prop="change_summary" label="变更摘要" min-width="200" />
-          <el-table-column label="操作" width="200" fixed="right">
+          <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
               <el-button link type="primary" @click="viewVersionDiff(row)">查看差异</el-button>
               <el-button link type="warning" @click="rollbackVersion(row)">回滚</el-button>
@@ -141,7 +141,7 @@
     </el-tabs>
 
     <!-- 快速创建对话框 -->
-    <el-dialog v-model="showQuickCreate" title="快速创建配置" width="500px">
+    <el-dialog v-model="showQuickCreate" title="快速创建配置" width="600px">
       <el-form :model="createForm" label-width="100px">
         <el-form-item label="配置类型">
           <el-select v-model="createForm.type" placeholder="选择类型">
@@ -181,10 +181,10 @@ const showQuickCreate = ref(false)
 const creating = ref(false)
 
 const stats = ref([
-  { label: '发现模板', value: 0, color: '#409EFF', trend: 0, click: () => { activeTab.value = 'discovery' } },
-  { label: '巡检规则', value: 0, color: '#67C23A', trend: 0, click: () => { activeTab.value = 'inspection' } },
-  { label: '阈值规则', value: 0, color: '#E6A23C', trend: 0, click: () => { activeTab.value = 'threshold' } },
-  { label: '通知规则', value: 0, color: '#F56C6C', trend: 0, click: () => { activeTab.value = 'notification' } },
+  { label: '发现模板', value: 0, color: '#165dff', trend: 0, click: () => { activeTab.value = 'discovery' } },
+  { label: '巡检规则', value: 0, color: '#00b42a', trend: 0, click: () => { activeTab.value = 'inspection' } },
+  { label: '阈值规则', value: 0, color: '#ff7d00', trend: 0, click: () => { activeTab.value = 'threshold' } },
+  { label: '通知规则', value: 0, color: '#f53f3f', trend: 0, click: () => { activeTab.value = 'notification' } },
 ])
 
 const discoveryTemplates = ref<any[]>([])
@@ -306,13 +306,10 @@ onMounted(loadData)
 
 <style scoped>
 .config-overview-page { padding: 20px; }
-.stat-card { text-align: center; cursor: pointer; transition: all 0.3s; }
 .stat-card:hover { transform: translateY(-2px); }
-.stat-value { font-size: 32px; font-weight: bold; margin-bottom: 4px; }
-.stat-label { color: #909399; font-size: 14px; }
 .stat-footer { margin-top: 8px; font-size: 12px; }
-.trend-up { color: #67C23A; }
-.trend-down { color: #F56C6C; }
+.trend-up { color: #00b42a; }
+.trend-down { color: #f53f3f; }
 .trend-label { color: #C0C4CC; margin-left: 4px; }
 .mt-4 { margin-top: 16px; }
 </style>

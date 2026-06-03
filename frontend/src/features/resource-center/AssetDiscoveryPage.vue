@@ -35,7 +35,7 @@
           <el-button @click="loadTasks"><el-icon><Refresh /></el-icon> 刷新</el-button>
         </div>
 
-        <el-table :data="tasks" v-loading="loading" stripe>
+        <el-table stripe :data="tasks" v-loading="loading">
           <el-table-column type="index" label="序号" width="60" />
           <el-table-column prop="name" label="任务名称" min-width="180" show-overflow-tooltip />
           <el-table-column label="IP范围" min-width="180">
@@ -59,7 +59,7 @@
           <el-table-column prop="started_at" label="开始时间" width="170">
             <template #default="{ row }">{{ formatTime(row.started_at) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="220" fixed="right">
+          <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
               <el-button v-if="row.status === 'pending'" size="small" type="primary" @click="startTask(row)">启动</el-button>
               <el-button v-if="row.status === 'running'" size="small" type="warning" @click="stopTask(row)">停止</el-button>
@@ -94,7 +94,7 @@
           </el-button>
         </div>
 
-        <el-table :data="results" v-loading="resultLoading" stripe @selection-change="(s: any[]) => selectedResults = s">
+        <el-table stripe :data="results" v-loading="resultLoading"@selection-change="(s: any[]) => selectedResults = s">
           <el-table-column type="selection" width="50" />
           <el-table-column prop="ip" label="IP地址" width="150" />
           <el-table-column prop="hostname" label="主机名" min-width="140" />
@@ -118,7 +118,7 @@
           <el-table-column prop="discovered_at" label="发现时间" width="170">
             <template #default="{ row }">{{ formatTime(row.discovered_at) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="120" fixed="right">
+          <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
               <el-button v-if="row.status === 'discovered' || row.status === 'new'" size="small" type="primary" @click="startOnboard([row])">纳管</el-button>
               <el-button v-if="row.status === 'managed' || row.status === 'onboarded'" size="small" @click="viewAsset(row)">查看</el-button>
@@ -137,7 +137,7 @@
 
         <!-- 步骤1：选择资产 -->
         <div v-if="wizardStep === 0" class="wizard-content">
-          <el-table :data="wizardAssets" stripe @selection-change="(s: any[]) => wizardSelected = s">
+          <el-table stripe :data="wizardAssets"@selection-change="(s: any[]) => wizardSelected = s">
             <el-table-column type="selection" width="50" />
             <el-table-column prop="ip" label="IP地址" width="150" />
             <el-table-column prop="hostname" label="主机名" min-width="140" />
@@ -218,7 +218,7 @@
           </el-descriptions>
           <div class="wizard-assets-preview">
             <h4>待纳管资产列表</h4>
-            <el-table :data="wizardSelected" stripe size="small">
+            <el-table stripe :data="wizardSelected"size="small">
               <el-table-column prop="ip" label="IP" width="150" />
               <el-table-column prop="hostname" label="主机名" min-width="140" />
               <el-table-column prop="asset_type" label="类型" width="120" />
@@ -528,20 +528,18 @@ onMounted(() => { loadTasks(); loadResults(); loadStats(); loadCredentials(); lo
 </script>
 
 <style scoped>
-.page-container { padding: 20px; }
 .stat-row { margin-bottom: 20px; }
-.stat-card { text-align: center; }
-.stat-card .stat-value { font-size: 28px; font-weight: bold; color: #303133; }
-.stat-card.success .stat-value { color: #67c23a; }
-.stat-card.warning .stat-value { color: #e6a23c; }
-.stat-card.primary .stat-value { color: #409eff; }
-.stat-card .stat-label { font-size: 13px; color: #909399; margin-top: 4px; }
+.stat-card 
+.stat-card.success .stat-value { color: #00b42a; }
+.stat-card.warning .stat-value { color: #ff7d00; }
+.stat-card.primary .stat-value { color: #165dff; }
+.stat-card 
 .toolbar { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; }
 .pagination { margin-top: 16px; display: flex; justify-content: flex-end; }
 .wizard-steps { margin: 20px 0; }
 .wizard-content { padding: 20px; min-height: 300px; }
 .wizard-actions { margin-top: 24px; display: flex; justify-content: flex-end; gap: 8px; }
 .wizard-assets-preview { margin-top: 20px; }
-.wizard-assets-preview h4 { margin-bottom: 10px; color: #606266; }
+.wizard-assets-preview h4 { margin-bottom: 10px; color: #4e5969; }
 .main-tabs { margin-top: 16px; }
 </style>

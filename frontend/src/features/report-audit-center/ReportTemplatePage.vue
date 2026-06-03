@@ -46,14 +46,12 @@
         </el-form>
 
         <!-- Table -->
-        <el-table
-          :data="templates"
-          v-loading="loading"
-          stripe
-          border
-          row-key="id"
-          class="template-table"
-        >
+        <el-table stripe
+ :data="templates"
+ v-loading="loading"border
+ row-key="id"
+ class="template-table"
+ >
           <el-table-column prop="name" label="模板名称" min-width="180" show-overflow-tooltip>
             <template #default="{ row }">
               <span class="template-name-link" @click="openEditDialog(row)">{{ row.name || '-' }}</span>
@@ -68,7 +66,7 @@
           <el-table-column prop="updated_at" label="更新时间" width="170">
             <template #default="{ row }">{{ formatTime(row.updated_at) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="240" fixed="right" align="center">
+          <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
               <el-button size="small" type="primary" link @click="openEditDialog(row)">编辑</el-button>
               <el-button size="small" type="success" link @click="handleGenerate(row)">生成报告</el-button>
@@ -96,7 +94,7 @@
     <el-dialog
       v-model="dialogVisible"
       :title="isEditing ? '编辑模板' : '新建模板'"
-      width="560px"
+      width="600px"
       destroy-on-close
       :close-on-click-modal="false"
     >
@@ -359,17 +357,10 @@ onMounted(() => {
 .main-card {
   border-radius: 8px;
 }
-
-.card-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {
@@ -382,7 +373,7 @@ onMounted(() => {
 
 .template-name-link {
   cursor: pointer;
-  color: #409eff;
+  color: #165dff;
 }
 
 .template-name-link:hover {

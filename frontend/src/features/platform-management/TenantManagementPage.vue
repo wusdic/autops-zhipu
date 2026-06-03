@@ -34,15 +34,13 @@
     </div>
 
     <!-- ── Table ────────────────────────────────────────── -->
-    <el-table
-      :data="tenants"
-      v-loading="loading"
-      stripe
-      border
-      row-key="id"
-      empty-text="暂无租户"
-      style="width: 100%"
-    >
+    <el-table stripe
+ :data="tenants"
+ v-loading="loading"border
+ row-key="id"
+ empty-text="暂无租户"
+ style="width: 100%"
+ >
       <el-table-column prop="name" label="租户名称" min-width="160" show-overflow-tooltip>
         <template #default="{ row }">
           <span class="tenant-name">{{ row.name }}</span>
@@ -91,7 +89,7 @@
           <span class="text-secondary">{{ formatTime(row.created_at) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="160" fixed="right" align="center">
+      <el-table-column label="操作" width="180" fixed="right" align="center">
         <template #default="{ row }">
           <el-button text type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
           <el-button
@@ -419,9 +417,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
-}
 .autops-page-header {
   display: flex;
   justify-content: space-between;
@@ -453,10 +448,6 @@ onMounted(() => {
   color: #86909c;
   font-size: 12px;
 }
-.text-danger {
-  color: #f53f3f;
-}
-
 .quota-cell {
   display: flex;
   gap: 16px;

@@ -82,13 +82,11 @@
               <div class="autops-card-title">关联告警</div>
             </div>
             <div class="autops-card-body" style="padding: 0">
-              <el-table
-                :data="relatedAlerts"
-                stripe
-                size="small"
-                v-loading="alertsLoading"
-                empty-text="暂无关联告警"
-              >
+              <el-table stripe
+ :data="relatedAlerts"size="small"
+ v-loading="alertsLoading"
+ empty-text="暂无关联告警"
+ >
                 <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
                 <el-table-column prop="severity" label="级别" width="80">
                   <template #default="{ row }">
@@ -110,7 +108,7 @@
                     <span class="text-tertiary">{{ row.created_at }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" width="80" fixed="right">
+                <el-table-column label="操作" width="100" fixed="right">
                   <template #default="{ row }">
                     <el-button text type="primary" size="small" @click="router.push(`/response/alerts/${row.id}`)">
                       查看
@@ -200,7 +198,7 @@
 
    </div>
    <!-- 分配对话框 -->
-   <el-dialog v-model="showAssignDialog" title="分配处理人" width="460px">
+   <el-dialog v-model="showAssignDialog" title="分配处理人" width="480px">
      <el-form label-width="80px">
        <el-form-item label="处理人ID">
          <el-input v-model="assigneeId" placeholder="输入处理人用户ID" />

@@ -55,13 +55,11 @@
         </el-form>
 
         <!-- ========== Table ========== -->
-        <el-table
-          :data="tableData"
-          v-loading="loading"
-          stripe
-          border
-          class="change-table"
-        >
+        <el-table stripe
+ :data="tableData"
+ v-loading="loading"border
+ class="change-table"
+ >
           <el-table-column prop="asset_name" label="资产名" min-width="160" show-overflow-tooltip>
             <template #default="{ row }">
               {{ row.asset_name || row.asset_id || '-' }}
@@ -99,7 +97,7 @@
           </el-table-column>
         </el-table>
         <el-empty v-if="!loading && tableData.length === 0" description="暂无状态变更记录">
-          <p style="color:#909399;font-size:13px;margin-top:4px">当资产状态发生变化时，变更记录将在此展示</p>
+          <p style="color:#86909c;font-size:13px;margin-top:4px">当资产状态发生变化时，变更记录将在此展示</p>
         </el-empty>
 
         <!-- ========== Pagination ========== -->
@@ -328,7 +326,7 @@ onMounted(() => {
 .filter-form {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #e5e6eb;
 }
 
 .filter-form :deep(.el-form-item) {
@@ -341,16 +339,16 @@ onMounted(() => {
 
 .arrow-cell {
   text-align: center;
-  color: #c0c4cc;
+  color: #c9cdd4;
 }
 
 .value-old {
-  color: #909399;
+  color: #86909c;
   text-decoration: line-through;
 }
 
 .value-new {
-  color: #409eff;
+  color: #165dff;
   font-weight: 500;
 }
 

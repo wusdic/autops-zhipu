@@ -65,7 +65,7 @@
     <!-- 审计日志表格 -->
     <div class="autops-card">
       <div class="autops-card-body" style="padding: 0">
-        <el-table :data="logs" stripe v-loading="loading" empty-text="暂无审计记录">
+        <el-table stripe :data="logs"v-loading="loading" empty-text="暂无审计记录">
           <el-table-column prop="created_at" label="时间" width="170">
             <template #default="{ row }">
               <span class="text-tertiary">{{ row.created_at }}</span>
@@ -76,7 +76,7 @@
               {{ row.user_name || row.username || row.user_id || '-' }}
             </template>
           </el-table-column>
-          <el-table-column prop="action" label="操作" width="90">
+          <el-table-column prop="action" label="操作" width="180">
             <template #default="{ row }">
               <el-tag :type="actionColor(row.action)" size="small">{{ actionLabel(row.action) }}</el-tag>
             </template>

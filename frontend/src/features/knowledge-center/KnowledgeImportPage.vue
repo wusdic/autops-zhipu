@@ -25,7 +25,7 @@
             :file-list="fileList"
             multiple
           >
-            <el-icon style="font-size: 48px; color: #c0c4cc"><UploadFilled /></el-icon>
+            <el-icon style="font-size: 48px; color: #c9cdd4"><UploadFilled /></el-icon>
             <div>拖拽文件到此处，或<em>点击上传</em></div>
             <template #tip>
               <div class="el-upload__tip">
@@ -37,13 +37,13 @@
           <!-- Validation Preview -->
           <div v-if="parsedFiles.length > 0" class="preview-section">
             <el-divider content-position="left">文件解析预览</el-divider>
-            <el-table :data="parsedFiles" stripe size="small">
+            <el-table stripe :data="parsedFiles"size="small">
               <el-table-column type="index" label="#" width="50" />
               <el-table-column label="文件名" prop="filename" min-width="180" show-overflow-tooltip />
               <el-table-column label="标题" min-width="200">
                 <template #default="{ row }">
                   <span v-if="row.valid">{{ row.title || '(无标题)' }}</span>
-                  <span v-else style="color: #F56C6C">{{ row.error || '解析失败' }}</span>
+                  <span v-else style="color: #f53f3f">{{ row.error || '解析失败' }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="类型" width="120">
@@ -59,8 +59,8 @@
               </el-table-column>
               <el-table-column label="校验" width="80" align="center">
                 <template #default="{ row }">
-                  <el-icon v-if="row.valid" color="#67C23A" :size="18"><CircleCheck /></el-icon>
-                  <el-icon v-else color="#F56C6C" :size="18"><CircleClose /></el-icon>
+                  <el-icon v-if="row.valid" color="#00b42a" :size="18"><CircleCheck /></el-icon>
+                  <el-icon v-else color="#f53f3f" :size="18"><CircleClose /></el-icon>
                 </template>
               </el-table-column>
             </el-table>
@@ -144,12 +144,10 @@
             </template>
           </el-alert>
 
-          <el-table
-            ref="standardTableRef"
-            :data="standardSchemes"
-            stripe
-            @selection-change="onStandardSelectionChange"
-          >
+          <el-table stripe
+ ref="standardTableRef"
+ :data="standardSchemes"@selection-change="onStandardSelectionChange"
+ >
             <el-table-column type="selection" width="55" :selectable="(row: any) => !row.imported" />
             <el-table-column prop="title" label="方案名称" min-width="220" show-overflow-tooltip />
             <el-table-column prop="scenario" label="场景" width="140" />
@@ -194,7 +192,7 @@
       </el-tabs>
 
       <!-- Import Progress Dialog -->
-      <el-dialog v-model="showProgress" title="导入进度" width="650px" :close-on-click-modal="false" :close-on-press-escape="false">
+      <el-dialog v-model="showProgress" title="导入进度" width="600px" :close-on-click-modal="false" :close-on-press-escape="false">
         <div class="progress-container">
           <el-progress
             :percentage="progressPercent"
@@ -211,7 +209,7 @@
             <h4>错误详情：</h4>
             <el-scrollbar max-height="200px">
               <div v-for="(err, idx) in importResult.errors" :key="idx" class="error-item">
-                <el-icon color="#F56C6C"><CircleClose /></el-icon>
+                <el-icon color="#f53f3f"><CircleClose /></el-icon>
                 <span>{{ err }}</span>
               </div>
             </el-scrollbar>
@@ -224,7 +222,7 @@
       </el-dialog>
 
       <!-- Legacy Result Dialog (kept for paste import) -->
-      <el-dialog v-model="showResult" title="导入结果" width="500px">
+      <el-dialog v-model="showResult" title="导入结果" width="600px">
         <el-result
           :icon="importResult.success > 0 ? 'success' : 'error'"
           :title="`成功 ${importResult.success} 条，失败 ${importResult.failed} 条`"
@@ -233,7 +231,7 @@
             <div v-if="importResult.errors.length">
               <h4>错误详情：</h4>
               <ul>
-                <li v-for="(err, idx) in importResult.errors" :key="idx" style="color: #F56C6C">
+                <li v-for="(err, idx) in importResult.errors" :key="idx" style="color: #f53f3f">
                   {{ err }}
                 </li>
               </ul>
@@ -699,7 +697,7 @@ async function checkExisting() {
 .preview-section {
   margin-top: 16px;
   padding: 12px;
-  background: #f5f7fa;
+  background: #f7f8fa;
   border-radius: 4px;
 }
 .preview-summary {
@@ -723,7 +721,7 @@ async function checkExisting() {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #F56C6C;
+  color: #f53f3f;
   font-size: 13px;
   padding: 2px 0;
 }

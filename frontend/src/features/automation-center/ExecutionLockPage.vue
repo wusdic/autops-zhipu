@@ -87,14 +87,12 @@
         </div>
       </template>
 
-      <el-table
-        v-loading="loading"
-        :data="lockList"
-        stripe
-        border
-        style="width: 100%"
-        @selection-change="handleSelectionChange"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="lockList"border
+ style="width: 100%"
+ @selection-change="handleSelectionChange"
+ >
         <el-table-column type="selection" width="50" align="center" />
 
         <el-table-column prop="id" label="执行ID" width="160" align="center">
@@ -188,7 +186,7 @@
     </el-card>
 
     <!-- 详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="锁详情" width="650px" destroy-on-close>
+    <el-dialog v-model="detailVisible" title="锁详情" width="600px" destroy-on-close>
       <el-descriptions :column="2" border v-if="currentLock">
         <el-descriptions-item label="执行ID">{{ currentLock.id || currentLock.execution_id }}</el-descriptions-item>
         <el-descriptions-item label="锁类型">
@@ -410,37 +408,16 @@ onBeforeUnmount(() => {
   .stat-row {
     margin-bottom: 16px;
 
-    .stat-card {
-      .stat-content {
-        text-align: center;
-        padding: 8px 0;
-
-        .stat-label {
-          font-size: 13px;
-          color: #909399;
-          margin-bottom: 4px;
-        }
-
-        .stat-value {
-          font-size: 28px;
-          font-weight: 700;
-
-          &.primary { color: #409eff; }
-          &.warning { color: #e6a23c; }
-          &.danger { color: #f56c6c; }
-          &.success { color: #67c23a; }
+    
+          &.danger { color: #f53f3f; }
+          &.success { color: #00b42a; }
         }
       }
     }
   }
 
   .table-card {
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
+    
     .resource-cell {
       display: flex;
       align-items: center;
@@ -455,7 +432,7 @@ onBeforeUnmount(() => {
   }
 
   .text-danger {
-    color: #f56c6c;
+    color: #f53f3f;
     font-weight: 600;
   }
 }

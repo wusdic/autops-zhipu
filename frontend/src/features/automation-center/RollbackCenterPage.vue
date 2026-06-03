@@ -92,15 +92,13 @@
         </div>
       </template>
 
-      <el-table
-        v-loading="loading"
-        :data="executionList"
-        stripe
-        border
-        style="width: 100%"
-        row-key="id"
-        :row-class-name="rowClassName"
-      >
+      <el-table stripe
+ v-loading="loading"
+ :data="executionList"border
+ style="width: 100%"
+ row-key="id"
+ :row-class-name="rowClassName"
+ >
         <el-table-column type="expand">
           <template #default="{ row }">
             <div class="expand-content">
@@ -172,7 +170,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button
               type="primary"
@@ -229,7 +227,7 @@
     </el-card>
 
     <!-- 回滚确认弹窗 -->
-    <el-dialog v-model="rollbackConfirmVisible" title="回滚确认" width="500px" destroy-on-close>
+    <el-dialog v-model="rollbackConfirmVisible" title="回滚确认" width="600px" destroy-on-close>
       <el-alert
         type="warning"
         :closable="false"
@@ -261,7 +259,7 @@
     </el-dialog>
 
     <!-- 详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="执行详情" width="700px" destroy-on-close>
+    <el-dialog v-model="detailVisible" title="执行详情" width="780px" destroy-on-close>
       <el-descriptions v-if="currentExecution" :column="2" border>
         <el-descriptions-item label="执行名">{{ currentExecution.name }}</el-descriptions-item>
         <el-descriptions-item label="执行ID">{{ currentExecution.id }}</el-descriptions-item>
@@ -522,37 +520,15 @@ onMounted(() => {
   .stat-row {
     margin-bottom: 16px;
 
-    .stat-card {
-      .stat-content {
-        text-align: center;
-        padding: 8px 0;
-
-        .stat-label {
-          font-size: 13px;
-          color: #909399;
-          margin-bottom: 4px;
-        }
-
-        .stat-value {
-          font-size: 28px;
-          font-weight: 700;
-          color: #303133;
-
-          &.success { color: #67c23a; }
-          &.warning { color: #e6a23c; }
-          &.primary { color: #409eff; }
+    
+          &.primary { color: #165dff; }
         }
       }
     }
   }
 
   .table-card {
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
+    
     .expand-content {
       padding: 12px 20px;
     }
@@ -569,13 +545,13 @@ onMounted(() => {
   }
 
   .text-muted {
-    color: #c0c4cc;
+    color: #c9cdd4;
     font-size: 13px;
   }
 
   .form-tip {
     margin-left: 8px;
-    color: #909399;
+    color: #86909c;
     font-size: 12px;
   }
 

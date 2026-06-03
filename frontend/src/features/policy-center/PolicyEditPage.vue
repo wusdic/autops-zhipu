@@ -66,7 +66,7 @@
               <el-tag type="danger" effect="dark" size="small">Critical</el-tag>
             </el-option>
             <el-option label="高 (High)" value="high">
-              <el-tag color="#e6a23c" effect="dark" size="small" style="border-color: #e6a23c">High</el-tag>
+              <el-tag color="#ff7d00" effect="dark" size="small" style="border-color: #ff7d00">High</el-tag>
             </el-option>
             <el-option label="中 (Medium)" value="medium">
               <el-tag type="warning" effect="dark" size="small">Medium</el-tag>
@@ -270,20 +270,15 @@ onMounted(() => {
 .policy-edit-page {
   padding: 16px;
 }
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 .form-tip {
   font-size: 12px;
-  color: #909399;
+  color: #86909c;
   margin-top: 4px;
   line-height: 1.4;
 }
 .json-preview {
-  background: #f5f7fa;
-  border: 1px solid #ebeef5;
+  background: #f7f8fa;
+  border: 1px solid #e5e6eb;
   border-radius: 4px;
   padding: 12px;
   font-size: 13px;
@@ -292,6 +287,6 @@ onMounted(() => {
   overflow: auto;
   white-space: pre-wrap;
   word-break: break-all;
-  color: #303133;
+  color: #1d2129;
 }
 </style>
