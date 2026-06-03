@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">租户管理</div>
-        <div class="autops-page-subtitle">多租户资源与配额管理</div>
+        <div class="autops-page-desc">多租户资源与配额管理</div>
       </div>
       <div class="header-actions">
         <el-button @click="loadTenants" :loading="loading">
@@ -432,11 +432,6 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #1d2129;
-}
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 2px;
 }
 .header-actions {
   display: flex;

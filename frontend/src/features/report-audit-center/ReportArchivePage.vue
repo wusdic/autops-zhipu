@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">报表归档</div>
-        <div class="autops-page-subtitle">历史报表存储、下载与管理</div>
+        <div class="autops-page-desc">历史报表存储、下载与管理</div>
       </div>
     </div>
 

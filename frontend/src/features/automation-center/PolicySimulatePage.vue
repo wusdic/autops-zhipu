@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">策略模拟</div>
-        <div class="autops-page-subtitle">在沙箱中验证策略匹配结果</div>
+        <div class="autops-page-desc">在沙箱中验证策略匹配结果</div>
       </div>
     </div>
 

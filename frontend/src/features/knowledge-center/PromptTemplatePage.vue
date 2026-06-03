@@ -7,7 +7,7 @@
           <el-icon style="margin-right: 6px"><Notebook /></el-icon>
           Prompt 模板管理
         </div>
-        <div class="autops-page-subtitle">管理 AI 提示词模板</div>
+        <div class="autops-page-desc">管理 AI 提示词模板</div>
       </div>
       <div class="top-actions">
         <el-button type="primary" :icon="Plus" @click="openCreate">新建模板</el-button>
@@ -450,11 +450,6 @@ onMounted(() => {
   color: #303133;
   display: flex;
   align-items: center;
-}
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #909399;
-  margin-top: 4px;
 }
 .top-actions {
   display: flex;

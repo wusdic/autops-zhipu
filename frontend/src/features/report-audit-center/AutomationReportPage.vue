@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">自动化报告</div>
-        <div class="autops-page-subtitle">自动化执行统计与详细分析</div>
+        <div class="autops-page-desc">自动化执行统计与详细分析</div>
       </div>
       <div class="header-actions">
         <el-date-picker

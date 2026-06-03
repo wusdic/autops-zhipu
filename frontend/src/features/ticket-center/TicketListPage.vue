@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">工单中心</div>
-        <div class="autops-page-subtitle">统一管理事件工单，支持指派、升级、关闭与 SLA 跟踪</div>
+        <div class="autops-page-desc">统一管理事件工单，支持指派、升级、关闭与 SLA 跟踪</div>
       </div>
     </div>
 

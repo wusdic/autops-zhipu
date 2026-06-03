@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">外部集成</div>
-        <div class="autops-page-subtitle">管理平台与外部系统的集成连接</div>
+        <div class="autops-page-desc">管理平台与外部系统的集成连接</div>
       </div>
       <div class="header-actions">
         <el-button @click="loadIntegrations" :loading="loading">
@@ -344,11 +344,6 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #1d2129;
-}
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 2px;
 }
 .header-actions {
   display: flex;

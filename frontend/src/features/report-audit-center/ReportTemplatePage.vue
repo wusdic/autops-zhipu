@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">报表模板</div>
-        <div class="autops-page-subtitle">管理报表模板，支持创建、编辑和生成报表</div>
+        <div class="autops-page-desc">管理报表模板，支持创建、编辑和生成报表</div>
       </div>
     </div>
 

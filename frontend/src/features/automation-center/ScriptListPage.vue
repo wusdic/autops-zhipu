@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">脚本库</div>
-        <div class="autops-page-subtitle">管理可复用的自动化脚本</div>
+        <div class="autops-page-desc">管理可复用的自动化脚本</div>
       </div>
     </div>
 

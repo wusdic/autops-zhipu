@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">监控总览</div>
-        <div class="autops-page-subtitle">实时监控概览，包括事件趋势、告警分布与状态变更</div>
+        <div class="autops-page-desc">实时监控概览，包括事件趋势、告警分布与状态变更</div>
       </div>
     </div>
 

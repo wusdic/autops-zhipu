@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">任务队列</div>
-        <div class="autops-page-subtitle">管理后台异步任务的执行状态</div>
+        <div class="autops-page-desc">管理后台异步任务的执行状态</div>
       </div>
       <div class="header-actions">
         <el-button @click="loadTasks" :loading="loading">
@@ -374,11 +374,6 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #1d2129;
-}
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 2px;
 }
 .header-actions {
   display: flex;

@@ -7,7 +7,7 @@
           <el-icon style="margin-right: 6px"><Reading /></el-icon>
           知识审核
         </div>
-        <div class="autops-page-subtitle">审核待发布的知识文章</div>
+        <div class="autops-page-desc">审核待发布的知识文章</div>
       </div>
     </div>
 
@@ -399,11 +399,6 @@ onMounted(() => {
   color: #303133;
   display: flex;
   align-items: center;
-}
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #909399;
-  margin-top: 4px;
 }
 .filter-row {
   margin-bottom: 16px;

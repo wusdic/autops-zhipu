@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">工单详情</div>
-        <div class="autops-page-subtitle">查看工单信息、关联告警、处理历史与 SLA 跟踪</div>
+        <div class="autops-page-desc">查看工单信息、关联告警、处理历史与 SLA 跟踪</div>
       </div>
     </div>
 

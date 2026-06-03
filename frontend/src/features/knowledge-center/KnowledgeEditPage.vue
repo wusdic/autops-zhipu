@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">编辑知识</div>
-        <div class="autops-page-subtitle">编辑知识条目内容</div>
+        <div class="autops-page-desc">编辑知识条目内容</div>
       </div>
     </div>
 

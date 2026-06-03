@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">告警详情</div>
-        <div class="autops-page-subtitle">查看告警详情、影响分析、证据链和处理历史</div>
+        <div class="autops-page-desc">查看告警详情、影响分析、证据链和处理历史</div>
       </div>
     </div>
 

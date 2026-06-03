@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">日志接入</div>
-        <div class="autops-page-subtitle">日志源、解析规则、接入状态</div>
+        <div class="autops-page-desc">日志源、解析规则、接入状态</div>
       </div>
     </div>
 

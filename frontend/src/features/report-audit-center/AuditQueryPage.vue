@@ -1,6 +1,9 @@
 <template>
   <div class="p-6">
-    <h2 class="page-title">审计查询</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">审计查询</div>
+      <div class="autops-page-desc">查询系统操作审计日志</div>
+    </div>
 
     <!-- 查询条件 -->
     <div class="autops-card mb-lg">
@@ -229,12 +232,6 @@ onMounted(() => search())
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: #1d2129;
-}
 .mb-lg {
   margin-bottom: 16px;
 }

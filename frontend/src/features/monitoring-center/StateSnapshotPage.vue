@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">状态快照</div>
-        <div class="autops-page-subtitle">资源当前可达性、健康状态、最新指标</div>
+        <div class="autops-page-desc">资源当前可达性、健康状态、最新指标</div>
       </div>
     </div>
 

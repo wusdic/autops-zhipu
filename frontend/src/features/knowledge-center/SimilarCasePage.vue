@@ -7,7 +7,7 @@
           <el-icon style="margin-right: 6px"><Connection /></el-icon>
           相似案例查找
         </div>
-        <div class="autops-page-subtitle">基于历史事件智能匹配相似案例</div>
+        <div class="autops-page-desc">基于历史事件智能匹配相似案例</div>
       </div>
     </div>
 
@@ -311,11 +311,6 @@ onMounted(() => {
   color: #303133;
   display: flex;
   align-items: center;
-}
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #909399;
-  margin-top: 4px;
 }
 .search-panel {
   margin-bottom: 0;

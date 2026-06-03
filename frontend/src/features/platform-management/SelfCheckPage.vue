@@ -20,7 +20,7 @@
       <div class="autops-page-header">
         <div>
           <div class="autops-page-title">平台自检</div>
-          <div class="autops-page-subtitle">检查平台各组件的运行状态与健康情况</div>
+          <div class="autops-page-desc">检查平台各组件的运行状态与健康情况</div>
         </div>
         <div class="header-actions">
           <el-button @click="loadHistory" :loading="historyLoading">刷新记录</el-button>
@@ -373,11 +373,6 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #1d2129;
-}
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 2px;
 }
 .header-actions {
   display: flex;

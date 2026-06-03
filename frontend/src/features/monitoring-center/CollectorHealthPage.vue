@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">采集器健康</div>
-        <div class="autops-page-subtitle">在线状态、心跳、成功率、平均延迟</div>
+        <div class="autops-page-desc">在线状态、心跳、成功率、平均延迟</div>
       </div>
     </div>
 

@@ -20,7 +20,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">授权许可</div>
-        <div class="autops-page-subtitle">查看与管理平台授权信息</div>
+        <div class="autops-page-desc">查看与管理平台授权信息</div>
       </div>
       <el-button @click="loadLicense" :loading="loading">
         <el-icon><Refresh /></el-icon> 刷新
@@ -349,11 +349,6 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #1d2129;
-}
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 2px;
 }
 
 .autops-card {

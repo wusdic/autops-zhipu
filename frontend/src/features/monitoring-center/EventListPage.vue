@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">事件中心</div>
-        <div class="autops-page-subtitle">统一查看与关联分析所有监控事件</div>
+        <div class="autops-page-desc">统一查看与关联分析所有监控事件</div>
       </div>
     </div>
 

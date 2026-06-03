@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">指标趋势</div>
-        <div class="autops-page-subtitle">CPU、内存、磁盘、网络、数据库、页面响应时间</div>
+        <div class="autops-page-desc">CPU、内存、磁盘、网络、数据库、页面响应时间</div>
       </div>
     </div>
 

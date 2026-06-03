@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">生成报表</div>
-        <div class="autops-page-subtitle">选择模板与参数，快速生成运维报表</div>
+        <div class="autops-page-desc">选择模板与参数，快速生成运维报表</div>
       </div>
     </div>
 

@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">巡检报告</div>
-        <div class="autops-page-subtitle">巡检结果汇总报告、下载和归档</div>
+        <div class="autops-page-desc">巡检结果汇总报告、下载和归档</div>
       </div>
     </div>
 

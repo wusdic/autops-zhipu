@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">报表预览</div>
-        <div class="autops-page-subtitle">在线预览生成的报表内容</div>
+        <div class="autops-page-desc">在线预览生成的报表内容</div>
       </div>
       <div class="header-actions">
         <el-button @click="goBack">返回</el-button>

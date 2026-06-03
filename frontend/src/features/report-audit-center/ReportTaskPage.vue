@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">报表任务</div>
-        <div class="autops-page-subtitle">报表生成任务队列、进度跟踪与日志</div>
+        <div class="autops-page-desc">报表生成任务队列、进度跟踪与日志</div>
       </div>
     </div>
 

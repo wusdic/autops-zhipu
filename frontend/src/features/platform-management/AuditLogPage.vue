@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">审计日志</div>
-        <div class="autops-page-subtitle">查看系统操作审计日志</div>
+        <div class="autops-page-desc">查看系统操作审计日志</div>
       </div>
     </div>
 

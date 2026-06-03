@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">数据字典</div>
-        <div class="autops-page-subtitle">管理系统字典分类与字典项</div>
+        <div class="autops-page-desc">管理系统字典分类与字典项</div>
       </div>
     </div>
 
@@ -340,11 +340,6 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #1d2129;
-}
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 2px;
 }
 
 /* Layout */

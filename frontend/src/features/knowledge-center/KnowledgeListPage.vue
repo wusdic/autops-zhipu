@@ -6,7 +6,7 @@
           <el-icon style="margin-right: 6px"><Reading /></el-icon>
           知识库管理
         </div>
-        <div class="autops-page-subtitle">运维知识沉淀与检索</div>
+        <div class="autops-page-desc">运维知识沉淀与检索</div>
       </div>
       <div class="top-actions">
         <el-button type="primary" :icon="Plus" @click="goCreate">新建知识</el-button>

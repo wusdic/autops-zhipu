@@ -7,7 +7,7 @@
           <el-icon style="margin-right: 6px"><MagicStick /></el-icon>
           AI 响应建议
         </div>
-        <div class="autops-page-subtitle">基于知识库智能生成告警/异常响应建议</div>
+        <div class="autops-page-desc">基于知识库智能生成告警/异常响应建议</div>
       </div>
     </div>
 
@@ -321,11 +321,6 @@ onMounted(() => {
   color: #303133;
   display: flex;
   align-items: center;
-}
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #909399;
-  margin-top: 4px;
 }
 .input-panel {
   margin-bottom: 0;

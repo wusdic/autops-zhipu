@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">API 密钥</div>
-        <div class="autops-page-subtitle">管理系统 API 密钥</div>
+        <div class="autops-page-desc">管理系统 API 密钥</div>
       </div>
     </div>
 

@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">策略管理</div>
-        <div class="autops-page-subtitle">配置自动化触发策略</div>
+        <div class="autops-page-desc">配置自动化触发策略</div>
       </div>
     </div>
 

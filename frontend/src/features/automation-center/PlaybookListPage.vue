@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">Playbook 管理</div>
-        <div class="autops-page-subtitle">编排自动化步骤流程</div>
+        <div class="autops-page-desc">编排自动化步骤流程</div>
       </div>
     </div>
 

@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">系统配置</div>
-        <div class="autops-page-subtitle">管理平台全局配置参数</div>
+        <div class="autops-page-desc">管理平台全局配置参数</div>
       </div>
     </div>
 

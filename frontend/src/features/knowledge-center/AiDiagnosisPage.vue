@@ -6,7 +6,7 @@
           <el-icon style="margin-right: 6px"><MagicStick /></el-icon>
           AI 智能诊断
         </div>
-        <div class="autops-page-subtitle">
+        <div class="autops-page-desc">
           <template v-if="activeMode === 'analysis'">选择告警，由 AI 自动构建上下文并进行根因分析</template>
           <template v-else>输入运维任务，Agent 自主规划并执行多步骤排查</template>
         </div>
@@ -1204,12 +1204,6 @@ watch(activeMode, (mode) => {
   color: #303133;
   display: flex;
   align-items: center;
-}
-
-.page-subtitle {
-  margin-left: 16px;
-  color: #909399;
-  font-size: 14px;
 }
 
 /* Cards */

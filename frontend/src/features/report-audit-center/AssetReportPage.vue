@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">资产报告</div>
-        <div class="autops-page-subtitle">资产清单统计与状态分析报告</div>
+        <div class="autops-page-desc">资产清单统计与状态分析报告</div>
       </div>
       <div class="header-actions">
         <el-button :icon="Refresh" circle size="small" @click="loadAll" />

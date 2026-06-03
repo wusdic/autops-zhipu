@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">告警规则</div>
-        <div class="autops-page-subtitle">配置指标阈值与触发条件，实现自动化告警</div>
+        <div class="autops-page-desc">配置指标阈值与触发条件，实现自动化告警</div>
       </div>
     </div>
 

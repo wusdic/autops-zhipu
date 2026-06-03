@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">状态变化</div>
-        <div class="autops-page-subtitle">状态变更历史、触发来源、证据</div>
+        <div class="autops-page-desc">状态变更历史、触发来源、证据</div>
       </div>
     </div>
 

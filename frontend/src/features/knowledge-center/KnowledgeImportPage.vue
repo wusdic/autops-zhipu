@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">导入知识</div>
-        <div class="autops-page-subtitle">批量导入知识条目</div>
+        <div class="autops-page-desc">批量导入知识条目</div>
       </div>
       <div class="top-actions">
         <el-button :icon="ArrowLeft" @click="$router.push({ name: 'knowledge' })">返回知识库</el-button>

@@ -7,7 +7,7 @@
           <el-icon style="margin-right: 6px"><Warning /></el-icon>
           规则缺口分析
         </div>
-        <div class="autops-page-subtitle">识别缺少告警规则和策略的事件类型</div>
+        <div class="autops-page-desc">识别缺少告警规则和策略的事件类型</div>
       </div>
       <div class="top-actions">
         <el-button type="primary" @click="runAnalysis" :loading="loading">执行分析</el-button>
@@ -351,11 +351,6 @@ onMounted(() => {
   color: #303133;
   display: flex;
   align-items: center;
-}
-.autops-page-subtitle {
-  font-size: 13px;
-  color: #909399;
-  margin-top: 4px;
 }
 .top-actions {
   display: flex;

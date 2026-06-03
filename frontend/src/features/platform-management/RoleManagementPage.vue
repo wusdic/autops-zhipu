@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">角色管理</div>
-        <div class="autops-page-subtitle">管理角色与权限</div>
+        <div class="autops-page-desc">管理角色与权限</div>
       </div>
       <div class="top-actions">
         <el-button type="primary" @click="showCreateDialog">新建角色</el-button>

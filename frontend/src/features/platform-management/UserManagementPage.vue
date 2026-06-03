@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">用户管理</div>
-        <div class="autops-page-subtitle">管理系统用户账号</div>
+        <div class="autops-page-desc">管理系统用户账号</div>
       </div>
       <div class="top-actions">
         <el-button type="primary" @click="showCreateDialog">新建用户</el-button>

@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">平台状态</div>
-        <div class="autops-page-subtitle">查看平台运行指标与健康度</div>
+        <div class="autops-page-desc">查看平台运行指标与健康度</div>
       </div>
       <div class="top-actions" style="display:flex;align-items:center;gap:12px">
         <div class="auto-refresh-control">

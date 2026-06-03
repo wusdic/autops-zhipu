@@ -17,7 +17,7 @@
       <div class="autops-page-header">
         <div>
           <div class="autops-page-title">备份与恢复</div>
-          <div class="autops-page-subtitle">系统数据备份和恢复</div>
+          <div class="autops-page-desc">系统数据备份和恢复</div>
         </div>
         <div class="top-actions">
           <el-button @click="loadBackups" :loading="loading">刷新</el-button>

@@ -4,7 +4,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">采集结果</div>
-        <div class="autops-page-subtitle">原始输出、标准化指标、解析结果、错误详情</div>
+        <div class="autops-page-desc">原始输出、标准化指标、解析结果、错误详情</div>
       </div>
     </div>
 

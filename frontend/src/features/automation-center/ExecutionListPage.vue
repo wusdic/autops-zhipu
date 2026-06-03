@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">执行历史</div>
-        <div class="autops-page-subtitle">查看所有自动化执行记录与状态</div>
+        <div class="autops-page-desc">查看所有自动化执行记录与状态</div>
       </div>
     </div>
 
