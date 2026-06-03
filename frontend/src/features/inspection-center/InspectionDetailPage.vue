@@ -1,159 +1,226 @@
 <template>
   <div class="page-container">
-    <el-page-header @back="$router.back()" :title="'返回'">
-      <template #content>
-        <span>巡检详情</span>
-        <el-tag v-if="detail" :type="statusTagType(detail.status)" size="small" style="margin-left: 8px">
-          {{ statusLabel(detail.status) }}
-        </el-tag>
-      </template>
-    </el-page-header>
+    <div class="autops-page-header">
+      <h2>巡检详情</h2>
+      <div>
+        <el-button @click="goBack"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <el-button type="primary" @click="rerunInspection" :loading="rerunning"><el-icon><Refresh /></el-icon> 重新巡检</el-button>
+      </div>
+    </div>
 
-    <el-row :gutter="16" style="margin-top: 16px" v-if="detail">
+    <div v-loading="loading">
       <!-- 基本信息 -->
-      <el-col :span="16">
-        <el-card shadow="never">
-          <template #header><span>基本信息</span></template>
-          <el-descriptions :column="2" border>
-            <el-descriptions-item label="任务ID">{{ detail.id }}</el-descriptions-item>
-            <el-descriptions-item label="巡检计划">{{ detail.planName }}</el-descriptions-item>
-            <el-descriptions-item label="巡检模板">{{ detail.templateName }}</el-descriptions-item>
-            <el-descriptions-item label="执行时间">{{ detail.startTime }}</el-descriptions-item>
-            <el-descriptions-item label="完成时间">{{ detail.endTime }}</el-descriptions-item>
-            <el-descriptions-item label="执行耗时">{{ detail.duration }}</el-descriptions-item>
-            <el-descriptions-item label="目标范围">{{ detail.scope }}</el-descriptions-item>
-            <el-descriptions-item label="检查项数">{{ detail.totalChecks }}</el-descriptions-item>
-          </el-descriptions>
-        </el-card>
+      <div class="autops-card" style="margin-bottom: 16px">
+        <el-descriptions :column="3" border>
+          <el-descriptions-item label="巡检任务ID">{{ taskDetail?.id?.slice(0, 8) || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="巡检模板">{{ taskDetail?.template_name || taskDetail?.inspection_type || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag :type="statusTag(taskDetail?.status)" effect="dark">{{ statusLabel(taskDetail?.status) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="资产数量">{{ taskDetail?.asset_count || taskDetail?.target_assets?.length || 0 }}</el-descriptions-item>
+          <el-descriptions-item label="开始时间">{{ formatTime(taskDetail?.started_at) }}</el-descriptions-item>
+          <el-descriptions-item label="完成时间">{{ formatTime(taskDetail?.completed_at) }}</el-descriptions-item>
+          <el-descriptions-item label="巡检类型">{{ typeLabel(taskDetail?.inspection_type) }}</el-descriptions-item>
+          <el-descriptions-item label="创建人">{{ taskDetail?.created_by || 'system' }}</el-descriptions-item>
+          <el-descriptions-item label="耗时">{{ taskDetail?.duration || '-' }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
 
-        <!-- 检查结果统计 -->
-        <el-card shadow="never" style="margin-top: 16px">
-          <template #header><span>检查结果统计</span></template>
-          <el-row :gutter="16">
-            <el-col :span="6">
-              <el-statistic title="通过" :value="detail.passed" />
-            </el-col>
-            <el-col :span="6">
-              <el-statistic title="警告" :value="detail.warned" />
-            </el-col>
-            <el-col :span="6">
-              <el-statistic title="失败" :value="detail.failed" />
-            </el-col>
-            <el-col :span="6">
-              <el-statistic title="跳过" :value="detail.skipped" />
-            </el-col>
-          </el-row>
-        </el-card>
+      <!-- 结果概要 -->
+      <el-row :gutter="16" style="margin-bottom: 16px">
+        <el-col :xs="12" :sm="6" v-for="stat in resultStats" :key="stat.label">
+          <div class="autops-metric-card">
+            <div class="metric-label">{{ stat.label }}</div>
+            <div class="metric-value" :style="{ color: stat.color }">{{ stat.value }}</div>
+          </div>
+        </el-col>
+      </el-row>
 
-        <!-- 检查项详情列表 -->
-        <el-card shadow="never" style="margin-top: 16px">
-          <template #header>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span>检查项详情</span>
-              <el-input v-model="checkFilter" placeholder="搜索检查项" style="width:200px" clearable :prefix-icon="Search" />
-            </div>
-          </template>
-          <el-table :data="filteredChecks" stripe max-height="400">
-            <el-table-column prop="name" label="检查项" min-width="180" />
-            <el-table-column prop="category" label="分类" width="120" />
-            <el-table-column prop="target" label="检查对象" width="150" />
-            <el-table-column prop="status" label="状态" width="90">
-              <template #default="{ row }">
-                <el-tag :type="checkStatusType(row.status)" size="small">{{ row.status }}</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="expected" label="期望值" width="120" />
-            <el-table-column prop="actual" label="实际值" width="120" />
-            <el-table-column prop="message" label="说明" min-width="200" show-overflow-tooltip />
-          </el-table>
-        </el-card>
-      </el-col>
+      <!-- 巡检项明细 -->
+      <div class="autops-card" style="margin-bottom: 16px">
+        <div class="autops-card-header">
+          <div class="autops-card-title">巡检项明细</div>
+          <div>
+            <el-select v-model="resultFilter" placeholder="结果筛选" style="width: 120px" clearable>
+              <el-option label="通过" value="pass" />
+              <el-option label="失败" value="fail" />
+              <el-option label="警告" value="warning" />
+              <el-option label="跳过" value="skip" />
+            </el-select>
+          </div>
+        </div>
+        <el-table :data="filteredResults" stripe class="autops-table" @expand-change="handleExpand">
+          <el-table-column type="expand">
+            <template #default="{ row }">
+              <div style="padding: 12px 24px">
+                <h4>详细结果</h4>
+                <el-descriptions :column="2" border size="small">
+                  <el-descriptions-item label="检查项">{{ row.check_item }}</el-descriptions-item>
+                  <el-descriptions-item label="实际值">{{ row.actual_value || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="期望值">{{ row.expected_value || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="差异说明">{{ row.diff_description || '-' }}</el-descriptions-item>
+                </el-descriptions>
+                <div v-if="row.recommendation" style="margin-top: 8px">
+                  <el-alert type="info" :closable="false"><strong>建议:</strong> {{ row.recommendation }}</el-alert>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="asset_name" label="资产" min-width="140" show-overflow-tooltip />
+          <el-table-column prop="check_item" label="检查项" min-width="160" show-overflow-tooltip />
+          <el-table-column prop="module" label="模块" width="100">
+            <template #default="{ row }">
+              <el-tag size="small">{{ row.module || '-' }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="result" label="结果" width="80">
+            <template #default="{ row }">
+              <el-tag :type="resultTag(row.result)" size="small">{{ resultLabel(row.result) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="severity" label="严重度" width="80">
+            <template #default="{ row }">
+              <el-tag v-if="row.result === 'fail'" :type="severityTag(row.severity)" size="small">{{ row.severity || '-' }}</el-tag>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="message" label="信息" min-width="200" show-overflow-tooltip />
+          <el-table-column label="操作" width="120" fixed="right">
+            <template #default="{ row }">
+              <el-button v-if="row.result === 'fail'" link type="warning" @click="navToAnomalyFromInspection(taskDetail?.id)">报异常</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
-      <!-- 右侧面板 -->
-      <el-col :span="8">
-        <el-card shadow="never">
-          <template #header><span>操作</span></template>
-          <el-space direction="vertical" fill style="width:100%">
-            <el-button type="primary" style="width:100%" @click="rerunInspection">重新巡检</el-button>
-            <el-button style="width:100%" @click="exportReport">导出报告</el-button>
-            <el-button type="warning" style="width:100%" @click="createTicket" v-if="detail.failed > 0">
-              失败项转工单
-            </el-button>
-          </el-space>
-        </el-card>
-
-        <el-card shadow="never" style="margin-top: 16px">
-          <template #header><span>巡检时间线</span></template>
-          <el-timeline>
-            <el-timeline-item
-              v-for="item in timeline"
-              :key="item.time"
-              :timestamp="item.time"
-              :type="item.type"
-              placement="top"
-            >
-              {{ item.content }}
-            </el-timeline-item>
-          </el-timeline>
-        </el-card>
-      </el-col>
-    </el-row>
+      <!-- 工作流操作 -->
+      <div class="autops-card">
+        <div class="autops-card-header"><div class="autops-card-title">后续操作</div></div>
+        <div style="display: flex; gap: 8px; padding: 12px">
+          <el-button type="warning" @click="navToAnomalyFromInspection(taskDetail?.id)">
+            <el-icon><Warning /></el-icon> 查看异常项
+          </el-button>
+          <el-button type="primary" @click="navToReportFromInspection(taskDetail?.id)">
+            <el-icon><Document /></el-icon> 生成报告
+          </el-button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ArrowLeft, Refresh, Warning, Document } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
+import api from '@/shared/api'
+import { routes as API } from '@/shared/api/routes'
+import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 const route = useRoute()
-const checkFilter = ref('')
+const router = useRouter()
+const { navToAnomalyFromInspection, navToReportFromInspection } = useWorkflowNav()
 
-const detail = ref({
-  id: String(route.params.id || 'INS-001'),
-  planName: '每日基础巡检',
-  templateName: 'Linux 服务器基础巡检模板',
-  startTime: '2026-06-02 08:00:00',
-  endTime: '2026-06-02 08:15:23',
-  duration: '15m 23s',
-  scope: '生产环境 Linux 服务器 (32台)',
-  totalChecks: 96,
-  passed: 78,
-  warned: 12,
-  failed: 4,
-  skipped: 2,
-  status: 'completed',
+const loading = ref(false)
+const rerunning = ref(false)
+const taskDetail = ref<any>(null)
+const checkResults = ref<any[]>([])
+const resultFilter = ref('')
+
+const taskId = computed(() => route.params.id as string || route.query.task_id as string)
+
+const resultStats = computed(() => {
+  const all = checkResults.value
+  return [
+    { label: '检查项总数', value: all.length, color: '#165dff' },
+    { label: '通过', value: all.filter(r => r.result === 'pass').length, color: '#00b42a' },
+    { label: '失败', value: all.filter(r => r.result === 'fail').length, color: '#f53f3f' },
+    { label: '警告', value: all.filter(r => r.result === 'warning').length, color: '#ff7d00' },
+  ]
 })
 
-const checks = ref([
-  { name: 'CPU 使用率', category: '性能', target: 'web-server-01', status: '通过', expected: '<80%', actual: '45%', message: '' },
-  { name: '磁盘使用率', category: '容量', target: 'web-server-01', status: '通过', expected: '<85%', actual: '62%', message: '' },
-  { name: '内存使用率', category: '性能', target: 'web-server-02', status: '警告', expected: '<80%', actual: '78%', message: '接近阈值' },
-  { name: 'SSH 服务状态', category: '服务', target: 'db-server-01', status: '失败', expected: 'running', actual: 'stopped', message: 'SSH服务未运行' },
-])
-
-const filteredChecks = computed(() => {
-  if (!checkFilter.value) return checks.value
-  const kw = checkFilter.value.toLowerCase()
-  return checks.value.filter(c => c.name.toLowerCase().includes(kw) || c.target.toLowerCase().includes(kw))
+const filteredResults = computed(() => {
+  if (!resultFilter.value) return checkResults.value
+  return checkResults.value.filter(r => r.result === resultFilter.value)
 })
 
-const timeline = ref([
-  { time: '2026-06-02 08:15:23', content: '巡检完成', type: 'success' },
-  { time: '2026-06-02 08:00:00', content: '开始巡检', type: 'primary' },
-  { time: '2026-06-02 07:59:50', content: '任务调度触发', type: 'info' },
-])
+async function fetchDetail() {
+  if (!taskId.value) return
+  loading.value = true
+  try {
+    const res = await api.get(`${API.INSPECTION_TASKS}/${taskId.value}`)
+    const data = res.data
+    if (data?.code === 0) {
+      taskDetail.value = data.data
+      // Build check results from task detail
+      const items = data.data?.items || data.data?.check_results || []
+      checkResults.value = items.map((r: any) => ({
+        ...r,
+        asset_name: r.asset_name || r.asset?.name || '-',
+        check_item: r.check_item || r.name || r.item_name || '-',
+        result: r.result || r.status || 'pass',
+        message: r.message || r.description || '',
+        module: r.module || r.category || '-',
+      }))
+    }
+  } catch (e) {
+    ElMessage.error('获取巡检详情失败')
+  } finally {
+    loading.value = false
+  }
+}
 
-const statusTagType = (s: string) => s === 'completed' ? 'success' : s === 'running' ? 'warning' : s === 'failed' ? 'danger' : 'info'
-const statusLabel = (s: string) => ({ completed: '已完成', running: '执行中', failed: '执行失败', pending: '待执行' }[s] || s)
-const checkStatusType = (s: string) => s === '通过' ? 'success' : s === '警告' ? 'warning' : s === '失败' ? 'danger' : 'info'
+async function rerunInspection() {
+  rerunning.value = true
+  try {
+    await api.post(API.INSPECTION_TASKS, { template_id: taskDetail.value?.template_id, asset_ids: taskDetail.value?.target_assets })
+    ElMessage.success('已触发重新巡检')
+  } catch (e) {
+    ElMessage.error('触发失败')
+  } finally {
+    rerunning.value = false
+  }
+}
 
-function rerunInspection() { ElMessage.info('正在重新执行巡检...') }
-function exportReport() { ElMessage.success('报告导出中...') }
-function createTicket() { ElMessage.success('已创建工单') }
+function handleExpand(row: any) { /* expanded */ }
+
+function goBack() { router.back() }
+
+function statusTag(s: string) {
+  const map: Record<string, string> = { running: 'warning', completed: 'success', failed: 'danger', pending: 'info' }
+  return map[s] || 'info'
+}
+function statusLabel(s: string) {
+  const map: Record<string, string> = { running: '执行中', completed: '已完成', failed: '失败', pending: '待执行' }
+  return map[s] || s || '-'
+}
+function resultTag(r: string) {
+  const map: Record<string, string> = { pass: 'success', fail: 'danger', warning: 'warning', skip: 'info' }
+  return map[r] || 'info'
+}
+function resultLabel(r: string) {
+  const map: Record<string, string> = { pass: '通过', fail: '失败', warning: '警告', skip: '跳过' }
+  return map[r] || r || '-'
+}
+function severityTag(s: string) {
+  const map: Record<string, string> = { critical: 'danger', high: 'danger', medium: 'warning', low: 'info' }
+  return map[s] || 'info'
+}
+function typeLabel(t: string) {
+  const map: Record<string, string> = { page: '页面巡检', log: '日志巡检', config: '配置巡检', performance: '性能巡检', security: '安全巡检', baseline: '基线巡检' }
+  return map[t] || t || '-'
+}
+function formatTime(t: string) {
+  return t ? new Date(t).toLocaleString('zh-CN') : '-'
+}
+
+onMounted(fetchDetail)
 </script>
 
 <style scoped>
-.page-container { padding: 16px; }
+.page-container { padding: 20px; }
+.autops-metric-card { padding: 16px; background: #fff; border-radius: 8px; text-align: center; border: 1px solid #e5e6eb; }
+.metric-label { font-size: 13px; color: #86909c; margin-bottom: 4px; }
+.metric-value { font-size: 28px; font-weight: 700; }
 </style>

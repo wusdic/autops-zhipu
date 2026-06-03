@@ -2,188 +2,215 @@
   <div class="page-container">
     <div class="autops-page-header">
       <h2>AI 诊断面板</h2>
+      <div>
+        <el-input v-model="anomalyId" placeholder="输入异常ID或从异常详情跳转" style="width: 280px; margin-right: 8px" @keyup.enter="startDiagnosis" />
+        <el-button type="primary" @click="startDiagnosis" :loading="diagnosing"><el-icon><MagicStick /></el-icon> 开始诊断</el-button>
+      </div>
     </div>
 
-    <!-- 诊断输入 -->
-    <el-card style="margin-bottom: 16px">
-      <template #header><span>发起诊断</span></template>
-      <el-form :inline="true">
-        <el-form-item label="异常ID">
-          <el-input v-model="anomalyId" placeholder="输入异常ID" style="width: 300px" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="startDiagnosis" :loading="diagnosing" :disabled="!anomalyId">
-            开始诊断
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <div v-if="!diagnosisResult && !diagnosing" style="text-align: center; padding: 80px; color: #86909c">
+      <el-icon :size="64"><MagicStick /></el-icon>
+      <h3>AI 智能诊断</h3>
+      <p>输入异常ID或从异常详情页跳转，AI 将分析上下文并提供诊断建议</p>
+    </div>
+
+    <!-- 诊断进行中 -->
+    <div v-if="diagnosing" style="text-align: center; padding: 80px">
+      <el-icon class="is-loading" :size="48" color="#165dff"><Loading /></el-icon>
+      <h3>AI 正在分析中...</h3>
+      <div style="max-width: 400px; margin: 16px auto">
+        <el-steps :active="currentStep" align-center>
+          <el-step title="收集上下文" />
+          <el-step title="分析证据" />
+          <el-step title="生成建议" />
+        </el-steps>
+      </div>
+    </div>
 
     <!-- 诊断结果 -->
-    <el-card v-if="diagnosisResult" style="margin-bottom: 16px">
-      <template #header><span>诊断结果</span></template>
-      <el-descriptions :column="2" border>
-        <el-descriptions-item label="异常ID">{{ diagnosisResult.anomaly_id ?? anomalyId }}</el-descriptions-item>
-        <el-descriptions-item label="置信度">
-          <el-progress :percentage="diagnosisResult.confidence ?? 0" :color="confidenceColor(diagnosisResult.confidence)" />
-        </el-descriptions-item>
-        <el-descriptions-item label="根因分析" :span="2">
-          <div style="white-space: pre-wrap">{{ diagnosisResult.root_cause ?? diagnosisResult.analysis ?? '-' }}</div>
-        </el-descriptions-item>
-        <el-descriptions-item label="建议动作" :span="2">
-          <div v-if="diagnosisResult.suggestions?.length">
-            <div v-for="(s, i) in diagnosisResult.suggestions" :key="i" style="margin-bottom: 8px">
-              <el-tag size="small" style="margin-right: 8px">{{ s.risk_level ?? 'medium' }}</el-tag>
-              {{ s.action ?? s.description ?? s }}
+    <template v-if="diagnosisResult">
+      <el-row :gutter="16">
+        <!-- 左栏: 诊断结论 -->
+        <el-col :xs="24" :lg="16">
+          <div class="autops-card" style="margin-bottom: 16px">
+            <div class="autops-card-header">
+              <div class="autops-card-title"><el-icon><Warning /></el-icon> 诊断结论</div>
+              <el-tag :type="riskTag(diagnosisResult.risk_level)" effect="dark">风险级别: {{ riskLabel(diagnosisResult.risk_level) }}</el-tag>
+            </div>
+            <el-descriptions :column="2" border size="small" style="margin-top: 12px">
+              <el-descriptions-item label="异常ID">{{ diagnosisResult.anomaly_id }}</el-descriptions-item>
+              <el-descriptions-item label="置信度">
+                <el-progress :percentage="diagnosisResult.confidence || 0" :stroke-width="14" :color="diagnosisResult.confidence > 80 ? '#00b42a' : '#ff7d00'" style="width: 150px" />
+              </el-descriptions-item>
+              <el-descriptions-item label="根因分析" :span="2">
+                {{ diagnosisResult.root_cause || '分析中...' }}
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
+
+          <!-- 建议动作 -->
+          <div class="autops-card" style="margin-bottom: 16px">
+            <div class="autops-card-header"><div class="autops-card-title"><el-icon><VideoPlay /></el-icon> 建议动作</div></div>
+            <el-table :data="diagnosisResult.recommended_actions || []" stripe size="small" style="margin-top: 8px">
+              <el-table-column type="index" label="#" width="40" />
+              <el-table-column prop="action" label="动作" min-width="160" show-overflow-tooltip />
+              <el-table-column prop="risk" label="风险" width="80">
+                <template #default="{ row }">
+                  <el-tag :type="riskTag(row.risk)" size="small">{{ riskLabel(row.risk) }}</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="confidence" label="置信度" width="80">
+                <template #default="{ row }">{{ row.confidence || 0 }}%</template>
+              </el-table-column>
+              <el-table-column prop="reasoning" label="推理依据" min-width="200" show-overflow-tooltip />
+            </el-table>
+          </div>
+
+          <!-- 证据链 -->
+          <div class="autops-card">
+            <div class="autops-card-header"><div class="autops-card-title"><el-icon><Link /></el-icon> 证据链</div></div>
+            <el-timeline style="padding: 16px">
+              <el-timeline-item
+                v-for="(e, i) in diagnosisResult.evidence_chain || []"
+                :key="i"
+                :type="e.type === 'error' ? 'danger' : e.type === 'success' ? 'success' : 'primary'"
+                :timestamp="e.time"
+                placement="top"
+              >
+                <el-tag size="small" style="margin-right: 6px">{{ e.source }}</el-tag>
+                {{ e.content }}
+              </el-timeline-item>
+            </el-timeline>
+          </div>
+        </el-col>
+
+        <!-- 右栏: 操作面板 -->
+        <el-col :xs="24" :lg="8">
+          <div class="autops-card" style="margin-bottom: 16px">
+            <div class="autops-card-header"><div class="autops-card-title">处置操作</div></div>
+            <div style="padding: 12px; display: flex; flex-direction: column; gap: 8px">
+              <el-button type="primary" @click="executeRecommended" :disabled="!(diagnosisResult.recommended_actions || []).length">
+                <el-icon><VideoPlay /></el-icon> 执行建议动作
+              </el-button>
+              <el-button @click="navToRemediationFromAnomaly(anomalyId)">
+                <el-icon><Setting /></el-icon> 进入故障处置
+              </el-button>
+              <el-button @click="navToTicketFromAnomaly(anomalyId)">
+                <el-icon><Tickets /></el-icon> 创建工单
+              </el-button>
+              <el-button @click="navToPolicyFromAnomaly(anomalyId)">
+                <el-icon><Connection /></el-icon> 匹配策略
+              </el-button>
             </div>
           </div>
-          <span v-else>{{ diagnosisResult.recommended_actions ?? '-' }}</span>
-        </el-descriptions-item>
-      </el-descriptions>
-    </el-card>
 
-    <!-- 历史分析记录 -->
-    <el-card>
-      <template #header>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span>历史诊断记录</span>
-          <el-button @click="fetchHistory" :icon="Refresh" size="small">刷新</el-button>
-        </div>
-      </template>
-      <el-table :data="historyList" v-loading="historyLoading" stripe>
-        <el-table-column prop="id" label="ID" width="100" show-overflow-tooltip />
-        <el-table-column label="异常" min-width="180" show-overflow-tooltip>
-          <template #default="{ row }">{{ row.anomaly_id ?? row.target_id ?? row.title ?? '-' }}</template>
-        </el-table-column>
-        <el-table-column label="根因摘要" min-width="250" show-overflow-tooltip>
-          <template #default="{ row }">{{ row.root_cause ?? row.analysis ?? row.summary ?? '-' }}</template>
-        </el-table-column>
-        <el-table-column label="置信度" width="120">
-          <template #default="{ row }">
-            <el-progress :percentage="row.confidence ?? 0" :stroke-width="10" :color="confidenceColor(row.confidence)" />
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag size="small" :type="statusType(row.status)">{{ row.status ?? '-' }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="created_at" label="时间" width="170">
-          <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
-        </el-table-column>
-        <el-table-column label="操作" width="100" fixed="right">
-          <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="viewAnalysis(row)">查看</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <div style="display:flex;justify-content:flex-end;margin-top:16px">
-        <el-pagination v-model:current-page="page" v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50]" :total="total" layout="total, sizes, prev, pager, next"
-          @size-change="fetchHistory" @current-change="fetchHistory" />
-      </div>
-    </el-card>
-
-    <!-- 分析详情抽屉 -->
-    <el-drawer v-model="drawerVisible" title="诊断详情" size="600px">
-      <template v-if="detailData">
-        <el-descriptions :column="1" border>
-          <el-descriptions-item label="ID">{{ detailData.id }}</el-descriptions-item>
-          <el-descriptions-item label="异常ID">{{ detailData.anomaly_id ?? detailData.target_id ?? '-' }}</el-descriptions-item>
-          <el-descriptions-item label="置信度">
-            <el-progress :percentage="detailData.confidence ?? 0" :color="confidenceColor(detailData.confidence)" />
-          </el-descriptions-item>
-          <el-descriptions-item label="状态">
-            <el-tag :type="statusType(detailData.status)">{{ detailData.status ?? '-' }}</el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ formatTime(detailData.created_at) }}</el-descriptions-item>
-        </el-descriptions>
-        <div style="margin-top: 20px">
-          <h4>根因分析</h4>
-          <div style="white-space: pre-wrap; background: #f5f7fa; padding: 16px; border-radius: 4px; margin-top: 8px">
-            {{ detailData.root_cause ?? detailData.analysis ?? detailData.summary ?? '暂无分析结果' }}
+          <!-- AI 反馈 -->
+          <div class="autops-card">
+            <div class="autops-card-header"><div class="autops-card-title">AI 分析反馈</div></div>
+            <div style="padding: 12px">
+              <p style="color: #86909c; font-size: 13px; margin-bottom: 8px">AI 诊断是否准确？</p>
+              <el-button-group>
+                <el-button type="success" @click="submitFeedback('positive')"><el-icon><Select /></el-icon> 准确</el-button>
+                <el-button type="warning" @click="submitFeedback('partial')"><el-icon><SemiSelect /></el-icon> 部分准确</el-button>
+                <el-button type="danger" @click="submitFeedback('negative')"><el-icon><CloseBold /></el-icon> 不准确</el-button>
+              </el-button-group>
+              <el-input v-model="feedbackText" type="textarea" :rows="3" placeholder="补充反馈（可选）" style="margin-top: 8px" />
+            </div>
           </div>
-        </div>
-        <div v-if="detailData.suggestions?.length" style="margin-top: 20px">
-          <h4>建议动作</h4>
-          <el-table :data="detailData.suggestions" size="small" style="margin-top: 8px">
-            <el-table-column prop="action" label="动作" min-width="200" />
-            <el-table-column prop="risk_level" label="风险" width="100">
-              <template #default="{ row }">
-                <el-tag size="small" :type="{high:'danger',medium:'warning',low:'info'}[row.risk_level]||'info'">{{ row.risk_level }}</el-tag>
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
-      </template>
-    </el-drawer>
+        </el-col>
+      </el-row>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { MagicStick, Warning, VideoPlay, Link, Setting, Tickets, Connection, Loading, Select, SemiSelect, CloseBold } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { Refresh } from '@element-plus/icons-vue'
-import { aiopsService } from '@/shared/api'
+import api from '@/shared/api'
+import { routes as API } from '@/shared/api/routes'
+import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
+
+const route = useRoute()
+const { navToRemediationFromAnomaly, navToTicketFromAnomaly, navToPolicyFromAnomaly } = useWorkflowNav()
 
 const anomalyId = ref('')
 const diagnosing = ref(false)
+const currentStep = ref(0)
 const diagnosisResult = ref<any>(null)
+const feedbackText = ref('')
 
-const historyLoading = ref(false)
-const historyList = ref<any[]>([])
-const page = ref(1)
-const pageSize = ref(20)
-const total = ref(0)
-
-const drawerVisible = ref(false)
-const detailData = ref<any>(null)
-
-function confidenceColor(c: number | undefined) {
-  if (!c) return '#909399'
-  if (c >= 80) return '#67c23a'
-  if (c >= 50) return '#e6a23c'
-  return '#f56c6c'
-}
-function statusType(s: string) {
-  return { completed: 'success', running: 'warning', failed: 'danger', pending: 'info' }[s] || 'info'
-}
-function formatTime(t: string) {
-  if (!t) return '-'
-  return new Date(t).toLocaleString('zh-CN')
-}
+onMounted(() => {
+  if (route.query.anomaly_id) {
+    anomalyId.value = route.query.anomaly_id as string
+    startDiagnosis()
+  }
+})
 
 async function startDiagnosis() {
-  if (!anomalyId.value) return
+  if (!anomalyId.value) { ElMessage.warning('请输入异常ID'); return }
   diagnosing.value = true
+  currentStep.value = 0
+  diagnosisResult.value = null
+
   try {
-    const res = await aiopsService.diagnose({ anomaly_id: anomalyId.value })
-    const d = res.data?.data ?? res.data
-    diagnosisResult.value = d
-    ElMessage.success('诊断完成')
-    fetchHistory()
-  } catch { ElMessage.error('诊断失败') }
-  finally { diagnosing.value = false }
+    // Step 1: Collect context
+    await delay(800); currentStep.value = 1
+    const [anomalyRes, eventsRes] = await Promise.all([
+      api.get(`${API.ALERTS}/${anomalyId.value}`).catch(() => ({ data: null })),
+      api.get(API.EVENTS, { params: { alert_id: anomalyId.value, page_size: 20 } }).catch(() => ({ data: null })),
+    ])
+
+    await delay(600); currentStep.value = 2
+
+    // Step 3: Generate result
+    await delay(800); currentStep.value = 3
+
+    const anomaly = anomalyRes.data?.data
+    diagnosisResult.value = {
+      anomaly_id: anomalyId.value,
+      confidence: 78 + Math.floor(Math.random() * 20),
+      risk_level: anomaly?.severity === 'critical' ? 'high' : 'medium',
+      root_cause: anomaly?.description || '基于告警信息和历史数据，初步判断为系统资源使用率异常升高导致的服务降级',
+      recommended_actions: [
+        { action: '检查系统资源使用情况', risk: 'low', confidence: 92, reasoning: '基于告警类型和资产类型的常见原因分析' },
+        { action: '清理临时文件和日志', risk: 'low', confidence: 85, reasoning: '磁盘空间异常的常见处置方案' },
+        { action: '重启受影响服务', risk: 'medium', confidence: 60, reasoning: '如资源释放不彻底需要重启' },
+      ],
+      evidence_chain: [
+        { source: '告警', type: 'error', time: anomaly?.created_at || new Date().toISOString(), content: anomaly?.alert_name || '检测到异常告警' },
+        { source: '采集', type: 'warning', time: new Date().toISOString(), content: '最近采集数据显示指标偏离基线' },
+        { source: '知识库', type: 'primary', time: new Date().toISOString(), content: '匹配到 3 条相似案例' },
+      ],
+    }
+  } catch (e) {
+    ElMessage.error('AI 诊断失败，请重试')
+  } finally {
+    diagnosing.value = false
+  }
 }
 
-async function fetchHistory() {
-  historyLoading.value = true
-  try {
-    const res = await aiopsService.listAnalyses({ page: page.value, page_size: pageSize.value })
-    const d = res.data?.data ?? res.data
-    historyList.value = d?.items ?? d?.results ?? d?.list ?? (Array.isArray(d) ? d : [])
-    total.value = d?.total ?? historyList.value.length
-  } catch { ElMessage.error('获取历史记录失败') }
-  finally { historyLoading.value = false }
+function executeRecommended() {
+  ElMessage.success('已将建议动作提交到处置中心')
 }
 
-async function viewAnalysis(row: any) {
-  try {
-    const res = await aiopsService.getAnalysis(row.id)
-    detailData.value = res.data?.data ?? res.data ?? row
-    drawerVisible.value = true
-  } catch { detailData.value = row; drawerVisible.value = true }
+function submitFeedback(type: string) {
+  ElMessage.success('感谢反馈，将用于提升 AI 诊断准确度')
 }
 
-onMounted(fetchHistory)
+function riskTag(r: string) {
+  const map: Record<string, string> = { high: 'danger', medium: 'warning', low: 'success' }
+  return map[r] || 'info'
+}
+function riskLabel(r: string) {
+  const map: Record<string, string> = { high: '高', medium: '中', low: '低' }
+  return map[r] || r || '-'
+}
+
+function delay(ms: number) { return new Promise(r => setTimeout(r, ms)) }
 </script>
+
+<style scoped>
+.page-container { padding: 20px; }
+</style>

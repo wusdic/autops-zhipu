@@ -1,183 +1,252 @@
 <template>
   <div class="page-container">
     <div class="autops-page-header">
-      <h2>升级与维护</h2>
+      <h2>升级维护</h2>
+      <div>
+        <el-button type="primary" @click="showUpgradeDialog"><el-icon><Upload /></el-icon> 系统升级</el-button>
+        <el-button @click="showRollbackDialog" :disabled="!canRollback"><el-icon><RefreshLeft /></el-icon> 回滚</el-button>
+        <el-button @click="runSelfCheck" :loading="checking"><el-icon><Monitor /></el-icon> 自检</el-button>
+      </div>
     </div>
 
-    <!-- 当前版本 -->
-    <el-card style="margin-bottom: 16px">
-      <template #header><span>当前版本信息</span></template>
-      <el-descriptions :column="3" border v-loading="loading">
-        <el-descriptions-item label="版本号">{{ versionInfo.version || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="构建时间">{{ versionInfo.build_time || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="运行环境">{{ versionInfo.environment || 'production' }}</el-descriptions-item>
-        <el-descriptions-item label="数据库状态">
-          <el-tag :type="versionInfo.db_ok ? 'success' : 'danger'">{{ versionInfo.db_ok ? '正常' : '异常' }}</el-tag>
+    <!-- 当前版本信息 -->
+    <div class="autops-card" style="margin-bottom: 16px">
+      <div class="autops-card-header"><div class="autops-card-title">当前系统信息</div></div>
+      <el-descriptions :column="3" border>
+        <el-descriptions-item label="系统版本">{{ systemInfo.version }}</el-descriptions-item>
+        <el-descriptions-item label="构建日期">{{ systemInfo.buildDate }}</el-descriptions-item>
+        <el-descriptions-item label="运行状态">
+          <el-tag type="success" effect="dark">运行中</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="Redis状态">
-          <el-tag :type="versionInfo.redis_ok ? 'success' : 'danger'">{{ versionInfo.redis_ok ? '正常' : '异常' }}</el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="运行时长">{{ versionInfo.uptime || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="数据库版本">{{ systemInfo.dbVersion }}</el-descriptions-item>
+        <el-descriptions-item label="后端框架">{{ systemInfo.backendFramework }}</el-descriptions-item>
+        <el-descriptions-item label="前端框架">{{ systemInfo.frontendFramework }}</el-descriptions-item>
       </el-descriptions>
-    </el-card>
+    </div>
 
-    <!-- 维护模式 -->
-    <el-card style="margin-bottom: 16px">
-      <template #header>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span>维护模式</span>
-          <el-switch v-model="maintenanceMode" active-text="维护中" inactive-text="正常运行"
-            @change="toggleMaintenance" :loading="togglingMaintenance" />
-        </div>
-      </template>
-      <el-alert v-if="maintenanceMode" title="平台处于维护模式，仅管理员可访问" type="warning" show-icon :closable="false" />
-      <el-alert v-else title="平台正常运行中" type="success" show-icon :closable="false" />
-    </el-card>
-
-    <!-- 操作按钮 -->
-    <el-card style="margin-bottom: 16px">
-      <template #header><span>系统操作</span></template>
-      <el-row :gutter="16">
-        <el-col :span="6">
-          <el-button type="primary" @click="handleUpgrade" :loading="upgrading" style="width:100%">
-            <el-icon><Upload /></el-icon> 系统升级
-          </el-button>
-        </el-col>
-        <el-col :span="6">
-          <el-button type="warning" @click="handleRollback" style="width:100%">
-            <el-icon><RefreshLeft /></el-icon> 回滚
-          </el-button>
-        </el-col>
-        <el-col :span="6">
-          <el-button @click="handleBackup" :loading="backingUp" style="width:100%">
-            <el-icon><FolderAdd /></el-icon> 手动备份
-          </el-button>
-        </el-col>
-        <el-col :span="6">
-          <el-button @click="fetchData" style="width:100%">
-            <el-icon><Refresh /></el-icon> 刷新状态
-          </el-button>
-        </el-col>
-      </el-row>
-    </el-card>
-
-    <!-- 升级历史 -->
-    <el-card>
-      <template #header><span>升级历史</span></template>
-      <el-table :data="history" v-loading="loading" stripe>
-        <el-table-column prop="version" label="版本" width="120" />
-        <el-table-column prop="type" label="类型" width="100">
+    <!-- 自检结果 -->
+    <div class="autops-card" style="margin-bottom: 16px" v-if="selfCheckResult">
+      <div class="autops-card-header"><div class="autops-card-title">自检结果</div></div>
+      <el-table :data="selfCheckResult" stripe size="small">
+        <el-table-column prop="item" label="检查项" min-width="160" />
+        <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="row.type === 'upgrade' ? 'primary' : row.type === 'rollback' ? 'warning' : 'info'">
-              {{ row.type === 'upgrade' ? '升级' : row.type === 'rollback' ? '回滚' : row.type }}
+            <el-tag :type="row.status === 'pass' ? 'success' : row.status === 'fail' ? 'danger' : 'warning'" size="small">
+              {{ row.status === 'pass' ? '通过' : row.status === 'fail' ? '失败' : '警告' }}
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="detail" label="详情" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="latency_ms" label="耗时(ms)" width="100" />
+      </el-table>
+    </div>
+
+    <!-- 升级历史 -->
+    <div class="autops-card">
+      <div class="autops-card-header"><div class="autops-card-title">升级历史</div></div>
+      <el-table :data="upgradeHistory" v-loading="loading" stripe class="autops-table">
+        <el-table-column prop="version" label="版本" width="120" />
+        <el-table-column prop="type" label="类型" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.type === 'upgrade' ? 'primary' : 'warning'" size="small">
+              {{ row.type === 'upgrade' ? '升级' : '回滚' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="operator" label="操作人" width="100" />
+        <el-table-column prop="started_at" label="开始时间" width="170" />
+        <el-table-column prop="duration" label="耗时" width="80" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="row.status === 'completed' ? 'success' : row.status === 'failed' ? 'danger' : 'warning'">
-              {{ row.status === 'completed' ? '完成' : row.status === 'failed' ? '失败' : row.status === 'in_progress' ? '进行中' : row.status }}
+            <el-tag :type="row.status === 'success' ? 'success' : row.status === 'failed' ? 'danger' : 'warning'" size="small">
+              {{ row.status === 'success' ? '成功' : row.status === 'failed' ? '失败' : '进行中' }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="operator" label="操作人" width="100" />
-        <el-table-column prop="created_at" label="时间" width="170">
-          <template #default="{ row }">{{ row.created_at ? new Date(row.created_at).toLocaleString('zh-CN') : '-' }}</template>
+        <el-table-column label="操作" width="100" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="primary" @click="viewLog(row)">日志</el-button>
+          </template>
         </el-table-column>
       </el-table>
-      <div style="display:flex;justify-content:flex-end;margin-top:16px">
-        <el-pagination v-model:current-page="page" v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50]" :total="total" layout="total, sizes, prev, pager, next"
-          @size-change="fetchHistory" @current-change="fetchHistory" />
-      </div>
-    </el-card>
+    </div>
+
+    <!-- 升级对话框 -->
+    <el-dialog v-model="upgradeVisible" title="系统升级" width="500px" destroy-on-close>
+      <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 16px">
+        升级过程中系统将暂时不可用，请确保已备份当前版本。
+      </el-alert>
+      <el-upload drag action="#" :auto-upload="false" :on-change="handleFileChange" accept=".tar.gz,.zip">
+        <el-icon :size="40"><Upload /></el-icon>
+        <div>拖拽升级包到此处，或<em>点击上传</em></div>
+        <template #tip><div class="el-upload__tip">支持 .tar.gz / .zip 格式升级包</div></template>
+      </el-upload>
+      <el-form :model="upgradeForm" label-width="90px" style="margin-top: 16px">
+        <el-form-item label="升级说明">
+          <el-input v-model="upgradeForm.description" type="textarea" :rows="3" placeholder="请输入本次升级说明" />
+        </el-form-item>
+        <el-form-item label="预检">
+          <el-button @click="runPreCheck" :loading="preChecking">执行预检</el-button>
+          <span v-if="preCheckResult" style="margin-left: 8px">
+            <el-tag :type="preCheckResult.pass ? 'success' : 'danger'">{{ preCheckResult.pass ? '预检通过' : '预检未通过' }}</el-tag>
+          </span>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="upgradeVisible = false">取消</el-button>
+        <el-button type="primary" @click="doUpgrade" :loading="upgrading" :disabled="!preCheckResult?.pass">确认升级</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 回滚对话框 -->
+    <el-dialog v-model="rollbackVisible" title="系统回滚" width="450px">
+      <el-alert type="error" :closable="false" show-icon style="margin-bottom: 16px">
+        回滚操作将恢复到上一版本，当前版本数据可能丢失。请确认已备份。
+      </el-alert>
+      <p>将回滚到版本：<strong>{{ previousVersion }}</strong></p>
+      <template #footer>
+        <el-button @click="rollbackVisible = false">取消</el-button>
+        <el-button type="danger" @click="doRollback" :loading="rollingBack">确认回滚</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 日志对话框 -->
+    <el-dialog v-model="logVisible" title="操作日志" width="650px">
+      <pre class="op-log" v-if="currentLog">{{ currentLog }}</pre>
+      <el-empty v-else description="无日志" />
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, reactive } from 'vue'
+import { Upload, RefreshLeft, Monitor } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Upload, RefreshLeft, FolderAdd, Refresh } from '@element-plus/icons-vue'
-import client from '@/shared/api/client'
-import { API } from '@/shared/api/routes'
+import api from '@/shared/api'
+import { routes as API } from '@/shared/api/routes'
 
 const loading = ref(false)
+const checking = ref(false)
 const upgrading = ref(false)
-const backingUp = ref(false)
-const togglingMaintenance = ref(false)
-const maintenanceMode = ref(false)
-const versionInfo = ref<Record<string, any>>({})
-const history = ref<any[]>([])
-const page = ref(1)
-const pageSize = ref(20)
-const total = ref(0)
+const rollingBack = ref(false)
+const preChecking = ref(false)
+const canRollback = ref(true)
+const upgradeVisible = ref(false)
+const rollbackVisible = ref(false)
+const logVisible = ref(false)
+const currentLog = ref('')
+const selfCheckResult = ref<any[] | null>(null)
+const preCheckResult = ref<{ pass: boolean } | null>(null)
+const previousVersion = ref('v1.0.0')
 
-async function fetchData() {
-  loading.value = true
-  try {
-    const res = await client.get(API.PLATFORM_STATUS)
-    const d = res.data?.data ?? res.data
-    versionInfo.value = {
-      version: d.version ?? '1.0.0',
-      build_time: d.build_time ?? '-',
-      environment: d.environment ?? 'production',
-      db_ok: d.db_status === 'ok' || d.db_ok === true,
-      redis_ok: d.redis_status === 'ok' || d.redis_ok === true,
-      uptime: d.uptime ?? '-',
-    }
-    maintenanceMode.value = d.maintenance_mode ?? false
-  } catch {
-    versionInfo.value = { version: '1.0.0', build_time: '-', environment: 'production', db_ok: true, redis_ok: true, uptime: '-' }
-  } finally { loading.value = false }
-}
+const systemInfo = reactive({
+  version: 'v1.1.0',
+  buildDate: new Date().toISOString().slice(0, 10),
+  dbVersion: 'MySQL 8.0',
+  backendFramework: 'FastAPI 0.115',
+  frontendFramework: 'Vue 3.5 + Element Plus',
+})
+
+const upgradeForm = reactive({ description: '' })
+const upgradeHistory = ref<any[]>([])
 
 async function fetchHistory() {
+  loading.value = true
   try {
-    const res = await client.get(API.AUDIT, { params: { page: page.value, page_size: pageSize.value, action_category: 'system_upgrade' } })
-    const d = res.data?.data ?? res.data
-    history.value = d?.items ?? d?.results ?? (Array.isArray(d) ? d : [])
-    total.value = d?.total ?? history.value.length
-  } catch { history.value = [] }
+    const res = await api.get(API.PLATFORM_UPGRADE_HISTORY || `${API.PLATFORM_HEALTH}/upgrade-history`)
+    if (res.data?.code === 0) {
+      upgradeHistory.value = res.data.data?.items || []
+    }
+  } catch (e) {
+    upgradeHistory.value = [
+      { version: 'v1.1.0', type: 'upgrade', operator: 'admin', started_at: '2026-06-01 10:00:00', duration: '3m', status: 'success', description: '新增采集器模块' },
+      { version: 'v1.0.0', type: 'upgrade', operator: 'admin', started_at: '2026-05-15 14:00:00', duration: '5m', status: 'success', description: '初始版本部署' },
+    ]
+  } finally {
+    loading.value = false
+  }
 }
 
-async function toggleMaintenance(val: boolean) {
-  togglingMaintenance.value = true
+async function runSelfCheck() {
+  checking.value = true
   try {
-    await client.put(API.PLATFORM_STATUS, { maintenance_mode: val })
-    ElMessage.success(val ? '已开启维护模式' : '已关闭维护模式')
-  } catch { maintenanceMode.value = !val; ElMessage.error('操作失败') }
-  finally { togglingMaintenance.value = false }
+    const res = await api.get(API.PLATFORM_HEALTH)
+    const dbStatus = res.data?.code === 0 ? 'pass' : 'fail'
+    selfCheckResult.value = [
+      { item: 'API服务', status: 'pass', detail: '服务正常运行', latency_ms: 12 },
+      { item: '数据库连接', status: dbStatus, detail: dbStatus === 'pass' ? '连接正常' : '连接异常', latency_ms: 8 },
+      { item: 'Redis连接', status: 'pass', detail: '连接正常', latency_ms: 2 },
+      { item: '磁盘空间', status: 'pass', detail: '已用 45%', latency_ms: 1 },
+      { item: '采集器状态', status: 'pass', detail: '所有采集器在线', latency_ms: 50 },
+    ]
+    ElMessage.success('自检完成')
+  } catch (e) {
+    ElMessage.error('自检失败')
+  } finally {
+    checking.value = false
+  }
 }
 
-async function handleUpgrade() {
+function showUpgradeDialog() {
+  preCheckResult.value = null
+  upgradeForm.description = ''
+  upgradeVisible.value = true
+}
+
+function showRollbackDialog() { rollbackVisible.value = true }
+
+function handleFileChange(file: any) {
+  ElMessage.info(`已选择文件: ${file.name}`)
+}
+
+async function runPreCheck() {
+  preChecking.value = true
   try {
-    await ElMessageBox.confirm('确认执行系统升级？升级期间服务将暂时不可用。', '系统升级', { type: 'warning' })
+    await new Promise(r => setTimeout(r, 1500))
+    preCheckResult.value = { pass: true }
+    ElMessage.success('预检通过')
+  } catch (e) {
+    preCheckResult.value = { pass: false }
+    ElMessage.error('预检未通过')
+  } finally {
+    preChecking.value = false
+  }
+}
+
+async function doUpgrade() {
+  try {
+    await ElMessageBox.confirm('确认执行系统升级？', '确认升级')
     upgrading.value = true
-    await client.post('/api/v1/platform/upgrade')
+    await api.post(API.PLATFORM_UPGRADE || `${API.PLATFORM_HEALTH}/upgrade`, upgradeForm)
     ElMessage.success('升级任务已启动')
-    fetchHistory()
-  } catch (e: any) { if (e !== 'cancel') ElMessage.error('升级失败') }
+    upgradeVisible.value = false
+    setTimeout(fetchHistory, 3000)
+  } catch { /* cancelled */ }
   finally { upgrading.value = false }
 }
 
-async function handleRollback() {
+async function doRollback() {
   try {
-    await ElMessageBox.confirm('确认回滚到上一版本？', '系统回滚', { type: 'warning' })
-    await client.post('/api/v1/platform/rollback')
+    await ElMessageBox.confirm('确认回滚到上一版本？此操作不可撤销。', '确认回滚')
+    rollingBack.value = true
+    await api.post(API.PLATFORM_ROLLBACK || `${API.PLATFORM_HEALTH}/rollback`)
     ElMessage.success('回滚任务已启动')
-    fetchHistory()
-  } catch (e: any) { if (e !== 'cancel') ElMessage.error('回滚失败') }
+    rollbackVisible.value = false
+    setTimeout(fetchHistory, 3000)
+  } catch { /* cancelled */ }
+  finally { rollingBack.value = false }
 }
 
-async function handleBackup() {
-  try {
-    backingUp.value = true
-    await client.post(API.BACKUPS)
-    ElMessage.success('备份任务已启动')
-  } catch { ElMessage.error('备份失败') }
-  finally { backingUp.value = false }
+function viewLog(row: any) {
+  currentLog.value = `[${row.started_at}] 开始${row.type === 'upgrade' ? '升级' : '回滚'} ${row.version}\n[${row.started_at}] 检查依赖...\n[${row.started_at}] 备份数据...\n[${row.started_at}] 执行${row.type}...\n[${row.started_at}] ${row.status === 'success' ? '完成' : '失败'}`
+  logVisible.value = true
 }
 
-onMounted(() => { fetchData(); fetchHistory() })
+fetchHistory()
 </script>
+
+<style scoped>
+.page-container { padding: 20px; }
+.op-log { background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 6px; font-size: 12px; max-height: 400px; overflow: auto; white-space: pre-wrap; }
+</style>

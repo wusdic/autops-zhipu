@@ -1,175 +1,189 @@
 <template>
   <div class="page-container">
     <div class="autops-page-header">
-      <h2>运维总览报告</h2>
+      <h2>运维报告</h2>
       <div>
-        <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
-          end-placeholder="结束日期" value-format="YYYY-MM-DD" style="width: 300px;margin-right:12px" />
-        <el-button type="primary" @click="fetchData" :icon="Refresh">刷新</el-button>
+        <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" style="margin-right: 8px" @change="fetchData" />
+        <el-select v-model="moduleFilter" placeholder="报告类型" style="width: 140px; margin-right: 8px" clearable @change="fetchData">
+          <el-option label="日报" value="daily" />
+          <el-option label="周报" value="weekly" />
+          <el-option label="月报" value="monthly" />
+        </el-select>
+        <el-button type="primary" @click="generateReport" :loading="generating"><el-icon><Document /></el-icon> 生成报告</el-button>
       </div>
     </div>
 
-    <!-- 总览统计 -->
+    <!-- 运维概要 -->
     <el-row :gutter="16" style="margin-bottom: 16px">
-      <el-col :span="4" v-for="card in summaryCards" :key="card.label">
-        <el-card shadow="hover" v-loading="loading">
-          <el-statistic :title="card.label" :value="card.value" :suffix="card.suffix" />
-        </el-card>
+      <el-col :xs="12" :sm="6" v-for="stat in summaryStats" :key="stat.label">
+        <div class="autops-metric-card">
+          <div class="metric-label">{{ stat.label }}</div>
+          <div class="metric-value" :style="{ color: stat.color }">{{ stat.value }}</div>
+        </div>
       </el-col>
     </el-row>
 
-    <!-- 资产概况 -->
-    <el-card style="margin-bottom: 16px">
-      <template #header><span>资产概况</span></template>
-      <el-table :data="assetStats" v-loading="loading" stripe size="small">
-        <el-table-column prop="type" label="资产类型" />
-        <el-table-column prop="total" label="总数" width="80" />
-        <el-table-column prop="online" label="在线" width="80" />
-        <el-table-column prop="offline" label="离线" width="80" />
-        <el-table-column prop="alerting" label="告警中" width="80" />
+    <!-- 报告列表 -->
+    <div class="autops-card">
+      <el-table :data="reports" v-loading="loading" stripe class="autops-table">
+        <el-table-column prop="title" label="报告名称" min-width="200" show-overflow-tooltip sortable />
+        <el-table-column prop="report_type" label="类型" width="100">
+          <template #default="{ row }">
+            <el-tag size="small">{{ typeLabel(row.report_type) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="period_start" label="起始日期" width="110">
+          <template #default="{ row }">{{ (row.period_start || '').slice(0, 10) }}</template>
+        </el-table-column>
+        <el-table-column prop="period_end" label="结束日期" width="110">
+          <template #default="{ row }">{{ (row.period_end || '').slice(0, 10) }}</template>
+        </el-table-column>
+        <el-table-column prop="asset_count" label="覆盖资产" width="90" />
+        <el-table-column prop="anomaly_count" label="异常数" width="80">
+          <template #default="{ row }">
+            <span :class="{ 'text-danger': row.anomaly_count > 0 }">{{ row.anomaly_count }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="auto_remediation_rate" label="自动处置率" width="110">
+          <template #default="{ row }">{{ row.auto_remediation_rate || 0 }}%</template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="80">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 'completed' ? 'success' : row.status === 'generating' ? 'warning' : 'info'" size="small">
+              {{ row.status === 'completed' ? '已完成' : row.status === 'generating' ? '生成中' : '待生成' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="created_at" label="生成时间" width="170" sortable />
+        <el-table-column label="操作" width="150" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="primary" @click="viewReport(row)" :disabled="row.status !== 'completed'">查看</el-button>
+            <el-button link type="success" @click="downloadReport(row)" :disabled="row.status !== 'completed'">下载</el-button>
+          </template>
+        </el-table-column>
       </el-table>
-    </el-card>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px">
+        <el-pagination v-model:current-page="page" v-model:page-size="pageSize" :total="total" :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next" @size-change="fetchData" @current-change="fetchData" />
+      </div>
+    </div>
 
-    <!-- 告警概况 -->
-    <el-card style="margin-bottom: 16px">
-      <template #header><span>告警概况</span></template>
-      <el-table :data="alertList" v-loading="loading" stripe size="small">
-        <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="severity" label="严重度" width="100">
-          <template #default="{ row }">
-            <el-tag size="small" :type="severityType(row.severity)">{{ row.severity }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag size="small" :type="alertStatusType(row.status)">{{ row.status }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="created_at" label="触发时间" width="170">
-          <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
-        </el-table-column>
-      </el-table>
-    </el-card>
-
-    <!-- 执行概况 -->
-    <el-card style="margin-bottom: 16px">
-      <template #header><span>自动化执行概况</span></template>
-      <el-table :data="execList" v-loading="loading" stripe size="small">
-        <el-table-column prop="name" label="执行名称" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag size="small" :type="execStatusType(row.status)">{{ row.status }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="trigger_type" label="触发方式" width="100" />
-        <el-table-column prop="started_at" label="开始时间" width="170">
-          <template #default="{ row }">{{ formatTime(row.started_at) }}</template>
-        </el-table-column>
-        <el-table-column prop="finished_at" label="结束时间" width="170">
-          <template #default="{ row }">{{ formatTime(row.finished_at) }}</template>
-        </el-table-column>
-      </el-table>
-    </el-card>
-
-    <!-- 工单概况 -->
-    <el-card>
-      <template #header><span>工单概况</span></template>
-      <el-table :data="ticketList" v-loading="loading" stripe size="small">
-        <el-table-column prop="title" label="工单标题" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag size="small">{{ row.status }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="priority" label="优先级" width="100" />
-        <el-table-column prop="created_at" label="创建时间" width="170">
-          <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
-        </el-table-column>
-      </el-table>
-    </el-card>
+    <!-- 生成对话框 -->
+    <el-dialog v-model="genVisible" title="生成运维报告" width="550px" destroy-on-close>
+      <el-form :model="genForm" label-width="90px">
+        <el-form-item label="报告类型">
+          <el-select v-model="genForm.report_type" style="width: 100%">
+            <el-option label="日报" value="daily" />
+            <el-option label="周报" value="weekly" />
+            <el-option label="月报" value="monthly" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="时间范围">
+          <el-date-picker v-model="genForm.period" type="daterange" range-separator="至" start-placeholder="开始" end-placeholder="结束" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="资产范围">
+          <el-select v-model="genForm.asset_scope" style="width: 100%">
+            <el-option label="全部资产" value="all" />
+            <el-option label="按业务系统" value="business_system" />
+            <el-option label="按资产类型" value="asset_type" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="genVisible = false">取消</el-button>
+        <el-button type="primary" @click="doGenerate" :loading="generating">确认生成</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
+import { Document } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { Refresh } from '@element-plus/icons-vue'
-import client from '@/shared/api/client'
-import { API } from '@/shared/api/routes'
+import { useRouter } from 'vue-router'
+import api from '@/shared/api'
+import { routes as API } from '@/shared/api/routes'
 
+const router = useRouter()
 const loading = ref(false)
-const dateRange = ref<string[] | null>(null)
-const dashboardData = ref<Record<string, any>>({})
-const alertList = ref<any[]>([])
-const execList = ref<any[]>([])
-const ticketList = ref<any[]>([])
+const generating = ref(false)
+const reports = ref<any[]>([])
+const total = ref(0)
+const page = ref(1)
+const pageSize = ref(20)
+const dateRange = ref<[Date, Date] | null>(null)
+const moduleFilter = ref('')
+const genVisible = ref(false)
+const genForm = reactive({ report_type: 'weekly', period: null as [Date, Date] | null, asset_scope: 'all' })
 
-const summaryCards = computed(() => [
-  { label: '资产总数', value: dashboardData.value.assets?.total ?? 0 },
-  { label: '活跃告警', value: dashboardData.value.alerts?.active ?? dashboardData.value.alerts?.total ?? 0 },
-  { label: '异常数', value: dashboardData.value.anomalies?.total ?? 0 },
-  { label: '执行次数', value: dashboardData.value.automation?.total ?? 0 },
-  { label: '工单数', value: dashboardData.value.tickets?.total ?? 0 },
-  { label: '巡检完成率', value: dashboardData.value.inspection?.completion_rate ?? 0, suffix: '%' },
-])
-
-const assetStats = computed(() => {
-  const types = dashboardData.value.assets?.by_type ?? {}
-  return Object.entries(types).map(([type, info]: [string, any]) => ({
-    type,
-    total: info.total ?? info ?? 0,
-    online: info.online ?? 0,
-    offline: info.offline ?? 0,
-    alerting: info.alerting ?? 0,
-  }))
+const summaryStats = computed(() => {
+  const completed = reports.value.filter(r => r.status === 'completed')
+  return [
+    { label: '报告总数', value: reports.value.length, color: '#165dff' },
+    { label: '已完成', value: completed.length, color: '#00b42a' },
+    { label: '本月异常', value: reports.value.reduce((s, r) => s + (r.anomaly_count || 0), 0), color: '#ff7d00' },
+    { label: '自动处置率', value: completed.length > 0 ? Math.round(completed.reduce((s, r) => s + (r.auto_remediation_rate || 0), 0) / completed.length) + '%' : '0%', color: '#722ed1' },
+  ]
 })
-
-function severityType(s: string) {
-  return { critical: 'danger', high: 'danger', warning: 'warning', info: 'info' }[s] || 'info'
-}
-function alertStatusType(s: string) {
-  return { active: 'danger', acknowledged: 'warning', resolved: 'success' }[s] || 'info'
-}
-function execStatusType(s: string) {
-  return { completed: 'success', success: 'success', running: 'warning', failed: 'danger', pending: 'info' }[s] || 'info'
-}
-function formatTime(t: string) {
-  if (!t) return '-'
-  return new Date(t).toLocaleString('zh-CN')
-}
 
 async function fetchData() {
   loading.value = true
   try {
-    const params: Record<string, any> = {}
-    if (dateRange.value?.length === 2) {
-      params.start_date = dateRange.value[0]
-      params.end_date = dateRange.value[1]
+    const params: any = { page: page.value, page_size: pageSize.value }
+    if (moduleFilter.value) params.report_type = moduleFilter.value
+    const res = await api.get(API.REPORTS, { params })
+    if (res.data?.code === 0) {
+      reports.value = (res.data.data?.items || []).map((r: any) => ({
+        ...r,
+        title: r.title || `${typeLabel(r.report_type || 'weekly')} - ${(r.period_start || '').slice(0, 10)}`,
+        anomaly_count: r.anomaly_count || 0,
+        auto_remediation_rate: r.auto_remediation_rate || 0,
+      }))
+      total.value = res.data.data?.total || 0
     }
-    const [dashRes, alertRes, execRes, ticketRes] = await Promise.allSettled([
-      client.get(API.DASHBOARD.STATS, { params }),
-      client.get(API.ALERTS, { params: { page_size: 10, ...params } }),
-      client.get(API.EXECUTIONS, { params: { page_size: 10, ...params } }),
-      client.get(API.TICKETS, { params: { page_size: 10, ...params } }),
-    ])
-    if (dashRes.status === 'fulfilled') {
-      dashboardData.value = dashRes.value.data?.data ?? dashRes.value.data
-    }
-    if (alertRes.status === 'fulfilled') {
-      const d = alertRes.value.data?.data ?? alertRes.value.data
-      alertList.value = d?.items ?? d?.results ?? (Array.isArray(d) ? d : [])
-    }
-    if (execRes.status === 'fulfilled') {
-      const d = execRes.value.data?.data ?? execRes.value.data
-      execList.value = d?.items ?? d?.results ?? (Array.isArray(d) ? d : [])
-    }
-    if (ticketRes.status === 'fulfilled') {
-      const d = ticketRes.value.data?.data ?? ticketRes.value.data
-      ticketList.value = d?.items ?? d?.results ?? (Array.isArray(d) ? d : [])
-    }
-  } catch (e: any) { ElMessage.error('获取报告数据失败') }
-  finally { loading.value = false }
+  } catch (e) {
+    ElMessage.error('获取报告列表失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+function generateReport() { genVisible.value = true }
+
+async function doGenerate() {
+  generating.value = true
+  try {
+    await api.post(API.REPORTS, genForm)
+    ElMessage.success('报告生成任务已创建')
+    genVisible.value = false
+    setTimeout(fetchData, 2000)
+  } catch (e) {
+    ElMessage.error('生成报告失败')
+  } finally {
+    generating.value = false
+  }
+}
+
+function viewReport(row: any) {
+  router.push({ path: '/report-audit/preview', query: { id: row.id } })
+}
+
+function downloadReport(row: any) {
+  ElMessage.info('下载功能开发中')
+}
+
+function typeLabel(t: string) {
+  const map: Record<string, string> = { daily: '日报', weekly: '周报', monthly: '月报' }
+  return map[t] || t || '报告'
 }
 
 onMounted(fetchData)
 </script>
+
+<style scoped>
+.page-container { padding: 20px; }
+.autops-metric-card { padding: 16px; background: #fff; border-radius: 8px; text-align: center; border: 1px solid #e5e6eb; }
+.metric-label { font-size: 13px; color: #86909c; margin-bottom: 4px; }
+.metric-value { font-size: 28px; font-weight: 700; }
+.text-danger { color: #f53f3f; }
+</style>

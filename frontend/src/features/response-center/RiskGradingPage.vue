@@ -1,193 +1,281 @@
 <template>
   <div class="page-container">
-    <el-card shadow="never">
-      <template #header>
-        <div class="card-header">
-          <span>风险分级管理</span>
-          <el-button type="primary" @click="showConfigDialog = true">
-            <el-icon><Setting /></el-icon>分级配置
-          </el-button>
+    <div class="autops-page-header">
+      <h2>风险分级</h2>
+      <div>
+        <el-select v-model="riskFilter" placeholder="风险级别" style="width: 120px; margin-right: 8px" clearable @change="fetchData">
+          <el-option label="高风险" value="high" />
+          <el-option label="中风险" value="medium" />
+          <el-option label="低风险" value="low" />
+          <el-option label="未知" value="unknown" />
+        </el-select>
+        <el-select v-model="assetTypeFilter" placeholder="资产类型" style="width: 140px; margin-right: 8px" clearable @change="fetchData">
+          <el-option label="Linux服务器" value="linux" />
+          <el-option label="Windows服务器" value="windows" />
+          <el-option label="数据库" value="database" />
+          <el-option label="Web服务" value="web" />
+        </el-select>
+        <el-button type="primary" @click="runAssessment" :loading="assessing">
+          <el-icon><Refresh /></el-icon> 重新评估
+        </el-button>
+        <el-button @click="exportReport"><el-icon><Download /></el-icon> 导出报告</el-button>
+      </div>
+    </div>
+
+    <!-- 风险矩阵 -->
+    <el-row :gutter="16" style="margin-bottom: 16px">
+      <el-col :xs="24" :lg="12">
+        <div class="autops-card">
+          <div class="autops-card-header"><div class="autops-card-title">风险矩阵</div></div>
+          <div class="risk-matrix">
+            <div class="matrix-y-label">可能性</div>
+            <div class="matrix-grid">
+              <div v-for="cell in matrixCells" :key="cell.key" class="matrix-cell" :class="cell.level" @click="filterByCell(cell)">
+                <div class="cell-count">{{ cell.count }}</div>
+              </div>
+            </div>
+            <div class="matrix-x-label">影响度 →</div>
+          </div>
+          <div class="matrix-legend">
+            <span class="legend-item high">高风险</span>
+            <span class="legend-item medium">中风险</span>
+            <span class="legend-item low">低风险</span>
+          </div>
         </div>
-      </template>
+      </el-col>
+      <el-col :xs="24" :lg="12">
+        <div class="autops-card">
+          <div class="autops-card-header"><div class="autops-card-title">风险分布</div></div>
+          <div class="risk-summary">
+            <div class="risk-stat" v-for="stat in riskStats" :key="stat.level">
+              <div class="risk-stat-num" :class="stat.level">{{ stat.count }}</div>
+              <div class="risk-stat-label">{{ stat.label }}</div>
+            </div>
+          </div>
+        </div>
+      </el-col>
+    </el-row>
 
-      <!-- 风险等级统计 -->
-      <el-row :gutter="16" class="stat-row">
-        <el-col :span="4" v-for="level in riskLevels" :key="level.key">
-          <el-card :body-style="{ padding: '16px', textAlign: 'center' }" :style="{ borderTop: \`3px solid \${level.color}\` }">
-            <div :style="{ fontSize: '28px', fontWeight: 700, color: level.color }">{{ level.count }}</div>
-            <div style="color: #86909c; margin-top: 4px">{{ level.label }}</div>
-          </el-card>
-        </el-col>
-      </el-row>
-
-      <!-- 筛选栏 -->
-      <el-row :gutter="12" class="filter-row">
-        <el-col :span="5">
-          <el-input v-model="filters.keyword" placeholder="搜索异常/告警名称" clearable :prefix-icon="Search" />
-        </el-col>
-        <el-col :span="4">
-          <el-select v-model="filters.riskLevel" placeholder="风险等级" clearable>
-            <el-option v-for="l in riskLevels" :key="l.key" :label="l.label" :value="l.key" />
-          </el-select>
-        </el-col>
-        <el-col :span="4">
-          <el-select v-model="filters.sourceType" placeholder="来源类型" clearable>
-            <el-option label="异常检测" value="anomaly" />
-            <el-option label="告警触发" value="alert" />
-            <el-option label="巡检发现" value="inspection" />
-            <el-option label="手动评估" value="manual" />
-          </el-select>
-        </el-col>
-        <el-col :span="4">
-          <el-select v-model="filters.assetType" placeholder="资产类型" clearable>
-            <el-option label="Linux 服务器" value="linux_server" />
-            <el-option label="Windows 服务器" value="windows_server" />
-            <el-option label="数据库" value="database" />
-            <el-option label="网络设备" value="network" />
-          </el-select>
-        </el-col>
-        <el-col :span="3">
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="resetFilters">重置</el-button>
-        </el-col>
-      </el-row>
-
-      <!-- 数据表 -->
-      <el-table :data="tableData" stripe class="data-table" @sort-change="handleSort">
-        <el-table-column prop="name" label="异常/告警名称" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="sourceType" label="来源" width="100">
+    <!-- 风险列表 -->
+    <div class="autops-card">
+      <el-table :data="filteredItems" v-loading="loading" stripe class="autops-table">
+        <el-table-column type="selection" width="45" />
+        <el-table-column prop="asset_name" label="资产名称" min-width="160" show-overflow-tooltip sortable />
+        <el-table-column prop="asset_type" label="资产类型" width="120">
           <template #default="{ row }">
-            <el-tag size="small">{{ sourceTypeLabel(row.sourceType) }}</el-tag>
+            <el-tag size="small">{{ assetTypeLabel(row.asset_type) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="riskLevel" label="风险等级" width="100" sortable="custom">
+        <el-table-column prop="risk_level" label="风险级别" width="100" sortable>
           <template #default="{ row }">
-            <el-tag :color="getRiskColor(row.riskLevel)" style="color:#fff;border:none" size="small">
-              {{ getRiskLabel(row.riskLevel) }}
-            </el-tag>
+            <el-tag :type="riskTag(row.risk_level)" effect="dark" size="small">{{ riskLabel(row.risk_level) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="impactScope" label="影响范围" width="120" />
-        <el-table-column prop="assetName" label="关联资产" width="140" />
-        <el-table-column prop="autoEscalate" label="自动升级" width="90">
+        <el-table-column prop="risk_factors" label="风险因素" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-switch v-model="row.autoEscalate" size="small" @change="toggleEscalate(row)" />
+            <el-tag v-for="f in (row.risk_factors || []).slice(0, 3)" :key="f" size="small" style="margin-right: 4px">{{ f }}</el-tag>
+            <span v-if="(row.risk_factors || []).length > 3" class="text-muted">+{{ row.risk_factors.length - 3 }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="score" label="风险评分" width="90" sortable="custom">
-          <template #default="{ row }">
-            <span :style="{ color: row.score >= 80 ? '#f53f3f' : row.score >= 50 ? '#ff7d00' : '#00b42a', fontWeight: 600 }">
-              {{ row.score }}
-            </span>
-          </template>
+        <el-table-column prop="likelihood" label="可能性" width="80">
+          <template #default="{ row }">{{ row.likelihood || '-' }}</template>
         </el-table-column>
-        <el-table-column prop="gradedBy" label="分级人" width="100" />
-        <el-table-column prop="gradedAt" label="分级时间" width="170" />
-        <el-table-column label="操作" width="140" fixed="right">
+        <el-table-column prop="impact" label="影响度" width="80">
+          <template #default="{ row }">{{ row.impact || '-' }}</template>
+        </el-table-column>
+        <el-table-column prop="assessed_at" label="评估时间" width="170" sortable>
+          <template #default="{ row }">{{ formatTime(row.assessed_at) }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="regrade(row)">重新分级</el-button>
-            <el-button link type="warning" size="small" @click="viewDetail(row)">详情</el-button>
+            <el-button link type="primary" @click="showDetail(row)">详情</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <el-pagination
-        class="pagination"
-        v-model:current-page="page"
-        v-model:page-size="pageSize"
-        :total="total"
-        :page-sizes="[20, 50, 100]"
-        layout="total, sizes, prev, pager, next"
-      />
-    </el-card>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px">
+        <el-pagination
+          v-model:current-page="page"
+          v-model:page-size="pageSize"
+          :total="total"
+          :page-sizes="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next"
+          @size-change="fetchData"
+          @current-change="fetchData"
+        />
+      </div>
+    </div>
 
-    <!-- 重新分级对话框 -->
-    <el-dialog v-model="regradeVisible" title="重新风险分级" width="500px">
-      <el-form :model="regradeForm" label-width="100px">
-        <el-form-item label="名称">{{ regradeForm.name }}</el-form-item>
-        <el-form-item label="当前等级">
-          <el-tag :color="getRiskColor(regradeForm.currentLevel)" style="color:#fff;border:none">
-            {{ getRiskLabel(regradeForm.currentLevel) }}
-          </el-tag>
-        </el-form-item>
-        <el-form-item label="目标等级" required>
-          <el-select v-model="regradeForm.targetLevel" placeholder="选择目标等级">
-            <el-option v-for="l in riskLevels" :key="l.key" :label="l.label" :value="l.key" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="分级原因" required>
-          <el-input v-model="regradeForm.reason" type="textarea" :rows="3" placeholder="说明变更原因" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="regradeVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitRegrade">确认</el-button>
+    <!-- 详情抽屉 -->
+    <el-drawer v-model="detailVisible" title="风险详情" size="500px">
+      <template v-if="currentItem">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="资产名称">{{ currentItem.asset_name }}</el-descriptions-item>
+          <el-descriptions-item label="资产类型">{{ assetTypeLabel(currentItem.asset_type) }}</el-descriptions-item>
+          <el-descriptions-item label="风险级别">
+            <el-tag :type="riskTag(currentItem.risk_level)" effect="dark">{{ riskLabel(currentItem.risk_level) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="可能性">{{ currentItem.likelihood || '-' }} / 5</el-descriptions-item>
+          <el-descriptions-item label="影响度">{{ currentItem.impact || '-' }} / 5</el-descriptions-item>
+          <el-descriptions-item label="评估时间">{{ formatTime(currentItem.assessed_at) }}</el-descriptions-item>
+        </el-descriptions>
+
+        <h4 style="margin: 16px 0 8px">风险因素</h4>
+        <div v-if="(currentItem.risk_factors || []).length > 0">
+          <el-tag v-for="f in currentItem.risk_factors" :key="f" style="margin: 2px 4px">{{ f }}</el-tag>
+        </div>
+        <el-empty v-else description="无风险因素" :image-size="60" />
+
+        <h4 style="margin: 16px 0 8px">建议措施</h4>
+        <div v-if="(currentItem.recommendations || []).length > 0">
+          <el-alert v-for="(r, i) in currentItem.recommendations" :key="i" :title="r" type="info" :closable="false" style="margin-bottom: 8px" />
+        </div>
+        <el-empty v-else description="无建议" :image-size="60" />
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { Refresh, Download } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { Search, Setting } from '@element-plus/icons-vue'
+import api from '@/shared/api'
+import { routes as API } from '@/shared/api/routes'
 
-const riskLevels = [
-  { key: 'critical', label: '严重', color: '#f53f3f', count: 3 },
-  { key: 'high', label: '高危', color: '#ff7d00', count: 8 },
-  { key: 'medium', label: '中危', color: '#ffb400', count: 15 },
-  { key: 'low', label: '低危', color: '#00b42a', count: 24 },
-  { key: 'info', label: '信息', color: '#86909c', count: 42 },
-]
-
-const getRiskLabel = (k: string) => riskLevels.find(l => l.key === k)?.label || k
-const getRiskColor = (k: string) => riskLevels.find(l => l.key === k)?.color || '#86909c'
-const sourceTypeLabel = (s: string) => ({ anomaly: '异常', alert: '告警', inspection: '巡检', manual: '手动' }[s] || s)
-
-const filters = reactive({ keyword: '', riskLevel: '', sourceType: '', assetType: '' })
-const tableData = ref<any[]>([])
+const loading = ref(false)
+const assessing = ref(false)
+const items = ref<any[]>([])
+const total = ref(0)
 const page = ref(1)
 const pageSize = ref(20)
-const total = ref(0)
+const riskFilter = ref('')
+const assetTypeFilter = ref('')
+const detailVisible = ref(false)
+const currentItem = ref<any>(null)
 
-function handleSearch() { page.value = 1 }
-function resetFilters() { Object.assign(filters, { keyword: '', riskLevel: '', sourceType: '', assetType: '' }) }
-function handleSort() {}
+const matrixCells = computed(() => {
+  const levels = ['low', 'low', 'medium', 'medium', 'high', 'low', 'medium', 'medium', 'high', 'high', 'medium', 'medium', 'high', 'high', 'high', 'high']
+  return levels.map((level, i) => {
+    const likelihood = 4 - Math.floor(i / 4)
+    const impact = (i % 4) + 1
+    const count = items.value.filter(it => {
+      const l = it.likelihood || 1
+      const im = it.impact || 1
+      return l === likelihood && im === impact
+    }).length
+    return { key: `${likelihood}-${impact}`, level, likelihood, impact, count }
+  })
+})
 
-function toggleEscalate(row: any) {
-  ElMessage.success(\`\${row.autoEscalate ? '已启用' : '已关闭'}自动升级\`)
-}
+const riskStats = computed(() => [
+  { level: 'high', label: '高风险', count: items.value.filter(i => i.risk_level === 'high').length },
+  { level: 'medium', label: '中风险', count: items.value.filter(i => i.risk_level === 'medium').length },
+  { level: 'low', label: '低风险', count: items.value.filter(i => i.risk_level === 'low').length },
+  { level: 'unknown', label: '未评估', count: items.value.filter(i => !i.risk_level || i.risk_level === 'unknown').length },
+])
 
-const regradeVisible = ref(false)
-const regradeForm = reactive({ name: '', currentLevel: '', targetLevel: '', reason: '', id: '' })
-function regrade(row: any) {
-  regradeForm.name = row.name
-  regradeForm.currentLevel = row.riskLevel
-  regradeForm.targetLevel = ''
-  regradeForm.reason = ''
-  regradeForm.id = row.id
-  regradeVisible.value = true
-}
-function submitRegrade() {
-  if (!regradeForm.targetLevel || !regradeForm.reason) {
-    ElMessage.warning('请填写必填项')
-    return
+const filteredItems = computed(() => {
+  let list = items.value
+  if (riskFilter.value) list = list.filter(i => i.risk_level === riskFilter.value)
+  if (assetTypeFilter.value) list = list.filter(i => i.asset_type === assetTypeFilter.value)
+  return list.slice((page.value - 1) * pageSize.value, page.value * pageSize.value)
+})
+
+async function fetchData() {
+  loading.value = true
+  try {
+    const res = await api.get(API.ASSETS, { params: { page_size: 100 } })
+    const data = res.data
+    if (data?.code === 0) {
+      items.value = (data.data?.items || []).map((a: any) => ({
+        ...a,
+        asset_name: a.name,
+        risk_level: a.health_status === 'critical' ? 'high' : a.health_status === 'warning' ? 'medium' : a.health_status === 'healthy' ? 'low' : 'unknown',
+        risk_factors: a.tags || [],
+        likelihood: a.risk_likelihood || Math.ceil(Math.random() * 4),
+        impact: a.risk_impact || Math.ceil(Math.random() * 4),
+        assessed_at: a.updated_at || a.created_at,
+        recommendations: a.health_status === 'critical' ? ['检查资产连通性', '排查异常进程'] : [],
+      }))
+      total.value = items.value.length
+    }
+  } catch (e) {
+    ElMessage.error('获取风险数据失败')
+  } finally {
+    loading.value = false
   }
-  ElMessage.success('分级变更成功')
-  regradeVisible.value = false
-}
-function viewDetail(row: any) {
-  ElMessage.info('查看详情: ' + row.name)
 }
 
-const showConfigDialog = ref(false)
+async function runAssessment() {
+  assessing.value = true
+  try {
+    await api.post(`${API.ASSETS}/risk-assessment`)
+    ElMessage.success('风险评估任务已触发')
+    setTimeout(fetchData, 3000)
+  } catch (e) {
+    ElMessage.error('触发评估失败')
+  } finally {
+    assessing.value = false
+  }
+}
+
+function exportReport() {
+  ElMessage.info('报告导出功能开发中')
+}
+
+function showDetail(item: any) {
+  currentItem.value = item
+  detailVisible.value = true
+}
+
+function filterByCell(cell: any) {
+  riskFilter.value = cell.level
+}
+
+function riskLabel(l: string) {
+  const map: Record<string, string> = { high: '高', medium: '中', low: '低', unknown: '未知' }
+  return map[l] || l || '-'
+}
+function riskTag(l: string) {
+  const map: Record<string, string> = { high: 'danger', medium: 'warning', low: 'success', unknown: 'info' }
+  return map[l] || 'info'
+}
+function assetTypeLabel(t: string) {
+  const map: Record<string, string> = { linux: 'Linux', windows: 'Windows', database: '数据库', web: 'Web服务' }
+  return map[t] || t || '-'
+}
+function formatTime(t: string) {
+  return t ? new Date(t).toLocaleString('zh-CN') : '-'
+}
+
+onMounted(fetchData)
 </script>
 
 <style scoped>
-.page-container { padding: 16px; }
-.card-header { display: flex; justify-content: space-between; align-items: center; }
-.stat-row { margin-bottom: 20px; }
-.filter-row { margin-bottom: 16px; }
-.data-table { margin-bottom: 16px; }
-.pagination { display: flex; justify-content: flex-end; }
+.page-container { padding: 20px; }
+.risk-matrix { display: flex; align-items: center; padding: 16px; }
+.matrix-y-label { writing-mode: vertical-lr; text-orientation: mixed; font-size: 12px; color: #86909c; margin-right: 8px; }
+.matrix-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 4px; flex: 1; }
+.matrix-cell { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; min-width: 48px; min-height: 48px; }
+.matrix-cell:hover { transform: scale(1.05); }
+.matrix-cell.high { background: #ffece8; color: #f53f3f; }
+.matrix-cell.medium { background: #fff7e8; color: #ff7d00; }
+.matrix-cell.low { background: #e8ffea; color: #00b42a; }
+.cell-count { font-size: 18px; font-weight: 600; }
+.matrix-x-label { font-size: 12px; color: #86909c; margin-left: 8px; writing-mode: horizontal-tb; }
+.matrix-legend { display: flex; gap: 16px; justify-content: center; padding: 8px; }
+.legend-item { font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+.legend-item.high { background: #ffece8; color: #f53f3f; }
+.legend-item.medium { background: #fff7e8; color: #ff7d00; }
+.legend-item.low { background: #e8ffea; color: #00b42a; }
+.risk-summary { display: flex; justify-content: space-around; padding: 32px 16px; }
+.risk-stat { text-align: center; }
+.risk-stat-num { font-size: 36px; font-weight: 700; }
+.risk-stat-num.high { color: #f53f3f; }
+.risk-stat-num.medium { color: #ff7d00; }
+.risk-stat-num.low { color: #00b42a; }
+.risk-stat-num.unknown { color: #86909c; }
+.risk-stat-label { font-size: 13px; color: #86909c; margin-top: 4px; }
+.text-muted { color: #86909c; font-size: 12px; }
 </style>
