@@ -411,7 +411,7 @@ function buildKnowledgeContent(t: any): string {
   let content = `## 问题描述\n${t.description || '（无描述）'}\n\n`
   content += `## 工单信息\n- 工单ID: ${t.id}\n- 类型: ${t.ticket_type || '-'}\n- 优先级: ${t.priority || '-'}\n`
   if (t.context) {
-    content += `\n## 上下文信息\n\`\`\`json\n${formatJson(t.context)}\n\`\`\`\n`
+    content += '\n## 上下文信息\n```\n' + formatJson(t.context) + '\n```\n'
   }
   content += `\n## 处理过程\n（请补充处理步骤）\n\n## 解决方案\n（请补充解决方案）\n\n## 经验总结\n（请补充经验总结）`
   return content

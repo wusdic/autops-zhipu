@@ -55,7 +55,7 @@
         </el-table-column>
         <el-table-column label="静默时段" width="140">
           <template #default="{ row }">
-            {{ row.quiet_hours_start && row.quiet_hours_end ? \`\${row.quiet_hours_start}-\${row.quiet_hours_end}\` : '无' }}
+            {{ row.quiet_hours_start && row.quiet_hours_end ? row.quiet_hours_start + '-' + row.quiet_hours_end : '无' }}
           </template>
         </el-table-column>
         <el-table-column prop="enabled" label="状态" width="80">

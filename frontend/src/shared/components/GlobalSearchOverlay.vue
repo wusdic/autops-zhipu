@@ -122,7 +122,8 @@ function handleSearch() {
 
 function highlightKeyword(text: string) {
   if (!keyword.value) return text
-  const regex = new RegExp(\`(\${keyword.value.replace(/[.*+?^\${}()|[\]\\]/g, '\\$&')})\`, 'gi')
+  const escaped = keyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp('(' + escaped + ')', 'gi')
   return text.replace(regex, '<mark>$1</mark>')
 }
 

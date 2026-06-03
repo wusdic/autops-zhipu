@@ -61,7 +61,7 @@
       <el-table :data="tableData" stripe class="data-table">
         <el-table-column prop="name" label="资产名称" min-width="160">
           <template #default="{ row }">
-            <el-link type="primary" @click="$router.push(\`/assets/\${row.id}\`)">{{ row.name }}</el-link>
+            <el-link type="primary" @click="$router.push('/assets/' + row.id)">{{ row.name }}</el-link>
           </template>
         </el-table-column>
         <el-table-column prop="assetType" label="类型" width="130" />

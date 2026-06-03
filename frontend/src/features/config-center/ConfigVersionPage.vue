@@ -160,7 +160,7 @@ async function submitVersion() {
   }
   submitting.value = true
   try {
-    const resp = await api.post(\`\${API.CONFIGS}/definitions/\${selectedDefId.value}/versions\`, {
+    const resp = await api.post(API.CONFIGS + '/definitions/' + selectedDefId.value + '/versions', {
       content: newVersion.content,
     })
     if (resp.data?.code === 0) {

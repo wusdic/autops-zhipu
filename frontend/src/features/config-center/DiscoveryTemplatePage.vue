@@ -230,16 +230,16 @@ function scopePreview(s: string): string {
   try {
     const obj = JSON.parse(s)
     const parts: string[] = []
-    if (obj.ip_ranges?.length) parts.push(\`IP: \${obj.ip_ranges.slice(0, 2).join(',')}\`)
-    if (obj.asset_groups?.length) parts.push(\`分组: \${obj.asset_groups.length}个\`)
+    if (obj.ip_ranges?.length) parts.push('IP: ' + obj.ip_ranges.slice(0, 2).join(','))
+    if (obj.asset_groups?.length) parts.push('分组: ' + obj.asset_groups.length + '个')
     return parts.length ? parts.join(' | ') : '未配置'
   } catch { return s?.slice(0, 50) || '未配置' }
 }
 
 function formatInterval(seconds: number): string {
-  if (seconds >= 86400) return \`\${Math.round(seconds / 86400)}天\`
-  if (seconds >= 3600) return \`\${Math.round(seconds / 3600)}小时\`
-  return \`\${seconds}秒\`
+  if (seconds >= 86400) return Math.round(seconds / 86400) + '天'
+  if (seconds >= 3600) return Math.round(seconds / 3600) + '小时'
+  return seconds + '秒'
 }
 
 onMounted(fetchData)
