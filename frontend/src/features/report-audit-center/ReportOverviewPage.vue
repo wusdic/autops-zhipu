@@ -1,8 +1,11 @@
 <template>
   <div class="page-container">
     <!-- 页面头部 -->
-    <div class="page-header">
-      <h2>报表总览</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">报表总览</div>
+      <div class="autops-page-desc">查看各类报表的生成状态和统计数据</div>
+    </div>
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px">
       <el-button type="primary" @click="router.push('/report-audit/generate')">
         <el-icon><Plus /></el-icon>
         生成报告
@@ -374,24 +377,20 @@ async function fetchStats() {
     }
 
     // 解析 overview 统计（补充完整数据）
+    // /api/v1/report/stats returns: { templates, tasks: {...}, archives: {...} }
     if (overviewRes.status === 'fulfilled') {
-      const od = overviewRes.value?.data
-      if (od) {
-        const data = od.data ?? od
-        if (data.template_count !== undefined) statCards[0].value = data.template_count
-        else if (data.templates_count !== undefined) statCards[0].value = data.templates_count
-
-        if (data.task_count !== undefined) statCards[1].value = data.task_count
-        else if (data.tasks_count !== undefined) statCards[1].value = data.tasks_count
-
-        if (data.archived !== undefined) statCards[2].value = data.archived
-        else if (data.archived_count !== undefined) statCards[2].value = data.archived_count
-        else if (data.archive_count !== undefined) statCards[2].value = data.archive_count
-
-        if (data.generating !== undefined) statCards[3].value = data.generating
-        else if (data.generating_count !== undefined) statCards[3].value = data.generating_count
-        else if (data.in_progress !== undefined) statCards[3].value = data.in_progress
-      }
+      const raw = overviewRes.value?.data
+      const wrapper = raw?.data ?? raw ?? {}
+      const data = wrapper.data ?? wrapper
+      // templates is a number
+      if (data.templates !== undefined) statCards[0].value = data.templates
+      // tasks is an object with total
+      if (data.tasks && data.tasks.total !== undefined) statCards[1].value = data.tasks.total
+      // archives is an object with total
+      if (data.archives && data.archives.total !== undefined) statCards[2].value = data.archives.total
+      // generating/running count
+      if (data.tasks && data.tasks.running !== undefined) statCards[3].value = data.tasks.running
+      else if (data.tasks && data.tasks.pending !== undefined) statCards[3].value = data.tasks.pending
     }
   } catch (err: any) {
     console.error('获取报表统计数据失败:', err)
@@ -439,20 +438,6 @@ onMounted(() => {
   padding: 20px;
   background: #f7f8fa;
   min-height: 100%;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.page-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  margin: 0;
 }
 
 .stat-row {

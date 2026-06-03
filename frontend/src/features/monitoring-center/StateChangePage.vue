@@ -60,18 +60,21 @@
           v-loading="loading"
           stripe
           border
-          empty-text="暂无数据"
           class="change-table"
         >
-          <el-table-column prop="asset_name" label="资产名" min-width="160" show-overflow-tooltip />
-          <el-table-column prop="attribute_name" label="变更属性" width="120" align="center">
+          <el-table-column prop="asset_name" label="资产名" min-width="160" show-overflow-tooltip>
             <template #default="{ row }">
-              <el-tag size="small" effect="plain">{{ row.attribute_name }}</el-tag>
+              {{ row.asset_name || row.asset_id || '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="attribute_name" label="变更属性" width="140" align="center">
+            <template #default="{ row }">
+              <el-tag size="small" effect="plain">{{ attributeLabel(row.attribute_name) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="old_value" label="旧值" min-width="140" show-overflow-tooltip>
             <template #default="{ row }">
-              <span class="value-old">{{ row.old_value ?? '-' }}</span>
+              <span class="value-old">{{ formatValue(row.attribute_name, row.old_value) }}</span>
             </template>
           </el-table-column>
           <el-table-column label="" width="40" align="center" class-name="arrow-cell">
@@ -81,7 +84,7 @@
           </el-table-column>
           <el-table-column prop="new_value" label="新值" min-width="140" show-overflow-tooltip>
             <template #default="{ row }">
-              <span class="value-new">{{ row.new_value ?? '-' }}</span>
+              <span class="value-new">{{ formatValue(row.attribute_name, row.new_value) }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="changed_at" label="变更时间" width="175">
@@ -91,10 +94,13 @@
           </el-table-column>
           <el-table-column prop="trigger_source" label="触发来源" width="120" show-overflow-tooltip>
             <template #default="{ row }">
-              {{ row.trigger_source || '-' }}
+              <el-tag size="small" :type="triggerSourceType(row.trigger_source)" effect="plain">{{ triggerSourceLabel(row.trigger_source) }}</el-tag>
             </template>
           </el-table-column>
         </el-table>
+        <el-empty v-if="!loading && tableData.length === 0" description="暂无状态变更记录">
+          <p style="color:#909399;font-size:13px;margin-top:4px">当资产状态发生变化时，变更记录将在此展示</p>
+        </el-empty>
 
         <!-- ========== Pagination ========== -->
         <div class="pagination-wrapper">
@@ -137,6 +143,125 @@ const pagination = reactive({
 })
 
 // ── Helpers ─────────────────────────────────────────────────────────
+var ATTRIBUTE_LABEL_MAP: Record<string, string> = {
+  status: '运行状态',
+  health: '健康度',
+  health_score: '健康分数',
+  ip: 'IP 地址',
+  reachability: '可达性',
+  config: '配置',
+  cpu_usage: 'CPU使用率',
+  memory_usage: '内存使用率',
+  disk_usage: '磁盘使用率',
+  network_in: '网络入流量',
+  network_out: '网络出流量',
+  load_1m: '负载(1分钟)',
+  load_5m: '负载(5分钟)',
+  load_15m: '负载(15分钟)',
+  process_count: '进程数',
+  connection_count: '连接数',
+  response_time: '响应时间',
+  uptime: '运行时间',
+  os_version: '系统版本',
+  agent_version: 'Agent版本',
+  port: '端口',
+  service_status: '服务状态',
+  temperature: '温度',
+}
+
+var PERCENT_ATTRIBUTES = ['cpu_usage', 'memory_usage', 'disk_usage', 'health_score']
+var BYTE_ATTRIBUTES = ['network_in', 'network_out']
+
+function attributeLabel(name: string): string {
+  return ATTRIBUTE_LABEL_MAP[name] || name || '-'
+}
+
+function formatValue(attrName: string | null | undefined, value: any): string {
+  if (value === null || value === undefined || value === '') return '-'
+  if (!attrName) return String(value)
+  if (PERCENT_ATTRIBUTES.indexOf(attrName) >= 0) {
+    var num = parseFloat(value)
+    if (!isNaN(num)) {
+      if (num > 1) return num.toFixed(1) + '%'
+      return (num * 100).toFixed(1) + '%'
+    }
+  }
+  if (BYTE_ATTRIBUTES.indexOf(attrName) >= 0) {
+    var bytes = parseFloat(value)
+    if (!isNaN(bytes)) return formatBytes(bytes)
+  }
+  if (attrName === 'temperature') {
+    var temp = parseFloat(value)
+    if (!isNaN(temp)) return temp.toFixed(1) + '°C'
+  }
+  if (attrName === 'response_time') {
+    var ms = parseFloat(value)
+    if (!isNaN(ms)) {
+      if (ms >= 1000) return (ms / 1000).toFixed(2) + 's'
+      return ms.toFixed(0) + 'ms'
+    }
+  }
+  if (attrName === 'status' || attrName === 'service_status') {
+    return statusValueLabel(String(value))
+  }
+  if (attrName === 'reachability') {
+    return String(value) === 'true' || value === true ? '可达' : '不可达'
+  }
+  return String(value)
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return bytes.toFixed(0) + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB'
+}
+
+function statusValueLabel(val: string): string {
+  var map: Record<string, string> = {
+    online: '在线',
+    offline: '离线',
+    running: '运行中',
+    stopped: '已停止',
+    warning: '警告',
+    critical: '严重',
+    healthy: '健康',
+    unhealthy: '不健康',
+    unknown: '未知',
+    active: '活跃',
+    inactive: '不活跃',
+  }
+  return map[val] || val
+}
+
+var TRIGGER_SOURCE_MAP: Record<string, string> = {
+  collector: '采集器',
+  monitoring: '监控',
+  agent: 'Agent',
+  manual: '手动',
+  system: '系统',
+  policy: '策略',
+  alert: '告警',
+  api: 'API',
+  schedule: '定时任务',
+  discovery: '自动发现',
+  execution: '自动化执行',
+}
+
+function triggerSourceLabel(source: string | null | undefined): string {
+  return TRIGGER_SOURCE_MAP[source || ''] || source || '-'
+}
+
+function triggerSourceType(source: string | null | undefined): string {
+  var map: Record<string, string> = {
+    collector: '', monitoring: '', agent: '',
+    manual: 'warning', system: 'info', policy: 'success',
+    alert: 'danger', api: 'info', schedule: '',
+    discovery: 'success', execution: '',
+  }
+  return map[source || ''] || 'info'
+}
+
 function formatTime(val: string | null | undefined): string {
   if (!val) return '-'
   const d = new Date(val)

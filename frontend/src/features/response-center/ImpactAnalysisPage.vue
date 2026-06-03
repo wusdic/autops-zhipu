@@ -1,7 +1,7 @@
 <template>
   <div class="p-6">
-    <div class="page-header">
-      <h2 class="page-title">影响分析</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">影响分析</div>
     </div>
 
     <!-- 选择异常 -->
@@ -344,14 +344,6 @@ onMounted(() => fetchAnomalies())
 </script>
 
 <style scoped>
-.page-header {
-  margin-bottom: 16px;
-}
-.page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d2129;
-}
 .mb-lg {
   margin-bottom: 16px;
 }

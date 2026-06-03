@@ -1,7 +1,7 @@
 <template>
   <div class="p-6">
-    <div class="page-header">
-      <h2 class="page-title">业务健康地图</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">业务健康地图</div>
       <el-button @click="fetchSystems" :loading="loading" type="primary" plain size="small">刷新</el-button>
     </div>
 
@@ -302,17 +302,7 @@ onMounted(() => fetchSystems())
 </script>
 
 <style scoped>
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-.page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d2129;
-}
+
 .mb-lg {
   margin-bottom: 16px;
 }

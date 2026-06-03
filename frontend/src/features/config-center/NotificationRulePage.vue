@@ -1,7 +1,10 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <h2>通知规则</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">通知规则</div>
+      <div class="autops-page-desc">配置告警和事件的通知规则和发送渠道</div>
+    </div>
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px">
       <el-button type="primary" @click="openCreateDialog">
         <el-icon><Plus /></el-icon> 新建规则
       </el-button>
@@ -260,6 +263,5 @@ onMounted(fetchData)
 
 <style scoped>
 .page-container { padding: 20px; }
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .mb-md { margin-bottom: 16px; }
 </style>

@@ -1,6 +1,12 @@
 <template>
   <div class="p-6">
-    <el-page-header @back="router.back()" title="返回异常列表" content="异常详情" />
+    <div class="autops-page-header">
+      <div class="autops-page-title-row">
+        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <span class="autops-page-title">异常详情</span>
+      </div>
+      <div class="autops-page-desc">查看异常详细信息、处置时间线和关联告警</div>
+    </div>
 
     <div v-loading="loading" style="margin-top: 16px">
       <el-row :gutter="16">
@@ -177,9 +183,8 @@
               </el-descriptions>
             </div>
           </div>
-         </div>
-       </el-col>
-     </el-row>
+        </el-col>
+      </el-row>
       <!-- 工作流导航 -->
       <el-card style="margin-top: 16px" shadow="never">
         <template #header>
@@ -212,6 +217,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import { anomalyService, alertService } from '@/shared/api'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 const route = useRoute()

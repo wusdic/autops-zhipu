@@ -1,7 +1,7 @@
 <template>
   <div class="p-6">
-    <div class="page-header">
-      <h2 class="page-title">异常列表</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">异常列表</div>
       <el-button type="primary" @click="router.push('/response/anomalies/create')">新建异常</el-button>
     </div>
 
@@ -216,17 +216,6 @@ onMounted(() => fetchList())
 </script>
 
 <style scoped>
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-.page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d2129;
-}
 .mb-lg {
   margin-bottom: 16px;
 }

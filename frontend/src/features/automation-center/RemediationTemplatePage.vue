@@ -1,15 +1,20 @@
 <template>
   <div class="remediation-template-page">
-    <el-page-header @back="router.back()" title="返回" content="处置模板管理">
-      <template #extra>
-        <el-button type="primary" @click="openDialog()">
-          <el-icon><Plus /></el-icon> 新建模板
-        </el-button>
-        <el-button @click="loadData" :loading="loading">
-          <el-icon><Refresh /></el-icon> 刷新
-        </el-button>
-      </template>
-    </el-page-header>
+    <div class="autops-page-header">
+      <div class="autops-page-title-row">
+        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <span class="autops-page-title">处置模板管理</span>
+      </div>
+      <div class="autops-page-desc">管理和配置自动处置模板，定义故障处置步骤</div>
+    </div>
+    <div style="display: flex; gap: 8px; margin-bottom: 16px">
+      <el-button type="primary" @click="openDialog()">
+        <el-icon><Plus /></el-icon> 新建模板
+      </el-button>
+      <el-button @click="loadData" :loading="loading">
+        <el-icon><Refresh /></el-icon> 刷新
+      </el-button>
+    </div>
 
     <el-card class="mt-4" shadow="never">
       <el-form :inline="true" :model="filters">
@@ -145,7 +150,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh } from '@element-plus/icons-vue'
+import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const loading = ref(false)

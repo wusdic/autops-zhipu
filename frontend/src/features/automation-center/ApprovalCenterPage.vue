@@ -1,11 +1,9 @@
 <template>
   <div class="page-container">
     <!-- Page Header -->
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">审批中心</h2>
-        <p class="page-subtitle">审批自动化执行请求，管控操作风险</p>
-      </div>
+    <div class="autops-page-header">
+      <div class="autops-page-title">审批中心</div>
+      <div class="autops-page-desc">审批自动化执行请求，管控操作风险</div>
     </div>
 
     <!-- Status Tabs -->
@@ -440,26 +438,6 @@ onMounted(() => {
 <style scoped>
 .page-container {
   padding: 20px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d2129;
-  margin: 0;
-}
-
-.page-subtitle {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 4px;
 }
 
 .tabs-card :deep(.el-card__body) {

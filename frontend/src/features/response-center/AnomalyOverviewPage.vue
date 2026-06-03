@@ -1,8 +1,8 @@
 <template>
   <div class="page-container">
     <!-- 页面头部 -->
-    <div class="page-header">
-      <h2>异常总览</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">异常总览</div>
       <el-button type="primary" @click="router.push('/response/anomaly-list')">
         <el-icon><Plus /></el-icon>
         异常列表
@@ -296,31 +296,27 @@ async function fetchStats() {
     // 先尝试 stats 接口
     try {
       const statsRes = await anomalyService.stats()
-      const sd = statsRes?.data
-      if (sd) {
-        // 兼容多种响应结构
-        const data = sd.data ?? sd
-        if (data.total !== undefined) statCards[0].value = data.total
-        else if (data.total_count !== undefined) statCards[0].value = data.total_count
-        else if (data.count !== undefined) statCards[0].value = data.count
+      // /api/v1/anomalies/stats returns: { total, by_status: {...}, by_severity: {...} }
+      // Response is wrapped: { code: 0, data: { total, by_status, by_severity } }
+      const raw = statsRes?.data ?? {}
+      const data = raw.data ?? raw
 
-        if (data.pending !== undefined) statCards[1].value = data.pending
-        else if (data.pending_count !== undefined) statCards[1].value = data.pending_count
-        else if (data.open !== undefined) statCards[1].value = data.open
-        else if (data.open_count !== undefined) statCards[1].value = data.open_count
+      if (data.total !== undefined) statCards[0].value = data.total
+      else if (data.total_count !== undefined) statCards[0].value = data.total_count
 
-        if (data.acknowledged !== undefined) statCards[2].value = data.acknowledged
-        else if (data.acknowledged_count !== undefined) statCards[2].value = data.acknowledged_count
-
-        if (data.closed !== undefined) statCards[3].value = data.closed
-        else if (data.closed_count !== undefined) statCards[3].value = data.closed_count
-        else if (data.resolved !== undefined) statCards[3].value = data.resolved
-        else if (data.resolved_count !== undefined) statCards[3].value = data.resolved_count
-      }
+      // by_status is a dict like { "open": 5, "acknowledged": 3, "closed": 10 }
+      var byStatus: Record<string, number> = data.by_status ?? {}
+      // Map pending/open to card[1]
+      statCards[1].value = byStatus['pending'] ?? byStatus['open'] ?? byStatus['new'] ?? 0
+      // Map acknowledged/processing to card[2]
+      statCards[2].value = byStatus['acknowledged'] ?? byStatus['processing'] ?? byStatus['in_progress'] ?? 0
+      // Map closed/resolved to card[3]
+      statCards[3].value = byStatus['closed'] ?? byStatus['resolved'] ?? 0
     } catch {
       // stats 接口失败，回退到 list 接口获取总数
       const listRes = await anomalyService.list({ page: 1, page_size: 1 })
-      const ld = listRes?.data
+      const raw = listRes?.data ?? {}
+      const ld = raw.data ?? raw
       statCards[0].value = ld?.total ?? ld?.count ?? (Array.isArray(ld) ? ld.length : 0)
     }
   } catch (err: any) {
@@ -369,20 +365,6 @@ onMounted(() => {
   padding: 20px;
   background: #f7f8fa;
   min-height: 100%;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.page-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  margin: 0;
 }
 
 .stat-row {

@@ -1,8 +1,12 @@
 <template>
   <div class="page-container">
     <!-- 页面头部 -->
-    <div class="page-header">
-      <h2>巡检总览</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">巡检总览</div>
+      <div class="autops-page-desc">管理和配置巡检模板、计划与任务</div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
       <el-button type="primary" @click="router.push('/inspection/templates')">
         <el-icon><Plus /></el-icon>
         创建模板
@@ -305,15 +309,19 @@ async function fetchStats() {
     // 尝试获取 overview 统计（补充完成率等）
     try {
       const overviewRes = await inspectionService.overview()
-      const od = overviewRes?.data
-      if (od) {
-        if (od.template_count !== undefined) statCards[0].value = od.template_count
-        if (od.plan_count !== undefined) statCards[1].value = od.plan_count
-        if (od.task_count !== undefined) statCards[2].value = od.task_count
-        if (od.completion_rate !== undefined) statCards[3].value = Number(od.completion_rate)
-        if (od.templates_count !== undefined) statCards[0].value = od.templates_count
-        if (od.plans_count !== undefined) statCards[1].value = od.plans_count
-        if (od.tasks_count !== undefined) statCards[2].value = od.tasks_count
+      // /api/v1/inspection/stats returns: { tasks: {...}, templates: {...}, plans: {...}, results: {...} }
+      const raw = overviewRes?.data
+      const od = raw?.data ?? raw ?? {}
+      if (od.templates) statCards[0].value = od.templates.total ?? statCards[0].value
+      if (od.plans) statCards[1].value = od.plans.total ?? statCards[1].value
+      if (od.tasks) {
+        statCards[2].value = od.tasks.total ?? statCards[2].value
+        // Compute completion rate from tasks
+        var taskTotal = od.tasks.total ?? 0
+        var taskCompleted = od.tasks.completed ?? 0
+        if (taskTotal > 0) {
+          statCards[3].value = Math.round((taskCompleted / taskTotal) * 100)
+        }
       }
     } catch {
       // overview 接口可选，忽略错误
@@ -362,20 +370,6 @@ onMounted(() => {
   padding: 20px;
   background: #f7f8fa;
   min-height: 100%;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.page-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  margin: 0;
 }
 
 .stat-row {

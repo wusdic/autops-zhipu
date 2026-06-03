@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import './shared/styles/global.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from './app/router'
@@ -11,7 +12,7 @@ import { permission, role } from './shared/directives'
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
-app.use(ElementPlus)
+app.use(ElementPlus, { locale: zhCn })
 
 // Register directives
 app.directive('permission', permission)

@@ -1,22 +1,27 @@
 <template>
   <div class="manual-handling-page">
-    <el-page-header @back="router.back()" title="返回" content="人工处置台">
-      <template #extra>
-        <el-button type="primary" @click="openCreateDialog">
-          <el-icon><Plus /></el-icon> 新建处置工单
-        </el-button>
-        <el-button @click="loadData" :loading="loading">
-          <el-icon><Refresh /></el-icon> 刷新
-        </el-button>
-      </template>
-    </el-page-header>
+    <div class="autops-page-header">
+      <div class="autops-page-title-row">
+        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <span class="autops-page-title">人工处置台</span>
+      </div>
+      <div class="autops-page-desc">处理人工干预的工单，跟踪处置进度和 SLA</div>
+    </div>
+    <div style="display: flex; gap: 8px; margin-bottom: 16px">
+      <el-button type="primary" @click="openCreateDialog">
+        <el-icon><Plus /></el-icon> 新建处置工单
+      </el-button>
+      <el-button @click="loadData" :loading="loading">
+        <el-icon><Refresh /></el-icon> 刷新
+      </el-button>
+    </div>
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="mt-4">
       <el-col :span="6"><el-card shadow="hover"><el-statistic title="待处置" :value="stats.pending" /></el-card></el-col>
       <el-col :span="6"><el-card shadow="hover"><el-statistic title="进行中" :value="stats.in_progress" /></el-card></el-col>
       <el-col :span="6"><el-card shadow="hover"><el-statistic title="今日完成" :value="stats.completed_today" /></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover"><el-statistic title="平均处置时长" :value="stats.avg_duration" suffix="分钟" /></el-col></el-col>
+      <el-col :span="6"><el-card shadow="hover"><el-statistic title="平均处置时长" :value="stats.avg_duration" suffix="分钟" /></el-card></el-col>
     </el-row>
 
     <!-- 筛选 -->
@@ -50,7 +55,11 @@
     <!-- 工单列表 -->
     <el-card class="mt-4" shadow="never">
       <el-table :data="items" v-loading="loading" stripe border>
-        <el-table-column prop="id" label="工单号" width="120" />
+        <el-table-column prop="id" label="工单号" width="120">
+          <template #default="{ row }">
+            <span style="font-family:monospace;font-size:12px">{{ row.id && String(row.id).length > 12 ? String(row.id).slice(0, 8) + '...' : (row.id || '-') }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="title" label="处置标题" min-width="250" />
         <el-table-column prop="priority" label="优先级" width="90">
           <template #default="{ row }">
@@ -114,7 +123,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Plus, Refresh } from '@element-plus/icons-vue'
+import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 
 const router = useRouter()

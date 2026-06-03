@@ -1,144 +1,162 @@
 <template>
   <div class="page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">平台自检</div>
-        <div class="autops-page-subtitle">检查平台各组件的运行状态与健康情况</div>
-      </div>
-      <div class="header-actions">
-        <el-button @click="loadHistory" :loading="historyLoading">刷新记录</el-button>
-        <el-button type="primary" @click="runCheck" :loading="checking">
-          <el-icon><CircleCheck /></el-icon> 开始自检
-        </el-button>
-      </div>
+    <!-- ── API Not Available: Coming Soon ────────────────── -->
+    <div v-if="apiNotAvailable" class="coming-soon-wrapper">
+      <el-empty :image-size="160" description=" ">
+        <template #image>
+          <el-icon :size="120" color="#c0c4cc"><Monitor /></el-icon>
+        </template>
+        <template #description>
+          <div class="coming-soon-title">平台自检功能即将上线</div>
+          <div class="coming-soon-desc">
+            后端自检服务正在开发中，届时将支持对数据库、缓存、磁盘、服务等组件的健康检查。
+          </div>
+        </template>
+      </el-empty>
     </div>
 
-    <!-- ── Category Filter ───────────────────────────────── -->
-    <div class="category-bar">
-      <span
-        v-for="cat in categories"
-        :key="cat.key"
-        class="category-tag"
-        :class="{ active: activeCategory === cat.key }"
-        @click="filterCategory(cat.key)"
-      >
-        <el-icon style="margin-right: 4px"><component :is="cat.icon" /></el-icon>
-        {{ cat.label }}
-        <el-badge
-          :value="getCategoryCount(cat.key)"
-          :type="getCategoryBadgeType(cat.key)"
-          class="category-badge"
-        />
-      </span>
-    </div>
-
-    <!-- ── Check Results Grid ────────────────────────────── -->
-    <el-row :gutter="16" class="check-grid" v-if="checkResults.length > 0">
-      <el-col :xs="24" :sm="12" :md="8" v-for="item in filteredResults" :key="item.name">
-        <div class="check-card" :class="item.status">
-          <div class="check-card-header">
-            <el-icon size="22" :color="statusColor(item.status)">
-              <component :is="statusIcon(item.status)" />
-            </el-icon>
-            <span class="check-name">{{ item.name }}</span>
-            <el-tag
-              :type="statusTagType(item.status)"
-              size="small"
-              effect="dark"
-              class="check-status-tag"
-            >
-              {{ statusLabel(item.status) }}
-            </el-tag>
-          </div>
-          <div class="check-detail">
-            <span class="detail-label">详情：</span>
-            <span class="detail-value">{{ item.detail || '等待检查' }}</span>
-          </div>
-          <div class="check-meta">
-            <span class="check-category">
-              <el-tag size="small" type="info">{{ getCategoryLabel(item.category) }}</el-tag>
-            </span>
-            <span class="check-time">{{ item.checked_at || '' }}</span>
-          </div>
-          <div class="check-extra" v-if="item.latency">
-            <span class="extra-label">延迟：</span>
-            <span>{{ item.latency }}ms</span>
-          </div>
-          <div class="check-extra" v-if="item.error">
-            <span class="extra-label error">错误：</span>
-            <span class="error-text">{{ item.error }}</span>
-          </div>
+    <!-- ── Normal Content (API available) ────────────────── -->
+    <template v-else>
+      <div class="autops-page-header">
+        <div>
+          <div class="autops-page-title">平台自检</div>
+          <div class="autops-page-subtitle">检查平台各组件的运行状态与健康情况</div>
         </div>
-      </el-col>
-    </el-row>
-
-    <el-empty v-else description="点击「开始自检」执行平台组件检查" :image-size="120" />
-
-    <!-- ── Summary ───────────────────────────────────────── -->
-    <div class="summary-bar" v-if="checkResults.length > 0 && !checking">
-      <div class="summary-item">
-        <span class="summary-dot success" />
-        正常：<strong>{{ passCount }}</strong>
-      </div>
-      <div class="summary-item">
-        <span class="summary-dot error" />
-        异常：<strong>{{ failCount }}</strong>
-      </div>
-      <div class="summary-item">
-        <span class="summary-dot warning" />
-        警告：<strong>{{ warnCount }}</strong>
-      </div>
-      <div class="summary-item">
-        <span class="summary-dot pending" />
-        未检查：<strong>{{ pendingCount }}</strong>
-      </div>
-      <div class="summary-time">
-        检查时间：{{ lastCheckTime || '-' }}
-      </div>
-    </div>
-
-    <!-- ── History Table ─────────────────────────────────── -->
-    <div class="section-title" style="margin-top: 24px">历史自检记录</div>
-    <el-table
-      :data="history"
-      v-loading="historyLoading"
-      stripe
-      border
-      size="small"
-      empty-text="暂无历史记录"
-      style="width: 100%"
-    >
-      <el-table-column prop="checked_at" label="检查时间" width="180">
-        <template #default="{ row }">
-          {{ formatTime(row.checked_at) }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="total" label="检查项" width="80" align="center" />
-      <el-table-column prop="pass" label="通过" width="70" align="center">
-        <template #default="{ row }">
-          <span style="color: #00b42a">{{ row.pass }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="fail" label="异常" width="70" align="center">
-        <template #default="{ row }">
-          <span style="color: #f53f3f">{{ row.fail }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="warn" label="警告" width="70" align="center">
-        <template #default="{ row }">
-          <span style="color: #ff7d00">{{ row.warn }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="duration" label="耗时(ms)" width="100" align="center" />
-      <el-table-column prop="operator" label="操作人" width="100" />
-      <el-table-column label="操作" width="80" align="center">
-        <template #default="{ row }">
-          <el-button text type="primary" size="small" @click="viewHistoryDetail(row)">
-            详情
+        <div class="header-actions">
+          <el-button @click="loadHistory" :loading="historyLoading">刷新记录</el-button>
+          <el-button type="primary" @click="runCheck" :loading="checking">
+            <el-icon><CircleCheck /></el-icon> 开始自检
           </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+        </div>
+      </div>
+
+      <!-- ── Category Filter ───────────────────────────────── -->
+      <div class="category-bar">
+        <span
+          v-for="cat in categories"
+          :key="cat.key"
+          class="category-tag"
+          :class="{ active: activeCategory === cat.key }"
+          @click="filterCategory(cat.key)"
+        >
+          <el-icon style="margin-right: 4px"><component :is="cat.icon" /></el-icon>
+          {{ cat.label }}
+          <el-badge
+            :value="getCategoryCount(cat.key)"
+            :type="getCategoryBadgeType(cat.key)"
+            class="category-badge"
+          />
+        </span>
+      </div>
+
+      <!-- ── Check Results Grid ────────────────────────────── -->
+      <el-row :gutter="16" class="check-grid" v-if="checkResults.length > 0">
+        <el-col :xs="24" :sm="12" :md="8" v-for="item in filteredResults" :key="item.name">
+          <div class="check-card" :class="item.status">
+            <div class="check-card-header">
+              <el-icon size="22" :color="statusColor(item.status)">
+                <component :is="statusIcon(item.status)" />
+              </el-icon>
+              <span class="check-name">{{ item.name }}</span>
+              <el-tag
+                :type="statusTagType(item.status)"
+                size="small"
+                effect="dark"
+                class="check-status-tag"
+              >
+                {{ statusLabel(item.status) }}
+              </el-tag>
+            </div>
+            <div class="check-detail">
+              <span class="detail-label">详情：</span>
+              <span class="detail-value">{{ item.detail || '等待检查' }}</span>
+            </div>
+            <div class="check-meta">
+              <span class="check-category">
+                <el-tag size="small" type="info">{{ getCategoryLabel(item.category) }}</el-tag>
+              </span>
+              <span class="check-time">{{ item.checked_at || '' }}</span>
+            </div>
+            <div class="check-extra" v-if="item.latency">
+              <span class="extra-label">延迟：</span>
+              <span>{{ item.latency }}ms</span>
+            </div>
+            <div class="check-extra" v-if="item.error">
+              <span class="extra-label error">错误：</span>
+              <span class="error-text">{{ item.error }}</span>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+
+      <el-empty v-else description="点击「开始自检」执行平台组件检查" :image-size="120" />
+
+      <!-- ── Summary ───────────────────────────────────────── -->
+      <div class="summary-bar" v-if="checkResults.length > 0 && !checking">
+        <div class="summary-item">
+          <span class="summary-dot success" />
+          正常：<strong>{{ passCount }}</strong>
+        </div>
+        <div class="summary-item">
+          <span class="summary-dot error" />
+          异常：<strong>{{ failCount }}</strong>
+        </div>
+        <div class="summary-item">
+          <span class="summary-dot warning" />
+          警告：<strong>{{ warnCount }}</strong>
+        </div>
+        <div class="summary-item">
+          <span class="summary-dot pending" />
+          未检查：<strong>{{ pendingCount }}</strong>
+        </div>
+        <div class="summary-time">
+          检查时间：{{ lastCheckTime || '-' }}
+        </div>
+      </div>
+
+      <!-- ── History Table ─────────────────────────────────── -->
+      <div class="section-title" style="margin-top: 24px">历史自检记录</div>
+      <el-table
+        :data="history"
+        v-loading="historyLoading"
+        stripe
+        border
+        size="small"
+        empty-text="暂无历史记录"
+        style="width: 100%"
+      >
+        <el-table-column prop="checked_at" label="检查时间" width="180">
+          <template #default="{ row }">
+            {{ formatTime(row.checked_at) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="total" label="检查项" width="80" align="center" />
+        <el-table-column prop="pass" label="通过" width="70" align="center">
+          <template #default="{ row }">
+            <span style="color: #00b42a">{{ row.pass }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="fail" label="异常" width="70" align="center">
+          <template #default="{ row }">
+            <span style="color: #f53f3f">{{ row.fail }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="warn" label="警告" width="70" align="center">
+          <template #default="{ row }">
+            <span style="color: #ff7d00">{{ row.warn }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="duration" label="耗时(ms)" width="100" align="center" />
+        <el-table-column prop="operator" label="操作人" width="100" />
+        <el-table-column label="操作" width="80" align="center">
+          <template #default="{ row }">
+            <el-button text type="primary" size="small" @click="viewHistoryDetail(row)">
+              详情
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </template>
   </div>
 </template>
 
@@ -173,6 +191,7 @@ function getCategoryLabel(key: string): string {
 }
 
 // ── State ────────────────────────────────────────────────
+const apiNotAvailable = ref(false)
 const checking = ref(false)
 const historyLoading = ref(false)
 const checkResults = ref<any[]>([])
@@ -294,7 +313,13 @@ async function runCheck() {
       ElMessage.success('自检完成，全部正常')
     }
   } catch (err: any) {
-    ElMessage.error(err.message || '自检执行失败')
+    const status = err?.response?.status
+    if (status === 404 || status === 501 || !err.response) {
+      apiNotAvailable.value = true
+      ElMessage.info('自检功能即将上线，后端服务正在开发中')
+    } else {
+      ElMessage.warning(err.message || '自检执行失败，请稍后重试')
+    }
   } finally {
     checking.value = false
   }
@@ -309,8 +334,11 @@ async function loadHistory() {
     if (data?.history && Array.isArray(data.history)) {
       history.value = data.history
     }
-  } catch {
-    // History might not be available
+  } catch (err: any) {
+    const status = err?.response?.status
+    if (status === 404 || status === 501 || !err.response) {
+      apiNotAvailable.value = true
+    }
   } finally {
     historyLoading.value = false
   }
@@ -497,5 +525,26 @@ onMounted(() => {
   font-weight: 600;
   color: #1d2129;
   margin-bottom: 12px;
+}
+
+/* Coming soon */
+.coming-soon-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+.coming-soon-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d2129;
+  margin-bottom: 8px;
+}
+.coming-soon-desc {
+  font-size: 14px;
+  color: #86909c;
+  line-height: 1.6;
+  max-width: 420px;
+  text-align: center;
+  margin: 0 auto;
 }
 </style>

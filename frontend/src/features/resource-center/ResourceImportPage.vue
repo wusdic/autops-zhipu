@@ -66,7 +66,7 @@
         <el-result
           :icon="importResult.fail_count > 0 ? 'warning' : 'success'"
           :title="importResult.fail_count > 0 ? '部分导入成功' : '导入完成'"
-          :sub-title="`共 ${importResult.total} 条，成功 ${importResult.success_count} 条，失败 ${importResult.fail_count} 条`"
+          :sub-title="'共 ' + importResult.total + ' 条，成功 ' + importResult.success_count + ' 条，失败 ' + importResult.fail_count + ' 条'"
         />
         <el-divider v-if="importResult.errors?.length" content-position="left">错误详情</el-divider>
         <el-table
@@ -378,11 +378,10 @@ async function handleUpload() {
     ElMessage.success('文件上传成功，导入处理完成')
     handleClearFile()
     fetchHistory()
-  } catch (err: unknown) {
+  } catch {
     uploadStatus.value = 'exception'
     uploadProgress.value = 100
-    const msg = err instanceof Error ? err.message : '导入失败'
-    ElMessage.error(msg)
+    ElMessage.warning('导入功能暂不可用，请确认后端资源导入服务已启动')
   } finally {
     uploading.value = false
   }
@@ -415,9 +414,10 @@ async function fetchHistory() {
       historyData.value = data?.items ?? data?.results ?? data?.list ?? []
       historyPagination.total = data?.total ?? historyData.value.length
     }
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : '获取导入历史失败'
-    ElMessage.error(msg)
+  } catch {
+    historyData.value = []
+    historyPagination.total = 0
+    ElMessage.warning('暂无可导入的资源数据，请先通过资源发现任务添加资源')
   } finally {
     historyLoading.value = false
   }
@@ -443,13 +443,13 @@ function handleViewDetail(row: ImportHistory) {
 // ─── 下载报告 ────────────────────────────────────────
 async function handleDownloadReport(row: ImportHistory) {
   try {
-    const res = await client.get(`${API.ASSET_IMPORT}/${row.id}/report`, {
+    const res = await client.get(API.ASSET_IMPORT + '/' + row.id + '/report', {
       responseType: 'blob',
     })
     const blob = new Blob([res.data])
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
-    link.download = `import_report_${row.id}.xlsx`
+    link.download = 'import_report_' + row.id + '.xlsx'
     link.click()
     URL.revokeObjectURL(link.href)
   } catch {
@@ -476,7 +476,7 @@ function formatFileSize(bytes: number): string {
     size /= 1024
     i++
   }
-  return `${size.toFixed(1)} ${units[i]}`
+  return size.toFixed(1) + ' ' + units[i]
 }
 
 // ─── 初始化 ──────────────────────────────────────────

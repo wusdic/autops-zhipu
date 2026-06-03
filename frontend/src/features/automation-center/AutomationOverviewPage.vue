@@ -1,8 +1,12 @@
 <template>
   <div class="page-container">
     <!-- 页面头部 -->
-    <div class="page-header">
-      <h2>自动化总览</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">自动化总览</div>
+      <div class="autops-page-desc">管理自动化脚本、Playbook 与执行记录</div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
       <el-button type="primary" @click="router.push('/scripts')">
         <el-icon><Plus /></el-icon>
         创建脚本
@@ -313,19 +317,14 @@ async function fetchStats() {
     // 尝试获取 overview 统计（补充成功率等）
     try {
       const overviewRes = await automationService.overview()
-      const od = overviewRes?.data
-      if (od) {
-        if (od.script_count !== undefined) statCards[0].value = od.script_count
-        else if (od.scripts_count !== undefined) statCards[0].value = od.scripts_count
-
-        if (od.playbook_count !== undefined) statCards[1].value = od.playbook_count
-        else if (od.playbooks_count !== undefined) statCards[1].value = od.playbooks_count
-
-        if (od.execution_count !== undefined) statCards[2].value = od.execution_count
-        else if (od.executions_count !== undefined) statCards[2].value = od.executions_count
-
-        if (od.success_rate !== undefined) statCards[3].value = Number(od.success_rate)
-      }
+      // /api/v1/automation/stats returns: { total, completed, failed, pending_approval, running, rolling_back, success_rate }
+      const raw = overviewRes?.data
+      const od = raw?.data ?? raw ?? {}
+      // execution total and success_rate from stats endpoint
+      if (od.total !== undefined) statCards[2].value = od.total ?? statCards[2].value
+      if (od.success_rate !== undefined) statCards[3].value = Number(od.success_rate)
+      // These fields are not returned by the stats endpoint,
+      // so we rely on the list endpoints above for script/playbook counts
     } catch {
       // overview 接口可选，忽略错误
     }
@@ -341,15 +340,15 @@ async function fetchRecentExecutions() {
   executionsLoading.value = true
   try {
     const res = await automationService.listExecutions({ page: 1, page_size: 10 })
-    const data = res?.data
+    // Backend wraps: { code: 0, data: { items: [...], total, ... } }
+    const raw = res?.data ?? {}
+    const data = raw.data ?? raw
     if (Array.isArray(data?.items)) {
       recentExecutions.value = data.items
     } else if (Array.isArray(data?.results)) {
       recentExecutions.value = data.results
     } else if (Array.isArray(data)) {
       recentExecutions.value = data
-    } else if (data?.data && Array.isArray(data.data)) {
-      recentExecutions.value = data.data
     } else {
       recentExecutions.value = []
     }
@@ -373,20 +372,6 @@ onMounted(() => {
   padding: 20px;
   background: #f7f8fa;
   min-height: 100%;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.page-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  margin: 0;
 }
 
 .stat-row {

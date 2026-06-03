@@ -486,9 +486,10 @@ async function fetchData() {
       tableData.value = data?.items ?? data?.results ?? data?.list ?? []
       pagination.total = data?.total ?? tableData.value.length
     }
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : '获取规则列表失败'
-    ElMessage.error(msg)
+  } catch {
+    tableData.value = []
+    pagination.total = 0
+    ElMessage.warning('暂无派单规则数据，请检查后端工单服务是否已启动')
   } finally {
     loading.value = false
   }
@@ -587,7 +588,7 @@ async function handleDialogSubmit() {
       conditions: validConditions,
     }
     if (isEditing.value) {
-      await client.put(`${ruleApiUrl}/${dialogForm.id}`, payload)
+      await client.put(ruleApiUrl + '/' + dialogForm.id, payload)
       ElMessage.success('规则更新成功')
     } else {
       await client.post(ruleApiUrl, payload)
@@ -614,7 +615,7 @@ async function handleDuplicate(row: AssignmentRule) {
     await client.post(ruleApiUrl, {
       ...row,
       id: undefined,
-      name: `${row.name} (副本)`,
+      name: row.name + ' (副本)',
       match_count: 0,
     })
     ElMessage.success('规则复制成功')
@@ -629,7 +630,7 @@ async function handleDuplicate(row: AssignmentRule) {
 async function handleToggleStatus(row: AssignmentRule, enabled: boolean) {
   const newStatus = enabled ? 'enabled' : 'disabled'
   try {
-    await client.patch(`${ruleApiUrl}/${row.id}`, { status: newStatus })
+    await client.patch(ruleApiUrl + '/' + row.id, { status: newStatus })
     row.status = newStatus
     ElMessage.success(enabled ? '已启用' : '已禁用')
   } catch (err: unknown) {
@@ -642,11 +643,11 @@ async function handleToggleStatus(row: AssignmentRule, enabled: boolean) {
 async function handleDelete(row: AssignmentRule) {
   try {
     await ElMessageBox.confirm(
-      `确定删除规则「${row.name}」？此操作不可撤销。`,
+      '确定删除规则「' + row.name + '」？此操作不可撤销。',
       '删除确认',
       { type: 'warning' }
     )
-    await client.delete(`${ruleApiUrl}/${row.id}`)
+    await client.delete(ruleApiUrl + '/' + row.id)
     ElMessage.success('规则已删除')
     fetchData()
   } catch (err: unknown) {
@@ -667,7 +668,7 @@ async function handleSaveReorder() {
   reorderLoading.value = true
   try {
     const orders = reorderList.value.map((r, idx) => ({ id: r.id, priority: idx + 1 }))
-    await client.put(`${ruleApiUrl}/reorder`, { orders })
+    await client.put(ruleApiUrl + '/reorder', { orders })
     ElMessage.success('优先级顺序已更新')
     reorderVisible.value = false
     fetchData()

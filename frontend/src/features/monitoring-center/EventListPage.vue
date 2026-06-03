@@ -169,9 +169,15 @@
                 <el-col :span="12">
                   <h4 style="margin-bottom: 8px">事件详情</h4>
                   <el-descriptions :column="1" border size="small">
-                    <el-descriptions-item label="事件ID">{{ row.id }}</el-descriptions-item>
-                    <el-descriptions-item label="事件类型">{{ row.event_type || '-' }}</el-descriptions-item>
-                    <el-descriptions-item label="来源">{{ row.source || '-' }}</el-descriptions-item>
+                    <el-descriptions-item label="事件ID">
+                      <span style="font-family:monospace;font-size:12px">{{ row.id && row.id.length > 16 ? row.id.slice(0, 8) + '...' + row.id.slice(-4) : (row.id || '-') }}</span>
+                    </el-descriptions-item>
+                    <el-descriptions-item label="事件类型">
+                      <el-tag size="small" :type="eventTypeTagType(row.event_type)">{{ eventTypeLabel(row.event_type) }}</el-tag>
+                    </el-descriptions-item>
+                    <el-descriptions-item label="来源">
+                      <el-tag :type="sourceTagType(row.source)" size="small">{{ sourceLabel(row.source) }}</el-tag>
+                    </el-descriptions-item>
                     <el-descriptions-item label="严重级别">
                       <SeverityBadge :severity="row.severity" size="small" />
                     </el-descriptions-item>
@@ -224,7 +230,7 @@
         </el-table-column>
         <el-table-column prop="event_type" label="类型" width="120" align="center">
           <template #default="{ row }">
-            <el-tag size="small" type="info">{{ row.event_type || '-' }}</el-tag>
+            <el-tag size="small" :type="eventTypeTagType(row.event_type)">{{ eventTypeLabel(row.event_type) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="140" fixed="right" align="center">
@@ -262,9 +268,11 @@
           <!-- Tab: Basic Info -->
           <el-tab-pane label="基本信息" name="info">
             <el-descriptions :column="2" border>
-              <el-descriptions-item label="事件ID">{{ currentEvent.id }}</el-descriptions-item>
+              <el-descriptions-item label="事件ID">
+                <span style="font-family:monospace;font-size:12px">{{ currentEvent.id && currentEvent.id.length > 16 ? currentEvent.id.slice(0, 8) + '...' + currentEvent.id.slice(-4) : (currentEvent.id || '-') }}</span>
+              </el-descriptions-item>
               <el-descriptions-item label="事件类型">
-                <el-tag size="small">{{ currentEvent.event_type || '-' }}</el-tag>
+                <el-tag size="small" :type="eventTypeTagType(currentEvent.event_type)">{{ eventTypeLabel(currentEvent.event_type) }}</el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="来源">
                 <el-tag :type="sourceTagType(currentEvent.source)" size="small">
@@ -555,6 +563,48 @@ function sourceTagType(source: string): string {
     execution: '',
   }
   return map[source] || 'info'
+}
+
+function eventTypeLabel(type: string): string {
+  var map: Record<string, string> = {
+    alert_triggered: '告警触发',
+    alert_resolved: '告警恢复',
+    alert_suppressed: '告警抑制',
+    state_changed: '状态变更',
+    config_changed: '配置变更',
+    asset_discovered: '资产发现',
+    asset_offline: '资产离线',
+    asset_online: '资产上线',
+    execution_started: '执行开始',
+    execution_completed: '执行完成',
+    execution_failed: '执行失败',
+    threshold_exceeded: '阈值超限',
+    anomaly_detected: '异常检测',
+    health_check: '健康检查',
+    system: '系统事件',
+  }
+  return map[type] || type || '-'
+}
+
+function eventTypeTagType(type: string): string {
+  var map: Record<string, string> = {
+    alert_triggered: 'danger',
+    alert_resolved: 'success',
+    alert_suppressed: 'info',
+    state_changed: 'warning',
+    config_changed: '',
+    asset_discovered: 'success',
+    asset_offline: 'danger',
+    asset_online: 'success',
+    execution_started: '',
+    execution_completed: 'success',
+    execution_failed: 'danger',
+    threshold_exceeded: 'danger',
+    anomaly_detected: 'warning',
+    health_check: 'info',
+    system: 'info',
+  }
+  return map[type] || 'info'
 }
 
 function logLevelType(level: string): string {

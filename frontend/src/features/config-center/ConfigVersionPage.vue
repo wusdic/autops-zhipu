@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <h2>配置版本</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">配置版本</div>
     </div>
 
     <!-- Filter by definition -->
@@ -197,7 +197,6 @@ onMounted(fetchDefinitions)
 
 <style scoped>
 .page-container { padding: 20px; }
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .mb-md { margin-bottom: 16px; }
 .text-tertiary { color: #86909c; }
 .font-12 { font-size: 12px; }

@@ -1,9 +1,9 @@
 <template>
   <div class="page-container">
     <!-- Page Header -->
-    <div class="page-header">
-      <h2>知识总览</h2>
-      <p class="page-subtitle">查看知识库整体情况，快速访问核心功能</p>
+    <div class="autops-page-header">
+      <div class="autops-page-title">知识总览</div>
+      <div class="autops-page-desc">查看知识库整体情况，快速访问核心功能</div>
     </div>
 
     <!-- Stat Cards -->
@@ -241,7 +241,10 @@ async function fetchStats() {
   statsLoading.value = true
   try {
     const res = await knowledgeService.stats()
-    const data = res.data?.data ?? res.data ?? {}
+    // /api/v1/knowledge/stats returns: { total, published, draft }
+    // Response is wrapped: { code: 0, data: { total, published, draft } }
+    const raw = res.data ?? {}
+    const data = raw.data ?? raw
     statCards[0].value = data.total ?? 0
     statCards[1].value = data.published ?? 0
     statCards[2].value = data.draft ?? 0
@@ -249,14 +252,16 @@ async function fetchStats() {
 
     // Build category distribution
     if (data.categories && Array.isArray(data.categories)) {
-      const total = data.categories.reduce((s: number, c: any) => s + (c.count || 0), 0) || 1
-      const colors = ['#165dff', '#00b42a', '#ff7d00', '#722ed1', '#f53f3f', '#0fc6c2', '#f77234', '#3491fa']
-      categories.value = data.categories.map((c: any, i: number) => ({
-        name: c.name || c.category || '未分类',
-        count: c.count || 0,
-        percentage: Math.round(((c.count || 0) / total) * 100),
-        color: colors[i % colors.length],
-      }))
+      var catTotal = data.categories.reduce(function (s: number, c: any) { return s + (c.count || 0) }, 0) || 1
+      var colors = ['#165dff', '#00b42a', '#ff7d00', '#722ed1', '#f53f3f', '#0fc6c2', '#f77234', '#3491fa']
+      categories.value = data.categories.map(function (c: any, i: number) {
+        return {
+          name: c.name || c.category || '未分类',
+          count: c.count || 0,
+          percentage: Math.round(((c.count || 0) / catTotal) * 100),
+          color: colors[i % colors.length],
+        }
+      })
     }
   } catch (err: any) {
     console.error('Failed to fetch knowledge stats:', err)
@@ -292,23 +297,6 @@ onMounted(() => {
   padding: 24px;
   background: #f7f8fa;
   min-height: 100%;
-}
-
-.page-header {
-  margin-bottom: 20px;
-}
-
-.page-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  margin: 0 0 4px 0;
-}
-
-.page-subtitle {
-  font-size: 14px;
-  color: #86909c;
-  margin: 0;
 }
 
 .stat-row {

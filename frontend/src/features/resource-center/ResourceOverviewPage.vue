@@ -1,9 +1,9 @@
 <template>
   <div class="page-container">
     <!-- Page Header -->
-    <div class="page-header">
-      <h2>资源总览</h2>
-      <p class="page-subtitle">查看资产整体情况，快速访问核心功能</p>
+    <div class="autops-page-header">
+      <div class="autops-page-title">资源总览</div>
+      <div class="autops-page-desc">查看资产整体情况，快速访问核心功能</div>
     </div>
 
     <!-- Stat Cards -->
@@ -179,6 +179,8 @@ import {
   Coordinate,
 } from '@element-plus/icons-vue'
 import { assetService, dashboardService } from '@/shared/api'
+import client from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 const router = useRouter()
 
@@ -264,6 +266,9 @@ function formatTime(val: string | number | null | undefined): string {
 function getAssetTypeLabel(type: string): string {
   const map: Record<string, string> = {
     server: '服务器',
+    linux_server: 'Linux 服务器',
+    windows_server: 'Windows 服务器',
+    web_server: 'Web 服务器',
     network: '网络设备',
     storage: '存储设备',
     database: '数据库',
@@ -279,6 +284,9 @@ function getAssetTypeLabel(type: string): string {
 function getAssetTypeTagType(type: string): '' | 'success' | 'warning' | 'danger' | 'info' {
   const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
     server: '',
+    linux_server: '',
+    windows_server: '',
+    web_server: 'success',
     network: 'success',
     storage: 'warning',
     database: 'danger',
@@ -293,6 +301,7 @@ function getAssetTypeTagType(type: string): '' | 'success' | 'warning' | 'danger
 function getStatusTagType(status: string): '' | 'success' | 'warning' | 'danger' | 'info' {
   const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
     online: 'success',
+    active: 'success',
     reachable: 'success',
     running: 'success',
     offline: 'danger',
@@ -307,6 +316,7 @@ function getStatusTagType(status: string): '' | 'success' | 'warning' | 'danger'
 function getStatusLabel(status: string): string {
   const map: Record<string, string> = {
     online: '在线',
+    active: '运行中',
     reachable: '可达',
     running: '运行中',
     offline: '离线',
@@ -321,6 +331,9 @@ function getStatusLabel(status: string): string {
 function getAssetTypeIcon(type: string): any {
   const map: Record<string, any> = {
     server: Server,
+    linux_server: Server,
+    windows_server: Server,
+    web_server: Grid,
     network: Coordinate,
     storage: Box,
     database: Cpu,
@@ -334,6 +347,9 @@ function getAssetTypeIcon(type: string): any {
 
 const assetTypeColors: Record<string, { color: string; bgColor: string }> = {
   server: { color: '#165dff', bgColor: '#e8f3ff' },
+  linux_server: { color: '#165dff', bgColor: '#e8f3ff' },
+  windows_server: { color: '#409eff', bgColor: '#ecf5ff' },
+  web_server: { color: '#3491fa', bgColor: '#e8f3ff' },
   network: { color: '#0fc6c2', bgColor: '#e8fffb' },
   storage: { color: '#722ed1', bgColor: '#f5e8ff' },
   database: { color: '#f53f3f', bgColor: '#ffece8' },
@@ -347,26 +363,83 @@ const assetTypeColors: Record<string, { color: string; bgColor: string }> = {
 async function fetchStats() {
   statsLoading.value = true
   try {
-    const res = await dashboardService.stats()
-    const data = res.data?.data ?? res.data ?? {}
+    // 1) Fetch dashboard stats (asset_total, alert_open) + asset-discovery (type_distribution)
+    const [statsRes, discoveryRes] = await Promise.allSettled([
+      dashboardService.stats(),
+      dashboardService.assetDiscovery(),
+    ])
+
+    // Parse dashboard/stats: { asset_total, alert_open, anomaly_open, ... }
+    let assetTotal = 0
+    let alertOpen = 0
+    if (statsRes.status === 'fulfilled') {
+      const d = statsRes.value.data?.data ?? statsRes.value.data ?? {}
+      assetTotal = d.asset_total ?? 0
+      alertOpen = d.alert_open ?? 0
+    }
+
+    // Parse dashboard/asset-discovery: { asset_total, type_distribution: {"db":1,...} }
+    let typeDistributionRaw: Record<string, number> = {}
+    if (discoveryRes.status === 'fulfilled') {
+      const d = discoveryRes.value.data?.data ?? discoveryRes.value.data ?? {}
+      // Prefer asset-discovery total, fall back to stats total
+      assetTotal = d.asset_total ?? assetTotal
+      typeDistributionRaw = d.type_distribution ?? {}
+    }
+
+    // 2) Fetch all assets to count online/offline/alarming by status
+    const assetsRes = await assetService.list({ page: 1, page_size: 500 })
+    const assetsData = assetsRes.data?.data ?? assetsRes.data ?? {}
+    const allAssets: any[] = assetsData.items ?? assetsData.list ?? []
+
+    let onlineCount = 0
+    let offlineCount = 0
+    let alarmingCount = alertOpen
+    for (const asset of allAssets) {
+      const st = (asset.status ?? asset.reachability ?? 'unknown').toLowerCase()
+      if (st === 'online' || st === 'active' || st === 'reachable' || st === 'running') {
+        onlineCount++
+      } else if (st === 'offline' || st === 'unreachable') {
+        offlineCount++
+      }
+    }
 
     // Populate stat cards
-    const assetStats = data.assets ?? data.asset_stats ?? {}
-    statCards[0].value = assetStats.total ?? data.total_assets ?? 0
-    statCards[1].value = assetStats.online ?? assetStats.reachable ?? data.online_assets ?? 0
-    statCards[2].value = assetStats.offline ?? assetStats.unreachable ?? data.offline_assets ?? 0
-    statCards[3].value = assetStats.alarming ?? data.alarming_assets ?? 0
+    statCards[0].value = assetTotal
+    statCards[1].value = onlineCount
+    statCards[2].value = offlineCount
+    statCards[3].value = alarmingCount
 
-    // Build type distribution
-    const rawTypes = assetStats.by_type ?? data.asset_type_distribution ?? []
-    if (Array.isArray(rawTypes)) {
-      typeDistribution.value = rawTypes.map((item: any) => {
-        const t = item.type ?? item.asset_type ?? 'other'
-        const colors = assetTypeColors[t] ?? { color: '#86909c', bgColor: '#f2f3f5' }
+    // 3) Build type distribution from typeDistributionRaw object {"database": 1, ...}
+    if (Object.keys(typeDistributionRaw).length > 0) {
+      typeDistribution.value = Object.entries(typeDistributionRaw).map(function (entry) {
+        var t = entry[0]
+        var count = entry[1]
+        var colors = assetTypeColors[t] ?? { color: '#86909c', bgColor: '#f2f3f5' }
         return {
           type: t,
           label: getAssetTypeLabel(t),
-          count: item.count ?? 0,
+          count: count,
+          color: colors.color,
+          bgColor: colors.bgColor,
+          icon: getAssetTypeIcon(t),
+        }
+      })
+    } else {
+      // Fallback: build from asset list
+      var typeCounts: Record<string, number> = {}
+      for (var i = 0; i < allAssets.length; i++) {
+        var at = allAssets[i].asset_type ?? 'other'
+        typeCounts[at] = (typeCounts[at] ?? 0) + 1
+      }
+      typeDistribution.value = Object.entries(typeCounts).map(function (entry) {
+        var t = entry[0]
+        var count = entry[1]
+        var colors = assetTypeColors[t] ?? { color: '#86909c', bgColor: '#f2f3f5' }
+        return {
+          type: t,
+          label: getAssetTypeLabel(t),
+          count: count,
           color: colors.color,
           bgColor: colors.bgColor,
           icon: getAssetTypeIcon(t),
@@ -374,28 +447,51 @@ async function fetchStats() {
       })
     }
 
-    // Build status distribution
-    const total = statCards[0].value || 1
-    const rawStatus = assetStats.by_status ?? data.asset_status_distribution ?? null
-    if (rawStatus && Array.isArray(rawStatus)) {
-      statusDistribution.value = rawStatus.map((item: any) => ({
-        label: item.label ?? getStatusLabel(item.status ?? item.key),
-        key: item.status ?? item.key ?? '',
-        count: item.count ?? 0,
-        percentage: Math.round(((item.count ?? 0) / total) * 100),
-        color: item.color ?? '#86909c',
-      }))
+    // 4) Build status distribution from asset list
+    var total = statCards[0].value || 1
+    var statusCounts: Record<string, number> = {}
+    for (var j = 0; j < allAssets.length; j++) {
+      var status = (allAssets[j].status ?? allAssets[j].reachability ?? 'unknown').toLowerCase()
+      statusCounts[status] = (statusCounts[status] ?? 0) + 1
+    }
+    if (Object.keys(statusCounts).length > 0) {
+      var statusColors: Record<string, string> = {
+        online: '#00b42a',
+        active: '#00b42a',
+        reachable: '#00b42a',
+        running: '#00b42a',
+        offline: '#86909c',
+        unreachable: '#f53f3f',
+        unknown: '#c9cdd4',
+        alarming: '#f53f3f',
+        maintenance: '#ff7d00',
+      }
+      statusDistribution.value = Object.entries(statusCounts).map(function (entry) {
+        var key = entry[0]
+        var count = entry[1]
+        return {
+          label: getStatusLabel(key),
+          key: key,
+          count: count,
+          percentage: Math.round((count / total) * 100),
+          color: statusColors[key] ?? '#86909c',
+        }
+      })
     } else {
-      // Build from stat card values
-      const statusData = [
+      var statusData = [
         { label: '在线', key: 'online', count: statCards[1].value, color: '#00b42a' },
         { label: '离线', key: 'offline', count: statCards[2].value, color: '#86909c' },
         { label: '告警中', key: 'alarming', count: statCards[3].value, color: '#f53f3f' },
       ]
-      statusDistribution.value = statusData.map((s) => ({
-        ...s,
-        percentage: Math.round((s.count / total) * 100),
-      }))
+      statusDistribution.value = statusData.map(function (s) {
+        return {
+          label: s.label,
+          key: s.key,
+          count: s.count,
+          percentage: Math.round((s.count / total) * 100),
+          color: s.color,
+        }
+      })
     }
   } catch (err: any) {
     console.error('Failed to fetch dashboard stats:', err)
@@ -409,7 +505,9 @@ async function fetchRecentAssets() {
   tableLoading.value = true
   try {
     const res = await assetService.list({ page: 1, page_size: 10 })
-    const data = res.data?.data ?? res.data ?? {}
+    // Backend returns { code: 0, data: { items: [...], total, page, page_size } }
+    const wrapper = res.data ?? {}
+    const data = wrapper.data ?? wrapper
     recentAssets.value = data.items ?? data.list ?? []
   } catch (err: any) {
     console.error('Failed to fetch recent assets:', err)
@@ -431,23 +529,6 @@ onMounted(() => {
   padding: 24px;
   background: #f7f8fa;
   min-height: 100%;
-}
-
-.page-header {
-  margin-bottom: 20px;
-}
-
-.page-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  margin: 0 0 4px 0;
-}
-
-.page-subtitle {
-  font-size: 14px;
-  color: #86909c;
-  margin: 0;
 }
 
 .stat-row {

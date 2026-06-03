@@ -139,7 +139,6 @@
             <div class="legend-item"><span class="legend-line" style="border-top:2px solid #f56c6c"></span> 影响路径</div>
           </div>
           </div>
-          </div>
         </div>
 
         <!-- 节点快速信息 -->

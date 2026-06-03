@@ -1,15 +1,20 @@
 <template>
   <div class="manual-confirm-page">
-    <el-page-header @back="router.back()" title="返回" content="人工确认台">
-      <template #extra>
-        <el-badge :value="pendingCount" :max="99" class="mr-4">
-          <el-tag type="danger">待确认</el-tag>
-        </el-badge>
-        <el-button @click="loadData" :loading="loading">
-          <el-icon><Refresh /></el-icon> 刷新
-        </el-button>
-      </template>
-    </el-page-header>
+    <div class="autops-page-header">
+      <div class="autops-page-title-row">
+        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <span class="autops-page-title">人工确认台</span>
+      </div>
+      <div class="autops-page-desc">审核和确认自动处置、AI建议和策略触发的操作</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px">
+      <el-badge :value="pendingCount" :max="99">
+        <el-tag type="danger">待确认</el-tag>
+      </el-badge>
+      <el-button @click="loadData" :loading="loading">
+        <el-icon><Refresh /></el-icon> 刷新
+      </el-button>
+    </div>
 
     <!-- 筛选 -->
     <el-card class="mt-4" shadow="never">
@@ -113,7 +118,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Refresh } from '@element-plus/icons-vue'
+import { Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 
 const router = useRouter()

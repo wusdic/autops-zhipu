@@ -1,8 +1,11 @@
 <template>
   <div class="page-container">
     <!-- 页面头部 -->
-    <div class="page-header">
-      <h2 class="page-title">巡检任务</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">巡检任务</div>
+      <div class="autops-page-desc">查看和管理巡检任务执行状态</div>
+    </div>
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px">
       <el-button type="primary" @click="handleTriggerTask">
         <el-icon><VideoPlay /></el-icon> 手动触发
       </el-button>

@@ -1,11 +1,12 @@
 <template>
   <div class="page-container">
     <!-- Page Header -->
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">业务系统</h2>
-        <p class="page-subtitle">管理业务系统及其关联资产</p>
-      </div>
+    <div class="autops-page-header">
+      <div class="autops-page-title">业务系统</div>
+      <div class="autops-page-desc">管理业务系统及其关联资产</div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
       <el-button type="primary" @click="openCreateDialog">
         <el-icon><Plus /></el-icon> 新建业务系统
       </el-button>
@@ -368,26 +369,6 @@ onMounted(() => {
 <style scoped>
 .page-container {
   padding: 20px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d2129;
-  margin: 0;
-}
-
-.page-subtitle {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 4px;
 }
 
 .filter-card {

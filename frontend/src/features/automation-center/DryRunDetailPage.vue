@@ -1,16 +1,12 @@
 <template>
   <div class="page-container">
     <!-- Page Header -->
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">Dry-run 预演</h2>
-        <p class="page-subtitle">模拟自动化策略执行，预览执行计划与影响分析</p>
+    <div class="autops-page-header">
+      <div class="autops-page-title-row">
+        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <span class="autops-page-title">Dry-run 预演</span>
       </div>
-      <div class="header-actions">
-        <el-button @click="fetchDryRuns">
-          <el-icon><Refresh /></el-icon> 刷新
-        </el-button>
-      </div>
+      <div class="autops-page-desc">模拟自动化策略执行，预览执行计划与影响分析</div>
     </div>
 
     <!-- Alert -->
@@ -236,11 +232,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Refresh, Search, Close } from '@element-plus/icons-vue'
+import { ArrowLeft, Refresh, Search, Close } from '@element-plus/icons-vue'
 import { automationService } from '@/shared/api'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
+
+const router = useRouter()
 
 // ---------- Types ----------
 interface DryRunStep {
@@ -424,26 +423,6 @@ onMounted(() => {
 <style scoped>
 .page-container {
   padding: 20px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d2129;
-  margin: 0;
-}
-
-.page-subtitle {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 4px;
 }
 
 .card-header {

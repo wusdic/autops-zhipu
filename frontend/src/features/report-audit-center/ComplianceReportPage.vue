@@ -1,15 +1,20 @@
 <template>
   <div class="compliance-report-page">
-    <el-page-header @back="router.back()" title="返回" content="合规报告">
-      <template #extra>
-        <el-button type="primary" @click="generateReport">
-          <el-icon><Document /></el-icon> 生成报告
-        </el-button>
-        <el-button @click="loadData" :loading="loading">
-          <el-icon><Refresh /></el-icon> 刷新
-        </el-button>
-      </template>
-    </el-page-header>
+    <div class="autops-page-header">
+      <div class="autops-page-title-row">
+        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <span class="autops-page-title">合规报告</span>
+      </div>
+      <div class="autops-page-desc">生成和查看合规检查报告，评估系统合规状态</div>
+    </div>
+    <div style="display: flex; gap: 8px; margin-bottom: 16px">
+      <el-button type="primary" @click="generateReport">
+        <el-icon><Document /></el-icon> 生成报告
+      </el-button>
+      <el-button @click="loadData" :loading="loading">
+        <el-icon><Refresh /></el-icon> 刷新
+      </el-button>
+    </div>
 
     <!-- 合规总览 -->
     <el-row :gutter="16" class="mt-4">
@@ -103,7 +108,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Document, Refresh } from '@element-plus/icons-vue'
+import { Document, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 
 const router = useRouter()

@@ -1,15 +1,20 @@
 <template>
   <div class="inspection-rules-page">
-    <el-page-header @back="router.back()" title="返回" content="巡检规则管理">
-      <template #extra>
-        <el-button type="primary" @click="openDialog()">
-          <el-icon><Plus /></el-icon> 新建规则
-        </el-button>
-        <el-button @click="loadData" :loading="loading">
-          <el-icon><Refresh /></el-icon> 刷新
-        </el-button>
-      </template>
-    </el-page-header>
+    <div class="autops-page-header">
+      <div class="autops-page-title-row">
+        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <span class="autops-page-title">巡检规则管理</span>
+      </div>
+      <div class="autops-page-desc">管理和配置各类巡检规则，支持页面、配置、日志、基线检查</div>
+    </div>
+    <div style="display: flex; gap: 8px; margin-bottom: 16px">
+      <el-button type="primary" @click="openDialog()">
+        <el-icon><Plus /></el-icon> 新建规则
+      </el-button>
+      <el-button @click="loadData" :loading="loading">
+        <el-icon><Refresh /></el-icon> 刷新
+      </el-button>
+    </div>
 
     <!-- 分类标签 -->
     <el-tabs v-model="activeCategory" class="mt-4" @tab-change="loadData">
@@ -159,7 +164,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh } from '@element-plus/icons-vue'
+import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 
 const router = useRouter()

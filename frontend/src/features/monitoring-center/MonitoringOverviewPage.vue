@@ -232,27 +232,25 @@ async function loadOverview() {
 
     // 告警统计
     if (alertStatsRes.status === 'fulfilled') {
-      const d = alertStatsRes.value.data?.data
-      if (alertStatsRes.value.data?.code === 0 && d) {
-        overview.activeAlerts = d.active ?? d.active_alerts ?? 0
-        overview.activeEvents24h = d.events_24h ?? d.active_events_24h ?? 0
-      }
+      const raw = alertStatsRes.value.data ?? {}
+      const d = raw.data ?? raw
+      // /api/v1/alerts/stats/overview returns: { total, firing, acknowledged, resolved }
+      overview.activeAlerts = d.firing ?? d.active_alerts ?? d.active ?? 0
+      // No events_24h from this endpoint, keep as 0
     }
 
     // 资产总数
     if (assetsRes.status === 'fulfilled') {
-      const d = assetsRes.value.data?.data
-      if (assetsRes.value.data?.code === 0) {
-        overview.totalAssets = d?.total ?? d?.items?.length ?? 0
-      }
+      const raw = assetsRes.value.data ?? {}
+      const d = raw.data ?? raw
+      overview.totalAssets = d?.total ?? d?.items?.length ?? 0
     }
 
     // 采集成功率
     if (collectionRes.status === 'fulfilled') {
-      const d = collectionRes.value.data?.data
-      if (collectionRes.value.data?.code === 0) {
-        overview.collectionRate = d?.success_rate ?? d?.collection_rate ?? 0
-      }
+      const raw = collectionRes.value.data ?? {}
+      const d = raw.data ?? raw
+      overview.collectionRate = d?.success_rate ?? d?.collection_rate ?? 0
     }
   } catch {
     // 静默处理，卡片显示 0

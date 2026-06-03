@@ -1,10 +1,10 @@
 <template>
   <div class="page-container">
     <!-- 页面头部 -->
-    <div class="page-header">
-      <h2 class="page-title">页面巡检</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">页面巡检</div>
+      <div class="autops-page-desc">URL可用性、状态码、响应时间、页面关键字检测</div>
     </div>
-    <p class="page-desc">URL可用性、状态码、响应时间、页面关键字检测</p>
 
     <!-- 搜索栏 -->
     <div class="page-toolbar">

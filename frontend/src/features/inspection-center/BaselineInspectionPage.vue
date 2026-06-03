@@ -1,10 +1,10 @@
 <template>
   <div class="page-container">
     <!-- 页面头部 -->
-    <div class="page-header">
-      <h2 class="page-title">基线巡检</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">基线巡检</div>
+      <div class="autops-page-desc">安全和运维基线检查、合规状态、整改建议</div>
     </div>
-    <p class="page-desc">安全和运维基线检查、合规状态、整改建议</p>
 
     <!-- 搜索栏 -->
     <div class="page-toolbar">

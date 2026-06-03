@@ -18,27 +18,24 @@
       </div>
     </div>
 
-    <!-- ── Page Header ───────────────────────────────────── -->
-    <div class="page-header">
-      <h2>系统配置</h2>
-      <div class="header-actions">
-        <el-input
-          v-model="searchQuery"
-          placeholder="搜索配置 Key …"
-          clearable
-          style="width: 240px"
-          :prefix-icon="Search"
-          @clear="onSearchClear"
-        />
-        <el-button type="primary" @click="openCreateDialog">
-          <el-icon><Plus /></el-icon>
-          新增配置
-        </el-button>
-        <el-button @click="loadConfigs" :loading="loading">
-          <el-icon><Refresh /></el-icon>
-          刷新
-        </el-button>
-      </div>
+    <!-- ── Action Bar ──────────────────────────────────── -->
+    <div class="header-actions" style="margin-bottom: 16px;">
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索配置 Key …"
+        clearable
+        style="width: 240px"
+        :prefix-icon="Search"
+        @clear="onSearchClear"
+      />
+      <el-button type="primary" @click="openCreateDialog">
+        <el-icon><Plus /></el-icon>
+        新增配置
+      </el-button>
+      <el-button @click="loadConfigs" :loading="loading">
+        <el-icon><Refresh /></el-icon>
+        刷新
+      </el-button>
     </div>
 
     <!-- ── Group Tabs ────────────────────────────────────── -->
@@ -558,18 +555,7 @@ onMounted(() => {
 .status-ok { color: #67C23A; }
 .status-warn { color: #E6A23C; }
 
-/* ── Page Header ──────────────────────────── */
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-.page-header h2 {
-  margin: 0;
-  font-size: 20px;
-  color: #303133;
-}
+/* ── Action Bar ──────────────────────────── */
 .header-actions {
   display: flex;
   gap: 12px;

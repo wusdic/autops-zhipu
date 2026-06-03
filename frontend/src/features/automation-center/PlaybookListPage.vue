@@ -144,7 +144,7 @@
 
         <h4 style="margin:16px 0 8px">执行历史</h4>
         <el-table :data="execHistory" stripe size="small" v-loading="execLoading">
-          <el-table-column prop="id" label="ID" width="80" />
+          <el-table-column label="序号" type="index" width="60" align="center" />
           <el-table-column prop="status" label="状态" width="90">
             <template #default="{ row }"><el-tag :type="row.status==='success'?'success':'danger'" size="small">{{ row.status }}</el-tag></template>
           </el-table-column>

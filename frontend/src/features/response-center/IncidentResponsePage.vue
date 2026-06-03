@@ -1,7 +1,7 @@
 <template>
   <div class="incident-response-page">
     <!-- 顶部标题栏 -->
-    <el-card class="page-header" shadow="never">
+    <el-card class="autops-page-header" shadow="never">
       <div class="header-bar">
         <div class="header-left">
           <h2 style="margin: 0">🚨 故障处置工作台</h2>
@@ -1077,10 +1077,6 @@ onMounted(async () => {
 <style scoped>
 .incident-response-page {
   padding: 0;
-}
-
-.page-header {
-  margin-bottom: 16px;
 }
 
 .header-bar {

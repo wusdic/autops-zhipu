@@ -1,5 +1,22 @@
 <template>
   <div class="page-container">
+    <!-- 后端不可用时的引导页面 -->
+    <div v-if="backendUnavailable" class="autops-card guide-card">
+      <el-empty description="授权许可功能需要配置后端许可服务">
+        <el-button type="primary" @click="retryLoadLicense">重新检测</el-button>
+      </el-empty>
+      <div class="guide-info">
+        <div class="guide-title">配置说明</div>
+        <ul class="guide-list">
+          <li>请确保后端许可服务已正确部署并启动</li>
+          <li>检查后端 API 端点 /api/v1/platform/license 是否可访问</li>
+          <li>如需帮助，请联系平台管理员</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 正常页面内容 -->
+    <div v-if="!backendUnavailable">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">授权许可</div>
@@ -99,7 +116,7 @@
                   :percentage="assetUsagePercent"
                   :color="usageColor(assetUsagePercent)"
                   :stroke-width="16"
-                  :format="() => `${license.current_assets ?? 0} / ${license.max_assets}`"
+                  :format="() => (license.current_assets ?? 0) + ' / ' + license.max_assets"
                 />
               </div>
               <div class="usage-item" v-if="license.max_nodes">
@@ -108,7 +125,7 @@
                   :percentage="nodeUsagePercent"
                   :color="usageColor(nodeUsagePercent)"
                   :stroke-width="16"
-                  :format="() => `${license.current_nodes ?? 0} / ${license.max_nodes}`"
+                  :format="() => (license.current_nodes ?? 0) + ' / ' + license.max_nodes"
                 />
               </div>
             </div>
@@ -179,6 +196,7 @@
         </div>
       </el-col>
     </el-row>
+    </div>
   </div>
 </template>
 
@@ -191,6 +209,7 @@ import client from '@/shared/api/client'
 // ── State ────────────────────────────────────────────────
 const loading = ref(false)
 const activating = ref(false)
+const backendUnavailable = ref(false)
 const licenseKey = ref('')
 const fileList = ref<any[]>([])
 
@@ -245,6 +264,7 @@ function usageColor(pct: number): string {
 // ── Data Loading ─────────────────────────────────────────
 async function loadLicense() {
   loading.value = true
+  backendUnavailable.value = false
   try {
     const res = await client.get('/api/v1/platform/license')
     const data = res.data?.data ?? res.data
@@ -264,12 +284,15 @@ async function loadLicense() {
         issued_at: data.issued_at ?? data.created_at ?? '',
       })
     }
-  } catch (err: any) {
-    // Fallback: keep current state (may show empty or defaults)
-    ElMessage.warning(err.message || '获取授权信息失败，显示缓存数据')
+  } catch {
+    backendUnavailable.value = true
   } finally {
     loading.value = false
   }
+}
+
+function retryLoadLicense() {
+  loadLicense()
 }
 
 // ── File Handling ────────────────────────────────────────
@@ -418,5 +441,33 @@ onMounted(() => {
   color: #86909c;
   font-size: 12px;
   line-height: 1.8;
+}
+
+/* Guide card */
+.guide-card {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.guide-info {
+  text-align: left;
+  margin-top: 24px;
+}
+
+.guide-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4e5969;
+  margin-bottom: 8px;
+}
+
+.guide-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #86909c;
+  font-size: 13px;
+  line-height: 2;
 }
 </style>

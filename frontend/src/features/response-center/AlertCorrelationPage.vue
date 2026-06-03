@@ -1,7 +1,7 @@
 <template>
   <div class="p-6">
-    <div class="page-header">
-      <h2 class="page-title">告警收敛分析</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">告警收敛分析</div>
     </div>
 
     <!-- 选择告警 -->
@@ -321,17 +321,7 @@ onMounted(() => fetchAlerts())
 </script>
 
 <style scoped>
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-.page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d2129;
-}
+
 .mb-lg {
   margin-bottom: 16px;
 }

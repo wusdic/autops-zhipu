@@ -99,9 +99,11 @@
 
         <el-table-column prop="id" label="执行ID" width="160" align="center">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleViewExecution(row)">
-              {{ row.id || row.execution_id }}
-            </el-button>
+            <el-tooltip :content="row.id || row.execution_id || ''" placement="top">
+              <el-button type="primary" link @click="handleViewExecution(row)">
+                {{ truncateLockId(row.id || row.execution_id) }}
+              </el-button>
+            </el-tooltip>
           </template>
         </el-table-column>
 
@@ -264,6 +266,12 @@ const expiredCount = computed(() => lockList.value.filter(isExpired).length)
 const longHeldCount = computed(() => lockList.value.filter(isLongHeld).length)
 
 // ---------- 工具函数 ----------
+function truncateLockId(id: string | number | undefined): string {
+  if (!id) return '-'
+  var s = String(id)
+  return s.length > 16 ? s.slice(0, 8) + '...' + s.slice(-4) : s
+}
+
 const formatTime = (ts?: string): string => {
   if (!ts) return '-'
   const d = new Date(ts)

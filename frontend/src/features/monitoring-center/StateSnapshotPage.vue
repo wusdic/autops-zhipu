@@ -33,8 +33,17 @@
           </el-form-item>
         </el-form>
 
+        <!-- ========== Empty State ========== -->
+        <el-empty
+          v-if="!loading && loadFailed"
+          description="状态快照数据暂不可用，请确认后端监控服务已启动"
+        >
+          <el-button type="primary" @click="loadData">重新加载</el-button>
+        </el-empty>
+
         <!-- ========== Table ========== -->
         <el-table
+          v-if="!loadFailed"
           :data="tableData"
           v-loading="loading"
           stripe
@@ -114,7 +123,7 @@
         </el-table>
 
         <!-- ========== Pagination ========== -->
-        <div class="pagination-wrapper">
+        <div v-if="!loadFailed" class="pagination-wrapper">
           <el-pagination
             v-model:current-page="pagination.page"
             v-model:page-size="pagination.pageSize"
@@ -138,6 +147,7 @@ import { monitoringService } from '@/shared/api'
 
 // ── State ──────────────────────────────────────────────────────────
 const loading = ref(false)
+const loadFailed = ref(false)
 const tableData = ref<any[]>([])
 
 const filters = reactive({
@@ -156,7 +166,7 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function usageClass(usage: number): string {
@@ -204,6 +214,7 @@ function healthLabel(health: string): string {
 // ── Data Loading ────────────────────────────────────────────────────
 async function loadData() {
   loading.value = true
+  loadFailed.value = false
   try {
     const params: Record<string, any> = {
       page: pagination.page,
@@ -217,7 +228,10 @@ async function loadData() {
       pagination.total = data.data?.total || 0
     }
   } catch {
-    ElMessage.error('加载状态快照失败')
+    tableData.value = []
+    pagination.total = 0
+    loadFailed.value = true
+    ElMessage.warning('状态快照数据暂不可用，请确认后端监控服务已启动')
   } finally {
     loading.value = false
   }

@@ -266,7 +266,13 @@
           <!-- ─── Tab 7: Execution History ─── -->
           <el-tab-pane label="执行历史" name="executions">
             <el-table :data="executions" stripe>
-              <el-table-column prop="id" label="执行ID" width="200" show-overflow-tooltip />
+              <el-table-column prop="id" label="执行ID" width="160" align="center">
+                <template #default="{ row }">
+                  <el-button link type="primary" size="small" @click="$router.push('/executions/' + row.id)">
+                    {{ row.id && row.id.length > 12 ? row.id.slice(0, 8) + '...' : (row.id || '-') }}
+                  </el-button>
+                </template>
+              </el-table-column>
               <el-table-column prop="playbook_name" label="Playbook" min-width="160" show-overflow-tooltip />
               <el-table-column label="状态" width="110">
                 <template #default="{ row }">

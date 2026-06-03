@@ -149,10 +149,10 @@ const statCards = computed(() => [
 ])
 
 const statusDistribution = computed(() => [
-  { status: 'open', label: '待处理', count: stats.value.open_count ?? 0, color: '#e6a23c' },
-  { status: 'in_progress', label: '处理中', count: stats.value.in_progress_count ?? 0, color: '#409eff' },
-  { status: 'resolved', label: '已解决', count: stats.value.resolved_count ?? 0, color: '#67c23a' },
-  { status: 'closed', label: '已关闭', count: stats.value.closed_count ?? 0, color: '#909399' },
+  { status: 'open', label: '待处理', count: stats.value.open_count ?? stats.value.open ?? 0, color: '#e6a23c' },
+  { status: 'in_progress', label: '处理中', count: stats.value.in_progress_count ?? stats.value.in_progress ?? 0, color: '#409eff' },
+  { status: 'resolved', label: '已解决', count: stats.value.resolved_count ?? stats.value.resolved ?? 0, color: '#67c23a' },
+  { status: 'closed', label: '已关闭', count: stats.value.closed_count ?? stats.value.closed ?? 0, color: '#909399' },
 ])
 
 const slaWarnings = computed(() => {

@@ -1,15 +1,29 @@
 <template>
   <div class="page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">备份与恢复</div>
-        <div class="autops-page-subtitle">系统数据备份和恢复</div>
-      </div>
-      <div class="top-actions">
-        <el-button @click="loadBackups" :loading="loading">刷新</el-button>
-        <el-button type="primary" @click="openCreateDialog">新建备份</el-button>
-      </div>
+    <!-- ── API Not Available: Coming Soon ────────────────── -->
+    <div v-if="apiNotAvailable" class="coming-soon-wrapper">
+      <el-empty :image-size="160" description=" ">
+        <template #description>
+          <div class="coming-soon-title">备份恢复功能即将上线</div>
+          <div class="coming-soon-desc">
+            后端备份恢复服务正在开发中，届时将支持系统数据备份、恢复、定时备份策略等功能。
+          </div>
+        </template>
+      </el-empty>
     </div>
+
+    <!-- ── Normal Content (API available) ────────────────── -->
+    <template v-else>
+      <div class="autops-page-header">
+        <div>
+          <div class="autops-page-title">备份与恢复</div>
+          <div class="autops-page-subtitle">系统数据备份和恢复</div>
+        </div>
+        <div class="top-actions">
+          <el-button @click="loadBackups" :loading="loading">刷新</el-button>
+          <el-button type="primary" @click="openCreateDialog">新建备份</el-button>
+        </div>
+      </div>
 
     <!-- ── Storage Info Card ───────────────────────────────── -->
     <div class="autops-card storage-card">
@@ -77,7 +91,11 @@
 
     <!-- ── Backup List Table ───────────────────────────────── -->
     <el-table :data="backups" v-loading="loading" stripe border style="width:100%">
-      <el-table-column prop="id" label="ID" width="100" show-overflow-tooltip />
+      <el-table-column prop="id" label="ID" width="100" show-overflow-tooltip>
+        <template #default="{ row }">
+          <span style="font-family:monospace;font-size:12px">{{ row.id && String(row.id).length > 12 ? String(row.id).slice(0, 8) + '...' : (row.id || '-') }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="description" label="文件名 / 描述" min-width="200" show-overflow-tooltip>
         <template #default="{ row }">
           {{ row.filename || row.description || '—' }}
@@ -219,6 +237,7 @@
         </el-button>
       </template>
     </el-dialog>
+    </template>
   </div>
 </template>
 
@@ -238,6 +257,7 @@ const statusLabels: Record<string, string> = {
 }
 
 // ── Refs ───────────────────────────────────────────────────
+const apiNotAvailable = ref(false)
 const loading = ref(false)
 const creating = ref(false)
 const restoring = ref(false)
@@ -350,7 +370,13 @@ async function loadBackups() {
       total.value = data.data.total ?? backups.value.length
     }
   } catch (e: any) {
-    ElMessage.error(e.message || '加载备份列表失败')
+    const status = e?.response?.status
+    if (status === 404 || status === 501 || !e.response) {
+      apiNotAvailable.value = true
+      ElMessage.info('备份恢复功能即将上线，后端服务正在开发中')
+    } else {
+      ElMessage.warning(e.message || '加载备份列表失败，请稍后重试')
+    }
   } finally {
     loading.value = false
   }
@@ -391,7 +417,7 @@ async function saveSettings() {
     await api.put(R.BACKUP_SETTINGS, { ...settings })
     ElMessage.success('备份设置已保存')
   } catch (e: any) {
-    ElMessage.error(e.message || '保存设置失败')
+    ElMessage.warning(e.message || '保存设置失败')
   } finally {
     savingSettings.value = false
   }
@@ -416,7 +442,7 @@ async function doCreateBackup() {
     loadBackups()
     loadStorage()
   } catch (e: any) {
-    ElMessage.error(e.message || '创建备份失败')
+    ElMessage.warning(e.message || '创建备份失败')
   } finally {
     creating.value = false
   }
@@ -455,7 +481,7 @@ async function handleDelete(row: any) {
     loadBackups()
     loadStorage()
   } catch (e: any) {
-    ElMessage.error(e.message || '删除失败')
+    ElMessage.warning(e.message || '删除失败')
   }
 }
 
@@ -501,7 +527,7 @@ async function doRestore() {
   } catch (e: any) {
     restoreProgress.status = 'exception'
     restoreProgress.message = e.message || '恢复失败'
-    ElMessage.error(e.message || '恢复失败')
+    ElMessage.warning(e.message || '恢复失败')
   } finally {
     restoring.value = false
   }
@@ -551,4 +577,25 @@ onUnmounted(() => {
 .settings-card { margin-bottom: 16px; }
 .card-title { font-weight: 600; font-size: 15px; color: #303133; }
 .form-hint { color: #909399; font-size: 13px; }
+
+/* Coming soon */
+.coming-soon-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+.coming-soon-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d2129;
+  margin-bottom: 8px;
+}
+.coming-soon-desc {
+  font-size: 14px;
+  color: #86909c;
+  line-height: 1.6;
+  max-width: 420px;
+  text-align: center;
+  margin: 0 auto;
+}
 </style>

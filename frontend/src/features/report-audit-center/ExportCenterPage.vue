@@ -1,6 +1,12 @@
 <template>
   <div class="export-center-page">
-    <el-page-header @back="router.back()" title="返回" content="导出中心" />
+    <div class="autops-page-header">
+      <div class="autops-page-title-row">
+        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <span class="autops-page-title">导出中心</span>
+      </div>
+      <div class="autops-page-desc">管理数据导出任务，支持多种格式和类型导出</div>
+    </div>
 
     <!-- 导出任务列表 -->
     <el-card class="mt-4" shadow="never">
@@ -97,6 +103,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 
 const router = useRouter()

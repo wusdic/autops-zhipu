@@ -1,10 +1,10 @@
 <template>
   <div class="page-container">
     <!-- 页面头部 -->
-    <div class="page-header">
-      <h2 class="page-title">日志巡检</h2>
+    <div class="autops-page-header">
+      <div class="autops-page-title">日志巡检</div>
+      <div class="autops-page-desc">日志源、匹配规则、命中数量、样例日志</div>
     </div>
-    <p class="page-desc">日志源、匹配规则、命中数量、样例日志</p>
 
     <!-- 搜索栏 -->
     <div class="page-toolbar">

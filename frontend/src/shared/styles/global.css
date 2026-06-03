@@ -3,6 +3,17 @@
    唯一事实源: docs/04-frontend/FRONTEND_DESIGN_SYSTEM.md
 */
 
+/* ─── Element Plus 主题覆盖（科技蓝） ─── */
+:root {
+  --el-color-primary: #165dff;
+  --el-color-primary-light-3: #5ea5ff;
+  --el-color-primary-light-5: #8cc0ff;
+  --el-color-primary-light-7: #b8d9ff;
+  --el-color-primary-light-8: #cee5ff;
+  --el-color-primary-light-9: #e8f2ff;
+  --el-color-primary-dark-2: #114bcc;
+}
+
 /* ─── CSS Reset & Base ─── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -331,16 +342,25 @@ body {
 
 /* ─── 页面标题 ─── */
 .autops-page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   margin-bottom: 20px;
 }
 
 .autops-page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #1d2129;
+  color: var(--el-text-color-primary, #1d2129);
+}
+
+.autops-page-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.autops-page-desc {
+  font-size: 13px;
+  color: var(--el-text-color-secondary, #86909c);
+  margin-top: 4px;
 }
 
 .autops-page-subtitle {
@@ -384,21 +404,7 @@ body {
   padding: 16px 20px !important;
 }
 
-/* 按钮 */
-.el-button--primary {
-  background: #165dff !important;
-  border-color: #165dff !important;
-}
-
-.el-button--danger {
-  background: #f53f3f !important;
-  border-color: #f53f3f !important;
-}
-
-.el-button--success {
-  background: #00b42a !important;
-  border-color: #00b42a !important;
-}
+/* 按钮 — 通过 :root --el-color-primary 统一控制 */
 
 /* 分页 */
 .el-pagination {

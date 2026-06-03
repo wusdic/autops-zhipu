@@ -1,10 +1,10 @@
 <template>
   <div class="page-container">
     <!-- Page Header -->
-    <div class="page-header">
+    <div class="autops-page-header">
       <div>
-        <h2 class="page-title">Agent 管理</h2>
-        <p class="page-subtitle">管理采集 Agent 节点，监控运行状态</p>
+        <div class="autops-page-title">Agent 管理</div>
+        <div class="autops-page-desc">管理采集 Agent 节点，监控运行状态</div>
       </div>
       <div class="header-actions">
         <el-button @click="fetchAgents">
@@ -356,26 +356,6 @@ onMounted(() => {
 <style scoped>
 .page-container {
   padding: 20px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d2129;
-  margin: 0;
-}
-
-.page-subtitle {
-  font-size: 13px;
-  color: #86909c;
-  margin-top: 4px;
 }
 
 .filter-card {

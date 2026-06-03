@@ -1,12 +1,17 @@
 <template>
   <div class="config-overview-page">
-    <el-page-header @back="router.back()" title="返回" content="配置总览">
-      <template #extra>
-        <el-button type="primary" @click="showQuickCreate = true">
-          <el-icon><Plus /></el-icon> 快速创建
-        </el-button>
-      </template>
-    </el-page-header>
+    <div class="autops-page-header">
+      <div class="autops-page-title-row">
+        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <span class="autops-page-title">配置总览</span>
+      </div>
+      <div class="autops-page-desc">统一管理发现模板、巡检规则、阈值规则、通知规则和配置版本</div>
+    </div>
+    <div style="display: flex; gap: 8px; margin-bottom: 16px">
+      <el-button type="primary" @click="showQuickCreate = true">
+        <el-icon><Plus /></el-icon> 快速创建
+      </el-button>
+    </div>
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="mt-4">
@@ -85,32 +90,9 @@
       </el-tab-pane>
 
       <el-tab-pane label="阈值规则" name="threshold">
-        <el-table :data="thresholdRules" v-loading="loading" stripe>
-          <el-table-column prop="name" label="规则名称" min-width="180" />
-          <el-table-column prop="metric" label="监控指标" width="150" />
-          <el-table-column prop="condition" label="条件" width="120">
-            <template #default="{ row }">
-              <code>{{ row.operator }} {{ row.threshold }}{{ row.unit || '' }}</code>
-            </template>
-          </el-table-column>
-          <el-table-column prop="duration" label="持续时间" width="100" />
-          <el-table-column prop="severity" label="告警级别" width="100">
-            <template #default="{ row }">
-              <el-tag :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="enabled" label="状态" width="80">
-            <template #default="{ row }">
-              <el-switch v-model="row.enabled" size="small" @change="toggleRule(row)" />
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="150" fixed="right">
-            <template #default="{ row }">
-              <el-button link type="primary" @click="editTemplate('threshold', row)">编辑</el-button>
-              <el-button link type="danger" @click="deleteTemplate('threshold', row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+        <el-empty description="阈值规则已迁移至独立页面" :image-size="80">
+          <el-button type="primary" @click="$router.push('/config/threshold-rules')">前往阈值规则管理</el-button>
+        </el-empty>
       </el-tab-pane>
 
       <el-tab-pane label="通知规则" name="notification">
@@ -188,9 +170,9 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
-import { configService } from '@/shared/api'
-import type { AxiosResponse } from 'axios'
+import { Plus, ArrowLeft } from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 const router = useRouter()
 const loading = ref(false)
@@ -223,28 +205,34 @@ function severityType(severity: string) {
   return map[severity] || 'info'
 }
 
+function unwrapItems(res: any): any[] {
+  var raw = res?.data ?? {}
+  var payload = raw.data ?? raw
+  return payload?.items ?? payload?.results ?? (Array.isArray(payload) ? payload : [])
+}
+
 async function loadData() {
   loading.value = true
   try {
-    const [discRes, inspRes, threshRes, notifRes, verRes] = await Promise.allSettled([
-      configService.getDiscoveryTemplates?.() ?? Promise.resolve({ data: { items: [] } }),
-      configService.getInspectionRules?.() ?? Promise.resolve({ data: { items: [] } }),
-      configService.getThresholdRules?.() ?? Promise.resolve({ data: { items: [] } }),
-      configService.getNotificationRules?.() ?? Promise.resolve({ data: { items: [] } }),
-      configService.getConfigVersions?.() ?? Promise.resolve({ data: { items: [] } }),
+    var settled = await Promise.allSettled([
+      client.get(API.DISCOVERY_TEMPLATES, { params: { page_size: 100 } }),
+      client.get(API.CONFIGS, { params: { page_size: 100, type: 'inspection_rule' } }),
+      client.get(API.CONFIGS, { params: { page_size: 100, type: 'threshold_rule' } }),
+      client.get(API.NOTIFICATION_RULES, { params: { page_size: 100 } }),
+      client.get(API.CONFIGS, { params: { page_size: 100, type: 'version' } }),
     ])
-    discoveryTemplates.value = discRes.status === 'fulfilled' ? (discRes.value as any)?.data?.items || [] : []
-    inspectionRules.value = inspRes.status === 'fulfilled' ? (inspRes.value as any)?.data?.items || [] : []
-    thresholdRules.value = threshRes.status === 'fulfilled' ? (threshRes.value as any)?.data?.items || [] : []
-    notificationRules.value = notifRes.status === 'fulfilled' ? (notifRes.value as any)?.data?.items || [] : []
-    configVersions.value = verRes.status === 'fulfilled' ? (verRes.value as any)?.data?.items || [] : []
+    discoveryTemplates.value = settled[0].status === 'fulfilled' ? unwrapItems(settled[0].value) : []
+    inspectionRules.value = settled[1].status === 'fulfilled' ? unwrapItems(settled[1].value) : []
+    thresholdRules.value = settled[2].status === 'fulfilled' ? unwrapItems(settled[2].value) : []
+    notificationRules.value = settled[3].status === 'fulfilled' ? unwrapItems(settled[3].value) : []
+    configVersions.value = settled[4].status === 'fulfilled' ? unwrapItems(settled[4].value) : []
 
     stats.value[0].value = discoveryTemplates.value.length
     stats.value[1].value = inspectionRules.value.length
     stats.value[2].value = thresholdRules.value.length
     stats.value[3].value = notificationRules.value.length
   } catch (e: any) {
-    ElMessage.warning('部分数据加载失败: ' + (e.message || '未知错误'))
+    ElMessage.warning('部分数据加载失败: ' + (e.message ?? '未知错误'))
   } finally {
     loading.value = false
   }
