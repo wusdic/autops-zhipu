@@ -2,7 +2,7 @@
   <div class="page-container">
     <div class="autops-page-header">
       <div>
-        <div class="autops-page-title">外部集成</div>
+        <div class="autops-page-title">集成管理</div>
         <div class="autops-page-desc">管理平台与外部系统的集成连接</div>
       </div>
       <div class="header-actions">

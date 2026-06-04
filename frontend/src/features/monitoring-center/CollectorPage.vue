@@ -2,7 +2,7 @@
   <div class="collector-page">
     <!-- 页面头部 -->
     <div class="autops-page-header">
-      <span class="autops-page-title">采集器管理</span>
+<div class="autops-page-title">采集任务</div>
     </div>
 
     <!-- ========== Tab 切换：本地采集器 / Edge采集器 ========== -->

@@ -119,8 +119,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { Search, VideoPlay } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import api from '@/shared/api'
-import { routes as API } from '@/shared/api/routes'
+import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

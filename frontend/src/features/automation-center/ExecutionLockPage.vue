@@ -407,13 +407,6 @@ onBeforeUnmount(() => {
 
   .stat-row {
     margin-bottom: 16px;
-
-    
-          &.danger { color: #f53f3f; }
-          &.success { color: #00b42a; }
-        }
-      }
-    }
   }
 
   .table-card {

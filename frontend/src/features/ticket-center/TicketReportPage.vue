@@ -103,8 +103,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { Document, Download } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import api from '@/shared/api'
-import { routes as API } from '@/shared/api/routes'
+import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 const generating = ref(false)
 const dateRange = ref<[Date, Date] | null>(null)

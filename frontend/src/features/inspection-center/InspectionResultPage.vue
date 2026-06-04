@@ -526,12 +526,6 @@ onMounted(() => {
 
   .stat-row {
     margin-bottom: 16px;
-
-    
-          &.fail { color: #f53f3f; }
-        }
-      }
-    }
   }
 
   .table-card {

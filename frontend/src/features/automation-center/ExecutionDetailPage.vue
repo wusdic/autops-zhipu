@@ -170,7 +170,6 @@
         <el-table stripe
           v-if="verification.checks && verification.checks.length > 0"
           :data="verification.checks"
-          stripe
           border
         >
           <el-table-column type="index" label="#" width="50" />

@@ -3,7 +3,7 @@
     <div class="autops-page-header">
       <div class="autops-page-title-row">
         <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <span class="autops-page-title">巡检规则管理</span>
+<div class="autops-page-title">巡检规则</div>
       </div>
       <div class="autops-page-desc">管理和配置各类巡检规则，支持页面、配置、日志、基线检查</div>
     </div>

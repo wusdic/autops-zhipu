@@ -114,8 +114,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Refresh, Warning, Document } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import api from '@/shared/api'
-import { routes as API } from '@/shared/api/routes'
+import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 const route = useRoute()

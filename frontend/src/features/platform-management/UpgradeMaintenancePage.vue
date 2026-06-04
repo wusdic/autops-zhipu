@@ -141,8 +141,8 @@
 import { ref, reactive } from 'vue'
 import { Upload, RefreshLeft, Monitor } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import api from '@/shared/api'
-import { routes as API } from '@/shared/api/routes'
+import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 const apiNotAvailable = ref(false)
 const loading = ref(false)

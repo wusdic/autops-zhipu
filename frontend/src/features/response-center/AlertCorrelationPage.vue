@@ -1,7 +1,7 @@
 <template>
   <div class="p-6">
     <div class="autops-page-header">
-      <div class="autops-page-title">告警收敛分析</div>
+      <div class="autops-page-title">告警收敛</div>
     </div>
 
     <!-- 选择告警 -->

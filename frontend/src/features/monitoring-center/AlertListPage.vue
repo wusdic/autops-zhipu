@@ -3,7 +3,7 @@
     <!-- ========== Page Header ========== -->
     <div class="autops-page-header">
       <div>
-        <div class="autops-page-title">告警中心</div>
+        <div class="autops-page-title">告警列表</div>
         <div class="autops-page-desc">实时监控告警事件，支持确认、恢复、转工单等操作</div>
       </div>
     </div>

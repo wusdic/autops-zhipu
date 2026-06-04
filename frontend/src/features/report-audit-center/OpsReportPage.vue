@@ -101,8 +101,8 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { Document } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
-import api from '@/shared/api'
-import { routes as API } from '@/shared/api/routes'
+import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 const router = useRouter()
 const loading = ref(false)

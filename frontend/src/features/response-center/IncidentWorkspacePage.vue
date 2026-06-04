@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="autops-page-header">
-      <div class="autops-page-title">故障处置工作台</div>
+      <div class="autops-page-title">故障工作台</div>
       <div>
         <el-select v-model="severityFilter" placeholder="严重级别" style="width: 120px; margin-right: 8px" clearable @change="fetchIncidents">
           <el-option label="紧急" value="critical" />
@@ -142,8 +142,8 @@
 import { ref, onMounted } from 'vue'
 import { Refresh, Loading, Box, Clock, InfoFilled, CircleCheck, MagicStick, VideoPlay, Tickets, Setting, Close } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import api from '@/shared/api'
-import { routes as API } from '@/shared/api/routes'
+import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 const { navToAIFromAnomaly, navToRemediationFromAnomaly, navToTicketFromAnomaly, navToPolicyFromAnomaly } = useWorkflowNav()

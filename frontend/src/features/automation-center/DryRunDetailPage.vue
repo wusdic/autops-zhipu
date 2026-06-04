@@ -487,3 +487,4 @@ onMounted(() => {
 .step-item.step-running {
   border-left: 3px solid #165dff;
 }
+</style>

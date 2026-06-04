@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="autops-page-header">
-      <div class="autops-page-title">AI 诊断面板</div>
+      <div class="autops-page-title">AI 诊断</div>
       <div>
         <el-input v-model="anomalyId" placeholder="输入异常ID或从异常详情跳转" style="width: 280px; margin-right: 8px" @keyup.enter="startDiagnosis" />
         <el-button type="primary" @click="startDiagnosis" :loading="diagnosing"><el-icon><MagicStick /></el-icon> 开始诊断</el-button>
@@ -128,8 +128,8 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { MagicStick, Warning, VideoPlay, Link, Setting, Tickets, Connection, Loading, Select, SemiSelect, CloseBold } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import api from '@/shared/api'
-import { routes as API } from '@/shared/api/routes'
+import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 const route = useRoute()

@@ -4,7 +4,7 @@
     <el-card class="autops-page-header" shadow="never">
       <div class="header-bar">
         <div class="header-left">
-          <div class="autops-page-title">故障处置工作台</div>
+          <div class="autops-page-title">故障工作台</div>
           <span v-if="selectedAlert" class="header-alert-tag">
             <el-tag :type="severityType(selectedAlert.severity)" effect="dark" size="small">
               {{ selectedAlert.severity }}

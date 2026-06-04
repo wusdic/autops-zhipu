@@ -140,8 +140,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { Refresh, Download } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import api from '@/shared/api'
-import { routes as API } from '@/shared/api/routes'
+import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 const loading = ref(false)
 const assessing = ref(false)
