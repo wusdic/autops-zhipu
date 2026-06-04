@@ -13,9 +13,9 @@ const router = createRouter({
     { path: '/profile', name: 'profile', component: () => import('@/app/UserProfilePage.vue') },
 
     // ============================================================
-    // M1 首页指挥台
+    // M1 运维驾驶舱
     // ============================================================
-    { path: '/', name: 'dashboard', component: () => import('@/features/command-dashboard/CommandDashboardPage.vue'), meta: { module: 'M1', title: '首页指挥台' } },
+    { path: '/', name: 'dashboard', component: () => import('@/features/command-dashboard/CommandDashboardPage.vue'), meta: { module: 'M1', title: '指挥首页' } },
     { path: '/business-health-map', name: 'business-health-map', component: () => import('@/features/command-dashboard/BusinessHealthMapPage.vue'), meta: { module: 'M1', title: '业务健康地图' } },
     { path: '/daily-summary', name: 'daily-summary', component: () => import('@/features/command-dashboard/DailySummaryPage.vue'), meta: { module: 'M1', title: '今日摘要' } },
 

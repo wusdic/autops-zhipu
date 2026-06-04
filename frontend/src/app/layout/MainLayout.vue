@@ -21,16 +21,15 @@
           class="sidebar-menu"
           @select="handleMenuSelect"
         >
-          <!-- M1 首页指挥台 -->
-          <el-menu-item index="/">
-            <el-icon><DataBoard /></el-icon><span>首页指挥台</span>
-          </el-menu-item>
-          <el-menu-item index="/business-health-map">
-            <el-icon><MapLocation /></el-icon><span>业务健康地图</span>
-          </el-menu-item>
-          <el-menu-item index="/daily-summary">
-            <el-icon><Calendar /></el-icon><span>今日摘要</span>
-          </el-menu-item>
+          <!-- M1 运维驾驶舱 -->
+          <el-sub-menu index="m1">
+            <template #title>
+              <el-icon><DataBoard /></el-icon><span>运维驾驶舱</span>
+            </template>
+            <el-menu-item index="/">指挥首页</el-menu-item>
+            <el-menu-item index="/business-health-map">业务健康地图</el-menu-item>
+            <el-menu-item index="/daily-summary">今日摘要</el-menu-item>
+          </el-sub-menu>
 
           <!-- M2 资源中心 -->
           <el-sub-menu index="m2">
@@ -339,7 +338,7 @@ const activeMenu = computed(() => {
 
 // ─── V3 菜单映射（12模块） ───
 const menuMap: Record<string, string> = {
-  '/': '首页指挥台',
+  '/': '指挥首页',
   '/business-health-map': '业务健康地图',
   '/daily-summary': '今日摘要',
   // M2 资源中心
@@ -463,8 +462,8 @@ const menuMap: Record<string, string> = {
 }
 
 const groupMap: Record<string, string> = {
-  '/': '首页指挥台',
-  '/business-health-map': '首页指挥台', '/daily-summary': '首页指挥台',
+  '/': '运维驾驶舱',
+  '/business-health-map': '运维驾驶舱', '/daily-summary': '运维驾驶舱',
   '/resources': '资源中心', '/resources/discovery': '资源中心', '/resources/discovery-results': '资源中心',
   '/assets': '资源中心', '/business-systems': '资源中心', '/topology': '资源中心',
   '/resources/import': '资源中心', '/asset-groups': '资源中心', '/lifecycle': '资源中心',
