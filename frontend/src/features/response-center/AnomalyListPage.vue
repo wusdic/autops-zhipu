@@ -42,7 +42,7 @@
         <el-table stripe :data="anomalies"v-loading="loading" empty-text="暂无异常数据">
           <el-table-column prop="title" label="异常标题" min-width="200" show-overflow-tooltip>
             <template #default="{ row }">
-              <el-link type="primary" @click="router.push(`/response/anomalies/${row.id}`)">
+              <el-link type="primary" @click="router.push('/response/anomalies/' + row.id)">
                 {{ row.title }}
               </el-link>
             </template>
@@ -83,7 +83,7 @@
           </el-table-column>
           <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button plain type="primary" size="small" @click="router.push(`/response/anomalies/${row.id}`)">
+              <el-button plain type="primary" size="small" @click="router.push('/response/anomalies/' + row.id)">
                 详情
               </el-button>
               <el-button
@@ -183,7 +183,7 @@ function resetFilter() {
 
 async function handleAcknowledge(row: any) {
   try {
-    await ElMessageBox.confirm(`确认异常「${row.title}」？`, '确认操作')
+    await ElMessageBox.confirm('确认异常「' + row.title + '」？', '确认操作')
     actionMap[row.id] = 'ack'
     await anomalyService.acknowledge(row.id)
     ElMessage.success('已确认')

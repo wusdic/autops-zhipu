@@ -179,7 +179,7 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function statusType(s: string): string {
@@ -264,7 +264,7 @@ async function downloadTask(row: any) {
       const link = document.createElement('a')
       link.href = url
       const ext = row.format || 'pdf'
-      link.download = `${row.title || 'report'}.${ext}`
+      link.download = row.title || 'report' + '.' + ext
       link.click()
       URL.revokeObjectURL(url)
       ElMessage.success('下载成功')

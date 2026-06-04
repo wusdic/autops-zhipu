@@ -5,9 +5,9 @@
       <div class="isg-center-status">{{ centerStatus }}</div>
     </div>
     <div class="isg-rings" v-if="layers.length">
-      <div v-for="(layer, lIdx) in layers" :key="lIdx" class="isg-layer" :class="`layer-${lIdx}`">
-        <div v-for="(node, nIdx) in layer" :key="nIdx" class="isg-node" :class="`impact-${node.level}`"
-          :style="{ transform: `rotate(${(360/layer.length)*nIdx}deg) translateY(-${80*(lIdx+1)}px) rotate(-${(360/layer.length)*nIdx}deg)` }">
+      <div v-for="(layer, lIdx) in layers" :key="lIdx" class="isg-layer" :class="'layer-' + lIdx">
+        <div v-for="(node, nIdx) in layer" :key="nIdx" class="isg-node" :class="'impact-' + node.level"
+          :style="{ transform: 'rotate(' + (360/layer.length)*nIdx + 'deg) translateY(-' + 80*(lIdx+1) + 'px) rotate(-' + (360/layer.length)*nIdx + 'deg)' }">
           <div class="isg-node-name">{{ node.name }}</div>
           <div class="isg-node-type">{{ node.type }}</div>
         </div>

@@ -34,7 +34,7 @@ export const useExecutionStore = defineStore('execution', () => {
     disconnectLogs()
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const host = window.location.hostname
-    const ws = new WebSocket(`${protocol}//${host}:8001/api/v1/ws/execution/${executionId}/logs`)
+    const ws = new WebSocket(protocol + '//' + host + ':8001/api/v1/ws/execution/' + executionId + '/logs')
     ws.onmessage = (event) => {
       realtimeLogs.value.push(event.data)
     }

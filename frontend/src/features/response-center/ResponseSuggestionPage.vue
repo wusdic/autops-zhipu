@@ -111,7 +111,7 @@
         <el-table-column label="置信度" width="100">
           <template #default="{ row }">
             <span :style="{ color: row.confidence >= 80 ? '#00b42a' : row.confidence >= 50 ? '#ff7d00' : '#86909c' }">
-              {{ row.confidence ? `${row.confidence}%` : '-' }}
+              {{ row.confidence ? row.confidence + '%' : '-' }}
             </span>
           </template>
         </el-table-column>
@@ -248,7 +248,7 @@ function resetInput() {
 async function applySuggestion(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定应用此建议？\n\n${row.suggestion}`,
+      '确定应用此建议？\n\n' + row.suggestion,
       '确认应用',
       { confirmButtonText: '确认应用', cancelButtonText: '取消', type: 'info' }
     )
@@ -270,7 +270,7 @@ function ignoreSuggestion(row: any) {
 async function applyAll() {
   try {
     await ElMessageBox.confirm(
-      `确定应用所有 ${suggestions.value.filter(s => !s.applied).length} 条建议？`,
+      '确定应用所有 ' + suggestions.value.filter(s => !s.applied).length + ' 条建议？',
       '全部应用',
       { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' }
     )

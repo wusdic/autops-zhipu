@@ -306,7 +306,7 @@ async function runCheck() {
     lastCheckTime.value = new Date().toLocaleString('zh-CN')
 
     if (failCount.value > 0) {
-      ElMessage.warning(`自检完成：${failCount.value} 项异常`)
+      ElMessage.warning('自检完成：' + failCount.value + ' 项异常')
     } else {
       ElMessage.success('自检完成，全部正常')
     }

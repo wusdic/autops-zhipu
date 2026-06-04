@@ -10,7 +10,7 @@
     @change="$emit('update:modelValue', selected)"
     style="width: 100%"
   >
-    <el-option v-for="asset in options" :key="asset.id" :label="`${asset.name} (${asset.ip || asset.id})`" :value="asset.id">
+    <el-option v-for="asset in options" :key="asset.id" :label="asset.name + ' (' + asset.ip || asset.id + ')'" :value="asset.id">
       <span>{{ asset.name }}</span>
       <span style="color: #999; margin-left: 8px; font-size: 12px">{{ asset.ip }}</span>
     </el-option>

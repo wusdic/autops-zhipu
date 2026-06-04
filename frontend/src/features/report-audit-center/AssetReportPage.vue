@@ -254,7 +254,7 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function formatOs(osType: string | null | undefined, osVersion: string | null | undefined): string {
@@ -371,12 +371,12 @@ function exportReport() {
       formatTime(a.updated_at),
     ]
   })
-  const csvContent = [headers.join(','), ...rows.map((r) => r.map(c => `"${c}"`).join(','))].join('\n')
+  const csvContent = [headers.join(','), ...rows.map((r) => r.map(c => '"' + c + '"').join(','))].join('\n')
   const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = `asset_report_${new Date().toISOString().slice(0, 10)}.csv`
+  link.download = 'asset_report_' + new Date().toISOString().slice(0, 10) + '.csv'
   link.click()
   URL.revokeObjectURL(url)
   ElMessage.success('导出成功')

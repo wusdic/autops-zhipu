@@ -68,7 +68,7 @@
         <div class="autops-card">
           <div class="autops-card-header">
             <div class="autops-card-title">
-              {{ selectedAnomaly ? `「${selectedAnomaly.title}」影响范围` : '影响范围' }}
+              {{ selectedAnomaly ? '「' + selectedAnomaly.title + '」影响范围' : '影响范围' }}
             </div>
             <el-button
               type="primary"
@@ -118,7 +118,7 @@
                   <span style="margin-left: 8px; font-weight: 500">{{ level.length }} 个资产</span>
                 </div>
                 <div class="blast-nodes">
-                  <div v-for="node in level" :key="node.name" class="blast-node" :class="`blast-${severityFromLevel(lidx)}`">
+                  <div v-for="node in level" :key="node.name" class="blast-node" :class="'blast-' + severityFromLevel(lidx)">
                     <div class="blast-node-name">{{ node.name }}</div>
                     <div class="blast-node-type">{{ node.asset_type || '-' }}</div>
                   </div>

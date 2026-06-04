@@ -166,7 +166,7 @@
 
         <el-table-column prop="duration" label="执行耗时" width="110" align="center">
           <template #default="{ row }">
-            {{ row.duration ? `${row.duration}s` : '-' }}
+            {{ row.duration ? row.duration + 's' : '-' }}
           </template>
         </el-table-column>
 
@@ -272,7 +272,7 @@
         <el-descriptions-item label="执行时间">{{ formatTime(currentExecution.created_at) }}</el-descriptions-item>
         <el-descriptions-item label="回滚时间">{{ currentExecution.rollback_at ? formatTime(currentExecution.rollback_at) : '-' }}</el-descriptions-item>
         <el-descriptions-item label="创建者">{{ currentExecution.created_by || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="耗时">{{ currentExecution.duration ? `${currentExecution.duration}s` : '-' }}</el-descriptions-item>
+        <el-descriptions-item label="耗时">{{ currentExecution.duration ? currentExecution.duration + 's' : '-' }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>
@@ -483,7 +483,7 @@ const handleCancelRollback = async (row: ExecutionEntry) => {
     await ElMessageBox.confirm('确定取消回滚操作吗？', '取消确认', {
       type: 'warning',
     })
-    await client.post(`${API.EXECUTIONS}${row.id}/cancel-rollback/`)
+    await client.post(API.EXECUTIONS + row.id + '/cancel-rollback/')
     ElMessage.success('回滚已取消')
     fetchRollbackList()
   } catch {

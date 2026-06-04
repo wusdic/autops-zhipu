@@ -107,7 +107,7 @@
                 <el-step
                   v-for="(ev, idx) in aiResult.evidence_chain"
                   :key="idx"
-                  :title="ev.source || `证据 ${idx + 1}`"
+                  :title="ev.source || '证据 ' + idx + 1"
                   :description="ev.detail || ev.description || ev"
                   :status="ev.confirmed ? 'success' : 'process'"
                 />
@@ -313,7 +313,7 @@
               </el-descriptions-item>
               <el-descriptions-item label="动作链">
                 <div v-for="(a, i) in parseActionChain(matchedPolicy.action_chain)" :key="i" style="margin: 2px 0">
-                  <el-tag size="small" type="info">{{ a.step || a.name || `步骤${i + 1}` }}</el-tag>
+                  <el-tag size="small" type="info">{{ a.step || a.name || '步骤' + i + 1 }}</el-tag>
                 </div>
               </el-descriptions-item>
             </el-descriptions>
@@ -549,8 +549,8 @@ const timelineItems = computed(() => {
       time: new Date().toLocaleString('zh-CN'),
       type: 'success',
       severity: 'success',
-      title: `策略匹配: ${matchedPolicy.value.name}`,
-      description: `风险级别: ${matchedPolicy.value.risk_level}`,
+      title: '策略匹配: ' + matchedPolicy.value.name,
+      description: '风险级别: ' + matchedPolicy.value.risk_level,
     })
   }
 
@@ -561,7 +561,7 @@ const timelineItems = computed(() => {
       type: exec.status === 'failed' ? 'critical' : exec.status === 'running' ? 'warning' : 'success',
       severity: exec.status === 'failed' ? 'critical' : exec.status === 'running' ? 'warning' : 'success',
       title: exec.status === 'running' ? '自动化执行中' : '自动化执行完成',
-      description: `执行ID: ${exec.id} | ${exec.execution_type}`,
+      description: '执行ID: ' + exec.id + ' | ' + exec.execution_type,
     })
   }
 
@@ -823,7 +823,7 @@ async function handleEscalate(id: string) {
 async function createTicketFromAlert(alertId: string) {
   try {
     const { data } = await api.post(API.TICKETS, {
-      title: `告警工单: ${selectedAlert.value?.title}`,
+      title: '告警工单: ' + selectedAlert.value?.title,
       alert_ids: JSON.stringify([alertId]),
     })
     if (data.code === 0) {
@@ -872,7 +872,7 @@ async function matchPolicy() {
       const policies = data.data.items || []
       matchedPolicy.value = policies.length > 0 ? policies[0] : null
       if (matchedPolicy.value) {
-        ElMessage.success(`匹配策略: ${matchedPolicy.value.name}`)
+        ElMessage.success('匹配策略: ' + matchedPolicy.value.name)
       } else {
         ElMessage.info('未找到匹配策略')
       }
@@ -1030,7 +1030,7 @@ async function toggleChannel(name: string, enabled: boolean) {
       enabled,
     })
     if (data.code === 0) {
-      ElMessage.success(`${name} 渠道已${enabled ? '启用' : '禁用'}`)
+      ElMessage.success(name + ' 渠道已' + enabled ? '启用' : '禁用')
       loadChannels()
     }
   } catch {
@@ -1048,12 +1048,12 @@ async function testChannel(name: string) {
     if (data.code === 0) {
       channelTestSuccess.value = data.data?.sent ?? true
       channelTestResult.value = data.data?.sent
-        ? `${name} 渠道测试通知发送成功`
-        : `${name} 渠道测试通知发送失败`
+        ? name + ' 渠道测试通知发送成功'
+        : name + ' 渠道测试通知发送失败'
     }
   } catch {
     channelTestSuccess.value = false
-    channelTestResult.value = `${name} 渠道测试失败，请检查配置`
+    channelTestResult.value = name + ' 渠道测试失败，请检查配置'
   } finally {
     testingChannel.value = ''
   }

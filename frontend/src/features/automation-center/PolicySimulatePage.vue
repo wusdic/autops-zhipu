@@ -61,7 +61,7 @@
                 style="width:100%"
                 value-key="id"
                 @change="onAssetSelect">
-                <el-option v-for="a in assetOptions" :key="a.id" :label="`${a.name} (${a.ip || a.id})`" :value="a.id">
+                <el-option v-for="a in assetOptions" :key="a.id" :label="a.name + ' (' + a.ip || a.id + ')'" :value="a.id">
                   <div style="display:flex;justify-content:space-between;align-items:center">
                     <span>{{ a.name }}</span>
                     <el-tag size="small" type="info">{{ a.asset_type || a.type }}</el-tag>
@@ -260,7 +260,7 @@
             <el-timeline>
               <el-timeline-item v-for="(act, idx) in simulateResult.actions" :key="idx"
                 :type="getActionColor(act.type)" :hollow="false" size="large"
-                :timestamp="`步骤 ${idx+1}`">
+                :timestamp="'步骤 ' + idx+1">
                 <div class="action-preview-card">
                   <div class="action-preview-header">
                     <el-tag :type="getActionColor(act.type)">{{ actionTypeLabel(act.type) }}</el-tag>

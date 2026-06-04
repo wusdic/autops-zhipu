@@ -189,6 +189,48 @@
             </el-button>
           </div>
         </el-tab-pane>
+
+        <!-- 导入历史 -->
+        <el-tab-pane label="导入历史" name="history">
+          <el-table stripe :data="importHistory" v-loading="loadingHistory" size="small">
+            <el-table-column type="index" label="#" width="50" />
+            <el-table-column prop="title" label="标题" min-width="200" show-overflow-tooltip />
+            <el-table-column prop="article_type" label="类型" width="120">
+              <template #default="{ row }">
+                <el-tag size="small">{{ articleTypeLabel(row.article_type) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="source" label="来源" width="100">
+              <template #default="{ row }">
+                <el-tag :type="row.source === 'standard' ? 'warning' : row.source === 'import' ? 'info' : 'success'" size="small">
+                  {{ sourceLabel(row.source) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态" width="80">
+              <template #default="{ row }">
+                <el-tag :type="row.status === 'published' ? 'success' : 'info'" size="small">
+                  {{ row.status === 'published' ? '已发布' : '草稿' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="created_at" label="导入时间" width="170">
+              <template #default="{ row }">{{ formatTime(row.created_at) }}</template>
+            </el-table-column>
+          </el-table>
+          <div style="display: flex; justify-content: flex-end; margin-top: 12px">
+            <el-pagination
+              v-model:current-page="historyPagination.page"
+              v-model:page-size="historyPagination.pageSize"
+              :total="historyPagination.total"
+              :page-sizes="[10, 20, 50]"
+              layout="total, sizes, prev, pager, next"
+              background
+              small
+              @change="loadImportHistory"
+            />
+          </div>
+        </el-tab-pane>
       </el-tabs>
 
       <!-- Import Progress Dialog -->
@@ -225,7 +267,7 @@
       <el-dialog v-model="showResult" title="导入结果" width="600px">
         <el-result
           :icon="importResult.success > 0 ? 'success' : 'error'"
-          :title="`成功 ${importResult.success} 条，失败 ${importResult.failed} 条`"
+          :title="'成功 ' + importResult.success + ' 条，失败 ' + importResult.failed + ' 条'"
         >
           <template #extra>
             <div v-if="importResult.errors.length">
@@ -281,6 +323,11 @@ const parsedFiles = ref<ParsedFile[]>([])
 
 const validFileCount = computed(() => parsedFiles.value.filter(f => f.valid).length)
 const invalidFileCount = computed(() => parsedFiles.value.filter(f => !f.valid).length)
+
+// ─── Import history state ──────────────────────────────────────────
+const importHistory = ref<any[]>([])
+const loadingHistory = ref(false)
+const historyPagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
 // ─── Import result ───────────────────────────────────────────────────
 const importResult = reactive({
@@ -470,7 +517,7 @@ async function parseFile(file: UploadFile) {
         }
       } catch (e: any) {
         entry.valid = false
-        entry.error = `JSON 解析失败: ${e.message}`
+        entry.error = 'JSON 解析失败: ' + e.message
       }
     } else if (raw.name.endsWith('.yaml') || raw.name.endsWith('.yml')) {
       // Basic YAML parsing (key: value lines)
@@ -505,7 +552,7 @@ async function parseFile(file: UploadFile) {
     }
   } catch (e: any) {
     entry.valid = false
-    entry.error = `文件读取失败: ${e.message}`
+    entry.error = '文件读取失败: ' + e.message
   }
 
   // Update or add the parsed entry
@@ -546,17 +593,17 @@ async function startBatchImport() {
         importResult.success++
       } else {
         importResult.failed++
-        importResult.errors.push(`${file.filename}: ${data.message}`)
+        importResult.errors.push(file.filename + ': ' + data.message)
       }
     } catch (e: any) {
       importResult.failed++
-      importResult.errors.push(`${file.filename}: ${e.message || '未知错误'}`)
+      importResult.errors.push(file.filename + ': ' + (e.message || '未知错误'))
     }
   }
 
   importing.value = false
   if (importResult.success > 0) {
-    ElMessage.success(`成功导入 ${importResult.success} 条知识`)
+    ElMessage.success('成功导入 ' + importResult.success + ' 条知识')
   }
   // Reset file list
   fileList.value = []
@@ -632,7 +679,7 @@ async function doStandardImport(schemes: any[]) {
       const template = scheme.template || {}
       const { data } = await api.post(R.KNOWLEDGE, {
         title: scheme.title,
-        content: `# ${scheme.title}\n\n## 场景\n${scheme.scenario}\n\n## 分类\n${scheme.category}`,
+        content: '# ' + scheme.title + '\n\n## 场景\n' + scheme.scenario + '\n\n## 分类\n' + scheme.category,
         article_type: 'runbook',
         category: scheme.category,
         risk_level: scheme.risk_level,
@@ -648,17 +695,17 @@ async function doStandardImport(schemes: any[]) {
         scheme.imported = true
       } else {
         importResult.failed++
-        importResult.errors.push(`${scheme.title}: ${data.message}`)
+        importResult.errors.push(scheme.title + ': ' + data.message)
       }
     } catch (e: any) {
       importResult.failed++
-      importResult.errors.push(`${scheme.title}: ${e.message || '未知错误'}`)
+      importResult.errors.push(scheme.title + ': ' + (e.message || '未知错误'))
     }
   }
 
   importing.value = false
   if (importResult.success > 0) {
-    ElMessage.success(`成功导入 ${importResult.success} 条标准方案`)
+    ElMessage.success('成功导入 ' + importResult.success + ' 条标准方案')
   }
   selectedStandardSchemes.value = []
 }
@@ -669,9 +716,61 @@ function goToKnowledgeList() {
   router.push({ name: 'knowledge' })
 }
 
+// ─── Import History ─────────────────────────────────────────────────
+function formatTime(val: string | null | undefined): string {
+  if (!val) return '-'
+  const d = new Date(val)
+  if (isNaN(d.getTime())) return '-'
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
+}
+
+function articleTypeLabel(t: string): string {
+  var map: Record<string, string> = {
+    incident_summary: '事件总结',
+    runbook: 'Runbook',
+    standard_solution: '标准方案',
+    faq: 'FAQ',
+    best_practice: '最佳实践',
+  }
+  return map[t] || t || '-'
+}
+
+function sourceLabel(s: string): string {
+  var map: Record<string, string> = {
+    import: '文件导入',
+    manual: '手动导入',
+    standard: '标准模板',
+    api: 'API导入',
+  }
+  return map[s] || s || '-'
+}
+
+async function loadImportHistory() {
+  loadingHistory.value = true
+  try {
+    var params = {
+      page: historyPagination.page,
+      page_size: historyPagination.pageSize,
+      source: 'import,standard,manual',
+    }
+    var response = await api.get(R.KNOWLEDGE, { params: params })
+    var data = response.data
+    if (data.code === 0) {
+      importHistory.value = data.data?.items || data.data?.list || []
+      historyPagination.total = data.data?.total || 0
+    }
+  } catch {
+    importHistory.value = []
+  } finally {
+    loadingHistory.value = false
+  }
+}
+
 // ─── Init ────────────────────────────────────────────────────────────
 onMounted(() => {
   checkExisting()
+  loadImportHistory()
 })
 
 async function checkExisting() {

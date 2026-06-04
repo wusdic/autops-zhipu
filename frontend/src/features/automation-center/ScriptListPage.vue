@@ -768,7 +768,7 @@ async function saveScript() {
     }
 
     if (isEditing.value) {
-      const { data } = await api.put(`${API.SCRIPTS}/${editingId.value}`, payload)
+      const { data } = await api.put(API.SCRIPTS + '/' + editingId.value, payload)
       if (data.code === 0) {
         ElMessage.success('保存成功')
         showFormDialog.value = false
@@ -840,7 +840,7 @@ async function openDetailDrawer(row: Script) {
   // Load version history
   versionLoading.value = true
   try {
-    const { data } = await api.get(`${API.SCRIPTS}/${row.id}/versions`, {
+    const { data } = await api.get(API.SCRIPTS + '/' + row.id + '/versions', {
       params: { page: 1, page_size: 20 },
     })
     if (data.code === 0) {
@@ -855,7 +855,7 @@ async function openDetailDrawer(row: Script) {
   // Load related playbooks
   playbookLoading.value = true
   try {
-    const { data } = await api.get(`${API.SCRIPTS}/${row.id}/playbooks`, {
+    const { data } = await api.get(API.SCRIPTS + '/' + row.id + '/playbooks', {
       params: { page: 1, page_size: 20 },
     })
     if (data.code === 0) {
@@ -876,7 +876,7 @@ async function confirmDeleteScript(row: Script) {
 
   // Check usage
   try {
-    const { data } = await api.get(`${API.SCRIPTS}/${row.id}/usage`)
+    const { data } = await api.get(API.SCRIPTS + '/' + row.id + '/usage')
     if (data.code === 0) {
       deleteUsage.playbookCount = data.data?.playbook_count || 0
       deleteUsage.recentExecutions = data.data?.recent_executions || 0
@@ -896,7 +896,7 @@ async function doDeleteScript() {
   if (!deletingScript.value) return
   deleting.value = true
   try {
-    const { data } = await api.delete(`${API.SCRIPTS}/${deletingScript.value.id}`)
+    const { data } = await api.delete(API.SCRIPTS + '/' + deletingScript.value.id)
     if (data.code === 0 || data.status === 204 || data.status === 200) {
       ElMessage.success('删除成功')
       showDeleteDialog.value = false
@@ -916,7 +916,7 @@ async function doDeleteScript() {
 async function duplicateScript(row: Script) {
   try {
     const payload = {
-      name: `${row.name} (副本)`,
+      name: row.name + ' (副本)',
       script_type: row.script_type,
       description: row.description,
       content: row.content,

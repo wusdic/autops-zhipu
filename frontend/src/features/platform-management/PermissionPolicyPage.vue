@@ -534,7 +534,7 @@ const handleEdit = (row: PolicyEntry) => {
 const handleClone = (row: PolicyEntry) => {
   resetForm()
   isEdit.value = false
-  policyForm.name = `${row.name} (副本)`
+  policyForm.name = row.name + ' (副本)'
   policyForm.description = row.description || ''
   policyForm.resource_type = row.resource_type
   policyForm.actions = [...(row.actions || [])]
@@ -555,7 +555,7 @@ const handleSubmit = async () => {
   submitLoading.value = true
   try {
     if (isEdit.value && policyForm.id) {
-      await client.put(`${API.GOVERNANCE.ROLES}${policyForm.id}/`, policyForm)
+      await client.put(API.GOVERNANCE.ROLES + policyForm.id + '/', policyForm)
       ElMessage.success('策略更新成功')
     } else {
       await client.post(API.GOVERNANCE.ROLES, policyForm)
@@ -573,7 +573,7 @@ const handleSubmit = async () => {
 
 const handleToggleEnabled = async (row: PolicyEntry, val: boolean) => {
   try {
-    await client.patch(`${API.GOVERNANCE.ROLES}${row.id}/`, { enabled: val })
+    await client.patch(API.GOVERNANCE.ROLES + row.id + '/', { enabled: val })
     row.enabled = val
     ElMessage.success(val ? '策略已启用' : '策略已禁用')
   } catch {
@@ -583,7 +583,7 @@ const handleToggleEnabled = async (row: PolicyEntry, val: boolean) => {
 
 const handleDelete = async (row: PolicyEntry) => {
   try {
-    await client.delete(`${API.GOVERNANCE.ROLES}${row.id}/`)
+    await client.delete(API.GOVERNANCE.ROLES + row.id + '/')
     ElMessage.success('策略已删除')
     fetchPolicyList()
   } catch {

@@ -283,7 +283,7 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function computeDuration(start: string | null | undefined, end?: string | null): string {
@@ -293,10 +293,10 @@ function computeDuration(start: string | null | undefined, end?: string | null):
   const e = end ? new Date(end).getTime() : Date.now()
   if (isNaN(e)) return '-'
   const diff = Math.max(0, Math.floor((e - s) / 1000))
-  if (diff < 60) return `${diff}秒`
-  if (diff < 3600) return `${Math.floor(diff / 60)}分${diff % 60}秒`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}时${Math.floor((diff % 3600) / 60)}分`
-  return `${Math.floor(diff / 86400)}天${Math.floor((diff % 86400) / 3600)}时`
+  if (diff < 60) return diff + '秒'
+  if (diff < 3600) return Math.floor(diff / 60) + '分' + diff % 60 + '秒'
+  if (diff < 86400) return Math.floor(diff / 3600) + '时' + Math.floor((diff % 3600) / 60) + '分'
+  return Math.floor(diff / 86400) + '天' + Math.floor((diff % 86400) / 3600) + '时'
 }
 
 // ── Statistics ──────────────────────────────────────────────────────
@@ -405,7 +405,7 @@ async function createTicket(alert: any) {
       inputPlaceholder: '请输入工单描述',
     })
     const { data } = await api.post(R.TICKETS, {
-      title: `[告警] ${alert.title}`,
+      title: '[告警] ' + alert.title,
       ticket_type: 'incident',
       priority: alert.severity === 'critical' ? 'high' : 'medium',
       description: description || alert.title,
@@ -428,7 +428,7 @@ async function batchAcknowledge() {
   const ids = selectedIds.value
   if (!ids.length) return
   try {
-    await ElMessageBox.confirm(`确认批量确认 ${ids.length} 条告警？`, '批量确认', {
+    await ElMessageBox.confirm('确认批量确认 ' + ids.length + ' 条告警？', '批量确认', {
       confirmButtonText: '确认',
       cancelButtonText: '取消',
       type: 'warning',
@@ -437,9 +437,9 @@ async function batchAcknowledge() {
     const results = await Promise.allSettled(promises)
     const failed = results.filter((r) => r.status === 'rejected').length
     if (failed === 0) {
-      ElMessage.success(`${ids.length} 条告警已全部确认`)
+      ElMessage.success(ids.length + ' 条告警已全部确认')
     } else {
-      ElMessage.warning(`${ids.length - failed} 条成功，${failed} 条失败`)
+      ElMessage.warning(ids.length - failed + ' 条成功，' + failed + ' 条失败')
     }
     clearSelection()
     loadAlerts()
@@ -453,7 +453,7 @@ async function batchSuppress() {
   const ids = selectedIds.value
   if (!ids.length) return
   try {
-    await ElMessageBox.confirm(`确认批量抑制 ${ids.length} 条告警？抑制后告警将不再通知。`, '批量抑制', {
+    await ElMessageBox.confirm('确认批量抑制 ' + ids.length + ' 条告警？抑制后告警将不再通知。', '批量抑制', {
       confirmButtonText: '抑制',
       cancelButtonText: '取消',
       type: 'warning',
@@ -463,9 +463,9 @@ async function batchSuppress() {
     const results = await Promise.allSettled(promises)
     const failed = results.filter((r) => r.status === 'rejected').length
     if (failed === 0) {
-      ElMessage.success(`${ids.length} 条告警已全部抑制`)
+      ElMessage.success(ids.length + ' 条告警已全部抑制')
     } else {
-      ElMessage.warning(`${ids.length - failed} 条成功，${failed} 条失败`)
+      ElMessage.warning(ids.length - failed + ' 条成功，' + failed + ' 条失败')
     }
     clearSelection()
     loadAlerts()
@@ -479,7 +479,7 @@ async function batchResolve() {
   const ids = selectedIds.value
   if (!ids.length) return
   try {
-    await ElMessageBox.confirm(`确认批量恢复 ${ids.length} 条告警？`, '批量恢复', {
+    await ElMessageBox.confirm('确认批量恢复 ' + ids.length + ' 条告警？', '批量恢复', {
       confirmButtonText: '恢复',
       cancelButtonText: '取消',
       type: 'success',
@@ -488,9 +488,9 @@ async function batchResolve() {
     const results = await Promise.allSettled(promises)
     const failed = results.filter((r) => r.status === 'rejected').length
     if (failed === 0) {
-      ElMessage.success(`${ids.length} 条告警已全部恢复`)
+      ElMessage.success(ids.length + ' 条告警已全部恢复')
     } else {
-      ElMessage.warning(`${ids.length - failed} 条成功，${failed} 条失败`)
+      ElMessage.warning(ids.length - failed + ' 条成功，' + failed + ' 条失败')
     }
     clearSelection()
     loadAlerts()

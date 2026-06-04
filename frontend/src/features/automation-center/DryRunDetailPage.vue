@@ -159,7 +159,7 @@
                   <div class="step-header">
                     <div class="step-index">{{ index + 1 }}</div>
                     <div class="step-info">
-                      <div class="step-name">{{ step.name || `步骤 ${index + 1}` }}</div>
+                      <div class="step-name">{{ step.name || '步骤 ' + index + 1 }}</div>
                       <div class="step-desc">{{ step.description || '-' }}</div>
                     </div>
                     <el-tag
@@ -395,7 +395,7 @@ async function loadDetail(row: DryRun) {
 async function handleDelete(row: DryRun) {
   try {
     await ElMessageBox.confirm(
-      `确认删除预演记录「${row.name}」？此操作不可撤销。`,
+      '确认删除预演记录「' + row.name + '」？此操作不可撤销。',
       '删除确认',
       { type: 'warning', confirmButtonText: '确定', cancelButtonText: '取消' }
     )

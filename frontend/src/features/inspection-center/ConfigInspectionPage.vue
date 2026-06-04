@@ -198,7 +198,7 @@ async function runSingle(item: any) {
   item._running = true
   try {
     await api.post(API.INSPECTION_TASKS, { type: 'config', template_id: item.id })
-    ElMessage.success(`巡检项 ${item.name} 已触发`)
+    ElMessage.success('巡检项 ' + item.name + ' 已触发')
     setTimeout(fetchItems, 2000)
   } catch (e) {
     ElMessage.error('执行失败')

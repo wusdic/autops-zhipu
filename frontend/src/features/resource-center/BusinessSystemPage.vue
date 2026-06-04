@@ -343,7 +343,7 @@ function viewSystem(row: BusinessSystem) {
 
 async function handleDelete(row: BusinessSystem) {
   try {
-    await ElMessageBox.confirm(`确认删除业务系统「${row.name}」？此操作不可撤销。`, '删除确认', {
+    await ElMessageBox.confirm('确认删除业务系统「' + row.name + '」？此操作不可撤销。', '删除确认', {
       type: 'warning',
       confirmButtonText: '确定',
       cancelButtonText: '取消',

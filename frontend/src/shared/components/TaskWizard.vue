@@ -49,7 +49,7 @@ const submitting = ref(false)
 const formData = ref<Record<string, any>>({})
 
 const currentStepName = computed(() => {
-  return props.steps[currentStep.value]?.name || `step-${currentStep.value}`
+  return props.steps[currentStep.value]?.name || 'step-' + currentStep.value
 })
 
 const canNext = computed(() => {

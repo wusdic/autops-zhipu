@@ -101,7 +101,7 @@
         </el-table-column>
         <el-table-column prop="max_calls_per_minute" label="频率限制" width="110" align="center">
           <template #default="{ row }">
-            {{ row.max_calls_per_minute ? `${row.max_calls_per_minute}/min` : '无限制' }}
+            {{ row.max_calls_per_minute ? row.max_calls_per_minute + '/min' : '无限制' }}
           </template>
         </el-table-column>
         <el-table-column prop="updated_at" label="更新时间" width="170">
@@ -306,7 +306,7 @@ function resetFilters() {
 async function toggleApproval(row: any) {
   row._toggling = true
   try {
-    const { data } = await client.put(`${TOOL_POLICY_API}/${row.id}`, {
+    const { data } = await client.put(TOOL_POLICY_API + '/' + row.id, {
       requires_approval: row.requires_approval,
     })
     if (data.code === 0) {
@@ -364,7 +364,7 @@ async function handleSave() {
     const payload = { ...form }
     let res: any
     if (isEditing.value) {
-      res = await client.put(`${TOOL_POLICY_API}/${editingId.value}`, payload)
+      res = await client.put(TOOL_POLICY_API + '/' + editingId.value, payload)
     } else {
       res = await client.post(TOOL_POLICY_API, payload)
     }
@@ -385,11 +385,11 @@ async function handleSave() {
 async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定删除工具「${row.tool_name}」的调用策略？`,
+      '确定删除工具「' + row.tool_name + '」的调用策略？',
       '确认删除',
       { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' }
     )
-    const { data } = await client.delete(`${TOOL_POLICY_API}/${row.id}`)
+    const { data } = await client.delete(TOOL_POLICY_API + '/' + row.id)
     if (data.code === 0) {
       ElMessage.success('已删除')
       loadList()

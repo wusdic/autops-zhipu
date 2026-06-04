@@ -238,8 +238,8 @@ async function fetchTodayAlerts() {
       recentActivities.value.push({
         time: a.created_at,
         type: 'alert',
-        summary: `告警: ${a.title}`,
-        detail: a.asset_name ? `资产: ${a.asset_name}` : '',
+        summary: '告警: ' + a.title,
+        detail: a.asset_name ? '资产: ' + a.asset_name : '',
       })
     })
   } catch {
@@ -264,8 +264,8 @@ async function fetchTodayAnomalies() {
       recentActivities.value.push({
         time: a.created_at || a.discovered_at,
         type: 'anomaly',
-        summary: `异常: ${a.title}`,
-        detail: a.asset_name ? `资产: ${a.asset_name}` : '',
+        summary: '异常: ' + a.title,
+        detail: a.asset_name ? '资产: ' + a.asset_name : '',
       })
     })
   } catch {
@@ -289,8 +289,8 @@ async function fetchTodayExecutions() {
       recentActivities.value.push({
         time: e.created_at,
         type: 'execution',
-        summary: `执行: ${e.playbook_name || e.name || '-'}`,
-        detail: `状态: ${e.status}`,
+        summary: '执行: ' + e.playbook_name || e.name || '-',
+        detail: '状态: ' + e.status,
       })
     })
 

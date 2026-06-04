@@ -336,7 +336,7 @@ async function handleSave() {
     const payload = { ...form }
     let res: any
     if (isEditing.value) {
-      res = await client.put(`${TEMPLATE_API}/${editingId.value}`, payload)
+      res = await client.put(TEMPLATE_API + '/' + editingId.value, payload)
     } else {
       res = await client.post(TEMPLATE_API, payload)
     }
@@ -357,11 +357,11 @@ async function handleSave() {
 async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定删除模板「${row.name}」？此操作不可撤销。`,
+      '确定删除模板「' + row.name + '」？此操作不可撤销。',
       '确认删除',
       { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' }
     )
-    const { data } = await client.delete(`${TEMPLATE_API}/${row.id}`)
+    const { data } = await client.delete(TEMPLATE_API + '/' + row.id)
     if (data.code === 0) {
       ElMessage.success('已删除')
       loadList()
@@ -377,7 +377,7 @@ function duplicateTemplate(row: any) {
   isEditing.value = false
   editingId.value = ''
   Object.assign(form, {
-    name: `${row.name} (副本)`,
+    name: row.name + ' (副本)',
     usage: row.usage || '',
     model: row.model || '',
     temperature: row.temperature ?? 70,
@@ -409,14 +409,14 @@ async function runTest() {
       return
     }
 
-    const { data } = await client.post(`${TEMPLATE_API}/${testTemplateData.id}/test`, { variables })
+    const { data } = await client.post(TEMPLATE_API + '/' + testTemplateData.id + '/test', { variables })
     if (data.code === 0) {
       testResult.value = data.data?.output || data.data?.result || JSON.stringify(data.data, null, 2)
     } else {
-      testResult.value = `错误: ${data.message || '测试失败'}`
+      testResult.value = '错误: ' + data.message || '测试失败'
     }
   } catch (e: any) {
-    testResult.value = `错误: ${e.message || e}`
+    testResult.value = '错误: ' + e.message || e
   } finally {
     testing.value = false
   }

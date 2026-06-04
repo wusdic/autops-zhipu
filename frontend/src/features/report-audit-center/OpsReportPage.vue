@@ -135,7 +135,7 @@ async function fetchData() {
     if (res.data?.code === 0) {
       reports.value = (res.data.data?.items || []).map((r: any) => ({
         ...r,
-        title: r.title || `${typeLabel(r.report_type || 'weekly')} - ${(r.period_start || '').slice(0, 10)}`,
+        title: r.title || typeLabel(r.report_type || 'weekly') + ' - ' + (r.period_start || '').slice(0, 10),
         anomaly_count: r.anomaly_count || 0,
         auto_remediation_rate: r.auto_remediation_rate || 0,
       }))

@@ -46,7 +46,7 @@
  >
         <el-table-column prop="title" label="异常标题" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-link type="primary" @click="router.push(`/response/anomaly-list/${row.id}`)">
+            <el-link type="primary" @click="router.push('/response/anomaly-list/' + row.id)">
               {{ row.title || row.name || '-' }}
             </el-link>
           </template>
@@ -77,7 +77,7 @@
         </el-table-column>
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button plain type="primary" size="small" @click="router.push(`/response/anomaly-list/${row.id}`)">
+            <el-button plain type="primary" size="small" @click="router.push('/response/anomaly-list/' + row.id)">
               详情
             </el-button>
             <el-button
@@ -261,7 +261,7 @@ function formatTime(val: string | null | undefined): string {
     const d = new Date(val)
     if (isNaN(d.getTime())) return val
     const pad = (n: number) => String(n).padStart(2, '0')
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes())
   } catch {
     return val
   }
@@ -271,7 +271,7 @@ function formatTime(val: string | null | undefined): string {
 async function handleAcknowledge(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确认处理异常「${row.title || row.name || row.id}」？`,
+      '确认处理异常「' + row.title || row.name || row.id + '」？',
       '确认异常',
       { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' },
     )

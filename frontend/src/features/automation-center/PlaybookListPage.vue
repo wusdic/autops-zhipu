@@ -254,7 +254,7 @@ async function save() {
   if (!form.name) return ElMessage.warning('请输入名称')
   try {
     const payload = { ...form, steps: form.steps.map(s => ({ ...s, params: s.params_json ? JSON.parse(s.params_json) : {} })) }
-    if (editing.value) await api.put(`${API.PLAYBOOKS}/${editId.value}`, payload)
+    if (editing.value) await api.put(API.PLAYBOOKS + '/' + editId.value, payload)
     else await api.post(API.PLAYBOOKS, payload)
     ElMessage.success('保存成功'); showDialog.value = false; load()
   } catch (e: any) { ElMessage.error(e?.message || '保存失败') }
@@ -262,7 +262,7 @@ async function save() {
 
 async function viewDetail(row: any) {
   try {
-    const res = await api.get(`${API.PLAYBOOKS}/${row.id}`)
+    const res = await api.get(API.PLAYBOOKS + '/' + row.id)
     if (res.data?.code === 0) detail.value = res.data.data
     else detail.value = row
   } catch { detail.value = row }
@@ -281,7 +281,7 @@ async function loadExecHistory(playbookId: string) {
 
 async function duplicate(row: any) {
   try {
-    const payload = { ...row, name: `${row.name} (副本)`, status: 'draft', id: undefined, created_at: undefined, updated_at: undefined }
+    const payload = { ...row, name: row.name + ' (副本)', status: 'draft', id: undefined, created_at: undefined, updated_at: undefined }
     await api.post(API.PLAYBOOKS, payload)
     ElMessage.success('复制成功'); load()
   } catch { ElMessage.error('复制失败') }
@@ -294,7 +294,7 @@ function quickExec(row: any) {
 async function remove(row: any) {
   try {
     await ElMessageBox.confirm('确定删除此 Playbook？关联策略将失效。', '确认删除', { type: 'warning' })
-    await api.delete(`${API.PLAYBOOKS}/${row.id}`)
+    await api.delete(API.PLAYBOOKS + '/' + row.id)
     ElMessage.success('已删除'); load()
   } catch {}
 }

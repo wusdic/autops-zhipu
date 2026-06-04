@@ -144,7 +144,7 @@
         <el-descriptions-item label="最后心跳">{{ formatTime(currentRow.last_heartbeat) }}</el-descriptions-item>
         <el-descriptions-item label="任务积压">{{ currentRow.task_backlog ?? '-' }}</el-descriptions-item>
         <el-descriptions-item label="成功率">
-          {{ currentRow.success_rate != null ? `${(currentRow.success_rate * 100).toFixed(1)}%` : '-' }}
+          {{ currentRow.success_rate != null ? (currentRow.success_rate * 100).toFixed(1) + '%' : '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="平均延迟">
           {{ currentRow.avg_latency != null ? formatLatency(currentRow.avg_latency) : '-' }}
@@ -190,13 +190,13 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function formatLatency(ms: number | null | undefined): string {
   if (ms == null) return '-'
-  if (ms < 1000) return `${Math.round(ms)}ms`
-  return `${(ms / 1000).toFixed(2)}s`
+  if (ms < 1000) return Math.round(ms) + 'ms'
+  return (ms / 1000).toFixed(2) + 's'
 }
 
 function healthTagType(status: string): '' | 'success' | 'danger' | 'warning' | 'info' {

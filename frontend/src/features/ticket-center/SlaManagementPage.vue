@@ -499,7 +499,7 @@ async function handleDialogSubmit() {
   try {
     const payload = { ...dialogForm }
     if (isEditing.value) {
-      await client.put(`${slaApiUrl}/${dialogForm.id}`, payload)
+      await client.put(slaApiUrl + '/' + dialogForm.id, payload)
       ElMessage.success('策略更新成功')
     } else {
       await client.post(slaApiUrl, payload)
@@ -524,7 +524,7 @@ function resetDialogForm() {
 async function handleToggleStatus(row: SlaPolicy, enabled: boolean) {
   const newStatus = enabled ? 'enabled' : 'disabled'
   try {
-    await client.patch(`${slaApiUrl}/${row.id}`, { status: newStatus })
+    await client.patch(slaApiUrl + '/' + row.id, { status: newStatus })
     row.status = newStatus
     ElMessage.success(enabled ? '已启用' : '已禁用')
   } catch (err: unknown) {
@@ -537,11 +537,11 @@ async function handleToggleStatus(row: SlaPolicy, enabled: boolean) {
 async function handleDelete(row: SlaPolicy) {
   try {
     await ElMessageBox.confirm(
-      `确定删除策略「${row.name}」？此操作不可撤销。`,
+      '确定删除策略「' + row.name + '」？此操作不可撤销。',
       '删除确认',
       { type: 'warning' }
     )
-    await client.delete(`${slaApiUrl}/${row.id}`)
+    await client.delete(slaApiUrl + '/' + row.id)
     ElMessage.success('策略已删除')
     fetchData()
   } catch (err: unknown) {

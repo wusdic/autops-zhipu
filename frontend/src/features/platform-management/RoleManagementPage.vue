@@ -265,7 +265,7 @@ async function handleDelete(row: any) {
   }
 
   // No users — simple delete
-  await ElMessageBox.confirm(`确定删除角色「${row.name}」？删除后不可恢复。`, '确认删除', { type: 'warning' })
+  await ElMessageBox.confirm('确定删除角色「' + row.name + '」？删除后不可恢复。', '确认删除', { type: 'warning' })
   try {
     await api.delete(R.GOVERNANCE.ROLES + '/' + row.id)
     ElMessage.success('删除成功')

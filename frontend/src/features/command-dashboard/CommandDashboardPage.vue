@@ -150,7 +150,7 @@
             <el-table stripe
  :data="recentAlerts"size="default"
  :max-height="300"
- @row-click="(row: any) => navigateTo(`/alerts/${row.id}`)"
+ @row-click="(row: any) => navigateTo('/alerts/' + row.id)"
               style="cursor: pointer"
               empty-text="暂无告警"
             >
@@ -165,7 +165,7 @@
               <el-table-column prop="asset_name" label="资产" width="140" show-overflow-tooltip />
               <el-table-column prop="status" label="状态" width="80">
                 <template #default="{ row }">
-                  <span class="autops-status-tag" :class="`status-${row.status}`">
+                  <span class="autops-status-tag" :class="'status-' + row.status">
                     {{ getStatusText(row.status) }}
                   </span>
                 </template>
@@ -193,7 +193,7 @@
           <div class="autops-card-body">
             <div v-for="item in healthData" :key="item.label" class="health-bar-item">
               <div class="health-bar-label">
-                <span :class="`health-dot health-dot-${item.key}`"></span>
+                <span :class="'health-dot health-dot-' + item.key"></span>
                 <span class="font-14">{{ item.label }}</span>
                 <span class="font-12 text-tertiary" style="margin-left: auto">{{ item.count }}</span>
               </div>
@@ -289,7 +289,7 @@
               <el-table-column prop="title" label="内容" min-width="180" show-overflow-tooltip />
               <el-table-column prop="priority" label="优先级" width="70">
                 <template #default="{ row }">
-                  <span :class="`priority-${row.priority}`">{{ row.priority }}</span>
+                  <span :class="'priority-' + row.priority">{{ row.priority }}</span>
                 </template>
               </el-table-column>
               <el-table-column prop="created_at" label="时间" width="100">
@@ -307,7 +307,7 @@
           <div class="autops-card-body" v-loading="platformHealthLoading">
             <div class="platform-health-grid">
               <div v-for="comp in platformHealth" :key="comp.name" class="health-item">
-                <span class="health-dot" :class="`health-dot-${comp.status}`"></span>
+                <span class="health-dot" :class="'health-dot-' + comp.status"></span>
                 <span class="font-12">{{ comp.name }}</span>
                 <span class="font-12 text-tertiary" style="margin-left: auto">{{ comp.latency }}</span>
               </div>
@@ -483,7 +483,7 @@ async function fetchDashboard() {
         .slice(0, 5)
         .map((e: any) => ({
           type: '执行审批',
-          title: e.execution_type || `执行任务 #${e.id?.slice(0,8)}`,
+          title: e.execution_type || '执行任务 #' + e.id?.slice(0,8),
           priority: e.risk_level || 'medium',
           created_at: e.created_at,
         }))
@@ -517,7 +517,7 @@ function computeTrendData(jobs: any[]) {
   for (let i = buckets - 1; i >= 0; i--) {
     const bucketStart = now - i * bucketMs
     const d = new Date(bucketStart)
-    const label = is24h ? `${d.getHours()}:00` : `${d.getMonth()+1}/${d.getDate()}`
+    const label = is24h ? d.getHours() + ':00' : d.getMonth()+1 + '/' + d.getDate()
     bucketMap[label] = { success: 0, total: 0 }
   }
 
@@ -529,7 +529,7 @@ function computeTrendData(jobs: any[]) {
     if (age > buckets * bucketMs) continue
 
     const d = new Date(t)
-    const label = is24h ? `${d.getHours()}:00` : `${d.getMonth()+1}/${d.getDate()}`
+    const label = is24h ? d.getHours() + ':00' : d.getMonth()+1 + '/' + d.getDate()
     if (bucketMap[label]) {
       bucketMap[label].total++
       if (job.status === 'completed') bucketMap[label].success++
@@ -566,7 +566,7 @@ function renderChart() {
         const idx = params[0]?.dataIndex
         if (idx == null || idx >= chartRawData.value.length) return ''
         const d = chartRawData.value[idx]
-        return `${d.time}<br/>成功率: ${d.total > 0 ? d.success + '%' : '无数据'}<br/>任务数: ${d.total}`
+        return d.time + '<br/>成功率: ' + d.total > 0 ? d.success + '%' : '无数据' + '<br/>任务数: ' + d.total
       },
     },
     grid: { left: 40, right: 20, top: 16, bottom: 30 },
@@ -644,8 +644,8 @@ function formatTime(t: string): string {
     const now = new Date()
     const diff = (now.getTime() - d.getTime()) / 1000
     if (diff < 60) return '刚刚'
-    if (diff < 3600) return `${Math.floor(diff/60)}分钟前`
-    if (diff < 86400) return `${Math.floor(diff/3600)}小时前`
+    if (diff < 3600) return Math.floor(diff/60) + '分钟前'
+    if (diff < 86400) return Math.floor(diff/3600) + '小时前'
     return d.toLocaleDateString('zh-CN')
   } catch { return t }
 }

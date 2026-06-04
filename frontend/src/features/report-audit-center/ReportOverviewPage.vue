@@ -49,7 +49,7 @@
  >
         <el-table-column prop="title" label="报告名" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-link type="primary" @click="router.push(`/report-audit/tasks/${row.id}`)">
+            <el-link type="primary" @click="router.push('/report-audit/tasks/' + row.id)">
               {{ row.title || row.name || '-' }}
             </el-link>
           </template>
@@ -282,7 +282,7 @@ function formatTime(val: string | null | undefined): string {
     const d = new Date(val)
     if (isNaN(d.getTime())) return val
     const pad = (n: number) => String(n).padStart(2, '0')
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes())
   } catch {
     return val
   }
@@ -292,18 +292,18 @@ function formatDuration(row: any): string {
   if (row.duration !== undefined && row.duration !== null) {
     const sec = Number(row.duration)
     if (isNaN(sec)) return row.duration
-    if (sec < 60) return `${sec}s`
-    if (sec < 3600) return `${Math.floor(sec / 60)}m ${sec % 60}s`
-    return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`
+    if (sec < 60) return sec + 's'
+    if (sec < 3600) return Math.floor(sec / 60) + 'm ' + sec % 60 + 's'
+    return Math.floor(sec / 3600) + 'h ' + Math.floor((sec % 3600) / 60) + 'm'
   }
   // 尝试从 started_at / finished_at 计算
   if (row.started_at && row.finished_at) {
     const diff = new Date(row.finished_at).getTime() - new Date(row.started_at).getTime()
     if (diff > 0) {
       const sec = Math.round(diff / 1000)
-      if (sec < 60) return `${sec}s`
-      if (sec < 3600) return `${Math.floor(sec / 60)}m ${sec % 60}s`
-      return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`
+      if (sec < 60) return sec + 's'
+      if (sec < 3600) return Math.floor(sec / 60) + 'm ' + sec % 60 + 's'
+      return Math.floor(sec / 3600) + 'h ' + Math.floor((sec % 3600) / 60) + 'm'
     }
   }
   return '-'
@@ -311,7 +311,7 @@ function formatDuration(row: any): string {
 
 // ── 操作处理 ──
 function handlePreview(row: any) {
-  router.push(`/report-audit/tasks/${row.id}`)
+  router.push('/report-audit/tasks/' + row.id)
 }
 
 async function handleDownload(row: any) {
@@ -321,7 +321,7 @@ async function handleDownload(row: any) {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `${row.title || row.name || 'report'}.pdf`
+    link.download = row.title || row.name || 'report' + '.pdf'
     link.click()
     window.URL.revokeObjectURL(url)
     ElMessage.success('下载已开始')
@@ -334,7 +334,7 @@ async function handleDownload(row: any) {
 async function handleRetry(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确认重新生成报告「${row.title || row.name || row.id}」？`,
+      '确认重新生成报告「' + row.title || row.name || row.id + '」？',
       '重新生成',
       { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' },
     )

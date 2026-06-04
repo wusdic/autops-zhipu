@@ -36,8 +36,8 @@ const props = withDefaults(defineProps<{
   valueColor: "#1d2129",
 })
 
-const displayValue = computed(() => props.suffix ? `${props.value}${props.suffix}` : String(props.value))
-const borderStyle = computed(() => props.borderColor ? { borderLeft: `4px solid ${props.borderColor}` } : {})
+const displayValue = computed(() => props.suffix ? props.value + props.suffix : String(props.value))
+const borderStyle = computed(() => props.borderColor ? { borderLeft: '4px solid ' + props.borderColor } : {})
 </script>
 
 <style scoped>

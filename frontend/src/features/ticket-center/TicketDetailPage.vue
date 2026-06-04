@@ -119,7 +119,7 @@
                   </el-table-column>
                   <el-table-column label="操作" width="100">
                     <template #default="{ row }">
-                      <el-button plain type="primary" size="small" @click="$router.push(`/alerts/${row.id}`)">查看</el-button>
+                      <el-button plain type="primary" size="small" @click="$router.push('/alerts/' + row.id)">查看</el-button>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -136,7 +136,7 @@
                   </el-table-column>
                   <el-table-column label="操作" width="100">
                     <template #default="{ row }">
-                      <el-button plain type="primary" size="small" @click="$router.push(`/executions/${row.id}`)">查看</el-button>
+                      <el-button plain type="primary" size="small" @click="$router.push('/executions/' + row.id)">查看</el-button>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -347,9 +347,9 @@ const slaRemainingText = computed(() => {
   if (hours > 24) {
     const days = Math.floor(hours / 24)
     const remainHours = hours % 24
-    return `${days}天${remainHours}时${minutes}分`
+    return days + '天' + remainHours + '时' + minutes + '分'
   }
-  return `${hours}时${minutes}分${seconds}秒`
+  return hours + '时' + minutes + '分' + seconds + '秒'
 })
 
 function startSlaTimer() {
@@ -399,7 +399,7 @@ function openKnowledgeDialog() {
   const t = ticket.value
   if (!t) return
   knowledgeForm.value = {
-    title: `[工单] ${t.title || ''} 处置经验`,
+    title: '[工单] ' + t.title || '' + ' 处置经验',
     content: buildKnowledgeContent(t),
     type: 'incident',
     tags: [t.ticket_type || 'incident'],
@@ -408,8 +408,8 @@ function openKnowledgeDialog() {
 }
 
 function buildKnowledgeContent(t: any): string {
-  let content = `## 问题描述\n${t.description || '（无描述）'}\n\n`
-  content += `## 工单信息\n- 工单ID: ${t.id}\n- 类型: ${t.ticket_type || '-'}\n- 优先级: ${t.priority || '-'}\n`
+  let content = '## 问题描述\n' + t.description || '（无描述）' + '\n\n'
+  content += '## 工单信息\n- 工单ID: ' + t.id + '\n- 类型: ' + t.ticket_type || '-' + '\n- 优先级: ' + t.priority || '-' + '\n'
   if (t.context) {
     content += '\n## 上下文信息\n```\n' + formatJson(t.context) + '\n```\n'
   }
@@ -505,7 +505,7 @@ const attachmentsLoading = ref(false)
 const uploadUrl = computed(() => R.TICKET_ATTACHMENTS(ticketId()))
 const uploadHeaders = computed(() => {
   const token = localStorage.getItem('token') || ''
-  return token ? { Authorization: `Bearer ${token}` } : {}
+  return token ? { Authorization: 'Bearer ' + token } : {}
 })
 
 async function loadAttachments() {
@@ -568,7 +568,7 @@ function formatFileSize(bytes: number): string {
   if (!bytes || bytes === 0) return '0 B'
   const units = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${units[i]}`
+  return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i]
 }
 
 // ─── 原有功能 ───

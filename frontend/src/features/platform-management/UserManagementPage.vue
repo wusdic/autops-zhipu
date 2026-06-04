@@ -197,9 +197,9 @@ async function toggleUserStatus(row: any, enabled: boolean) {
   const newStatus = enabled ? 'active' : 'disabled'
   const actionText = enabled ? '启用' : '禁用'
   try {
-    await ElMessageBox.confirm(`确定${actionText}用户 ${row.username}?`, '确认', { type: 'warning' })
+    await ElMessageBox.confirm('确定' + actionText + '用户 ' + row.username + '?', '确认', { type: 'warning' })
     await api.put(R.GOVERNANCE.USERS + '/' + row.id, { status: newStatus })
-    ElMessage.success(`已${actionText}用户 ${row.username}`)
+    ElMessage.success('已' + actionText + '用户 ' + row.username)
     loadUsers()
   } catch {
     // user cancelled or API error – revert is handled by re-fetch
@@ -277,7 +277,7 @@ async function handleSave() {
 }
 
 async function handleDelete(row: any) {
-  await ElMessageBox.confirm(`确定删除用户 ${row.username}?`, '确认', { type: 'warning' })
+  await ElMessageBox.confirm('确定删除用户 ' + row.username + '?', '确认', { type: 'warning' })
   try {
     await api.delete(R.GOVERNANCE.USERS + '/' + row.id)
     ElMessage.success('删除成功')

@@ -158,7 +158,7 @@ async function startDiagnosis() {
     // Step 1: Collect context
     await delay(800); currentStep.value = 1
     const [anomalyRes, eventsRes] = await Promise.all([
-      api.get(`${API.ALERTS}/${anomalyId.value}`).catch(() => ({ data: null })),
+      api.get(API.ALERTS + '/' + anomalyId.value).catch(() => ({ data: null })),
       api.get(API.EVENTS, { params: { alert_id: anomalyId.value, page_size: 20 } }).catch(() => ({ data: null })),
     ])
 

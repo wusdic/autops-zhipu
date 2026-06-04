@@ -144,6 +144,30 @@
         <el-descriptions-item label="Token消耗">{{ metricsData.token_usage }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
+
+    <!-- 连接测试结果对话框 -->
+    <el-dialog v-model="testResultVisible" title="连接测试结果" width="500px">
+      <el-result v-if="testResultData.success" icon="success" title="连接成功">
+        <template #extra>
+          <el-descriptions :column="1" border size="small">
+            <el-descriptions-item label="模型">{{ testResultData.name }}</el-descriptions-item>
+            <el-descriptions-item label="响应时间">{{ testResultData.latency }}ms</el-descriptions-item>
+            <el-descriptions-item label="返回内容">{{ testResultData.response || '-' }}</el-descriptions-item>
+          </el-descriptions>
+        </template>
+      </el-result>
+      <el-result v-else icon="error" :title="'连接失败: ' + (testResultData.error || '未知错误')">
+        <template #extra>
+          <el-descriptions :column="1" border size="small">
+            <el-descriptions-item label="模型">{{ testResultData.name }}</el-descriptions-item>
+            <el-descriptions-item label="错误详情">{{ testResultData.error || '-' }}</el-descriptions-item>
+          </el-descriptions>
+        </template>
+      </el-result>
+      <template #footer>
+        <el-button type="primary" @click="testResultVisible = false">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -160,9 +184,11 @@ const submitting = ref(false)
 const saving = ref(false)
 const dialogVisible = ref(false)
 const metricsVisible = ref(false)
+const testResultVisible = ref(false)
 const editing = ref<any>(null)
 const models = ref<any[]>([])
 const metricsData = ref<any>({})
+const testResultData = ref<any>({ success: false, name: '', latency: 0, response: '', error: '' })
 const formRef = ref()
 
 const overviewStats = computed(() => [
@@ -219,11 +245,30 @@ async function handleSubmit() {
 }
 
 async function testModel(row: any) {
+  testResultData.value = { success: false, name: row.name, latency: 0, response: '', error: '' }
+  testResultVisible.value = true
   try {
-    ElMessage.info('正在测试模型 ' + row.name + '...')
-    await client.post('/api/v1/aiops/agents/' + row.id + '/test')
+    const startTime = Date.now()
+    const res = await client.post('/api/v1/aiops/agents/' + row.id + '/test')
+    const elapsed = Date.now() - startTime
+    const result = res.data?.data || res.data
+    testResultData.value = {
+      success: true,
+      name: row.name,
+      latency: elapsed,
+      response: result?.response || result?.content || '测试连接成功',
+      error: '',
+    }
     ElMessage.success('测试完成')
-  } catch { ElMessage.error('测试失败') }
+  } catch (e: any) {
+    testResultData.value = {
+      success: false,
+      name: row.name,
+      latency: 0,
+      response: '',
+      error: e.response?.data?.message || e.message || '连接失败',
+    }
+  }
 }
 
 function viewMetrics(row: any) {
@@ -243,7 +288,15 @@ async function handleDelete(row: any) {
 async function saveConfig() {
   saving.value = true
   try {
+    await client.post('/api/v1/aiops/model-config', {
+      default_model: globalConfig.default_model,
+      timeout: globalConfig.timeout,
+      max_tokens: globalConfig.max_tokens,
+      temperature: globalConfig.temperature / 100,
+    })
     ElMessage.success('全局配置已保存')
+  } catch {
+    ElMessage.error('配置保存失败')
   } finally { saving.value = false }
 }
 

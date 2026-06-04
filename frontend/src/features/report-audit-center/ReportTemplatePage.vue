@@ -66,11 +66,13 @@
           <el-table-column prop="updated_at" label="更新时间" width="170">
             <template #default="{ row }">{{ formatTime(row.updated_at) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="180" fixed="right" align="center">
+          <el-table-column label="操作" width="320" fixed="right" align="center">
             <template #default="{ row }">
-              <el-button type="primary" plain @click="openEditDialog(row)">编辑</el-button>
-              <el-button type="success" plain @click="handleGenerate(row)">生成报告</el-button>
-              <el-button type="danger" plain @click="handleDelete(row)">删除</el-button>
+              <el-button type="primary" plain size="small" @click="openPreview(row)">预览</el-button>
+              <el-button type="primary" plain size="small" @click="openEditDialog(row)">编辑</el-button>
+              <el-button type="success" plain size="small" @click="handleCopy(row)">复制</el-button>
+              <el-button type="warning" plain size="small" @click="handleExport(row)">导出</el-button>
+              <el-button type="danger" plain size="small" @click="handleDelete(row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -137,12 +139,82 @@
             <el-checkbox label="审计日志" value="audit" />
           </el-checkbox-group>
         </el-form-item>
+        <el-divider content-position="left">参数配置</el-divider>
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="时间范围">
+              <el-select v-model="form.params.timeRange" placeholder="默认时间范围" style="width: 100%">
+                <el-option label="最近24小时" value="24h" />
+                <el-option label="最近7天" value="7d" />
+                <el-option label="最近30天" value="30d" />
+                <el-option label="自定义" value="custom" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="输出格式">
+              <el-select v-model="form.params.outputFormat" placeholder="输出格式" style="width: 100%">
+                <el-option label="PDF" value="pdf" />
+                <el-option label="Word" value="docx" />
+                <el-option label="HTML" value="html" />
+                <el-option label="Excel" value="xlsx" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="自动发送">
+              <el-switch v-model="form.params.autoSend" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="接收人" v-if="form.params.autoSend">
+              <el-input v-model="form.params.receivers" placeholder="多人用逗号分隔" />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" :loading="submitting" @click="submitForm">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- Preview Drawer -->
+    <el-drawer v-model="previewVisible" title="模板预览" size="500px" destroy-on-close>
+      <template v-if="previewData">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="模板名称">{{ previewData.name }}</el-descriptions-item>
+          <el-descriptions-item label="类型">
+            <el-tag :type="typeTagType(previewData.type)" size="small">{{ typeLabel(previewData.type) }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="描述">{{ previewData.description || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="更新时间">{{ formatTime(previewData.updated_at) }}</el-descriptions-item>
+        </el-descriptions>
+
+        <div v-if="previewData.sections && previewData.sections.length" style="margin-top: 16px">
+          <h4 style="margin-bottom: 8px">报表章节</h4>
+          <el-tag v-for="sec in previewData.sections" :key="sec" size="small" style="margin: 2px 4px">
+            {{ sectionLabel(sec) }}
+          </el-tag>
+        </div>
+
+        <div v-if="previewData.params" style="margin-top: 16px">
+          <h4 style="margin-bottom: 8px">参数配置</h4>
+          <el-descriptions :column="1" border size="small">
+            <el-descriptions-item label="时间范围">{{ previewData.params.timeRange || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="输出格式">{{ previewData.params.outputFormat || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="自动发送">{{ previewData.params.autoSend ? '是' : '否' }}</el-descriptions-item>
+            <el-descriptions-item label="接收人" v-if="previewData.params.autoSend">{{ previewData.params.receivers || '-' }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+      </template>
+      <template #footer>
+        <el-button @click="previewVisible = false">关闭</el-button>
+        <el-button type="primary" @click="handleGenerate(previewData)">生成报告</el-button>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
@@ -164,6 +236,8 @@ const isEditing = ref(false)
 const editingId = ref('')
 const submitting = ref(false)
 const formRef = ref<FormInstance>()
+const previewVisible = ref(false)
+const previewData = ref<any>(null)
 
 const filters = reactive({
   keyword: '',
@@ -181,6 +255,12 @@ const form = reactive({
   type: '',
   description: '',
   sections: [] as string[],
+  params: {
+    timeRange: '7d',
+    outputFormat: 'pdf',
+    autoSend: false,
+    receivers: '',
+  } as Record<string, any>,
 })
 
 const formRules: FormRules = {
@@ -194,7 +274,7 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function typeLabel(t: string): string {
@@ -217,6 +297,18 @@ function typeTagType(t: string): string {
     compliance: 'info',
   }
   return map[t] || 'info'
+}
+
+function sectionLabel(s: string): string {
+  const map: Record<string, string> = {
+    summary: '概述',
+    assets: '资产统计',
+    inspection: '巡检结果',
+    alerts: '告警汇总',
+    sla: 'SLA统计',
+    audit: '审计日志',
+  }
+  return map[s] || s
 }
 
 // ── Data Loading ───────────────────────────────────────────────────
@@ -260,6 +352,7 @@ function resetForm() {
   form.type = ''
   form.description = ''
   form.sections = []
+  form.params = { timeRange: '7d', outputFormat: 'pdf', autoSend: false, receivers: '' }
   formRef.value?.resetFields()
 }
 
@@ -277,6 +370,7 @@ function openEditDialog(row: any) {
   form.type = row.type || ''
   form.description = row.description || ''
   form.sections = row.sections || []
+  form.params = row.params || { timeRange: '7d', outputFormat: 'pdf', autoSend: false, receivers: '' }
   dialogVisible.value = true
 }
 
@@ -291,6 +385,7 @@ async function submitForm() {
         type: form.type,
         description: form.description,
         sections: form.sections,
+        params: form.params,
       }
       if (isEditing.value) {
         const { data } = await reportService.updateTemplate(editingId.value, payload)
@@ -322,7 +417,7 @@ async function submitForm() {
 // ── Actions ────────────────────────────────────────────────────────
 async function handleDelete(row: any) {
   try {
-    await ElMessageBox.confirm(`确认删除模板「${row.name}」？此操作不可恢复。`, '删除确认', {
+    await ElMessageBox.confirm('确认删除模板「' + row.name + '」？此操作不可恢复。', '删除确认', {
       confirmButtonText: '删除',
       cancelButtonText: '取消',
       type: 'warning',
@@ -341,6 +436,51 @@ async function handleDelete(row: any) {
 
 function handleGenerate(row: any) {
   router.push({ name: 'report-generate', query: { template_id: row.id } })
+}
+
+function openPreview(row: any) {
+  previewData.value = row
+  previewVisible.value = true
+}
+
+async function handleCopy(row: any) {
+  try {
+    const payload = {
+      name: row.name + ' (副本)',
+      type: row.type,
+      description: row.description,
+      sections: row.sections || [],
+      params: row.params || {},
+    }
+    const { data } = await reportService.createTemplate(payload)
+    if (data.code === 0) {
+      ElMessage.success('模板复制成功')
+      loadTemplates()
+    } else {
+      ElMessage.error(data.message || '复制失败')
+    }
+  } catch (err: any) {
+    ElMessage.error(err.message || '复制失败')
+  }
+}
+
+function handleExport(row: any) {
+  const exportData = {
+    name: row.name,
+    type: row.type,
+    description: row.description,
+    sections: row.sections,
+    params: row.params || {},
+  }
+  const jsonStr = JSON.stringify(exportData, null, 2)
+  const blob = new Blob([jsonStr], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'template_' + (row.name || 'export') + '.json'
+  link.click()
+  URL.revokeObjectURL(url)
+  ElMessage.success('模板已导出')
 }
 
 // ── Lifecycle ──────────────────────────────────────────────────────

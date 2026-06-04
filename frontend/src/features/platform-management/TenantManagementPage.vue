@@ -381,12 +381,12 @@ async function toggleTenant(row: any, newStatus: string) {
   const label = newStatus === 'active' ? '启用' : '停用'
   try {
     await ElMessageBox.confirm(
-      `确定${label}租户「${row.name}」吗？`,
-      `${label}确认`,
+      '确定' + label + '租户「' + row.name + '」吗？',
+      label + '确认',
       { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' },
     )
     await platformService.tenantUpdate(row.id, { status: newStatus })
-    ElMessage.success(`已${label}租户 ${row.name}`)
+    ElMessage.success('已' + label + '租户 ' + row.name)
     loadTenants()
   } catch {
     // cancelled
@@ -397,7 +397,7 @@ async function toggleTenant(row: any, newStatus: string) {
 async function deleteTenant(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定删除租户「${row.name}」吗？此操作不可恢复！`,
+      '确定删除租户「' + row.name + '」吗？此操作不可恢复！',
       '删除确认',
       { confirmButtonText: '删除', cancelButtonText: '取消', type: 'error' },
     )

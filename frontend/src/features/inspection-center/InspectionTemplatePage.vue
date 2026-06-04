@@ -286,7 +286,7 @@ async function handleSubmit() {
 async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定要删除模板「${row.name}」吗？此操作不可恢复。`,
+      '确定要删除模板「' + row.name + '」吗？此操作不可恢复。',
       '删除确认',
       { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' }
     )

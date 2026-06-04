@@ -60,7 +60,7 @@
       <el-col :span="14">
         <div class="autops-card">
           <div class="autops-card-header">
-            <span class="autops-card-title">{{ currentGroup ? `分组: ${currentGroup.name}` : '分组资产列表' }}</span>
+            <span class="autops-card-title">{{ currentGroup ? '分组: ' + currentGroup.name : '分组资产列表' }}</span>
             <div v-if="currentGroup">
               <el-button type="primary" size="small" @click="showAddMemberDialog = true" :icon="Plus">
                 添加资产
@@ -337,7 +337,7 @@ async function addMembers() {
     const asset_ids = selectedAssets.value.map((a) => a.id)
     const { data } = await api.post(R.ASSET_GROUP_MEMBERS(currentGroup.value.id), { asset_ids })
     if (data.code === 0) {
-      ElMessage.success(`已添加 ${selectedAssets.value.length} 个资产`)
+      ElMessage.success('已添加 ' + selectedAssets.value.length + ' 个资产')
       showAddMemberDialog.value = false
       selectedAssets.value = []
       assetSearch.value = ''

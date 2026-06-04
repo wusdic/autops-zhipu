@@ -593,10 +593,10 @@ function formatJobType(type: string): string {
 
 function calcRunningDuration(startedAt: string): string {
   const diff = Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000)
-  if (diff < 60) return `${diff}s`
+  if (diff < 60) return diff + 's'
   const min = Math.floor(diff / 60)
   const sec = diff % 60
-  return `${min}m${sec}s`
+  return min + 'm' + sec + 's'
 }
 
 // ---------- Collector API ----------
@@ -625,7 +625,7 @@ async function loadCollectors() {
 
 async function deleteCollector(id: string) {
   try {
-    const { data } = await api.delete(`${R.COLLECTORS}/${id}`)
+    const { data } = await api.delete(R.COLLECTORS + '/' + id)
     if (data.code === 0) {
       ElMessage.success('已删除')
       loadCollectors()
@@ -644,7 +644,7 @@ async function openDetailDialog(row: Collector) {
   healthChecks.value = []
 
   try {
-    const { data } = await api.get(`${R.COLLECTORS}/${row.id}/health-checks`, {
+    const { data } = await api.get(R.COLLECTORS + '/' + row.id + '/health-checks', {
       params: { page: 1, page_size: 10 },
     })
     if (data.code === 0) {
@@ -756,7 +756,7 @@ async function viewJobLogs(job: CollectionJob) {
   showLogDialog.value = true
 
   try {
-    const { data } = await api.get(`${R.COLLECTION_JOBS}/${job.id}/logs`)
+    const { data } = await api.get(R.COLLECTION_JOBS + '/' + job.id + '/logs')
     if (data.code === 0) {
       jobLogs.value = typeof data.data === 'string' ? data.data : JSON.stringify(data.data, null, 2)
     }
@@ -771,12 +771,12 @@ async function viewJobLogs(job: CollectionJob) {
 async function retryJob(job: CollectionJob) {
   try {
     await ElMessageBox.confirm(
-      `确定重试采集任务「${job.collector_name} - ${job.asset_name}」？`,
+      '确定重试采集任务「' + job.collector_name + ' - ' + job.asset_name + '」？',
       '确认重试',
       { type: 'warning' },
     )
 
-    const { data } = await api.post(`${R.COLLECTION_JOBS}/${job.id}/retry`)
+    const { data } = await api.post(R.COLLECTION_JOBS + '/' + job.id + '/retry')
     if (data.code === 0) {
       ElMessage.success('已重新触发')
       loadJobs()

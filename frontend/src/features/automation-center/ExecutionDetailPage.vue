@@ -437,7 +437,7 @@ async function submitRollback() {
     const payload: any = {
       type: rollbackType.value === 'script' ? 'script_execution' : 'playbook_execution',
       ref_id: rollbackItemId.value,
-      comment: rollbackComment.value || `回滚执行 ${executionId}`,
+      comment: rollbackComment.value || '回滚执行 ' + executionId,
       rollback_for: executionId,
       asset_id: execution.value?.asset_id,
     }
@@ -465,7 +465,7 @@ function downloadLogs() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `execution-${executionId}-logs.txt`
+  a.download = 'execution-' + executionId + '-logs.txt'
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)

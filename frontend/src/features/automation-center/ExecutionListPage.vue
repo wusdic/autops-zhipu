@@ -281,7 +281,7 @@
     <!-- ========== Log Drawer ========== -->
     <el-drawer
       v-model="logDrawerVisible"
-      :title="`执行日志 - ${logDrawerTitle}`"
+      :title="'执行日志 - ' + logDrawerTitle"
       direction="rtl"
       size="55%"
       :destroy-on-close="true"
@@ -370,7 +370,7 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function computeDuration(start: string | null | undefined, end?: string | null): string {
@@ -384,15 +384,15 @@ function computeDuration(start: string | null | undefined, end?: string | null):
 }
 
 function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${seconds}秒`
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}分${seconds % 60}秒`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}时${Math.floor((seconds % 3600) / 60)}分`
-  return `${Math.floor(seconds / 86400)}天${Math.floor((seconds % 86400) / 3600)}时`
+  if (seconds < 60) return seconds + '秒'
+  if (seconds < 3600) return Math.floor(seconds / 60) + '分' + seconds % 60 + '秒'
+  if (seconds < 86400) return Math.floor(seconds / 3600) + '时' + Math.floor((seconds % 3600) / 60) + '分'
+  return Math.floor(seconds / 86400) + '天' + Math.floor((seconds % 86400) / 3600) + '时'
 }
 
 function truncateId(id: string | undefined): string {
   if (!id) return '-'
-  return id.length > 12 ? `${id.slice(0, 8)}...${id.slice(-4)}` : id
+  return id.length > 12 ? id.slice(0, 8) + '...' + id.slice(-4) : id
 }
 
 function triggerSourceType(source: string): string {
@@ -458,7 +458,7 @@ async function loadTrend() {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
       const pad = (n: number) => String(n).padStart(2, '0')
-      days.push(`${pad(d.getMonth() + 1)}-${pad(d.getDate())}`)
+      days.push(pad(d.getMonth() + 1) + '-' + pad(d.getDate()))
     }
 
     // Build the trend data for the chart
@@ -591,7 +591,7 @@ async function cancelExecution(row: any) {
   const id = row.execution_id || row.id
   try {
     await ElMessageBox.confirm(
-      `确认取消执行 ${truncateId(id)}？执行中的任务将被终止。`,
+      '确认取消执行 ' + truncateId(id) + '？执行中的任务将被终止。',
       '取消执行',
       { confirmButtonText: '确认取消', cancelButtonText: '返回', type: 'warning' },
     )
@@ -610,7 +610,7 @@ async function retryExecution(row: any) {
   const id = row.execution_id || row.id
   try {
     await ElMessageBox.confirm(
-      `确认重新执行 ${truncateId(id)}？将使用相同的参数重新发起执行。`,
+      '确认重新执行 ' + truncateId(id) + '？将使用相同的参数重新发起执行。',
       '重新执行',
       { confirmButtonText: '确认重试', cancelButtonText: '返回', type: 'info' },
     )
@@ -640,7 +640,7 @@ async function batchCancel() {
   }
   try {
     await ElMessageBox.confirm(
-      `确认批量取消 ${cancellable.length} 条执行？`,
+      '确认批量取消 ' + cancellable.length + ' 条执行？',
       '批量取消',
       { confirmButtonText: '确认取消', cancelButtonText: '返回', type: 'warning' },
     )
@@ -650,9 +650,9 @@ async function batchCancel() {
     const results = await Promise.allSettled(promises)
     const failed = results.filter((r) => r.status === 'rejected').length
     if (failed === 0) {
-      ElMessage.success(`${cancellable.length} 条执行已全部取消`)
+      ElMessage.success(cancellable.length + ' 条执行已全部取消')
     } else {
-      ElMessage.warning(`${cancellable.length - failed} 条成功，${failed} 条失败`)
+      ElMessage.warning(cancellable.length - failed + ' 条成功，' + failed + ' 条失败')
     }
     clearSelection()
     loadExecutions()
@@ -672,7 +672,7 @@ async function batchRetry() {
   }
   try {
     await ElMessageBox.confirm(
-      `确认批量重新执行 ${retriable.length} 条执行？`,
+      '确认批量重新执行 ' + retriable.length + ' 条执行？',
       '批量重试',
       { confirmButtonText: '确认重试', cancelButtonText: '返回', type: 'info' },
     )
@@ -685,9 +685,9 @@ async function batchRetry() {
     const results = await Promise.allSettled(promises)
     const failed = results.filter((r) => r.status === 'rejected').length
     if (failed === 0) {
-      ElMessage.success(`${retriable.length} 条执行已全部重新发起`)
+      ElMessage.success(retriable.length + ' 条执行已全部重新发起')
     } else {
-      ElMessage.warning(`${retriable.length - failed} 条成功，${failed} 条失败`)
+      ElMessage.warning(retriable.length - failed + ' 条成功，' + failed + ' 条失败')
     }
     clearSelection()
     loadExecutions()

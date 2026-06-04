@@ -63,7 +63,7 @@
       <!-- 拓扑画布 -->
       <el-col :span="18">
         <div class="topology-canvas" ref="canvasRef" @mousedown="startDrag" @mousemove="onDrag" @mouseup="endDrag" @mouseleave="endDrag" @wheel.prevent="onWheel">
-          <svg :width="canvasW" :height="canvasH" :viewBox="`${viewX} ${viewY} ${canvasW/zoom} ${canvasH/zoom}`" style="background:#fafbfc">
+          <svg :width="canvasW" :height="canvasH" :viewBox="viewX + ' ' + viewY + ' ' + canvasW/zoom + ' ' + canvasH/zoom" style="background:#fafbfc">
             <defs>
               <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#c9cdd4" /></marker>
               <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f53f3f" /></marker>
@@ -93,7 +93,7 @@
             </g>
 
             <!-- 节点 -->
-            <g v-for="node in filteredNodes" :key="node.id" :transform="`translate(${node.x},${node.y})`" @click.stop="selectNode(node)" style="cursor:pointer">
+            <g v-for="node in filteredNodes" :key="node.id" :transform="'translate(' + node.x + ',' + node.y + ')'" @click.stop="selectNode(node)" style="cursor:pointer">
               <rect :x="-65" :y="-28" width="130" height="56" rx="10"
                     :fill="getNodeFill(node)" :stroke="getNodeStroke(node)"
                     :stroke-width="isHighlighted(node)?3:node.id===selectedNode?.id?2.5:1.5"
@@ -273,7 +273,7 @@ const minimapViewBox = computed(() => {
   const ys = nodes.value.map(n => n.y)
   const minX = Math.min(...xs) - 20, maxX = Math.max(...xs) + 20
   const minY = Math.min(...ys) - 20, maxY = Math.max(...ys) + 20
-  return `${minX} ${minY} ${maxX - minX} ${maxY - minY}`
+  return minX + ' ' + minY + ' ' + maxX - minX + ' ' + maxY - minY
 })
 
 function getNode(id: string) { return nodes.value.find(n => n.id === id) }
@@ -351,11 +351,11 @@ async function loadTopology() {
         edges.value = relResults.filter(Boolean).flatMap((r: any) => r.data?.data?.relations || r.data?.data || [])
         const seen = new Set<string>()
         edges.value = edges.value.filter((e: any) => {
-          const key = `${e.source_id}-${e.target_id}-${e.relation_type}`
+          const key = e.source_id + '-' + e.target_id + '-' + e.relation_type
           if (seen.has(key)) return false; seen.add(key); return true
         })
       }
-      ElMessage.success(`加载 ${nodes.value.length} 个节点, ${edges.value.length} 条关系`)
+      ElMessage.success('加载 ' + nodes.value.length + ' 个节点, ' + edges.value.length + ' 条关系')
     }
   } catch { ElMessage.error('加载拓扑失败') }
 }
@@ -404,7 +404,7 @@ function selectNode(node: any) {
 }
 
 function viewAsset() {
-  if (selectedNode.value?.id) router.push(`/assets/${selectedNode.value.id}`)
+  if (selectedNode.value?.id) router.push('/assets/' + selectedNode.value.id)
 }
 
 function startImpact() {

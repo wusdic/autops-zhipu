@@ -129,7 +129,7 @@
     <!-- ── Config Dialog ─────────────────────────────────── -->
     <el-dialog
       v-model="configDialogVisible"
-      :title="`配置 - ${configuringName}`"
+      :title="'配置 - ' + configuringName"
       width="600px"
       destroy-on-close
     >
@@ -274,10 +274,10 @@ async function testConnection(row: any) {
   testingMap[row.name] = true
   try {
     await platformService.integrationTest(row.name)
-    ElMessage.success(`${row.name} 连接测试成功`)
+    ElMessage.success(row.name + ' 连接测试成功')
     loadIntegrations()
   } catch (err: any) {
-    ElMessage.error(err.message || `${row.name} 连接测试失败`)
+    ElMessage.error(err.message || row.name + ' 连接测试失败')
   } finally {
     testingMap[row.name] = false
   }
@@ -288,11 +288,11 @@ async function toggleIntegration(row: any) {
   const action = row.status === 'connected' ? '禁用' : '启用'
   try {
     await ElMessageBox.confirm(
-      `确定${action}集成「${row.name}」吗？`,
-      `${action}确认`,
+      '确定' + action + '集成「' + row.name + '」吗？',
+      action + '确认',
       { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' },
     )
-    ElMessage.success(`已${action} ${row.name}`)
+    ElMessage.success('已' + action + ' ' + row.name)
     loadIntegrations()
   } catch {
     // cancelled
@@ -313,7 +313,7 @@ async function saveConfig() {
   savingConfig.value = true
   try {
     // In a real implementation this would call an update API
-    ElMessage.success(`${configuringName.value} 配置已保存`)
+    ElMessage.success(configuringName.value + ' 配置已保存')
     configDialogVisible.value = false
     loadIntegrations()
   } catch (err: any) {

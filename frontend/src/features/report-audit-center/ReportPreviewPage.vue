@@ -46,7 +46,7 @@
       <!-- Report Sections -->
       <div v-for="(section, idx) in previewData.sections || []" :key="idx" class="autops-card mb-lg">
         <div class="autops-card-header">
-          <span class="autops-card-title">{{ section.title || `章节 ${idx + 1}` }}</span>
+          <span class="autops-card-title">{{ section.title || '章节 ' + idx + 1 }}</span>
         </div>
         <div class="autops-card-body">
           <!-- Summary Section -->
@@ -162,7 +162,7 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function formatLabel(f: string): string {
@@ -199,7 +199,7 @@ async function handleDownload() {
       const link = document.createElement('a')
       link.href = url
       const ext = previewData.value?.format || 'pdf'
-      link.download = `${previewData.value?.title || 'report'}.${ext}`
+      link.download = previewData.value?.title || 'report' + '.' + ext
       link.click()
       URL.revokeObjectURL(url)
       ElMessage.success('下载成功')

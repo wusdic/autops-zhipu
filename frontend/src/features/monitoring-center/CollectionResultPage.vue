@@ -157,17 +157,17 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function formatDuration(ms: number | null | undefined): string {
   if (ms == null) return '-'
-  if (ms < 1000) return `${ms}ms`
+  if (ms < 1000) return ms + 'ms'
   const seconds = Math.floor(ms / 1000)
-  if (seconds < 60) return `${seconds}s`
+  if (seconds < 60) return seconds + 's'
   const minutes = Math.floor(seconds / 60)
   const remainSeconds = seconds % 60
-  return `${minutes}m${remainSeconds}s`
+  return minutes + 'm' + remainSeconds + 's'
 }
 
 function statusTagType(status: string): '' | 'success' | 'danger' | 'warning' | 'info' {

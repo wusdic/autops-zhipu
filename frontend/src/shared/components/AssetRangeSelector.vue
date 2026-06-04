@@ -88,10 +88,10 @@ const assetTypes = [
 const previewText = computed(() => {
   switch (rangeMode.value) {
     case 'all': return '全部资产'
-    case 'type': return selectedTypes.value.length ? `类型: ${selectedTypes.value.length} 种` : ''
-    case 'group': return selectedGroups.value.length ? `分组: ${selectedGroups.value.length} 个` : ''
-    case 'tag': return selectedTags.value.length ? `标签: ${selectedTags.value.length} 个` : ''
-    case 'custom': return selectedAssets.value.length ? `已选: ${selectedAssets.value.length} 个资产` : ''
+    case 'type': return selectedTypes.value.length ? '类型: ' + selectedTypes.value.length + ' 种' : ''
+    case 'group': return selectedGroups.value.length ? '分组: ' + selectedGroups.value.length + ' 个' : ''
+    case 'tag': return selectedTags.value.length ? '标签: ' + selectedTags.value.length + ' 个' : ''
+    case 'custom': return selectedAssets.value.length ? '已选: ' + selectedAssets.value.length + ' 个资产' : ''
     default: return ''
   }
 })

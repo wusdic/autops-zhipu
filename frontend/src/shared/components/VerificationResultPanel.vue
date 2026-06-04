@@ -10,7 +10,7 @@
       </span>
     </div>
     <div class="vp-items">
-      <div v-for="(item, idx) in items" :key="idx" class="vp-item" :class="`status-${item.status}`">
+      <div v-for="(item, idx) in items" :key="idx" class="vp-item" :class="'status-' + item.status">
         <el-icon v-if="item.status === 'pass'" style="color:#00b42a"><CircleCheck /></el-icon>
         <el-icon v-else-if="item.status === 'fail'" style="color:#f53f3f"><CircleClose /></el-icon>
         <el-icon v-else style="color:#c9cdd4"><Clock /></el-icon>

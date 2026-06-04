@@ -3,7 +3,7 @@
  * 所有环境相关的常量统一在此定义
  */
 const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-const defaultWsUrl = `${wsProtocol}//${window.location.host}/api/v1/ws`
+const defaultWsUrl = wsProtocol + '//' + window.location.host + '/api/v1/ws'
 
 export const APP_CONFIG = {
   /** localStorage 中存储 auth token 的 key */

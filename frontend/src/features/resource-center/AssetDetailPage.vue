@@ -9,7 +9,7 @@
         <el-tag :type="healthType(asset.health_status)" size="small" style="margin-left: 4px">{{ asset.health_status }}</el-tag>
       </div>
       <div class="autops-toolbar-right" v-if="asset">
-        <el-button type="primary" plain @click="$router.push(`/assets/${asset.id}/topology`)">
+        <el-button type="primary" plain @click="$router.push('/assets/' + asset.id + '/topology')">
           <el-icon><Connection /></el-icon> 拓扑图
         </el-button>
         <el-button type="primary" @click="navToInspectionFromAsset(assetId)">
@@ -214,7 +214,7 @@
                       <el-option
                         v-for="c in allCredentials"
                         :key="c.id"
-                        :label="`${c.name}（${c.username || c.type || '-'}）`"
+                        :label="c.name + '（' + c.username || c.type || '-' + '）'"
                         :value="c.id"
                       />
                     </el-select>
@@ -288,7 +288,7 @@
                       <el-option
                         v-for="c in allCollectionConfigs"
                         :key="c.id"
-                        :label="`${c.name}（${c.type || '-'}）`"
+                        :label="c.name + '（' + c.type || '-' + '）'"
                         :value="c.id"
                       />
                     </el-select>
@@ -351,7 +351,7 @@
                       <el-option
                         v-for="p in allPolicies"
                         :key="p.id"
-                        :label="`${p.name}（${p.risk_level || '-'}）`"
+                        :label="p.name + '（' + p.risk_level || '-' + '）'"
                         :value="p.id"
                       />
                     </el-select>

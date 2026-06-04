@@ -87,8 +87,8 @@ function fmtTime(t: string) {
   const now = new Date()
   const diff = now.getTime() - d.getTime()
   if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return `${Math.floor(diff/60000)} 分钟前`
-  if (diff < 86400000) return `${Math.floor(diff/3600000)} 小时前`
+  if (diff < 3600000) return Math.floor(diff/60000) + ' 分钟前'
+  if (diff < 86400000) return Math.floor(diff/3600000) + ' 小时前'
   return d.toLocaleDateString('zh-CN')
 }
 
@@ -123,9 +123,9 @@ async function markAllRead() {
 function handleNotification(n: any) {
   if (!n.read_at) markRead(n.id)
   if (n.link) router.push(n.link)
-  else if (n.type === 'alert' && n.ref_id) router.push(`/alerts/${n.ref_id}`)
-  else if (n.type === 'approval' && n.ref_id) router.push(`/executions/${n.ref_id}`)
-  else if (n.type === 'ticket' && n.ref_id) router.push(`/tickets/${n.ref_id}`)
+  else if (n.type === 'alert' && n.ref_id) router.push('/alerts/' + n.ref_id)
+  else if (n.type === 'approval' && n.ref_id) router.push('/executions/' + n.ref_id)
+  else if (n.type === 'ticket' && n.ref_id) router.push('/tickets/' + n.ref_id)
 }
 
 function viewAll() { router.push('/notifications') }

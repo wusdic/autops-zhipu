@@ -240,7 +240,7 @@ async function loadData() {
 
 async function runDiscovery(row: any) {
   try {
-    await ElMessageBox.confirm(`确认执行发现模板「${row.name}」？`, '执行确认', { type: 'info' })
+    await ElMessageBox.confirm('确认执行发现模板「' + row.name + '」？', '执行确认', { type: 'info' })
     ElMessage.success('发现任务已提交')
   } catch { /* cancelled */ }
 }
@@ -257,7 +257,7 @@ function editTemplate(type: string, row: any) {
 
 async function deleteTemplate(type: string, row: any) {
   try {
-    await ElMessageBox.confirm(`确认删除「${row.name}」？此操作不可恢复。`, '删除确认', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除「' + row.name + '」？此操作不可恢复。', '删除确认', { type: 'warning' })
     ElMessage.success('已删除')
     loadData()
   } catch { /* cancelled */ }
@@ -268,7 +268,7 @@ function simulateRule(row: any) {
 }
 
 function toggleRule(row: any) {
-  ElMessage.success(`规则已${row.enabled ? '启用' : '禁用'}`)
+  ElMessage.success('规则已' + row.enabled ? '启用' : '禁用')
 }
 
 function viewVersionDiff(row: any) {
@@ -277,7 +277,7 @@ function viewVersionDiff(row: any) {
 
 async function rollbackVersion(row: any) {
   try {
-    await ElMessageBox.confirm(`确认回滚到版本 ${row.version}？`, '回滚确认', { type: 'warning' })
+    await ElMessageBox.confirm('确认回滚到版本 ' + row.version + '？', '回滚确认', { type: 'warning' })
     ElMessage.success('配置已回滚')
     loadData()
   } catch { /* cancelled */ }

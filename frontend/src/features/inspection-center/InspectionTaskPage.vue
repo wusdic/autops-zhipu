@@ -264,13 +264,13 @@ function formatDuration(start: string, end: string): string {
     const diff = endTime - startTime
     if (diff < 0) return '-'
     const seconds = Math.floor(diff / 1000)
-    if (seconds < 60) return `${seconds} 秒`
+    if (seconds < 60) return seconds + ' 秒'
     const minutes = Math.floor(seconds / 60)
     const remainSeconds = seconds % 60
-    if (minutes < 60) return `${minutes} 分 ${remainSeconds} 秒`
+    if (minutes < 60) return minutes + ' 分 ' + remainSeconds + ' 秒'
     const hours = Math.floor(minutes / 60)
     const remainMinutes = minutes % 60
-    return `${hours} 小时 ${remainMinutes} 分`
+    return hours + ' 小时 ' + remainMinutes + ' 分'
   } catch {
     return '-'
   }
@@ -325,7 +325,7 @@ async function triggerTask(data: Record<string, any>) {
 
 // ---------- 操作 ----------
 function handleTriggerTask() {
-  triggerForm.name = `手动巡检_${new Date().toLocaleString('zh-CN', { hour12: false }).replace(/[\/:]/g, '-').replace(/\s/g, '_')}`
+  triggerForm.name = '手动巡检_' + new Date().toLocaleString('zh-CN', { hour12: false  + ').replace(/[\/:]/g, '-').replace(/\s/g, '_')}'
   triggerDialogVisible.value = true
 }
 
@@ -366,7 +366,7 @@ async function handleView(row: any) {
 async function handleCancel(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定要取消任务「${row.name}」吗？`,
+      '确定要取消任务「' + row.name + '」吗？',
       '取消确认',
       { confirmButtonText: '确认取消', cancelButtonText: '返回', type: 'warning' }
     )

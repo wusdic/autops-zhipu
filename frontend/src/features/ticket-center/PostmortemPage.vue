@@ -190,7 +190,7 @@ async function submitForm() {
 
 async function handleDelete(row: any) {
   try {
-    await ElMessageBox.confirm(`确认删除复盘报告"${row.title}"？`, '确认', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除复盘报告"' + row.title + '"？', '确认', { type: 'warning' })
     await knowledgeService.delete(row.id)
     ElMessage.success('删除成功')
     fetchList()

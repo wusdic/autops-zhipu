@@ -110,7 +110,7 @@
                 </el-table-column>
                 <el-table-column label="操作" width="100" fixed="right">
                   <template #default="{ row }">
-                    <el-button plain type="primary" size="small" @click="router.push(`/response/alerts/${row.id}`)">
+                    <el-button plain type="primary" size="small" @click="router.push('/response/alerts/' + row.id)">
                       查看
                     </el-button>
                   </template>
@@ -290,9 +290,9 @@ async function fetchRelatedAlerts(detail: Record<string, any>) {
 // Build timeline from anomaly data
 function buildTimeline(data: Record<string, any>) {
   const items: any[] = []
-  if (data.created_at) items.push({ time: data.created_at, action: '异常创建', type: 'created', detail: data.source ? `来源: ${data.source}` : '' })
-  if (data.acknowledged_at) items.push({ time: data.acknowledged_at, action: '已确认', type: 'acknowledged', detail: data.acknowledged_by ? `操作人: ${data.acknowledged_by}` : '' })
-  if (data.assigned_at) items.push({ time: data.assigned_at, action: '已分配', type: 'assigned', detail: data.assignee_name ? `处理人: ${data.assignee_name}` : '' })
+  if (data.created_at) items.push({ time: data.created_at, action: '异常创建', type: 'created', detail: data.source ? '来源: ' + data.source : '' })
+  if (data.acknowledged_at) items.push({ time: data.acknowledged_at, action: '已确认', type: 'acknowledged', detail: data.acknowledged_by ? '操作人: ' + data.acknowledged_by : '' })
+  if (data.assigned_at) items.push({ time: data.assigned_at, action: '已分配', type: 'assigned', detail: data.assignee_name ? '处理人: ' + data.assignee_name : '' })
   if (data.escalated_at) items.push({ time: data.escalated_at, action: '已升级', type: 'escalated', detail: '' })
   if (data.closed_at) items.push({ time: data.closed_at, action: '已关闭', type: 'closed', detail: data.close_reason || '' })
   // Sort by time desc

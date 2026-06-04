@@ -206,7 +206,7 @@ const buildParams = (): Record<string, unknown> => {
   const params: Record<string, unknown> = {
     page: queryParams.page,
     page_size: queryParams.pageSize,
-    ordering: queryParams.orderDir === 'desc' ? `-${queryParams.orderBy}` : queryParams.orderBy,
+    ordering: queryParams.orderDir === 'desc' ? '-' + queryParams.orderBy : queryParams.orderBy,
   }
   if (queryParams.keyword) params.keyword = queryParams.keyword
   if (queryParams.level) params.level = queryParams.level
@@ -283,7 +283,7 @@ const handleExport = async () => {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `audit_logs_${Date.now()}.csv`)
+    link.setAttribute('download', 'audit_logs_' + Date.now() + '.csv')
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)

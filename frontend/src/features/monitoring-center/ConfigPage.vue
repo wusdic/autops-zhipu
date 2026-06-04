@@ -138,7 +138,7 @@
     <!-- ========== 版本历史对话框 ========== -->
     <el-dialog
       v-model="showHistoryDialog"
-      :title="`版本历史 - ${historyConfigName}`"
+      :title="'版本历史 - ' + historyConfigName"
       width="780px"
       destroy-on-close
     >
@@ -230,15 +230,15 @@
         v-if="diffLeft && diffRight"
         :old-value="diffLeft.config_value"
         :new-value="diffRight.config_value"
-        :old-label="`v${diffLeft.version} (${formatTime(diffLeft.created_at)})`"
-        :new-label="`v${diffRight.version} (${formatTime(diffRight.created_at)})`"
+        :old-label="'v' + diffLeft.version + ' (' + formatTime(diffLeft.created_at) + ')'"
+        :new-label="'v' + diffRight.version + ' (' + formatTime(diffRight.created_at) + ')'"
       />
     </el-dialog>
 
     <!-- ========== 配置绑定对话框 ========== -->
     <el-dialog
       v-model="showBindingDialog"
-      :title="`配置绑定 - ${bindingConfigName}`"
+      :title="'配置绑定 - ' + bindingConfigName"
       width="780px"
       destroy-on-close
     >
@@ -561,13 +561,13 @@ function handleVersionSelection(rows: ConfigVersion[]) {
 async function rollbackVersion(version: ConfigVersion) {
   try {
     await ElMessageBox.confirm(
-      `确定回滚到 v${version.version}？当前激活版本将被替换。`,
+      '确定回滚到 v' + version.version + '？当前激活版本将被替换。',
       '确认回滚',
       { type: 'warning', confirmButtonText: '回滚', cancelButtonText: '取消' }
     )
     const { data } = await api.post(R.CONFIG_PUBLISH(version.id))
     if (data.code === 0) {
-      ElMessage.success(`已回滚到 v${version.version}`)
+      ElMessage.success('已回滚到 v' + version.version)
       await loadVersions(historyConfigId.value)
       loadConfigs()
     } else {

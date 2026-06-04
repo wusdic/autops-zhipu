@@ -257,7 +257,7 @@ async function save() {
   if (!form.name) return ElMessage.warning('请输入名称')
   try {
     const payload = { ...form, active: form.active }
-    if (editing.value) await api.put(`${API.ALERT_RULES}/${editId.value}`, payload)
+    if (editing.value) await api.put(API.ALERT_RULES + '/' + editId.value, payload)
     else await api.post(API.ALERT_RULES, payload)
     ElMessage.success('保存成功'); showDialog.value = false; load()
   } catch (e: any) { ElMessage.error(e?.message || '保存失败') }
@@ -265,7 +265,7 @@ async function save() {
 
 async function viewDetail(row: any) {
   try {
-    const res = await api.get(`${API.ALERT_RULES}/${row.id}`)
+    const res = await api.get(API.ALERT_RULES + '/' + row.id)
     if (res.data?.code === 0) detail.value = res.data.data
     else detail.value = row
   } catch { detail.value = row }
@@ -275,21 +275,21 @@ async function viewDetail(row: any) {
 
 async function toggleRule(row: any) {
   try {
-    await api.patch(`${API.ALERT_RULES}/${row.id}`, { active: row._active })
+    await api.patch(API.ALERT_RULES + '/' + row.id, { active: row._active })
     ElMessage.success(row._active ? '已启用' : '已停用')
   } catch { row._active = !row._active; ElMessage.error('操作失败') }
 }
 
 async function testRule(row: any) {
   try {
-    const res = await api.post(`${API.ALERT_RULES}/${row.id}/test`)
+    const res = await api.post(API.ALERT_RULES + '/' + row.id + '/test')
     ElMessage.success(res.data?.data?.matched ? '规则命中! 条件满足' : '规则未命中，条件不满足')
   } catch { ElMessage.warning('测试功能暂不可用') }
 }
 
 async function duplicateRule(row: any) {
   try {
-    await api.post(API.ALERT_RULES, { ...row, name: `${row.name} (副本)`, active: false, id: undefined })
+    await api.post(API.ALERT_RULES, { ...row, name: row.name + ' (副本)', active: false, id: undefined })
     ElMessage.success('复制成功'); load()
   } catch { ElMessage.error('复制失败') }
 }

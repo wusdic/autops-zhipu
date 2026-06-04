@@ -373,7 +373,7 @@ const maxAlertCount = computed(() => {
 })
 
 function barWidth(count: number) {
-  return `${Math.max((count / maxAlertCount.value) * 100, 4)}%`
+  return Math.max((count / maxAlertCount.value) * 100, 4) + '%'
 }
 
 function barColor(count: number) {

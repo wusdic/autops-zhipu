@@ -310,7 +310,7 @@ function openReview(row: any) {
 async function handlePublish(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定通过并发布「${row.title || currentItem.title}」？`,
+      '确定通过并发布「' + row.title || currentItem.title + '」？',
       '确认发布',
       { confirmButtonText: '确认', cancelButtonText: '取消', type: 'success' }
     )
@@ -332,7 +332,7 @@ async function handlePublish(row: any) {
 async function handleReject(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定驳回「${row.title || currentItem.title}」？`,
+      '确定驳回「' + row.title || currentItem.title + '」？',
       '确认驳回',
       { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' }
     )
@@ -357,7 +357,7 @@ async function handleReject(row: any) {
 async function handleSubmit(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定将「${row.title}」提交审核？`,
+      '确定将「' + row.title + '」提交审核？',
       '确认提交',
       { confirmButtonText: '确认', cancelButtonText: '取消', type: 'info' }
     )

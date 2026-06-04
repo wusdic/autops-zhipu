@@ -99,7 +99,7 @@
  >
         <el-table-column prop="name" label="资产名" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-link type="primary" @click="router.push(`/assets/${row.id}`)">
+            <el-link type="primary" @click="router.push('/assets/' + row.id)">
               {{ row.name || row.hostname || '-' }}
             </el-link>
           </template>
@@ -258,7 +258,7 @@ function formatTime(val: string | number | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes())
 }
 
 function getAssetTypeLabel(type: string): string {

@@ -263,12 +263,12 @@ const getDetailScopeGroups = computed(() => {
 })
 
 const usageBars = computed(() => {
-  if (!detailData.value?.use_count) return Array.from({ length: 7 }, (_, i) => ({ label: `${7 - i}天前`, height: 0 }))
+  if (!detailData.value?.use_count) return Array.from({ length: 7 }, (_, i) => ({ label: 7 - i + '天前', height: 0 }))
   const count = detailData.value.use_count || 0
   // 均匀分布，不使用随机数
   const avg = Math.max(5, Math.round(count / 7))
   return Array.from({ length: 7 }, (_, i) => ({
-    label: `${7 - i}天前`,
+    label: 7 - i + '天前',
     height: avg
   }))
 })
@@ -304,7 +304,7 @@ function expiryLabel(row: any) {
   if (isExpired(row)) return '已过期'
   if (isExpiringSoon(row)) {
     const days = Math.ceil((new Date(row.expires_at).getTime() - Date.now()) / 86400000)
-    return `${days}天后`
+    return days + '天后'
   }
   return '有效'
 }
@@ -374,7 +374,7 @@ async function toggleEnabled(row: any) {
 }
 
 async function handleDelete(row: any) {
-  await ElMessageBox.confirm(`确定删除「${row.name}」？所有请求将被拒绝。`, '确认', { type: 'warning' })
+  await ElMessageBox.confirm('确定删除「' + row.name + '」？所有请求将被拒绝。', '确认', { type: 'warning' })
   try { await api.delete(API.API_KEY_DETAIL(row.id)); ElMessage.success('已删除'); load() }
   catch (e: any) { ElMessage.error(e.response?.data?.message || '删除失败') }
 }

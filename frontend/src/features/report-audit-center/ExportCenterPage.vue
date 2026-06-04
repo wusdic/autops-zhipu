@@ -167,7 +167,7 @@ function downloadExport(row: any) {
 
 async function cancelExport(row: any) {
   try {
-    await api.post(`/api/v1/exports/${row.id}/cancel`)
+    await api.post('/api/v1/exports/' + row.id + '/cancel')
     ElMessage.success('导出已取消')
     loadExports()
   } catch { ElMessage.error('取消失败') }
@@ -176,7 +176,7 @@ async function cancelExport(row: any) {
 async function deleteExport(row: any) {
   try {
     await ElMessageBox.confirm('确认删除此导出记录？', '删除确认', { type: 'warning' })
-    await api.delete(`/api/v1/exports/${row.id}`)
+    await api.delete('/api/v1/exports/' + row.id)
     ElMessage.success('已删除')
     loadExports()
   } catch { /* cancelled */ }

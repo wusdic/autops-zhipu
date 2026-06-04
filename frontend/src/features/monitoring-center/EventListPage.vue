@@ -358,7 +358,7 @@
     >
       <div v-if="correlationEvent" class="correlation-drawer">
         <el-alert
-          :title="`基于事件: ${correlationEvent.description || correlationEvent.title || correlationEvent.id}`"
+          :title="'基于事件: ' + correlationEvent.description || correlationEvent.title || correlationEvent.id"
           type="info"
           :closable="false"
           show-icon
@@ -531,7 +531,7 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function parseJsonSafe(raw: any): any {
@@ -846,14 +846,14 @@ function exportEvents() {
 
   const csvContent = [
     headers.join(','),
-    ...rows.map((r) => r.map((cell) => `"${cell}"`).join(',')),
+    ...rows.map((r) => r.map((cell) => '"' + cell + '"').join(',')),
   ].join('\n')
 
   const BOM = '\uFEFF'
   const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
   const link = document.createElement('a')
   link.href = URL.createObjectURL(blob)
-  link.download = `events_${new Date().toISOString().slice(0, 10)}.csv`
+  link.download = 'events_' + new Date().toISOString().slice(0, 10) + '.csv'
   link.click()
   URL.revokeObjectURL(link.href)
   ElMessage.success('导出成功')

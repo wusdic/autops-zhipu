@@ -34,12 +34,12 @@
           <div class="ep-summary">{{ item.summary }}</div>
           <div v-if="item.detail" class="ep-detail-toggle" @click="toggleDetail(gIdx, iIdx)">
             <el-icon :size="12">
-              <ArrowDown v-if="!expanded[`${gIdx}-${iIdx}`]" />
+              <ArrowDown v-if="!expanded[gIdx + '-' + iIdx]" />
               <ArrowUp v-else />
             </el-icon>
-            {{ expanded[`${gIdx}-${iIdx}`] ? '收起' : '展开详情' }}
+            {{ expanded[gIdx + '-' + iIdx] ? '收起' : '展开详情' }}
           </div>
-          <div v-if="item.detail && expanded[`${gIdx}-${iIdx}`]" class="ep-detail">
+          <div v-if="item.detail && expanded[gIdx + '-' + iIdx]" class="ep-detail">
             <pre>{{ item.detail }}</pre>
           </div>
         </div>
@@ -73,7 +73,7 @@ defineEmits<{ collect: []; export: [] }>()
 const expanded = reactive<Record<string, boolean>>({})
 
 function toggleDetail(g: number, i: number) {
-  const key = `${g}-${i}`
+  const key = g + '-' + i
   expanded[key] = !expanded[key]
 }
 

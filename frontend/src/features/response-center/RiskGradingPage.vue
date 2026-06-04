@@ -164,7 +164,7 @@ const matrixCells = computed(() => {
       const im = it.impact || 1
       return l === likelihood && im === impact
     }).length
-    return { key: `${likelihood}-${impact}`, level, likelihood, impact, count }
+    return { key: likelihood + '-' + impact, level, likelihood, impact, count }
   })
 })
 
@@ -210,7 +210,7 @@ async function fetchData() {
 async function runAssessment() {
   assessing.value = true
   try {
-    await api.post(`${API.ASSETS}/risk-assessment`)
+    await api.post(API.ASSETS + '/risk-assessment')
     ElMessage.success('风险评估任务已触发')
     setTimeout(fetchData, 3000)
   } catch (e) {

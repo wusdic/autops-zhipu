@@ -160,7 +160,7 @@
           <el-form label-width="100px">
             <el-form-item label="选择凭证">
               <el-select v-model="wizardCredential" placeholder="选择已有凭证" style="width:300px">
-                <el-option v-for="c in credentials" :key="c.id" :label="`${c.name} (${c.credential_type})`" :value="c.id" />
+                <el-option v-for="c in credentials" :key="c.id" :label="c.name + ' (' + c.credential_type + ')'" :value="c.id" />
               </el-select>
             </el-form-item>
             <el-form-item label="或新建凭证">
@@ -413,7 +413,7 @@ async function createTask() {
 
 async function startTask(task: any) {
   try {
-    await api.post(`${API.DISCOVERY_TASKS}/${task.id}/start`)
+    await api.post(API.DISCOVERY_TASKS + '/' + task.id + '/start')
     ElMessage.success('任务已启动')
     loadTasks()
   } catch { ElMessage.error('启动失败') }
@@ -421,7 +421,7 @@ async function startTask(task: any) {
 
 async function stopTask(task: any) {
   try {
-    await api.post(`${API.DISCOVERY_TASKS}/${task.id}/stop`)
+    await api.post(API.DISCOVERY_TASKS + '/' + task.id + '/stop')
     ElMessage.success('任务已停止')
     loadTasks()
   } catch { ElMessage.error('停止失败') }
@@ -430,7 +430,7 @@ async function stopTask(task: any) {
 async function deleteTask(task: any) {
   try {
     await ElMessageBox.confirm('确定删除此任务？', '确认')
-    await api.delete(`${API.DISCOVERY_TASKS}/${task.id}`)
+    await api.delete(API.DISCOVERY_TASKS + '/' + task.id)
     ElMessage.success('已删除')
     loadTasks()
   } catch {}
@@ -455,21 +455,21 @@ function batchOnboard() {
 
 async function ignoreResult(item: any) {
   try {
-    await api.patch(`${API.DISCOVERY_RESULTS}/${item.id}`, { status: 'ignored' })
+    await api.patch(API.DISCOVERY_RESULTS + '/' + item.id, { status: 'ignored' })
     ElMessage.success('已忽略')
     loadResults()
   } catch { ElMessage.error('操作失败') }
 }
 
 function viewAsset(item: any) {
-  if (item.asset_id) router.push(`/assets/${item.asset_id}`)
+  if (item.asset_id) router.push('/assets/' + item.asset_id)
 }
 
 async function testConnection() {
   if (!wizardCredential.value || !wizardSelected.value.length) return ElMessage.warning('请先选择凭证和资产')
   testing.value = true; testResult.value = ''
   try {
-    const res = await api.post(`${API.CREDENTIALS}/test`, {
+    const res = await api.post(API.CREDENTIALS + '/test', {
       credential_id: wizardCredential.value,
       target: wizardSelected.value[0]?.ip,
     })
@@ -494,7 +494,7 @@ async function executeOnboard() {
         collection_interval: wizardInterval.value || undefined,
       })
     }
-    ElMessage.success(`成功纳管 ${wizardSelected.value.length} 个资产`)
+    ElMessage.success('成功纳管 ' + wizardSelected.value.length + ' 个资产')
     wizardActive.value = false
     wizardStep.value = 0
     loadResults(); loadStats()

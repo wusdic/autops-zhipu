@@ -6,7 +6,7 @@ export function useDeleteConfirm(
 ) {
   async function confirmDelete(id: string, name?: string) {
     await ElMessageBox.confirm(
-      options?.message || `确定要删除${name ? ' ' + name : '该项'}吗？此操作不可撤销。`,
+      options?.message || '确定要删除' + name ? ' ' + name : '该项' + '吗？此操作不可撤销。',
       options?.title || '删除确认',
       { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
     )

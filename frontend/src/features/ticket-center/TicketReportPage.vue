@@ -73,8 +73,8 @@
         <div v-if="trendData.length === 0" style="text-align: center; color: #86909c; padding: 80px">暂无趋势数据</div>
         <div v-else class="trend-bars">
           <div v-for="d in trendData" :key="d.date" class="trend-bar-group">
-            <div class="trend-bar" :style="{ height: barHeight(d.created) + 'px', background: '#165dff' }" :title="`新建: ${d.created}`"></div>
-            <div class="trend-bar" :style="{ height: barHeight(d.resolved) + 'px', background: '#00b42a' }" :title="`解决: ${d.resolved}`"></div>
+            <div class="trend-bar" :style="{ height: barHeight(d.created) + 'px', background: '#165dff' }" :title="'新建: ' + d.created"></div>
+            <div class="trend-bar" :style="{ height: barHeight(d.resolved) + 'px', background: '#00b42a' }" :title="'解决: ' + d.resolved"></div>
             <div class="trend-label">{{ d.date.slice(5) }}</div>
           </div>
         </div>

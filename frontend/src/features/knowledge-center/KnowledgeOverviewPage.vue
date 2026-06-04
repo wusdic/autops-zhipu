@@ -42,7 +42,7 @@
  >
         <el-table-column prop="title" label="标题" min-width="220" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-link type="primary" @click="router.push(`/knowledge/${row.id}`)">
+            <el-link type="primary" @click="router.push('/knowledge/' + row.id)">
               {{ row.title }}
             </el-link>
           </template>
@@ -199,7 +199,7 @@ function formatTime(val: string | number | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes())
 }
 
 function getStatusTagType(status: string): '' | 'success' | 'warning' | 'danger' | 'info' {

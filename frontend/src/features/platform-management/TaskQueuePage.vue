@@ -92,7 +92,7 @@
             v-if="row.status === 'running'"
             :percentage="row.progress ?? 0"
             :stroke-width="14"
-            :format="(p: number) => `${p}%`"
+            :format="(p: number) => p + '%'"
           />
           <span v-else class="text-secondary">
             {{ row.status === 'completed' ? '100%' : '-' }}
@@ -177,7 +177,7 @@
     <!-- ── Detail Dialog ─────────────────────────────────── -->
     <el-dialog
       v-model="detailVisible"
-      :title="`任务详情 - ${detailTask?.name ?? ''}`"
+      :title="'任务详情 - ' + detailTask?.name ?? ''"
       width="600px"
       destroy-on-close
     >
@@ -318,7 +318,7 @@ async function loadTasks() {
 async function retryTask(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定重试任务「${row.name || row.id}」吗？`,
+      '确定重试任务「' + row.name || row.id + '」吗？',
       '重试确认',
       { confirmButtonText: '重试', cancelButtonText: '取消', type: 'warning' },
     )
@@ -334,7 +334,7 @@ async function retryTask(row: any) {
 async function cancelTask(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定取消任务「${row.name || row.id}」吗？`,
+      '确定取消任务「' + row.name || row.id + '」吗？',
       '取消确认',
       { confirmButtonText: '取消任务', cancelButtonText: '返回', type: 'warning' },
     )

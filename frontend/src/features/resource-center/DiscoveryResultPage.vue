@@ -384,13 +384,13 @@ async function handleBatchImport() {
   }
   try {
     await ElMessageBox.confirm(
-      `确定批量导入选中的 ${importable.length} 条记录？`,
+      '确定批量导入选中的 ' + importable.length + ' 条记录？',
       '批量导入确认',
       { type: 'info' }
     )
     loading.value = true
     await client.post(API.ASSET_IMPORT, { items: importable })
-    ElMessage.success(`成功导入 ${importable.length} 条记录`)
+    ElMessage.success('成功导入 ' + importable.length + ' 条记录')
     fetchData()
   } catch (err: unknown) {
     if (err !== 'cancel') {
@@ -406,11 +406,11 @@ async function handleBatchImport() {
 async function handleIgnore(row: DiscoveryResult) {
   try {
     await ElMessageBox.confirm(
-      `确定忽略 ${row.ip} 的发现结果？`,
+      '确定忽略 ' + row.ip + ' 的发现结果？',
       '忽略确认',
       { type: 'warning' }
     )
-    await client.patch(`${API.DISCOVERY_RESULTS}/${row.id}/ignore`, {})
+    await client.patch(API.DISCOVERY_RESULTS + '/' + row.id + '/ignore', {})
     ElMessage.success('已忽略')
     fetchData()
   } catch (err: unknown) {

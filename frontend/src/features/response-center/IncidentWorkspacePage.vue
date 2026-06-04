@@ -43,7 +43,7 @@
                 <el-tag :type="severityType(inc.severity)" size="small" effect="dark">{{ severityLabel(inc.severity) }}</el-tag>
                 <el-tag :type="statusType(inc.status)" size="small">{{ statusLabel(inc.status) }}</el-tag>
               </div>
-              <div class="incident-title">{{ inc.title || inc.alert_name || `事件 #${inc.id?.slice(0,8)}` }}</div>
+              <div class="incident-title">{{ inc.title || inc.alert_name || '事件 #' + inc.id?.slice(0,8) }}</div>
               <div class="incident-meta">
                 <span v-if="inc.asset_name"><el-icon><Box /></el-icon> {{ inc.asset_name }}</span>
                 <span><el-icon><Clock /></el-icon> {{ formatTime(inc.created_at) }}</span>
@@ -191,7 +191,7 @@ async function selectIncident(inc: any) {
   selectedId.value = inc.id
   // Fetch timeline
   try {
-    const res = await api.get(`${API.EVENTS}`, { params: { alert_id: inc.id, page_size: 50 } })
+    const res = await api.get(API.EVENTS, { params: { alert_id: inc.id, page_size: 50 } })
     const data = res.data
     if (data?.code === 0) {
       timeline.value = (data.data?.items || []).map((e: any) => ({
@@ -214,7 +214,7 @@ async function selectIncident(inc: any) {
 async function resolveIncident() {
   try {
     await ElMessageBox.confirm('确认标记该事件为已解决？', '确认')
-    await api.patch(`${API.ALERTS}/${selectedId.value}`, { status: 'resolved' })
+    await api.patch(API.ALERTS + '/' + selectedId.value, { status: 'resolved' })
     ElMessage.success('事件已标记为已解决')
     fetchIncidents()
   } catch { /* cancelled */ }
@@ -223,7 +223,7 @@ async function resolveIncident() {
 async function closeIncident() {
   try {
     await ElMessageBox.confirm('确认关闭该事件？', '确认')
-    await api.patch(`${API.ALERTS}/${selectedId.value}`, { status: 'closed' })
+    await api.patch(API.ALERTS + '/' + selectedId.value, { status: 'closed' })
     ElMessage.success('事件已关闭')
     fetchIncidents()
   } catch { /* cancelled */ }

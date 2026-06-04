@@ -214,9 +214,9 @@ function parseCron(cron: string) {
   // 每天
   if (dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
     if (hour.startsWith('*/')) {
-      return `每 ${hour.slice(2)} 小时执行`
+      return '每 ' + hour.slice(2) + ' 小时执行'
     }
-    return `每天 ${hour}:${minute.padStart(2, '0')} 执行`
+    return '每天 ' + hour + ':' + minute.padStart(2, '0') + ' 执行'
   }
   // 每周
   if (dayOfWeek !== '*' && dayOfMonth === '*' && month === '*') {
@@ -224,13 +224,13 @@ function parseCron(cron: string) {
       '0': '周日', '1': '周一', '2': '周二', '3': '周三',
       '4': '周四', '5': '周五', '6': '周六', '7': '周日',
     }
-    return `每${weekDayMap[dayOfWeek] || '周' + dayOfWeek} ${hour}:${minute.padStart(2, '0')} 执行`
+    return '每' + weekDayMap[dayOfWeek] || '周' + dayOfWeek + ' ' + hour + ':' + minute.padStart(2, '0') + ' 执行'
   }
   // 每月
   if (dayOfMonth !== '*' && month === '*' && dayOfWeek === '*') {
-    return `每月 ${dayOfMonth} 日 ${hour}:${minute.padStart(2, '0')} 执行`
+    return '每月 ' + dayOfMonth + ' 日 ' + hour + ':' + minute.padStart(2, '0') + ' 执行'
   }
-  return `Cron: ${cron}`
+  return 'Cron: ' + cron
 }
 
 // ---------- API ----------
@@ -336,7 +336,7 @@ async function handleSubmit() {
 async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定要删除计划「${row.name}」吗？此操作不可恢复。`,
+      '确定要删除计划「' + row.name + '」吗？此操作不可恢复。',
       '删除确认',
       { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' }
     )

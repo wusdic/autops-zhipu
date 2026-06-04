@@ -12,6 +12,6 @@
 import { Clock } from '@element-plus/icons-vue'
 const reLogin = () => {
   const redirect = encodeURIComponent(window.location.pathname)
-  window.location.href = `/login?redirect=${redirect}`
+  window.location.href = '/login?redirect=' + redirect
 }
 </script>

@@ -246,12 +246,12 @@ async function simulateRule(row: any) {
 async function viewHistory(row: any) { ElMessage.info('历史记录功能开发中') }
 
 async function toggleRule(row: any) {
-  ElMessage.success(`规则已${row.enabled ? '启用' : '禁用'}`)
+  ElMessage.success('规则已' + row.enabled ? '启用' : '禁用')
 }
 
 async function handleDelete(row: any) {
   try {
-    await ElMessageBox.confirm(`确认删除规则「${row.name}」？`, '删除确认', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除规则「' + row.name + '」？', '删除确认', { type: 'warning' })
     ElMessage.success('已删除')
     loadData()
   } catch { /* cancelled */ }

@@ -161,7 +161,7 @@
                 <el-option
                   v-for="alert in alertOptions"
                   :key="alert.id"
-                  :label="`[${alert.severity}] ${alert.name || alert.title}`"
+                  :label="'[' + alert.severity + '] ' + alert.name || alert.title"
                   :value="alert.id"
                 >
                   <div class="alert-option">
@@ -190,7 +190,7 @@
                 <el-option
                   v-for="asset in assetOptions"
                   :key="asset.id"
-                  :label="`${asset.ip} - ${asset.hostname || asset.name}`"
+                  :label="asset.ip + ' - ' + asset.hostname || asset.name"
                   :value="asset.id"
                 >
                   <div class="asset-option">
@@ -443,7 +443,7 @@ async function handleSubmit() {
 
     ElMessage.success('工单创建成功')
     if (ticketId) {
-      router.push(`/ticket-center/tickets/${ticketId}`)
+      router.push('/ticket-center/tickets/' + ticketId)
     } else {
       router.push('/ticket-center/tickets')
     }

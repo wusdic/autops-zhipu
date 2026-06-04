@@ -1,5 +1,5 @@
 <template>
-  <div class="risk-decision-card" :class="`risk-${riskLevel}`">
+  <div class="risk-decision-card" :class="'risk-' + riskLevel">
     <div class="rdc-header">
       <span class="rdc-title">{{ title }}</span>
       <el-tag :type="riskTagType" size="small">{{ riskLabel }}</el-tag>

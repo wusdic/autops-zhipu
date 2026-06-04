@@ -287,7 +287,7 @@ async function runAnalysis() {
       .sort((a, b) => b.gap_score - a.gap_score)
 
     analysisDone.value = true
-    ElMessage.success(`分析完成，发现 ${gapResults.value.length} 个规则缺口`)
+    ElMessage.success('分析完成，发现 ' + gapResults.value.length + ' 个规则缺口')
   } catch (e: any) {
     ElMessage.error('分析失败: ' + (e.message || e))
   } finally {
@@ -297,31 +297,31 @@ async function runAnalysis() {
 
 // ─── Actions ─────────────────────────────────────────────────────────
 function createRule(row: any) {
-  ElMessage.info(`创建告警规则: ${row.event_type}`)
+  ElMessage.info('创建告警规则: ' + row.event_type)
 }
 
 function createPolicy(row: any) {
-  ElMessage.info(`创建处置策略: ${row.event_type}`)
+  ElMessage.info('创建处置策略: ' + row.event_type)
 }
 
 function ignoreGap(row: any) {
   const idx = gapResults.value.findIndex(r => r.event_type === row.event_type)
   if (idx !== -1) {
     gapResults.value.splice(idx, 1)
-    ElMessage.info(`已忽略「${row.event_type}」`)
+    ElMessage.info('已忽略「' + row.event_type + '」')
   }
 }
 
 function exportReport() {
   const lines = ['事件类型,告警规则数,策略数,近期事件数,缺口评分\n']
   gapResults.value.forEach(r => {
-    lines.push(`${r.event_type},${r.alert_rule_count},${r.policy_count},${r.recent_event_count},${r.gap_score}\n`)
+    lines.push(r.event_type + ',' + r.alert_rule_count + ',' + r.policy_count + ',' + r.recent_event_count + ',' + r.gap_score + '\n')
   })
   const blob = new Blob([lines.join('')], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `rule-gap-report-${new Date().toISOString().slice(0, 10)}.csv`
+  a.download = 'rule-gap-report-' + new Date().toISOString().slice(0, 10) + '.csv'
   a.click()
   URL.revokeObjectURL(url)
   ElMessage.success('报告已导出')

@@ -241,7 +241,7 @@ async function exportLogs() {
       const url = window.URL.createObjectURL(data)
       const a = document.createElement('a')
       a.href = url
-      a.download = `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`
+      a.download = 'audit-logs-' + new Date().toISOString().slice(0, 10) + '.csv'
       a.click()
       window.URL.revokeObjectURL(url)
       ElMessage.success('导出成功')
@@ -265,7 +265,7 @@ async function exportLogs() {
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`
+    a.download = 'audit-logs-' + new Date().toISOString().slice(0, 10) + '.csv'
     a.click()
     window.URL.revokeObjectURL(url)
     ElMessage.success('导出成功')

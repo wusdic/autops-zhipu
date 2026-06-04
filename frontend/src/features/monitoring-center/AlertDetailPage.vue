@@ -146,7 +146,7 @@
                       </el-table-column>
                       <el-table-column label="操作" width="100">
                         <template #default="{ row }">
-                          <el-button plain type="primary" size="small" @click="$router.push(`/assets/${row.id}`)">详情</el-button>
+                          <el-button plain type="primary" size="small" @click="$router.push('/assets/' + row.id)">详情</el-button>
                         </template>
                       </el-table-column>
                     </el-table>
@@ -242,7 +242,7 @@
               </el-table-column>
               <el-table-column label="操作" width="100">
                 <template #default="{ row }">
-                  <el-button plain type="primary" size="small" @click="$router.push(`/alerts/${row.id}`)">详情</el-button>
+                  <el-button plain type="primary" size="small" @click="$router.push('/alerts/' + row.id)">详情</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -287,7 +287,7 @@
               </el-table-column>
               <el-table-column label="操作" width="100">
                 <template #default="{ row }">
-                  <el-button plain type="primary" size="small" @click="$router.push(`/executions/${row.id}`)">详情</el-button>
+                  <el-button plain type="primary" size="small" @click="$router.push('/executions/' + row.id)">详情</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -351,7 +351,7 @@
                   <div class="evidence-item">
                     <div class="evidence-header">
                       <el-tag size="small" :type="evidenceType(ev.type)">{{ ev.type || '事件' }}</el-tag>
-                      <span class="evidence-title">{{ ev.title || ev.source || `证据 ${idx + 1}` }}</span>
+                      <span class="evidence-title">{{ ev.title || ev.source || '证据 ' + idx + 1 }}</span>
                     </div>
                     <div class="evidence-desc" v-if="ev.description || ev.detail">
                       {{ ev.description || ev.detail }}
@@ -503,10 +503,10 @@ const alertDuration = computed(() => {
   const start = new Date(a.created_at).getTime()
   const end = a.resolved_at ? new Date(a.resolved_at).getTime() : Date.now()
   const diff = end - start
-  if (diff < 60000) return `${Math.floor(diff / 1000)} 秒`
-  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时 ${Math.floor((diff % 3600000) / 60000)} 分钟`
-  return `${Math.floor(diff / 86400000)} 天 ${Math.floor((diff % 86400000) / 3600000)} 小时`
+  if (diff < 60000) return Math.floor(diff / 1000) + ' 秒'
+  if (diff < 3600000) return Math.floor(diff / 60000) + ' 分钟'
+  if (diff < 86400000) return Math.floor(diff / 3600000) + ' 小时 ' + Math.floor((diff % 3600000) / 60000) + ' 分钟'
+  return Math.floor(diff / 86400000) + ' 天 ' + Math.floor((diff % 86400000) / 3600000) + ' 小时'
 })
 
 // ─── Trigger Conditions ───
@@ -693,7 +693,7 @@ async function loadEvidenceChain() {
       evidenceChain.value = (Array.isArray(items) ? items : []).map((ev: any, idx: number) => ({
         ...ev,
         type: ev.type || 'event',
-        title: ev.title || ev.source || `证据 ${idx + 1}`,
+        title: ev.title || ev.source || '证据 ' + idx + 1,
         timestamp: ev.timestamp || ev.created_at,
       })).sort((a: any, b: any) => {
         const ta = new Date(a.timestamp || 0).getTime()
@@ -774,13 +774,13 @@ async function createTicketFromAlert() {
   if (!alert.value) return
   try {
     const { data } = await api.post(R.TICKETS, {
-      title: `告警工单: ${alert.value.title}`,
+      title: '告警工单: ' + alert.value.title,
       alert_ids: JSON.stringify([alertId()]),
     })
     if (data.code === 0) {
       ElMessage.success('工单已创建')
       if (data.data?.id) {
-        router.push(`/tickets/${data.data.id}`)
+        router.push('/tickets/' + data.data.id)
       }
     }
   } catch {
@@ -801,7 +801,7 @@ async function handleSuppress() {
       },
     )
     // Use the escalate API with a suppress flag as a placeholder
-    ElMessage.success(`告警已抑制: ${value}`)
+    ElMessage.success('告警已抑制: ' + value)
   } catch { /* cancelled */ }
 }
 

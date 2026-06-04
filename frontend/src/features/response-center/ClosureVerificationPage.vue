@@ -265,7 +265,7 @@ function handleDetail(row: TicketRecord) {
 function handleVerify(row: TicketRecord, status: 'verified' | 'failed') {
   const action = status === 'verified' ? '通过' : '不通过'
   ElMessageBox.confirm(
-    `确认将工单「${row.title}」标记为验证${action}？`,
+    '确认将工单「' + row.title + '」标记为验证' + action + '？',
     '验证确认',
     {
       confirmButtonText: '确定',
@@ -294,7 +294,7 @@ function handleVerify(row: TicketRecord, status: 'verified' | 'failed') {
     if (currentRow.value && currentRow.value.id === row.id) {
       currentRow.value = { ...currentRow.value, verification_status: status, verifier: currentUser, verification_time: new Date().toISOString() }
     }
-    ElMessage.success(`工单已标记为验证${action}`)
+    ElMessage.success('工单已标记为验证' + action)
   }).catch(() => {
     // cancelled
   })

@@ -27,7 +27,7 @@
           :color="healthColor(overallHealth)"
           :stroke-width="20"
           style="flex: 1"
-          :format="(p: number) => `${p}分`"
+          :format="(p: number) => p + '分'"
         />
         <el-tag :type="healthTagType(overallHealth)" size="large">
           {{ healthText(overallHealth) }}
@@ -76,7 +76,7 @@
                 @click="selectSystem(sys)"
               >
                 <div class="health-card-header">
-                  <div class="health-indicator" :class="`indicator-${sys.health}`"></div>
+                  <div class="health-indicator" :class="'indicator-' + sys.health"></div>
                   <div class="health-name">{{ sys.name }}</div>
                 </div>
                 <div class="health-status">{{ healthLabel(sys.health) }}</div>
@@ -118,7 +118,7 @@
                 </span>
               </el-descriptions-item>
               <el-descriptions-item label="SLA达成率">
-                {{ selectedSystem.sla !== undefined ? `${selectedSystem.sla}%` : '-' }}
+                {{ selectedSystem.sla !== undefined ? selectedSystem.sla + '%' : '-' }}
               </el-descriptions-item>
               <el-descriptions-item label="负责人">
                 {{ selectedSystem.owner || '-' }}

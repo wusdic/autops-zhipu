@@ -1,7 +1,7 @@
 <template>
   <div class="topology-graph" :style="{ width: '100%', height: height, border: '1px solid #e5e6eb', borderRadius: '6px', position: 'relative' }">
     <div v-if="!nodes.length" :style="{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999' }">暂无拓扑数据</div>
-    <svg v-else :width="'100%'" :height="height" :viewBox="`0 0 ${svgWidth} ${svgHeight}`">
+    <svg v-else :width="'100%'" :height="height" :viewBox="'0 0 ' + svgWidth + ' ' + svgHeight">
       <defs>
         <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
           <polygon points="0 0, 10 3.5, 0 7" fill="#c9cdd4" />

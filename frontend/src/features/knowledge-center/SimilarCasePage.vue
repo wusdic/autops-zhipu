@@ -277,11 +277,11 @@ function viewDetail(row: any) {
 async function applySolution(row: any) {
   try {
     await ElMessageBox.confirm(
-      `是否将案例「${row.title}」的处理方案应用到当前告警？`,
+      '是否将案例「' + row.title + '」的处理方案应用到当前告警？',
       '应用处理方案',
       { confirmButtonText: '确认应用', cancelButtonText: '取消', type: 'info' }
     )
-    ElMessage.success(`已应用「${row.title}」的处理方案`)
+    ElMessage.success('已应用「' + row.title + '」的处理方案')
   } catch {
     // cancelled
   }

@@ -53,7 +53,7 @@
  >
         <el-table-column prop="name" label="任务名称" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-link type="primary" @click="router.push(`/inspection/${row.id}`)">
+            <el-link type="primary" @click="router.push('/inspection/' + row.id)">
               {{ row.name || row.template_name || '-' }}
             </el-link>
           </template>
@@ -82,7 +82,7 @@
         </el-table-column>
         <el-table-column label="操作" width="100" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button plain type="primary" size="small" @click="router.push(`/inspection/${row.id}`)">
+            <el-button plain type="primary" size="small" @click="router.push('/inspection/' + row.id)">
               详情
             </el-button>
           </template>
@@ -232,7 +232,7 @@ function formatTime(val: string | null | undefined): string {
     const d = new Date(val)
     if (isNaN(d.getTime())) return val
     const pad = (n: number) => String(n).padStart(2, '0')
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes())
   } catch {
     return val
   }
@@ -243,7 +243,7 @@ function formatAssets(row: any): string {
     return row.asset_names.join(', ') || '-'
   }
   if (row.asset_name) return row.asset_name
-  if (row.asset_count !== undefined) return `${row.asset_count} 个资产`
+  if (row.asset_count !== undefined) return row.asset_count + ' 个资产'
   return '-'
 }
 
@@ -251,18 +251,18 @@ function formatDuration(row: any): string {
   if (row.duration !== undefined && row.duration !== null) {
     const sec = Number(row.duration)
     if (isNaN(sec)) return row.duration
-    if (sec < 60) return `${sec}s`
-    if (sec < 3600) return `${Math.floor(sec / 60)}m ${sec % 60}s`
-    return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`
+    if (sec < 60) return sec + 's'
+    if (sec < 3600) return Math.floor(sec / 60) + 'm ' + sec % 60 + 's'
+    return Math.floor(sec / 3600) + 'h ' + Math.floor((sec % 3600) / 60) + 'm'
   }
   // 尝试从 started_at / finished_at 计算
   if (row.started_at && row.finished_at) {
     const diff = new Date(row.finished_at).getTime() - new Date(row.started_at).getTime()
     if (diff > 0) {
       const sec = Math.round(diff / 1000)
-      if (sec < 60) return `${sec}s`
-      if (sec < 3600) return `${Math.floor(sec / 60)}m ${sec % 60}s`
-      return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`
+      if (sec < 60) return sec + 's'
+      if (sec < 3600) return Math.floor(sec / 60) + 'm ' + sec % 60 + 's'
+      return Math.floor(sec / 3600) + 'h ' + Math.floor((sec % 3600) / 60) + 'm'
     }
   }
   return '-'

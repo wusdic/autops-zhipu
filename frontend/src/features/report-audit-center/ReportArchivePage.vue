@@ -148,15 +148,15 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function formatSize(bytes: number | null | undefined): string {
   if (!bytes && bytes !== 0) return '-'
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB'
 }
 
 function typeLabel(t: string): string {
@@ -232,7 +232,7 @@ async function downloadArchive(row: any) {
       const link = document.createElement('a')
       link.href = url
       const ext = row.format || 'pdf'
-      link.download = `${row.title || 'report'}.${ext}`
+      link.download = row.title || 'report' + '.' + ext
       link.click()
       URL.revokeObjectURL(url)
       ElMessage.success('下载成功')
@@ -245,7 +245,7 @@ async function downloadArchive(row: any) {
 async function deleteArchive(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确认删除归档报表「${row.title}」？此操作不可恢复。`,
+      '确认删除归档报表「' + row.title + '」？此操作不可恢复。',
       '删除确认',
       { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' },
     )

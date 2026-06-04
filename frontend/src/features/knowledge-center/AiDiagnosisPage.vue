@@ -65,12 +65,12 @@
               <el-option
                 v-for="alert in alerts"
                 :key="alert.id"
-                :label="alert.title || alert.name || `告警 #${alert.id}`"
+                :label="alert.title || alert.name || '告警 #' + alert.id"
                 :value="alert.id"
               >
                 <div class="alert-option">
                   <SeverityBadge :severity="alert.severity" size="small" />
-                  <span class="alert-option-title">{{ alert.title || alert.name || `告警 #${alert.id}` }}</span>
+                  <span class="alert-option-title">{{ alert.title || alert.name || '告警 #' + alert.id }}</span>
                   <StatusBadge :status="alert.status" size="small" />
                   <span class="alert-option-time">{{ formatTime(alert.created_at) }}</span>
                 </div>
@@ -390,7 +390,7 @@
                 @click="loadAnalysisDetail(item.id)"
               >
                 <div class="history-item-header">
-                  <span class="history-alert-title">{{ item.alert_title || item.title || `分析 #${item.id}` }}</span>
+                  <span class="history-alert-title">{{ item.alert_title || item.title || '分析 #' + item.id }}</span>
                   <el-tag
                     :type="item.confidence > 0.8 ? 'success' : item.confidence > 0.5 ? 'warning' : 'info'"
                     size="small"
@@ -573,7 +573,7 @@
                 @click="loadAgentResult(item.id)"
               >
                 <div class="history-item-header">
-                  <span class="history-alert-title">{{ item.task_summary || item.task || `任务 #${item.id}` }}</span>
+                  <span class="history-alert-title">{{ item.task_summary || item.task || '任务 #' + item.id }}</span>
                   <el-tag
                     :type="item.status === 'completed' ? 'success' : item.status === 'failed' ? 'danger' : 'warning'"
                     size="small"
@@ -1051,7 +1051,7 @@ async function executeAction(index: number, actionType: string, action: Recommen
   if (action.approval_required) {
     try {
       await ElMessageBox.confirm(
-        `该操作风险等级为「${riskLabel(action.risk_level)}」，需要确认后执行。是否继续？`,
+        '该操作风险等级为「' + riskLabel(action.risk_level) + '」，需要确认后执行。是否继续？',
         '操作确认',
         { confirmButtonText: '确认执行', cancelButtonText: '取消', type: 'warning' }
       )
@@ -1118,10 +1118,10 @@ async function executeAction(index: number, actionType: string, action: Recommen
     }
 
     if (response.data?.code === 0) {
-      ElMessage.success(`${label}成功`)
+      ElMessage.success(label + '成功')
     }
   } catch (e: any) {
-    ElMessage.error(`${label}失败: ` + (e.message || e))
+    ElMessage.error(label + '失败: ' + (e.message || e))
   } finally {
     actionExecuting.value[index] = false
   }

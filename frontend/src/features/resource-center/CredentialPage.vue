@@ -415,7 +415,7 @@ async function bindAssets() {
     const asset_ids = selectedBindAssets.value.map((a) => a.id)
     const { data } = await api.post(R.CREDENTIAL_BIND(bindingCredential.value.id), { asset_ids })
     if (data.code === 0) {
-      ElMessage.success(`已绑定 ${selectedBindAssets.value.length} 个资产`)
+      ElMessage.success('已绑定 ' + selectedBindAssets.value.length + ' 个资产')
       selectedBindAssets.value = []
       bindAssetSearch.value = ''
       loadBoundAssets(bindingCredential.value.id)

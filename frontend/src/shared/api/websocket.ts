@@ -43,7 +43,7 @@ class WebSocketService {
     this.url = APP_CONFIG.WS_URL
     if (this.token) {
       const sep = this.url.includes('?') ? '&' : '?'
-      this.url += `${sep}token=${encodeURIComponent(this.token)}`
+      this.url += sep + 'token=' + encodeURIComponent(this.token)
     }
 
     try {

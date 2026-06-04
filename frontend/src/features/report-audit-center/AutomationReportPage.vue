@@ -246,17 +246,17 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function formatDuration(seconds: number | null | undefined): string {
   if (seconds == null) return '-'
-  if (seconds < 60) return `${seconds.toFixed(1)}s`
+  if (seconds < 60) return seconds.toFixed(1) + 's'
   const min = Math.floor(seconds / 60)
   const sec = Math.round(seconds % 60)
-  if (min < 60) return `${min}m${sec}s`
+  if (min < 60) return min + 'm' + sec + 's'
   const hr = Math.floor(min / 60)
-  return `${hr}h${min % 60}m`
+  return hr + 'h' + min % 60 + 'm'
 }
 
 function execStatusType(s: string): string {

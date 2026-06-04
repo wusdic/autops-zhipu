@@ -327,7 +327,7 @@ function viewDetail(row: Agent) {
 async function restartAgent(row: Agent) {
   try {
     await ElMessageBox.confirm(
-      `确认重启 Agent「${row.name || row.hostname}」？该操作会短暂中断数据采集。`,
+      '确认重启 Agent「' + row.name || row.hostname + '」？该操作会短暂中断数据采集。',
       '重启确认',
       { type: 'warning', confirmButtonText: '确定重启', cancelButtonText: '取消' }
     )

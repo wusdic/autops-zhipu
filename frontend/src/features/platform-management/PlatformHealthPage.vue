@@ -95,7 +95,7 @@
         <el-result
           :icon="selfCheckResult.healthy ? 'success' : 'error'"
           :title="selfCheckResult.healthy ? '所有组件正常' : '部分组件异常'"
-          :sub-title="`检查时间: ${selfCheckResult.time}`"
+          :sub-title="'检查时间: ' + selfCheckResult.time"
         />
         <el-descriptions :column="1" border style="margin-top: 16px">
           <el-descriptions-item v-for="item in selfCheckResult.items" :key="item.key" :label="item.label">

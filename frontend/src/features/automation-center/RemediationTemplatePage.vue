@@ -202,7 +202,7 @@ async function handleSubmit() {
 
 async function dryRun(row: any) {
   try {
-    await ElMessageBox.confirm(`对模板「${row.name}」执行 Dry-Run？仅模拟不实际执行。`, 'Dry-Run 确认', { type: 'info' })
+    await ElMessageBox.confirm('对模板「' + row.name + '」执行 Dry-Run？仅模拟不实际执行。', 'Dry-Run 确认', { type: 'info' })
     ElMessage.success('Dry-Run 已启动')
   } catch { /* cancelled */ }
 }
@@ -211,7 +211,7 @@ function viewHistory(row: any) { ElMessage.info('历史记录功能开发中') }
 
 async function handleDelete(row: any) {
   try {
-    await ElMessageBox.confirm(`确认删除「${row.name}」？`, '删除确认', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除「' + row.name + '」？', '删除确认', { type: 'warning' })
     ElMessage.success('已删除'); loadData()
   } catch { /* cancelled */ }
 }

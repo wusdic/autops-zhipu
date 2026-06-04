@@ -109,7 +109,7 @@
         <div class="autops-card">
           <div class="autops-card-header">
             <div class="autops-card-title">
-              {{ selectedAlert ? `「${selectedAlert.title}」收敛结果` : '收敛结果' }}
+              {{ selectedAlert ? '「' + selectedAlert.title + '」收敛结果' : '收敛结果' }}
             </div>
           </div>
           <div class="autops-card-body" style="padding: 0">
@@ -136,7 +136,7 @@
                     :color="strengthColor(row.correlation_strength)"
                     :stroke-width="8"
                     :show-text="true"
-                    :format="(p: number) => `${p}%`"
+                    :format="(p: number) => p + '%'"
                   />
                 </template>
               </el-table-column>
@@ -303,7 +303,7 @@ async function runCorrelation() {
     // Stats
     correlationStats.raw_count = items.length
     correlationStats.group_count = corrTotal.value > 0 ? 1 : 0
-    correlationStats.ratio = items.length ? `${Math.round(((items.length - corrTotal.value) / items.length) * 100)}%` : '-'
+    correlationStats.ratio = items.length ? Math.round(((items.length - corrTotal.value) / items.length) * 100) + '%' : '-'
     const assetSet = new Set(items.map((i: any) => i.asset_id || i.asset_name).filter(Boolean))
     correlationStats.asset_count = assetSet.size
   } catch (e: any) {

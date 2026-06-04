@@ -418,7 +418,7 @@ const buildParams = (): Record<string, unknown> => {
   const params: Record<string, unknown> = {
     page: queryParams.page,
     page_size: queryParams.pageSize,
-    ordering: queryParams.orderDir === 'desc' ? `-${queryParams.orderBy}` : queryParams.orderBy,
+    ordering: queryParams.orderDir === 'desc' ? '-' + queryParams.orderBy : queryParams.orderBy,
   }
   if (queryParams.keyword) params.keyword = queryParams.keyword
   if (queryParams.status) params.status = queryParams.status
@@ -475,7 +475,7 @@ const handleViewDetail = (row: InspectionResult) => {
 }
 
 const handleCreateTicket = (row: InspectionResult) => {
-  ElMessage.info(`创建工单: ${row.check_item || row.item_name} - ${row.asset_name || row.asset?.name}`)
+  ElMessage.info('创建工单: ' + row.check_item || row.item_name + ' - ' + row.asset_name || row.asset?.name)
 }
 
 const handleExport = async () => {
@@ -499,7 +499,7 @@ const handleExport = async () => {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `inspection_results_${Date.now()}.csv`)
+    link.setAttribute('download', 'inspection_results_' + Date.now() + '.csv')
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)

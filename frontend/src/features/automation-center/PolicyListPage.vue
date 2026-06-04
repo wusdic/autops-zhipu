@@ -189,7 +189,7 @@
 
         <h4 style="margin:16px 0 8px">动作链</h4>
         <el-timeline v-if="detail.actions?.length">
-          <el-timeline-item v-for="(a,i) in detail.actions" :key="i" :timestamp="`步骤 ${i+1}`" placement="top">
+          <el-timeline-item v-for="(a,i) in detail.actions" :key="i" :timestamp="'步骤 ' + i+1" placement="top">
             <el-tag>{{ actionTypeLabel(a.type) }}</el-tag> → {{ a.target || '-' }}
           </el-timeline-item>
         </el-timeline>
@@ -308,11 +308,11 @@ async function viewDetail(row: any) {
   showDetail.value = true
 }
 
-function simulate(row: any) { router.push(`/policies/${row.id}/simulate`) }
+function simulate(row: any) { router.push('/policies/' + row.id + '/simulate') }
 
 async function duplicate(row: any) {
   try {
-    const payload = { ...row, name: `${row.name} (副本)`, status: 'draft', id: undefined }
+    const payload = { ...row, name: row.name + ' (副本)', status: 'draft', id: undefined }
     await api.post(API.POLICIES, payload)
     ElMessage.success('复制成功'); load()
   } catch { ElMessage.error('复制失败') }

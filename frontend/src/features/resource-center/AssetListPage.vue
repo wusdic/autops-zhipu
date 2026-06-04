@@ -617,7 +617,7 @@ async function deleteAsset(id: string) {
 async function batchDelete() {
   try {
     await ElMessageBox.confirm(
-      `确认删除选中的 ${selectedAssets.value.length} 项资产？此操作不可撤销。`,
+      '确认删除选中的 ' + selectedAssets.value.length + ' 项资产？此操作不可撤销。',
       '批量删除确认',
       { type: 'warning' },
     )
@@ -627,7 +627,7 @@ async function batchDelete() {
   try {
     const ids = selectedAssets.value.map(a => a.id)
     await Promise.all(ids.map(id => api.delete(R.ASSET_DETAIL(id))))
-    ElMessage.success(`成功删除 ${ids.length} 项资产`)
+    ElMessage.success('成功删除 ' + ids.length + ' 项资产')
     clearSelection()
     loadAssets()
   } catch (e: any) {
@@ -652,7 +652,7 @@ async function batchBindCredential() {
   try {
     const assetIds = selectedAssets.value.map(a => a.id)
     await api.post(R.CREDENTIAL_BIND(batchCredId.value), { asset_ids: assetIds })
-    ElMessage.success(`已绑定凭证到 ${assetIds.length} 项资产`)
+    ElMessage.success('已绑定凭证到 ' + assetIds.length + ' 项资产')
     showBatchCredDialog.value = false
     clearSelection()
     loadAssets()
@@ -678,7 +678,7 @@ async function batchAddToGroup() {
   try {
     const assetIds = selectedAssets.value.map(a => a.id)
     await api.post(R.ASSET_GROUP_MEMBERS(batchGroupId.value), { asset_ids: assetIds })
-    ElMessage.success(`已将 ${assetIds.length} 项资产加入分组`)
+    ElMessage.success('已将 ' + assetIds.length + ' 项资产加入分组')
     showBatchGroupDialog.value = false
     clearSelection()
   } catch (e: any) {
@@ -747,7 +747,7 @@ async function executeImport() {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     if (data.code === 0) {
-      ElMessage.success(`成功导入 ${data.data?.created || 0} 项资产`)
+      ElMessage.success('成功导入 ' + data.data?.created || 0 + ' 项资产')
       closeImportDialog()
       loadAssets()
     } else {
@@ -783,7 +783,7 @@ async function quickCollect(row: any) {
   try {
     const { data } = await api.post(R.ASSET_COLLECTION_TRIGGER(row.id))
     if (data.code === 0) {
-      ElMessage.success(`已触发 [${row.name}] 采集任务`)
+      ElMessage.success('已触发 [' + row.name + '] 采集任务')
     } else {
       ElMessage.error(data.message || '触发采集失败')
     }
@@ -799,7 +799,7 @@ async function quickStatusCheck(row: any) {
   try {
     const { data } = await api.get(R.STATES.LATEST(row.id))
     if (data.code === 0) {
-      ElMessage.success(`[${row.name}] 状态: ${data.data?.health_status || '正常'}`)
+      ElMessage.success('[' + row.name + '] 状态: ' + data.data?.health_status || '正常')
     } else {
       ElMessage.warning(data.message || '无法获取状态')
     }
@@ -820,7 +820,7 @@ async function executeQuickBind() {
     await api.post(R.CREDENTIAL_BIND(quickBindCredId.value), {
       asset_ids: [quickBindAsset.value.id],
     })
-    ElMessage.success(`凭证已绑定到 [${quickBindAsset.value.name}]`)
+    ElMessage.success('凭证已绑定到 [' + quickBindAsset.value.name + ']')
     showQuickBindDialog.value = false
   } catch (e: any) {
     ElMessage.error('绑定凭证失败: ' + (e.message || e))

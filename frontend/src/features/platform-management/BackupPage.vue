@@ -308,7 +308,7 @@ const storagePercentage = computed(() => {
   return Math.min(Math.round((storage.used / storage.total) * 100), 100)
 })
 
-const storageText = computed(() => `${storagePercentage.value}%`)
+const storageText = computed(() => storagePercentage.value + '%')
 
 const storageColor = computed(() => {
   const pct = storagePercentage.value
@@ -353,9 +353,9 @@ function formatDuration(row: any): string {
   const start = new Date(row.created_at).getTime()
   const end = row.finished_at ? new Date(row.finished_at).getTime() : Date.now()
   const diff = Math.max(0, Math.round((end - start) / 1000))
-  if (diff < 60) return `${diff}s`
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ${diff % 60}s`
-  return `${Math.floor(diff / 3600)}h ${Math.floor((diff % 3600) / 60)}m`
+  if (diff < 60) return diff + 's'
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ' + diff % 60 + 's'
+  return Math.floor(diff / 3600) + 'h ' + Math.floor((diff % 3600) / 60) + 'm'
 }
 
 // ── API: Load backup list ──────────────────────────────────
@@ -454,7 +454,7 @@ function handleDownload(row: any) {
   const url = R.BACKUP_DOWNLOAD(row.id)
   const token = localStorage.getItem('token')
   const link = document.createElement('a')
-  link.href = token ? `${url}?token=${encodeURIComponent(token)}` : url
+  link.href = token ? url + '?token=' + encodeURIComponent(token) : url
   link.target = '_blank'
   link.rel = 'noopener noreferrer'
   document.body.appendChild(link)
@@ -467,7 +467,7 @@ function handleDownload(row: any) {
 async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定删除备份「${row.filename || row.description || row.id}」？此操作不可撤销。`,
+      '确定删除备份「' + row.filename || row.description || row.id + '」？此操作不可撤销。',
       '删除备份',
       { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' },
     )

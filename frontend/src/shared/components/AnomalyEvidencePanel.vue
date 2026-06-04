@@ -14,7 +14,7 @@
           </div>
           <div class="ep-summary">{{ item.summary }}</div>
           <div class="ep-detail" v-if="item.detail" @click="toggleDetail(gIdx, iIdx)">
-            {{ expanded[`${gIdx}-${iIdx}`] ? item.detail : "展开详情..." }}
+            {{ expanded[gIdx + '-' + iIdx] ? item.detail : "展开详情..." }}
           </div>
         </div>
       </div>
@@ -35,7 +35,7 @@ defineEmits<{ collect: [] }>()
 const expanded = reactive<Record<string, boolean>>({})
 
 function toggleDetail(g: number, i: number) {
-  const key = `${g}-${i}`
+  const key = g + '-' + i
   expanded[key] = !expanded[key]
 }
 

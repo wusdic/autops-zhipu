@@ -149,7 +149,7 @@ async function fetchDetail() {
   if (!taskId.value) return
   loading.value = true
   try {
-    const res = await api.get(`${API.INSPECTION_TASKS}/${taskId.value}`)
+    const res = await api.get(API.INSPECTION_TASKS + '/' + taskId.value)
     const data = res.data
     if (data?.code === 0) {
       taskDetail.value = data.data

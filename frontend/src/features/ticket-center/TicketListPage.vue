@@ -497,7 +497,7 @@ function formatTime(val: string | null | undefined): string {
   const d = new Date(val)
   if (isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
 function priorityType(p: string): string {
@@ -566,10 +566,10 @@ function slaCountdown(deadline: string): string {
   const minutes = Math.floor((diff % 3600000) / 60000)
   if (hours >= 24) {
     const days = Math.floor(hours / 24)
-    return `${days}天${hours % 24}时`
+    return days + '天' + hours % 24 + '时'
   }
-  if (hours > 0) return `${hours}时${minutes}分`
-  return `${minutes}分`
+  if (hours > 0) return hours + '时' + minutes + '分'
+  return minutes + '分'
 }
 
 // ── Statistics ──────────────────────────────────────────────────────
@@ -874,9 +874,9 @@ async function submitBatchAssign() {
     const results = await Promise.allSettled(promises)
     const failed = results.filter((r) => r.status === 'rejected').length
     if (failed === 0) {
-      ElMessage.success(`${selectedIds.value.length} 条工单已全部指派`)
+      ElMessage.success(selectedIds.value.length + ' 条工单已全部指派')
     } else {
-      ElMessage.warning(`${selectedIds.value.length - failed} 条成功，${failed} 条失败`)
+      ElMessage.warning(selectedIds.value.length - failed + ' 条成功，' + failed + ' 条失败')
     }
     clearSelection()
     batchAssignDialogVisible.value = false
@@ -893,7 +893,7 @@ async function batchClose() {
   const ids = selectedIds.value
   if (!ids.length) return
   try {
-    await ElMessageBox.confirm(`确认批量关闭 ${ids.length} 条工单？`, '批量关闭', {
+    await ElMessageBox.confirm('确认批量关闭 ' + ids.length + ' 条工单？', '批量关闭', {
       confirmButtonText: '关闭',
       cancelButtonText: '取消',
       type: 'warning',
@@ -904,9 +904,9 @@ async function batchClose() {
     const results = await Promise.allSettled(promises)
     const failed = results.filter((r) => r.status === 'rejected').length
     if (failed === 0) {
-      ElMessage.success(`${ids.length} 条工单已全部关闭`)
+      ElMessage.success(ids.length + ' 条工单已全部关闭')
     } else {
-      ElMessage.warning(`${ids.length - failed} 条成功，${failed} 条失败`)
+      ElMessage.warning(ids.length - failed + ' 条成功，' + failed + ' 条失败')
     }
     clearSelection()
     loadTickets()
@@ -945,7 +945,7 @@ async function exportTickets() {
       const url = URL.createObjectURL(data)
       const link = document.createElement('a')
       link.href = url
-      link.download = `tickets_${new Date().toISOString().slice(0, 10)}.csv`
+      link.download = 'tickets_' + new Date().toISOString().slice(0, 10) + '.csv'
       link.click()
       URL.revokeObjectURL(url)
       ElMessage.success('导出成功')
@@ -968,7 +968,7 @@ function generateCsv() {
   const headers = ['ID', '标题', '来源', '优先级', '状态', '负责人', 'SLA截止', '创建时间']
   const rows = tickets.value.map((t) => [
     t.id || '',
-    `"${(t.title || '').replace(/"/g, '""')}"`,
+    '"' + (t.title || '').replace(/"/g, '""') + '"',
     t.source || '',
     t.priority || '',
     t.status || '',
@@ -981,7 +981,7 @@ function generateCsv() {
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = `tickets_${new Date().toISOString().slice(0, 10)}.csv`
+  link.download = 'tickets_' + new Date().toISOString().slice(0, 10) + '.csv'
   link.click()
   URL.revokeObjectURL(url)
   ElMessage.success('导出成功')

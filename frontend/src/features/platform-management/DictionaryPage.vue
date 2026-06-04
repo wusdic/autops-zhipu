@@ -307,7 +307,7 @@ async function submitForm() {
 async function deleteItem(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定删除字典项「${row.label || row.key}」吗？`,
+      '确定删除字典项「' + row.label || row.key + '」吗？',
       '删除确认',
       { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' },
     )
