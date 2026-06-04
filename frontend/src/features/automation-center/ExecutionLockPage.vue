@@ -13,9 +13,9 @@
           />
         </el-form-item>
 
-        <el-form-item label="锁定资源">
+        <el-form-item label="目标资源">
           <el-input
-            v-model="queryParams.lock_resource"
+            v-model="queryParams.target_id"
             placeholder="资源名称"
             clearable
             style="width: 200px"
@@ -23,14 +23,13 @@
           />
         </el-form-item>
 
-        <el-form-item label="持有者">
-          <el-input
-            v-model="queryParams.owner"
-            placeholder="持有者"
-            clearable
-            style="width: 180px"
-            @keyup.enter="handleSearch"
-          />
+        <el-form-item label="状态">
+          <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 140px">
+            <el-option label="待执行" value="pending" />
+            <el-option label="已完成" value="completed" />
+            <el-option label="运行中" value="running" />
+            <el-option label="失败" value="failed" />
+          </el-select>
         </el-form-item>
 
         <el-form-item>
@@ -45,7 +44,7 @@
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-label">活跃锁总数</div>
+            <div class="stat-label">执行总数</div>
             <div class="stat-value primary">{{ total }}</div>
           </div>
         </el-card>
@@ -53,34 +52,34 @@
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-label">锁超时数</div>
-            <div class="stat-value warning">{{ expiredCount }}</div>
+            <div class="stat-label">已完成</div>
+            <div class="stat-value success">{{ completedCount }}</div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-label">长时间持有</div>
-            <div class="stat-value danger">{{ longHeldCount }}</div>
+            <div class="stat-label">运行中/待执行</div>
+            <div class="stat-value warning">{{ runningCount }}</div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-content">
-            <div class="stat-label">正常运行</div>
-            <div class="stat-value success">{{ total - expiredCount - longHeldCount }}</div>
+            <div class="stat-label">失败数</div>
+            <div class="stat-value danger">{{ failedCount }}</div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 锁列表表格 -->
+    <!-- 执行锁列表表格 -->
     <el-card class="table-card" shadow="never">
       <template #header>
         <div class="card-header">
-          <span>执行锁列表</span>
+          <span>执行记录列表</span>
           <el-button type="danger" plain :icon="Unlock" :disabled="!selectedRows.length" @click="handleBatchRelease">
             批量释放 ({{ selectedRows.length }})
           </el-button>
@@ -88,68 +87,72 @@
       </template>
 
       <el-table stripe
- v-loading="loading"
- :data="lockList"border
- style="width: 100%"
- @selection-change="handleSelectionChange"
- >
+        v-loading="loading"
+        :data="lockList"
+        border
+        style="width: 100%"
+        @selection-change="handleSelectionChange"
+      >
         <el-table-column type="selection" width="50" align="center" />
 
         <el-table-column prop="id" label="执行ID" width="160" align="center">
           <template #default="{ row }">
-            <el-tooltip :content="row.id || row.execution_id || ''" placement="top">
+            <el-tooltip :content="row.id || ''" placement="top">
               <el-button type="primary" plain @click="handleViewExecution(row)">
-                {{ truncateLockId(row.id || row.execution_id) }}
+                {{ truncateLockId(row.id) }}
               </el-button>
             </el-tooltip>
           </template>
         </el-table-column>
 
-        <el-table-column prop="lock_resource" label="锁定资源" min-width="200" show-overflow-tooltip>
+        <el-table-column prop="execution_type" label="执行类型" width="120" align="center">
           <template #default="{ row }">
-            <div class="resource-cell">
-              <el-icon><Lock /></el-icon>
-              <span>{{ row.lock_resource || row.resource }}</span>
-            </div>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="lock_type" label="锁类型" width="120" align="center">
-          <template #default="{ row }">
-            <el-tag size="small" :type="row.lock_type === 'exclusive' ? 'danger' : 'warning'">
-              {{ row.lock_type === 'exclusive' ? '排他锁' : row.lock_type === 'shared' ? '共享锁' : row.lock_type || '-' }}
+            <el-tag size="small" :type="execTypeTagType(row.execution_type)">
+              {{ execTypeLabel(row.execution_type) }}
             </el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column prop="locked_at" label="锁定时间" width="180" align="center">
+        <el-table-column prop="target_id" label="目标资源" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
-            {{ formatTime(row.locked_at || row.created_at) }}
+            <div class="resource-cell">
+              <el-icon><Lock /></el-icon>
+              <span>{{ row.target_id || '-' }}</span>
+            </div>
           </template>
         </el-table-column>
 
-        <el-table-column prop="duration" label="持有时长" width="120" align="center">
+        <el-table-column prop="trigger_source" label="触发来源" width="120" align="center">
           <template #default="{ row }">
-            <span :class="{ 'text-danger': isLongHeld(row) }">
-              {{ calcDuration(row.locked_at || row.created_at) }}
-            </span>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="owner" label="持有者" width="150" show-overflow-tooltip>
-          <template #default="{ row }">
-            {{ row.owner || row.holder || row.created_by || '-' }}
+            <el-tag size="small" type="info">{{ triggerLabel(row.trigger_source) }}</el-tag>
           </template>
         </el-table-column>
 
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag
-              :type="isExpired(row) ? 'danger' : isLongHeld(row) ? 'warning' : 'success'"
-              size="small"
-            >
-              {{ isExpired(row) ? '超时' : isLongHeld(row) ? '长时间' : '正常' }}
+            <el-tag :type="statusTagType(row.status)" size="small">
+              {{ statusLabel(row.status) }}
             </el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="risk_level" label="风险等级" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.risk_level === 'high' ? 'danger' : row.risk_level === 'medium' ? 'warning' : 'info'" size="small">
+              {{ riskLabel(row.risk_level) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="created_at" label="创建时间" width="180" align="center">
+          <template #default="{ row }">
+            {{ formatTime(row.created_at) }}
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="updated_at" label="更新时间" width="180" align="center">
+          <template #default="{ row }">
+            {{ formatTime(row.updated_at) }}
           </template>
         </el-table-column>
 
@@ -186,24 +189,24 @@
     </el-card>
 
     <!-- 详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="锁详情" width="600px" destroy-on-close>
+    <el-dialog v-model="detailVisible" title="执行详情" width="600px" destroy-on-close>
       <el-descriptions :column="2" border v-if="currentLock">
-        <el-descriptions-item label="执行ID">{{ currentLock.id || currentLock.execution_id }}</el-descriptions-item>
-        <el-descriptions-item label="锁类型">
-          <el-tag size="small">{{ currentLock.lock_type || '-' }}</el-tag>
+        <el-descriptions-item label="执行ID" :span="2">{{ currentLock.id }}</el-descriptions-item>
+        <el-descriptions-item label="执行类型">
+          <el-tag size="small">{{ execTypeLabel(currentLock.execution_type) }}</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="锁定资源" :span="2">{{ currentLock.lock_resource || currentLock.resource }}</el-descriptions-item>
-        <el-descriptions-item label="锁定时间">{{ formatTime(currentLock.locked_at || currentLock.created_at) }}</el-descriptions-item>
-        <el-descriptions-item label="持有时长">{{ calcDuration(currentLock.locked_at || currentLock.created_at) }}</el-descriptions-item>
-        <el-descriptions-item label="持有者">{{ currentLock.owner || currentLock.holder || '-' }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="isExpired(currentLock) ? 'danger' : 'success'" size="small">
-            {{ isExpired(currentLock) ? '超时' : '正常' }}
-          </el-tag>
+          <el-tag :type="statusTagType(currentLock.status)" size="small">{{ statusLabel(currentLock.status) }}</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item v-if="currentLock.description" label="描述" :span="2">
-          {{ currentLock.description }}
-        </el-descriptions-item>
+        <el-descriptions-item label="目标资源" :span="2">{{ currentLock.target_id || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="触发来源">{{ triggerLabel(currentLock.trigger_source) }}</el-descriptions-item>
+        <el-descriptions-item label="风险等级">{{ riskLabel(currentLock.risk_level) }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ formatTime(currentLock.created_at) }}</el-descriptions-item>
+        <el-descriptions-item label="更新时间">{{ formatTime(currentLock.updated_at) }}</el-descriptions-item>
+        <el-descriptions-item v-if="currentLock.started_at" label="开始时间">{{ formatTime(currentLock.started_at) }}</el-descriptions-item>
+        <el-descriptions-item v-if="currentLock.completed_at" label="完成时间">{{ formatTime(currentLock.completed_at) }}</el-descriptions-item>
+        <el-descriptions-item v-if="currentLock.error_message" label="错误信息" :span="2">{{ currentLock.error_message }}</el-descriptions-item>
+        <el-descriptions-item v-if="currentLock.result" label="执行结果" :span="2">{{ currentLock.result }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>
@@ -219,25 +222,32 @@ import type { AxiosResponse } from 'axios'
 
 // ---------- 类型定义 ----------
 interface LockEntry {
-  id: string | number
-  execution_id?: string
-  lock_resource?: string
-  resource?: string
-  lock_type?: string
-  locked_at?: string
+  id: string
+  execution_type?: string
+  target_id?: string
+  asset_ids?: string
+  parameters?: string
+  status?: string
+  trigger_source?: string
+  trigger_source_id?: string
+  policy_execution_id?: string
+  is_dry_run?: boolean
+  risk_level?: string
+  approved_by?: string
+  approved_at?: string
+  started_at?: string
+  completed_at?: string
+  result?: string
+  error_message?: string
   created_at?: string
-  owner?: string
-  holder?: string
-  created_by?: string
-  description?: string
-  ttl?: number
+  updated_at?: string
   [key: string]: unknown
 }
 
 interface QueryParams {
   execution_id: string
-  lock_resource: string
-  owner: string
+  target_id: string
+  status: string
   page: number
   pageSize: number
 }
@@ -253,18 +263,19 @@ let refreshTimer: ReturnType<typeof setInterval> | null = null
 
 const queryParams = reactive<QueryParams>({
   execution_id: '',
-  lock_resource: '',
-  owner: '',
+  target_id: '',
+  status: '',
   page: 1,
   pageSize: 20,
 })
 
 // ---------- 计算属性 ----------
-const expiredCount = computed(() => lockList.value.filter(isExpired).length)
-const longHeldCount = computed(() => lockList.value.filter(isLongHeld).length)
+const completedCount = computed(() => lockList.value.filter(r => r.status === 'completed').length)
+const runningCount = computed(() => lockList.value.filter(r => r.status === 'running' || r.status === 'pending').length)
+const failedCount = computed(() => lockList.value.filter(r => r.status === 'failed').length)
 
 // ---------- 工具函数 ----------
-function truncateLockId(id: string | number | undefined): string {
+function truncateLockId(id: string | undefined): string {
   if (!id) return '-'
   var s = String(id)
   return s.length > 16 ? s.slice(0, 8) + '...' + s.slice(-4) : s
@@ -272,57 +283,64 @@ function truncateLockId(id: string | number | undefined): string {
 
 const formatTime = (ts?: string): string => {
   if (!ts) return '-'
-  const d = new Date(ts)
+  var d = new Date(ts)
   if (isNaN(d.getTime())) return ts
   return d.toLocaleString('zh-CN', { hour12: false })
 }
 
-const calcDuration = (ts?: string): string => {
-  if (!ts) return '-'
-  const start = new Date(ts).getTime()
-  if (isNaN(start)) return '-'
-  const diff = Date.now() - start
-  if (diff < 0) return '-'
-  const hours = Math.floor(diff / 3600000)
-  const minutes = Math.floor((diff % 3600000) / 60000)
-  if (hours > 0) return `${hours}时${minutes}分`
-  return `${minutes}分`
+function execTypeLabel(t: string | undefined): string {
+  var map: Record<string, string> = { manual: '手动', script: '脚本', playbook: 'Playbook', policy: '策略' }
+  return map[t || ''] || t || '-'
 }
 
-const isExpired = (row: LockEntry): boolean => {
-  if (!row.ttl) return false
-  const lockedAt = new Date(row.locked_at || row.created_at || '').getTime()
-  return !isNaN(lockedAt) && Date.now() - lockedAt > row.ttl * 1000
+function execTypeTagType(t: string | undefined): string {
+  var map: Record<string, string> = { manual: 'primary', script: 'success', playbook: 'warning', policy: 'info' }
+  return map[t || ''] || 'info'
 }
 
-const isLongHeld = (row: LockEntry): boolean => {
-  const lockedAt = new Date(row.locked_at || row.created_at || '').getTime()
-  return !isNaN(lockedAt) && Date.now() - lockedAt > 3600000 // > 1h
+function triggerLabel(t: string | undefined): string {
+  var map: Record<string, string> = { manual: '手动', policy: '策略', schedule: '定时', alert: '告警', api: 'API' }
+  return map[t || ''] || t || '-'
+}
+
+function statusLabel(s: string | undefined): string {
+  var map: Record<string, string> = { pending: '待执行', running: '运行中', completed: '已完成', failed: '失败', cancelled: '已取消' }
+  return map[s || ''] || s || '-'
+}
+
+function statusTagType(s: string | undefined): string {
+  var map: Record<string, string> = { pending: 'info', running: 'warning', completed: 'success', failed: 'danger', cancelled: 'info' }
+  return map[s || ''] || 'info'
+}
+
+function riskLabel(r: string | undefined): string {
+  var map: Record<string, string> = { high: '高', medium: '中', low: '低' }
+  return map[r || ''] || r || '-'
 }
 
 // ---------- 数据请求 ----------
-const buildParams = (): Record<string, unknown> => {
-  const params: Record<string, unknown> = {
-    status: 'running',
+var buildParams = (): Record<string, unknown> => {
+  var params: Record<string, unknown> = {
     page: queryParams.page,
     page_size: queryParams.pageSize,
-    has_lock: true,
   }
-  if (queryParams.execution_id) params.execution_id = queryParams.execution_id
-  if (queryParams.lock_resource) params.lock_resource = queryParams.lock_resource
-  if (queryParams.owner) params.owner = queryParams.owner
+  if (queryParams.execution_id) params.id = queryParams.execution_id
+  if (queryParams.target_id) params.target_id = queryParams.target_id
+  if (queryParams.status) params.status = queryParams.status
   return params
 }
 
-const fetchLockList = async () => {
+var fetchLockList = async () => {
   loading.value = true
   try {
-    const res: AxiosResponse = await client.get(API.EXECUTIONS, { params: buildParams() })
-    const data = res.data?.data ?? res.data
-    lockList.value = data?.items ?? data?.results ?? data?.list ?? []
-    total.value = data?.total ?? data?.count ?? 0
+    var res: AxiosResponse = await client.get(API.EXECUTIONS, { params: buildParams() })
+    var rawData = res.data
+    var payload = rawData?.data ?? rawData
+    // API returns items[] in data.data
+    lockList.value = payload?.items ?? payload?.results ?? payload?.list ?? []
+    total.value = payload?.total ?? payload?.count ?? 0
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : '获取锁列表失败'
+    var msg = err instanceof Error ? err.message : '获取执行列表失败'
     ElMessage.error(msg)
   } finally {
     loading.value = false
@@ -330,51 +348,50 @@ const fetchLockList = async () => {
 }
 
 // ---------- 事件处理 ----------
-const handleSearch = () => {
+var handleSearch = () => {
   queryParams.page = 1
   fetchLockList()
 }
 
-const handleReset = () => {
+var handleReset = () => {
   queryParams.execution_id = ''
-  queryParams.lock_resource = ''
-  queryParams.owner = ''
+  queryParams.target_id = ''
+  queryParams.status = ''
   queryParams.page = 1
   queryParams.pageSize = 20
   fetchLockList()
 }
 
-const handleSelectionChange = (rows: LockEntry[]) => {
+var handleSelectionChange = (rows: LockEntry[]) => {
   selectedRows.value = rows
 }
 
-const handleViewExecution = (row: LockEntry) => {
-  // Navigate to execution detail if router available
-  console.log('View execution:', row.id || row.execution_id)
+var handleViewExecution = (row: LockEntry) => {
+  console.log('View execution:', row.id)
 }
 
-const handleViewDetail = (row: LockEntry) => {
+var handleViewDetail = (row: LockEntry) => {
   currentLock.value = row
   detailVisible.value = true
 }
 
-const handleRelease = async (row: LockEntry) => {
+var handleRelease = async (row: LockEntry) => {
   try {
-    const id = row.id || row.execution_id
-    await client.post(`${API.EXECUTIONS}${id}/unlock/`)
-    ElMessage.success('锁释放成功')
+    await client.post(API.EXECUTION_CANCEL(row.id))
+    ElMessage.success('执行已取消/释放')
     fetchLockList()
   } catch {
-    ElMessage.error('锁释放失败')
+    ElMessage.error('操作失败')
   }
 }
 
-const handleBatchRelease = async () => {
+var handleBatchRelease = async () => {
   if (!selectedRows.value.length) return
   try {
-    const ids = selectedRows.value.map(r => r.id || r.execution_id)
-    await client.post(`${API.EXECUTIONS}batch-unlock/`, { ids })
-    ElMessage.success(`成功释放 ${ids.length} 个锁`)
+    for (var i = 0; i < selectedRows.value.length; i++) {
+      await client.post(API.EXECUTION_CANCEL(selectedRows.value[i].id))
+    }
+    ElMessage.success('成功释放 ' + selectedRows.value.length + ' 个执行')
     selectedRows.value = []
     fetchLockList()
   } catch {
@@ -385,7 +402,6 @@ const handleBatchRelease = async () => {
 // ---------- 生命周期 ----------
 onMounted(() => {
   fetchLockList()
-  // Auto refresh every 30 seconds
   refreshTimer = setInterval(fetchLockList, 30000)
 })
 

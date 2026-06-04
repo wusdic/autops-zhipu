@@ -55,6 +55,7 @@ from app.api.platform_extra import (
     selfcheck_router,
     tenant_router,
 )
+from app.api.aiops_extra import router as aiops_extra_router
 from app.api.search import router as search_router
 from app.domains.alert.threshold_api import router as threshold_rule_router
 from app.domains.notification.rule_api import router as notification_rule_router
@@ -111,6 +112,7 @@ api_router.include_router(knowledge_router)
 # AIops
 api_router.include_router(aiops_router)
 api_router.include_router(agent_router, prefix="/aiops")
+api_router.include_router(aiops_extra_router, prefix="/aiops")
 
 # Anomalies
 api_router.include_router(anomaly_router)

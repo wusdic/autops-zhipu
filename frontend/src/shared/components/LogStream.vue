@@ -1,26 +1,142 @@
 <template>
-  <div class="log-stream" :style="{ height: height, overflow: 'auto', background: '#1e1e1e', color: '#d4d4d4', padding: '12px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '13px', lineHeight: '1.6' }">
-    <div v-for="(line, idx) in lines" :key="idx" :class="getLineClass(line)">
-      <span class="line-number" :style="{ color: '#666', marginRight: '12px' }">{{ idx + 1 }}</span>
-      <span :style="{ color: getLineColor(line) }">{{ line }}</span>
+  <div class="log-stream">
+    <div class="log-stream__toolbar" v-if="showToolbar">
+      <el-button size="small" :plain="!autoScroll" :type="autoScroll ? 'primary' : 'default'" @click="autoScroll = !autoScroll">
+        {{ autoScroll ? '自动滚动: 开' : '自动滚动: 关' }}
+      </el-button>
+      <el-button size="small" plain @click="clearLogs">清空</el-button>
+      <span class="log-stream__count">{{ logs.length }} 行</span>
     </div>
-    <div v-if="!lines.length" :style="{ color: '#666', textAlign: 'center', padding: '20px' }">等待日志输出...</div>
+    <div class="log-stream__content" ref="contentRef">
+      <div v-if="logs.length === 0" class="log-stream__empty">暂无日志</div>
+      <div v-for="(log, idx) in logs" :key="idx" :class="['log-stream__line', 'log-stream__line--' + log.level]">
+        <span class="log-stream__time">{{ log.time }}</span>
+        <span :class="['log-stream__level', 'log-stream__level--' + log.level]">{{ levelText(log.level) }}</span>
+        <span class="log-stream__msg">{{ log.message }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{ lines: string[]; height?: string }>()
+import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
 
-function getLineClass(line: string): string {
-  if (line.toLowerCase().includes('error')) return 'log-error'
-  if (line.toLowerCase().includes('warning') || line.toLowerCase().includes('warn')) return 'log-warn'
-  return ''
+export interface LogEntry {
+  time: string
+  level: 'info' | 'warn' | 'error' | 'debug'
+  message: string
 }
 
-function getLineColor(line: string): string {
-  if (line.toLowerCase().includes('error')) return '#f44747'
-  if (line.toLowerCase().includes('warning') || line.toLowerCase().includes('warn')) return '#cca700'
-  if (line.toLowerCase().includes('success') || line.toLowerCase().includes('ok')) return '#6a9955'
-  return '#d4d4d4'
+const props = withDefaults(defineProps<{
+  logs?: LogEntry[]
+  showToolbar?: boolean
+  maxLines?: number
+}>(), {
+  logs: () => [],
+  showToolbar: true,
+  maxLines: 1000,
+})
+
+const emit = defineEmits<{
+  clear: []
+}>()
+
+const contentRef = ref<HTMLElement | null>(null)
+const autoScroll = ref(true)
+
+function levelText(level: string) {
+  const map: Record<string, string> = { info: 'INFO', warn: 'WARN', error: 'ERR', debug: 'DBG' }
+  return map[level] || level.toUpperCase()
 }
+
+function clearLogs() {
+  emit('clear')
+}
+
+function scrollToBottom() {
+  if (autoScroll.value && contentRef.value) {
+    contentRef.value.scrollTop = contentRef.value.scrollHeight
+  }
+}
+
+watch(() => props.logs, () => {
+  nextTick(scrollToBottom)
+}, { deep: true })
+
+onBeforeUnmount(() => {
+  // cleanup
+})
 </script>
+
+<style scoped>
+.log-stream {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 200px;
+}
+
+.log-stream__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f7f8fa;
+  border-bottom: 1px solid #e5e6eb;
+}
+
+.log-stream__count {
+  margin-left: auto;
+  font-size: 12px;
+  color: #86909c;
+}
+
+.log-stream__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  background: #1d1d1f;
+  color: #d4d4d4;
+}
+
+.log-stream__empty {
+  color: #666;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.log-stream__line {
+  display: flex;
+  gap: 8px;
+}
+
+.log-stream__time {
+  color: #86909c;
+  white-space: nowrap;
+}
+
+.log-stream__level {
+  min-width: 40px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.log-stream__level--info { color: #52c41a; }
+.log-stream__level--warn { color: #faad14; }
+.log-stream__level--error { color: #ff4d4f; }
+.log-stream__level--debug { color: #86909c; }
+
+.log-stream__msg {
+  word-break: break-all;
+}
+
+.log-stream__line--error {
+  background: rgba(255, 77, 79, 0.08);
+}
+.log-stream__line--warn {
+  background: rgba(250, 173, 20, 0.05);
+}
+</style>

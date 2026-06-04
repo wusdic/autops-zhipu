@@ -1,123 +1,154 @@
 <template>
-  <div ref="chartRef" :style="{ width: '100%', height: height }"></div>
+  <div class="metric-chart" ref="chartRef" :style="{ height: height + 'px' }" />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted } from 'vue'
-import * as echarts from 'echarts'
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 
 const props = withDefaults(defineProps<{
-  data: Array<{ time: string; value: number }>
+  data?: Array<{ time: string; value: number }>
   title?: string
+  height?: number
   color?: string
-  height?: string
   unit?: string
-  chartType?: 'line' | 'bar' | 'pie'
-  multiple?: Array<{ name: string; data: Array<{ time: string; value: number }>; color: string }>
 }>(), {
-  height: '300px',
+  height: 240,
   color: '#165dff',
   unit: '',
-  chartType: 'line',
 })
 
-const chartRef = ref<HTMLElement>()
-let chart: echarts.ECharts | null = null
+const chartRef = ref<HTMLElement | null>(null)
+let chartInstance: any = null
 
-function initChart() {
-  if (chartRef.value) {
-    chart = echarts.init(chartRef.value)
-    renderChart()
-  }
-}
-
-onMounted(() => {
-  initChart()
-  window.addEventListener('resize', handleResize)
-})
-
-watch(() => [props.data, props.multiple], renderChart, { deep: true })
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-  chart?.dispose()
-})
-
-function handleResize() {
-  chart?.resize()
-}
-
+// Simple canvas-based chart (no echarts dependency)
 function renderChart() {
-  if (!chart) return
-
-  if (props.chartType === 'pie') {
-    renderPieChart()
+  const el = chartRef.value
+  if (!el || !props.data || props.data.length === 0) {
+    // Draw empty state
+    if (el) {
+      const canvas = document.createElement('canvas')
+      canvas.width = el.clientWidth * 2
+      canvas.height = el.clientHeight * 2
+      canvas.style.width = '100%'
+      canvas.style.height = '100%'
+      el.innerHTML = ''
+      el.appendChild(canvas)
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        ctx.scale(2, 2)
+        const w = el.clientWidth
+        const h = el.clientHeight
+        ctx.fillStyle = '#f2f3f5'
+        ctx.fillRect(0, 0, w, h)
+        ctx.fillStyle = '#c9cdd4'
+        ctx.font = '13px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.fillText('暂无数据', w / 2, h / 2)
+      }
+    }
     return
   }
 
-  // Line or Bar chart
-  const series: any[] = []
-  if (props.multiple && props.multiple.length > 0) {
-    // Multiple series
-    const allTimes = new Set<string>()
-    props.multiple.forEach(s => s.data.forEach(d => allTimes.add(d.time)))
-    const times = Array.from(allTimes).sort()
-    props.multiple.forEach(s => {
-      const dataMap = new Map(s.data.map(d => [d.time, d.value]))
-      series.push({
-        name: s.name,
-        type: props.chartType,
-        data: times.map(t => dataMap.get(t) ?? null),
-        smooth: props.chartType === 'line',
-        areaStyle: props.chartType === 'line' ? { opacity: 0.15 } : undefined,
-        itemStyle: { color: s.color },
-      })
-    })
-    chart.setOption({
-      title: { text: props.title, left: 'center', textStyle: { fontSize: 14 } },
-      tooltip: { trigger: 'axis' },
-      legend: { bottom: 0 },
-      grid: { left: '3%', right: '4%', bottom: '12%', top: '14%', containLabel: true },
-      xAxis: { type: 'category', data: times, boundaryGap: props.chartType === 'bar' },
-      yAxis: { type: 'value' },
-      series,
-    }, true)
-  } else {
-    // Single series
-    chart.setOption({
-      title: { text: props.title, left: 'center', textStyle: { fontSize: 14 } },
-      tooltip: {
-        trigger: 'axis',
-        formatter: (p: any) => `${p[0]?.axisValue}<br/>${p[0]?.value}${props.unit}`
-      },
-      grid: { left: '3%', right: '4%', bottom: '3%', top: '14%', containLabel: true },
-      xAxis: { type: 'category', data: props.data.map(d => d.time), boundaryGap: false },
-      yAxis: { type: 'value' },
-      series: [{
-        type: props.chartType,
-        data: props.data.map(d => d.value),
-        smooth: props.chartType === 'line',
-        areaStyle: props.chartType === 'line' ? { opacity: 0.15 } : undefined,
-        itemStyle: { color: props.color },
-      }],
-    }, true)
+  const canvas = document.createElement('canvas')
+  canvas.width = el.clientWidth * 2
+  canvas.height = el.clientHeight * 2
+  canvas.style.width = '100%'
+  canvas.style.height = '100%'
+  el.innerHTML = ''
+  el.appendChild(canvas)
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  ctx.scale(2, 2)
+  const w = el.clientWidth
+  const h = el.clientHeight
+  const pad = { top: 20, right: 20, bottom: 30, left: 50 }
+  const cw = w - pad.left - pad.right
+  const ch = h - pad.top - pad.bottom
+
+  // Background
+  ctx.fillStyle = '#fff'
+  ctx.fillRect(0, 0, w, h)
+
+  // Grid
+  ctx.strokeStyle = '#e5e6eb'
+  ctx.lineWidth = 0.5
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (ch / 4) * i
+    ctx.beginPath()
+    ctx.moveTo(pad.left, y)
+    ctx.lineTo(w - pad.right, y)
+    ctx.stroke()
   }
+
+  // Data
+  const values = props.data.map(d => d.value)
+  const minVal = Math.min(...values)
+  const maxVal = Math.max(...values)
+  const range = maxVal - minVal || 1
+
+  // Line
+  ctx.strokeStyle = props.color
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  props.data.forEach((d, i) => {
+    const x = pad.left + (cw / (props.data!.length - 1 || 1)) * i
+    const y = pad.top + ch - ((d.value - minVal) / range) * ch
+    if (i === 0) ctx.moveTo(x, y)
+    else ctx.lineTo(x, y)
+  })
+  ctx.stroke()
+
+  // Fill area
+  ctx.lineTo(pad.left + cw, pad.top + ch)
+  ctx.lineTo(pad.left, pad.top + ch)
+  ctx.closePath()
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + ch)
+  grad.addColorStop(0, props.color + '30')
+  grad.addColorStop(1, props.color + '05')
+  ctx.fillStyle = grad
+  ctx.fill()
+
+  // Y axis labels
+  ctx.fillStyle = '#86909c'
+  ctx.font = '11px sans-serif'
+  ctx.textAlign = 'right'
+  for (let i = 0; i <= 4; i++) {
+    const val = maxVal - (range / 4) * i
+    const y = pad.top + (ch / 4) * i + 4
+    ctx.fillText(val.toFixed(0) + props.unit, pad.left - 6, y)
+  }
+
+  // X axis labels (first, middle, last)
+  ctx.textAlign = 'center'
+  const showLabels = props.data.filter((_, i) => {
+    const step = Math.max(1, Math.floor(props.data!.length / 5))
+    return i % step === 0 || i === props.data!.length - 1
+  })
+  showLabels.forEach(d => {
+    const idx = props.data!.indexOf(d)
+    const x = pad.left + (cw / (props.data!.length - 1 || 1)) * idx
+    ctx.fillText(d.time.slice(-5), x, h - 6)
+  })
 }
 
-function renderPieChart() {
-  if (!chart) return
-  chart.setOption({
-    title: { text: props.title, left: 'center', textStyle: { fontSize: 14 } },
-    tooltip: { trigger: 'item' },
-    legend: { bottom: 0 },
-    series: [{
-      type: 'pie',
-      radius: ['40%', '70%'],
-      avoidLabelOverlap: false,
-      itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
-      label: { show: true, formatter: '{b}: {c}' },
-      data: props.data.map(d => ({ name: d.time, value: d.value })),
-    }],
-  }, true)
-}
+onMounted(() => {
+  nextTick(renderChart)
+})
+
+onBeforeUnmount(() => {
+  chartInstance = null
+})
+
+watch(() => props.data, () => {
+  nextTick(renderChart)
+}, { deep: true })
 </script>
+
+<style scoped>
+.metric-chart {
+  width: 100%;
+  min-height: 120px;
+}
+</style>

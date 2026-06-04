@@ -134,6 +134,9 @@
         <el-form :inline="true" class="autops-toolbar filter-form" @submit.prevent="handleSearch">
           <el-form-item label="类型">
             <el-select v-model="filters.type" placeholder="全部类型" clearable style="width: 140px">
+              <el-option label="Linux服务器" value="linux_server" />
+              <el-option label="Web服务器" value="web_server" />
+              <el-option label="Windows服务器" value="windows_server" />
               <el-option label="服务器" value="server" />
               <el-option label="网络设备" value="network" />
               <el-option label="数据库" value="database" />
@@ -173,9 +176,9 @@
  class="asset-table"
  >
           <el-table-column prop="name" label="资产名称" min-width="160" show-overflow-tooltip />
-          <el-table-column prop="type" label="类型" width="110" align="center">
+          <el-table-column prop="asset_type" label="类型" width="110" align="center">
             <template #default="{ row }">
-              <el-tag size="small">{{ assetTypeLabel(row.type) }}</el-tag>
+              <el-tag size="small">{{ assetTypeLabel(row.asset_type) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="ip" label="IP地址" width="140" show-overflow-tooltip />
@@ -184,7 +187,9 @@
               <el-tag :type="assetStatusType(row.status)" size="small">{{ assetStatusLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="os" label="操作系统" min-width="140" show-overflow-tooltip />
+          <el-table-column label="操作系统" min-width="140" show-overflow-tooltip>
+            <template #default="{ row }">{{ formatOs(row.os_type, row.os_version) }}</template>
+          </el-table-column>
           <el-table-column prop="business_system" label="所属业务" min-width="120" show-overflow-tooltip />
           <el-table-column prop="updated_at" label="更新时间" width="170">
             <template #default="{ row }">{{ formatTime(row.updated_at) }}</template>
@@ -252,10 +257,17 @@ function formatTime(val: string | null | undefined): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
+function formatOs(osType: string | null | undefined, osVersion: string | null | undefined): string {
+  if (!osType && !osVersion) return '-'
+  if (osType && osVersion) return osType + ' ' + osVersion
+  return osType || osVersion || '-'
+}
+
 function assetTypeLabel(t: string): string {
-  const map: Record<string, string> = {
+  var map: Record<string, string> = {
     server: '服务器', network: '网络设备', database: '数据库',
     middleware: '中间件', application: '应用', cloud: '云资源', storage: '存储',
+    linux_server: 'Linux服务器', web_server: 'Web服务器', windows_server: 'Windows服务器',
   }
   return map[t] || t || '-'
 }
@@ -302,7 +314,7 @@ async function loadAssets() {
       page: pagination.page,
       page_size: pagination.pageSize,
     }
-    if (filters.type) params.type = filters.type
+    if (filters.type) params.asset_type = filters.type
     if (filters.status) params.status = filters.status
     if (filters.keyword) params.keyword = filters.keyword
 
@@ -348,15 +360,17 @@ function exportReport() {
     return
   }
   const headers = ['资产名称', '类型', 'IP地址', '状态', '操作系统', '所属业务', '更新时间']
-  const rows = assets.value.map((a) => [
-    a.name || '',
-    assetTypeLabel(a.type),
-    a.ip || '',
-    assetStatusLabel(a.status),
-    a.os || '',
-    a.business_system || '',
-    formatTime(a.updated_at),
-  ])
+  var rows = assets.value.map(function(a) {
+    return [
+      a.name || '',
+      assetTypeLabel(a.asset_type),
+      a.ip || '',
+      assetStatusLabel(a.status),
+      formatOs(a.os_type, a.os_version),
+      a.business_system || '',
+      formatTime(a.updated_at),
+    ]
+  })
   const csvContent = [headers.join(','), ...rows.map((r) => r.map(c => `"${c}"`).join(','))].join('\n')
   const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)

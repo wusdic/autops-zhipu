@@ -162,19 +162,25 @@
  row-key="id"
  class="exec-table"
  >
-          <el-table-column prop="playbook_name" label="Playbook" min-width="180" show-overflow-tooltip />
+          <el-table-column label="Playbook" min-width="180" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ row.playbook_name || row.execution_type || row.target_id || '-' }}
+            </template>
+          </el-table-column>
           <el-table-column prop="status" label="状态" width="100" align="center">
             <template #default="{ row }">
               <el-tag :type="execStatusType(row.status)" size="small">{{ execStatusLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="trigger_type" label="触发方式" width="100" align="center">
+          <el-table-column prop="trigger_source" label="触发方式" width="100" align="center">
             <template #default="{ row }">
-              <el-tag size="small" type="info">{{ triggerLabel(row.trigger_type) }}</el-tag>
+              <el-tag size="small" type="info">{{ triggerLabel(row.trigger_source) }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="duration" label="耗时" width="100" align="center">
-            <template #default="{ row }">{{ formatDuration(row.duration) }}</template>
+          <el-table-column label="耗时" width="100" align="center">
+            <template #default="{ row }">
+              {{ calcExecDuration(row.started_at, row.completed_at) }}
+            </template>
           </el-table-column>
           <el-table-column prop="started_at" label="开始时间" width="170">
             <template #default="{ row }">{{ formatTime(row.started_at || row.created_at) }}</template>
@@ -264,8 +270,18 @@ function execStatusLabel(s: string): string {
 }
 
 function triggerLabel(t: string): string {
-  const map: Record<string, string> = { manual: '手动', schedule: '定时', alert: '告警', api: 'API', policy: '策略' }
+  var map: Record<string, string> = { manual: '手动', policy: '策略', schedule: '定时', alert: '告警', api: 'API' }
   return map[t] || t || '-'
+}
+
+function calcExecDuration(startAt: string | null, completedAt: string | null): string {
+  if (!startAt) return '-'
+  var start = new Date(startAt).getTime()
+  if (isNaN(start)) return '-'
+  var end = completedAt ? new Date(completedAt).getTime() : Date.now()
+  var diff = Math.max(0, end - start)
+  var seconds = Math.round(diff / 1000)
+  return formatDuration(seconds)
 }
 
 // ── Data Loading ───────────────────────────────────────────────────

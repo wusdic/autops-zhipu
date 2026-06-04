@@ -6,16 +6,16 @@
         <el-form-item label="告警ID">
           <el-input v-model="queryForm.alert_id" placeholder="输入告警ID查询证据链" clearable style="width: 240px" />
         </el-form-item>
-        <el-form-item label="证据类型">
+        <el-form-item label="事件类型">
           <el-select v-model="queryForm.evidence_type" placeholder="全部" clearable style="width: 140px">
-            <el-option label="日志" value="log" />
-            <el-option label="指标" value="metric" />
-            <el-option label="事件" value="event" />
-            <el-option label="配置" value="config" />
+            <el-option label="告警创建" value="alert_created" />
+            <el-option label="状态变更" value="status_change" />
+            <el-option label="处置操作" value="action" />
+            <el-option label="关联事件" value="event" />
           </el-select>
         </el-form-item>
-        <el-form-item label="来源资产">
-          <el-input v-model="queryForm.source_asset" placeholder="搜索来源资产" clearable style="width: 200px" />
+        <el-form-item label="关键词">
+          <el-input v-model="queryForm.keyword" placeholder="搜索标题/内容" clearable style="width: 200px" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">
@@ -34,19 +34,14 @@
         <span>关联告警信息</span>
       </template>
       <el-descriptions :column="3" border size="small">
-        <el-descriptions-item label="告警名称">{{ alertInfo.name || alertInfo.alert_name || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="告警标题">{{ alertInfo.title || '-' }}</el-descriptions-item>
         <el-descriptions-item label="告警等级">
           <el-tag :type="severityTagType(alertInfo.severity)" size="small">{{ alertInfo.severity || '-' }}</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="告警时间">{{ formatTime(alertInfo.created_at || alertInfo.time) }}</el-descriptions-item>
-        <el-descriptions-item label="来源资产">{{ alertInfo.source_asset || alertInfo.asset_name || '-' }}</el-descriptions-item>
         <el-descriptions-item label="状态">
           <el-tag :type="alertInfo.status === 'resolved' ? 'success' : 'warning'" size="small">
             {{ alertInfo.status || '-' }}
           </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="证据数量">
-          <el-tag type="info" size="small">{{ tableData.length }}</el-tag>
         </el-descriptions-item>
       </el-descriptions>
     </el-card>
@@ -55,40 +50,37 @@
     <el-card shadow="never" class="table-card">
       <template #header>
         <div style="display: flex; justify-content: space-between; align-items: center">
-          <span>证据归档列表</span>
+          <span>证据时间线</span>
           <el-tag v-if="queryForm.alert_id" type="info" size="small">
             告警: {{ queryForm.alert_id }}
           </el-tag>
         </div>
       </template>
 
-      <el-table stripe v-loading="loading" :data="filteredData"border style="width: 100%">
+      <el-table stripe v-loading="loading" :data="filteredData" border style="width: 100%">
         <el-table-column type="index" label="#" width="50" align="center" />
-        <el-table-column prop="evidence_type" label="证据类型" width="100" align="center">
+        <el-table-column prop="type" label="事件类型" width="130" align="center">
           <template #default="{ row }">
-            <el-tag :type="evidenceTagType(row.evidence_type)" size="small" effect="plain">
-              <el-icon v-if="row.evidence_type === 'log'" style="margin-right: 4px"><Document /></el-icon>
-              <el-icon v-else-if="row.evidence_type === 'metric'" style="margin-right: 4px"><TrendCharts /></el-icon>
-              <el-icon v-else-if="row.evidence_type === 'event'" style="margin-right: 4px"><Bell /></el-icon>
-              <el-icon v-else style="margin-right: 4px"><Setting /></el-icon>
-              {{ evidenceLabel(row.evidence_type) }}
+            <el-tag :type="eventTypeTagType(row.type)" size="small" effect="plain">
+              {{ eventTypeLabel(row.type) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="source_asset" label="来源资产" min-width="160" show-overflow-tooltip />
-        <el-table-column prop="timestamp" label="时间" width="180" align="center">
+        <el-table-column prop="title" label="事件标题" min-width="240" show-overflow-tooltip />
+        <el-table-column prop="severity" label="严重程度" width="100" align="center">
           <template #default="{ row }">
-            {{ formatTime(row.timestamp) }}
+            <el-tag :type="severityTagType(row.severity)" size="small">{{ row.severity || '-' }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="summary" label="内容摘要" min-width="280" show-overflow-tooltip>
+        <el-table-column prop="time" label="时间" width="180" align="center">
           <template #default="{ row }">
-            {{ row.summary || row.content?.substring(0, 120) || '-' }}
+            {{ formatTime(row.time) }}
           </template>
         </el-table-column>
-        <el-table-column prop="collected_by" label="采集方式" width="100" align="center">
+        <el-table-column label="详情" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
-            {{ row.collected_by || '-' }}
+            <span v-if="row.data">{{ formatDataBrief(row.data) }}</span>
+            <span v-else>-</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="100" align="center" fixed="right">
@@ -117,30 +109,21 @@
     <el-drawer v-model="drawerVisible" title="证据详情" size="600px">
       <template v-if="currentRow">
         <el-descriptions :column="1" border>
-          <el-descriptions-item label="证据类型">
-            <el-tag :type="evidenceTagType(currentRow.evidence_type)" size="small">
-              {{ evidenceLabel(currentRow.evidence_type) }}
+          <el-descriptions-item label="事件类型">
+            <el-tag :type="eventTypeTagType(currentRow.type)" size="small">
+              {{ eventTypeLabel(currentRow.type) }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="来源资产">{{ currentRow.source_asset || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="时间">{{ formatTime(currentRow.timestamp) }}</el-descriptions-item>
-          <el-descriptions-item label="采集方式">{{ currentRow.collected_by || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="关联告警ID">{{ currentRow.alert_id || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="事件标题">{{ currentRow.title || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="严重程度">
+            <el-tag :type="severityTagType(currentRow.severity)" size="small">{{ currentRow.severity || '-' }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="时间">{{ formatTime(currentRow.time) }}</el-descriptions-item>
         </el-descriptions>
 
-        <div class="detail-content-section">
-          <h4>内容摘要</h4>
-          <div class="summary-box">{{ currentRow.summary || '-' }}</div>
-        </div>
-
-        <div v-if="currentRow.content" class="detail-content-section">
-          <h4>原始内容</h4>
-          <pre class="raw-content">{{ formatContent(currentRow.content) }}</pre>
-        </div>
-
-        <div v-if="currentRow.metadata" class="detail-content-section">
-          <h4>元数据</h4>
-          <pre class="raw-content">{{ formatMetadata(currentRow.metadata) }}</pre>
+        <div v-if="currentRow.data" class="detail-content-section">
+          <h4>事件数据</h4>
+          <pre class="raw-content">{{ formatData(currentRow.data) }}</pre>
         </div>
       </template>
     </el-drawer>
@@ -149,45 +132,36 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { Search, Refresh, Document, TrendCharts, Bell, Setting } from '@element-plus/icons-vue'
+import { Search, Refresh } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
-interface EvidenceRecord {
-  id: string | number
-  alert_id: string | number
-  evidence_type: 'log' | 'metric' | 'event' | 'config'
-  source_asset: string
-  timestamp: string
-  summary: string
-  content: string
-  collected_by: string
-  metadata: Record<string, any>
+interface TimelineEntry {
+  time: string
+  type: string
+  severity: string
+  title: string
+  data: Record<string, any>
 }
 
 interface AlertInfo {
-  id: string | number
-  name: string
-  alert_name: string
+  id: string
+  title: string
   severity: string
-  created_at: string
-  time: string
-  source_asset: string
-  asset_name: string
   status: string
 }
 
 const loading = ref(false)
-const tableData = ref<EvidenceRecord[]>([])
+const tableData = ref<TimelineEntry[]>([])
 const alertInfo = ref<AlertInfo | null>(null)
 const drawerVisible = ref(false)
-const currentRow = ref<EvidenceRecord | null>(null)
+const currentRow = ref<TimelineEntry | null>(null)
 
 const queryForm = reactive({
   alert_id: '',
   evidence_type: '',
-  source_asset: '',
+  keyword: '',
 })
 
 const pagination = reactive({
@@ -197,40 +171,47 @@ const pagination = reactive({
 })
 
 const filteredData = computed(() => {
-  let data = tableData.value
+  var data = tableData.value
   if (queryForm.evidence_type) {
-    data = data.filter((r) => r.evidence_type === queryForm.evidence_type)
+    data = data.filter(function(r) { return r.type === queryForm.evidence_type })
   }
-  if (queryForm.source_asset) {
-    data = data.filter((r) => r.source_asset?.includes(queryForm.source_asset))
+  if (queryForm.keyword) {
+    var kw = queryForm.keyword.toLowerCase()
+    data = data.filter(function(r) {
+      return (r.title || '').toLowerCase().indexOf(kw) >= 0
+    })
   }
   return data
 })
 
-function evidenceTagType(type: string): '' | 'success' | 'warning' | 'danger' | 'info' {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
-    log: '',
-    metric: 'success',
-    event: 'warning',
-    config: 'info',
+function eventTypeTagType(t: string): string {
+  var map: Record<string, string> = {
+    alert_created: 'danger',
+    status_change: 'warning',
+    action: 'primary',
+    event: 'info',
   }
-  return map[type] || ''
+  return map[t] || 'info'
 }
 
-function evidenceLabel(type: string): string {
-  const map: Record<string, string> = {
-    log: '日志',
-    metric: '指标',
-    event: '事件',
-    config: '配置',
+function eventTypeLabel(t: string): string {
+  var map: Record<string, string> = {
+    alert_created: '告警创建',
+    status_change: '状态变更',
+    action: '处置操作',
+    event: '关联事件',
+    acknowledged: '已确认',
+    resolved: '已解决',
+    escalated: '已升级',
   }
-  return map[type] || type || '-'
+  return map[t] || t || '-'
 }
 
-function severityTagType(severity: string): '' | 'success' | 'warning' | 'danger' | 'info' {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+function severityTagType(severity: string): string {
+  var map: Record<string, string> = {
     critical: 'danger',
     high: 'danger',
+    warning: 'warning',
     medium: 'warning',
     low: 'info',
     info: 'info',
@@ -243,20 +224,25 @@ function formatTime(t: string | undefined): string {
   return new Date(t).toLocaleString('zh-CN')
 }
 
-function formatContent(content: string): string {
+function formatDataBrief(data: Record<string, any>): string {
+  if (!data) return '-'
   try {
-    const parsed = JSON.parse(content)
-    return JSON.stringify(parsed, null, 2)
+    var parts: string[] = []
+    var keys = Object.keys(data)
+    for (var i = 0; i < Math.min(keys.length, 3); i++) {
+      parts.push(keys[i] + ': ' + String(data[keys[i]]))
+    }
+    return parts.join('; ')
   } catch {
-    return content
+    return String(data)
   }
 }
 
-function formatMetadata(metadata: Record<string, any>): string {
+function formatData(data: Record<string, any>): string {
   try {
-    return JSON.stringify(metadata, null, 2)
+    return JSON.stringify(data, null, 2)
   } catch {
-    return String(metadata)
+    return String(data)
   }
 }
 
@@ -267,53 +253,43 @@ async function fetchData() {
   try {
     if (queryForm.alert_id) {
       // Fetch evidence chain for specific alert
-      try {
-        const evidenceRes = await client.get(API.ALERT_EVIDENCE_CHAIN(queryForm.alert_id))
-        const data = evidenceRes.data?.data ?? evidenceRes.data ?? {}
-        tableData.value = Array.isArray(data) ? data : (data.items ?? data.records ?? data.list ?? [])
-        // Try to get alert info from evidence
-        if (tableData.value.length > 0 && tableData.value[0].alert_id) {
-          try {
-            const alertRes = await client.get(`${API.ALERTS}/${queryForm.alert_id}`)
-            alertInfo.value = alertRes.data?.data ?? alertRes.data ?? null
-          } catch {
-            // Alert info not available, that's okay
-          }
-        }
-      } catch {
-        // Fallback: search alerts and extract evidence
-        const alertRes = await client.get(API.ALERTS, {
-          params: { id: queryForm.alert_id, page: 1, page_size: 1 },
-        })
-        const alertData = alertRes.data?.data ?? alertRes.data ?? {}
-        const alerts = alertData.items ?? alertData.records ?? alertData.list ?? []
-        if (alerts.length > 0) {
-          alertInfo.value = alerts[0]
-          tableData.value = alerts[0].evidence_chain ?? alerts[0].evidences ?? []
-        } else {
-          tableData.value = []
-        }
+      var evidenceRes = await client.get(API.ALERT_EVIDENCE_CHAIN(queryForm.alert_id))
+      var rawData = evidenceRes.data?.data ?? evidenceRes.data ?? {}
+
+      // API returns { alert, timeline, related_ticket }
+      if (rawData.alert) {
+        alertInfo.value = rawData.alert
       }
+      // timeline is the actual data array
+      tableData.value = Array.isArray(rawData.timeline)
+        ? rawData.timeline
+        : (Array.isArray(rawData) ? rawData : [])
+      pagination.total = tableData.value.length
     } else {
-      // Fetch all alerts and aggregate evidence
-      const res = await client.get(API.ALERTS, {
+      // Fetch all alerts and collect timelines
+      var res = await client.get(API.ALERTS, {
         params: {
           page: pagination.page,
           page_size: pagination.page_size,
         },
       })
-      const data = res.data?.data ?? res.data ?? {}
-      const alerts = data.items ?? data.records ?? data.list ?? []
-      // Flatten evidence from all alerts
-      const allEvidence: EvidenceRecord[] = []
-      alerts.forEach((alert: any) => {
-        const evidences = alert.evidence_chain ?? alert.evidences ?? []
-        evidences.forEach((e: EvidenceRecord) => {
-          allEvidence.push({ ...e, alert_id: alert.id })
+      var resData = res.data?.data ?? res.data ?? {}
+      var alerts = resData.items ?? resData.records ?? resData.list ?? []
+
+      var allEntries: TimelineEntry[] = []
+      for (var i = 0; i < alerts.length; i++) {
+        var alert = alerts[i]
+        // Add alert creation as timeline entry
+        allEntries.push({
+          time: alert.created_at || '',
+          type: 'alert_created',
+          severity: alert.severity || 'info',
+          title: alert.title || '告警',
+          data: { alert_id: alert.id, status: alert.status },
         })
-      })
-      tableData.value = allEvidence
-      pagination.total = data.total ?? allEvidence.length
+      }
+      tableData.value = allEntries
+      pagination.total = resData.total ?? allEntries.length
     }
   } catch (e: any) {
     ElMessage.error('获取证据数据失败: ' + (e.message ?? '未知错误'))
@@ -330,17 +306,17 @@ function handleSearch() {
 function handleReset() {
   queryForm.alert_id = ''
   queryForm.evidence_type = ''
-  queryForm.source_asset = ''
+  queryForm.keyword = ''
   pagination.page = 1
   fetchData()
 }
 
-function handleViewDetail(row: EvidenceRecord) {
+function handleViewDetail(row: TimelineEntry) {
   currentRow.value = row
   drawerVisible.value = true
 }
 
-onMounted(() => {
+onMounted(function() {
   fetchData()
 })
 </script>
@@ -370,16 +346,6 @@ onMounted(() => {
   margin-bottom: 8px;
   color: #1d2129;
   font-size: 14px;
-}
-.summary-box {
-  background: #f7f8fa;
-  border: 1px solid #e5e6eb;
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #4e5969;
-  word-break: break-all;
 }
 .raw-content {
   background: #1e1e1e;
