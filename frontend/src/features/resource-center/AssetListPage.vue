@@ -1,7 +1,7 @@
 <template>
   <div class="asset-list">
     <div class="autops-page-header">
-      <span class="autops-page-title">资产列表</span>
+      <span class="autops-page-title">资源列表</span>
       <div class="autops-toolbar-right">
         <el-button type="success" @click="showImportDialog = true">
           <el-icon><Upload /></el-icon> 批量导入
