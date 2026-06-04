@@ -2,7 +2,7 @@
   <div class="page-container">
     <!-- 页面头部 -->
     <div class="autops-page-header">
-      <span class="autops-page-title">资产拓扑</span>
+      <span class="autops-page-title">拓扑视图</span>
     </div>
 
     <!-- 统计卡片 -->

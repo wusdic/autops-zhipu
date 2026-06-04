@@ -121,15 +121,15 @@
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <template v-if="row.status === 'new'">
-              <el-button type="primary" link size="small" @click="handleImport(row)">
+              <el-button type="primary" plain size="small" @click="handleImport(row)">
                 导入
               </el-button>
-              <el-button type="warning" link size="small" @click="handleIgnore(row)">
+              <el-button type="warning" plain size="small" @click="handleIgnore(row)">
                 忽略
               </el-button>
             </template>
             <template v-else-if="row.status === 'ignored'">
-              <el-button type="primary" link size="small" @click="handleImport(row)">
+              <el-button type="primary" plain size="small" @click="handleImport(row)">
                 导入
               </el-button>
             </template>

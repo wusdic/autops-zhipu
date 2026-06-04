@@ -2,7 +2,7 @@
   <div class="p-6">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
-        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
         <span class="autops-page-title">异常详情</span>
       </div>
       <div class="autops-page-desc">查看异常详细信息、处置时间线和关联告警</div>
@@ -110,7 +110,7 @@
                 </el-table-column>
                 <el-table-column label="操作" width="100" fixed="right">
                   <template #default="{ row }">
-                    <el-button text type="primary" size="small" @click="router.push(`/response/alerts/${row.id}`)">
+                    <el-button plain type="primary" size="small" @click="router.push(`/response/alerts/${row.id}`)">
                       查看
                     </el-button>
                   </template>

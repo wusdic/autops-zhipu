@@ -150,8 +150,8 @@
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button text type="primary" size="small" @click="goDetail(row.id)">查看</el-button>
-            <el-button text type="primary" size="small" @click="goEdit(row.id)">编辑</el-button>
+            <el-button plain type="primary" size="small" @click="goDetail(row.id)">查看</el-button>
+            <el-button plain type="primary" size="small" @click="goEdit(row.id)">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -384,13 +384,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   margin-bottom: 16px;
-}
-.page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  display: flex;
-  align-items: center;
 }
 .top-actions {
   margin-left: auto;

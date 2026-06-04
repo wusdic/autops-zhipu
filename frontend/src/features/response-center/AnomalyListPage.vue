@@ -83,12 +83,12 @@
           </el-table-column>
           <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button text type="primary" size="small" @click="router.push(`/response/anomalies/${row.id}`)">
+              <el-button plain type="primary" size="small" @click="router.push(`/response/anomalies/${row.id}`)">
                 详情
               </el-button>
               <el-button
                 v-if="row.status === 'open'"
-                text type="success" size="small"
+                plain type="success" size="small"
                 :loading="actionMap[row.id] === 'ack'"
                 @click="handleAcknowledge(row)"
               >
@@ -96,7 +96,7 @@
               </el-button>
               <el-button
                 v-if="row.status !== 'closed'"
-                text type="warning" size="small"
+                plain type="warning" size="small"
                 :loading="actionMap[row.id] === 'close'"
                 @click="handleClose(row)"
               >

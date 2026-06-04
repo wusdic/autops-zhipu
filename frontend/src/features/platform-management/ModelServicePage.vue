@@ -2,8 +2,8 @@
   <div class="model-service-page">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
-        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <span class="autops-page-title">模型服务管理</span>
+        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <span class="autops-page-title">模型服务</span>
       </div>
       <div class="autops-page-desc">注册和管理 AI 模型服务，配置全局模型参数</div>
     </div>
@@ -57,10 +57,10 @@
         <el-table-column prop="call_count" label="近7天调用" width="120" />
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="testModel(row)">测试</el-button>
-            <el-button link type="primary" @click="viewMetrics(row)">指标</el-button>
-            <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button plain type="primary" @click="testModel(row)">测试</el-button>
+            <el-button plain type="primary" @click="viewMetrics(row)">指标</el-button>
+            <el-button plain type="primary" @click="openDialog(row)">编辑</el-button>
+            <el-button plain type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

@@ -136,16 +136,16 @@
           <template #default="{ row }">
             <el-button
               v-if="row.alert_rule_count === 0"
-              text type="primary" size="small"
+              plain type="primary" size="small"
               @click="createRule(row)"
             >创建规则</el-button>
             <el-button
               v-if="row.policy_count === 0"
-              text type="success" size="small"
+              plain type="success" size="small"
               @click="createPolicy(row)"
             >创建策略</el-button>
             <el-button
-              text size="small"
+              plain size="small"
               @click="ignoreGap(row)"
             >忽略</el-button>
           </template>
@@ -342,13 +342,6 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
-}
-.autops-page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  display: flex;
-  align-items: center;
 }
 .top-actions {
   display: flex;

@@ -80,9 +80,9 @@
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button text type="primary" size="small" @click="viewSystem(row)">查看</el-button>
-            <el-button text type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
-            <el-button text type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button plain type="primary" size="small" @click="viewSystem(row)">查看</el-button>
+            <el-button plain type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
+            <el-button plain type="danger" size="small" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

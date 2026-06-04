@@ -4,7 +4,7 @@
     <el-card class="autops-page-header" shadow="never">
       <div class="header-bar">
         <div class="header-left">
-          <h2 style="margin: 0">🚨 故障处置工作台</h2>
+          <div class="autops-page-title">故障处置工作台</div>
           <span v-if="selectedAlert" class="header-alert-tag">
             <el-tag :type="severityType(selectedAlert.severity)" effect="dark" size="small">
               {{ selectedAlert.severity }}
@@ -347,8 +347,7 @@
               <div class="exec-detail">{{ exec.execution_type }} - {{ exec.target_id }}</div>
               <el-button
                 v-if="exec.id"
-                link
-                type="primary"
+                plain type="primary"
                 size="small"
                 @click="loadExecutionLogs(exec.id)"
               >
@@ -381,10 +380,7 @@
               <el-radio-button value="info">Info</el-radio-button>
             </el-radio-group>
             <el-button
-              v-if="currentExecutionId"
-              size="small"
-              type="primary"
-              link
+              type="primary" plain
               @click="loadExecutionLogs(currentExecutionId)"
               :loading="logLoading"
             >
@@ -435,8 +431,7 @@
         <el-table-column label="操作" width="100" align="center">
           <template #default="{ row }">
             <el-button
-              link
-              type="primary"
+              plain type="primary"
               size="small"
               @click="testChannel(row.name)"
               :loading="testingChannel === row.name"

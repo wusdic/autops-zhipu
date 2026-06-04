@@ -62,7 +62,7 @@
         <el-table-column type="index" label="序号" width="60" align="center" />
         <el-table-column prop="name" label="规则名称" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">{{ row.name }}</el-button>
+            <el-button type="primary" plain @click="handleEdit(row)">{{ row.name }}</el-button>
           </template>
         </el-table-column>
         <el-table-column prop="conditions" label="匹配条件" min-width="220">
@@ -136,9 +136,9 @@
         </el-table-column>
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button type="info" link size="small" @click="handleDuplicate(row)">复制</el-button>
-            <el-button type="danger" link size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" plain size="small" @click="handleEdit(row)">编辑</el-button>
+            <el-button type="info" plain size="small" @click="handleDuplicate(row)">复制</el-button>
+            <el-button type="danger" plain size="small" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

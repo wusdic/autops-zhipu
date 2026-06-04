@@ -233,8 +233,8 @@
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button size="small" type="primary" link @click.stop="openDetailDrawer(row)">详情</el-button>
-            <el-button size="small" link @click.stop="viewRelatedEvents(row)">关联</el-button>
+            <el-button type="primary" plain @click.stop="openDetailDrawer(row)">详情</el-button>
+            <el-button size="small" plain @click.stop="viewRelatedEvents(row)">关联</el-button>
           </template>
         </el-table-column>
       </el-table>

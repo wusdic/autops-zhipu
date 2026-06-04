@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="autops-page-header">
-      <h2>工单总览</h2>
+      <div class="autops-page-title">工单总览</div>
     </div>
 
     <!-- SLA 看板 -->
@@ -36,7 +36,7 @@
         </el-table-column>
         <el-table-column label="操作" width="100">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="router.push(`/tickets/${row.id}`)">处理</el-button>
+            <el-button plain type="primary" size="small" @click="router.push(`/tickets/${row.id}`)">处理</el-button>
           </template>
         </el-table-column>
       </el-table>

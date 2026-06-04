@@ -76,8 +76,8 @@
         <el-table-column prop="warranty" label="保修到期" width="130" />
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="viewTimeline(row)">时间线</el-button>
-            <el-button link type="warning" size="small" @click="changePhase(row)">变更阶段</el-button>
+            <el-button plain type="primary" size="small" @click="viewTimeline(row)">时间线</el-button>
+            <el-button plain type="warning" size="small" @click="changePhase(row)">变更阶段</el-button>
           </template>
         </el-table-column>
       </el-table>

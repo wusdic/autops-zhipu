@@ -142,7 +142,7 @@
               <el-icon><AlarmClock /></el-icon>
               最近告警
             </div>
-            <el-button text type="primary" @click="navigateTo('/alerts')">
+            <el-button plain type="primary" @click="navigateTo('/alerts')">
               查看全部 →
             </el-button>
           </div>
@@ -277,7 +277,7 @@
         <div class="autops-card" style="margin-top: 16px">
           <div class="autops-card-header">
             <div class="autops-card-title"><el-icon><Bell /></el-icon> 待我处理</div>
-            <el-button text type="primary" size="small" @click="navigateTo('/automation/approvals')">全部 →</el-button>
+            <el-button plain type="primary" size="small" @click="navigateTo('/automation/approvals')">全部 →</el-button>
           </div>
           <div class="autops-card-body" style="padding: 0">
             <el-table stripe :data="pendingTasks"size="small" :max-height="200" empty-text="暂无待办">

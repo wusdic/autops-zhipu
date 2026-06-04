@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="autops-page-header">
-      <h2>AI 诊断面板</h2>
+      <div class="autops-page-title">AI 诊断面板</div>
       <div>
         <el-input v-model="anomalyId" placeholder="输入异常ID或从异常详情跳转" style="width: 280px; margin-right: 8px" @keyup.enter="startDiagnosis" />
         <el-button type="primary" @click="startDiagnosis" :loading="diagnosing"><el-icon><MagicStick /></el-icon> 开始诊断</el-button>

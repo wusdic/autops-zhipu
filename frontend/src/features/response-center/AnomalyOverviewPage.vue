@@ -34,7 +34,7 @@
       <template #header>
         <div class="card-header">
           <span class="card-title">最近异常</span>
-          <el-button text type="primary" @click="router.push('/response/anomaly-list')">
+          <el-button plain type="primary" @click="router.push('/response/anomaly-list')">
             查看全部 <el-icon><ArrowRight /></el-icon>
           </el-button>
         </div>
@@ -77,12 +77,12 @@
         </el-table-column>
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button text type="primary" size="small" @click="router.push(`/response/anomaly-list/${row.id}`)">
+            <el-button plain type="primary" size="small" @click="router.push(`/response/anomaly-list/${row.id}`)">
               详情
             </el-button>
             <el-button
               v-if="row.status === 'pending' || row.status === 'open'"
-              text
+              plain
               type="success"
               size="small"
               @click="handleAcknowledge(row)"

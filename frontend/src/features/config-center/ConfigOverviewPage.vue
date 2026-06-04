@@ -2,7 +2,7 @@
   <div class="config-overview-page">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
-        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
         <span class="autops-page-title">配置总览</span>
       </div>
       <div class="autops-page-desc">统一管理发现模板、巡检规则、阈值规则、通知规则和配置版本</div>
@@ -52,9 +52,9 @@
           </el-table-column>
           <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="runDiscovery(row)">执行</el-button>
-              <el-button link type="primary" @click="editTemplate('discovery', row)">编辑</el-button>
-              <el-button link type="danger" @click="deleteTemplate('discovery', row)">删除</el-button>
+              <el-button plain type="primary" @click="runDiscovery(row)">执行</el-button>
+              <el-button plain type="primary" @click="editTemplate('discovery', row)">编辑</el-button>
+              <el-button plain type="danger" @click="deleteTemplate('discovery', row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -81,9 +81,9 @@
           </el-table-column>
           <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="editTemplate('inspection-rule', row)">编辑</el-button>
-              <el-button link type="primary" @click="simulateRule(row)">模拟</el-button>
-              <el-button link type="danger" @click="deleteTemplate('inspection-rule', row)">删除</el-button>
+              <el-button plain type="primary" @click="editTemplate('inspection-rule', row)">编辑</el-button>
+              <el-button plain type="primary" @click="simulateRule(row)">模拟</el-button>
+              <el-button plain type="danger" @click="deleteTemplate('inspection-rule', row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -116,8 +116,8 @@
           </el-table-column>
           <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="editTemplate('notification', row)">编辑</el-button>
-              <el-button link type="danger" @click="deleteTemplate('notification', row)">删除</el-button>
+              <el-button plain type="primary" @click="editTemplate('notification', row)">编辑</el-button>
+              <el-button plain type="danger" @click="deleteTemplate('notification', row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -132,8 +132,8 @@
           <el-table-column prop="change_summary" label="变更摘要" min-width="200" />
           <el-table-column label="操作" width="180" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="viewVersionDiff(row)">查看差异</el-button>
-              <el-button link type="warning" @click="rollbackVersion(row)">回滚</el-button>
+              <el-button plain type="primary" @click="viewVersionDiff(row)">查看差异</el-button>
+              <el-button plain type="warning" @click="rollbackVersion(row)">回滚</el-button>
             </template>
           </el-table-column>
         </el-table>

@@ -136,8 +136,8 @@
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button text type="primary" size="small" @click="viewDetail(row)">详情</el-button>
-            <el-button text type="warning" size="small" @click="restartAgent(row)">重启</el-button>
+            <el-button plain type="primary" size="small" @click="viewDetail(row)">详情</el-button>
+            <el-button plain type="warning" size="small" @click="restartAgent(row)">重启</el-button>
           </template>
         </el-table-column>
       </el-table>

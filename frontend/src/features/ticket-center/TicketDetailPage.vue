@@ -50,7 +50,7 @@
               </el-descriptions-item>
               <el-descriptions-item label="负责人">
                 <span>{{ ticket.assigned_to || '未分配' }}</span>
-                <el-button text type="primary" size="small" style="margin-left: 8px" @click="openAssignDialog">
+                <el-button plain type="primary" size="small" style="margin-left: 8px" @click="openAssignDialog">
                   指派
                 </el-button>
               </el-descriptions-item>
@@ -119,7 +119,7 @@
                   </el-table-column>
                   <el-table-column label="操作" width="100">
                     <template #default="{ row }">
-                      <el-button text type="primary" size="small" @click="$router.push(`/alerts/${row.id}`)">查看</el-button>
+                      <el-button plain type="primary" size="small" @click="$router.push(`/alerts/${row.id}`)">查看</el-button>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -136,7 +136,7 @@
                   </el-table-column>
                   <el-table-column label="操作" width="100">
                     <template #default="{ row }">
-                      <el-button text type="primary" size="small" @click="$router.push(`/executions/${row.id}`)">查看</el-button>
+                      <el-button plain type="primary" size="small" @click="$router.push(`/executions/${row.id}`)">查看</el-button>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -204,10 +204,10 @@
               </el-table-column>
               <el-table-column label="操作" width="180" fixed="right">
                 <template #default="{ row }">
-                  <el-button text type="primary" size="small" @click="downloadAttachment(row)">下载</el-button>
+                  <el-button plain type="primary" size="small" @click="downloadAttachment(row)">下载</el-button>
                   <el-popconfirm title="确认删除此附件？" @confirm="deleteAttachment(row.id)">
                     <template #reference>
-                      <el-button text type="danger" size="small">删除</el-button>
+                      <el-button plain type="danger" size="small">删除</el-button>
                     </template>
                   </el-popconfirm>
                 </template>

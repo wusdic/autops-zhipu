@@ -173,35 +173,28 @@
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button
-              type="primary"
-              link
+              type="primary" plain
               size="small"
               @click="handleViewDetail(row)"
             >
               详情
             </el-button>
             <el-button
-              v-if="row.rollback_available && !row.rollback_status"
-              type="warning"
-              link
+              type="warning" plain
               size="small"
               @click="handleRollback(row)"
             >
               回滚
             </el-button>
             <el-button
-              v-if="row.rollback_status === 'running'"
-              type="danger"
-              link
+              type="danger" plain
               size="small"
               @click="handleCancelRollback(row)"
             >
               取消
             </el-button>
             <el-button
-              v-if="row.rollback_status === 'completed'"
-              type="info"
-              link
+              type="info" plain
               size="small"
               @click="handleRollbackLog(row)"
             >

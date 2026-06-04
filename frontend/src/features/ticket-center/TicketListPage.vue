@@ -3,7 +3,7 @@
     <!-- ========== Page Header ========== -->
     <div class="autops-page-header">
       <div>
-        <div class="autops-page-title">工单中心</div>
+        <div class="autops-page-title">工单列表</div>
         <div class="autops-page-desc">统一管理事件工单，支持指派、升级、关闭与 SLA 跟踪</div>
       </div>
     </div>
@@ -213,7 +213,7 @@
         <el-table-column type="selection" width="45" fixed="left" />
         <el-table-column prop="id" label="ID" width="90" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click.stop="viewDetail(row)">
+            <el-button plain type="primary" size="small" @click.stop="viewDetail(row)">
               #{{ row.id?.slice(0, 8) || '-' }}
             </el-button>
           </template>
@@ -279,30 +279,19 @@
         <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button
-              size="small"
-              type="primary"
-              link
+              type="primary" plain
               @click.stop="viewDetail(row)"
             >详情</el-button>
             <el-button
-              v-if="!row.assigned_to && row.status === 'open'"
-              size="small"
-              type="warning"
-              link
+              type="warning" plain
               @click.stop="assignToMe(row)"
             >认领</el-button>
             <el-button
-              v-if="['open', 'in_progress'].includes(row.status)"
-              size="small"
-              type="success"
-              link
+              type="success" plain
               @click.stop="closeTicket(row)"
             >关闭</el-button>
             <el-button
-              v-if="['open', 'in_progress'].includes(row.status)"
-              size="small"
-              type="danger"
-              link
+              type="danger" plain
               @click.stop="escalateTicket(row)"
             >升级</el-button>
           </template>

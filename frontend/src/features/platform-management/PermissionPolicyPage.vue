@@ -162,8 +162,8 @@
 
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button type="info" link size="small" @click="handleClone(row)">克隆</el-button>
+            <el-button type="primary" plain size="small" @click="handleEdit(row)">编辑</el-button>
+            <el-button type="info" plain size="small" @click="handleClone(row)">克隆</el-button>
             <el-popconfirm
               title="确定删除该策略吗？此操作不可恢复。"
               confirm-button-text="确定"
@@ -171,7 +171,7 @@
               @confirm="handleDelete(row)"
             >
               <template #reference>
-                <el-button type="danger" link size="small">删除</el-button>
+                <el-button type="danger" plain size="small">删除</el-button>
               </template>
             </el-popconfirm>
           </template>

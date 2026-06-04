@@ -2,7 +2,7 @@
   <div class="credential-page">
     <!-- 页面头部 -->
     <div class="autops-page-header">
-      <span class="autops-page-title">凭证管理</span>
+      <span class="autops-page-title">凭证库</span>
       <div class="autops-toolbar-right">
         <el-button type="primary" @click="openCreateDialog" :icon="Plus">新建凭证</el-button>
       </div>
@@ -45,7 +45,7 @@
             <div style="display:flex;align-items:center;gap:4px">
               <span v-if="!row._showSecret">{{ maskSecret(row) }}</span>
               <span v-else style="font-family:monospace;font-size:12px">{{ row.password || row.secret || row.token || '-' }}</span>
-              <el-button link size="small" @click="toggleSecret(row)">
+              <el-button plain size="small" @click="toggleSecret(row)">
                 <el-icon><View v-if="!row._showSecret" /><Hide v-else /></el-icon>
               </el-button>
             </div>
@@ -142,7 +142,7 @@
           <el-table-column prop="ip" label="IP" width="140" />
           <el-table-column label="操作" width="100">
             <template #default="{ row }">
-              <el-button size="small" link type="danger" @click="unbindAsset(row.id)">解绑</el-button>
+              <el-button size="small" plain type="danger" @click="unbindAsset(row.id)">解绑</el-button>
             </template>
           </el-table-column>
         </el-table>

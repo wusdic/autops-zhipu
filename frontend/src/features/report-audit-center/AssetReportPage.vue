@@ -378,13 +378,6 @@ onMounted(() => {
 .asset-report-page {
   padding: 20px;
 }
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .mb-lg {
   margin-bottom: 16px;
 }

@@ -637,7 +637,20 @@ body {
   color: var(--autops-text-1);
 }
 
-/* ─── 17. 废弃 class 别名（向后兼容） ─── */
+/* ─── 17. 页面头部操作区（统一） ─── */
+.header-actions,
+.autops-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--autops-space-sm);
+}
+
+/* ─── 18. 表格操作列统一标准 ─── */
+/* 操作列宽度: 1-2个按钮 → width="140", 3个按钮 → width="180", 4+个按钮 → width="240" */
+/* 操作按钮统一使用: <el-button size="small" plain type="primary|success|warning|danger|info"> */
+/* 查看类: type="primary", 确认类: type="success", 警告/编辑: type="warning", 删除/拒绝: type="danger" */
+
+/* ─── 19. 废弃 class 别名（向后兼容） ─── */
 /* autops-page-subtitle 已废弃，统一使用 autops-page-desc */
 .autops-page-subtitle {
   font-size: var(--autops-font-13);

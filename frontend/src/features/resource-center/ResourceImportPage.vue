@@ -8,7 +8,7 @@
             <el-icon><UploadFilled /></el-icon>
             资产导入
           </span>
-          <el-button link type="primary" @click="handleDownloadTemplate">
+          <el-button plain type="primary" @click="handleDownloadTemplate">
             <el-icon><Download /></el-icon>
             下载模板
           </el-button>
@@ -153,13 +153,11 @@
         <el-table-column prop="operator" label="操作人" width="110" />
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleViewDetail(row)">
+            <el-button type="primary" plain size="small" @click="handleViewDetail(row)">
               查看详情
             </el-button>
             <el-button
-              v-if="row.status === 'completed' || row.status === 'partial'"
-              type="success"
-              link
+              type="success" plain
               size="small"
               @click="handleDownloadReport(row)"
             >

@@ -37,7 +37,7 @@
       <template #header>
         <div class="card-header">
           <span class="card-title">最近报告任务</span>
-          <el-button text type="primary" @click="router.push('/report-audit/tasks')">
+          <el-button plain type="primary" @click="router.push('/report-audit/tasks')">
             查看全部 <el-icon><ArrowRight /></el-icon>
           </el-button>
         </div>
@@ -82,7 +82,7 @@
           <template #default="{ row }">
             <el-button
               v-if="row.status === 'completed' || row.status === 'success'"
-              text
+              plain
               type="primary"
               size="small"
               @click="handlePreview(row)"
@@ -91,7 +91,7 @@
             </el-button>
             <el-button
               v-if="row.status === 'completed' || row.status === 'success'"
-              text
+              plain
               type="success"
               size="small"
               @click="handleDownload(row)"
@@ -100,7 +100,7 @@
             </el-button>
             <el-button
               v-if="row.status === 'failed'"
-              text
+              plain
               type="warning"
               size="small"
               @click="handleRetry(row)"

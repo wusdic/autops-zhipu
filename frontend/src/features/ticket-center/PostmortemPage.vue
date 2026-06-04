@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="autops-page-header">
-      <h2>复盘报告</h2>
+      <div class="autops-page-title">故障复盘</div>
       <el-button type="primary" @click="handleCreate" :icon="Plus">新建复盘</el-button>
     </div>
     <div class="page-toolbar" style="display:flex;gap:12px;margin-bottom:16px">
@@ -43,9 +43,9 @@
       </el-table-column>
       <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
-          <el-button link type="primary" size="small" @click="viewDetail(row)">查看</el-button>
-          <el-button link type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
-          <el-button link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+          <el-button plain type="primary" size="small" @click="viewDetail(row)">查看</el-button>
+          <el-button plain type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
+          <el-button plain type="danger" size="small" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

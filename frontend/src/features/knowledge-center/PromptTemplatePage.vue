@@ -73,10 +73,10 @@
         </el-table-column>
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
-            <el-button text type="primary" size="small" @click="openEdit(row)">编辑</el-button>
-            <el-button text size="small" @click="testTemplate(row)">测试</el-button>
-            <el-button text type="primary" size="small" @click="duplicateTemplate(row)">复制</el-button>
-            <el-button text type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button plain type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+            <el-button plain size="small" @click="testTemplate(row)">测试</el-button>
+            <el-button plain type="primary" size="small" @click="duplicateTemplate(row)">复制</el-button>
+            <el-button plain type="danger" size="small" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -441,13 +441,6 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
-}
-.autops-page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  display: flex;
-  align-items: center;
 }
 .top-actions {
   display: flex;

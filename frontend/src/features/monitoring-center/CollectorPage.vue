@@ -919,12 +919,6 @@ onMounted(() => {
   font-weight: 600;
   color: #1d2129;
 }
-
-.header-actions {
-  display: flex;
-  gap: 8px;
-}
-
 .filter-form {
   margin-bottom: 16px;
 }

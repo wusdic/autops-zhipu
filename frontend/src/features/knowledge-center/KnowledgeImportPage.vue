@@ -2,7 +2,7 @@
   <div class="knowledge-import">
     <div class="autops-page-header">
       <div>
-        <div class="autops-page-title">导入知识</div>
+        <div class="autops-page-title">知识导入</div>
         <div class="autops-page-desc">批量导入知识条目</div>
       </div>
       <div class="top-actions">

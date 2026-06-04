@@ -168,13 +168,11 @@
 
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleViewDetail(row)">
+            <el-button type="primary" plain size="small" @click="handleViewDetail(row)">
               详情
             </el-button>
             <el-button
-              v-if="row.status === 'fail'"
-              type="warning"
-              link
+              type="warning" plain
               size="small"
               @click="handleCreateTicket(row)"
             >

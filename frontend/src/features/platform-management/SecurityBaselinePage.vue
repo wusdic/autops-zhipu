@@ -61,7 +61,7 @@
         </el-table-column>
         <el-table-column label="操作" width="100" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleDetail(row)">详情</el-button>
+            <el-button type="primary" plain size="small" @click="handleDetail(row)">详情</el-button>
           </template>
         </el-table-column>
       </el-table>

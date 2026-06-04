@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="autops-page-header">
-      <h2>风险分级</h2>
+      <div class="autops-page-title">风险分级</div>
       <div>
         <el-select v-model="riskFilter" placeholder="风险级别" style="width: 120px; margin-right: 8px" clearable @change="fetchData">
           <el-option label="高风险" value="high" />
@@ -88,7 +88,7 @@
         </el-table-column>
         <el-table-column label="操作" width="100" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="showDetail(row)">详情</el-button>
+            <el-button plain type="primary" @click="showDetail(row)">详情</el-button>
           </template>
         </el-table-column>
       </el-table>

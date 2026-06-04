@@ -323,7 +323,7 @@
               </el-table-column>
               <el-table-column label="操作" width="100" align="center">
                 <template #default="{ $index }">
-                  <el-button type="danger" size="small" link @click="removeParam($index)">
+                  <el-button type="danger" size="small" plain @click="removeParam($index)">
                     <el-icon><Delete /></el-icon>
                   </el-button>
                 </template>
@@ -982,12 +982,6 @@ onMounted(() => {
   font-weight: 600;
   color: #1d2129;
 }
-
-.header-actions {
-  display: flex;
-  gap: 8px;
-}
-
 .category-tabs {
   margin-bottom: 4px;
 }

@@ -19,7 +19,7 @@
     <template v-else>
       <div class="autops-page-header">
         <div>
-          <div class="autops-page-title">平台自检</div>
+          <div class="autops-page-title">系统自检</div>
           <div class="autops-page-desc">检查平台各组件的运行状态与健康情况</div>
         </div>
         <div class="header-actions">
@@ -148,7 +148,7 @@
         <el-table-column prop="operator" label="操作人" width="100" />
         <el-table-column label="操作" width="100" align="center">
           <template #default="{ row }">
-            <el-button text type="primary" size="small" @click="viewHistoryDetail(row)">
+            <el-button plain type="primary" size="small" @click="viewHistoryDetail(row)">
               详情
             </el-button>
           </template>
@@ -364,16 +364,6 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 16px;
 }
-.autops-page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d2129;
-}
-.header-actions {
-  display: flex;
-  gap: 8px;
-}
-
 /* Category bar */
 .category-bar {
   display: flex;

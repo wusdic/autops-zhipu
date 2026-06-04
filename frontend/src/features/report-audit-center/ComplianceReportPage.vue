@@ -2,7 +2,7 @@
   <div class="compliance-report-page">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
-        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
         <span class="autops-page-title">合规报告</span>
       </div>
       <div class="autops-page-desc">生成和查看合规检查报告，评估系统合规状态</div>
@@ -92,8 +92,8 @@
         <el-table-column prop="generated_at" label="生成时间" width="180" />
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="viewReport(row)">查看</el-button>
-            <el-button link type="primary" @click="downloadReport(row)">下载</el-button>
+            <el-button plain type="primary" @click="viewReport(row)">查看</el-button>
+            <el-button plain type="primary" @click="downloadReport(row)">下载</el-button>
           </template>
         </el-table-column>
       </el-table>

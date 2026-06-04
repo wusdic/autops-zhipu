@@ -9,7 +9,7 @@
         <el-tag :type="healthType(asset.health_status)" size="small" style="margin-left: 4px">{{ asset.health_status }}</el-tag>
       </div>
       <div class="autops-toolbar-right" v-if="asset">
-        <el-button type="primary" link @click="$router.push(`/assets/${asset.id}/topology`)">
+        <el-button type="primary" plain @click="$router.push(`/assets/${asset.id}/topology`)">
           <el-icon><Connection /></el-icon> 拓扑图
         </el-button>
         <el-button type="primary" @click="navToInspectionFromAsset(assetId)">
@@ -143,7 +143,7 @@
                   </el-table-column>
                   <el-table-column prop="target_name" label="关联资产" min-width="160">
                     <template #default="{ row }">
-                      <el-button link type="primary" @click="navigateToAsset(row.target_id)">
+                      <el-button plain type="primary" @click="navigateToAsset(row.target_id)">
                         {{ row.target_name || row.target_id }}
                       </el-button>
                     </template>
@@ -192,7 +192,7 @@
                     <template #default="{ row }">
                       <el-popconfirm title="确定解绑该凭证？" @confirm="unbindCredential(row.id)">
                         <template #reference>
-                          <el-button type="danger" link size="small">解绑</el-button>
+                          <el-button type="danger" plain size="small">解绑</el-button>
                         </template>
                       </el-popconfirm>
                     </template>
@@ -254,7 +254,7 @@
                   </el-table-column>
                   <el-table-column label="操作" width="100" fixed="right">
                     <template #default="{ row }">
-                      <el-button type="primary" link size="small" @click="triggerCollection(row.id)">触发采集</el-button>
+                      <el-button type="primary" plain size="small" @click="triggerCollection(row.id)">触发采集</el-button>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -329,7 +329,7 @@
                     <template #default="{ row }">
                       <el-popconfirm title="确定解绑该策略？" @confirm="unbindPolicy(row.id)">
                         <template #reference>
-                          <el-button type="danger" link size="small">解绑</el-button>
+                          <el-button type="danger" plain size="small">解绑</el-button>
                         </template>
                       </el-popconfirm>
                     </template>

@@ -26,7 +26,7 @@
             <template #title>
               <el-icon><DataBoard /></el-icon><span>运维驾驶舱</span>
             </template>
-            <el-menu-item index="/">指挥首页</el-menu-item>
+            <el-menu-item index="/">指挥台</el-menu-item>
             <el-menu-item index="/business-health-map">业务健康地图</el-menu-item>
             <el-menu-item index="/daily-summary">今日摘要</el-menu-item>
           </el-sub-menu>
@@ -338,7 +338,7 @@ const activeMenu = computed(() => {
 
 // ─── V3 菜单映射（12模块） ───
 const menuMap: Record<string, string> = {
-  '/': '指挥首页',
+  '/': '指挥台',
   '/business-health-map': '业务健康地图',
   '/daily-summary': '今日摘要',
   // M2 资源中心

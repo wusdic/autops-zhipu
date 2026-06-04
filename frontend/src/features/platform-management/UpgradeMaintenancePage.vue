@@ -18,7 +18,7 @@
     <!-- ── Normal Content (API available) ────────────────── -->
     <template v-else>
       <div class="autops-page-header">
-        <h2>升级维护</h2>
+        <div class="autops-page-title">升级维护</div>
         <div>
           <el-button type="primary" @click="showUpgradeDialog"><el-icon><Upload /></el-icon> 系统升级</el-button>
           <el-button @click="showRollbackDialog" :disabled="!canRollback"><el-icon><RefreshLeft /></el-icon> 回滚</el-button>
@@ -83,7 +83,7 @@
           <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
           <el-table-column label="操作" width="100" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="viewLog(row)">日志</el-button>
+              <el-button plain type="primary" @click="viewLog(row)">日志</el-button>
             </template>
           </el-table-column>
         </el-table>

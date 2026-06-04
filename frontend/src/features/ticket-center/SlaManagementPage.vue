@@ -59,7 +59,7 @@
         <el-table-column type="index" label="#" width="50" align="center" />
         <el-table-column prop="name" label="策略名称" min-width="160" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">{{ row.name }}</el-button>
+            <el-button type="primary" plain @click="handleEdit(row)">{{ row.name }}</el-button>
           </template>
         </el-table-column>
         <el-table-column prop="ticket_type" label="工单类型" min-width="110">
@@ -118,8 +118,8 @@
         </el-table-column>
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button type="danger" link size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" plain size="small" @click="handleEdit(row)">编辑</el-button>
+            <el-button type="danger" plain size="small" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

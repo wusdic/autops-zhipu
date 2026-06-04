@@ -16,7 +16,7 @@
     <template v-else>
       <div class="autops-page-header">
         <div>
-          <div class="autops-page-title">备份与恢复</div>
+          <div class="autops-page-title">备份恢复</div>
           <div class="autops-page-desc">系统数据备份和恢复</div>
         </div>
         <div class="top-actions">
@@ -566,8 +566,6 @@ onUnmounted(() => {
 <style scoped>
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .page-header h2 { margin: 0; font-size: 20px; color: #1d2129; }
-.header-actions { display: flex; gap: 8px; }
-
 .storage-card { margin-bottom: 16px; }
 .storage-body { padding: 4px 0; }
 .storage-detail { margin-top: 12px; color: #4e5969; font-size: 13px; }

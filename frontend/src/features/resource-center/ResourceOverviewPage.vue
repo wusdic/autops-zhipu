@@ -87,7 +87,7 @@
       <template #header>
         <div class="card-header">
           <span class="card-title">最近更新的资产</span>
-          <el-button type="primary" text @click="router.push({ name: 'assets' })">
+          <el-button type="primary" plain @click="router.push({ name: 'assets' })">
             查看全部 <el-icon class="el-icon--right"><ArrowRight /></el-icon>
           </el-button>
         </div>

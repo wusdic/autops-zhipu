@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="autops-page-header">
-      <h2>故障处置工作台</h2>
+      <div class="autops-page-title">故障处置工作台</div>
       <div>
         <el-select v-model="severityFilter" placeholder="严重级别" style="width: 120px; margin-right: 8px" clearable @change="fetchIncidents">
           <el-option label="紧急" value="critical" />

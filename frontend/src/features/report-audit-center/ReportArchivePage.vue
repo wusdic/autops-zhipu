@@ -68,9 +68,9 @@
           </el-table-column>
           <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
-              <el-button size="small" type="primary" link @click="viewArchive(row)">查看</el-button>
-              <el-button size="small" link @click="downloadArchive(row)">下载</el-button>
-              <el-button size="small" type="danger" link @click="deleteArchive(row)">删除</el-button>
+              <el-button type="primary" plain @click="viewArchive(row)">查看</el-button>
+              <el-button size="small" plain @click="downloadArchive(row)">下载</el-button>
+              <el-button type="danger" plain @click="deleteArchive(row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>

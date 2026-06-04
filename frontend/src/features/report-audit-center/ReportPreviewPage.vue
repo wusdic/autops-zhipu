@@ -230,12 +230,6 @@ onMounted(() => {
 .report-preview-page {
   padding: 20px;
 }
-
-.header-actions {
-  display: flex;
-  gap: 8px;
-}
-
 .loading-wrapper {
   padding: 24px;
 }

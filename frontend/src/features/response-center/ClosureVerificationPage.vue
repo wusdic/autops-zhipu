@@ -65,14 +65,14 @@
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <template v-if="row.verification_status === 'pending' || !row.verification_status">
-              <el-button type="success" link size="small" @click="handleVerify(row, 'verified')">
+              <el-button type="success" plain size="small" @click="handleVerify(row, 'verified')">
                 通过
               </el-button>
-              <el-button type="danger" link size="small" @click="handleVerify(row, 'failed')">
+              <el-button type="danger" plain size="small" @click="handleVerify(row, 'failed')">
                 不通过
               </el-button>
             </template>
-            <el-button type="primary" link size="small" @click="handleDetail(row)">详情</el-button>
+            <el-button type="primary" plain size="small" @click="handleDetail(row)">详情</el-button>
           </template>
         </el-table-column>
       </el-table>

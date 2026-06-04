@@ -74,7 +74,7 @@
           <el-table-column prop="output_summary" label="输出摘要" min-width="200" show-overflow-tooltip />
           <el-table-column label="操作" width="100" fixed="right" align="center">
             <template #default="{ row }">
-              <el-button size="small" type="primary" link @click="viewDetail(row)">查看详情</el-button>
+              <el-button type="primary" plain @click="viewDetail(row)">查看详情</el-button>
             </template>
           </el-table-column>
         </el-table>

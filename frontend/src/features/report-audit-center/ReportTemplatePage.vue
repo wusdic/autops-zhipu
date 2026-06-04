@@ -68,9 +68,9 @@
           </el-table-column>
           <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
-              <el-button size="small" type="primary" link @click="openEditDialog(row)">编辑</el-button>
-              <el-button size="small" type="success" link @click="handleGenerate(row)">生成报告</el-button>
-              <el-button size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
+              <el-button type="primary" plain @click="openEditDialog(row)">编辑</el-button>
+              <el-button type="success" plain @click="handleGenerate(row)">生成报告</el-button>
+              <el-button type="danger" plain @click="handleDelete(row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>

@@ -189,28 +189,20 @@
         <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button
-              v-if="row.status === 'firing'"
-              size="small"
-              type="warning"
-              link
+              type="warning" plain
               @click="ackAlert(row.id)"
             >确认</el-button>
             <el-button
-              v-if="row.status !== 'resolved'"
-              size="small"
-              type="success"
-              link
+              type="success" plain
               @click="resolveAlert(row.id)"
             >恢复</el-button>
             <el-button
-              size="small"
-              type="primary"
-              link
+              type="primary" plain
               @click="createTicket(row)"
             >转工单</el-button>
             <el-button
               size="small"
-              link
+              plain
               @click="viewDetail(row)"
             >详情</el-button>
           </template>

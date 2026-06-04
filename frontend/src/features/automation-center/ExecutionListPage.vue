@@ -181,7 +181,7 @@
         <el-table-column type="selection" width="45" fixed="left" />
         <el-table-column prop="id" label="执行ID" width="180" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-button link type="primary" @click="goDetail(row)">
+            <el-button plain type="primary" @click="goDetail(row)">
               {{ truncateId(row.id) }}
             </el-button>
           </template>
@@ -244,28 +244,20 @@
         <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
             <el-button
-              size="small"
-              type="primary"
-              link
+              type="primary" plain
               @click="viewLogs(row)"
             >日志</el-button>
             <el-button
-              v-if="canCancel(row.status)"
-              size="small"
-              type="warning"
-              link
+              type="warning" plain
               @click="cancelExecution(row)"
             >取消</el-button>
             <el-button
-              v-if="canRetry(row.status)"
-              size="small"
-              type="danger"
-              link
+              type="danger" plain
               @click="retryExecution(row)"
             >重试</el-button>
             <el-button
               size="small"
-              link
+              plain
               @click="goDetail(row)"
             >详情</el-button>
           </template>

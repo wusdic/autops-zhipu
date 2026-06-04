@@ -2,7 +2,7 @@
   <div class="inspection-rules-page">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
-        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
         <span class="autops-page-title">巡检规则管理</span>
       </div>
       <div class="autops-page-desc">管理和配置各类巡检规则，支持页面、配置、日志、基线检查</div>
@@ -77,10 +77,10 @@
         </el-table-column>
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
-            <el-button link type="primary" @click="simulateRule(row)">模拟</el-button>
-            <el-button link type="primary" @click="viewHistory(row)">历史</el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button plain type="primary" @click="openDialog(row)">编辑</el-button>
+            <el-button plain type="primary" @click="simulateRule(row)">模拟</el-button>
+            <el-button plain type="primary" @click="viewHistory(row)">历史</el-button>
+            <el-button plain type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

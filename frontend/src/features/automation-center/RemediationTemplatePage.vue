@@ -2,8 +2,8 @@
   <div class="remediation-template-page">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
-        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <span class="autops-page-title">处置模板管理</span>
+        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <span class="autops-page-title">处置模板</span>
       </div>
       <div class="autops-page-desc">管理和配置自动处置模板，定义故障处置步骤</div>
     </div>
@@ -68,10 +68,10 @@
         </el-table-column>
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openDialog(row)">编辑</el-button>
-            <el-button link type="primary" @click="dryRun(row)">Dry-Run</el-button>
-            <el-button link type="primary" @click="viewHistory(row)">历史</el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button plain type="primary" @click="openDialog(row)">编辑</el-button>
+            <el-button plain type="primary" @click="dryRun(row)">Dry-Run</el-button>
+            <el-button plain type="primary" @click="viewHistory(row)">历史</el-button>
+            <el-button plain type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -118,7 +118,7 @@
               <el-col :span="8"><el-input v-model="step.name" placeholder="步骤名称" /></el-col>
               <el-col :span="9"><el-input v-model="step.command" placeholder="执行命令/脚本" /></el-col>
               <el-col :span="4">
-                <el-button link type="danger" @click="form.steps.splice(idx, 1)" v-if="form.steps.length > 1">删除</el-button>
+                <el-button plain type="danger" @click="form.steps.splice(idx, 1)" v-if="form.steps.length > 1">删除</el-button>
               </el-col>
             </el-row>
           </div>

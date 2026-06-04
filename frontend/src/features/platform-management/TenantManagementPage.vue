@@ -91,10 +91,10 @@
       </el-table-column>
       <el-table-column label="操作" width="180" fixed="right" align="center">
         <template #default="{ row }">
-          <el-button text type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
+          <el-button plain type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
           <el-button
             v-if="row.status === 'active'"
-            text
+            plain
             type="warning"
             size="small"
             @click="toggleTenant(row, 'disabled')"
@@ -103,14 +103,14 @@
           </el-button>
           <el-button
             v-else
-            text
+            plain
             type="success"
             size="small"
             @click="toggleTenant(row, 'active')"
           >
             启用
           </el-button>
-          <el-button text type="danger" size="small" @click="deleteTenant(row)">删除</el-button>
+          <el-button plain type="danger" size="small" @click="deleteTenant(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -423,16 +423,6 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 16px;
 }
-.autops-page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d2129;
-}
-.header-actions {
-  display: flex;
-  gap: 8px;
-}
-
 .filter-bar {
   display: flex;
   gap: 8px;

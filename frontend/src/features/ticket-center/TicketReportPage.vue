@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="autops-page-header">
-      <h2>工单报表</h2>
+      <div class="autops-page-title">工单报告</div>
       <div>
         <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" style="margin-right: 8px" @change="fetchData" />
         <el-button type="primary" @click="generateReport" :loading="generating">

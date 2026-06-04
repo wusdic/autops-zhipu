@@ -2,7 +2,7 @@
   <div class="manual-handling-page">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
-        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
         <span class="autops-page-title">人工处置台</span>
       </div>
       <div class="autops-page-desc">处理人工干预的工单，跟踪处置进度和 SLA</div>
@@ -88,9 +88,9 @@
         <el-table-column prop="created_at" label="创建时间" width="180" />
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="viewDetail(row)">详情</el-button>
-            <el-button link type="primary" @click="startHandle(row)" v-if="row.status === 'pending'">接单</el-button>
-            <el-button link type="success" @click="completeHandle(row)" v-if="row.status === 'in_progress'">完成</el-button>
+            <el-button plain type="primary" @click="viewDetail(row)">详情</el-button>
+            <el-button plain type="primary" @click="startHandle(row)" v-if="row.status === 'pending'">接单</el-button>
+            <el-button plain type="success" @click="completeHandle(row)" v-if="row.status === 'in_progress'">完成</el-button>
           </template>
         </el-table-column>
       </el-table>

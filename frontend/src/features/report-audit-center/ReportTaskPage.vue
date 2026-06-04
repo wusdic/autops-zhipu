@@ -76,29 +76,21 @@
           <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
               <el-button
-                v-if="row.status === 'completed'"
-                size="small"
-                type="primary"
-                link
+                type="primary" plain
                 @click="previewTask(row)"
               >预览</el-button>
               <el-button
                 v-if="row.status === 'completed'"
                 size="small"
-                link
+                plain
                 @click="downloadTask(row)"
               >下载</el-button>
               <el-button
-                v-if="row.status === 'failed'"
-                size="small"
-                type="warning"
-                link
+                type="warning" plain
                 @click="retryTask(row)"
               >重试</el-button>
               <el-button
-                size="small"
-                type="info"
-                link
+                type="info" plain
                 @click="viewDetail(row)"
               >详情</el-button>
             </template>

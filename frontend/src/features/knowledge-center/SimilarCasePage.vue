@@ -138,8 +138,8 @@
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button text type="primary" size="small" @click="viewDetail(row)">详情</el-button>
-            <el-button text type="success" size="small" @click="applySolution(row)">应用</el-button>
+            <el-button plain type="primary" size="small" @click="viewDetail(row)">详情</el-button>
+            <el-button plain type="success" size="small" @click="applySolution(row)">应用</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -302,13 +302,6 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
-}
-.autops-page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  display: flex;
-  align-items: center;
 }
 .search-panel {
   margin-bottom: 0;

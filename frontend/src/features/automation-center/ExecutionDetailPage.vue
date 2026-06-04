@@ -509,10 +509,6 @@ watch(
 </script>
 
 <style scoped>
-.header-actions {
-  display: flex;
-  gap: 8px;
-}
 .log-container {
   max-height: 400px;
   overflow-y: auto;

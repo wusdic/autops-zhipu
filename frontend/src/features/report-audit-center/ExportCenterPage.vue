@@ -2,7 +2,7 @@
   <div class="export-center-page">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
-        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
         <span class="autops-page-title">导出中心</span>
       </div>
       <div class="autops-page-desc">管理数据导出任务，支持多种格式和类型导出</div>
@@ -50,9 +50,9 @@
         <el-table-column prop="created_at" label="创建时间" width="180" />
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button v-if="row.status === 'completed'" link type="primary" @click="downloadExport(row)">下载</el-button>
-            <el-button v-if="row.status === 'processing'" link type="danger" @click="cancelExport(row)">取消</el-button>
-            <el-button link type="danger" @click="deleteExport(row)">删除</el-button>
+            <el-button v-if="row.status === 'completed'" plain type="primary" @click="downloadExport(row)">下载</el-button>
+            <el-button v-if="row.status === 'processing'" plain type="danger" @click="cancelExport(row)">取消</el-button>
+            <el-button plain type="danger" @click="deleteExport(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

@@ -2,7 +2,7 @@
   <div class="manual-confirm-page">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
-        <el-button link @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
         <span class="autops-page-title">人工确认台</span>
       </div>
       <div class="autops-page-desc">审核和确认自动处置、AI建议和策略触发的操作</div>
@@ -75,12 +75,12 @@
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
             <template v-if="row.status === 'pending'">
-              <el-button link type="primary" @click="viewDetail(row)">详情</el-button>
-              <el-button link type="success" @click="handleConfirm(row)">确认执行</el-button>
-              <el-button link type="danger" @click="handleReject(row)">拒绝</el-button>
+              <el-button plain type="primary" @click="viewDetail(row)">详情</el-button>
+              <el-button plain type="success" @click="handleConfirm(row)">确认执行</el-button>
+              <el-button plain type="danger" @click="handleReject(row)">拒绝</el-button>
             </template>
             <template v-else>
-              <el-button link type="primary" @click="viewDetail(row)">查看</el-button>
+              <el-button plain type="primary" @click="viewDetail(row)">查看</el-button>
             </template>
           </template>
         </el-table-column>

@@ -91,12 +91,12 @@
             <el-button
               v-if="row.is_secret"
               size="small"
-              link
+              plain
               @click="toggleReveal(row.id)"
             >
               <el-icon><component :is="revealedSet.has(row.id) ? Hide : View" /></el-icon>
             </el-button>
-            <el-button size="small" link type="primary" @click="startInlineEdit(row)">
+            <el-button size="small" plain type="primary" @click="startInlineEdit(row)">
               <el-icon><Edit /></el-icon>
             </el-button>
           </div>
@@ -125,8 +125,8 @@
 
       <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
-          <el-button size="small" link type="primary" @click="openEditDialog(row)">编辑</el-button>
-          <el-button size="small" link type="danger" @click="confirmDelete(row)">删除</el-button>
+          <el-button size="small" plain type="primary" @click="openEditDialog(row)">编辑</el-button>
+          <el-button size="small" plain type="danger" @click="confirmDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -550,12 +550,6 @@ onMounted(() => {
 .status-warn { color: #ff7d00; }
 
 /* ── Action Bar ──────────────────────────── */
-.header-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
 /* ── Tabs ─────────────────────────────────── */
 .config-tabs {
   margin-bottom: 12px;

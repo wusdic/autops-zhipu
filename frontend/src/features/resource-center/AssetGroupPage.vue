@@ -43,10 +43,10 @@
                 </div>
               </div>
               <div class="group-actions" @click.stop>
-                <el-button size="small" link type="primary" @click="openEditDialog(g)">编辑</el-button>
+                <el-button size="small" plain type="primary" @click="openEditDialog(g)">编辑</el-button>
                 <el-popconfirm title="确认删除此分组?" @confirm="deleteGroup(g.id)">
                   <template #reference>
-                    <el-button size="small" link type="danger">删除</el-button>
+                    <el-button size="small" plain type="danger">删除</el-button>
                   </template>
                 </el-popconfirm>
               </div>
@@ -93,7 +93,7 @@
                 <template #default="{ row }">
                   <el-popconfirm title="确认从此分组移除?" @confirm="removeMember(row.id)">
                     <template #reference>
-                      <el-button size="small" link type="danger">移除</el-button>
+                      <el-button size="small" plain type="danger">移除</el-button>
                     </template>
                   </el-popconfirm>
                 </template>

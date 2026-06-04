@@ -95,7 +95,7 @@
     <div class="autops-card">
       <div class="autops-card-header">
         <span class="autops-card-title">最近生成任务</span>
-        <el-button text type="primary" @click="goToTaskPage">查看全部</el-button>
+        <el-button plain type="primary" @click="goToTaskPage">查看全部</el-button>
       </div>
       <div class="autops-card-body" style="padding: 0">
         <el-table stripe
@@ -127,23 +127,17 @@
           <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
               <el-button
-                v-if="row.status === 'completed'"
-                size="small"
-                type="primary"
-                link
+                type="primary" plain
                 @click="previewReport(row)"
               >预览</el-button>
               <el-button
                 v-if="row.status === 'completed'"
                 size="small"
-                link
+                plain
                 @click="downloadReport(row)"
               >下载</el-button>
               <el-button
-                v-if="row.status === 'failed'"
-                size="small"
-                type="warning"
-                link
+                type="warning" plain
                 @click="retryTask(row)"
               >重试</el-button>
             </template>

@@ -98,7 +98,7 @@
         <el-table-column prop="id" label="执行ID" width="160" align="center">
           <template #default="{ row }">
             <el-tooltip :content="row.id || row.execution_id || ''" placement="top">
-              <el-button type="primary" link @click="handleViewExecution(row)">
+              <el-button type="primary" plain @click="handleViewExecution(row)">
                 {{ truncateLockId(row.id || row.execution_id) }}
               </el-button>
             </el-tooltip>
@@ -155,7 +155,7 @@
 
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="handleViewDetail(row)">详情</el-button>
+            <el-button type="primary" plain size="small" @click="handleViewDetail(row)">详情</el-button>
             <el-popconfirm
               title="确定释放该锁吗？释放后相关执行将被中断。"
               confirm-button-text="确定"
@@ -163,7 +163,7 @@
               @confirm="handleRelease(row)"
             >
               <template #reference>
-                <el-button type="danger" link size="small">释放</el-button>
+                <el-button type="danger" plain size="small">释放</el-button>
               </template>
             </el-popconfirm>
           </template>

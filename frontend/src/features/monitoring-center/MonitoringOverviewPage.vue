@@ -72,7 +72,7 @@
         <div class="autops-card">
           <div class="autops-card-header">
             <span class="autops-card-title">事件趋势（近 24 小时）</span>
-            <el-button text type="primary" @click="loadEventTrend">刷新</el-button>
+            <el-button plain type="primary" @click="loadEventTrend">刷新</el-button>
           </div>
           <div class="autops-card-body">
             <div v-loading="trendLoading">
@@ -91,7 +91,7 @@
         <div class="autops-card" style="margin-top: 16px">
           <div class="autops-card-header">
             <span class="autops-card-title">告警严重级别分布</span>
-            <el-button text type="primary" @click="loadSeverityDist">刷新</el-button>
+            <el-button plain type="primary" @click="loadSeverityDist">刷新</el-button>
           </div>
           <div class="autops-card-body">
             <div v-loading="severityLoading">
@@ -112,7 +112,7 @@
         <div class="autops-card">
           <div class="autops-card-header">
             <span class="autops-card-title">最近事件</span>
-            <el-button text type="primary" @click="$router.push('/monitoring/events')">查看全部</el-button>
+            <el-button plain type="primary" @click="$router.push('/monitoring/events')">查看全部</el-button>
           </div>
           <div class="autops-card-body">
             <div v-loading="eventsLoading" class="recent-events-list">
@@ -168,7 +168,7 @@
     <div class="autops-card" style="margin-top: 16px">
       <div class="autops-card-header">
         <span class="autops-card-title">最近状态变更</span>
-        <el-button text type="primary" @click="loadChanges">刷新</el-button>
+        <el-button plain type="primary" @click="loadChanges">刷新</el-button>
       </div>
       <div class="autops-card-body">
         <el-table stripe :data="changes" v-loading="changesLoading">

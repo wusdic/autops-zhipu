@@ -129,8 +129,8 @@
               <el-tag type="success" size="small">已应用</el-tag>
             </template>
             <template v-else>
-              <el-button text type="primary" size="small" @click="applySuggestion(row)">应用</el-button>
-              <el-button text type="info" size="small" @click="ignoreSuggestion(row)">忽略</el-button>
+              <el-button plain type="primary" size="small" @click="applySuggestion(row)">应用</el-button>
+              <el-button plain type="info" size="small" @click="ignoreSuggestion(row)">忽略</el-button>
             </template>
           </template>
         </el-table-column>
@@ -312,13 +312,6 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
-}
-.autops-page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  display: flex;
-  align-items: center;
 }
 .input-panel {
   margin-bottom: 0;

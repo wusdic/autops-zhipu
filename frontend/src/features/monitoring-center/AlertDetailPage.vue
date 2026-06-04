@@ -146,7 +146,7 @@
                       </el-table-column>
                       <el-table-column label="操作" width="100">
                         <template #default="{ row }">
-                          <el-button text type="primary" size="small" @click="$router.push(`/assets/${row.id}`)">详情</el-button>
+                          <el-button plain type="primary" size="small" @click="$router.push(`/assets/${row.id}`)">详情</el-button>
                         </template>
                       </el-table-column>
                     </el-table>
@@ -242,7 +242,7 @@
               </el-table-column>
               <el-table-column label="操作" width="100">
                 <template #default="{ row }">
-                  <el-button text type="primary" size="small" @click="$router.push(`/alerts/${row.id}`)">详情</el-button>
+                  <el-button plain type="primary" size="small" @click="$router.push(`/alerts/${row.id}`)">详情</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -268,7 +268,7 @@
             <el-table stripe :data="executions">
               <el-table-column prop="id" label="执行ID" width="160" align="center">
                 <template #default="{ row }">
-                  <el-button link type="primary" size="small" @click="$router.push('/executions/' + row.id)">
+                  <el-button plain type="primary" size="small" @click="$router.push('/executions/' + row.id)">
                     {{ row.id && row.id.length > 12 ? row.id.slice(0, 8) + '...' : (row.id || '-') }}
                   </el-button>
                 </template>
@@ -287,7 +287,7 @@
               </el-table-column>
               <el-table-column label="操作" width="100">
                 <template #default="{ row }">
-                  <el-button text type="primary" size="small" @click="$router.push(`/executions/${row.id}`)">详情</el-button>
+                  <el-button plain type="primary" size="small" @click="$router.push(`/executions/${row.id}`)">详情</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -858,15 +858,6 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
   align-items: center;
   flex: 1;
 }
-
-.header-actions {
-  display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
 .header-meta {
   margin-top: 8px;
 }

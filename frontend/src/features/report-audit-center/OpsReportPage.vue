@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="autops-page-header">
-      <h2>运维报告</h2>
+      <div class="autops-page-title">运维报告</div>
       <div>
         <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" style="margin-right: 8px" @change="fetchData" />
         <el-select v-model="moduleFilter" placeholder="报告类型" style="width: 140px; margin-right: 8px" clearable @change="fetchData">
@@ -57,8 +57,8 @@
         <el-table-column prop="created_at" label="生成时间" width="170" sortable />
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="viewReport(row)" :disabled="row.status !== 'completed'">查看</el-button>
-            <el-button link type="success" @click="downloadReport(row)" :disabled="row.status !== 'completed'">下载</el-button>
+            <el-button plain type="primary" @click="viewReport(row)" :disabled="row.status !== 'completed'">查看</el-button>
+            <el-button plain type="success" @click="downloadReport(row)" :disabled="row.status !== 'completed'">下载</el-button>
           </template>
         </el-table-column>
       </el-table>

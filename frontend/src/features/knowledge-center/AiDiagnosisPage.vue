@@ -47,7 +47,7 @@
                 <el-icon><Bell /></el-icon>
                 选择告警
               </span>
-              <el-button text type="primary" @click="loadAlerts" :loading="alertsLoading">
+              <el-button plain type="primary" @click="loadAlerts" :loading="alertsLoading">
                 <el-icon><Refresh /></el-icon>刷新
               </el-button>
             </div>
@@ -372,7 +372,7 @@
                 <el-icon><Clock /></el-icon>
                 近期分析记录
               </span>
-              <el-button text type="primary" size="small" @click="loadHistory" :loading="historyLoading">
+              <el-button plain type="primary" size="small" @click="loadHistory" :loading="historyLoading">
                 <el-icon><Refresh /></el-icon>
               </el-button>
             </div>
@@ -557,7 +557,7 @@
                 <el-icon><Clock /></el-icon>
                 Agent 运行历史
               </span>
-              <el-button text type="primary" size="small" @click="loadAgentHistory" :loading="agentHistoryLoading">
+              <el-button plain type="primary" size="small" @click="loadAgentHistory" :loading="agentHistoryLoading">
                 <el-icon><Refresh /></el-icon>
               </el-button>
             </div>
@@ -1197,15 +1197,6 @@ watch(activeMode, (mode) => {
   align-items: center;
   margin-bottom: 16px;
 }
-
-.page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  display: flex;
-  align-items: center;
-}
-
 /* Cards */
 .workflow-card {
   margin-bottom: 16px;

@@ -70,8 +70,8 @@
           </el-table-column>
           <el-table-column label="操作" width="180" fixed="right" align="center">
             <template #default="{ row }">
-              <el-button size="small" type="primary" link @click="viewReport(row)">查看</el-button>
-              <el-button size="small" link @click="downloadReport(row)">下载</el-button>
+              <el-button type="primary" plain @click="viewReport(row)">查看</el-button>
+              <el-button size="small" plain @click="downloadReport(row)">下载</el-button>
             </template>
           </el-table-column>
         </el-table>

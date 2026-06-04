@@ -85,16 +85,16 @@
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
             <template v-if="row.status === 'pending_review'">
-              <el-button text type="primary" size="small" @click="openReview(row)">审核</el-button>
-              <el-button text type="success" size="small" @click="handlePublish(row)">通过</el-button>
-              <el-button text type="danger" size="small" @click="handleReject(row)">驳回</el-button>
+              <el-button plain type="primary" size="small" @click="openReview(row)">审核</el-button>
+              <el-button plain type="success" size="small" @click="handlePublish(row)">通过</el-button>
+              <el-button plain type="danger" size="small" @click="handleReject(row)">驳回</el-button>
             </template>
             <template v-else-if="row.status === 'draft'">
-              <el-button text type="primary" size="small" @click="openReview(row)">查看</el-button>
-              <el-button text type="warning" size="small" @click="handleSubmit(row)">提交审核</el-button>
+              <el-button plain type="primary" size="small" @click="openReview(row)">查看</el-button>
+              <el-button plain type="warning" size="small" @click="handleSubmit(row)">提交审核</el-button>
             </template>
             <template v-else>
-              <el-button text type="primary" size="small" @click="openReview(row)">查看</el-button>
+              <el-button plain type="primary" size="small" @click="openReview(row)">查看</el-button>
             </template>
           </template>
         </el-table-column>
@@ -390,13 +390,6 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
-}
-.autops-page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1d2129;
-  display: flex;
-  align-items: center;
 }
 .filter-row {
   margin-bottom: 16px;

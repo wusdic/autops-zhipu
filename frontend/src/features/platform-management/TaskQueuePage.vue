@@ -135,7 +135,7 @@
         <template #default="{ row }">
           <el-button
             v-if="row.status === 'failed'"
-            text
+            plain
             type="warning"
             size="small"
             @click="retryTask(row)"
@@ -144,7 +144,7 @@
           </el-button>
           <el-button
             v-if="row.status === 'queued' || row.status === 'running'"
-            text
+            plain
             type="danger"
             size="small"
             @click="cancelTask(row)"
@@ -152,8 +152,7 @@
             取消
           </el-button>
           <el-button
-            text
-            type="primary"
+            plain type="primary"
             size="small"
             @click="viewDetail(row)"
           >
@@ -365,16 +364,6 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 16px;
 }
-.autops-page-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d2129;
-}
-.header-actions {
-  display: flex;
-  gap: 8px;
-}
-
 .filter-bar {
   display: flex;
   gap: 8px;
