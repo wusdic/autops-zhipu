@@ -24,7 +24,7 @@
             <el-icon :size="20"><component :is="stat.icon" /></el-icon>
           </div>
           <div class="metric-label">{{ stat.label }}</div>
-          <div class="metric-value">{{ stat.value }}<span v-if="stat.suffix" class="metric-suffix">{{ stat.suffix }}</span></div>
+          <div class="metric-value metric-suffix">{{ stat.value }}<span v-if="stat.suffix" >{{ stat.suffix }}</span></div>
         </div>
       </el-col>
     </el-row>

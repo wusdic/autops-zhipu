@@ -8,10 +8,10 @@
     </div>
 
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="6"><div class="autops-card stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">Playbook 总数</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已激活</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card primary"><div class="stat-value">{{ stats.withScripts }}</div><div class="stat-label">关联脚本</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card warning"><div class="stat-value">{{ stats.avgSteps }}</div><div class="stat-label">平均步骤数</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card stat-value stat-label"><div >{{ stats.total }}</div><div >Playbook 总数</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card success stat-value stat-label"><div >{{ stats.active }}</div><div >已激活</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card primary stat-value stat-label"><div >{{ stats.withScripts }}</div><div >关联脚本</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card warning stat-value stat-label"><div >{{ stats.avgSteps }}</div><div >平均步骤数</div></div></el-col>
     </el-row>
 
     <div class="autops-toolbar">

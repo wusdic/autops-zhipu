@@ -78,7 +78,7 @@
       <el-col :span="12">
         <div class="evidence-col">
           <!-- 关键指标 -->
-          <el-card shadow="hover" class="col-card" class="mb-lg">
+          <el-card shadow="hover" class="col-card mb-lg" >
             <template #header>
               <div class="col-header">
                 <span>📊 关键指标</span>
@@ -88,7 +88,7 @@
           </el-card>
 
           <!-- AI 分析结果 -->
-          <el-card shadow="hover" class="col-card" class="mb-lg" v-if="aiResult || aiLoading">
+          <el-card shadow="hover" class="col-card mb-lg"  v-if="aiResult || aiLoading">
             <div v-if="aiLoading" style="text-align: center; padding: 32px 0">
               <el-icon class="is-loading" :size="24"><Loading /></el-icon>
               <div style="margin-top: 8px; color: #86909c">AI 正在诊断分析中...</div>
@@ -141,7 +141,7 @@
           </el-card>
 
           <!-- 关联告警 -->
-          <el-card shadow="hover" class="col-card" class="mb-lg" v-if="relatedAlerts.length">
+          <el-card shadow="hover" class="col-card mb-lg"  v-if="relatedAlerts.length">
             <template #header>
               <div class="col-header">
                 <span>🔔 关联告警</span>
@@ -167,7 +167,7 @@
           </el-card>
 
           <!-- 关联日志 -->
-          <el-card shadow="hover" class="col-card" class="mb-lg">
+          <el-card shadow="hover" class="col-card mb-lg" >
             <template #header>
               <div class="col-header">
                 <span>📄 关联日志</span>
@@ -218,7 +218,7 @@
       <el-col :span="6">
         <div class="action-col">
           <!-- 操作面板 -->
-          <el-card shadow="hover" class="col-card" class="mb-lg">
+          <el-card shadow="hover" class="col-card mb-lg" >
             <template #header>
               <div class="col-header">
                 <span>⚡ 操作面板</span>
@@ -284,7 +284,7 @@
           </el-card>
 
           <!-- 匹配策略卡片 -->
-          <el-card shadow="hover" class="col-card" v-if="matchedPolicy" class="mb-lg">
+          <el-card shadow="hover" class="col-card mb-lg" v-if="matchedPolicy" >
             <template #header>
               <div class="col-header">
                 <span>🎯 匹配策略</span>

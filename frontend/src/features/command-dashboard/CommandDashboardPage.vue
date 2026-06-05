@@ -73,9 +73,9 @@
             <div class="autops-card-title"><el-icon><Search /></el-icon> 资产发现</div>
           </div>
           <div class="autops-card-body v3-card-body">
-            <div class="autops-metric-card"><span class="autops-metric-card-num">{{ discoveryStats.todayFound }}</span><span class="autops-metric-card-label">今日发现</span></div>
-            <div class="autops-metric-card"><span class="autops-metric-card-num text-warning">{{ discoveryStats.pendingConfirm }}</span><span class="autops-metric-card-label">待确认</span></div>
-            <div class="autops-metric-card"><span class="autops-metric-card-num text-success">{{ discoveryStats.managed }}</span><span class="autops-metric-card-label">已纳管</span></div>
+            <div class="autops-metric-card autops-metric-card-num autops-metric-card-label"><span >{{ discoveryStats.todayFound }}</span><span >今日发现</span></div>
+            <div class="autops-metric-card autops-metric-card-num text-warning autops-metric-card-label"><span >{{ discoveryStats.pendingConfirm }}</span><span >待确认</span></div>
+            <div class="autops-metric-card autops-metric-card-num text-success autops-metric-card-label"><span >{{ discoveryStats.managed }}</span><span >已纳管</span></div>
           </div>
         </div>
       </el-col>
@@ -86,9 +86,9 @@
             <div class="autops-card-title"><el-icon><CircleCheck /></el-icon> 巡检实况</div>
           </div>
           <div class="autops-card-body v3-card-body">
-            <div class="autops-metric-card"><span class="autops-metric-card-num text-primary">{{ inspectionStats.running }}</span><span class="autops-metric-card-label">正在巡检</span></div>
-            <div class="autops-metric-card"><span class="autops-metric-card-num text-danger">{{ inspectionStats.failed }}</span><span class="autops-metric-card-label">巡检失败</span></div>
-            <div class="autops-metric-card"><span class="autops-metric-card-num text-warning">{{ inspectionStats.abnormalItems }}</span><span class="autops-metric-card-label">异常巡检项</span></div>
+            <div class="autops-metric-card autops-metric-card-num text-primary autops-metric-card-label"><span >{{ inspectionStats.running }}</span><span >正在巡检</span></div>
+            <div class="autops-metric-card autops-metric-card-num text-danger autops-metric-card-label"><span >{{ inspectionStats.failed }}</span><span >巡检失败</span></div>
+            <div class="autops-metric-card autops-metric-card-num text-warning autops-metric-card-label"><span >{{ inspectionStats.abnormalItems }}</span><span >异常巡检项</span></div>
           </div>
         </div>
       </el-col>
@@ -99,9 +99,9 @@
             <div class="autops-card-title"><el-icon><VideoPlay /></el-icon> 自动处置</div>
           </div>
           <div class="autops-card-body v3-card-body">
-            <div class="autops-metric-card"><span class="autops-metric-card-num text-success">{{ remediationStats.autoHandled }}</span><span class="autops-metric-card-label">自动处理</span></div>
-            <div class="autops-metric-card"><span class="autops-metric-card-num text-warning">{{ remediationStats.rollbackCount }}</span><span class="autops-metric-card-label">回滚</span></div>
-            <div class="autops-metric-card"><span class="autops-metric-card-num">{{ remediationStats.successRate }}%</span><span class="autops-metric-card-label">成功率</span></div>
+            <div class="autops-metric-card autops-metric-card-num text-success autops-metric-card-label"><span >{{ remediationStats.autoHandled }}</span><span >自动处理</span></div>
+            <div class="autops-metric-card autops-metric-card-num text-warning autops-metric-card-label"><span >{{ remediationStats.rollbackCount }}</span><span >回滚</span></div>
+            <div class="autops-metric-card autops-metric-card-num autops-metric-card-label"><span >{{ remediationStats.successRate }}%</span><span >成功率</span></div>
           </div>
         </div>
       </el-col>
@@ -112,9 +112,9 @@
             <div class="autops-card-title"><el-icon><Document /></el-icon> 报告任务</div>
           </div>
           <div class="autops-card-body v3-card-body">
-            <div class="autops-metric-card"><span class="autops-metric-card-num text-primary">{{ reportStats.generating }}</span><span class="autops-metric-card-label">生成中</span></div>
-            <div class="autops-metric-card"><span class="autops-metric-card-num text-success">{{ reportStats.completed }}</span><span class="autops-metric-card-label">已完成</span></div>
-            <div class="autops-metric-card"><span class="autops-metric-card-num text-danger">{{ reportStats.failed }}</span><span class="autops-metric-card-label">失败</span></div>
+            <div class="autops-metric-card autops-metric-card-num text-primary autops-metric-card-label"><span >{{ reportStats.generating }}</span><span >生成中</span></div>
+            <div class="autops-metric-card autops-metric-card-num text-success autops-metric-card-label"><span >{{ reportStats.completed }}</span><span >已完成</span></div>
+            <div class="autops-metric-card autops-metric-card-num text-danger autops-metric-card-label"><span >{{ reportStats.failed }}</span><span >失败</span></div>
           </div>
         </div>
       </el-col>
@@ -201,7 +201,7 @@
               <div class="health-bar-label">
                 <span :class="'health-dot health-dot-' + item.key"></span>
                 <span class="font-14">{{ item.label }}</span>
-                <span class="font-12 text-tertiary" class="ml-auto">{{ item.count }}</span>
+                <span class="font-12 text-tertiary ml-auto" >{{ item.count }}</span>
               </div>
               <el-progress
                 :percentage="item.percent"
@@ -315,7 +315,7 @@
               <div v-for="comp in platformHealth" :key="comp.name" class="health-item">
                 <span class="health-dot" :class="'health-dot-' + comp.status"></span>
                 <span class="font-12">{{ comp.name }}</span>
-                <span class="font-12 text-tertiary" class="ml-auto">{{ comp.latency }}</span>
+                <span class="font-12 text-tertiary ml-auto" >{{ comp.latency }}</span>
               </div>
             </div>
           </div>
@@ -328,12 +328,12 @@
           </div>
           <div class="autops-card-body">
             <div class="today-summary">
-              <div class="summary-item"><span class="summary-label">新增资产</span><span class="summary-val">{{ todaySummary.newAssets }}</span></div>
-              <div class="summary-item"><span class="summary-label">完成巡检</span><span class="summary-val">{{ todaySummary.inspections }}</span></div>
-              <div class="summary-item"><span class="summary-label">发现异常</span><span class="summary-val text-warning">{{ todaySummary.anomalies }}</span></div>
-              <div class="summary-item"><span class="summary-label">自动处置</span><span class="summary-val text-success">{{ todaySummary.autoRemediations }}</span></div>
-              <div class="summary-item"><span class="summary-label">人工审批</span><span class="summary-val">{{ todaySummary.manualApprovals }}</span></div>
-              <div class="summary-item"><span class="summary-label">生成报告</span><span class="summary-val">{{ todaySummary.reports }}</span></div>
+              <div class="summary-item summary-label summary-val"><span >新增资产</span><span >{{ todaySummary.newAssets }}</span></div>
+              <div class="summary-item summary-label summary-val"><span >完成巡检</span><span >{{ todaySummary.inspections }}</span></div>
+              <div class="summary-item summary-label summary-val text-warning"><span >发现异常</span><span >{{ todaySummary.anomalies }}</span></div>
+              <div class="summary-item summary-label summary-val text-success"><span >自动处置</span><span >{{ todaySummary.autoRemediations }}</span></div>
+              <div class="summary-item summary-label summary-val"><span >人工审批</span><span >{{ todaySummary.manualApprovals }}</span></div>
+              <div class="summary-item summary-label summary-val"><span >生成报告</span><span >{{ todaySummary.reports }}</span></div>
             </div>
           </div>
         </div>

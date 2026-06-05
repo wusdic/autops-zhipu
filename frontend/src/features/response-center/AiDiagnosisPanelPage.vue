@@ -32,7 +32,7 @@
       <el-row :gutter="16">
         <!-- 左栏: 诊断结论 -->
         <el-col :xs="24" :lg="16">
-          <div class="autops-card" class="mb-lg">
+          <div class="autops-card mb-lg" >
             <div class="autops-card-header">
               <div class="autops-card-title"><el-icon><Warning /></el-icon> 诊断结论</div>
               <el-tag :type="(riskTag(diagnosisResult.risk_level)) as TagType" effect="dark">风险级别: {{ riskLabel(diagnosisResult.risk_level) }}</el-tag>
@@ -49,8 +49,8 @@
           </div>
 
           <!-- 建议动作 -->
-          <div class="autops-card" class="mb-lg">
-            <div class="autops-card-header"><div class="autops-card-title"><el-icon><VideoPlay /></el-icon> 建议动作</div></div>
+          <div class="autops-card mb-lg" >
+            <div class="autops-card-header autops-card-title"><div ><el-icon><VideoPlay /></el-icon> 建议动作</div></div>
             <el-table stripe :data="diagnosisResult.recommended_actions || []"size="small" style="margin-top: 8px">
               <el-table-column type="index" label="#" width="40" />
               <el-table-column prop="action" label="动作" min-width="180" show-overflow-tooltip />
@@ -68,7 +68,7 @@
 
           <!-- 证据链 -->
           <div class="autops-card">
-            <div class="autops-card-header"><div class="autops-card-title"><el-icon><Link /></el-icon> 证据链</div></div>
+            <div class="autops-card-header autops-card-title"><div ><el-icon><Link /></el-icon> 证据链</div></div>
             <el-timeline style="padding: 16px">
               <el-timeline-item
                 v-for="(e, i) in diagnosisResult.evidence_chain || []"
@@ -86,8 +86,8 @@
 
         <!-- 右栏: 操作面板 -->
         <el-col :xs="24" :lg="8">
-          <div class="autops-card" class="mb-lg">
-            <div class="autops-card-header"><div class="autops-card-title">处置操作</div></div>
+          <div class="autops-card mb-lg" >
+            <div class="autops-card-header autops-card-title"><div >处置操作</div></div>
             <div style="padding: 12px; display: flex; flex-direction: column; gap: 8px">
               <el-button type="primary" @click="executeRecommended" :disabled="!(diagnosisResult.recommended_actions || []).length">
                 <el-icon><VideoPlay /></el-icon> 执行建议动作
@@ -106,7 +106,7 @@
 
           <!-- AI 反馈 -->
           <div class="autops-card">
-            <div class="autops-card-header"><div class="autops-card-title">AI 分析反馈</div></div>
+            <div class="autops-card-header autops-card-title"><div >AI 分析反馈</div></div>
             <div style="padding: 12px">
               <p style="color: #86909c; font-size: 13px; margin-bottom: 8px">AI 诊断是否准确？</p>
               <el-button-group>

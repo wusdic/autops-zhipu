@@ -184,7 +184,7 @@
               </ul>
             </div>
 
-            <div class="info-section" class="mt-lg">
+            <div class="info-section mt-lg" >
               <div class="info-title">联系授权</div>
               <div class="text-secondary">
                 如需获取或更新授权，请联系商务团队：

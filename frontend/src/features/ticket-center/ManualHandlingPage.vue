@@ -45,7 +45,7 @@
         <div class="autops-metric-card">
           <div class="metric-icon bg-info"><el-icon :size="20"><Timer /></el-icon></div>
           <div class="metric-label">平均处置时长</div>
-          <div class="metric-value">{{ stats.avg_duration }}<span class="metric-suffix">分钟</span></div>
+          <div class="metric-value metric-suffix">{{ stats.avg_duration }}<span >分钟</span></div>
         </div>
       </el-col>
     </el-row>

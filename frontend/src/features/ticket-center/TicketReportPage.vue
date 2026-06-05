@@ -25,7 +25,7 @@
     <el-row :gutter="16" class="mb-lg">
       <el-col :xs="24" :lg="12">
         <div class="autops-card">
-          <div class="autops-card-header"><div class="autops-card-title">工单类型分布</div></div>
+          <div class="autops-card-header autops-card-title"><div >工单类型分布</div></div>
           <el-table stripe :data="typeDistribution"size="small">
             <el-table-column prop="type" label="工单类型" min-width="120" />
             <el-table-column prop="count" label="数量" width="80" />
@@ -40,7 +40,7 @@
       </el-col>
       <el-col :xs="24" :lg="12">
         <div class="autops-card">
-          <div class="autops-card-header"><div class="autops-card-title">SLA 达标情况</div></div>
+          <div class="autops-card-header autops-card-title"><div >SLA 达标情况</div></div>
           <el-table stripe :data="slaData"size="small">
             <el-table-column prop="level" label="优先级" width="100" />
             <el-table-column prop="total" label="总数" width="70" />
@@ -61,7 +61,7 @@
     </el-row>
 
     <!-- 工单趋势 -->
-    <div class="autops-card" class="mb-lg">
+    <div class="autops-card mb-lg" >
       <div class="autops-card-header">
         <div class="autops-card-title">工单趋势</div>
         <el-radio-group v-model="trendPeriod" size="small" @change="fetchTrend">
@@ -83,7 +83,7 @@
 
     <!-- 处理人员排行 -->
     <div class="autops-card">
-      <div class="autops-card-header"><div class="autops-card-title">处理人员排行</div></div>
+      <div class="autops-card-header autops-card-title"><div >处理人员排行</div></div>
       <el-table stripe :data="handlerRanking"size="small">
         <el-table-column type="index" label="排名" width="60" />
         <el-table-column prop="handler" label="处理人" min-width="120" />

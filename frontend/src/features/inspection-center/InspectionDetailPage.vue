@@ -100,7 +100,7 @@
 
       <!-- 工作流操作 -->
       <div class="autops-card">
-        <div class="autops-card-header"><div class="autops-card-title">后续操作</div></div>
+        <div class="autops-card-header autops-card-title"><div >后续操作</div></div>
         <div style="display: flex; gap: 8px; padding: 12px">
           <el-button type="warning" @click="navToAnomalyFromInspection(taskDetail?.id)">
             <el-icon><Warning /></el-icon> 查看异常项

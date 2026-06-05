@@ -8,10 +8,10 @@
     </div>
 
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="6"><div class="autops-card stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">API Key 总数</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">有效 Key</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card danger"><div class="stat-value">{{ stats.expired }}</div><div class="stat-label">已过期</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card warning"><div class="stat-value">{{ stats.expiringSoon }}</div><div class="stat-label">即将过期</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card stat-value stat-label"><div >{{ stats.total }}</div><div >API Key 总数</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card success stat-value stat-label"><div >{{ stats.active }}</div><div >有效 Key</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card danger stat-value stat-label"><div >{{ stats.expired }}</div><div >已过期</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card warning stat-value stat-label"><div >{{ stats.expiringSoon }}</div><div >即将过期</div></div></el-col>
     </el-row>
 
     <div class="autops-toolbar">
@@ -120,7 +120,7 @@
       <el-form label-width="80px">
         <el-form-item label="名称"><span>{{ createdKey.name }}</span></el-form-item>
         <el-form-item label="Key ID"><div class="secret-row"><code>{{ createdKey.key_id }}</code><el-button size="small" @click="copyText(createdKey.key_id)">复制</el-button></div></el-form-item>
-        <el-form-item label="密钥"><div class="secret-row"><code class="secret-value">{{ createdKey.secret }}</code><el-button size="small" type="primary" @click="copyText(createdKey.secret)">复制</el-button></div></el-form-item>
+        <el-form-item label="密钥"><div class="secret-row secret-value"><code >{{ createdKey.secret }}</code><el-button size="small" type="primary" @click="copyText(createdKey.secret)">复制</el-button></div></el-form-item>
       </el-form>
       <template #footer><el-button type="primary" @click="secretDialogVisible=false">我已保存</el-button></template>
     </el-dialog>

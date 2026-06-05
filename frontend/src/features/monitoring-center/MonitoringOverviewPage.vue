@@ -53,7 +53,7 @@
             <div class="stat-card-inner">
               <el-icon :size="36" color="#00b42a"><CircleCheckFilled /></el-icon>
               <div class="stat-card-info">
-                <div class="stat-card-value">{{ overview.collectionRate }}<span class="stat-unit">%</span></div>
+                <div class="stat-card-value stat-unit">{{ overview.collectionRate }}<span >%</span></div>
                 <div class="stat-card-label">采集成功率</div>
               </div>
             </div>

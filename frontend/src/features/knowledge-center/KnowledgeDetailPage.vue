@@ -64,31 +64,31 @@
         </div>
 
         <!-- 正文内容 -->
-        <div class="autops-card" v-if="article.content" class="mt-lg">
+        <div class="autops-card mt-lg" v-if="article.content" >
           <span class="autops-card-title">内容</span>
           <div v-html="renderMarkdown(article.content)" class="markdown-body" />
         </div>
 
         <!-- 诊断步骤 -->
-        <div class="autops-card" v-if="article.diagnosis_steps" class="mt-lg">
+        <div class="autops-card mt-lg" v-if="article.diagnosis_steps" >
           <span class="autops-card-title">诊断步骤</span>
           <div v-html="renderMarkdown(article.diagnosis_steps)" class="markdown-body" />
         </div>
 
         <!-- 处置步骤 -->
-        <div class="autops-card" v-if="article.resolution_steps" class="mt-lg">
+        <div class="autops-card mt-lg" v-if="article.resolution_steps" >
           <span class="autops-card-title">处置步骤</span>
           <div v-html="renderMarkdown(article.resolution_steps)" class="markdown-body" />
         </div>
 
         <!-- 验证步骤 -->
-        <div class="autops-card" v-if="article.verification_steps" class="mt-lg">
+        <div class="autops-card mt-lg" v-if="article.verification_steps" >
           <span class="autops-card-title">验证步骤</span>
           <div v-html="renderMarkdown(article.verification_steps)" class="markdown-body" />
         </div>
 
         <!-- Rating / Useful Feedback -->
-        <div class="autops-card" class="mt-lg">
+        <div class="autops-card mt-lg" >
           <span class="autops-card-title">评价与反馈</span>
           <div class="feedback-section">
             <div class="feedback-row">
@@ -127,7 +127,7 @@
         </div>
 
         <!-- Related Articles -->
-        <div class="autops-card" class="mt-lg" v-if="relatedArticles.length> 0">
+        <div class="autops-card mt-lg"  v-if="relatedArticles.length> 0">
           <span class="autops-card-title">相关文章</span>
           <el-table stripe :data="relatedArticles"size="small" @row-click="goToRelated">
             <el-table-column prop="title" label="标题" min-width="260" show-overflow-tooltip>

@@ -7,12 +7,12 @@
 
     <!-- 统计卡片 -->
     <el-row :gutter="12" class="stat-row mb-md">
-      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card"><div class="stat-value">{{ nodes.length }}</div><div class="stat-label">节点总数</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="stat-card success"><div class="stat-value">{{ edges.length }}</div><div class="stat-label">关系总数</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="stat-card primary"><div class="stat-value">{{ healthyCount }}</div><div class="stat-label">健康节点</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="stat-card warning"><div class="stat-value">{{ warningCount }}</div><div class="stat-label">告警节点</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="stat-card danger"><div class="stat-value">{{ criticalCount }}</div><div class="stat-label">故障节点</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card"><div class="stat-value">{{ typeCount }}</div><div class="stat-label">资产类型</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card stat-value stat-label"><div >{{ nodes.length }}</div><div >节点总数</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="stat-card success stat-value stat-label"><div >{{ edges.length }}</div><div >关系总数</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="stat-card primary stat-value stat-label"><div >{{ healthyCount }}</div><div >健康节点</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="stat-card warning stat-value stat-label"><div >{{ warningCount }}</div><div >告警节点</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="stat-card danger stat-value stat-label"><div >{{ criticalCount }}</div><div >故障节点</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card stat-value stat-label"><div >{{ typeCount }}</div><div >资产类型</div></el-card></el-col>
     </el-row>
 
     <!-- 工具栏 -->
@@ -127,16 +127,16 @@
           </div>
           <div class="legend-section">
             <div class="legend-title">健康状态</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#00b42a"></span> 健康</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#ff7d00"></span> 告警</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#f53f3f"></span> 故障</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#86909c"></span> 未知</div>
+            <div class="legend-item legend-dot"><span  style="background:#00b42a"></span> 健康</div>
+            <div class="legend-item legend-dot"><span  style="background:#ff7d00"></span> 告警</div>
+            <div class="legend-item legend-dot"><span  style="background:#f53f3f"></span> 故障</div>
+            <div class="legend-item legend-dot"><span  style="background:#86909c"></span> 未知</div>
           </div>
           <div class="legend-section">
             <div class="legend-title">关系类型</div>
-            <div class="legend-item"><span class="legend-line"></span> 依赖</div>
-            <div class="legend-item"><span class="legend-line" style="border-top:2px dashed #c9cdd4"></span> 备份</div>
-            <div class="legend-item"><span class="legend-line" style="border-top:2px solid #f53f3f"></span> 影响路径</div>
+            <div class="legend-item legend-line"><span ></span> 依赖</div>
+            <div class="legend-item legend-line"><span  style="border-top:2px dashed #c9cdd4"></span> 备份</div>
+            <div class="legend-item legend-line"><span  style="border-top:2px solid #f53f3f"></span> 影响路径</div>
           </div>
           </div>
         </div>

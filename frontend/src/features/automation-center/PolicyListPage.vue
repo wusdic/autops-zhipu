@@ -8,10 +8,10 @@
     </div>
 
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="6"><div class="autops-card stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">策略总数</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已激活</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card danger"><div class="stat-value">{{ stats.highRisk }}</div><div class="stat-label">高风险</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card warning"><div class="stat-value">{{ stats.pendingApproval }}</div><div class="stat-label">待审批</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card stat-value stat-label"><div >{{ stats.total }}</div><div >策略总数</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card success stat-value stat-label"><div >{{ stats.active }}</div><div >已激活</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card danger stat-value stat-label"><div >{{ stats.highRisk }}</div><div >高风险</div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card warning stat-value stat-label"><div >{{ stats.pendingApproval }}</div><div >待审批</div></div></el-col>
     </el-row>
 
     <div class="autops-toolbar">

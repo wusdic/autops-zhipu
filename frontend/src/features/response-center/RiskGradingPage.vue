@@ -26,7 +26,7 @@
     <el-row :gutter="16" class="mb-lg">
       <el-col :xs="24" :lg="12">
         <div class="autops-card">
-          <div class="autops-card-header"><div class="autops-card-title">风险矩阵</div></div>
+          <div class="autops-card-header autops-card-title"><div >风险矩阵</div></div>
           <div class="risk-matrix">
             <div class="matrix-y-label">可能性</div>
             <div class="matrix-grid">
@@ -45,7 +45,7 @@
       </el-col>
       <el-col :xs="24" :lg="12">
         <div class="autops-card">
-          <div class="autops-card-header"><div class="autops-card-title">风险分布</div></div>
+          <div class="autops-card-header autops-card-title"><div >风险分布</div></div>
           <div class="risk-summary">
             <div class="risk-stat" v-for="stat in riskStats" :key="stat.level">
               <div class="risk-stat-num" :class="stat.level">{{ stat.count }}</div>

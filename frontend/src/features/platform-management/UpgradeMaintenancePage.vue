@@ -17,7 +17,7 @@
     </div>
 
     <!-- 当前版本信息 -->
-    <div class="autops-card" class="mb-lg">
+    <div class="autops-card mb-lg" >
       <div class="autops-card-header">
         <div class="autops-card-title">当前系统信息</div>
         <el-button size="small" @click="checkForUpdates" :loading="checkingUpdate">
@@ -54,8 +54,8 @@
     </div>
 
     <!-- 自检结果 -->
-    <div class="autops-card" class="mb-lg" v-if="selfCheckResult">
-      <div class="autops-card-header"><div class="autops-card-title">自检结果</div></div>
+    <div class="autops-card mb-lg"  v-if="selfCheckResult">
+      <div class="autops-card-header autops-card-title"><div >自检结果</div></div>
       <div class="autops-card-body p-0">
         <el-table stripe :data="selfCheckResult" border size="small">
           <el-table-column prop="item" label="检查项" min-width="160" />

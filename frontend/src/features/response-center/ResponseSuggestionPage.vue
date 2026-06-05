@@ -74,7 +74,7 @@
     </el-row>
 
     <!-- Suggestions Table -->
-    <div class="autops-card" class="mt-lg">
+    <div class="autops-card mt-lg" >
       <div class="autops-card-header" v-if="hasSearched">
         <div class="autops-card-title">响应建议列表</div>
         <el-button type="primary" size="small" @click="applyAll" :disabled="suggestions.length === 0">

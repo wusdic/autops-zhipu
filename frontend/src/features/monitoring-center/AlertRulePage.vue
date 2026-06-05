@@ -9,10 +9,10 @@
     </div>
 
     <el-row :gutter="16" class="stat-row mb-lg">
-      <el-col :span="6"><div class="autops-card stat-card"><div class="autops-card-body"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">规则总数</div></div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card success"><div class="autops-card-body"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已启用</div></div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card warning"><div class="autops-card-body"><div class="stat-value">{{ stats.triggeredToday }}</div><div class="stat-label">今日触发</div></div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card primary"><div class="autops-card-body"><div class="stat-value">{{ stats.mostTriggered || '-' }}</div><div class="stat-label">最常触发</div></div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card autops-card-body stat-value stat-label"><div ><div >{{ stats.total }}</div><div >规则总数</div></div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card success autops-card-body stat-value stat-label"><div ><div >{{ stats.active }}</div><div >已启用</div></div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card warning autops-card-body stat-value stat-label"><div ><div >{{ stats.triggeredToday }}</div><div >今日触发</div></div></div></el-col>
+      <el-col :span="6"><div class="autops-card stat-card primary autops-card-body stat-value stat-label"><div ><div >{{ stats.mostTriggered || '-' }}</div><div >最常触发</div></div></div></el-col>
     </el-row>
 
     <div class="autops-toolbar">
