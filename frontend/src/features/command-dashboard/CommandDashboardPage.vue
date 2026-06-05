@@ -1,28 +1,34 @@
 <template>
-  <div class="command-center">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">指挥中心</div>
+      <div class="autops-page-desc">全局态势感知与运维指挥总览</div>
+    </div>
+
     <!-- ─── 第一行：核心态势指标（V3 M1-RQ-001） ─── -->
     <el-row :gutter="16" class="metric-row">
       <el-col :xs="12" :sm="8" :md="4">
-        <div class="autops-metric-card" @click="navigateTo('/alerts?severity=critical')">
-          <div class="metric-icon" style="background: #ffece8; color: #f53f3f">
+        <div class="autops-metric-card is-clickable" @click="navigateTo('/alerts?severity=critical')">
+          <div class="metric-icon bg-danger">
             <el-icon size="20"><AlarmClock /></el-icon>
           </div>
           <div class="metric-label">严重告警</div>
-          <div class="metric-value" style="color: #f53f3f">{{ stats.criticalAlerts }}</div>
+          <div class="metric-value text-danger">{{ stats.criticalAlerts }}</div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4">
-        <div class="autops-metric-card" @click="navigateTo('/response/anomalies')">
-          <div class="metric-icon" style="background: #fff2e8; color: #f77234">
+        <div class="autops-metric-card is-clickable" @click="navigateTo('/response/anomalies')">
+          <div class="metric-icon bg-warning">
             <el-icon size="20"><Warning /></el-icon>
           </div>
           <div class="metric-label">待处理异常</div>
-          <div class="metric-value" style="color: #f77234">{{ stats.pendingAnomalies }}</div>
+          <div class="metric-value text-warning">{{ stats.pendingAnomalies }}</div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4">
-        <div class="autops-metric-card" @click="navigateTo('/assets')">
-          <div class="metric-icon" style="background: #e8f3ff; color: #165dff">
+        <div class="autops-metric-card is-clickable" @click="navigateTo('/assets')">
+          <div class="metric-icon bg-brand">
             <el-icon size="20"><Box /></el-icon>
           </div>
           <div class="metric-label">资产总数</div>
@@ -30,8 +36,8 @@
         </div>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4">
-        <div class="autops-metric-card" @click="navigateTo('/inspection/tasks')">
-          <div class="metric-icon" style="background: #e8ffea; color: #00b42a">
+        <div class="autops-metric-card is-clickable" @click="navigateTo('/inspection/tasks')">
+          <div class="metric-icon bg-success">
             <el-icon size="20"><CircleCheck /></el-icon>
           </div>
           <div class="metric-label">巡检成功率</div>
@@ -39,8 +45,8 @@
         </div>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4">
-        <div class="autops-metric-card" @click="navigateTo('/automation/executions')">
-          <div class="metric-icon" style="background: #e8f3ff; color: #165dff">
+        <div class="autops-metric-card is-clickable" @click="navigateTo('/automation/executions')">
+          <div class="metric-icon bg-brand">
             <el-icon size="20"><VideoPlay /></el-icon>
           </div>
           <div class="metric-label">自动处置率</div>
@@ -48,18 +54,18 @@
         </div>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4">
-        <div class="autops-metric-card" @click="navigateTo('/automation/approvals')">
-          <div class="metric-icon" style="background: #fff7e8; color: #ff7d00">
+        <div class="autops-metric-card is-clickable" @click="navigateTo('/automation/approvals')">
+          <div class="metric-icon bg-warning">
             <el-icon size="20"><Clock /></el-icon>
           </div>
           <div class="metric-label">待审批</div>
-          <div class="metric-value" style="color: #ff7d00">{{ stats.pendingApprovals }}</div>
+          <div class="metric-value text-warning">{{ stats.pendingApprovals }}</div>
         </div>
       </el-col>
     </el-row>
 
     <!-- ─── 第二行：V3五条主线卡片（M1-RQ-002~008） ─── -->
-    <el-row :gutter="16" style="margin-top: 16px">
+    <el-row :gutter="16" class="mt-lg">
       <!-- M1-RQ-002 资产发现卡片 -->
       <el-col :xs="12" :sm="8" :md="6">
         <div class="autops-card v3-card" @click="navigateTo('/resource-center/discovery')">
@@ -115,7 +121,7 @@
     </el-row>
 
     <!-- ─── 内容区: 左大右小 ─── -->
-    <el-row :gutter="16" style="margin-top: 16px">
+    <el-row :gutter="16" class="mt-lg">
       <!-- 左栏：告警趋势 + 最近告警 -->
       <el-col :xs="24" :lg="16">
         <!-- 告警趋势 -->
@@ -146,7 +152,7 @@
               查看全部 →
             </el-button>
           </div>
-          <div class="autops-card-body" style="padding: 0">
+          <div class="autops-card-body p-0">
             <el-table stripe
  :data="recentAlerts"size="default"
  :max-height="300"
@@ -195,7 +201,7 @@
               <div class="health-bar-label">
                 <span :class="'health-dot health-dot-' + item.key"></span>
                 <span class="font-14">{{ item.label }}</span>
-                <span class="font-12 text-tertiary" style="margin-left: auto">{{ item.count }}</span>
+                <span class="font-12 text-tertiary" class="ml-auto">{{ item.count }}</span>
               </div>
               <el-progress
                 :percentage="item.percent"
@@ -219,7 +225,7 @@
             <div class="exec-stats">
               <div class="exec-stat-item">
                 <div class="font-12 text-tertiary mb-xs">成功率</div>
-                <div class="font-20" :style="{ color: remediationStats.successRate >= 95 ? '#00b42a' : remediationStats.successRate >= 80 ? '#ff7d00' : '#f53f3f' }">
+                <div class="font-20" :class="remediationStats.successRate >= 95 ? 'text-success' : remediationStats.successRate >= 80 ? 'text-warning' : 'text-danger'">
                   {{ remediationStats.successRate }}%
                 </div>
               </div>
@@ -274,12 +280,12 @@
         </div>
 
         <!-- M1-RQ-006 待我处理 -->
-        <div class="autops-card" style="margin-top: 16px">
+        <div class="autops-card mt-lg">
           <div class="autops-card-header">
             <div class="autops-card-title"><el-icon><Bell /></el-icon> 待我处理</div>
             <el-button plain type="primary" size="small" @click="navigateTo('/automation/approvals')">全部 →</el-button>
           </div>
-          <div class="autops-card-body" style="padding: 0">
+          <div class="autops-card-body p-0">
             <el-table stripe :data="pendingTasks"size="small" :max-height="200" empty-text="暂无待办">
               <el-table-column prop="type" label="类型" width="90">
                 <template #default="{ row }">
@@ -300,7 +306,7 @@
         </div>
 
         <!-- M1-RQ-008 平台健康卡片 -->
-        <div class="autops-card" style="margin-top: 16px">
+        <div class="autops-card mt-lg">
           <div class="autops-card-header">
             <div class="autops-card-title"><el-icon><Monitor /></el-icon> 平台健康</div>
           </div>
@@ -309,14 +315,14 @@
               <div v-for="comp in platformHealth" :key="comp.name" class="health-item">
                 <span class="health-dot" :class="'health-dot-' + comp.status"></span>
                 <span class="font-12">{{ comp.name }}</span>
-                <span class="font-12 text-tertiary" style="margin-left: auto">{{ comp.latency }}</span>
+                <span class="font-12 text-tertiary" class="ml-auto">{{ comp.latency }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- M1-RQ-010 今日摘要 -->
-        <div class="autops-card" style="margin-top: 16px">
+        <div class="autops-card mt-lg">
           <div class="autops-card-header">
             <div class="autops-card-title"><el-icon><Calendar /></el-icon> 今日摘要</div>
           </div>

@@ -7,20 +7,15 @@
     </div>
 
     <!-- Stat Cards -->
-    <el-row :gutter="16" class="stat-row">
+    <el-row :gutter="16" class="metric-row">
       <el-col :span="6" v-for="stat in statCards" :key="stat.label">
-        <el-card shadow="hover" class="autops-metric-card" v-loading="statsLoading">
-          <div class="stat-card-inner">
-            <div class="stat-icon-wrap" :style="{ background: stat.bgColor }">
-              <el-icon :size="24" :style="{ color: stat.color }">
-                <component :is="stat.icon" />
-              </el-icon>
-            </div>
-            <div class="stat-info">
-              <el-statistic :title="stat.label" :value="stat.value" />
-            </div>
+        <div class="autops-metric-card" v-loading="statsLoading">
+          <div class="metric-icon" :class="stat.bgClass">
+            <el-icon :size="20"><component :is="stat.icon" /></el-icon>
           </div>
-        </el-card>
+          <div class="metric-label">{{ stat.label }}</div>
+          <div class="metric-value">{{ stat.value }}</div>
+        </div>
       </el-col>
     </el-row>
 
@@ -135,7 +130,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Document, Checked, EditPen, StarFilled, ArrowRight, Upload, List, View as Review, Notebook } from '@element-plus/icons-vue'
+import { Document, CircleCheck, Edit, Star, ArrowRight, Upload, List, View as Review, Notebook } from '@element-plus/icons-vue'
 import { knowledgeService } from '@/shared/api'
 
 const router = useRouter()
@@ -146,10 +141,10 @@ const tableLoading = ref(false)
 const recentItems = ref<any[]>([])
 
 const statCards = reactive([
-  { label: '知识总数', value: 0, icon: Document, color: '#165dff', bgColor: '#e8f3ff' },
-  { label: '已发布', value: 0, icon: Checked, color: '#00b42a', bgColor: '#e8ffea' },
-  { label: '草稿', value: 0, icon: EditPen, color: '#ff7d00', bgColor: '#fff7e8' },
-  { label: '平均评分', value: 0, icon: StarFilled, color: '#722ed1', bgColor: '#f5e8ff' },
+  { label: '知识总数', value: 0, icon: Document, bgClass: 'bg-brand' },
+  { label: '已发布', value: 0, icon: CircleCheck, bgClass: 'bg-success' },
+  { label: '草稿', value: 0, icon: Edit, bgClass: 'bg-info' },
+  { label: '平均评分', value: 0, icon: Star, bgClass: 'bg-warning' },
 ])
 
 const categories = ref<{ name: string; count: number; percentage: number; color: string }[]>([])
@@ -292,34 +287,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
-
-.stat-row {
-  margin-bottom: var(--autops-space-lg);
-}
-
-
-
-.autops-metric-card-inner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--autops-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-info {
-  flex: 1;
-}
-
 .main-card {
   margin-bottom: var(--autops-space-lg);
   border-radius: var(--autops-radius-md);

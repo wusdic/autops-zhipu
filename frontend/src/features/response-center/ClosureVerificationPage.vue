@@ -1,5 +1,11 @@
 <template>
-  <div class="closure-verification-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">关闭验证</div>
+      <div class="autops-page-desc">验证异常处理结果的关闭状态</div>
+    </div>
+
     <!-- Tabs & Search -->
     <el-card shadow="never" class="filter-card">
       <div class="filter-header">
@@ -119,7 +125,7 @@
             type="textarea"
             :rows="3"
             placeholder="验证备注（可选）"
-            style="margin-bottom: 12px"
+            class="mb-md"
           />
           <div style="display: flex; gap: 8px">
             <el-button type="success" @click="handleVerify(currentRow, 'verified')">验证通过</el-button>

@@ -29,7 +29,7 @@
  empty-text="暂无告警"
  highlight-current-row
  @current-change="handleAlertSelect"
- style="margin-top: 12px"
+ class="mt-md"
  >
           <el-table-column type="index" width="50" />
           <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
@@ -90,7 +90,7 @@
         </div>
 
         <!-- 收敛统计 -->
-        <div class="autops-card" style="margin-top: 16px" v-if="correlationStats.raw_count > 0">
+        <div class="autops-card" class="mt-lg" v-if="correlationStats.raw_count > 0">
           <div class="autops-card-header">
             <div class="autops-card-title">收敛统计</div>
           </div>
@@ -112,7 +112,7 @@
               {{ selectedAlert ? '「' + selectedAlert.title + '」收敛结果' : '收敛结果' }}
             </div>
           </div>
-          <div class="autops-card-body" style="padding: 0">
+          <div class="autops-card-body p-0">
             <el-table stripe
  :data="correlatedAlerts"v-loading="corrLoading"
  empty-text="选择告警并执行收敛分析"
@@ -318,9 +318,7 @@ onMounted(() => fetchAlerts())
 
 <style scoped>
 
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 .text-tertiary {
   color: var(--autops-info);
   font-size: var(--autops-font-12);

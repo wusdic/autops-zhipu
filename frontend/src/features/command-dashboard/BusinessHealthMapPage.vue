@@ -1,19 +1,24 @@
 <template>
-  <div class="p-6">
-    <div class="autops-page-header">
-      <div class="autops-page-title">业务健康地图</div>
-      <el-button @click="fetchSystems" :loading="loading" type="primary" plain size="small">刷新</el-button>
+  <div class="autops-page-container">
+    <div class="autops-page-header autops-page-header--between">
+      <div>
+        <div class="autops-page-title">业务健康地图</div>
+        <div class="autops-page-desc">监控各业务系统的健康状态和告警情况</div>
+      </div>
+      <div class="autops-header-actions">
+        <el-button @click="fetchSystems" :loading="loading" type="primary" plain size="small">刷新</el-button>
+      </div>
     </div>
 
     <!-- 总体健康评分 -->
     <el-row :gutter="16" class="mb-lg">
       <el-col :xs="12" :sm="6" v-for="card in statCards" :key="card.label">
         <div class="autops-metric-card">
-          <div class="metric-icon" :style="{ background: card.bg, color: card.color }">
+          <div class="metric-icon" :class="card.bgClass">
             <el-icon size="20"><component :is="card.icon" /></el-icon>
           </div>
           <div class="metric-label">{{ card.label }}</div>
-          <div class="metric-value" :style="{ color: card.color }">{{ card.value }}</div>
+          <div class="metric-value" :class="card.textClass">{{ card.value }}</div>
         </div>
       </el-col>
     </el-row>
@@ -113,7 +118,7 @@
                 {{ selectedSystem.asset_count ?? '-' }}
               </el-descriptions-item>
               <el-descriptions-item label="活跃告警">
-                <span :style="{ color: (selectedSystem.alert_count ?? 0) > 0 ? '#f53f3f' : '' }">
+                <span :class="{ 'text-danger': (selectedSystem.alert_count ?? 0) > 0 }">
                   {{ selectedSystem.alert_count ?? 0 }}
                 </span>
               </el-descriptions-item>
@@ -129,7 +134,7 @@
             </el-descriptions>
 
             <!-- 该系统告警列表 -->
-            <div style="margin-top: 12px">
+            <div class="mt-lg">
               <div style="font-weight: 600; margin-bottom: 8px; font-size: 13px">最近告警</div>
               <el-table stripe :data="systemAlerts" size="small"v-loading="sysAlertLoading" empty-text="暂无告警" max-height="200">
                 <el-table-column prop="title" label="告警" min-width="120" show-overflow-tooltip />
@@ -165,10 +170,10 @@ const searchKeyword = ref('')
 const filterHealth = ref('')
 
 const statCards = reactive([
-  { label: '业务系统', value: 0, icon: QuestionFilled, bg: '#e8f3ff', color: '#165dff' },
-  { label: '正常', value: 0, icon: CircleCheck, bg: '#e8ffea', color: '#00b42a' },
-  { label: '告警', value: 0, icon: Warning, bg: '#fff7e8', color: '#ff7d00' },
-  { label: '故障', value: 0, icon: CircleClose, bg: '#ffece8', color: '#f53f3f' },
+  { label: '业务系统', value: 0, icon: QuestionFilled, bgClass: 'bg-brand', textClass: 'text-brand' },
+  { label: '正常', value: 0, icon: CircleCheck, bgClass: 'bg-success', textClass: 'text-success' },
+  { label: '告警', value: 0, icon: Warning, bgClass: 'bg-warning', textClass: 'text-warning' },
+  { label: '故障', value: 0, icon: CircleClose, bgClass: 'bg-danger', textClass: 'text-danger' },
 ])
 
 const overallHealth = ref<number | null>(null)
@@ -303,9 +308,7 @@ onMounted(() => fetchSystems())
 
 <style scoped>
 
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 .text-tertiary {
   color: var(--autops-info);
   font-size: var(--autops-font-12);

@@ -104,7 +104,7 @@
 
     <!-- Diff Dialog -->
     <el-dialog v-model="diffDialogVisible" title="版本对比" width="800px" destroy-on-close>
-      <el-form :inline="true" style="margin-bottom: 16px">
+      <el-form :inline="true" class="mb-lg">
         <el-form-item label="对比版本">
           <el-select v-model="diffTargetVersionId" placeholder="选择对比目标版本" style="width: 300px">
             <el-option
@@ -139,7 +139,7 @@
 
     <!-- Rollback Dialog -->
     <el-dialog v-model="rollbackDialogVisible" title="版本回滚" width="480px">
-      <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 16px">
+      <el-alert type="warning" :closable="false" show-icon class="mb-lg">
         回滚将恢复到指定版本的配置内容，当前草稿版本将被替换。
       </el-alert>
       <el-form label-width="80px">

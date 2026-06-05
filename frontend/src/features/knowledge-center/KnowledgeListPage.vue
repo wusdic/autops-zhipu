@@ -101,7 +101,7 @@
     </div>
 
     <!-- Knowledge Table -->
-    <div class="autops-card" style="margin-top: 16px">
+    <div class="autops-card" class="mt-lg">
       <el-table stripe
  v-loading="loading"
  :data="knowledgeList"@sort-change="onSortChange"

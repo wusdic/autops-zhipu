@@ -1,5 +1,11 @@
 <template>
-  <div class="discovery-result-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">发现结果</div>
+      <div class="autops-page-desc">查看资产自动发现的结果</div>
+    </div>
+
     <!-- 搜索与筛选栏 -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="filterForm" @submit.prevent="handleSearch">

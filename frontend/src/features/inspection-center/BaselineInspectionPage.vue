@@ -7,7 +7,7 @@
     </div>
 
     <!-- 搜索栏 -->
-    <div class="page-toolbar">
+    <div class="autops-toolbar">
       <el-input
         v-model="searchQuery"
         placeholder="搜索资产名 / 检查项..."

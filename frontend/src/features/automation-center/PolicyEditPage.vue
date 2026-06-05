@@ -1,5 +1,11 @@
 <template>
-  <div class="policy-edit-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">策略编辑</div>
+      <div class="autops-page-desc">编辑自动化执行策略</div>
+    </div>
+
     <el-card shadow="never">
       <template #header>
         <div class="autops-card-header">
@@ -96,7 +102,7 @@
     </el-card>
 
     <!-- JSON Preview -->
-    <el-card shadow="never" style="margin-top: 16px">
+    <el-card shadow="never" class="mt-lg">
       <template #header>
         <span>策略预览 (JSON)</span>
       </template>

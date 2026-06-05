@@ -9,7 +9,7 @@
       <slot />
     </el-table>
     <div v-if="showPagination" class="dt-pagination">
-      <el-pagination
+      <el-pagination small
         v-model:current-page="currentPage"
         v-model:page-size="currentPageSize"
         :page-sizes="pageSizes"

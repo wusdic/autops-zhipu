@@ -17,7 +17,7 @@
     </div>
 
     <!-- 筛选 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <el-form :inline="true" :model="filters">
         <el-form-item label="状态">
           <el-select v-model="filters.status" placeholder="全部" @change="loadData">
@@ -48,7 +48,7 @@
     </el-card>
 
     <!-- 确认列表 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <el-table stripe :data="items" v-loading="loading"border>
         <el-table-column prop="title" label="确认事项" min-width="250">
           <template #default="{ row }">
@@ -85,7 +85,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="mt-4" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+      <el-pagination class="mt-lg" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
         :total="pagination.total" :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next"
         @size-change="loadData" @current-change="loadData" />
     </el-card>

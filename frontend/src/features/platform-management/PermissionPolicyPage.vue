@@ -1,5 +1,11 @@
 <template>
-  <div class="permission-policy-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">权限策略</div>
+      <div class="autops-page-desc">管理系统访问权限策略</div>
+    </div>
+
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">
       <el-form :model="queryParams" inline @submit.prevent="handleSearch">

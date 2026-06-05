@@ -137,7 +137,7 @@
         <el-descriptions-item label="创建时间" :span="2">{{ formatTime(taskDetail.created_at) }}</el-descriptions-item>
         <el-descriptions-item label="完成时间" :span="2">{{ formatTime(taskDetail.completed_at) }}</el-descriptions-item>
         <el-descriptions-item v-if="taskDetail.error_message" label="错误信息" :span="2">
-          <span style="color: #f53f3f">{{ taskDetail.error_message }}</span>
+          <span class="text-danger">{{ taskDetail.error_message }}</span>
         </el-descriptions-item>
       </el-descriptions>
       <template #footer>

@@ -1,5 +1,11 @@
 <template>
-  <div class="assignment-rule-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">分配规则</div>
+      <div class="autops-page-desc">管理工单自动分配规则</div>
+    </div>
+
     <!-- 搜索与筛选栏 -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="filterForm" @submit.prevent="handleSearch">

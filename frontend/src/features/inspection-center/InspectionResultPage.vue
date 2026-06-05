@@ -1,5 +1,11 @@
 <template>
-  <div class="inspection-result-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">巡检结果</div>
+      <div class="autops-page-desc">查看详细的巡检检测项结果</div>
+    </div>
+
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">
       <el-form :model="queryParams" inline @submit.prevent="handleSearch">
@@ -198,7 +204,7 @@
               {{ stat.label }}: {{ stat.count }}
             </el-tag>
           </div>
-          <el-table stripe  :data="group.items" border size="small" style="margin-bottom: 16px">
+          <el-table stripe  :data="group.items" border size="small" class="mb-lg">
             <el-table-column prop="check_type" label="检查类型" width="140" align="center">
               <template #default="{ row }">
                 <el-tag size="small" type="info">{{ checkTypeLabel(row.check_type) }}</el-tag>

@@ -266,7 +266,7 @@
     <!-- ========== 任务结果对话框 ========== -->
     <el-dialog v-model="showResultDialog" title="采集结果" width="780px" destroy-on-close>
       <template v-if="currentJob">
-        <el-descriptions :column="2" border size="small" style="margin-bottom: 16px">
+        <el-descriptions :column="2" border size="small" class="mb-lg">
           <el-descriptions-item label="采集器">{{ currentJob.collector_name }}</el-descriptions-item>
           <el-descriptions-item label="资产">{{ currentJob.asset_name }}</el-descriptions-item>
           <el-descriptions-item label="任务类型">{{ formatJobType(currentJob.job_type) }}</el-descriptions-item>
@@ -288,7 +288,7 @@
     <!-- ========== 任务日志对话框 ========== -->
     <el-dialog v-model="showLogDialog" title="采集日志" width="780px" destroy-on-close>
       <template v-if="currentJob">
-        <el-descriptions :column="2" border size="small" style="margin-bottom: 16px">
+        <el-descriptions :column="2" border size="small" class="mb-lg">
           <el-descriptions-item label="采集器">{{ currentJob.collector_name }}</el-descriptions-item>
           <el-descriptions-item label="资产">{{ currentJob.asset_name }}</el-descriptions-item>
         </el-descriptions>
@@ -416,7 +416,7 @@
     <!-- ========== Edge 查看任务对话框 ========== -->
     <el-dialog v-model="showEdgeTasksDialog" title="Edge 采集器任务" width="780px" destroy-on-close>
       <template v-if="currentEdgeCollector">
-        <el-descriptions :column="2" border size="small" style="margin-bottom: 16px">
+        <el-descriptions :column="2" border size="small" class="mb-lg">
           <el-descriptions-item label="Collector ID">{{ currentEdgeCollector.collector_id }}</el-descriptions-item>
           <el-descriptions-item label="名称">{{ currentEdgeCollector.name || '-' }}</el-descriptions-item>
         </el-descriptions>

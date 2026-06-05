@@ -1,8 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">巡检详情</div>
+    <div class="autops-page-header autops-page-header--between">
       <div>
+        <div class="autops-page-title">巡检详情</div>
+      </div>
+      <div class="autops-header-actions">
         <el-button @click="goBack"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
         <el-button type="primary" @click="rerunInspection" :loading="rerunning"><el-icon><Refresh /></el-icon> 重新巡检</el-button>
       </div>
@@ -10,7 +12,7 @@
 
     <div v-loading="loading">
       <!-- 基本信息 -->
-      <div class="autops-card" style="margin-bottom: 16px">
+      <div class="autops-card mb-lg">
         <el-descriptions :column="3" border>
           <el-descriptions-item label="巡检任务ID">{{ taskDetail?.id?.slice(0, 8) || '-' }}</el-descriptions-item>
           <el-descriptions-item label="巡检模板">{{ taskDetail?.template_name || taskDetail?.inspection_type || '-' }}</el-descriptions-item>
@@ -27,17 +29,20 @@
       </div>
 
       <!-- 结果概要 -->
-      <el-row :gutter="16" style="margin-bottom: 16px">
+      <el-row :gutter="16" class="mb-lg">
         <el-col :xs="12" :sm="6" v-for="stat in resultStats" :key="stat.label">
           <div class="autops-metric-card">
+            <div class="metric-icon" :class="stat.bgClass">
+              <el-icon :size="20"><component :is="stat.icon" /></el-icon>
+            </div>
             <div class="metric-label">{{ stat.label }}</div>
-            <div class="metric-value" :style="{ color: stat.color }">{{ stat.value }}</div>
+            <div class="metric-value">{{ stat.value }}</div>
           </div>
         </el-col>
       </el-row>
 
       <!-- 巡检项明细 -->
-      <div class="autops-card" style="margin-bottom: 16px">
+      <div class="autops-card mb-lg">
         <div class="autops-card-header">
           <div class="autops-card-title">巡检项明细</div>
           <div>
@@ -112,7 +117,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Refresh, Warning, Document } from '@element-plus/icons-vue'
+import { ArrowLeft, Refresh, Warning, Document, DataAnalysis, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
@@ -133,10 +138,10 @@ const taskId = computed(() => route.params.id as string || route.query.task_id a
 const resultStats = computed(() => {
   const all = checkResults.value
   return [
-    { label: '检查项总数', value: all.length, color: '#165dff' },
-    { label: '通过', value: all.filter(r => r.result === 'pass').length, color: '#00b42a' },
-    { label: '失败', value: all.filter(r => r.result === 'fail').length, color: '#f53f3f' },
-    { label: '警告', value: all.filter(r => r.result === 'warning').length, color: '#ff7d00' },
+    { label: '检查项总数', value: all.length, icon: DataAnalysis, bgClass: 'bg-brand' },
+    { label: '通过', value: all.filter(r => r.result === 'pass').length, icon: CircleCheckFilled, bgClass: 'bg-success' },
+    { label: '失败', value: all.filter(r => r.result === 'fail').length, icon: CircleCloseFilled, bgClass: 'bg-danger' },
+    { label: '警告', value: all.filter(r => r.result === 'warning').length, icon: Warning, bgClass: 'bg-warning' },
   ]
 })
 

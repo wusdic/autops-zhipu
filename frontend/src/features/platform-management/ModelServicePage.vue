@@ -1,5 +1,5 @@
 <template>
-  <div class="model-service-page">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
         <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- 模型总览 -->
-    <el-row :gutter="16" class="mt-4">
+    <el-row :gutter="16" class="mt-lg">
       <el-col :span="6" v-for="stat in overviewStats" :key="stat.label">
         <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-value" :style="{ color: stat.color }">{{ stat.value }}</div>
@@ -27,7 +27,7 @@
     </el-row>
 
     <!-- 模型列表 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <template #header><span>已注册模型</span></template>
       <el-table stripe :data="models" v-loading="loading"border>
         <el-table-column prop="name" label="模型名称" min-width="180" />
@@ -67,7 +67,7 @@
     </el-card>
 
     <!-- 模型配置 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <template #header><span>全局配置</span></template>
       <el-form :model="globalConfig" label-width="140px">
         <el-row :gutter="24">

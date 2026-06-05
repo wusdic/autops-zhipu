@@ -190,7 +190,7 @@
                 <el-col :span="12">
                   <h4 style="margin-bottom: 8px">描述</h4>
                   <div class="expand-description">{{ row.description || row.title || '无描述' }}</div>
-                  <div v-if="row.raw_data" style="margin-top: 12px">
+                  <div v-if="row.raw_data" class="mt-md">
                     <h4 style="margin-bottom: 8px">原始数据</h4>
                     <JsonViewer :data="parseJsonSafe(row.raw_data)" />
                   </div>
@@ -294,7 +294,7 @@
             </el-descriptions>
 
             <!-- Raw Data -->
-            <div v-if="currentEvent.raw_data" style="margin-top: 16px">
+            <div v-if="currentEvent.raw_data" class="mt-lg">
               <h4 style="margin-bottom: 8px">原始数据</h4>
               <JsonViewer :data="parseJsonSafe(currentEvent.raw_data)" />
             </div>
@@ -362,10 +362,10 @@
           type="info"
           :closable="false"
           show-icon
-          style="margin-bottom: 16px"
+          class="mb-lg"
         />
 
-        <el-descriptions :column="2" border size="small" style="margin-bottom: 16px">
+        <el-descriptions :column="2" border size="small" class="mb-lg">
           <el-descriptions-item label="来源">{{ sourceLabel(correlationEvent.source) }}</el-descriptions-item>
           <el-descriptions-item label="严重级别">
             <SeverityBadge :severity="correlationEvent.severity" size="small" />

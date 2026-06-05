@@ -20,7 +20,7 @@
       </el-tabs>
 
       <!-- Filter Row -->
-      <el-row :gutter="16" align="middle" style="margin-bottom: 16px;">
+      <el-row :gutter="16" align="middle" class="mb-lg">
         <el-col :span="6">
           <el-input
             v-model="searchKeyword"
@@ -142,7 +142,7 @@
       @closed="resetActionForm"
     >
       <div class="action-dialog-content">
-        <el-descriptions :column="1" border size="small" style="margin-bottom: 16px;">
+        <el-descriptions :column="1" border size="small" class="mb-lg">
           <el-descriptions-item label="请求名称">{{ currentAction?.name || currentAction?.title || '-' }}</el-descriptions-item>
           <el-descriptions-item label="类型">{{ typeLabel(currentAction?.type || currentAction?.execution_type) }}</el-descriptions-item>
           <el-descriptions-item label="风险等级">
@@ -204,7 +204,7 @@
         </el-descriptions>
 
         <!-- Execution Targets -->
-        <div v-if="currentDetail.targets && currentDetail.targets.length" style="margin-top: 20px;">
+        <div v-if="currentDetail.targets && currentDetail.targets.length" class="mt-lg">
           <div class="section-title">执行目标</div>
           <el-table stripe  :data="currentDetail.targets" size="small" border>
             <el-table-column prop="name" label="名称" min-width="120" />
@@ -214,7 +214,7 @@
         </div>
 
         <!-- Quick Actions for Pending -->
-        <div v-if="currentDetail.status === 'pending'" style="margin-top: 24px; display: flex; gap: 12px;">
+        <div v-if="currentDetail.status === 'pending'" class="mt-lg" style="display: flex; gap: 12px;">
           <el-button type="success" @click="openActionDialog(currentDetail, 'approve'); drawerVisible = false">
             批准
           </el-button>

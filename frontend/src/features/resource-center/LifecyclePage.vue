@@ -1,37 +1,57 @@
 <template>
   <div class="autops-page-container">
-    <el-card shadow="never">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">资产生命周期</div>
+      <div class="autops-page-desc">管理资产生命周期规则与状态</div>
+    </div>
+
+    <!-- 统计卡片 -->
+    <el-row :gutter="16" class="metric-row">
+      <el-col :span="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon :size="20"><CircleCheck /></el-icon></div>
+          <div class="metric-label">活跃资产</div>
+          <div class="metric-value">{{ stats.active }}</div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon :size="20"><Clock /></el-icon></div>
+          <div class="metric-label">即将退役</div>
+          <div class="metric-value">{{ stats.retiring }}</div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon :size="20"><Remove /></el-icon></div>
+          <div class="metric-label">已退役</div>
+          <div class="metric-value">{{ stats.retired }}</div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon :size="20"><List /></el-icon></div>
+          <div class="metric-label">生命周期规则</div>
+          <div class="metric-value">{{ stats.rules }}</div>
+        </div>
+      </el-col>
+    </el-row>
+
+    <el-card shadow="never" class="main-card">
       <template #header>
         <div class="autops-card-header">
-          <span>资产生命周期管理</span>
+          <span class="autops-card-title">生命周期列表</span>
           <el-button type="primary" @click="showCreateDialog = true">
             <el-icon><Plus /></el-icon>新建规则
           </el-button>
         </div>
       </template>
 
-      <!-- 统计卡片 -->
-      <el-row :gutter="16" class="stat-row">
-        <el-col :span="6">
-          <el-statistic title="活跃资产" :value="stats.active" />
-        </el-col>
-        <el-col :span="6">
-          <el-statistic title="即将退役" :value="stats.retiring" />
-        </el-col>
-        <el-col :span="6">
-          <el-statistic title="已退役" :value="stats.retired" />
-        </el-col>
-        <el-col :span="6">
-          <el-statistic title="生命周期规则" :value="stats.rules" />
-        </el-col>
-      </el-row>
-
       <!-- 筛选栏 -->
-      <el-row :gutter="12" class="filter-row">
-        <el-col :span="6">
+      <div class="autops-toolbar">
+        <div class="autops-toolbar-left">
           <el-input v-model="filters.keyword" placeholder="搜索资产名称" clearable :prefix-icon="Search" />
-        </el-col>
-        <el-col :span="4">
           <el-select v-model="filters.phase" placeholder="生命周期阶段" clearable>
             <el-option label="规划中" value="planning" />
             <el-option label="采购中" value="procurement" />
@@ -41,8 +61,6 @@
             <el-option label="即将退役" value="retiring" />
             <el-option label="已退役" value="retired" />
           </el-select>
-        </el-col>
-        <el-col :span="4">
           <el-select v-model="filters.assetType" placeholder="资产类型" clearable>
             <el-option label="Linux 服务器" value="linux_server" />
             <el-option label="Windows 服务器" value="windows_server" />
@@ -50,12 +68,12 @@
             <el-option label="网络设备" value="network" />
             <el-option label="Web 服务" value="web_service" />
           </el-select>
-        </el-col>
-        <el-col :span="4">
+        </div>
+        <div class="autops-toolbar-right">
           <el-button type="primary" @click="handleSearch">查询</el-button>
           <el-button @click="resetFilters">重置</el-button>
-        </el-col>
-      </el-row>
+        </div>
+      </div>
 
       <!-- 数据表 -->
       <el-table stripe :data="tableData"class="data-table">
@@ -146,7 +164,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Search, Plus } from '@element-plus/icons-vue'
+import { Search, Plus, CircleCheck, Clock, Remove, List } from '@element-plus/icons-vue'
 
 const stats = reactive({ active: 128, retiring: 12, retired: 35, rules: 8 })
 const filters = reactive({ keyword: '', phase: '', assetType: '' })

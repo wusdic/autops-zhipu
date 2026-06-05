@@ -17,7 +17,7 @@
     </div>
 
     <!-- 分类标签 -->
-    <el-tabs v-model="activeCategory" class="mt-4" @tab-change="loadData">
+    <el-tabs v-model="activeCategory" class="mt-lg" @tab-change="loadData">
       <el-tab-pane label="页面检查" name="page_check" />
       <el-tab-pane label="配置检查" name="config_check" />
       <el-tab-pane label="日志检查" name="log_check" />
@@ -48,7 +48,7 @@
     </el-card>
 
     <!-- 规则列表 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <el-table stripe :data="rules" v-loading="loading"border>
         <el-table-column type="selection" width="50" />
         <el-table-column prop="name" label="规则名称" min-width="200" sortable />
@@ -84,7 +84,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="mt-4" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+      <el-pagination class="mt-lg" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
         :total="pagination.total" :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next"
         @size-change="loadData" @current-change="loadData" />
     </el-card>
@@ -147,7 +147,7 @@
         <el-descriptions-item label="异常">{{ simResult.failed || 0 }}</el-descriptions-item>
         <el-descriptions-item label="耗时">{{ simResult.duration || '-' }}</el-descriptions-item>
       </el-descriptions>
-      <el-table stripe :data="simResult.details || []" class="mt-4"max-height="300">
+      <el-table stripe :data="simResult.details || []" class="mt-lg"max-height="300">
         <el-table-column prop="asset_name" label="资产名称" />
         <el-table-column prop="result" label="检查结果">
           <template #default="{ row }">

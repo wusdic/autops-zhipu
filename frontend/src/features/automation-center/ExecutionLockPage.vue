@@ -1,5 +1,11 @@
 <template>
-  <div class="execution-lock-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">执行锁管理</div>
+      <div class="autops-page-desc">查看和管理自动化执行锁定记录</div>
+    </div>
+
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">
       <el-form :model="queryParams" inline @submit.prevent="handleSearch">

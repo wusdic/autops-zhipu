@@ -1,5 +1,5 @@
 <template>
-  <div class="knowledge-detail">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <el-button @click="goBack" :icon="ArrowLeft">返回知识列表</el-button>
@@ -25,7 +25,7 @@
               <el-dropdown-item command="version-history" :icon="Clock">
                 版本历史
               </el-dropdown-item>
-              <el-dropdown-item command="delete" :icon="Delete" style="color: #f53f3f">
+              <el-dropdown-item command="delete" :icon="Delete" class="text-danger">
                 删除
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -64,31 +64,31 @@
         </div>
 
         <!-- 正文内容 -->
-        <div class="autops-card" v-if="article.content" style="margin-top: 16px">
+        <div class="autops-card" v-if="article.content" class="mt-lg">
           <span class="autops-card-title">内容</span>
           <div v-html="renderMarkdown(article.content)" class="markdown-body" />
         </div>
 
         <!-- 诊断步骤 -->
-        <div class="autops-card" v-if="article.diagnosis_steps" style="margin-top: 16px">
+        <div class="autops-card" v-if="article.diagnosis_steps" class="mt-lg">
           <span class="autops-card-title">诊断步骤</span>
           <div v-html="renderMarkdown(article.diagnosis_steps)" class="markdown-body" />
         </div>
 
         <!-- 处置步骤 -->
-        <div class="autops-card" v-if="article.resolution_steps" style="margin-top: 16px">
+        <div class="autops-card" v-if="article.resolution_steps" class="mt-lg">
           <span class="autops-card-title">处置步骤</span>
           <div v-html="renderMarkdown(article.resolution_steps)" class="markdown-body" />
         </div>
 
         <!-- 验证步骤 -->
-        <div class="autops-card" v-if="article.verification_steps" style="margin-top: 16px">
+        <div class="autops-card" v-if="article.verification_steps" class="mt-lg">
           <span class="autops-card-title">验证步骤</span>
           <div v-html="renderMarkdown(article.verification_steps)" class="markdown-body" />
         </div>
 
         <!-- Rating / Useful Feedback -->
-        <div class="autops-card" style="margin-top: 16px">
+        <div class="autops-card" class="mt-lg">
           <span class="autops-card-title">评价与反馈</span>
           <div class="feedback-section">
             <div class="feedback-row">
@@ -106,7 +106,7 @@
               <span style="margin-left: 16px">有用 {{ article.useful_count || 0 }} 人</span>
             </div>
             <div class="feedback-quick">
-              <el-button-group style="margin-top: 12px">
+              <el-button-group class="mt-md">
                 <el-button
                   :type="userFeedback === 'useful' ? 'success' : 'default'"
                   size="small"
@@ -127,7 +127,7 @@
         </div>
 
         <!-- Related Articles -->
-        <div class="autops-card" style="margin-top: 16px" v-if="relatedArticles.length> 0">
+        <div class="autops-card" class="mt-lg" v-if="relatedArticles.length> 0">
           <span class="autops-card-title">相关文章</span>
           <el-table stripe :data="relatedArticles"size="small" @row-click="goToRelated">
             <el-table-column prop="title" label="标题" min-width="260" show-overflow-tooltip>

@@ -10,7 +10,7 @@
       </div>
     </div>
 
-    <div style="margin-top: 16px">
+    <div class="mt-lg">
       <el-tabs v-model="activeTab" type="border-card">
         <!-- YAML / JSON 文件导入 (with validation preview) -->
         <el-tab-pane label="文件导入" name="upload">
@@ -43,7 +43,7 @@
               <el-table-column label="标题" min-width="200">
                 <template #default="{ row }">
                   <span v-if="row.valid">{{ row.title || '(无标题)' }}</span>
-                  <span v-else style="color: #f53f3f">{{ row.error || '解析失败' }}</span>
+                  <span v-else class="text-danger">{{ row.error || '解析失败' }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="类型" width="120">
@@ -74,7 +74,7 @@
 
           <el-button
             type="primary"
-            style="margin-top: 16px"
+            class="mt-lg"
             @click="startBatchImport"
             :loading="importing"
             :disabled="!validFileCount"
@@ -137,7 +137,7 @@
           <el-alert
             type="info"
             :closable="false"
-            style="margin-bottom: 16px"
+            class="mb-lg"
           >
             <template #title>
               以下 8 大标准场景处置方案将批量导入知识库，每个方案包含完整的触发条件、诊断步骤、处置动作和验证方法，并关联对应的告警规则和自动化策略。
@@ -273,7 +273,7 @@
             <div v-if="importResult.errors.length">
               <h4>错误详情：</h4>
               <ul>
-                <li v-for="(err, idx) in importResult.errors" :key="idx" style="color: #f53f3f">
+                <li v-for="(err, idx) in importResult.errors" :key="idx" class="text-danger">
                   {{ err }}
                 </li>
               </ul>

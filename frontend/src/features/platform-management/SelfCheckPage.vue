@@ -131,17 +131,17 @@
         <el-table-column prop="total" label="检查项" width="80" align="center" />
         <el-table-column prop="pass" label="通过" width="70" align="center">
           <template #default="{ row }">
-            <span style="color: #00b42a">{{ row.pass }}</span>
+            <span class="text-success">{{ row.pass }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="fail" label="异常" width="70" align="center">
           <template #default="{ row }">
-            <span style="color: #f53f3f">{{ row.fail }}</span>
+            <span class="text-danger">{{ row.fail }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="warn" label="警告" width="70" align="center">
           <template #default="{ row }">
-            <span style="color: #ff7d00">{{ row.warn }}</span>
+            <span class="text-warning">{{ row.warn }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="duration" label="耗时(ms)" width="100" align="center" />

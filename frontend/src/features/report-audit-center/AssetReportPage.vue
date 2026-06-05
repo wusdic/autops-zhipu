@@ -392,9 +392,7 @@ onMounted(() => {
 .asset-report-page {
   padding: var(--autops-space-xl);
 }
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 
 .stats-row {
   margin-bottom: var(--autops-space-lg);

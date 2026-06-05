@@ -1,5 +1,5 @@
 <template>
-  <div class="script-list-page">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">脚本库</div>

@@ -1,31 +1,31 @@
 <template>
   <div class="autops-page-container">
     <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">异常总览</div>
-      <el-button type="primary" @click="router.push('/response/anomaly-list')">
-        <el-icon><Plus /></el-icon>
-        异常列表
-      </el-button>
+    <div class="autops-page-header autops-page-header--between">
+      <div>
+        <div class="autops-page-title">异常总览</div>
+        <div class="autops-page-desc">监控和处理系统异常事件</div>
+      </div>
+      <div class="autops-header-actions">
+        <el-button type="primary" @click="router.push('/response/anomaly-list')"><el-icon><Plus /></el-icon>异常列表</el-button>
+      </div>
     </div>
 
     <!-- 统计卡片 -->
-    <el-row :gutter="16" class="stat-row">
+    <el-row :gutter="16" class="metric-row">
       <el-col :span="6" v-for="stat in statCards" :key="stat.key">
-        <el-card
-          shadow="hover"
+        <div
           class="autops-metric-card"
-          :class="{ 'stat-card-clickable': stat.route }"
+          :class="{ 'is-clickable': stat.route }"
           v-loading="statsLoading"
           @click="stat.route && router.push(stat.route)"
         >
-          <div class="stat-card-inner">
-            <div class="stat-icon-wrap" :style="{ background: stat.bg, color: stat.color }">
-              <el-icon :size="24"><component :is="stat.icon" /></el-icon>
-            </div>
-            <el-statistic :title="stat.label" :value="stat.value" class="stat-body" />
+          <div class="metric-icon" :class="stat.bgClass">
+            <el-icon :size="20"><component :is="stat.icon" /></el-icon>
           </div>
-        </el-card>
+          <div class="metric-label">{{ stat.label }}</div>
+          <div class="metric-value">{{ stat.value }}<span v-if="stat.suffix" class="metric-suffix">{{ stat.suffix }}</span></div>
+        </div>
       </el-col>
     </el-row>
 
@@ -33,7 +33,7 @@
     <el-card class="main-card">
       <template #header>
         <div class="autops-card-header">
-          <span class="card-title">最近异常</span>
+          <span class="autops-card-title">最近异常</span>
           <el-button plain type="primary" @click="router.push('/response/anomaly-list')">
             查看全部 <el-icon><ArrowRight /></el-icon>
           </el-button>
@@ -143,8 +143,7 @@ const statCards = reactive([
     label: '异常总数',
     value: 0,
     icon: Warning,
-    bg: '#ffece8',
-    color: '#f53f3f',
+    bgClass: 'bg-danger',
     route: '/response/anomaly-list',
   },
   {
@@ -152,8 +151,7 @@ const statCards = reactive([
     label: '待处理',
     value: 0,
     icon: Clock,
-    bg: '#fff7e8',
-    color: '#ff7d00',
+    bgClass: 'bg-warning',
     route: '/response/anomaly-list?status=pending',
   },
   {
@@ -161,8 +159,7 @@ const statCards = reactive([
     label: '已确认',
     value: 0,
     icon: CircleCheck,
-    bg: '#e8ffea',
-    color: '#00b42a',
+    bgClass: 'bg-success',
     route: '/response/anomaly-list?status=acknowledged',
   },
   {
@@ -170,8 +167,7 @@ const statCards = reactive([
     label: '已关闭',
     value: 0,
     icon: CloseBold,
-    bg: '#e8f3ff',
-    color: '#165dff',
+    bgClass: 'bg-brand',
     route: '/response/anomaly-list?status=closed',
   },
 ])
@@ -359,49 +355,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.stat-row {
-  margin-bottom: var(--autops-space-lg);
-}
-.autops-metric-card-clickable {
-  cursor: pointer;
-}
-
-.autops-metric-card-clickable:hover {
-  transform: translateY(-2px);
-}
-
-.autops-metric-card-inner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--autops-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-body {
-  flex: 1;
-}
-
-.stat-body :deep(.el-statistic__head) {
-  font-size: var(--autops-font-13);
-  color: var(--autops-info);
-  margin-bottom: 4px;
-}
-
-.stat-body :deep(.el-statistic__content) {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--autops-text-1);
-}
-
 .main-card {
   margin-bottom: var(--autops-space-lg);
 }

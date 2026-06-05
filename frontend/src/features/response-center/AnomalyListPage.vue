@@ -38,7 +38,7 @@
 
     <!-- 表格 -->
     <div class="autops-card">
-      <div class="autops-card-body" style="padding: 0">
+      <div class="autops-card-body p-0">
         <el-table stripe :data="anomalies"v-loading="loading" empty-text="暂无异常数据">
           <el-table-column prop="title" label="异常标题" min-width="200" show-overflow-tooltip>
             <template #default="{ row }">
@@ -216,9 +216,7 @@ onMounted(() => fetchList())
 </script>
 
 <style scoped>
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 .text-tertiary {
   color: var(--autops-info);
   font-size: var(--autops-font-12);

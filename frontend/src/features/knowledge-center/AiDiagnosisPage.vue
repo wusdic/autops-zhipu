@@ -83,7 +83,7 @@
               :disabled="!selectedAlertId"
               :loading="analyzing"
               @click="startAnalysis"
-              style="margin-top: 12px"
+              class="mt-md"
             >
               开始 AI 分析
             </el-button>

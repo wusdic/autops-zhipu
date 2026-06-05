@@ -29,7 +29,7 @@
       :description="overallStatus.desc"
       show-icon
       :closable="false"
-      style="margin-bottom: 16px"
+      class="mb-lg"
     />
 
     <!-- Component Health Cards -->
@@ -97,7 +97,7 @@
           :title="selfCheckResult.healthy ? '所有组件正常' : '部分组件异常'"
           :sub-title="'检查时间: ' + selfCheckResult.time"
         />
-        <el-descriptions :column="1" border style="margin-top: 16px">
+        <el-descriptions :column="1" border class="mt-lg">
           <el-descriptions-item v-for="item in selfCheckResult.items" :key="item.key" :label="item.label">
             <div style="display:flex;align-items:center;gap:8px">
               <el-tag :type="getTagType(item.status)" size="small">{{ statusLabels[item.status] || item.status }}</el-tag>

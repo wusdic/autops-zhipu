@@ -16,7 +16,7 @@
       </el-button>
     </div>
 
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <el-form :inline="true" :model="filters">
         <el-form-item label="模板名称">
           <el-input v-model="filters.keyword" placeholder="搜索" clearable @clear="loadData" />
@@ -36,7 +36,7 @@
       </el-form>
     </el-card>
 
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <el-table stripe :data="templates" v-loading="loading"border>
         <el-table-column type="selection" width="50" />
         <el-table-column prop="name" label="模板名称" min-width="200" sortable />
@@ -75,7 +75,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="mt-4" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+      <el-pagination class="mt-lg" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
         :total="pagination.total" :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next"
         @size-change="loadData" @current-change="loadData" />
     </el-card>

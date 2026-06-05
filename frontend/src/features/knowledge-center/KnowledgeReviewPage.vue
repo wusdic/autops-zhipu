@@ -128,7 +128,7 @@
           <div class="review-content">{{ currentItem.content }}</div>
         </el-descriptions-item>
       </el-descriptions>
-      <el-form label-width="80px" style="margin-top: 16px">
+      <el-form label-width="80px" class="mt-lg">
         <el-form-item label="审核意见">
           <el-input
             type="textarea"

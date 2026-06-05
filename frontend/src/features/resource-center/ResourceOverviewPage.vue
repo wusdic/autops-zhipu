@@ -7,20 +7,15 @@
     </div>
 
     <!-- Stat Cards -->
-    <el-row :gutter="16" class="stat-row">
+    <el-row :gutter="16" class="metric-row">
       <el-col :span="6" v-for="stat in statCards" :key="stat.label">
-        <el-card shadow="hover" class="autops-metric-card" v-loading="statsLoading">
-          <div class="stat-card-inner">
-            <div class="stat-icon-wrap" :style="{ background: stat.bgColor }">
-              <el-icon :size="24" :style="{ color: stat.color }">
-                <component :is="stat.icon" />
-              </el-icon>
-            </div>
-            <div class="stat-info">
-              <el-statistic :title="stat.label" :value="stat.value" />
-            </div>
+        <div class="autops-metric-card" v-loading="statsLoading">
+          <div class="metric-icon" :class="stat.bgClass">
+            <el-icon :size="20"><component :is="stat.icon" /></el-icon>
           </div>
-        </el-card>
+          <div class="metric-label">{{ stat.label }}</div>
+          <div class="metric-value">{{ stat.value }}</div>
+        </div>
       </el-col>
     </el-row>
 
@@ -165,6 +160,7 @@ import {
   Connection,
   Warning,
   CircleCheck,
+  Remove,
   ArrowRight,
   Search,
   SetUp,
@@ -207,10 +203,10 @@ interface StatusDistItem {
 }
 
 const statCards = reactive([
-  { label: '资产总数', value: 0, icon: Monitor, color: '#165dff', bgColor: '#e8f3ff' },
-  { label: '在线', value: 0, icon: CircleCheck, color: '#00b42a', bgColor: '#e8ffea' },
-  { label: '离线', value: 0, icon: Connection, color: '#86909c', bgColor: '#f2f3f5' },
-  { label: '告警中', value: 0, icon: Warning, color: '#f53f3f', bgColor: '#ffece8' },
+  { label: '资产总数', value: 0, icon: Monitor, bgClass: 'bg-brand' },
+  { label: '在线', value: 0, icon: CircleCheck, bgClass: 'bg-success' },
+  { label: '离线', value: 0, icon: Remove, bgClass: 'bg-info' },
+  { label: '告警中', value: 0, icon: Warning, bgClass: 'bg-danger' },
 ])
 
 const quickLinks = [
@@ -523,29 +519,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.stat-row {
-  margin-bottom: var(--autops-space-lg);
-}
-.autops-metric-card-inner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--autops-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-info {
-  flex: 1;
-}
-
 .section-row {
   margin-bottom: var(--autops-space-lg);
 }

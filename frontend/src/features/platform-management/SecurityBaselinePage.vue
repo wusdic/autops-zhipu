@@ -1,5 +1,11 @@
 <template>
-  <div class="security-baseline-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">安全基线</div>
+      <div class="autops-page-desc">查看和管理资产安全合规基线检查</div>
+    </div>
+
     <!-- Search & Filter -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="queryForm" @submit.prevent="handleSearch">

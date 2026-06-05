@@ -64,7 +64,7 @@
 
     <!-- 审计日志表格 -->
     <div class="autops-card">
-      <div class="autops-card-body" style="padding: 0">
+      <div class="autops-card-body p-0">
         <el-table stripe :data="logs"v-loading="loading" empty-text="暂无审计记录">
           <el-table-column prop="created_at" label="时间" width="170">
             <template #default="{ row }">
@@ -232,9 +232,7 @@ onMounted(() => search())
 </script>
 
 <style scoped>
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 .text-tertiary {
   color: var(--autops-info);
   font-size: var(--autops-font-12);

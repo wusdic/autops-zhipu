@@ -131,7 +131,7 @@
         v-model="assetSearch"
         placeholder="搜索资产名称或IP"
         clearable
-        style="margin-bottom: 12px"
+        class="mb-md"
         :prefix-icon="Search"
         @input="searchAssets"
       />

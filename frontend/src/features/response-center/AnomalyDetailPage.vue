@@ -8,7 +8,7 @@
       <div class="autops-page-desc">查看异常详细信息、处置时间线和关联告警</div>
     </div>
 
-    <div v-loading="loading" style="margin-top: 16px">
+    <div v-loading="loading" class="mt-lg">
       <el-row :gutter="16">
         <!-- 左侧：异常信息 + 时间线 + 关联告警 -->
         <el-col :span="16">
@@ -55,7 +55,7 @@
           </div>
 
           <!-- 处置时间线 -->
-          <div class="autops-card" style="margin-top: 16px">
+          <div class="autops-card" class="mt-lg">
             <div class="autops-card-header">
               <div class="autops-card-title">处置时间线</div>
             </div>
@@ -77,11 +77,11 @@
           </div>
 
           <!-- 关联告警 -->
-          <div class="autops-card" style="margin-top: 16px">
+          <div class="autops-card" class="mt-lg">
             <div class="autops-card-header">
               <div class="autops-card-title">关联告警</div>
             </div>
-            <div class="autops-card-body" style="padding: 0">
+            <div class="autops-card-body p-0">
               <el-table stripe
  :data="relatedAlerts"size="small"
  v-loading="alertsLoading"
@@ -169,7 +169,7 @@
           </div>
 
           <!-- 快速信息 -->
-          <div class="autops-card" style="margin-top: 16px">
+          <div class="autops-card" class="mt-lg">
             <div class="autops-card-header">
               <div class="autops-card-title">快速信息</div>
             </div>
@@ -184,7 +184,7 @@
         </el-col>
       </el-row>
       <!-- 工作流导航 -->
-      <el-card style="margin-top: 16px" shadow="never">
+      <el-card class="mt-lg" shadow="never">
         <template #header>
           <span style="font-weight: 600">工作流导航</span>
         </template>

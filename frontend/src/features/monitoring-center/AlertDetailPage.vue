@@ -66,7 +66,7 @@
       </div>
     </div>
 
-    <div v-loading="loading" style="margin-top: 16px">
+    <div v-loading="loading" class="mt-lg">
       <template v-if="alert">
         <el-tabs v-model="activeTab" type="border-card">
 
@@ -101,7 +101,7 @@
                   </el-descriptions-item>
                 </el-descriptions>
                 <!-- Annotations -->
-                <div v-if="alert.annotations" style="margin-top: 16px">
+                <div v-if="alert.annotations" class="mt-lg">
                   <h4>注解</h4>
                   <el-input type="textarea" :rows="4" :model-value="formatJson(alert.annotations)" readonly />
                 </div>
@@ -129,7 +129,7 @@
                 </div>
 
                 <!-- Asset Info -->
-                <div class="autops-card side-card" style="margin-top: 12px">
+                <div class="autops-card side-card mt-lg">
                   <div class="autops-card-header">
                     <span class="autops-card-title">💻 关联资产</span>
                     <el-tag size="small" type="info">{{ relatedAssets.length }}</el-tag>
@@ -200,7 +200,7 @@
           <el-tab-pane label="时间线" name="timeline">
             <div v-loading="timelineLoading">
             <!-- Alert lifecycle steps -->
-            <div class="autops-card" style="margin-bottom: 16px">
+            <div class="autops-card" class="mb-lg">
               <div class="autops-card-header">
                 <span class="autops-card-title">🔄 告警生命周期</span>
               </div>
@@ -318,7 +318,7 @@
                 </el-statistic>
               </el-col>
             </el-row>
-            <div v-if="impactData.relatedServices.length" style="margin-top: 12px">
+            <div v-if="impactData.relatedServices.length" class="mt-lg">
               <span style="font-size: 13px; color: #86909c; margin-right: 8px">关联服务:</span>
               <el-tag
                 v-for="svc in impactData.relatedServices"
@@ -404,7 +404,7 @@
               <el-button
                 type="primary"
                 size="small"
-                style="margin-top: 8px"
+                class="mt-lg"
                 @click="addComment"
                 :disabled="!newComment.trim()"
               >

@@ -115,7 +115,7 @@
       </el-descriptions>
 
       <!-- Check Result Summary -->
-      <div v-if="detailData?.items && detailData.items.length" style="margin-top: 16px">
+      <div v-if="detailData?.items && detailData.items.length" class="mt-lg">
         <h4 style="margin-bottom: 8px; font-size: 14px; color: #1d2129">检查结果明细</h4>
         <el-table stripe :data="detailData.items"border size="small" max-height="300">
           <el-table-column prop="check_item" label="检查项" min-width="160" show-overflow-tooltip />

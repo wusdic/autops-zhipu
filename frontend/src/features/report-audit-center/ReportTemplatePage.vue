@@ -193,14 +193,14 @@
           <el-descriptions-item label="更新时间">{{ formatTime(previewData.updated_at) }}</el-descriptions-item>
         </el-descriptions>
 
-        <div v-if="previewData.sections && previewData.sections.length" style="margin-top: 16px">
+        <div v-if="previewData.sections && previewData.sections.length" class="mt-lg">
           <h4 style="margin-bottom: 8px">报表章节</h4>
           <el-tag v-for="sec in previewData.sections" :key="sec" size="small" style="margin: 2px 4px">
             {{ sectionLabel(sec) }}
           </el-tag>
         </div>
 
-        <div v-if="previewData.params" style="margin-top: 16px">
+        <div v-if="previewData.params" class="mt-lg">
           <h4 style="margin-bottom: 8px">参数配置</h4>
           <el-descriptions :column="1" border size="small">
             <el-descriptions-item label="时间范围">{{ previewData.params.timeRange || '-' }}</el-descriptions-item>

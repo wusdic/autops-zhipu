@@ -1,5 +1,5 @@
 <template>
-  <div class="ai-tool-policy-page">
+  <div class="autops-page-container">
     <!-- Page Header -->
     <div class="autops-page-header">
       <div>
@@ -48,7 +48,7 @@
     </div>
 
     <!-- Policy Table -->
-    <div class="autops-card" style="margin-top: 16px">
+    <div class="autops-card" class="mt-lg">
       <el-table stripe
  v-loading="loading"
  :data="tableData"style="width: 100%"

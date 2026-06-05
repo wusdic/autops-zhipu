@@ -1,5 +1,11 @@
 <template>
-  <div class="ticket-create-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">创建工单</div>
+      <div class="autops-page-desc">新建运维工单</div>
+    </div>
+
     <el-card shadow="never">
       <template #header>
         <div class="autops-card-header">

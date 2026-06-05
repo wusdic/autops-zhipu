@@ -1,5 +1,5 @@
 <template>
-  <div class="export-center-page">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
         <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
@@ -9,7 +9,7 @@
     </div>
 
     <!-- 导出任务列表 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <template #header>
         <div style="display: flex; justify-content: space-between; align-items: center">
           <span>导出任务</span>
@@ -57,7 +57,7 @@
         </el-table-column>
       </el-table>
 
-      <el-pagination class="mt-4" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+      <el-pagination class="mt-lg" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
         :total="pagination.total" :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next"
         @size-change="loadExports" @current-change="loadExports" />
     </el-card>

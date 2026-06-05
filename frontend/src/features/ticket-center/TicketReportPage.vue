@@ -12,7 +12,7 @@
     </div>
 
     <!-- 概要统计 -->
-    <el-row :gutter="16" style="margin-bottom: 16px">
+    <el-row :gutter="16" class="mb-lg">
       <el-col :xs="12" :sm="6" v-for="stat in summaryStats" :key="stat.label">
         <div class="autops-metric-card">
           <div class="metric-label">{{ stat.label }}</div>
@@ -22,7 +22,7 @@
     </el-row>
 
     <!-- 按类型分布 -->
-    <el-row :gutter="16" style="margin-bottom: 16px">
+    <el-row :gutter="16" class="mb-lg">
       <el-col :xs="24" :lg="12">
         <div class="autops-card">
           <div class="autops-card-header"><div class="autops-card-title">工单类型分布</div></div>
@@ -61,7 +61,7 @@
     </el-row>
 
     <!-- 工单趋势 -->
-    <div class="autops-card" style="margin-bottom: 16px">
+    <div class="autops-card" class="mb-lg">
       <div class="autops-card-header">
         <div class="autops-card-title">工单趋势</div>
         <el-radio-group v-model="trendPeriod" size="small" @change="fetchTrend">

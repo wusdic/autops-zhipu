@@ -15,7 +15,7 @@
       title="Dry-run 模式：仅预演执行计划，不实际修改系统"
       show-icon
       :closable="false"
-      style="margin-bottom: 16px;"
+      class="mb-lg"
     />
 
     <!-- Two-column layout: List + Detail -->
@@ -30,7 +30,7 @@
           </template>
 
           <!-- Filter -->
-          <el-row :gutter="12" style="margin-bottom: 12px;">
+          <el-row :gutter="12" class="mb-lg">
             <el-col :span="8">
               <el-input
                 v-model="searchKeyword"
@@ -130,7 +130,7 @@
           <div v-loading="detailLoading">
             <template v-if="detail">
               <!-- Basic Info -->
-              <el-descriptions :column="2" border size="small" style="margin-bottom: 20px;">
+              <el-descriptions :column="2" border size="small" class="mb-lg">
                 <el-descriptions-item label="名称">{{ detail.name || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="关联策略">{{ detail.policy_name || detail.policy_id || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="状态">
@@ -166,7 +166,7 @@
                       :type="dryRunStatusTag(step.status)"
                       size="small"
                       effect="light"
-                      style="margin-left: auto;"
+                      class="ml-auto"
                     >
                       {{ dryRunStatusLabel(step.status) }}
                     </el-tag>
@@ -194,7 +194,7 @@
               <el-empty v-else description="暂无执行步骤数据" :image-size="60" />
 
               <!-- Impact Analysis -->
-              <div class="section-title" style="margin-top: 20px;">影响分析</div>
+              <div class="section-title mt-lg">影响分析</div>
               <el-descriptions v-if="detail.impact" :column="1" border size="small">
                 <el-descriptions-item label="目标资源">
                   {{ detail.impact.target || '-' }}
@@ -217,8 +217,8 @@
               <el-empty v-else description="暂无影响分析数据" :image-size="60" />
 
               <!-- Error Info -->
-              <div v-if="detail.error" style="margin-top: 20px;">
-                <div class="section-title" style="color: #f53f3f;">错误信息</div>
+              <div v-if="detail.error" class="mt-lg">
+                <div class="section-title text-danger">错误信息</div>
                 <el-alert type="error" :title="detail.error" show-icon :closable="false" />
               </div>
             </template>

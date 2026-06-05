@@ -135,7 +135,7 @@
       </p>
 
       <!-- 已绑定的资产 -->
-      <div v-if="boundAssets.length" style="margin-bottom: 16px">
+      <div v-if="boundAssets.length" class="mb-lg">
         <h4 style="font-size:13px;color:#86909c;margin-bottom:8px">已绑定资产</h4>
         <el-table stripe :data="boundAssets" size="small"max-height="200">
           <el-table-column prop="name" label="名称" min-width="130" />

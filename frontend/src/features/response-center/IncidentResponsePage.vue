@@ -78,7 +78,7 @@
       <el-col :span="12">
         <div class="evidence-col">
           <!-- 关键指标 -->
-          <el-card shadow="hover" class="col-card" style="margin-bottom: 16px">
+          <el-card shadow="hover" class="col-card" class="mb-lg">
             <template #header>
               <div class="col-header">
                 <span>📊 关键指标</span>
@@ -88,7 +88,7 @@
           </el-card>
 
           <!-- AI 分析结果 -->
-          <el-card shadow="hover" class="col-card" style="margin-bottom: 16px" v-if="aiResult || aiLoading">
+          <el-card shadow="hover" class="col-card" class="mb-lg" v-if="aiResult || aiLoading">
             <div v-if="aiLoading" style="text-align: center; padding: 32px 0">
               <el-icon class="is-loading" :size="24"><Loading /></el-icon>
               <div style="margin-top: 8px; color: #86909c">AI 正在诊断分析中...</div>
@@ -101,7 +101,7 @@
               :summary="aiResult?.impact"
             />
             <!-- Evidence Chain -->
-            <div v-if="aiResult?.evidence_chain?.length" style="margin-top: 12px">
+            <div v-if="aiResult?.evidence_chain?.length" class="mt-md">
               <div style="font-weight: 600; margin-bottom: 6px">🔗 证据链</div>
               <el-steps direction="vertical" :active="aiResult.evidence_chain.length" finish-status="success" :space="40">
                 <el-step
@@ -141,7 +141,7 @@
           </el-card>
 
           <!-- 关联告警 -->
-          <el-card shadow="hover" class="col-card" style="margin-bottom: 16px" v-if="relatedAlerts.length">
+          <el-card shadow="hover" class="col-card" class="mb-lg" v-if="relatedAlerts.length">
             <template #header>
               <div class="col-header">
                 <span>🔔 关联告警</span>
@@ -167,7 +167,7 @@
           </el-card>
 
           <!-- 关联日志 -->
-          <el-card shadow="hover" class="col-card" style="margin-bottom: 16px">
+          <el-card shadow="hover" class="col-card" class="mb-lg">
             <template #header>
               <div class="col-header">
                 <span>📄 关联日志</span>
@@ -218,7 +218,7 @@
       <el-col :span="6">
         <div class="action-col">
           <!-- 操作面板 -->
-          <el-card shadow="hover" class="col-card" style="margin-bottom: 16px">
+          <el-card shadow="hover" class="col-card" class="mb-lg">
             <template #header>
               <div class="col-header">
                 <span>⚡ 操作面板</span>
@@ -284,7 +284,7 @@
           </el-card>
 
           <!-- 匹配策略卡片 -->
-          <el-card shadow="hover" class="col-card" v-if="matchedPolicy" style="margin-bottom: 16px">
+          <el-card shadow="hover" class="col-card" v-if="matchedPolicy" class="mb-lg">
             <template #header>
               <div class="col-header">
                 <span>🎯 匹配策略</span>
@@ -309,7 +309,7 @@
                     <el-tag size="small">{{ cond.value }}</el-tag>
                   </div>
                 </div>
-                <span v-else style="color: #86909c">{{ matchedPolicy.trigger_conditions || '未配置' }}</span>
+                <span v-else class="text-tertiary">{{ matchedPolicy.trigger_conditions || '未配置' }}</span>
               </el-descriptions-item>
               <el-descriptions-item label="动作链">
                 <div v-for="(a, i) in parseActionChain(matchedPolicy.action_chain)" :key="i" style="margin: 2px 0">
@@ -442,7 +442,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <div v-if="channelTestResult" style="margin-top: 12px">
+      <div v-if="channelTestResult" class="mt-md">
         <el-alert
           :title="channelTestResult"
           :type="channelTestSuccess ? 'success' : 'error'"

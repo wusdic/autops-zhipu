@@ -23,7 +23,7 @@
     </div>
 
     <!-- 风险矩阵 -->
-    <el-row :gutter="16" style="margin-bottom: 16px">
+    <el-row :gutter="16" class="mb-lg">
       <el-col :xs="24" :lg="12">
         <div class="autops-card">
           <div class="autops-card-header"><div class="autops-card-title">风险矩阵</div></div>

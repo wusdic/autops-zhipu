@@ -1,5 +1,5 @@
 <template>
-  <div class="alert-list-page">
+  <div class="autops-page-container">
     <!-- ========== Page Header ========== -->
     <div class="autops-page-header">
       <div>

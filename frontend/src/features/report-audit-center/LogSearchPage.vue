@@ -1,5 +1,9 @@
 <template>
   <div class="log-search-page">
+    <div class="autops-page-header">
+      <div class="autops-page-title">日志搜索</div>
+      <div class="autops-page-desc">搜索和查询系统操作日志</div>
+    </div>
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">
       <el-form :model="queryParams" inline @submit.prevent="handleSearch">

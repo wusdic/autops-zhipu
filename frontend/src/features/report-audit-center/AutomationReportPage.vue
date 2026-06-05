@@ -83,7 +83,7 @@
       <div class="autops-card-header">
         <span class="autops-card-title">执行分类统计</span>
       </div>
-      <div class="autops-card-body" style="padding: 0">
+      <div class="autops-card-body p-0">
         <el-table stripe
  :data="breakdownData"
  v-loading="statsLoading"border
@@ -375,9 +375,7 @@ onMounted(() => {
 .automation-report-page {
   padding: var(--autops-space-xl);
 }
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 
 .stats-row {
   margin-bottom: var(--autops-space-lg);

@@ -1,26 +1,31 @@
 <template>
-  <div class="p-6">
-    <div class="autops-page-header">
-      <div class="autops-page-title">今日摘要</div>
-      <el-date-picker
-        v-model="selectedDate"
-        type="date"
-        placeholder="选择日期"
-        value-format="YYYY-MM-DD"
-        style="width: 180px"
-        @change="fetchSummary"
-      />
+  <div class="autops-page-container">
+    <div class="autops-page-header autops-page-header--between">
+      <div>
+        <div class="autops-page-title">今日摘要</div>
+        <div class="autops-page-desc">查看当日告警、异常与自动化执行摘要</div>
+      </div>
+      <div class="autops-header-actions">
+        <el-date-picker
+          v-model="selectedDate"
+          type="date"
+          placeholder="选择日期"
+          value-format="YYYY-MM-DD"
+          style="width: 180px"
+          @change="fetchSummary"
+        />
+      </div>
     </div>
 
     <!-- 摘要卡片 -->
     <el-row :gutter="16" class="mb-lg">
       <el-col :xs="12" :sm="6" v-for="card in statCards" :key="card.label">
         <div class="autops-metric-card">
-          <div class="metric-icon" :style="{ background: card.bg, color: card.color }">
+          <div class="metric-icon" :class="card.bgClass">
             <el-icon size="20"><component :is="card.icon" /></el-icon>
           </div>
           <div class="metric-label">{{ card.label }}</div>
-          <div class="metric-value" :style="{ color: card.color }">{{ card.value }}</div>
+          <div class="metric-value" :class="card.textClass">{{ card.value }}</div>
         </div>
       </el-col>
     </el-row>
@@ -57,7 +62,7 @@
             <div class="autops-card-title">今日告警</div>
             <el-tag type="danger" size="small">{{ alertStats.firing || 0 }} 活跃</el-tag>
           </div>
-          <div class="autops-card-body" style="padding: 0">
+          <div class="autops-card-body p-0">
             <el-table stripe :data="todayAlerts"size="small" v-loading="alertsLoading" empty-text="今日暂无告警" max-height="300">
               <el-table-column prop="created_at" label="时间" width="80">
                 <template #default="{ row }">
@@ -80,11 +85,11 @@
         </div>
 
         <!-- 今日异常 -->
-        <div class="autops-card" style="margin-top: 16px">
+        <div class="autops-card mt-lg">
           <div class="autops-card-header">
             <div class="autops-card-title">今日异常</div>
           </div>
-          <div class="autops-card-body" style="padding: 0">
+          <div class="autops-card-body p-0">
             <el-table stripe :data="todayAnomalies"size="small" v-loading="anomaliesLoading" empty-text="今日暂无异常" max-height="250">
               <el-table-column prop="created_at" label="时间" width="80">
                 <template #default="{ row }">
@@ -107,11 +112,11 @@
         </div>
 
         <!-- 今日执行 -->
-        <div class="autops-card" style="margin-top: 16px">
+        <div class="autops-card mt-lg">
           <div class="autops-card-header">
             <div class="autops-card-title">今日自动化执行</div>
           </div>
-          <div class="autops-card-body" style="padding: 0">
+          <div class="autops-card-body p-0">
             <el-table stripe :data="todayExecutions"size="small" v-loading="execLoading" empty-text="今日暂无执行" max-height="250">
               <el-table-column prop="created_at" label="时间" width="80">
                 <template #default="{ row }">
@@ -150,10 +155,10 @@ const anomaliesLoading = ref(false)
 const execLoading = ref(false)
 
 const statCards = reactive([
-  { label: '今日告警', value: 0, icon: Warning, bg: '#ffece8', color: '#f53f3f' },
-  { label: '今日异常', value: 0, icon: Warning, bg: '#fff7e8', color: '#ff7d00' },
-  { label: '自动处置', value: 0, icon: VideoPlay, bg: '#e8f3ff', color: '#165dff' },
-  { label: '工单创建', value: 0, icon: Document, bg: '#e8ffea', color: '#00b42a' },
+  { label: '今日告警', value: 0, icon: Warning, bgClass: 'bg-danger', textClass: 'text-danger' },
+  { label: '今日异常', value: 0, icon: Warning, bgClass: 'bg-warning', textClass: 'text-warning' },
+  { label: '自动处置', value: 0, icon: VideoPlay, bgClass: 'bg-brand', textClass: 'text-brand' },
+  { label: '工单创建', value: 0, icon: Document, bgClass: 'bg-success', textClass: 'text-success' },
 ])
 
 const alertStats = reactive({ total: 0, firing: 0, resolved: 0 })
@@ -308,9 +313,7 @@ onMounted(() => fetchSummary())
 
 <style scoped>
 
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 .text-tertiary {
   color: var(--autops-info);
   font-size: var(--autops-font-12);

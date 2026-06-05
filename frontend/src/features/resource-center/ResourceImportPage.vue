@@ -1,5 +1,11 @@
 <template>
-  <div class="resource-import-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">资产导入</div>
+      <div class="autops-page-desc">批量导入资产数据</div>
+    </div>
+
     <!-- 上传区域 -->
     <el-card shadow="never" class="upload-card">
       <template #header>
@@ -56,7 +62,7 @@
         v-if="uploadProgress > 0 && uploadProgress < 100"
         :percentage="uploadProgress"
         :status="uploadStatus"
-        style="margin-top: 16px"
+        class="mt-lg"
       />
     </el-card>
 

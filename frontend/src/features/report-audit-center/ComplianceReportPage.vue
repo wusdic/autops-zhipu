@@ -1,23 +1,23 @@
 <template>
   <div class="compliance-report-page">
-    <div class="autops-page-header">
-      <div class="autops-page-title-row">
-        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <span class="autops-page-title">合规报告</span>
+    <div class="autops-page-header autops-page-header--between">
+      <div>
+        <div class="autops-page-title">合规报告</div>
+        <div class="autops-page-desc">生成和查看合规检查报告，评估系统合规状态</div>
       </div>
-      <div class="autops-page-desc">生成和查看合规检查报告，评估系统合规状态</div>
-    </div>
-    <div style="display: flex; gap: 8px; margin-bottom: 16px">
-      <el-button type="primary" @click="generateReport">
-        <el-icon><Document /></el-icon> 生成报告
-      </el-button>
-      <el-button @click="loadData" :loading="loading">
-        <el-icon><Refresh /></el-icon> 刷新
-      </el-button>
+      <div class="autops-header-actions">
+        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <el-button type="primary" @click="generateReport">
+          <el-icon><Document /></el-icon> 生成报告
+        </el-button>
+        <el-button @click="loadData" :loading="loading">
+          <el-icon><Refresh /></el-icon> 刷新
+        </el-button>
+      </div>
     </div>
 
     <!-- 合规总览 -->
-    <el-row :gutter="16" class="mt-4">
+    <el-row :gutter="16" class="mt-lg">
       <el-col :span="8">
         <el-card shadow="hover">
           <template #header><span>合规评分</span></template>
@@ -32,8 +32,8 @@
           <template #header><span>检查项统计</span></template>
           <el-descriptions :column="1" border>
             <el-descriptions-item label="总检查项">{{ checkStats.total }}</el-descriptions-item>
-            <el-descriptions-item label="通过"><span style="color: #00b42a">{{ checkStats.passed }}</span></el-descriptions-item>
-            <el-descriptions-item label="不合规"><span style="color: #f53f3f">{{ checkStats.failed }}</span></el-descriptions-item>
+            <el-descriptions-item label="通过"><span class="text-success">{{ checkStats.passed }}</span></el-descriptions-item>
+            <el-descriptions-item label="不合规"><span class="text-danger">{{ checkStats.failed }}</span></el-descriptions-item>
             <el-descriptions-item label="不适用">{{ checkStats.na }}</el-descriptions-item>
           </el-descriptions>
         </el-card>
@@ -52,9 +52,9 @@
     </el-row>
 
     <!-- 报告列表 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <template #header>
-        <div style="display: flex; justify-content: space-between">
+        <div class="autops-card-header">
           <span>合规报告列表</span>
           <el-form :inline="true" :model="filters" size="small">
             <el-form-item>
@@ -77,17 +77,17 @@
         </el-table-column>
         <el-table-column prop="score" label="合规评分" width="120">
           <template #default="{ row }">
-            <span :style="{ color: row.score >= 90 ? '#00b42a' : row.score >= 70 ? '#ff7d00' : '#f53f3f', fontWeight: 'bold' }">
+            <span :class="row.score >= 90 ? 'text-success' : row.score >= 70 ? 'text-warning' : 'text-danger'" style="font-weight: bold">
               {{ row.score }}分
             </span>
           </template>
         </el-table-column>
         <el-table-column prop="total_checks" label="检查项" width="90" />
         <el-table-column prop="passed" label="通过" width="80">
-          <template #default="{ row }"><span style="color: #00b42a">{{ row.passed }}</span></template>
+          <template #default="{ row }"><span class="text-success">{{ row.passed }}</span></template>
         </el-table-column>
         <el-table-column prop="failed" label="不合规" width="90">
-          <template #default="{ row }"><span style="color: #f53f3f">{{ row.failed }}</span></template>
+          <template #default="{ row }"><span class="text-danger">{{ row.failed }}</span></template>
         </el-table-column>
         <el-table-column prop="generated_at" label="生成时间" width="180" />
         <el-table-column label="操作" width="180" fixed="right">
@@ -97,7 +97,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="mt-4" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+      <el-pagination class="mt-lg" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
         :total="pagination.total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next"
         @size-change="loadData" @current-change="loadData" />
     </el-card>

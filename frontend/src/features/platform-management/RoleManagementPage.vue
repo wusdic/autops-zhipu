@@ -78,7 +78,7 @@
         type="warning"
         :closable="false"
         show-icon
-        style="margin-bottom: 16px"
+        class="mb-lg"
       >
         <template #title>
           角色「{{ deleteTarget?.name }}」下有 <b>{{ deleteTarget?.user_count ?? 0 }}</b> 个用户，请选择转移目标角色

@@ -1,5 +1,11 @@
 <template>
-  <div class="sla-management-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">SLA 管理</div>
+      <div class="autops-page-desc">配置工单服务级别协议</div>
+    </div>
+
     <!-- 搜索与操作栏 -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="filterForm" @submit.prevent="handleSearch">

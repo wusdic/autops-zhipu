@@ -33,7 +33,7 @@
  empty-text="暂无异常"
  highlight-current-row
  @current-change="handleAnomalySelect"
- style="margin-top: 12px"
+ class="mt-md"
  >
           <el-table-column prop="title" label="异常标题" min-width="200" show-overflow-tooltip />
           <el-table-column prop="severity" label="级别" width="80">
@@ -80,7 +80,7 @@
               分析影响
             </el-button>
           </div>
-          <div class="autops-card-body" style="padding: 0">
+          <div class="autops-card-body p-0">
             <el-table stripe
  :data="affectedAssets"v-loading="analysisLoading"
  empty-text="选择异常并分析影响"
@@ -106,7 +106,7 @@
         </div>
 
         <!-- 爆炸半径可视化 -->
-        <div class="autops-card" style="margin-top: 16px" v-if="blastRadius.length">
+        <div class="autops-card" class="mt-lg" v-if="blastRadius.length">
           <div class="autops-card-header">
             <div class="autops-card-title">爆炸半径</div>
           </div>
@@ -146,7 +146,7 @@
         </div>
 
         <!-- 严重度分布 -->
-        <div class="autops-card" style="margin-top: 16px" v-if="severityDistribution.length">
+        <div class="autops-card" class="mt-lg" v-if="severityDistribution.length">
           <div class="autops-card-header">
             <div class="autops-card-title">严重度分布</div>
           </div>
@@ -167,11 +167,11 @@
         </div>
 
         <!-- 业务系统影响 -->
-        <div class="autops-card" style="margin-top: 16px" v-if="businessImpact.length">
+        <div class="autops-card" class="mt-lg" v-if="businessImpact.length">
           <div class="autops-card-header">
             <div class="autops-card-title">业务系统影响</div>
           </div>
-          <div class="autops-card-body" style="padding: 0">
+          <div class="autops-card-body p-0">
             <el-table stripe :data="businessImpact" size="small">
               <el-table-column prop="name" label="业务系统" min-width="120" show-overflow-tooltip />
               <el-table-column prop="impact" label="影响" width="80">
@@ -340,9 +340,7 @@ onMounted(() => fetchAnomalies())
 </script>
 
 <style scoped>
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 .text-tertiary {
   color: var(--autops-info);
   font-size: var(--autops-font-12);

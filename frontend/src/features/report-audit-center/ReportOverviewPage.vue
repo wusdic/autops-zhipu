@@ -1,11 +1,11 @@
 <template>
   <div class="autops-page-container">
     <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">报表总览</div>
-      <div class="autops-page-desc">查看各类报表的生成状态和统计数据</div>
-    </div>
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px">
+    <div class="autops-page-header autops-page-header--between">
+      <div>
+        <div class="autops-page-title">报表总览</div>
+        <div class="autops-page-desc">查看各类报表的生成状态和统计数据</div>
+      </div>
       <el-button type="primary" @click="router.push('/report-audit/generate')">
         <el-icon><Plus /></el-icon>
         生成报告
@@ -13,22 +13,15 @@
     </div>
 
     <!-- 统计卡片 -->
-    <el-row :gutter="16" class="stat-row">
+    <el-row :gutter="16" class="metric-row">
       <el-col :span="6" v-for="stat in statCards" :key="stat.key">
-        <el-card
-          shadow="hover"
-          class="autops-metric-card"
-          :class="{ 'stat-card-clickable': stat.route }"
-          v-loading="statsLoading"
-          @click="stat.route && router.push(stat.route)"
-        >
-          <div class="stat-card-inner">
-            <div class="stat-icon-wrap" :style="{ background: stat.bg, color: stat.color }">
-              <el-icon :size="24"><component :is="stat.icon" /></el-icon>
-            </div>
-            <el-statistic :title="stat.label" :value="stat.value" class="stat-body" />
+        <div class="autops-metric-card" :class="{ 'is-clickable': !!stat.route }" v-loading="statsLoading" @click="stat.route && router.push(stat.route)">
+          <div class="metric-icon" :class="stat.bgClass">
+            <el-icon :size="20"><component :is="stat.icon" /></el-icon>
           </div>
-        </el-card>
+          <div class="metric-label">{{ stat.label }}</div>
+          <div class="metric-value">{{ stat.value }}</div>
+        </div>
       </el-col>
     </el-row>
 
@@ -162,26 +155,23 @@ const statCards = reactive([
     label: '报告模板',
     value: 0,
     icon: Document,
-    bg: '#e8f3ff',
-    color: '#165dff',
+    bgClass: 'bg-brand',
     route: '/report-audit/templates',
   },
   {
     key: 'tasks',
     label: '报告任务',
     value: 0,
-    icon: Tickets,
-    bg: '#fff7e8',
-    color: '#ff7d00',
+    icon: List,
+    bgClass: 'bg-info',
     route: '/report-audit/tasks',
   },
   {
     key: 'archived',
     label: '已归档',
     value: 0,
-    icon: FolderOpened,
-    bg: '#e8ffea',
-    color: '#00b42a',
+    icon: CircleCheck,
+    bgClass: 'bg-success',
     route: '/report-audit/archive',
   },
   {
@@ -189,8 +179,7 @@ const statCards = reactive([
     label: '生成中',
     value: 0,
     icon: Loading,
-    bg: '#f0e8ff',
-    color: '#722ed1',
+    bgClass: 'bg-warning',
     route: '/report-audit/tasks?status=generating',
   },
 ])
@@ -432,49 +421,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.stat-row {
-  margin-bottom: var(--autops-space-lg);
-}
-.autops-metric-card-clickable {
-  cursor: pointer;
-}
-
-.autops-metric-card-clickable:hover {
-  transform: translateY(-2px);
-}
-
-.autops-metric-card-inner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--autops-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-body {
-  flex: 1;
-}
-
-.stat-body :deep(.el-statistic__head) {
-  font-size: var(--autops-font-13);
-  color: var(--autops-info);
-  margin-bottom: 4px;
-}
-
-.stat-body :deep(.el-statistic__content) {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--autops-text-1);
-}
-
 .main-card {
   margin-bottom: var(--autops-space-lg);
 }

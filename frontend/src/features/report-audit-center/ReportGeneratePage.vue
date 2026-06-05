@@ -97,7 +97,7 @@
         <span class="autops-card-title">最近生成任务</span>
         <el-button plain type="primary" @click="goToTaskPage">查看全部</el-button>
       </div>
-      <div class="autops-card-body" style="padding: 0">
+      <div class="autops-card-body p-0">
         <el-table stripe
  :data="recentTasks"
  v-loading="tasksLoading"border
@@ -345,9 +345,7 @@ onMounted(() => {
   padding: var(--autops-space-xl);
 }
 
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 
 .task-table {
   width: 100%;

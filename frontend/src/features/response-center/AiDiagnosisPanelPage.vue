@@ -32,12 +32,12 @@
       <el-row :gutter="16">
         <!-- 左栏: 诊断结论 -->
         <el-col :xs="24" :lg="16">
-          <div class="autops-card" style="margin-bottom: 16px">
+          <div class="autops-card" class="mb-lg">
             <div class="autops-card-header">
               <div class="autops-card-title"><el-icon><Warning /></el-icon> 诊断结论</div>
               <el-tag :type="riskTag(diagnosisResult.risk_level)" effect="dark">风险级别: {{ riskLabel(diagnosisResult.risk_level) }}</el-tag>
             </div>
-            <el-descriptions :column="2" border size="small" style="margin-top: 12px">
+            <el-descriptions :column="2" border size="small" class="mt-md">
               <el-descriptions-item label="异常ID">{{ diagnosisResult.anomaly_id }}</el-descriptions-item>
               <el-descriptions-item label="置信度">
                 <el-progress :percentage="diagnosisResult.confidence || 0" :stroke-width="14" :color="diagnosisResult.confidence > 80 ? '#00b42a' : '#ff7d00'" style="width: 150px" />
@@ -49,7 +49,7 @@
           </div>
 
           <!-- 建议动作 -->
-          <div class="autops-card" style="margin-bottom: 16px">
+          <div class="autops-card" class="mb-lg">
             <div class="autops-card-header"><div class="autops-card-title"><el-icon><VideoPlay /></el-icon> 建议动作</div></div>
             <el-table stripe :data="diagnosisResult.recommended_actions || []"size="small" style="margin-top: 8px">
               <el-table-column type="index" label="#" width="40" />
@@ -86,7 +86,7 @@
 
         <!-- 右栏: 操作面板 -->
         <el-col :xs="24" :lg="8">
-          <div class="autops-card" style="margin-bottom: 16px">
+          <div class="autops-card" class="mb-lg">
             <div class="autops-card-header"><div class="autops-card-title">处置操作</div></div>
             <div style="padding: 12px; display: flex; flex-direction: column; gap: 8px">
               <el-button type="primary" @click="executeRecommended" :disabled="!(diagnosisResult.recommended_actions || []).length">

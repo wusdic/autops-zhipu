@@ -71,7 +71,7 @@
             </div>
 
             <!-- 基本信息 -->
-            <el-descriptions :column="2" border size="small" style="margin-bottom: 16px">
+            <el-descriptions :column="2" border size="small" class="mb-lg">
               <el-descriptions-item label="资产">{{ selectedIncident.asset_name || '-' }}</el-descriptions-item>
               <el-descriptions-item label="来源">{{ selectedIncident.source || '-' }}</el-descriptions-item>
               <el-descriptions-item label="发生时间">{{ formatTime(selectedIncident.created_at) }}</el-descriptions-item>
@@ -96,7 +96,7 @@
 
             <!-- 证据列表 -->
             <h4 style="margin-bottom: 8px">关联证据</h4>
-            <el-table stripe :data="evidenceList"size="small" v-if="evidenceList.length > 0" style="margin-bottom: 16px">
+            <el-table stripe :data="evidenceList"size="small" v-if="evidenceList.length > 0" class="mb-lg">
               <el-table-column prop="type" label="类型" width="100">
                 <template #default="{ row }">
                   <el-tag size="small">{{ row.type }}</el-tag>

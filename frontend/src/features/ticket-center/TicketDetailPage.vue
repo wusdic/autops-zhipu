@@ -1,5 +1,5 @@
 <template>
-  <div class="ticket-detail">
+  <div class="autops-page-container">
     <!-- ─── Page Header ─── -->
     <div class="autops-page-header">
       <div>
@@ -34,7 +34,7 @@
       </div>
     </div>
 
-    <div v-loading="loading" style="margin-top: 16px">
+    <div v-loading="loading" class="mt-lg">
       <template v-if="ticket">
         <el-tabs v-model="activeTab" type="border-card">
           <!-- 基本信息 -->
@@ -63,7 +63,7 @@
             </el-descriptions>
 
             <!-- 上下文信息 -->
-            <div v-if="ticket.context" style="margin-top: 16px">
+            <div v-if="ticket.context" class="mt-lg">
               <h4>上下文信息</h4>
               <el-input type="textarea" :rows="4" :model-value="formatJson(ticket.context)" readonly />
             </div>
@@ -147,7 +147,7 @@
 
           <!-- 评论 -->
           <el-tab-pane label="评论" name="comments">
-            <div style="margin-bottom: 16px">
+            <div class="mb-lg">
               <el-input
                 v-model="newComment"
                 type="textarea"

@@ -1,5 +1,11 @@
 <template>
-  <div class="rollback-center-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">回滚中心</div>
+      <div class="autops-page-desc">管理自动化回滚操作</div>
+    </div>
+
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">
       <el-form :model="queryParams" inline @submit.prevent="handleSearch">
@@ -225,7 +231,7 @@
         type="warning"
         :closable="false"
         show-icon
-        style="margin-bottom: 16px"
+        class="mb-lg"
       >
         <template #title>
           确定要回滚执行 <strong>{{ rollbackTarget?.name }}</strong> 吗？此操作将尝试恢复到执行前的状态。
