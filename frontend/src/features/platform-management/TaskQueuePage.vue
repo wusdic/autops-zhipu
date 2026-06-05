@@ -65,7 +65,7 @@
       </el-table-column>
       <el-table-column prop="task_type" label="类型" width="110">
         <template #default="{ row }">
-          <el-tag size="small" :type="typeTagMap[row.task_type] ?? 'info'">
+          <el-tag size="small" :type="(typeTagMap[row.task_type] ?? 'info') as TagType">
             {{ typeLabelMap[row.task_type] ?? row.task_type }}
           </el-tag>
         </template>
@@ -73,7 +73,7 @@
       <el-table-column prop="status" label="状态" width="100" align="center">
         <template #default="{ row }">
           <el-tag
-            :type="statusTagMap[row.status] ?? 'info'"
+            :type="(statusTagMap[row.status] ?? 'info') as TagType"
             size="small"
             effect="dark"
           >
@@ -104,9 +104,9 @@
           <el-tag
             v-if="row.priority !== undefined"
             size="small"
-            :type="{ high: 'danger', medium: 'warning', low: 'info' }[row.priority] ?? 'info'"
+            :type="({ high: 'danger', medium: 'warning', low: 'info' } as Record<string, TagType>)[row.priority] ?? 'info'"
           >
-            {{ { high: '高', medium: '中', low: '低' }[row.priority] ?? row.priority }}
+            {{ ({ high: '高', medium: '中', low: '低' } as Record<string, string>)[row.priority] ?? row.priority }}
           </el-tag>
           <span v-else class="text-secondary">-</span>
         </template>
@@ -177,7 +177,7 @@
     <!-- ── Detail Dialog ─────────────────────────────────── -->
     <el-dialog
       v-model="detailVisible"
-      :title="'任务详情 - ' + detailTask?.name ?? ''"
+      :title="'任务详情 - ' + (detailTask?.name ?? '')"
       width="600px"
       destroy-on-close
     >
@@ -208,6 +208,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, Loading } from '@element-plus/icons-vue'
@@ -222,12 +223,12 @@ const typeLabelMap: Record<string, string> = {
   report: '报告生成',
   system: '系统任务',
 }
-const typeTagMap: Record<string, string> = {
-  collection: '',
+const typeTagMap: Record<string, TagType> = {
+  collection: 'primary',
   import: 'success',
   export: 'warning',
   backup: 'primary',
-  report: '',
+  report: 'primary',
   system: 'info',
 }
 const statusLabelMap: Record<string, string> = {
@@ -237,7 +238,7 @@ const statusLabelMap: Record<string, string> = {
   failed: '失败',
   cancelled: '已取消',
 }
-const statusTagMap: Record<string, string> = {
+const statusTagMap: Record<string, TagType> = {
   queued: 'info',
   running: 'warning',
   completed: 'success',

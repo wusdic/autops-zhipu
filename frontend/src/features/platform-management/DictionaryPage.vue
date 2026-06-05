@@ -180,13 +180,13 @@ const editingId = ref('')
 const formRef = ref<FormInstance>()
 
 const form = reactive({
-  category: '',
-  key: '',
-  value: '',
-  label: '',
+  category: 'primary',
+  key: 'primary',
+  value: 'primary',
+  label: 'primary',
   sort_order: 0,
   is_active: true,
-  remark: '',
+  remark: 'primary',
 })
 
 const formRules: FormRules = {

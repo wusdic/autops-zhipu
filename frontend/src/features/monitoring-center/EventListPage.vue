@@ -171,10 +171,10 @@
                       <span style="font-family:monospace;font-size:12px">{{ row.id && row.id.length > 16 ? row.id.slice(0, 8) + '...' + row.id.slice(-4) : (row.id || '-') }}</span>
                     </el-descriptions-item>
                     <el-descriptions-item label="事件类型">
-                      <el-tag size="small" :type="eventTypeTagType(row.event_type)">{{ eventTypeLabel(row.event_type) }}</el-tag>
+                      <el-tag size="small" :type="(eventTypeTagType(row.event_type)) as TagType">{{ eventTypeLabel(row.event_type) }}</el-tag>
                     </el-descriptions-item>
                     <el-descriptions-item label="来源">
-                      <el-tag :type="sourceTagType(row.source)" size="small">{{ sourceLabel(row.source) }}</el-tag>
+                      <el-tag :type="(sourceTagType(row.source)) as TagType" size="small">{{ sourceLabel(row.source) }}</el-tag>
                     </el-descriptions-item>
                     <el-descriptions-item label="严重级别">
                       <SeverityBadge :severity="row.severity" size="small" />
@@ -190,7 +190,7 @@
                 <el-col :span="12">
                   <h4 style="margin-bottom: 8px">描述</h4>
                   <div class="expand-description">{{ row.description || row.title || '无描述' }}</div>
-                  <div v-if="row.raw_data" style="margin-top: 12px">
+                  <div v-if="row.raw_data" class="mt-md">
                     <h4 style="margin-bottom: 8px">原始数据</h4>
                     <JsonViewer :data="parseJsonSafe(row.raw_data)" />
                   </div>
@@ -206,7 +206,7 @@
         </el-table-column>
         <el-table-column prop="source" label="来源" width="110" align="center">
           <template #default="{ row }">
-            <el-tag :type="sourceTagType(row.source)" size="small" effect="plain">
+            <el-tag :type="(sourceTagType(row.source)) as TagType" size="small" effect="plain">
               {{ sourceLabel(row.source) }}
             </el-tag>
           </template>
@@ -228,7 +228,7 @@
         </el-table-column>
         <el-table-column prop="event_type" label="类型" width="120" align="center">
           <template #default="{ row }">
-            <el-tag size="small" :type="eventTypeTagType(row.event_type)">{{ eventTypeLabel(row.event_type) }}</el-tag>
+            <el-tag size="small" :type="(eventTypeTagType(row.event_type)) as TagType">{{ eventTypeLabel(row.event_type) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right" align="center">
@@ -270,10 +270,10 @@
                 <span style="font-family:monospace;font-size:12px">{{ currentEvent.id && currentEvent.id.length > 16 ? currentEvent.id.slice(0, 8) + '...' + currentEvent.id.slice(-4) : (currentEvent.id || '-') }}</span>
               </el-descriptions-item>
               <el-descriptions-item label="事件类型">
-                <el-tag size="small" :type="eventTypeTagType(currentEvent.event_type)">{{ eventTypeLabel(currentEvent.event_type) }}</el-tag>
+                <el-tag size="small" :type="(eventTypeTagType(currentEvent.event_type)) as TagType">{{ eventTypeLabel(currentEvent.event_type) }}</el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="来源">
-                <el-tag :type="sourceTagType(currentEvent.source)" size="small">
+                <el-tag :type="(sourceTagType(currentEvent.source)) as TagType" size="small">
                   {{ sourceLabel(currentEvent.source) }}
                 </el-tag>
               </el-descriptions-item>
@@ -294,7 +294,7 @@
             </el-descriptions>
 
             <!-- Raw Data -->
-            <div v-if="currentEvent.raw_data" style="margin-top: 16px">
+            <div v-if="currentEvent.raw_data" class="mt-lg">
               <h4 style="margin-bottom: 8px">原始数据</h4>
               <JsonViewer :data="parseJsonSafe(currentEvent.raw_data)" />
             </div>
@@ -333,7 +333,7 @@
               <div v-for="(log, idx) in relatedLogs" :key="idx" class="log-item">
                 <div class="log-item__header">
                   <span class="log-item__time">{{ formatTime(log.created_at || log.timestamp) }}</span>
-                  <el-tag v-if="log.level" :type="logLevelType(log.level)" size="small">{{ log.level }}</el-tag>
+                  <el-tag v-if="log.level" :type="(logLevelType(log.level)) as TagType" size="small">{{ log.level }}</el-tag>
                 </div>
                 <div class="log-item__message">{{ log.message || log.content || log.output || '-' }}</div>
               </div>
@@ -362,10 +362,10 @@
           type="info"
           :closable="false"
           show-icon
-          style="margin-bottom: 16px"
+          class="mb-lg"
         />
 
-        <el-descriptions :column="2" border size="small" style="margin-bottom: 16px">
+        <el-descriptions :column="2" border size="small" class="mb-lg">
           <el-descriptions-item label="来源">{{ sourceLabel(correlationEvent.source) }}</el-descriptions-item>
           <el-descriptions-item label="严重级别">
             <SeverityBadge :severity="correlationEvent.severity" size="small" />
@@ -385,7 +385,7 @@
           </el-table-column>
           <el-table-column prop="source" label="来源" width="100" align="center">
             <template #default="{ row }">
-              <el-tag :type="sourceTagType(row.source)" size="small">{{ sourceLabel(row.source) }}</el-tag>
+              <el-tag :type="(sourceTagType(row.source)) as TagType" size="small">{{ sourceLabel(row.source) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="severity" label="级别" width="80" align="center">
@@ -409,6 +409,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
@@ -441,12 +442,12 @@ const stats = reactive({
 })
 
 const filters = reactive({
-  source: '',
-  severity: '',
+  source: 'primary',
+  severity: 'primary',
   timePreset: '' as string,
   dateRange: null as [string, string] | null,
-  asset: '',
-  keyword: '',
+  asset: 'primary',
+  keyword: 'primary',
 })
 
 const pagination = reactive({
@@ -550,15 +551,15 @@ function sourceLabel(source: string): string {
   return map[source] || source || '-'
 }
 
-function sourceTagType(source: string): string {
+function sourceTagType(source: string): TagType {
   const map: Record<string, string> = {
-    collector: '',
+    collector: 'primary',
     state_change: 'warning',
     log: 'info',
     config_change: 'success',
-    execution: '',
+    execution: 'primary',
   }
-  return map[source] || 'info'
+  return (map[source] || 'info') as TagType
 }
 
 function eventTypeLabel(type: string): string {
@@ -582,17 +583,17 @@ function eventTypeLabel(type: string): string {
   return map[type] || type || '-'
 }
 
-function eventTypeTagType(type: string): string {
+function eventTypeTagType(type: string): TagType {
   var map: Record<string, string> = {
     alert_triggered: 'danger',
     alert_resolved: 'success',
     alert_suppressed: 'info',
     state_changed: 'warning',
-    config_changed: '',
+    config_changed: 'primary',
     asset_discovered: 'success',
     asset_offline: 'danger',
     asset_online: 'success',
-    execution_started: '',
+    execution_started: 'primary',
     execution_completed: 'success',
     execution_failed: 'danger',
     threshold_exceeded: 'danger',
@@ -600,21 +601,21 @@ function eventTypeTagType(type: string): string {
     health_check: 'info',
     system: 'info',
   }
-  return map[type] || 'info'
+  return (map[type] || 'info') as TagType
 }
 
-function logLevelType(level: string): string {
+function logLevelType(level: string): TagType {
   const map: Record<string, string> = {
     error: 'danger',
     ERROR: 'danger',
     warn: 'warning',
     WARNING: 'warning',
     info: 'info',
-    INFO: '',
+    INFO: 'primary',
     debug: 'info',
     DEBUG: 'info',
   }
-  return map[level] || 'info'
+  return (map[level] || 'info') as TagType
 }
 
 function rowClassName({ row }: { row: any }): string {
@@ -810,7 +811,7 @@ async function viewRelatedEvents(event: any) {
 }
 
 // ── Auto-Refresh ────────────────────────────────────────────────────
-function toggleAutoRefresh(val: boolean) {
+function toggleAutoRefresh(val: string | number | boolean) {
   if (val) {
     refreshTimer = setInterval(() => {
       loadEvents()

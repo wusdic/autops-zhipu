@@ -97,7 +97,7 @@
         <span class="autops-card-title">最近生成任务</span>
         <el-button plain type="primary" @click="goToTaskPage">查看全部</el-button>
       </div>
-      <div class="autops-card-body" style="padding: 0">
+      <div class="autops-card-body p-0">
         <el-table stripe
  :data="recentTasks"
  v-loading="tasksLoading"border
@@ -108,7 +108,7 @@
           <el-table-column prop="template_name" label="模板" min-width="120" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="110" align="center">
             <template #default="{ row }">
-              <el-tag :type="statusType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+              <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="progress" label="进度" width="140">
@@ -149,6 +149,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -167,12 +168,12 @@ const recentTasks = ref<any[]>([])
 const formRef = ref<FormInstance>()
 
 const form = reactive({
-  template_id: '',
-  title: '',
+  template_id: 'primary',
+  title: 'primary',
   date_range: null as [string, string] | null,
   asset_scope: 'all',
-  asset_group: '',
-  asset_ids: '',
+  asset_group: 'primary',
+  asset_ids: 'primary',
   format: 'pdf',
 })
 
@@ -197,11 +198,11 @@ function typeLabel(t: string): string {
   return map[t] || t || '-'
 }
 
-function statusType(s: string): string {
+function statusType(s: string): TagType {
   const map: Record<string, string> = {
     pending: 'info', generating: 'warning', completed: 'success', failed: 'danger',
   }
-  return map[s] || 'info'
+  return (map[s] || 'info') as TagType
 }
 
 function statusLabel(s: string): string {
@@ -345,9 +346,7 @@ onMounted(() => {
   padding: var(--autops-space-xl);
 }
 
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 
 .task-table {
   width: 100%;

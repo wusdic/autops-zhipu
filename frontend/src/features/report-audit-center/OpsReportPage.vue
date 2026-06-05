@@ -1,8 +1,11 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">运维报告</div>
+    <div class="autops-page-header autops-page-header--between">
       <div>
+        <div class="autops-page-title">运维报告</div>
+        <div class="autops-page-desc">生成和查看运维报告</div>
+      </div>
+      <div class="autops-header-actions">
         <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" style="margin-right: 8px" @change="fetchData" />
         <el-select v-model="moduleFilter" placeholder="报告类型" style="width: 140px; margin-right: 8px" clearable @change="fetchData">
           <el-option label="日报" value="daily" />
@@ -14,11 +17,14 @@
     </div>
 
     <!-- 运维概要 -->
-    <el-row :gutter="16" style="margin-bottom: 16px">
+    <el-row :gutter="16" class="mb-lg">
       <el-col :xs="12" :sm="6" v-for="stat in summaryStats" :key="stat.label">
         <div class="autops-metric-card">
+          <div class="metric-icon" :class="stat.bgClass">
+            <el-icon :size="20"><component :is="stat.icon" /></el-icon>
+          </div>
           <div class="metric-label">{{ stat.label }}</div>
-          <div class="metric-value" :style="{ color: stat.color }">{{ stat.value }}</div>
+          <div class="metric-value">{{ stat.value }}</div>
         </div>
       </el-col>
     </el-row>
@@ -62,7 +68,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <div style="display: flex; justify-content: flex-end; margin-top: 16px">
+      <div class="mt-lg" style="display: flex; justify-content: flex-end">
         <el-pagination v-model:current-page="page" v-model:page-size="pageSize" :total="total" :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next" @size-change="fetchData" @current-change="fetchData" />
       </div>
     </div>
@@ -98,7 +104,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from 'vue'
-import { Document } from '@element-plus/icons-vue'
+import { Document, DataAnalysis, CircleCheck, Warning, Clock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import api from '@/shared/api/client'
@@ -119,10 +125,10 @@ const genForm = reactive({ report_type: 'weekly', period: null as [Date, Date] |
 const summaryStats = computed(() => {
   const completed = reports.value.filter(r => r.status === 'completed')
   return [
-    { label: '报告总数', value: reports.value.length, color: '#165dff' },
-    { label: '已完成', value: completed.length, color: '#00b42a' },
-    { label: '本月异常', value: reports.value.reduce((s, r) => s + (r.anomaly_count || 0), 0), color: '#ff7d00' },
-    { label: '自动处置率', value: completed.length > 0 ? Math.round(completed.reduce((s, r) => s + (r.auto_remediation_rate || 0), 0) / completed.length) + '%' : '0%', color: '#722ed1' },
+    { label: '报告总数', value: reports.value.length, bgClass: 'bg-brand', icon: DataAnalysis },
+    { label: '已完成', value: completed.length, bgClass: 'bg-success', icon: CircleCheck },
+    { label: '本月异常', value: reports.value.reduce((s, r) => s + (r.anomaly_count || 0), 0), bgClass: 'bg-warning', icon: Warning },
+    { label: '自动处置率', value: completed.length > 0 ? Math.round(completed.reduce((s, r) => s + (r.auto_remediation_rate || 0), 0) / completed.length) + '%' : '0%', bgClass: 'bg-purple', icon: Clock },
   ]
 })
 
@@ -131,7 +137,7 @@ async function fetchData() {
   try {
     const params: any = { page: page.value, page_size: pageSize.value }
     if (moduleFilter.value) params.report_type = moduleFilter.value
-    const res = await api.get(API.REPORTS, { params })
+    const res = await api.get(API.REPORT.TASKS, { params })
     if (res.data?.code === 0) {
       reports.value = (res.data.data?.items || []).map((r: any) => ({
         ...r,
@@ -153,7 +159,7 @@ function generateReport() { genVisible.value = true }
 async function doGenerate() {
   generating.value = true
   try {
-    await api.post(API.REPORTS, genForm)
+    await api.post(API.REPORT.TASKS, genForm)
     ElMessage.success('报告生成任务已创建')
     genVisible.value = false
     setTimeout(fetchData, 2000)

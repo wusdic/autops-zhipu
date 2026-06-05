@@ -1,5 +1,11 @@
 <template>
-  <div class="discovery-result-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">发现结果</div>
+      <div class="autops-page-desc">查看资产自动发现的结果</div>
+    </div>
+
     <!-- 搜索与筛选栏 -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="filterForm" @submit.prevent="handleSearch">
@@ -91,7 +97,7 @@
         <el-table-column prop="hostname" label="主机名" min-width="150" show-overflow-tooltip />
         <el-table-column prop="asset_type" label="资产类型" min-width="110">
           <template #default="{ row }">
-            <el-tag :type="assetTypeTagMap[row.asset_type] || 'info'" size="small">
+            <el-tag :type="(assetTypeTagMap[row.asset_type] || 'info') as TagType" size="small">
               {{ assetTypeLabelMap[row.asset_type] || row.asset_type }}
             </el-tag>
           </template>
@@ -103,7 +109,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" min-width="100">
           <template #default="{ row }">
-            <el-tag :type="statusTagMap[row.status]" size="small" effect="dark">
+            <el-tag :type="(statusTagMap[row.status]) as TagType" size="small" effect="dark">
               {{ statusLabelMap[row.status] || row.status }}
             </el-tag>
           </template>
@@ -161,7 +167,7 @@
         <el-descriptions-item label="IP 地址">{{ currentRow?.ip }}</el-descriptions-item>
         <el-descriptions-item label="主机名">{{ currentRow?.hostname || '-' }}</el-descriptions-item>
         <el-descriptions-item label="资产类型">
-          {{ assetTypeLabelMap[currentRow?.asset_type] || currentRow?.asset_type }}
+          {{ assetTypeLabelMap[currentRow?.asset_type ?? ''] || currentRow?.asset_type }}
         </el-descriptions-item>
         <el-descriptions-item label="端口">{{ currentRow?.ports?.join(', ') || currentRow?.port || '-' }}</el-descriptions-item>
       </el-descriptions>
@@ -186,6 +192,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, RefreshRight, Download } from '@element-plus/icons-vue'
@@ -218,9 +225,9 @@ const currentRow = ref<DiscoveryResult | null>(null)
 const { navToAssetFromDiscovery } = useWorkflowNav()
 
 const filterForm = reactive({
-  keyword: '',
-  status: '',
-  asset_type: '',
+  keyword: 'primary',
+  status: 'primary',
+  asset_type: 'primary',
 })
 
 const pagination = reactive({
@@ -230,17 +237,17 @@ const pagination = reactive({
 })
 
 const sortInfo = reactive({
-  sort_by: '',
-  sort_order: '',
+  sort_by: 'primary',
+  sort_order: 'primary',
 })
 
 const importForm = reactive({
   group_id: undefined as number | undefined,
-  remark: '',
+  remark: 'primary',
 })
 
 // ─── 映射表 ──────────────────────────────────────────
-const statusTagMap: Record<string, string> = {
+const statusTagMap: Record<string, TagType> = {
   new: 'danger',
   ignored: 'warning',
   imported: 'success',
@@ -252,8 +259,8 @@ const statusLabelMap: Record<string, string> = {
   imported: '已导入',
 }
 
-const assetTypeTagMap: Record<string, string> = {
-  server: '',
+const assetTypeTagMap: Record<string, TagType> = {
+  server: 'primary',
   network: 'success',
   security: 'danger',
   database: 'warning',
@@ -317,9 +324,9 @@ function handleReset() {
 }
 
 // ─── 排序 ────────────────────────────────────────────
-function handleSortChange({ prop, order }: { prop: string; order: string | null }) {
-  sortInfo.sort_by = order ? prop : ''
-  sortInfo.sort_order = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : ''
+function handleSortChange({ prop, order }: { prop: string | null; order: string | null }) {
+  sortInfo.sort_by = order ? (prop ?? '') : ''
+  sortInfo.sort_order = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : 'primary'
   fetchData()
 }
 
@@ -348,7 +355,7 @@ const handleManageToAssets = () => {
 }
 
 // ─── 导入 ────────────────────────────────────────────
-function handleImport(row: DiscoveryResult) {
+function handleImport(row: any) {
   currentRow.value = row
   importForm.group_id = undefined
   importForm.remark = ''
@@ -403,7 +410,7 @@ async function handleBatchImport() {
 }
 
 // ─── 忽略 ────────────────────────────────────────────
-async function handleIgnore(row: DiscoveryResult) {
+async function handleIgnore(row: any) {
   try {
     await ElMessageBox.confirm(
       '确定忽略 ' + row.ip + ' 的发现结果？',

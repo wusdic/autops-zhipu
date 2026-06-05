@@ -1,5 +1,5 @@
 <template>
-  <div class="alert-list-page">
+  <div class="autops-page-container">
     <!-- ========== Page Header ========== -->
     <div class="autops-page-header">
       <div>
@@ -264,11 +264,11 @@ const stats = reactive({
 })
 
 const filters = reactive({
-  severity: '',
-  status: '',
+  severity: 'primary',
+  status: 'primary',
   dateRange: null as [string, string] | null,
-  asset: '',
-  keyword: '',
+  asset: 'primary',
+  keyword: 'primary',
 })
 
 const pagination = reactive({

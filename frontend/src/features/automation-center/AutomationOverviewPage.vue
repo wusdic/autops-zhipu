@@ -1,37 +1,31 @@
 <template>
   <div class="autops-page-container">
     <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">自动化总览</div>
-      <div class="autops-page-desc">管理自动化脚本、Playbook 与执行记录</div>
-    </div>
-
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
-      <el-button type="primary" @click="router.push('/scripts')">
-        <el-icon><Plus /></el-icon>
-        创建脚本
-      </el-button>
+    <div class="autops-page-header autops-page-header--between">
+      <div>
+        <div class="autops-page-title">自动化总览</div>
+        <div class="autops-page-desc">管理自动化脚本、Playbook 与执行记录</div>
+      </div>
+      <div class="autops-header-actions">
+        <el-button type="primary" @click="router.push('/scripts')"><el-icon><Plus /></el-icon>创建脚本</el-button>
+      </div>
     </div>
 
     <!-- 统计卡片 -->
-    <el-row :gutter="16" class="stat-row">
+    <el-row :gutter="16" class="metric-row">
       <el-col :span="6" v-for="stat in statCards" :key="stat.key">
-        <el-card
-          shadow="hover"
+        <div
           class="autops-metric-card"
-          :class="{ 'stat-card-clickable': stat.route }"
+          :class="{ 'is-clickable': stat.route }"
           v-loading="statsLoading"
           @click="stat.route && router.push(stat.route)"
         >
-          <div class="stat-card-inner">
-            <div class="stat-icon-wrap" :style="{ background: stat.bg, color: stat.color }">
-              <el-icon :size="24"><component :is="stat.icon" /></el-icon>
-            </div>
-            <el-statistic :title="stat.label" :value="stat.value" class="stat-body">
-              <template #suffix v-if="stat.suffix">{{ stat.suffix }}</template>
-            </el-statistic>
+          <div class="metric-icon" :class="stat.bgClass">
+            <el-icon :size="20"><component :is="stat.icon" /></el-icon>
           </div>
-        </el-card>
+          <div class="metric-label">{{ stat.label }}</div>
+          <div class="metric-value">{{ stat.value }}<span v-if="stat.suffix" class="metric-suffix">{{ stat.suffix }}</span></div>
+        </div>
       </el-col>
     </el-row>
 
@@ -39,7 +33,7 @@
     <el-card class="main-card">
       <template #header>
         <div class="card-header">
-          <span class="card-title">最近执行记录</span>
+          <span class="autops-card-title">最近执行记录</span>
           <el-button plain type="primary" @click="router.push('/executions')">
             查看全部 <el-icon><ArrowRight /></el-icon>
           </el-button>
@@ -60,7 +54,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusType(row.status)" size="small" effect="light">
+            <el-tag :type="(statusType(row.status)) as TagType" size="small" effect="light">
               {{ statusLabel(row.status) }}
             </el-tag>
           </template>
@@ -113,6 +107,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
@@ -137,8 +132,7 @@ const statCards = reactive([
     label: '脚本数',
     value: 0,
     icon: Document,
-    bg: '#e8f3ff',
-    color: '#165dff',
+    bgClass: 'bg-brand',
     route: '/scripts',
   },
   {
@@ -146,8 +140,7 @@ const statCards = reactive([
     label: 'Playbook数',
     value: 0,
     icon: VideoPlay,
-    bg: '#fff7e8',
-    color: '#ff7d00',
+    bgClass: 'bg-warning',
     route: '/playbooks',
   },
   {
@@ -155,8 +148,7 @@ const statCards = reactive([
     label: '执行数',
     value: 0,
     icon: List,
-    bg: '#e8ffea',
-    color: '#00b42a',
+    bgClass: 'bg-success',
     route: '/executions',
   },
   {
@@ -165,8 +157,7 @@ const statCards = reactive([
     value: 0,
     suffix: '%',
     icon: CircleCheck,
-    bg: '#f0e8ff',
-    color: '#722ed1',
+    bgClass: 'bg-purple',
     route: '/executions',
   },
 ])
@@ -221,8 +212,8 @@ const statusMap: Record<string, { type: '' | 'success' | 'warning' | 'danger' | 
   rolled_back: { type: 'info', label: '已回滚' },
 }
 
-function statusType(status: string) {
-  return statusMap[status]?.type ?? 'info'
+function statusType(status: string): TagType {
+  return (statusMap[status]?.type ?? 'info') as TagType
 }
 
 function statusLabel(status: string) {
@@ -367,60 +358,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
-
-.stat-row {
-  margin-bottom: var(--autops-space-lg);
-}
-
-
-
-.autops-metric-card-clickable {
-  cursor: pointer;
-}
-
-.autops-metric-card-clickable:hover {
-  transform: translateY(-2px);
-}
-
-.autops-metric-card-inner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--autops-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-body {
-  flex: 1;
-}
-
-.stat-body :deep(.el-statistic__head) {
-  font-size: var(--autops-font-13);
-  color: var(--autops-info);
-  margin-bottom: 4px;
-}
-
-.stat-body :deep(.el-statistic__content) {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--autops-text-1);
-}
-
 .main-card {
   margin-bottom: var(--autops-space-lg);
 }
-
-
-
 
 
 .text-muted {

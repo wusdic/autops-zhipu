@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { computed } from "vue"
 
 const props = withDefaults(defineProps<{

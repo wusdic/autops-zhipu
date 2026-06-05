@@ -18,15 +18,15 @@
         v-for="(item, idx) in filteredItems"
         :key="idx"
         :timestamp="formatTime(item.time || item.created_at)"
-        :type="typeMap[item.type || item.severity] || 'primary'"
+        :type="(typeMap[item.type || item.severity || ''] ?? 'primary') as TagType"
         :hollow="item.hollow || false"
         placement="top"
       >
         <el-card shadow="hover" :body-style="{ padding: '12px 16px' }">
           <div class="timeline-item-header">
             <span v-if="item.title" class="timeline-item-title">{{ item.title }}</span>
-            <el-tag v-if="item.type" size="small" :type="typeMap[item.type] || ''">{{ item.type }}</el-tag>
-            <el-tag v-if="item.severity && !item.type" size="small" :type="typeMap[item.severity] || ''">{{ severityLabels[item.severity] || item.severity }}</el-tag>
+            <el-tag v-if="item.type" size="small" :type="(typeMap[item.type] || '') as TagType">{{ item.type }}</el-tag>
+            <el-tag v-if="item.severity && !item.type" size="small" :type="(typeMap[item.severity] || '') as TagType">{{ severityLabels[item.severity] || item.severity }}</el-tag>
           </div>
           <div class="timeline-item-desc">{{ item.description || item.content || item.message }}</div>
           <div v-if="item.user || item.operator" class="timeline-item-meta">
@@ -48,6 +48,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed } from 'vue'
 
 interface TimelineItem {
@@ -73,7 +74,7 @@ const props = withDefaults(defineProps<{
   emptyText?: string
   hasMore?: boolean
 }>(), {
-  title: '',
+  title: 'primary',
   showFilter: false,
   emptyText: '暂无时间线记录',
   hasMore: false,
@@ -82,7 +83,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits(['load-more', 'filter'])
 
 const activeType = ref('')
-const typeMap: Record<string, string> = {
+const typeMap: Record<string, TagType> = {
   critical: 'danger', high: 'warning', warning: 'warning',
   info: 'primary', success: 'success', error: 'danger',
   alert: 'danger', event: 'primary', action: 'warning',

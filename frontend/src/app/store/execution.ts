@@ -27,7 +27,7 @@ export const useExecutionStore = defineStore('execution', () => {
   }
 
   async function fetchLogs(id: string, params?: Record<string, any>) {
-    const res = await automationService.getExecutionLogs(id, params)
+    const res = await automationService.getExecution(id)
     return res.data
   }
 

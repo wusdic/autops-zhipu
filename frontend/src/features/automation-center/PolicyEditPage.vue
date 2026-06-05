@@ -1,5 +1,11 @@
 <template>
-  <div class="policy-edit-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">策略编辑</div>
+      <div class="autops-page-desc">编辑自动化执行策略</div>
+    </div>
+
     <el-card shadow="never">
       <template #header>
         <div class="autops-card-header">
@@ -96,7 +102,7 @@
     </el-card>
 
     <!-- JSON Preview -->
-    <el-card shadow="never" style="margin-top: 16px">
+    <el-card shadow="never" class="mt-lg">
       <template #header>
         <span>策略预览 (JSON)</span>
       </template>
@@ -134,12 +140,12 @@ const policyId = computed(() => (route.query.id as string) || '')
 const isEdit = computed(() => !!policyId.value)
 
 const formData = reactive<PolicyForm>({
-  name: '',
-  description: '',
-  trigger_type: '',
-  conditions: '',
-  actions: '',
-  risk_level: '',
+  name: 'primary',
+  description: 'primary',
+  trigger_type: 'primary',
+  conditions: 'primary',
+  actions: 'primary',
+  risk_level: 'primary',
   enabled: true,
 })
 
@@ -211,7 +217,7 @@ async function loadPolicy() {
     formData.name = data.name ?? ''
     formData.description = data.description ?? ''
     formData.trigger_type = data.trigger_type ?? ''
-    formData.conditions = data.conditions ? JSON.stringify(data.conditions, null, 2) : ''
+    formData.conditions = data.conditions ? JSON.stringify(data.conditions, null, 2) : 'primary'
     formData.actions = Array.isArray(data.actions) ? data.actions.join('\n') : (data.actions ?? '')
     formData.risk_level = data.risk_level ?? ''
     formData.enabled = data.enabled ?? true

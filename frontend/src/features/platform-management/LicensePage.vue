@@ -184,7 +184,7 @@
               </ul>
             </div>
 
-            <div class="info-section" style="margin-top: 16px">
+            <div class="info-section" class="mt-lg">
               <div class="info-title">联系授权</div>
               <div class="text-secondary">
                 如需获取或更新授权，请联系商务团队：
@@ -215,18 +215,18 @@ const licenseKey = ref('')
 const fileList = ref<any[]>([])
 
 const license = reactive({
-  type: '',
-  holder: '',
-  expires_at: '',
+  type: 'primary',
+  holder: 'primary',
+  expires_at: 'primary',
   expired: false,
-  serial: '',
+  serial: 'primary',
   max_assets: 0,
   current_assets: 0,
   max_nodes: 0,
   current_nodes: 0,
   max_users: 0,
   modules: '' as string | string[],
-  issued_at: '',
+  issued_at: 'primary',
 })
 
 // ── Computed ─────────────────────────────────────────────

@@ -14,7 +14,7 @@
         <span class="autops-card-title">报告列表</span>
         <div class="card-header__actions">
           <el-button :icon="Refresh" circle size="small" @click="loadReports" />
-          <el-button type="primary" size="small" @click="navToReportFromInspection()">
+          <el-button type="primary" size="small" @click="navToReportFromInspection('')">
             <el-icon><Document /></el-icon> 生成报告
           </el-button>
         </div>
@@ -115,7 +115,7 @@
       </el-descriptions>
 
       <!-- Check Result Summary -->
-      <div v-if="detailData?.items && detailData.items.length" style="margin-top: 16px">
+      <div v-if="detailData?.items && detailData.items.length" class="mt-lg">
         <h4 style="margin-bottom: 8px; font-size: 14px; color: #1d2129">检查结果明细</h4>
         <el-table stripe :data="detailData.items"border size="small" max-height="300">
           <el-table-column prop="check_item" label="检查项" min-width="160" show-overflow-tooltip />
@@ -128,7 +128,7 @@
           </el-table-column>
           <el-table-column prop="severity" label="严重级别" width="100" align="center">
             <template #default="{ row }">
-              <el-tag v-if="row.severity" :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag>
+              <el-tag v-if="row.severity" :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag>
               <span v-else>-</span>
             </template>
           </el-table-column>
@@ -145,6 +145,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
@@ -161,7 +162,7 @@ const detailData = ref<any>(null)
 const { navToReportFromInspection } = useWorkflowNav()
 
 const filters = reactive({
-  keyword: '',
+  keyword: 'primary',
 })
 
 const pagination = reactive({
@@ -185,9 +186,9 @@ function rateColor(rate: number): string {
   return '#f53f3f'
 }
 
-function severityType(severity: string): string {
-  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: '', low: 'info' }
-  return map[severity] || 'info'
+function severityType(severity: string): TagType {
+  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }
+  return (map[severity] || 'info') as TagType
 }
 
 // ── Data Loading ───────────────────────────────────────────────────

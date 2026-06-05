@@ -54,7 +54,7 @@
           <el-table-column prop="title" label="报告名" min-width="200" show-overflow-tooltip />
           <el-table-column prop="type" label="类型" width="120" align="center">
             <template #default="{ row }">
-              <el-tag :type="typeTagType(row.type)" size="small">{{ typeLabel(row.type) }}</el-tag>
+              <el-tag :type="(typeTagType(row.type)) as TagType" size="small">{{ typeLabel(row.type) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="generated_at" label="生成时间" width="170">
@@ -100,7 +100,7 @@
       <el-descriptions v-if="archiveDetail" :column="2" border size="small">
         <el-descriptions-item label="报告名" :span="2">{{ archiveDetail.title || '-' }}</el-descriptions-item>
         <el-descriptions-item label="类型">
-          <el-tag :type="typeTagType(archiveDetail.type)" size="small">{{ typeLabel(archiveDetail.type) }}</el-tag>
+          <el-tag :type="(typeTagType(archiveDetail.type)) as TagType" size="small">{{ typeLabel(archiveDetail.type) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="文件大小">{{ formatSize(archiveDetail.file_size) }}</el-descriptions-item>
         <el-descriptions-item label="生成时间" :span="2">{{ formatTime(archiveDetail.generated_at) }}</el-descriptions-item>
@@ -120,6 +120,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
@@ -132,8 +133,8 @@ const detailVisible = ref(false)
 const archiveDetail = ref<any>(null)
 
 const filters = reactive({
-  keyword: '',
-  type: '',
+  keyword: 'primary',
+  type: 'primary',
 })
 
 const pagination = reactive({
@@ -167,11 +168,11 @@ function typeLabel(t: string): string {
   return map[t] || t || '-'
 }
 
-function typeTagType(t: string): string {
+function typeTagType(t: string): TagType {
   const map: Record<string, string> = {
-    inspection: '', anomaly: 'danger', automation: 'warning', asset: 'success', compliance: 'info',
+    inspection: 'primary', anomaly: 'danger', automation: 'warning', asset: 'success', compliance: 'info',
   }
-  return map[t] || 'info'
+  return (map[t] || 'info') as TagType
 }
 
 // ── Data Loading ───────────────────────────────────────────────────

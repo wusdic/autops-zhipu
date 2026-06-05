@@ -195,14 +195,14 @@ const activeTab = ref('structured')
 const editorRef = ref<HTMLElement>()
 
 const form = reactive({
-  title: '', category: 'incident_response', tags: [] as string[],
+  title: 'primary', category: 'incident_response', tags: [] as string[],
   applicable_asset_types: [] as string[], risk_level: 'low', auto_executable: false,
   trigger_events: [] as { event: string; condition: string }[],
   diagnosis_steps: [] as { name: string; command: string; description: string }[],
   action_steps: [] as { name: string; type: string; target: string; description: string }[],
   verification_steps: [] as { name: string; expected: string }[],
-  related_policy_id: '', related_playbook_id: '', related_script_id: '',
-  content: '',
+  related_policy_id: 'primary', related_playbook_id: 'primary', related_script_id: 'primary',
+  content: 'primary',
 })
 
 function goBack() { router.push('/knowledge') }

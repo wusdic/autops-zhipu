@@ -1,5 +1,5 @@
 <template>
-  <div class="knowledge-detail">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <el-button @click="goBack" :icon="ArrowLeft">返回知识列表</el-button>
@@ -25,7 +25,7 @@
               <el-dropdown-item command="version-history" :icon="Clock">
                 版本历史
               </el-dropdown-item>
-              <el-dropdown-item command="delete" :icon="Delete" style="color: #f53f3f">
+              <el-dropdown-item command="delete" :icon="Delete" class="text-danger">
                 删除
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -49,7 +49,7 @@
               <el-tag size="small">{{ typeLabel(article.article_type) }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="风险等级">
-              <el-tag :type="riskTagType(article.risk_level)" size="small">{{ article.risk_level }}</el-tag>
+              <el-tag :type="(riskTagType(article.risk_level)) as TagType" size="small">{{ article.risk_level }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="状态">
               <el-tag :type="article.status === 'published' ? 'success' : 'info'" size="small">
@@ -64,31 +64,31 @@
         </div>
 
         <!-- 正文内容 -->
-        <div class="autops-card" v-if="article.content" style="margin-top: 16px">
+        <div class="autops-card" v-if="article.content" class="mt-lg">
           <span class="autops-card-title">内容</span>
           <div v-html="renderMarkdown(article.content)" class="markdown-body" />
         </div>
 
         <!-- 诊断步骤 -->
-        <div class="autops-card" v-if="article.diagnosis_steps" style="margin-top: 16px">
+        <div class="autops-card" v-if="article.diagnosis_steps" class="mt-lg">
           <span class="autops-card-title">诊断步骤</span>
           <div v-html="renderMarkdown(article.diagnosis_steps)" class="markdown-body" />
         </div>
 
         <!-- 处置步骤 -->
-        <div class="autops-card" v-if="article.resolution_steps" style="margin-top: 16px">
+        <div class="autops-card" v-if="article.resolution_steps" class="mt-lg">
           <span class="autops-card-title">处置步骤</span>
           <div v-html="renderMarkdown(article.resolution_steps)" class="markdown-body" />
         </div>
 
         <!-- 验证步骤 -->
-        <div class="autops-card" v-if="article.verification_steps" style="margin-top: 16px">
+        <div class="autops-card" v-if="article.verification_steps" class="mt-lg">
           <span class="autops-card-title">验证步骤</span>
           <div v-html="renderMarkdown(article.verification_steps)" class="markdown-body" />
         </div>
 
         <!-- Rating / Useful Feedback -->
-        <div class="autops-card" style="margin-top: 16px">
+        <div class="autops-card" class="mt-lg">
           <span class="autops-card-title">评价与反馈</span>
           <div class="feedback-section">
             <div class="feedback-row">
@@ -106,7 +106,7 @@
               <span style="margin-left: 16px">有用 {{ article.useful_count || 0 }} 人</span>
             </div>
             <div class="feedback-quick">
-              <el-button-group style="margin-top: 12px">
+              <el-button-group class="mt-md">
                 <el-button
                   :type="userFeedback === 'useful' ? 'success' : 'default'"
                   size="small"
@@ -127,7 +127,7 @@
         </div>
 
         <!-- Related Articles -->
-        <div class="autops-card" style="margin-top: 16px" v-if="relatedArticles.length> 0">
+        <div class="autops-card" class="mt-lg" v-if="relatedArticles.length> 0">
           <span class="autops-card-title">相关文章</span>
           <el-table stripe :data="relatedArticles"size="small" @row-click="goToRelated">
             <el-table-column prop="title" label="标题" min-width="260" show-overflow-tooltip>
@@ -137,12 +137,12 @@
             </el-table-column>
             <el-table-column label="类型" width="130">
               <template #default="{ row }">
-                <el-tag :type="typeTagColor(row.article_type)" size="small">{{ typeLabel(row.article_type) }}</el-tag>
+                <el-tag :type="(typeTagColor(row.article_type)) as TagType" size="small">{{ typeLabel(row.article_type) }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="风险" width="80">
               <template #default="{ row }">
-                <el-tag :type="riskTagType(row.risk_level)" size="small">{{ row.risk_level }}</el-tag>
+                <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small">{{ row.risk_level }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="浏览" width="80" align="center">
@@ -178,6 +178,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
@@ -227,18 +228,18 @@ function typeTagColor(t: string) {
   const m: Record<string, string> = {
     incident_summary: 'warning',
     runbook: 'success',
-    standard_solution: '',
+    standard_solution: 'primary',
     faq: 'info',
-    best_practice: '',
+    best_practice: 'primary',
   }
   return m[t] || ''
 }
 
 /** 风险等级 Tag 类型 */
-function riskTagType(level: string) {
-  if (level === 'high') return 'danger'
-  if (level === 'medium') return 'warning'
-  return 'info'
+function riskTagType(level: string): TagType {
+  if (level === 'high') return ('danger') as TagType
+  if (level === 'medium') return ('warning') as TagType
+  return ('info') as TagType
 }
 
 /** 简易 Markdown 渲染 */

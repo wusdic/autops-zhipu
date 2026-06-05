@@ -87,7 +87,7 @@
     </el-row>
 
     <!-- Results Table -->
-    <div class="autops-card" style="margin-top: 16px">
+    <div class="autops-card" class="mt-lg">
       <div class="autops-card-header" v-if="hasSearched">
         <div class="autops-card-title">搜索结果</div>
         <el-tag type="info" size="small">共 {{ searchResults.length }} 条</el-tag>
@@ -262,7 +262,7 @@ function resetSearch() {
   hasSearched.value = false
 }
 
-function onSortChange({ prop, order }: { prop: string; order: string | null }) {
+function onSortChange({ prop, order }: { prop: string | null; order: string | null }) {
   if (!prop) return
   const multiplier = order === 'ascending' ? 1 : -1
   searchResults.value.sort((a: any, b: any) => ((a[prop] || 0) - (b[prop] || 0)) * multiplier)

@@ -107,7 +107,7 @@
 
       <el-table-column prop="group" label="分组" width="120" sortable>
         <template #default="{ row }">
-          <el-tag size="small" :type="groupTagType(row.group)">{{ groupLabel(row.group) }}</el-tag>
+          <el-tag size="small" :type="(groupTagType(row.group)) as TagType">{{ groupLabel(row.group) }}</el-tag>
         </template>
       </el-table-column>
 
@@ -211,6 +211,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -247,16 +248,16 @@ function groupLabel(g: string) {
   return groupMap[g] || g
 }
 
-const groupTagTypes: Record<string, string> = {
-  general: '',
+const groupTagTypes: Record<string, TagType> = {
+  general: 'primary',
   security: 'danger',
   llm: 'warning',
   collector: 'success',
   notification: 'info',
 }
 
-function groupTagType(g: string) {
-  return groupTagTypes[g] || ''
+function groupTagType(g: string): TagType {
+  return (groupTagTypes[g] || '') as TagType
 }
 
 // ── State ──────────────────────────────────────────────
@@ -277,10 +278,10 @@ const isEditing = ref(false)
 const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const formData = reactive({
-  id: '',
-  key: '',
-  value: '',
-  description: '',
+  id: 'primary',
+  key: 'primary',
+  value: 'primary',
+  description: 'primary',
   group: 'general',
   is_secret: false,
 })
@@ -375,7 +376,7 @@ async function loadConfigs() {
 }
 
 // ── Inline Edit ────────────────────────────────────────
-function startInlineEdit(row: ConfigItem) {
+function startInlineEdit(row: any) {
   editingId.value = row.id
   editValue.value = row.is_secret && !revealedSet.value.has(row.id) ? '' : row.value
 }
@@ -385,7 +386,7 @@ function cancelInlineEdit() {
   editValue.value = ''
 }
 
-async function saveInlineEdit(row: ConfigItem) {
+async function saveInlineEdit(row: any) {
   saving.value = true
   try {
     await api.put(R.CONFIG_DETAIL(row.id), { value: editValue.value })
@@ -431,7 +432,7 @@ function openCreateDialog() {
   dialogVisible.value = true
 }
 
-function openEditDialog(row: ConfigItem) {
+function openEditDialog(row: any) {
   isEditing.value = true
   formData.id = row.id
   formData.key = row.key
@@ -483,7 +484,7 @@ async function submitForm() {
 }
 
 // ── Delete ─────────────────────────────────────────────
-function confirmDelete(row: ConfigItem) {
+function confirmDelete(row: any) {
   deleteTarget.value = row
   deleteDialogVisible.value = true
 }

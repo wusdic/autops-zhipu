@@ -182,6 +182,10 @@ body {
 .mb-xl  { margin-bottom: var(--autops-space-xl); }
 .mb-2xl { margin-bottom: var(--autops-space-2xl); }
 
+.ml-auto { margin-left: auto; }
+.mr-auto { margin-right: auto; }
+.p-0     { padding: 0 !important; }
+
 /* ─── 5. 页面结构 ─── */
 .autops-page-container {
   padding: var(--autops-space-xl);
@@ -292,36 +296,58 @@ body {
   gap: var(--autops-space-xs);
 }
 
-/* 图标背景色（统一4种语义 + 2种辅助） */
+/* 图标背景色（统一4种语义 + 3种辅助） */
 .metric-icon.bg-brand   { background: var(--autops-primary-light-5); color: var(--autops-primary); }
-.metric-icon.bg-success  { background: var(--autops-success-light); color: var(--autops-success); }
-.metric-icon.bg-warning  { background: var(--autops-warning-light); color: var(--autops-warning); }
-.metric-icon.bg-danger   { background: var(--autops-danger-light);  color: var(--autops-danger); }
-.metric-icon.bg-info     { background: var(--autops-info-light);    color: var(--autops-info); }
-.metric-icon.bg-purple   { background: #f5e8ff; color: #722ed1; }
+.metric-icon.bg-success { background: var(--autops-success-light);   color: var(--autops-success); }
+.metric-icon.bg-warning { background: var(--autops-warning-light);   color: var(--autops-warning); }
+.metric-icon.bg-danger  { background: var(--autops-danger-light);    color: var(--autops-danger); }
+.metric-icon.bg-info    { background: var(--autops-info-light);      color: var(--autops-info); }
+.metric-icon.bg-purple  { background: var(--autops-purple-light);    color: var(--autops-purple); }
+.metric-icon.bg-cyan    { background: var(--autops-cyan-light);      color: var(--autops-cyan); }
 
 /* ─── 8. 工具栏（搜索/过滤/操作按钮区） ─── */
+/*
+ * 布局原则：toolbar-right（操作按钮）永远不换行
+ * toolbar-left（过滤条件）可换行
+ * 两者之间用 gap 隔开，不允许按钮混入过滤条件同行
+ */
 .autops-toolbar {
   display: flex;
-  align-items: center;
-  gap: var(--autops-space-md);
-  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--autops-space-sm);
   margin-bottom: var(--autops-space-lg);
+  flex-wrap: nowrap;            /* 整行不换行，buttons 永远在右侧 */
 }
 
 .autops-toolbar-left {
   display: flex;
   align-items: center;
-  gap: var(--autops-space-md);
-  flex-wrap: wrap;
+  gap: var(--autops-space-sm);
+  flex-wrap: wrap;              /* 过滤条件可换行 */
   flex: 1;
+  min-width: 0;
+}
+
+.autops-toolbar-left .el-input,
+.autops-toolbar-left .el-select,
+.autops-toolbar-left .el-date-editor {
+  width: 200px;                 /* 统一输入框宽度，防止撑满整行 */
 }
 
 .autops-toolbar-right {
   display: flex;
   align-items: center;
   gap: var(--autops-space-sm);
-  flex-shrink: 0;
+  flex-shrink: 0;               /* 按钮区不收缩 */
+  padding-top: 1px;             /* 与 el-input 视觉对齐 */
+}
+
+/* 工具栏内通用按钮间距（操作列按钮） */
+.autops-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
 }
 
 /* ─── 9. 状态标签（唯一标准） ─── */
@@ -662,14 +688,80 @@ body {
 }
 
 /* ─── 18. 表格操作列统一标准 ─── */
-/* 操作列宽度: 1-2个按钮 → width="140", 3个按钮 → width="180", 4+个按钮 → width="240" */
-/* 操作按钮统一使用: <el-button size="small" plain type="primary|success|warning|danger|info"> */
-/* 查看类: type="primary", 确认类: type="success", 警告/编辑: type="warning", 删除/拒绝: type="danger" */
+/* 操作列宽度: 1-2个按钮 → width="120", 3个按钮 → width="180", 4+个按钮 → width="240" */
+/* 操作按钮统一: <el-button size="small" plain type="primary|danger"> */
+/* 查看/编辑: type="primary"，删除/拒绝: type="danger" */
 
-/* ─── 19. 废弃 class 别名（向后兼容） ─── */
-/* autops-page-subtitle 已废弃，统一使用 autops-page-desc */
+/* ─── 19. 页面头部（统一布局）─── */
+/*
+ * 标准结构:
+ * <div class="autops-page-header autops-page-header--between">
+ *   <div>
+ *     <div class="autops-page-title">标题</div>
+ *     <div class="autops-page-desc">描述</div>
+ *   </div>
+ *   <div class="autops-header-actions">
+ *     <el-button type="primary">操作</el-button>
+ *   </div>
+ * </div>
+ */
+.autops-page-header--between {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--autops-space-xl);
+}
+
+/* ─── 20. 统计指标行（页面顶部） ─── */
+/*
+ * 标准: <el-row :gutter="16" class="metric-row">
+ *         <el-col :span="6"> <div class="autops-metric-card"> ... </div> </el-col>
+ *       </el-row>
+ * 统一使用 :span="6"（4列），不使用 el-statistic
+ */
+.metric-row {
+  margin-bottom: var(--autops-space-lg);
+}
+
+/* ─── 21. 主内容卡片（el-card 包装） ─── */
+.main-card {
+  margin-bottom: var(--autops-space-lg);
+}
+
+/* el-card 内嵌表格时去掉 body padding */
+.main-card .el-card__body {
+  padding: 0 !important;
+}
+
+/* ─── 22. margin/padding 工具类扩展 ─── */
+.mt-xs  { margin-top: var(--autops-space-xs); }
+.mt-sm  { margin-top: var(--autops-space-sm); }
+.mt-md  { margin-top: var(--autops-space-md); }
+.mt-lg  { margin-top: var(--autops-space-lg); }
+.mt-xl  { margin-top: var(--autops-space-xl); }
+.mt-2xl { margin-top: var(--autops-space-2xl); }
+
+.ml-sm  { margin-left: var(--autops-space-sm); }
+.mr-sm  { margin-right: var(--autops-space-sm); }
+
+/* flex 工具 */
+.flex       { display: flex; }
+.flex-col   { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.flex-1     { flex: 1; }
+.gap-sm     { gap: var(--autops-space-sm); }
+.gap-md     { gap: var(--autops-space-md); }
+.gap-lg     { gap: var(--autops-space-lg); }
+
+/* ─── 23. 废弃 class 别名（向后兼容） ─── */
 .autops-page-subtitle {
   font-size: var(--autops-font-13);
   color: var(--autops-text-3);
   margin-top: var(--autops-space-xs);
+}
+
+/* el-card shadow=never 在全局统一 */
+.el-card.is-never-shadow {
+  box-shadow: none !important;
 }

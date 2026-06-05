@@ -17,7 +17,7 @@
     </div>
 
     <!-- 分类标签 -->
-    <el-tabs v-model="activeCategory" class="mt-4" @tab-change="loadData">
+    <el-tabs v-model="activeCategory" class="mt-lg" @tab-change="loadData">
       <el-tab-pane label="页面检查" name="page_check" />
       <el-tab-pane label="配置检查" name="config_check" />
       <el-tab-pane label="日志检查" name="log_check" />
@@ -48,7 +48,7 @@
     </el-card>
 
     <!-- 规则列表 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <el-table stripe :data="rules" v-loading="loading"border>
         <el-table-column type="selection" width="50" />
         <el-table-column prop="name" label="规则名称" min-width="200" sortable />
@@ -65,7 +65,7 @@
         </el-table-column>
         <el-table-column prop="severity" label="严重度" width="100">
           <template #default="{ row }">
-            <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
+            <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="asset_count" label="适用资产" width="100" />
@@ -84,7 +84,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="mt-4" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+      <el-pagination class="mt-lg" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
         :total="pagination.total" :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next"
         @size-change="loadData" @current-change="loadData" />
     </el-card>
@@ -147,7 +147,7 @@
         <el-descriptions-item label="异常">{{ simResult.failed || 0 }}</el-descriptions-item>
         <el-descriptions-item label="耗时">{{ simResult.duration || '-' }}</el-descriptions-item>
       </el-descriptions>
-      <el-table stripe :data="simResult.details || []" class="mt-4"max-height="300">
+      <el-table stripe :data="simResult.details || []" class="mt-lg"max-height="300">
         <el-table-column prop="asset_name" label="资产名称" />
         <el-table-column prop="result" label="检查结果">
           <template #default="{ row }">
@@ -162,6 +162,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
@@ -177,13 +178,13 @@ const activeCategory = ref('all')
 const rules = ref<any[]>([])
 const formRef = ref()
 
-const filters = reactive({ keyword: '', severity: '' })
+const filters = reactive({ keyword: 'primary', severity: 'primary'})
 const pagination = reactive({ page: 1, size: 20, total: 0 })
 const simResult = ref<any>({})
 
 const form = reactive({
-  name: '', category: '', check_target: '', condition: '',
-  severity: 'medium', asset_types: [] as string[], remediation: '', description: '',
+  name: 'primary', category: 'primary', check_target: 'primary', condition: 'primary',
+  severity: 'medium', asset_types: [] as string[], remediation: 'primary', description: 'primary',
 })
 const formRules = {
   name: [{ required: true, message: '请输入规则名称', trigger: 'blur' }],
@@ -195,8 +196,8 @@ const categoryMap: Record<string, string> = {
   page_check: '页面检查', config_check: '配置检查',
   log_check: '日志检查', baseline_check: '基线检查', api_check: 'API检查',
 }
-function severityType(s: string) {
-  return { critical: 'danger', high: 'warning', medium: '', low: 'info' }[s] || 'info'
+function severityType(s: string): TagType {
+  return ({ critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }[s] || 'info') as TagType
 }
 function severityLabel(s: string) {
   return { critical: '紧急', high: '高危', medium: '中危', low: '低危' }[s] || s
@@ -221,7 +222,7 @@ async function loadData() {
 function openDialog(row?: any) {
   editing.value = row || null
   if (row) Object.assign(form, row)
-  else Object.assign(form, { name: '', category: '', check_target: '', condition: '', severity: 'medium', asset_types: [], remediation: '', description: '' })
+  else Object.assign(form, { name: 'primary', category: 'primary', check_target: 'primary', condition: 'primary', severity: 'medium', asset_types: [], remediation: 'primary', description: 'primary'})
   dialogVisible.value = true
 }
 

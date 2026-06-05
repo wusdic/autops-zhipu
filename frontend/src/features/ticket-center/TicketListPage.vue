@@ -234,14 +234,14 @@
         </el-table-column>
         <el-table-column prop="priority" label="优先级" width="90" align="center">
           <template #default="{ row }">
-            <el-tag :type="priorityType(row.priority)" size="small" effect="dark">
+            <el-tag :type="(priorityType(row.priority)) as TagType" size="small" effect="dark">
               {{ priorityLabel(row.priority) }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusType(row.status)" size="small">
+            <el-tag :type="(statusType(row.status)) as TagType" size="small">
               <el-icon v-if="row.status === 'overdue'" style="margin-right: 2px"><WarningFilled /></el-icon>
               {{ statusLabel(row.status) }}
             </el-tag>
@@ -424,6 +424,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -471,12 +472,12 @@ const stats = reactive({
 })
 
 const filters = reactive({
-  status: '',
-  priority: '',
-  source: '',
-  assignee: '',
+  status: 'primary',
+  priority: 'primary',
+  source: 'primary',
+  assignee: 'primary',
   dateRange: null as [string, string] | null,
-  keyword: '',
+  keyword: 'primary',
 })
 
 const pagination = reactive({
@@ -500,9 +501,9 @@ function formatTime(val: string | null | undefined): string {
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
-function priorityType(p: string): string {
-  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: '', low: 'info' }
-  return map[p] || 'info'
+function priorityType(p: string): TagType {
+  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }
+  return (map[p] || 'info') as TagType
 }
 
 function priorityLabel(p: string): string {
@@ -510,16 +511,16 @@ function priorityLabel(p: string): string {
   return map[p] || p || '-'
 }
 
-function statusType(s: string): string {
+function statusType(s: string): TagType {
   const map: Record<string, string> = {
     open: 'warning',
-    in_progress: '',
+    in_progress: 'primary',
     pending_approval: 'info',
     resolved: 'success',
     closed: 'info',
     overdue: 'danger',
   }
-  return map[s] || 'info'
+  return (map[s] || 'info') as TagType
 }
 
 function statusLabel(s: string): string {
@@ -698,12 +699,12 @@ const createDialogVisible = ref(false)
 const createSubmitting = ref(false)
 const createFormRef = ref<FormInstance>()
 const createForm = reactive({
-  title: '',
-  description: '',
+  title: 'primary',
+  description: 'primary',
   priority: 'medium',
-  assigned_to: '',
-  related_alert_id: '',
-  related_asset_id: '',
+  assigned_to: 'primary',
+  related_alert_id: 'primary',
+  related_asset_id: 'primary',
 })
 
 const createRules: FormRules = {
@@ -973,7 +974,7 @@ function generateCsv() {
     t.priority || '',
     t.status || '',
     t.assigned_to || t.assigned_to_name || '',
-    t.sla_deadline ? formatTime(t.sla_deadline) : '',
+    t.sla_deadline ? formatTime(t.sla_deadline) : 'primary',
     formatTime(t.created_at),
   ])
   const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')

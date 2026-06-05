@@ -1,5 +1,11 @@
 <template>
-  <div class="security-baseline-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">安全基线</div>
+      <div class="autops-page-desc">查看和管理资产安全合规基线检查</div>
+    </div>
+
     <!-- Search & Filter -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="queryForm" @submit.prevent="handleSearch">
@@ -138,9 +144,9 @@ const drawerVisible = ref(false)
 const currentRow = ref<BaselineRecord | null>(null)
 
 const queryForm = reactive({
-  asset_name: '',
-  baseline_name: '',
-  status: '',
+  asset_name: 'primary',
+  baseline_name: 'primary',
+  status: 'primary',
 })
 
 const pagination = reactive({
@@ -197,7 +203,7 @@ function handleReset() {
   handleSearch()
 }
 
-function handleDetail(row: BaselineRecord) {
+function handleDetail(row: any) {
   currentRow.value = row
   drawerVisible.value = true
 }

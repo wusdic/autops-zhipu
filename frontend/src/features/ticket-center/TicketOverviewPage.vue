@@ -1,22 +1,35 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">工单总览</div>
+    <div class="autops-page-header autops-page-header--between">
+      <div>
+        <div class="autops-page-title">工单总览</div>
+        <div class="autops-page-desc">查看工单整体状态与处理进度</div>
+      </div>
+      <div class="autops-header-actions">
+        <el-button type="primary" @click="router.push('/tickets/create')"><el-icon><Plus /></el-icon>新建工单</el-button>
+      </div>
     </div>
 
-    <!-- SLA 看板 -->
-    <el-row :gutter="16" style="margin-bottom: 16px">
-      <el-col :span="6" v-for="card in statCards" :key="card.label">
-        <el-card shadow="hover" v-loading="statsLoading">
-          <el-statistic :title="card.label" :value="card.value" />
-        </el-card>
+    <!-- 统计卡片 -->
+    <el-row :gutter="16" class="metric-row">
+      <el-col :span="6" v-for="stat in statCards" :key="stat.label">
+        <div
+          class="autops-metric-card"
+          v-loading="statsLoading"
+        >
+          <div class="metric-icon" :class="stat.bgClass">
+            <el-icon :size="20"><component :is="stat.icon" /></el-icon>
+          </div>
+          <div class="metric-label">{{ stat.label }}</div>
+          <div class="metric-value">{{ stat.value }}</div>
+        </div>
       </el-col>
     </el-row>
 
     <!-- SLA 临近到期 -->
-    <el-card v-if="slaWarnings.length" style="margin-bottom: 16px">
+    <el-card v-if="slaWarnings.length" class="main-card">
       <template #header>
-        <div style="display:flex;align-items:center;gap:8px">
+        <div class="autops-card-header">
           <el-icon color="#ff7d00"><Warning /></el-icon>
           <span>SLA 临近到期</span>
         </div>
@@ -25,7 +38,7 @@
         <el-table-column prop="title" label="工单标题" min-width="200" show-overflow-tooltip />
         <el-table-column prop="priority" label="优先级" width="80">
           <template #default="{ row }">
-            <el-tag size="small" :type="priorityType(row.priority)">{{ row.priority }}</el-tag>
+            <el-tag size="small" :type="(priorityType(row.priority)) as TagType">{{ row.priority }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="assignee_name" label="处理人" width="100" />
@@ -43,32 +56,32 @@
     </el-card>
 
     <!-- 状态分布 -->
-    <el-card style="margin-bottom: 16px">
+    <el-card class="main-card">
       <template #header>
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="autops-card-header">
           <span>工单状态分布</span>
           <el-button-group>
-            <el-button :type="timeView === 'day' ? 'primary' : ''" size="small" @click="timeView = 'day'">今日</el-button>
-            <el-button :type="timeView === 'week' ? 'primary' : ''" size="small" @click="timeView = 'week'">本周</el-button>
-            <el-button :type="timeView === 'month' ? 'primary' : ''" size="small" @click="timeView = 'month'">本月</el-button>
+            <el-button :type="timeView === 'day' ? 'primary' : 'default'" size="small" @click="timeView = 'day'">今日</el-button>
+            <el-button :type="timeView === 'week' ? 'primary' : 'default'" size="small" @click="timeView = 'week'">本周</el-button>
+            <el-button :type="timeView === 'month' ? 'primary' : 'default'" size="small" @click="timeView = 'month'">本月</el-button>
           </el-button-group>
         </div>
       </template>
       <el-row :gutter="24">
         <el-col :span="6" v-for="item in statusDistribution" :key="item.status">
-          <div style="text-align:center;padding:20px 0">
-            <div style="font-size:32px;font-weight:bold" :style="{color: item.color}">{{ item.count }}</div>
-            <div style="margin-top:8px;color:#666">{{ item.label }}</div>
+          <div class="status-dist-item">
+            <div class="status-dist-count" :style="{ color: item.color }">{{ item.count }}</div>
+            <div class="status-dist-label">{{ item.label }}</div>
           </div>
         </el-col>
       </el-row>
     </el-card>
 
     <!-- 我的待办 -->
-    <el-card style="margin-bottom: 16px">
+    <el-card class="main-card">
       <template #header>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span>我的待办工单</span>
+        <div class="autops-card-header">
+          <span class="autops-card-title">我的待办工单</span>
           <el-button type="primary" size="small" @click="router.push('/tickets/create')">新建工单</el-button>
         </div>
       </template>
@@ -83,12 +96,12 @@
         </el-table-column>
         <el-table-column prop="priority" label="优先级" width="80">
           <template #default="{ row }">
-            <el-tag size="small" :type="priorityType(row.priority)">{{ row.priority || '-' }}</el-tag>
+            <el-tag size="small" :type="(priorityType(row.priority)) as TagType">{{ row.priority || '-' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+            <el-tag size="small" :type="(statusType(row.status)) as TagType">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="created_at" label="创建时间" width="170">
@@ -111,7 +124,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+            <el-tag size="small" :type="(statusType(row.status)) as TagType">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="assignee_name" label="处理人" width="100" />
@@ -125,9 +138,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Warning } from '@element-plus/icons-vue'
+import { Warning, Document, Loading, CircleCheck, Plus } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
@@ -142,10 +156,10 @@ const myTickets = ref<any[]>([])
 const recentTickets = ref<any[]>([])
 
 const statCards = computed(() => [
-  { label: '工单总数', value: stats.value.total ?? 0 },
-  { label: '待处理', value: stats.value.open_count ?? stats.value.open ?? 0 },
-  { label: '处理中', value: stats.value.in_progress_count ?? stats.value.in_progress ?? 0 },
-  { label: '已关闭', value: stats.value.closed_count ?? stats.value.closed ?? 0 },
+  { label: '工单总数', value: stats.value.total ?? 0, icon: Document, bgClass: 'bg-brand' },
+  { label: '待处理', value: stats.value.open_count ?? stats.value.open ?? 0, icon: Warning, bgClass: 'bg-warning' },
+  { label: '处理中', value: stats.value.in_progress_count ?? stats.value.in_progress ?? 0, icon: Loading, bgClass: 'bg-brand' },
+  { label: '已关闭', value: stats.value.closed_count ?? stats.value.closed ?? 0, icon: CircleCheck, bgClass: 'bg-success' },
 ])
 
 const statusDistribution = computed(() => [
@@ -159,11 +173,11 @@ const slaWarnings = computed(() => {
   return myTickets.value.filter((t: any) => t.sla_remaining && t.status !== 'closed' && t.status !== 'resolved').slice(0, 5)
 })
 
-function priorityType(p: string) {
-  return { critical: 'danger', high: 'danger', medium: 'warning', low: 'info' }[p] || 'info'
+function priorityType(p: string): TagType {
+  return ({ critical: 'danger', high: 'danger', medium: 'warning', low: 'info' }[p] || 'info') as TagType
 }
-function statusType(s: string) {
-  return { open: 'warning', in_progress: '', pending: 'info', resolved: 'success', closed: 'success', cancelled: 'info' }[s] || 'info'
+function statusType(s: string): TagType {
+  return ({ open: 'warning', in_progress: 'primary', pending: 'info', resolved: 'success', closed: 'success', cancelled: 'info' }[s] || 'info') as TagType
 }
 function statusLabel(s: string) {
   return { open: '待处理', in_progress: '处理中', pending: '待分配', resolved: '已解决', closed: '已关闭', cancelled: '已取消' }[s] || s || '-'
@@ -201,3 +215,25 @@ async function fetchRecent() {
 
 onMounted(() => { fetchStats(); fetchMyTickets(); fetchRecent() })
 </script>
+
+<style scoped>
+.main-card {
+  margin-bottom: var(--autops-space-lg);
+}
+
+.status-dist-item {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.status-dist-count {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.status-dist-label {
+  margin-top: 8px;
+  color: var(--autops-info);
+}
+</style>
+

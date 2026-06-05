@@ -5,14 +5,8 @@
       <div class="autops-page-title">巡检计划</div>
       <div class="autops-page-desc">创建和管理巡检计划，设置调度周期</div>
     </div>
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px">
-      <el-button type="primary" @click="handleCreate">
-        <el-icon><Plus /></el-icon> 新建计划
-      </el-button>
-    </div>
-
     <!-- 搜索栏 -->
-    <div class="page-toolbar">
+    <div class="autops-toolbar">
       <el-input
         v-model="searchQuery"
         placeholder="搜索计划名称..."
@@ -184,11 +178,11 @@ const pagination = reactive({
 })
 
 const form = reactive({
-  name: '',
-  template_id: '',
+  name: 'primary',
+  template_id: 'primary',
   cron: '0 8 * * *',
   enabled: true,
-  description: '',
+  description: 'primary',
 })
 
 const formRules: FormRules = {

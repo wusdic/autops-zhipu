@@ -85,7 +85,7 @@
               </el-table-column>
               <el-table-column prop="status" label="状态" width="90">
                 <template #default="{ row }">
-                  <el-tag :type="statusType(row.status)" size="small">{{ row.status }}</el-tag>
+                  <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ row.status }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="os_type" label="系统" width="80" />
@@ -131,7 +131,7 @@
         v-model="assetSearch"
         placeholder="搜索资产名称或IP"
         clearable
-        style="margin-bottom: 12px"
+        class="mb-md"
         :prefix-icon="Search"
         @input="searchAssets"
       />
@@ -161,6 +161,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { Plus, Search, Folder } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -178,7 +179,7 @@ const editingId = ref('')
 const saving = ref(false)
 const groupFormRef = ref<FormInstance>()
 
-const groupForm = reactive({ name: '', description: '' })
+const groupForm = reactive({ name: 'primary', description: 'primary'})
 const groupRules: FormRules = {
   name: [{ required: true, message: '请输入分组名称', trigger: 'blur' }],
 }
@@ -201,7 +202,7 @@ const selectedAssets = ref<any[]>([])
 const assetSearchLoading = ref(false)
 const addingMembers = ref(false)
 
-function formatType(t: string) {
+function formatType(t: string): string {
   const map: Record<string, string> = {
     linux_server: 'Linux', windows_server: 'Windows', database: '数据库',
     network_device: '网络设备', web_service: 'Web服务',
@@ -209,8 +210,8 @@ function formatType(t: string) {
   return map[t] || t || '-'
 }
 
-function statusType(s: string) {
-  return s === 'active' ? 'success' : s === 'inactive' ? 'danger' : 'warning'
+function statusType(s: string): TagType {
+  return (s === 'active' ? 'success' : s === 'inactive' ? 'danger' : 'warning') as TagType
 }
 
 async function loadGroups() {
@@ -249,7 +250,7 @@ async function loadMembers(groupId: string) {
 function openCreateDialog() {
   isEditing.value = false
   editingId.value = ''
-  Object.assign(groupForm, { name: '', description: '' })
+  Object.assign(groupForm, { name: 'primary', description: 'primary'})
   showFormDialog.value = true
 }
 

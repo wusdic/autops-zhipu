@@ -15,7 +15,7 @@
       title="Dry-run 模式：仅预演执行计划，不实际修改系统"
       show-icon
       :closable="false"
-      style="margin-bottom: 16px;"
+      class="mb-lg"
     />
 
     <!-- Two-column layout: List + Detail -->
@@ -30,7 +30,7 @@
           </template>
 
           <!-- Filter -->
-          <el-row :gutter="12" style="margin-bottom: 12px;">
+          <el-row :gutter="12" class="mb-lg">
             <el-col :span="8">
               <el-input
                 v-model="searchKeyword"
@@ -80,7 +80,7 @@
             </el-table-column>
             <el-table-column prop="status" label="状态" width="90" align="center">
               <template #default="{ row }">
-                <el-tag :type="dryRunStatusTag(row.status)" size="small" effect="light">
+                <el-tag :type="(dryRunStatusTag(row.status)) as TagType" size="small" effect="light">
                   {{ dryRunStatusLabel(row.status) }}
                 </el-tag>
               </template>
@@ -130,11 +130,11 @@
           <div v-loading="detailLoading">
             <template v-if="detail">
               <!-- Basic Info -->
-              <el-descriptions :column="2" border size="small" style="margin-bottom: 20px;">
+              <el-descriptions :column="2" border size="small" class="mb-lg">
                 <el-descriptions-item label="名称">{{ detail.name || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="关联策略">{{ detail.policy_name || detail.policy_id || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="状态">
-                  <el-tag :type="dryRunStatusTag(detail.status)" size="small">
+                  <el-tag :type="(dryRunStatusTag(detail.status)) as TagType" size="small">
                     {{ dryRunStatusLabel(detail.status) }}
                   </el-tag>
                 </el-descriptions-item>
@@ -163,10 +163,10 @@
                       <div class="step-desc">{{ step.description || '-' }}</div>
                     </div>
                     <el-tag
-                      :type="dryRunStatusTag(step.status)"
+                      :type="(dryRunStatusTag(step.status)) as TagType"
                       size="small"
                       effect="light"
-                      style="margin-left: auto;"
+                      class="ml-auto"
                     >
                       {{ dryRunStatusLabel(step.status) }}
                     </el-tag>
@@ -194,7 +194,7 @@
               <el-empty v-else description="暂无执行步骤数据" :image-size="60" />
 
               <!-- Impact Analysis -->
-              <div class="section-title" style="margin-top: 20px;">影响分析</div>
+              <div class="section-title mt-lg">影响分析</div>
               <el-descriptions v-if="detail.impact" :column="1" border size="small">
                 <el-descriptions-item label="目标资源">
                   {{ detail.impact.target || '-' }}
@@ -203,7 +203,7 @@
                   <el-tag size="small" type="warning">{{ detail.impact.scope || '-' }}</el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="风险等级">
-                  <el-tag :type="riskTagType(detail.impact.risk_level)" size="small">
+                  <el-tag :type="(riskTagType(detail.impact.risk_level ?? '')) as TagType" size="small">
                     {{ riskLabel(detail.impact.risk_level) }}
                   </el-tag>
                 </el-descriptions-item>
@@ -217,8 +217,8 @@
               <el-empty v-else description="暂无影响分析数据" :image-size="60" />
 
               <!-- Error Info -->
-              <div v-if="detail.error" style="margin-top: 20px;">
-                <div class="section-title" style="color: #f53f3f;">错误信息</div>
+              <div v-if="detail.error" class="mt-lg">
+                <div class="section-title text-danger">错误信息</div>
                 <el-alert type="error" :title="detail.error" show-icon :closable="false" />
               </div>
             </template>
@@ -231,6 +231,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Refresh, Search, Close } from '@element-plus/icons-vue'
@@ -291,16 +292,16 @@ const pagination = reactive({
 })
 
 // ---------- Helpers ----------
-function dryRunStatusTag(status?: string) {
-  const map: Record<string, string> = {
+function dryRunStatusTag(status?: string): TagType {
+  const map: Record<string, TagType> = {
     pending: 'info',
-    running: '',
+    running: 'primary',
     success: 'success',
     failed: 'danger',
     cancelled: 'info',
     skipped: 'warning',
   }
-  return map[status || ''] || 'info'
+  return map[status || ''] ?? 'info'
 }
 
 function dryRunStatusLabel(status?: string) {
@@ -315,9 +316,9 @@ function dryRunStatusLabel(status?: string) {
   return map[status || ''] || '未知'
 }
 
-function riskTagType(level?: string) {
+function riskTagType(level: string): TagType {
   const map: Record<string, string> = { high: 'danger', medium: 'warning', low: 'success' }
-  return map[level || ''] || 'info'
+  return (map[level || ''] || 'info') as TagType
 }
 
 function riskLabel(level?: string) {
@@ -375,7 +376,7 @@ function handleRowSelect(row: DryRun | null) {
   if (row) loadDetail(row)
 }
 
-async function loadDetail(row: DryRun) {
+async function loadDetail(row: any) {
   detailLoading.value = true
   showDetail.value = true
   try {
@@ -392,7 +393,7 @@ async function loadDetail(row: DryRun) {
 }
 
 // ---------- Actions ----------
-async function handleDelete(row: DryRun) {
+async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm(
       '确认删除预演记录「' + row.name + '」？此操作不可撤销。',

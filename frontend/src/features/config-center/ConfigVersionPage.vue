@@ -57,7 +57,7 @@
           </el-table-column>
           <el-table-column prop="status" label="状态" width="100" align="center">
             <template #default="{ row }">
-              <el-tag :type="statusTag(row.status)" size="small">{{ statusText(row.status) }}</el-tag>
+              <el-tag :type="(statusTag(row.status)) as TagType" size="small">{{ statusText(row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="published_at" label="发布时间" width="180" align="center">
@@ -104,7 +104,7 @@
 
     <!-- Diff Dialog -->
     <el-dialog v-model="diffDialogVisible" title="版本对比" width="800px" destroy-on-close>
-      <el-form :inline="true" style="margin-bottom: 16px">
+      <el-form :inline="true" class="mb-lg">
         <el-form-item label="对比版本">
           <el-select v-model="diffTargetVersionId" placeholder="选择对比目标版本" style="width: 300px">
             <el-option
@@ -139,7 +139,7 @@
 
     <!-- Rollback Dialog -->
     <el-dialog v-model="rollbackDialogVisible" title="版本回滚" width="480px">
-      <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 16px">
+      <el-alert type="warning" :closable="false" show-icon class="mb-lg">
         回滚将恢复到指定版本的配置内容，当前草稿版本将被替换。
       </el-alert>
       <el-form label-width="80px">
@@ -163,6 +163,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
@@ -190,13 +191,12 @@ var rollbackDialogVisible = ref(false)
 var rollbackTargetId = ref('')
 var rollbackLoading = ref(false)
 
-var newVersion = reactive({ content: '' })
+var newVersion = reactive({ content: 'primary'})
 
 var currentDefName = computed(function() {
   if (!selectedDefId.value) return ''
   var found = definitions.value.find(function(d) { return d.id === selectedDefId.value })
-  return found ? found.name : ''
-})
+  return found ? found.name : 'primary'})
 
 var filteredVersions = computed(function() {
   var data = versions.value
@@ -363,9 +363,9 @@ function statusText(s: string): string {
   return map[s] || s
 }
 
-function statusTag(s: string): string {
-  var map: Record<string, string> = { draft: 'info', published: 'success', archived: '' }
-  return map[s] || 'info'
+function statusTag(s: string): TagType {
+  var map: Record<string, string> = { draft: 'info', published: 'success', archived: 'primary'}
+  return (map[s] || 'info') as TagType
 }
 
 onMounted(fetchDefinitions)

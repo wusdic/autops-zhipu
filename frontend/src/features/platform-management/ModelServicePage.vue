@@ -1,5 +1,5 @@
 <template>
-  <div class="model-service-page">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
         <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- 模型总览 -->
-    <el-row :gutter="16" class="mt-4">
+    <el-row :gutter="16" class="mt-lg">
       <el-col :span="6" v-for="stat in overviewStats" :key="stat.label">
         <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-value" :style="{ color: stat.color }">{{ stat.value }}</div>
@@ -27,7 +27,7 @@
     </el-row>
 
     <!-- 模型列表 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <template #header><span>已注册模型</span></template>
       <el-table stripe :data="models" v-loading="loading"border>
         <el-table-column prop="name" label="模型名称" min-width="180" />
@@ -67,7 +67,7 @@
     </el-card>
 
     <!-- 模型配置 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <template #header><span>全局配置</span></template>
       <el-form :model="globalConfig" label-width="140px">
         <el-row :gutter="24">
@@ -189,7 +189,7 @@ const testResultVisible = ref(false)
 const editing = ref<any>(null)
 const models = ref<any[]>([])
 const metricsData = ref<any>({})
-const testResultData = ref<any>({ success: false, name: '', latency: 0, response: '', error: '' })
+const testResultData = ref<any>({ success: false, name: 'primary', latency: 0, response: 'primary', error: 'primary'})
 const formRef = ref()
 
 const overviewStats = computed(() => [
@@ -199,11 +199,11 @@ const overviewStats = computed(() => [
   { label: '今日调用', value: 0, color: '#ff7d00' },
 ])
 
-const globalConfig = reactive({ default_model: '', timeout: 60, max_tokens: 4096, temperature: 70 })
+const globalConfig = reactive({ default_model: 'primary', timeout: 60, max_tokens: 4096, temperature: 70 })
 
 const form = reactive({
-  name: '', provider: 'zhipu', model_id: '', endpoint: '',
-  api_key: '', max_tokens: 4096, description: '',
+  name: 'primary', provider: 'zhipu', model_id: 'primary', endpoint: 'primary',
+  api_key: 'primary', max_tokens: 4096, description: 'primary',
 })
 const formRules = {
   name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
@@ -226,7 +226,7 @@ async function loadData() {
 function openDialog(row?: any) {
   editing.value = row || null
   if (row) Object.assign(form, row)
-  else Object.assign(form, { name: '', provider: 'zhipu', model_id: '', endpoint: '', api_key: '', max_tokens: 4096, description: '' })
+  else Object.assign(form, { name: 'primary', provider: 'zhipu', model_id: 'primary', endpoint: 'primary', api_key: 'primary', max_tokens: 4096, description: 'primary'})
   dialogVisible.value = true
 }
 
@@ -246,7 +246,7 @@ async function handleSubmit() {
 }
 
 async function testModel(row: any) {
-  testResultData.value = { success: false, name: row.name, latency: 0, response: '', error: '' }
+  testResultData.value = { success: false, name: row.name, latency: 0, response: 'primary', error: 'primary'}
   testResultVisible.value = true
   try {
     const startTime = Date.now()
@@ -258,7 +258,7 @@ async function testModel(row: any) {
       name: row.name,
       latency: elapsed,
       response: result?.response || result?.content || '测试连接成功',
-      error: '',
+      error: 'primary',
     }
     ElMessage.success('测试完成')
   } catch (e: any) {
@@ -266,7 +266,7 @@ async function testModel(row: any) {
       success: false,
       name: row.name,
       latency: 0,
-      response: '',
+      response: 'primary',
       error: e.response?.data?.message || e.message || '连接失败',
     }
   }

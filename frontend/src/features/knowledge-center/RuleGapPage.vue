@@ -52,8 +52,8 @@
     </el-row>
 
     <!-- Coverage Progress -->
-    <div class="autops-card" style="margin-top: 16px" v-if="analysisDone">
-      <div class="autops-card-title" style="margin-bottom: 12px">规则覆盖进度</div>
+    <div class="autops-card" class="mt-lg" v-if="analysisDone">
+      <div class="autops-card-title" class="mb-md">规则覆盖进度</div>
       <el-progress
         :percentage="coveragePercent"
         :color="coverageColor"
@@ -67,7 +67,7 @@
     </div>
 
     <!-- Gap Results Table -->
-    <div class="autops-card" style="margin-top: 16px">
+    <div class="autops-card" class="mt-lg">
       <div class="autops-card-header">
         <div class="autops-card-title">缺口详情</div>
         <el-tag v-if="analysisDone" type="info" size="small">共 {{ gapResults.length }} 条缺口</el-tag>

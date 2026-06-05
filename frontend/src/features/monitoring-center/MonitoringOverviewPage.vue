@@ -1,11 +1,9 @@
 <template>
-  <div class="monitoring-overview">
+  <div class="autops-page-container monitoring-overview">
     <!-- ========== Page Header ========== -->
     <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">监控总览</div>
-        <div class="autops-page-desc">实时监控概览，包括事件趋势、告警分布与状态变更</div>
-      </div>
+      <div class="autops-page-title">监控总览</div>
+      <div class="autops-page-desc">实时监控概览，包括事件趋势、告警分布与状态变更</div>
     </div>
 
     <!-- ===== 顶部统计卡片 ===== -->
@@ -80,7 +78,7 @@
                 :multiple="trendSeries"
                 :data="[]"
                 title="每小时事件数"
-                height="320px"
+                :height="320"
                 unit=" 次"
               />
             </div>
@@ -88,7 +86,7 @@
         </div>
 
         <!-- 告警严重级别分布饼图 -->
-        <div class="autops-card" style="margin-top: 16px">
+        <div class="autops-card mt-lg">
           <div class="autops-card-header">
             <span class="autops-card-title">告警严重级别分布</span>
             <el-button plain type="primary" @click="loadSeverityDist">刷新</el-button>
@@ -99,7 +97,7 @@
                 :data="severityData"
                 title=""
                 chart-type="pie"
-                height="300px"
+                :height="300"
               />
             </div>
           </div>
@@ -133,7 +131,7 @@
         </div>
 
         <!-- 告警最多的资产 -->
-        <div class="autops-card" style="margin-top: 16px">
+        <div class="autops-card mt-lg">
           <div class="autops-card-header">
             <span class="autops-card-title">告警最多资产 TOP 10</span>
           </div>
@@ -165,7 +163,7 @@
     </el-row>
 
     <!-- ===== 底部：状态变更时间线 ===== -->
-    <div class="autops-card" style="margin-top: 16px">
+    <div class="autops-card mt-lg">
       <div class="autops-card-header">
         <span class="autops-card-title">最近状态变更</span>
         <el-button plain type="primary" @click="loadChanges">刷新</el-button>
@@ -430,8 +428,7 @@ async function loadChanges() {
 
 // ===================== 工具函数 =====================
 function formatTime(t: string) {
-  return t ? new Date(t).toLocaleString('zh-CN') : ''
-}
+  return t ? new Date(t).toLocaleString('zh-CN') : 'primary'}
 
 // ===================== 初始化 =====================
 onMounted(() => {

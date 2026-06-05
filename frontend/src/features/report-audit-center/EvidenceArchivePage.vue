@@ -1,5 +1,9 @@
 <template>
   <div class="evidence-archive-page">
+    <div class="autops-page-header">
+      <div class="autops-page-title">证据归档</div>
+      <div class="autops-page-desc">查看告警证据链与处置操作时间线</div>
+    </div>
     <!-- Search -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="queryForm" @submit.prevent="handleSearch">
@@ -36,7 +40,7 @@
       <el-descriptions :column="3" border size="small">
         <el-descriptions-item label="告警标题">{{ alertInfo.title || '-' }}</el-descriptions-item>
         <el-descriptions-item label="告警等级">
-          <el-tag :type="severityTagType(alertInfo.severity)" size="small">{{ alertInfo.severity || '-' }}</el-tag>
+          <el-tag :type="(severityTagType(alertInfo.severity)) as TagType" size="small">{{ alertInfo.severity || '-' }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="状态">
           <el-tag :type="alertInfo.status === 'resolved' ? 'success' : 'warning'" size="small">
@@ -61,7 +65,7 @@
         <el-table-column type="index" label="#" width="50" align="center" />
         <el-table-column prop="type" label="事件类型" width="130" align="center">
           <template #default="{ row }">
-            <el-tag :type="eventTypeTagType(row.type)" size="small" effect="plain">
+            <el-tag :type="(eventTypeTagType(row.type)) as TagType" size="small" effect="plain">
               {{ eventTypeLabel(row.type) }}
             </el-tag>
           </template>
@@ -69,7 +73,7 @@
         <el-table-column prop="title" label="事件标题" min-width="240" show-overflow-tooltip />
         <el-table-column prop="severity" label="严重程度" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="severityTagType(row.severity)" size="small">{{ row.severity || '-' }}</el-tag>
+            <el-tag :type="(severityTagType(row.severity)) as TagType" size="small">{{ row.severity || '-' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="time" label="时间" width="180" align="center">
@@ -110,13 +114,13 @@
       <template v-if="currentRow">
         <el-descriptions :column="1" border>
           <el-descriptions-item label="事件类型">
-            <el-tag :type="eventTypeTagType(currentRow.type)" size="small">
+            <el-tag :type="(eventTypeTagType(currentRow.type)) as TagType" size="small">
               {{ eventTypeLabel(currentRow.type) }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="事件标题">{{ currentRow.title || '-' }}</el-descriptions-item>
           <el-descriptions-item label="严重程度">
-            <el-tag :type="severityTagType(currentRow.severity)" size="small">{{ currentRow.severity || '-' }}</el-tag>
+            <el-tag :type="(severityTagType(currentRow.severity)) as TagType" size="small">{{ currentRow.severity || '-' }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="时间">{{ formatTime(currentRow.time) }}</el-descriptions-item>
         </el-descriptions>
@@ -131,6 +135,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -159,9 +164,9 @@ const drawerVisible = ref(false)
 const currentRow = ref<TimelineEntry | null>(null)
 
 const queryForm = reactive({
-  alert_id: '',
-  evidence_type: '',
-  keyword: '',
+  alert_id: 'primary',
+  evidence_type: 'primary',
+  keyword: 'primary',
 })
 
 const pagination = reactive({
@@ -184,14 +189,14 @@ const filteredData = computed(() => {
   return data
 })
 
-function eventTypeTagType(t: string): string {
+function eventTypeTagType(t: string): TagType {
   var map: Record<string, string> = {
     alert_created: 'danger',
     status_change: 'warning',
     action: 'primary',
     event: 'info',
   }
-  return map[t] || 'info'
+  return (map[t] || 'info') as TagType
 }
 
 function eventTypeLabel(t: string): string {
@@ -207,7 +212,7 @@ function eventTypeLabel(t: string): string {
   return map[t] || t || '-'
 }
 
-function severityTagType(severity: string): string {
+function severityTagType(severity: string): TagType {
   var map: Record<string, string> = {
     critical: 'danger',
     high: 'danger',
@@ -216,7 +221,7 @@ function severityTagType(severity: string): string {
     low: 'info',
     info: 'info',
   }
-  return map[severity] || ''
+  return (map[severity] ?? undefined) as TagType
 }
 
 function formatTime(t: string | undefined): string {
@@ -311,7 +316,7 @@ function handleReset() {
   fetchData()
 }
 
-function handleViewDetail(row: TimelineEntry) {
+function handleViewDetail(row: any) {
   currentRow.value = row
   drawerVisible.value = true
 }

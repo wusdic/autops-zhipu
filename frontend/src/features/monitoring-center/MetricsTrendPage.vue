@@ -140,9 +140,9 @@ const tableData = ref<any[]>([])
 const assetOptions = ref<{ id: string; name: string }[]>([])
 
 const filters = reactive({
-  assetId: '',
+  assetId: 'primary',
   timeRange: null as [string, string] | null,
-  metricName: '',
+  metricName: 'primary',
 })
 
 const pagination = reactive({

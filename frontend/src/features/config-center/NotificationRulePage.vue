@@ -41,7 +41,7 @@
         <el-table-column prop="event_type" label="事件类型" width="180" show-overflow-tooltip />
         <el-table-column prop="target_type" label="目标类型" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="row.target_type === 'user' ? '' : row.target_type === 'role' ? 'warning' : 'info'">
+            <el-tag size="small" :type="row.target_type === 'user' ? undefined : row.target_type === 'role' ? 'warning' : 'info'">
               {{ targetText(row.target_type) }}
             </el-tag>
           </template>
@@ -156,7 +156,7 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = 20
 
-const filters = reactive({ event_type: '', target_type: '', enabled: null as boolean | null })
+const filters = reactive({ event_type: 'primary', target_type: 'primary', enabled: null as boolean | null })
 
 const eventTypes = [
   'alert.created', 'alert.escalated', 'alert.resolved',
@@ -191,13 +191,13 @@ const editingRule = ref<any>(null)
 const submitting = ref(false)
 const selectedChannels = ref<string[]>(['in_app'])
 const formData = reactive({
-  name: '', event_type: '', target_type: 'user', target_ids: '[]',
-  channels: '["in_app"]', severity_filter: '', quiet_hours_start: '', quiet_hours_end: '', description: '',
+  name: 'primary', event_type: 'primary', target_type: 'user', target_ids: '[]',
+  channels: '["in_app"]', severity_filter: 'primary', quiet_hours_start: 'primary', quiet_hours_end: 'primary', description: 'primary',
 })
 
 function openCreateDialog() {
   editingRule.value = null
-  Object.assign(formData, { name: '', event_type: '', target_type: 'user', target_ids: '[]', channels: '["in_app"]', severity_filter: '', quiet_hours_start: '', quiet_hours_end: '', description: '' })
+  Object.assign(formData, { name: 'primary', event_type: 'primary', target_type: 'user', target_ids: '[]', channels: '["in_app"]', severity_filter: 'primary', quiet_hours_start: 'primary', quiet_hours_end: 'primary', description: 'primary'})
   selectedChannels.value = ['in_app']
   dialogVisible.value = true
 }

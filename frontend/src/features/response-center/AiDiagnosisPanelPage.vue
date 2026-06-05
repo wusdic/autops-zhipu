@@ -32,12 +32,12 @@
       <el-row :gutter="16">
         <!-- 左栏: 诊断结论 -->
         <el-col :xs="24" :lg="16">
-          <div class="autops-card" style="margin-bottom: 16px">
+          <div class="autops-card" class="mb-lg">
             <div class="autops-card-header">
               <div class="autops-card-title"><el-icon><Warning /></el-icon> 诊断结论</div>
-              <el-tag :type="riskTag(diagnosisResult.risk_level)" effect="dark">风险级别: {{ riskLabel(diagnosisResult.risk_level) }}</el-tag>
+              <el-tag :type="(riskTag(diagnosisResult.risk_level)) as TagType" effect="dark">风险级别: {{ riskLabel(diagnosisResult.risk_level) }}</el-tag>
             </div>
-            <el-descriptions :column="2" border size="small" style="margin-top: 12px">
+            <el-descriptions :column="2" border size="small" class="mt-md">
               <el-descriptions-item label="异常ID">{{ diagnosisResult.anomaly_id }}</el-descriptions-item>
               <el-descriptions-item label="置信度">
                 <el-progress :percentage="diagnosisResult.confidence || 0" :stroke-width="14" :color="diagnosisResult.confidence > 80 ? '#00b42a' : '#ff7d00'" style="width: 150px" />
@@ -49,14 +49,14 @@
           </div>
 
           <!-- 建议动作 -->
-          <div class="autops-card" style="margin-bottom: 16px">
+          <div class="autops-card" class="mb-lg">
             <div class="autops-card-header"><div class="autops-card-title"><el-icon><VideoPlay /></el-icon> 建议动作</div></div>
             <el-table stripe :data="diagnosisResult.recommended_actions || []"size="small" style="margin-top: 8px">
               <el-table-column type="index" label="#" width="40" />
               <el-table-column prop="action" label="动作" min-width="180" show-overflow-tooltip />
               <el-table-column prop="risk" label="风险" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="riskTag(row.risk)" size="small">{{ riskLabel(row.risk) }}</el-tag>
+                  <el-tag :type="(riskTag(row.risk)) as TagType" size="small">{{ riskLabel(row.risk) }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="confidence" label="置信度" width="80">
@@ -86,7 +86,7 @@
 
         <!-- 右栏: 操作面板 -->
         <el-col :xs="24" :lg="8">
-          <div class="autops-card" style="margin-bottom: 16px">
+          <div class="autops-card" class="mb-lg">
             <div class="autops-card-header"><div class="autops-card-title">处置操作</div></div>
             <div style="padding: 12px; display: flex; flex-direction: column; gap: 8px">
               <el-button type="primary" @click="executeRecommended" :disabled="!(diagnosisResult.recommended_actions || []).length">
@@ -124,6 +124,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { MagicStick, Warning, VideoPlay, Link, Setting, Tickets, Connection, Loading, Select, SemiSelect, CloseBold } from '@element-plus/icons-vue'
@@ -199,9 +200,9 @@ function submitFeedback(type: string) {
   ElMessage.success('感谢反馈，将用于提升 AI 诊断准确度')
 }
 
-function riskTag(r: string) {
-  const map: Record<string, string> = { high: 'danger', medium: 'warning', low: 'success' }
-  return map[r] || 'info'
+function riskTag(r: string): TagType {
+  const map: Record<string, TagType> = { high: 'danger', medium: 'warning', low: 'success' }
+  return (map[r] || 'info') as TagType
 }
 function riskLabel(r: string) {
   const map: Record<string, string> = { high: '高', medium: '中', low: '低' }

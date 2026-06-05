@@ -41,7 +41,7 @@
         <el-table-column label="覆盖链" min-width="200">
           <template #default="{ row }">
             <span v-for="(s,i) in row.chain" :key="i">
-              {{ s }}<span v-if="i < row.chain.length - 1" style="color:#86909c"> → </span>
+              {{ s }}<span v-if="Number(i) < row.chain.length - 1" style="color:#86909c"> → </span>
             </span>
           </template>
         </el-table-column>
@@ -64,7 +64,7 @@ const props = defineProps<{
 
 interface InheritLevel {
   label: string
-  source: 'global' | 'organization' | 'system' | 'group' | 'asset'
+  source: 'global' | 'organization' | 'system' | 'group' | 'asset' | 'inherited'
   values: Record<string, any>
   overridden: boolean
 }

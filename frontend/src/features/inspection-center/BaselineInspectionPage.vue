@@ -7,7 +7,7 @@
     </div>
 
     <!-- 搜索栏 -->
-    <div class="page-toolbar">
+    <div class="autops-toolbar">
       <el-input
         v-model="searchQuery"
         placeholder="搜索资产名 / 检查项..."
@@ -69,7 +69,7 @@
       </el-table-column>
       <el-table-column prop="status" label="合规状态" width="120" align="center">
         <template #default="{ row }">
-          <el-tag :type="complianceTagType(row.status)" size="small" effect="light">
+          <el-tag :type="(complianceTagType(row.status)) as TagType" size="small" effect="light">
             <el-icon v-if="row.status === 'non-compliant'" style="margin-right: 2px"><CircleCloseFilled /></el-icon>
             <el-icon v-else-if="row.status === 'compliant'" style="margin-right: 2px"><CircleCheckFilled /></el-icon>
             {{ complianceLabel(row.status) }}
@@ -100,6 +100,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
@@ -133,8 +134,8 @@ const complianceMap: Record<string, { label: string; type: string }> = {
   'non-compliant': { label: '不合规', type: 'danger' },
 }
 
-function complianceTagType(status: string): string {
-  return complianceMap[status]?.type ?? 'info'
+function complianceTagType(status: string): TagType {
+  return (complianceMap[status]?.type ?? 'info') as TagType
 }
 
 function complianceLabel(status: string): string {

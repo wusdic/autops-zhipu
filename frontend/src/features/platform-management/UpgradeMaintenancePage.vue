@@ -9,7 +9,7 @@
         <el-button type="primary" @click="showUpgradeDialog"><el-icon><Upload /></el-icon> 系统升级</el-button>
         <el-button @click="showRollbackDialog" :disabled="!canRollback"><el-icon><RefreshLeft /></el-icon> 回滚</el-button>
         <el-button @click="runSelfCheck" :loading="checking"><el-icon><Monitor /></el-icon> 自检</el-button>
-        <el-button @click="toggleMaintenanceMode" :type="maintenanceMode ? 'danger' : ''">
+        <el-button @click="toggleMaintenanceMode" :type="maintenanceMode ? 'danger' : 'primary'">
           <el-icon><Setting /></el-icon>
           {{ maintenanceMode ? '退出维护模式' : '维护模式' }}
         </el-button>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- 当前版本信息 -->
-    <div class="autops-card" style="margin-bottom: 16px">
+    <div class="autops-card" class="mb-lg">
       <div class="autops-card-header">
         <div class="autops-card-title">当前系统信息</div>
         <el-button size="small" @click="checkForUpdates" :loading="checkingUpdate">
@@ -44,7 +44,7 @@
           type="info"
           show-icon
           :closable="false"
-          style="margin-top: 12px"
+          class="mt-md"
         >
           <template #title>
             发现新版本: {{ latestVersion }}，当前版本: {{ systemInfo.version }}
@@ -54,9 +54,9 @@
     </div>
 
     <!-- 自检结果 -->
-    <div class="autops-card" style="margin-bottom: 16px" v-if="selfCheckResult">
+    <div class="autops-card" class="mb-lg" v-if="selfCheckResult">
       <div class="autops-card-header"><div class="autops-card-title">自检结果</div></div>
-      <div class="autops-card-body" style="padding: 0">
+      <div class="autops-card-body p-0">
         <el-table stripe :data="selfCheckResult" border size="small">
           <el-table-column prop="item" label="检查项" min-width="160" />
           <el-table-column prop="status" label="状态" width="100" align="center">
@@ -76,7 +76,7 @@
       <div class="autops-card-header">
         <div class="autops-card-title">升级历史</div>
       </div>
-      <div class="autops-card-body" style="padding: 0">
+      <div class="autops-card-body p-0">
         <el-table stripe :data="upgradeHistory" v-loading="loading" border size="small" class="autops-table">
           <el-table-column prop="version" label="版本" width="120" />
           <el-table-column prop="type" label="类型" width="100" align="center">
@@ -111,7 +111,7 @@
 
     <!-- 升级对话框 -->
     <el-dialog v-model="upgradeVisible" title="系统升级" width="600px" destroy-on-close>
-      <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 16px">
+      <el-alert type="warning" :closable="false" show-icon class="mb-lg">
         升级过程中系统将暂时不可用，请确保已备份当前版本。
       </el-alert>
       <el-upload drag action="#" :auto-upload="false" :on-change="handleFileChange" accept=".tar.gz,.zip">
@@ -119,7 +119,7 @@
         <div>拖拽升级包到此处，或<em>点击上传</em></div>
         <template #tip><div class="el-upload__tip">支持 .tar.gz / .zip 格式升级包</div></template>
       </el-upload>
-      <el-form :model="upgradeForm" label-width="90px" style="margin-top: 16px">
+      <el-form :model="upgradeForm" label-width="90px" class="mt-lg">
         <el-form-item label="升级说明">
           <el-input v-model="upgradeForm.description" type="textarea" :rows="3" placeholder="请输入本次升级说明" />
         </el-form-item>
@@ -138,7 +138,7 @@
 
     <!-- 回滚对话框 -->
     <el-dialog v-model="rollbackVisible" title="系统回滚" width="480px">
-      <el-alert type="error" :closable="false" show-icon style="margin-bottom: 16px">
+      <el-alert type="error" :closable="false" show-icon class="mb-lg">
         回滚操作将恢复到上一版本，当前版本数据可能丢失。请确认已备份。
       </el-alert>
       <p>将回滚到版本：<strong>{{ previousVersion }}</strong></p>
@@ -187,7 +187,7 @@ var systemInfo = reactive({
 
 var platformComponents = ref<Record<string, any>>({})
 
-var upgradeForm = reactive({ description: '' })
+var upgradeForm = reactive({ description: 'primary'})
 var upgradeHistory = ref<any[]>([])
 
 function componentStatus(name: string): string {
@@ -407,9 +407,6 @@ onMounted(function() {
 </script>
 
 <style scoped>
-.autops-page-container {
-  padding: var(--autops-space-xl);
-}
 .op-log {
   background: var(--autops-terminal-bg);
   color: var(--autops-text-4);

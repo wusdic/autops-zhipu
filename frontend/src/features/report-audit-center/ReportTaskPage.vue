@@ -54,7 +54,7 @@
           <el-table-column prop="template_name" label="模板" min-width="120" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="100" align="center">
             <template #default="{ row }">
-              <el-tag :type="statusType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+              <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="progress" label="进度" width="150">
@@ -123,7 +123,7 @@
         <el-descriptions-item label="报告名" :span="2">{{ taskDetail.title || '-' }}</el-descriptions-item>
         <el-descriptions-item label="模板">{{ taskDetail.template_name || '-' }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="statusType(taskDetail.status)" size="small">{{ statusLabel(taskDetail.status) }}</el-tag>
+          <el-tag :type="(statusType(taskDetail.status)) as TagType" size="small">{{ statusLabel(taskDetail.status) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="进度">
           <el-progress
@@ -137,7 +137,7 @@
         <el-descriptions-item label="创建时间" :span="2">{{ formatTime(taskDetail.created_at) }}</el-descriptions-item>
         <el-descriptions-item label="完成时间" :span="2">{{ formatTime(taskDetail.completed_at) }}</el-descriptions-item>
         <el-descriptions-item v-if="taskDetail.error_message" label="错误信息" :span="2">
-          <span style="color: #f53f3f">{{ taskDetail.error_message }}</span>
+          <span class="text-danger">{{ taskDetail.error_message }}</span>
         </el-descriptions-item>
       </el-descriptions>
       <template #footer>
@@ -148,6 +148,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -163,8 +164,8 @@ const detailVisible = ref(false)
 const taskDetail = ref<any>(null)
 
 const filters = reactive({
-  status: '',
-  keyword: '',
+  status: 'primary',
+  keyword: 'primary',
 })
 
 const pagination = reactive({
@@ -182,11 +183,11 @@ function formatTime(val: string | null | undefined): string {
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
-function statusType(s: string): string {
+function statusType(s: string): TagType {
   const map: Record<string, string> = {
     pending: 'info', generating: 'warning', completed: 'success', failed: 'danger',
   }
-  return map[s] || 'info'
+  return (map[s] || 'info') as TagType
 }
 
 function statusLabel(s: string): string {

@@ -14,8 +14,8 @@
       <g v-for="(node, idx) in nodes" :key="'n-' + idx" @click="$emit('nodeClick', node)"
         style="cursor: pointer">
         <circle :cx="node.x" :cy="node.y" r="24" :fill="nodeColor(node.type)" stroke="#dcdfe6" stroke-width="2" />
-        <text :x="node.x" :y="node.y + 5" text-anchor="middle" fill="white" font-size="12" font-weight="600">{{ node.icon || node.type?.[0]?.toUpperCase() || '?' }}</text>
-        <text :x="node.x" :y="node.y + 44" text-anchor="middle" fill="#4e5969" font-size="12">{{ node.name }}</text>
+        <text :x="node.x" :y="(node.y ?? 0) + 5" text-anchor="middle" fill="white" font-size="12" font-weight="600">{{ node.icon || node.type?.[0]?.toUpperCase() || '?' }}</text>
+        <text :x="node.x" :y="(node.y ?? 0) + 44" text-anchor="middle" fill="#4e5969" font-size="12">{{ node.name }}</text>
       </g>
     </svg>
   </div>

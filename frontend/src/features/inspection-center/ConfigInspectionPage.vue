@@ -2,20 +2,25 @@
   <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title">配置巡检</div>
-      <div>
-        <el-input v-model="searchQuery" placeholder="搜索名称/资产" style="width: 200px; margin-right: 8px" clearable @clear="fetchItems" @keyup.enter="fetchItems">
+      <div class="autops-page-desc">配置漂移、合规检查与基线对比</div>
+    </div>
+    <div class="autops-toolbar">
+      <div class="autops-toolbar-left">
+        <el-input v-model="searchQuery" placeholder="搜索名称/资产" style="width: 200px" clearable @clear="fetchItems" @keyup.enter="fetchItems">
           <template #prefix><el-icon><Search /></el-icon></template>
         </el-input>
-        <el-select v-model="filterStatus" placeholder="状态" style="width: 120px; margin-right: 8px" clearable @change="fetchItems">
+        <el-select v-model="filterStatus" placeholder="状态" style="width: 120px" clearable @change="fetchItems">
           <el-option label="正常" value="normal" />
           <el-option label="异常" value="abnormal" />
           <el-option label="未执行" value="pending" />
         </el-select>
-        <el-select v-model="filterType" placeholder="检查类型" style="width: 140px; margin-right: 8px" clearable @change="fetchItems">
+        <el-select v-model="filterType" placeholder="检查类型" style="width: 140px" clearable @change="fetchItems">
           <el-option label="配置漂移" value="drift" />
           <el-option label="合规检查" value="compliance" />
           <el-option label="基线对比" value="baseline" />
         </el-select>
+      </div>
+      <div class="autops-toolbar-right">
         <el-button type="primary" :loading="runLoading" @click="handleRunInspection">
           <el-icon><VideoPlay /></el-icon> 执行巡检
         </el-button>
@@ -34,12 +39,12 @@
         </el-table-column>
         <el-table-column prop="check_type" label="检查类型" width="120">
           <template #default="{ row }">
-            <el-tag :type="checkTypeTag(row.check_type)" size="small">{{ checkTypeLabel(row.check_type) }}</el-tag>
+            <el-tag :type="(checkTypeTag(row.check_type)) as TagType" size="small">{{ checkTypeLabel(row.check_type) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="statusTag(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+            <el-tag :type="(statusTag(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="last_checked_at" label="最后检查" width="170" sortable="custom">
@@ -63,7 +68,7 @@
         </el-table-column>
       </el-table>
 
-      <div style="display: flex; justify-content: flex-end; margin-top: 16px">
+      <div class="mt-lg" style="display: flex; justify-content: flex-end">
         <el-pagination
           v-model:current-page="page"
           v-model:page-size="pageSize"
@@ -86,21 +91,21 @@
         </el-descriptions-item>
         <el-descriptions-item label="检查类型">{{ checkTypeLabel(currentItem.check_type) }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="statusTag(currentItem.status)">{{ statusLabel(currentItem.status) }}</el-tag>
+          <el-tag :type="(statusTag(currentItem.status)) as TagType">{{ statusLabel(currentItem.status) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="最后检查">{{ formatTime(currentItem.last_checked_at) }}</el-descriptions-item>
         <el-descriptions-item label="基线版本">{{ currentItem.baseline_version || '-' }}</el-descriptions-item>
       </el-descriptions>
 
       <!-- 配置差异展示 -->
-      <div v-if="currentItem?.diff_content" style="margin-top: 16px">
+      <div v-if="currentItem?.diff_content" class="mt-lg">
         <h4>配置差异</h4>
         <div class="diff-content">
           <pre style="background: #1e1e1e; color: #c9cdd4; padding: 12px; border-radius: 4px; font-size: 12px; max-height: 300px; overflow: auto">{{ currentItem.diff_content }}</pre>
         </div>
       </div>
 
-      <div v-if="currentItem?.result_summary" style="margin-top: 16px">
+      <div v-if="currentItem?.result_summary" class="mt-lg">
         <h4>结果摘要</h4>
         <el-alert :type="currentItem.status === 'normal' ? 'success' : 'error'" :closable="false" show-icon>
           {{ currentItem.result_summary }}
@@ -116,6 +121,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { Search, VideoPlay } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -184,7 +190,7 @@ async function fetchItems() {
 async function handleRunInspection() {
   runLoading.value = true
   try {
-    await api.post(API.INSPECTION_TASKS, { type: 'config', template_ids: filteredItems.value.filter(i => i.id).map(i => i.id) })
+    await api.post(API.INSPECTION.TASKS, { type: 'config', template_ids: filteredItems.value.filter(i => i.id).map(i => i.id) })
     ElMessage.success('配置巡检任务已创建')
     setTimeout(fetchItems, 2000)
   } catch (e) {
@@ -197,7 +203,7 @@ async function handleRunInspection() {
 async function runSingle(item: any) {
   item._running = true
   try {
-    await api.post(API.INSPECTION_TASKS, { type: 'config', template_id: item.id })
+    await api.post(API.INSPECTION.TASKS, { type: 'config', template_id: item.id })
     ElMessage.success('巡检项 ' + item.name + ' 已触发')
     setTimeout(fetchItems, 2000)
   } catch (e) {
@@ -227,17 +233,17 @@ function checkTypeLabel(t: string) {
   const map: Record<string, string> = { drift: '配置漂移', compliance: '合规检查', baseline: '基线对比' }
   return map[t] || t || '-'
 }
-function checkTypeTag(t: string) {
-  const map: Record<string, string> = { drift: 'warning', compliance: '', baseline: 'info' }
-  return map[t] || 'info'
+function checkTypeTag(t: string): TagType {
+  const map: Record<string, TagType> = { drift: 'warning', compliance: 'primary', baseline: 'info' }
+  return (map[t] || 'info') as TagType
 }
 function statusLabel(s: string) {
   const map: Record<string, string> = { normal: '正常', abnormal: '异常', pending: '未执行' }
   return map[s] || s || '-'
 }
-function statusTag(s: string) {
-  const map: Record<string, string> = { normal: 'success', abnormal: 'danger', pending: 'info' }
-  return map[s] || 'info'
+function statusTag(s: string): TagType {
+  const map: Record<string, TagType> = { normal: 'success', abnormal: 'danger', pending: 'info' }
+  return (map[s] || 'info') as TagType
 }
 function formatTime(t: string) {
   return t ? new Date(t).toLocaleString('zh-CN') : '-'

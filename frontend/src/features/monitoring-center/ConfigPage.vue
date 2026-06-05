@@ -41,7 +41,7 @@
         </el-table-column>
         <el-table-column prop="config_type" label="类型" width="120">
           <template #default="{ row }">
-            <el-tag size="small" :type="typeTagMap[row.config_type] || 'info'">
+            <el-tag size="small" :type="(typeTagMap[row.config_type] || 'info') as TagType">
               {{ formatConfigType(row.config_type) }}
             </el-tag>
           </template>
@@ -59,7 +59,7 @@
               active-text="激活"
               inactive-text="停用"
               inline-prompt
-              @change="(val: boolean) => toggleActive(row, val)"
+              @change="(val: string | number | boolean) => toggleActive(row, val as boolean)"
             />
           </template>
         </el-table-column>
@@ -211,7 +211,7 @@
             {{ previewData.version_note }}
           </span>
         </h4>
-        <JsonViewer v-if="isJsonValue(previewData.config_value)" :data="tryParseJson(previewData.config_value)" />
+        <JsonViewer v-if="isJsonValue(previewData.config_value ?? '')" :data="tryParseJson(previewData.config_value ?? '')" />
         <pre v-else class="value-preview">{{ previewData.config_value }}</pre>
       </div>
     </el-dialog>
@@ -279,6 +279,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
@@ -304,6 +305,7 @@ interface ConfigVersion {
   config_definition_id: string
   version: number
   schema_def: string
+  config_value?: string
   version_note?: string
   operator?: string
   is_deleted: boolean
@@ -318,8 +320,8 @@ const configTypes = [
   { label: '系统参数', value: 'system' },
 ]
 
-const typeTagMap: Record<string, string> = {
-  collection_template: '',
+const typeTagMap: Record<string, TagType> = {
+  collection_template: 'primary',
   policy_config: 'warning',
   notification: 'success',
   system: 'info',
@@ -328,7 +330,7 @@ const typeTagMap: Record<string, string> = {
 // ──────────────── List State ────────────────
 const loading = ref(false)
 const configs = ref<ConfigItem[]>([])
-const filters = reactive({ config_type: '', search: '' })
+const filters = reactive({ config_type: 'primary', search: 'primary'})
 const pagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
 // ──────────────── Form State ────────────────
@@ -338,11 +340,11 @@ const editingId = ref('')
 const saving = ref(false)
 
 const defaultForm = {
-  name: '',
-  schema_def: '',
+  name: 'primary',
+  schema_def: 'primary',
   config_type: 'system',
-  description: '',
-  version_note: '',
+  description: 'primary',
+  version_note: 'primary',
 }
 const formData = reactive({ ...defaultForm })
 
@@ -385,9 +387,9 @@ function truncate(s: string | undefined | null, n: number): string {
   return s.length > n ? s.substring(0, n) + '...' : s
 }
 
-function formatConfigType(type: string): string {
+function formatConfigType(type: string): TagType {
   const found = configTypes.find(t => t.value === type)
-  return found ? found.label : type
+  return (found ? found.label : type) as TagType
 }
 
 function isJsonValue(val: string): boolean {
@@ -432,7 +434,7 @@ function openCreateDialog() {
   showFormDialog.value = true
 }
 
-function openEditDialog(row: ConfigItem) {
+function openEditDialog(row: any) {
   isEditing.value = true
   editingId.value = row.id
   Object.assign(formData, {
@@ -440,7 +442,7 @@ function openEditDialog(row: ConfigItem) {
     schema_def: row.schema_def,
     config_type: row.config_type,
     description: row.description || '',
-    version_note: '',
+    version_note: 'primary',
   })
   showFormDialog.value = true
 }
@@ -501,7 +503,7 @@ async function deleteConfig(id: string) {
 }
 
 // ──────────────── Publish / Activate ────────────────
-async function toggleActive(row: ConfigItem, val: boolean) {
+async function toggleActive(row: any, val: boolean) {
   try {
     const endpoint = val
       ? R.CONFIG_PUBLISH(row.id)
@@ -522,7 +524,7 @@ async function toggleActive(row: ConfigItem, val: boolean) {
 }
 
 // ──────────────── Version History ────────────────
-async function openHistoryDialog(row: ConfigItem) {
+async function openHistoryDialog(row: any) {
   historyConfigId.value = row.id
   historyConfigName.value = row.name
   previewData.value = null
@@ -545,7 +547,7 @@ async function loadVersions(configId: string) {
   }
 }
 
-function previewVersion(row: ConfigVersion) {
+function previewVersion(row: any) {
   previewData.value = row
 }
 
@@ -558,7 +560,7 @@ function handleVersionSelection(rows: ConfigVersion[]) {
   }
 }
 
-async function rollbackVersion(version: ConfigVersion) {
+async function rollbackVersion(version: any) {
   try {
     await ElMessageBox.confirm(
       '确定回滚到 v' + version.version + '？当前激活版本将被替换。',
@@ -594,7 +596,7 @@ function openDiffView() {
 }
 
 // ──────────────── Config Binding ────────────────
-async function openBindingDialog(row: ConfigItem) {
+async function openBindingDialog(row: any) {
   bindingConfigId.value = row.id
   bindingConfigName.value = row.name
   boundAssets.value = []

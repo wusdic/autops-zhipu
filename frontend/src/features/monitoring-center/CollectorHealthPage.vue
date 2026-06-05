@@ -70,7 +70,7 @@
           <el-table-column prop="status" label="状态" width="100" align="center">
             <template #default="{ row }">
               <el-tag
-                :type="healthTagType(row.status)"
+                :type="(healthTagType(row.status)) as TagType"
                 size="small"
                 effect="light"
               >
@@ -136,7 +136,7 @@
         <el-descriptions-item label="采集器名称">{{ currentRow.collector_name }}</el-descriptions-item>
         <el-descriptions-item label="类型">{{ currentRow.collector_type }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="healthTagType(currentRow.status)" size="small">
+          <el-tag :type="(healthTagType(currentRow.status)) as TagType" size="small">
             {{ healthLabel(currentRow.status) }}
           </el-tag>
         </el-descriptions-item>
@@ -161,6 +161,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
@@ -199,13 +200,13 @@ function formatLatency(ms: number | null | undefined): string {
   return (ms / 1000).toFixed(2) + 's'
 }
 
-function healthTagType(status: string): '' | 'success' | 'danger' | 'warning' | 'info' {
-  const map: Record<string, '' | 'success' | 'danger' | 'warning' | 'info'> = {
+function healthTagType(status: string): TagType {
+  const map: Record<string, TagType> = {
     healthy: 'success',
     degraded: 'warning',
     down: 'danger',
   }
-  return map[status] || 'info'
+  return (map[status] || 'info') as TagType
 }
 
 function healthLabel(status: string): string {

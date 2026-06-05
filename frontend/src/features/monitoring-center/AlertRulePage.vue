@@ -46,7 +46,7 @@
           <span v-if="row.conditions?.length">
             <span v-for="(c,i) in row.conditions.slice(0,2)" :key="i">
               {{ c.field }} {{ c.operator }} {{ c.value }}{{ c.unit||'' }}
-              <span v-if="i < Math.min(row.conditions.length,2)-1" style="color:#86909c">{{ row.condition_logic||'AND' }} </span>
+              <span v-if="Number(i) < Math.min(row.conditions.length,2)-1" style="color:#86909c">{{ row.condition_logic||'AND' }} </span>
             </span>
             <span v-if="row.conditions.length > 2" style="color:#86909c">+{{ row.conditions.length-2 }}</span>
           </span>
@@ -54,7 +54,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="severity" label="严重度" width="90">
-        <template #default="{ row }"><el-tag :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag></template>
+        <template #default="{ row }"><el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag></template>
       </el-table-column>
       <el-table-column label="状态" width="80">
         <template #default="{ row }">
@@ -148,7 +148,7 @@
       <template v-if="detail">
         <el-descriptions :column="2" border>
           <el-descriptions-item label="名称">{{ detail.name }}</el-descriptions-item>
-          <el-descriptions-item label="严重度"><el-tag :type="severityType(detail.severity)" size="small">{{ detail.severity }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="严重度"><el-tag :type="(severityType(detail.severity)) as TagType" size="small">{{ detail.severity }}</el-tag></el-descriptions-item>
           <el-descriptions-item label="状态">{{ detail.active !== false ? '启用' : '停用' }}</el-descriptions-item>
           <el-descriptions-item label="触发次数">{{ detail.trigger_count || 0 }}</el-descriptions-item>
           <el-descriptions-item label="描述" :span="2">{{ detail.description || '-' }}</el-descriptions-item>
@@ -180,13 +180,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { ElMessage } from 'element-plus'
 import { Plus, Search, Delete } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
-const stats = reactive({ total: 0, active: 0, triggeredToday: 0, mostTriggered: '' })
-const filters = reactive({ keyword: '', severity: '', status: '', metric: '' })
+const stats = reactive({ total: 0, active: 0, triggeredToday: 0, mostTriggered: 'primary'})
+const filters = reactive({ keyword: 'primary', severity: 'primary', status: 'primary', metric: 'primary'})
 const items = ref<any[]>([])
 const loading = ref(false)
 const page = ref(1)
@@ -197,8 +198,8 @@ const showDialog = ref(false)
 const editing = ref(false)
 const editId = ref('')
 const form = reactive({
-  name: '', description: '', severity: 'warning', condition_logic: 'AND',
-  conditions: [] as any[], notify_type: 'internal', repeat_interval: '', active: true,
+  name: 'primary', description: 'primary', severity: 'warning', condition_logic: 'AND',
+  conditions: [] as any[], notify_type: 'internal', repeat_interval: 'primary', active: true,
 })
 
 const showDetail = ref(false)
@@ -233,7 +234,7 @@ function computeStats() {
   stats.mostTriggered = sorted[0]?.name || ''
 }
 
-function addCondition() { form.conditions.push({ metric: 'cpu_usage', operator: '>', value: 90, unit: '%', duration: '' }) }
+function addCondition() { form.conditions.push({ metric: 'cpu_usage', operator: '>', value: 90, unit: '%', duration: 'primary'}) }
 
 function openCreate() {
   editing.value = false; editId.value = ''
@@ -297,7 +298,7 @@ async function duplicateRule(row: any) {
 function metricLabel(m: string) {
   return ({ cpu_usage:'CPU使用率', memory_usage:'内存使用率', disk_usage:'磁盘使用率', network_in:'网络入', network_out:'网络出', response_time:'响应时间', status_check:'状态检查', status_code:'状态码', connection_count:'连接数', process_count:'进程数', custom:'自定义' })[m] || m
 }
-function severityType(s: string) { return ({ critical:'danger', warning:'warning', info:'info' })[s] || 'info' }
+function severityType(s: string): TagType { return (({ critical:'danger', warning:'warning', info:'info' })[s] ?? 'info') as TagType }
 function fmt(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '-' }
 
 onMounted(() => { load() })

@@ -50,7 +50,7 @@
       <el-table-column prop="status" label="状态" width="90" align="center">
         <template #default="{ row }">
           <el-tag
-            :type="tenantStatusMap[row.status] ?? 'info'"
+            :type="(tenantStatusMap[row.status] ?? 'info') as TagType"
             size="small"
             effect="dark"
           >
@@ -208,6 +208,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -215,7 +216,7 @@ import { Refresh, Plus } from '@element-plus/icons-vue'
 import { platformService } from '@/shared/api'
 
 // ── Maps ─────────────────────────────────────────────────
-const tenantStatusMap: Record<string, string> = {
+const tenantStatusMap: Record<string, TagType> = {
   active: 'success',
   disabled: 'info',
   expired: 'danger',
@@ -243,17 +244,17 @@ const editingId = ref('')
 const formRef = ref<FormInstance>()
 
 const form = reactive({
-  name: '',
-  code: '',
-  admin: '',
-  contact: '',
-  phone: '',
+  name: 'primary',
+  code: 'primary',
+  admin: 'primary',
+  contact: 'primary',
+  phone: 'primary',
   max_users: 100,
   max_assets: 1000,
   max_policies: 100,
   max_playbooks: 50,
-  expire_at: '',
-  remark: '',
+  expire_at: 'primary',
+  remark: 'primary',
 })
 
 const formRules: FormRules = {

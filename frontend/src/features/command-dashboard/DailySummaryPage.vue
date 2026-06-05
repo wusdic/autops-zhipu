@@ -1,26 +1,31 @@
 <template>
-  <div class="p-6">
-    <div class="autops-page-header">
-      <div class="autops-page-title">今日摘要</div>
-      <el-date-picker
-        v-model="selectedDate"
-        type="date"
-        placeholder="选择日期"
-        value-format="YYYY-MM-DD"
-        style="width: 180px"
-        @change="fetchSummary"
-      />
+  <div class="autops-page-container">
+    <div class="autops-page-header autops-page-header--between">
+      <div>
+        <div class="autops-page-title">今日摘要</div>
+        <div class="autops-page-desc">查看当日告警、异常与自动化执行摘要</div>
+      </div>
+      <div class="autops-header-actions">
+        <el-date-picker
+          v-model="selectedDate"
+          type="date"
+          placeholder="选择日期"
+          value-format="YYYY-MM-DD"
+          style="width: 180px"
+          @change="fetchSummary"
+        />
+      </div>
     </div>
 
     <!-- 摘要卡片 -->
     <el-row :gutter="16" class="mb-lg">
       <el-col :xs="12" :sm="6" v-for="card in statCards" :key="card.label">
         <div class="autops-metric-card">
-          <div class="metric-icon" :style="{ background: card.bg, color: card.color }">
+          <div class="metric-icon" :class="card.bgClass">
             <el-icon size="20"><component :is="card.icon" /></el-icon>
           </div>
           <div class="metric-label">{{ card.label }}</div>
-          <div class="metric-value" :style="{ color: card.color }">{{ card.value }}</div>
+          <div class="metric-value" :class="card.textClass">{{ card.value }}</div>
         </div>
       </el-col>
     </el-row>
@@ -38,7 +43,7 @@
                 v-for="(item, idx) in recentActivities"
                 :key="idx"
                 :timestamp="item.time"
-                :type="activityType(item.type)"
+                :type="(activityType(item.type)) as TagType"
                 placement="top"
               >
                 <div style="font-weight: 500; font-size: 13px">{{ item.summary }}</div>
@@ -57,7 +62,7 @@
             <div class="autops-card-title">今日告警</div>
             <el-tag type="danger" size="small">{{ alertStats.firing || 0 }} 活跃</el-tag>
           </div>
-          <div class="autops-card-body" style="padding: 0">
+          <div class="autops-card-body p-0">
             <el-table stripe :data="todayAlerts"size="small" v-loading="alertsLoading" empty-text="今日暂无告警" max-height="300">
               <el-table-column prop="created_at" label="时间" width="80">
                 <template #default="{ row }">
@@ -67,12 +72,12 @@
               <el-table-column prop="title" label="告警" min-width="180" show-overflow-tooltip />
               <el-table-column prop="severity" label="级别" width="70">
                 <template #default="{ row }">
-                  <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
+                  <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="status" label="状态" width="70">
                 <template #default="{ row }">
-                  <el-tag :type="alertStatusType(row.status)" size="small">{{ alertStatusLabel(row.status) }}</el-tag>
+                  <el-tag :type="(alertStatusType(row.status)) as TagType" size="small">{{ alertStatusLabel(row.status) }}</el-tag>
                 </template>
               </el-table-column>
             </el-table>
@@ -80,11 +85,11 @@
         </div>
 
         <!-- 今日异常 -->
-        <div class="autops-card" style="margin-top: 16px">
+        <div class="autops-card mt-lg">
           <div class="autops-card-header">
             <div class="autops-card-title">今日异常</div>
           </div>
-          <div class="autops-card-body" style="padding: 0">
+          <div class="autops-card-body p-0">
             <el-table stripe :data="todayAnomalies"size="small" v-loading="anomaliesLoading" empty-text="今日暂无异常" max-height="250">
               <el-table-column prop="created_at" label="时间" width="80">
                 <template #default="{ row }">
@@ -94,12 +99,12 @@
               <el-table-column prop="title" label="异常" min-width="180" show-overflow-tooltip />
               <el-table-column prop="severity" label="级别" width="70">
                 <template #default="{ row }">
-                  <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
+                  <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="status" label="状态" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="anomalyStatusType(row.status)" size="small">{{ anomalyStatusLabel(row.status) }}</el-tag>
+                  <el-tag :type="(anomalyStatusType(row.status)) as TagType" size="small">{{ anomalyStatusLabel(row.status) }}</el-tag>
                 </template>
               </el-table-column>
             </el-table>
@@ -107,11 +112,11 @@
         </div>
 
         <!-- 今日执行 -->
-        <div class="autops-card" style="margin-top: 16px">
+        <div class="autops-card mt-lg">
           <div class="autops-card-header">
             <div class="autops-card-title">今日自动化执行</div>
           </div>
-          <div class="autops-card-body" style="padding: 0">
+          <div class="autops-card-body p-0">
             <el-table stripe :data="todayExecutions"size="small" v-loading="execLoading" empty-text="今日暂无执行" max-height="250">
               <el-table-column prop="created_at" label="时间" width="80">
                 <template #default="{ row }">
@@ -125,7 +130,7 @@
               </el-table-column>
               <el-table-column prop="status" label="状态" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="execStatusType(row.status)" size="small">{{ row.status }}</el-tag>
+                  <el-tag :type="(execStatusType(row.status)) as TagType" size="small">{{ row.status }}</el-tag>
                 </template>
               </el-table-column>
             </el-table>
@@ -137,6 +142,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Warning, CircleCheck, VideoPlay, Document } from '@element-plus/icons-vue'
@@ -150,10 +156,10 @@ const anomaliesLoading = ref(false)
 const execLoading = ref(false)
 
 const statCards = reactive([
-  { label: '今日告警', value: 0, icon: Warning, bg: '#ffece8', color: '#f53f3f' },
-  { label: '今日异常', value: 0, icon: Warning, bg: '#fff7e8', color: '#ff7d00' },
-  { label: '自动处置', value: 0, icon: VideoPlay, bg: '#e8f3ff', color: '#165dff' },
-  { label: '工单创建', value: 0, icon: Document, bg: '#e8ffea', color: '#00b42a' },
+  { label: '今日告警', value: 0, icon: Warning, bgClass: 'bg-danger', textClass: 'text-danger' },
+  { label: '今日异常', value: 0, icon: Warning, bgClass: 'bg-warning', textClass: 'text-warning' },
+  { label: '自动处置', value: 0, icon: VideoPlay, bgClass: 'bg-brand', textClass: 'text-brand' },
+  { label: '工单创建', value: 0, icon: Document, bgClass: 'bg-success', textClass: 'text-success' },
 ])
 
 const alertStats = reactive({ total: 0, firing: 0, resolved: 0 })
@@ -166,7 +172,7 @@ const recentActivities = ref<any[]>([])
 const severityMap: Record<string, string> = { critical: '严重', high: '高', medium: '中', low: '低' }
 const severityLabel = (s: string) => severityMap[s] || s
 const severityType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ critical: 'danger', high: 'warning', medium: '', low: 'info' } as any)[s] || 'info'
+  ({ critical: 'danger', high: 'warning', medium: 'primary', low: 'info' } as any)[s] || 'info'
 
 const alertStatusLabel = (s: string) => ({ firing: '告警中', resolved: '已恢复', acknowledged: '已确认' } as any)[s] || s
 const alertStatusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
@@ -174,13 +180,13 @@ const alertStatusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'in
 
 const anomalyStatusLabel = (s: string) => ({ open: '新建', acknowledged: '已确认', assigned: '已分配', closed: '已关闭' } as any)[s] || s
 const anomalyStatusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ open: 'danger', acknowledged: 'warning', assigned: '', closed: 'success' } as any)[s] || 'info'
+  ({ open: 'danger', acknowledged: 'warning', assigned: 'primary', closed: 'success' } as any)[s] || 'info'
 
 const execStatusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
   ({ success: 'success', failed: 'danger', running: 'warning', pending: 'info' } as any)[s] || 'info'
 
 const activityType = (t: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ alert: 'danger', anomaly: 'warning', execution: '', ticket: 'success' } as any)[t] || 'info'
+  ({ alert: 'danger', anomaly: 'warning', execution: 'primary', ticket: 'success' } as any)[t] || 'info'
 
 function formatTime(t: string) {
   if (!t) return '-'
@@ -239,7 +245,7 @@ async function fetchTodayAlerts() {
         time: a.created_at,
         type: 'alert',
         summary: '告警: ' + a.title,
-        detail: a.asset_name ? '资产: ' + a.asset_name : '',
+        detail: a.asset_name ? '资产: ' + a.asset_name : 'primary',
       })
     })
   } catch {
@@ -265,7 +271,7 @@ async function fetchTodayAnomalies() {
         time: a.created_at || a.discovered_at,
         type: 'anomaly',
         summary: '异常: ' + a.title,
-        detail: a.asset_name ? '资产: ' + a.asset_name : '',
+        detail: a.asset_name ? '资产: ' + a.asset_name : 'primary',
       })
     })
   } catch {
@@ -308,9 +314,7 @@ onMounted(() => fetchSummary())
 
 <style scoped>
 
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 .text-tertiary {
   color: var(--autops-info);
   font-size: var(--autops-font-12);

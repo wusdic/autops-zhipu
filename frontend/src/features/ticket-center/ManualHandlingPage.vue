@@ -1,31 +1,57 @@
 <template>
-  <div class="manual-handling-page">
-    <div class="autops-page-header">
-      <div class="autops-page-title-row">
-        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <span class="autops-page-title">人工处置台</span>
+  <div class="autops-page-container">
+    <div class="autops-page-header autops-page-header--between">
+      <div>
+        <div class="autops-page-title-row">
+          <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+          <span class="autops-page-title">人工处置台</span>
+        </div>
+        <div class="autops-page-desc">处理人工干预的工单，跟踪处置进度和 SLA</div>
       </div>
-      <div class="autops-page-desc">处理人工干预的工单，跟踪处置进度和 SLA</div>
-    </div>
-    <div style="display: flex; gap: 8px; margin-bottom: 16px">
-      <el-button type="primary" @click="openCreateDialog">
-        <el-icon><Plus /></el-icon> 新建处置工单
-      </el-button>
-      <el-button @click="loadData" :loading="loading">
-        <el-icon><Refresh /></el-icon> 刷新
-      </el-button>
+      <div class="autops-header-actions">
+        <el-button type="primary" @click="openCreateDialog">
+          <el-icon><Plus /></el-icon> 新建处置工单
+        </el-button>
+        <el-button @click="loadData" :loading="loading">
+          <el-icon><Refresh /></el-icon> 刷新
+        </el-button>
+      </div>
     </div>
 
     <!-- 统计卡片 -->
-    <el-row :gutter="16" class="mt-4">
-      <el-col :span="6"><el-card shadow="hover"><el-statistic title="待处置" :value="stats.pending" /></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover"><el-statistic title="进行中" :value="stats.in_progress" /></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover"><el-statistic title="今日完成" :value="stats.completed_today" /></el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover"><el-statistic title="平均处置时长" :value="stats.avg_duration" suffix="分钟" /></el-card></el-col>
+    <el-row :gutter="16" class="metric-row">
+      <el-col :span="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon :size="20"><Clock /></el-icon></div>
+          <div class="metric-label">待处置</div>
+          <div class="metric-value">{{ stats.pending }}</div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon :size="20"><Loading /></el-icon></div>
+          <div class="metric-label">进行中</div>
+          <div class="metric-value">{{ stats.in_progress }}</div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon :size="20"><CircleCheck /></el-icon></div>
+          <div class="metric-label">今日完成</div>
+          <div class="metric-value">{{ stats.completed_today }}</div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon :size="20"><Timer /></el-icon></div>
+          <div class="metric-label">平均处置时长</div>
+          <div class="metric-value">{{ stats.avg_duration }}<span class="metric-suffix">分钟</span></div>
+        </div>
+      </el-col>
     </el-row>
 
     <!-- 筛选 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mb-lg" shadow="never">
       <el-form :inline="true" :model="filters">
         <el-form-item label="状态">
           <el-select v-model="filters.status" placeholder="全部" clearable @change="loadData">
@@ -53,7 +79,7 @@
     </el-card>
 
     <!-- 工单列表 -->
-    <el-card class="mt-4" shadow="never">
+    <el-card class="mt-lg" shadow="never">
       <el-table stripe :data="items" v-loading="loading"border>
         <el-table-column prop="id" label="工单号" width="120">
           <template #default="{ row }">
@@ -63,12 +89,12 @@
         <el-table-column prop="title" label="处置标题" min-width="250" />
         <el-table-column prop="priority" label="优先级" width="90">
           <template #default="{ row }">
-            <el-tag :type="priorityType(row.priority)" size="small">{{ priorityLabel(row.priority) }}</el-tag>
+            <el-tag :type="(priorityType(row.priority)) as TagType" size="small">{{ priorityLabel(row.priority) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="statusType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+            <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="handler" label="处置人" width="100" />
@@ -94,7 +120,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="mt-4" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+      <el-pagination class="mt-lg" v-model:current-page="pagination.page" v-model:page-size="pagination.size"
         :total="pagination.total" :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next"
         @size-change="loadData" @current-change="loadData" />
     </el-card>
@@ -121,9 +147,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
+import { Plus, Refresh, ArrowLeft, Clock, Loading, CircleCheck, Timer } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 
 const router = useRouter()
@@ -133,12 +160,12 @@ const items = ref<any[]>([])
 const detailData = ref<any>({})
 
 const stats = reactive({ pending: 0, in_progress: 0, completed_today: 0, avg_duration: 0 })
-const filters = reactive({ status: '', priority: '', handler: '' })
+const filters = reactive({ status: 'primary', priority: 'primary', handler: 'primary'})
 const pagination = reactive({ page: 1, size: 20, total: 0 })
 
-function priorityType(p: string) { return { urgent: 'danger', high: 'warning', medium: '', low: 'info' }[p] || 'info' }
+function priorityType(p: string): TagType { return ({ urgent: 'danger', high: 'warning', medium: 'primary', low: 'info' }[p] || 'info') as TagType }
 function priorityLabel(p: string) { return { urgent: '紧急', high: '高', medium: '中', low: '低' }[p] || p }
-function statusType(s: string) { return { pending: 'warning', in_progress: 'primary', completed: 'success', closed: 'info' }[s] || 'info' }
+function statusType(s: string): TagType { return ({ pending: 'warning', in_progress: 'primary', completed: 'success', closed: 'info' }[s] || 'info') as TagType }
 function statusLabel(s: string) { return { pending: '待处置', in_progress: '进行中', completed: '已完成', closed: '已关闭' }[s] || s }
 
 async function loadData() {

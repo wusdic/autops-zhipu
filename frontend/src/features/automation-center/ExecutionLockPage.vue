@@ -1,5 +1,11 @@
 <template>
-  <div class="execution-lock-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">执行锁管理</div>
+      <div class="autops-page-desc">查看和管理自动化执行锁定记录</div>
+    </div>
+
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">
       <el-form :model="queryParams" inline @submit.prevent="handleSearch">
@@ -107,7 +113,7 @@
 
         <el-table-column prop="execution_type" label="执行类型" width="120" align="center">
           <template #default="{ row }">
-            <el-tag size="small" :type="execTypeTagType(row.execution_type)">
+            <el-tag size="small" :type="(execTypeTagType(row.execution_type)) as TagType">
               {{ execTypeLabel(row.execution_type) }}
             </el-tag>
           </template>
@@ -130,7 +136,7 @@
 
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status)" size="small">
+            <el-tag :type="(statusTagType(row.status)) as TagType" size="small">
               {{ statusLabel(row.status) }}
             </el-tag>
           </template>
@@ -196,7 +202,7 @@
           <el-tag size="small">{{ execTypeLabel(currentLock.execution_type) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="statusTagType(currentLock.status)" size="small">{{ statusLabel(currentLock.status) }}</el-tag>
+          <el-tag :type="(statusTagType(currentLock.status)) as TagType" size="small">{{ statusLabel(currentLock.status) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="目标资源" :span="2">{{ currentLock.target_id || '-' }}</el-descriptions-item>
         <el-descriptions-item label="触发来源">{{ triggerLabel(currentLock.trigger_source) }}</el-descriptions-item>
@@ -213,6 +219,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Search, Refresh, Unlock, Lock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -262,9 +269,9 @@ const currentLock = ref<LockEntry | null>(null)
 let refreshTimer: ReturnType<typeof setInterval> | null = null
 
 const queryParams = reactive<QueryParams>({
-  execution_id: '',
-  target_id: '',
-  status: '',
+  execution_id: 'primary',
+  target_id: 'primary',
+  status: 'primary',
   page: 1,
   pageSize: 20,
 })
@@ -293,9 +300,9 @@ function execTypeLabel(t: string | undefined): string {
   return map[t || ''] || t || '-'
 }
 
-function execTypeTagType(t: string | undefined): string {
+function execTypeTagType(t: string | undefined): TagType {
   var map: Record<string, string> = { manual: 'primary', script: 'success', playbook: 'warning', policy: 'info' }
-  return map[t || ''] || 'info'
+  return (map[t || ''] || 'info') as TagType
 }
 
 function triggerLabel(t: string | undefined): string {
@@ -308,9 +315,9 @@ function statusLabel(s: string | undefined): string {
   return map[s || ''] || s || '-'
 }
 
-function statusTagType(s: string | undefined): string {
+function statusTagType(s: string | undefined): TagType {
   var map: Record<string, string> = { pending: 'info', running: 'warning', completed: 'success', failed: 'danger', cancelled: 'info' }
-  return map[s || ''] || 'info'
+  return (map[s || ''] || 'info') as TagType
 }
 
 function riskLabel(r: string | undefined): string {
@@ -366,16 +373,16 @@ var handleSelectionChange = (rows: LockEntry[]) => {
   selectedRows.value = rows
 }
 
-var handleViewExecution = (row: LockEntry) => {
+var handleViewExecution = (row: any) => {
   console.log('View execution:', row.id)
 }
 
-var handleViewDetail = (row: LockEntry) => {
+var handleViewDetail = (row: any) => {
   currentLock.value = row
   detailVisible.value = true
 }
 
-var handleRelease = async (row: LockEntry) => {
+var handleRelease = async (row: any) => {
   try {
     await client.post(API.EXECUTION_CANCEL(row.id))
     ElMessage.success('执行已取消/释放')

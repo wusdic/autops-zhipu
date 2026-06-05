@@ -59,7 +59,7 @@
           </el-table-column>
           <el-table-column prop="type" label="类型" width="130" align="center">
             <template #default="{ row }">
-              <el-tag :type="typeTagType(row.type)" size="small">{{ typeLabel(row.type) }}</el-tag>
+              <el-tag :type="(typeTagType(row.type)) as TagType" size="small">{{ typeLabel(row.type) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="description" label="描述" min-width="220" show-overflow-tooltip />
@@ -187,20 +187,20 @@
         <el-descriptions :column="1" border>
           <el-descriptions-item label="模板名称">{{ previewData.name }}</el-descriptions-item>
           <el-descriptions-item label="类型">
-            <el-tag :type="typeTagType(previewData.type)" size="small">{{ typeLabel(previewData.type) }}</el-tag>
+            <el-tag :type="(typeTagType(previewData.type)) as TagType" size="small">{{ typeLabel(previewData.type) }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="描述">{{ previewData.description || '-' }}</el-descriptions-item>
           <el-descriptions-item label="更新时间">{{ formatTime(previewData.updated_at) }}</el-descriptions-item>
         </el-descriptions>
 
-        <div v-if="previewData.sections && previewData.sections.length" style="margin-top: 16px">
+        <div v-if="previewData.sections && previewData.sections.length" class="mt-lg">
           <h4 style="margin-bottom: 8px">报表章节</h4>
           <el-tag v-for="sec in previewData.sections" :key="sec" size="small" style="margin: 2px 4px">
             {{ sectionLabel(sec) }}
           </el-tag>
         </div>
 
-        <div v-if="previewData.params" style="margin-top: 16px">
+        <div v-if="previewData.params" class="mt-lg">
           <h4 style="margin-bottom: 8px">参数配置</h4>
           <el-descriptions :column="1" border size="small">
             <el-descriptions-item label="时间范围">{{ previewData.params.timeRange || '-' }}</el-descriptions-item>
@@ -219,6 +219,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -240,8 +241,8 @@ const previewVisible = ref(false)
 const previewData = ref<any>(null)
 
 const filters = reactive({
-  keyword: '',
-  type: '',
+  keyword: 'primary',
+  type: 'primary',
 })
 
 const pagination = reactive({
@@ -251,15 +252,15 @@ const pagination = reactive({
 })
 
 const form = reactive({
-  name: '',
-  type: '',
-  description: '',
+  name: 'primary',
+  type: 'primary',
+  description: 'primary',
   sections: [] as string[],
   params: {
     timeRange: '7d',
     outputFormat: 'pdf',
     autoSend: false,
-    receivers: '',
+    receivers: 'primary',
   } as Record<string, any>,
 })
 
@@ -288,15 +289,15 @@ function typeLabel(t: string): string {
   return map[t] || t || '-'
 }
 
-function typeTagType(t: string): string {
+function typeTagType(t: string): TagType {
   const map: Record<string, string> = {
-    inspection: '',
+    inspection: 'primary',
     anomaly: 'danger',
     automation: 'warning',
     asset: 'success',
     compliance: 'info',
   }
-  return map[t] || 'info'
+  return (map[t] || 'info') as TagType
 }
 
 function sectionLabel(s: string): string {
@@ -352,7 +353,7 @@ function resetForm() {
   form.type = ''
   form.description = ''
   form.sections = []
-  form.params = { timeRange: '7d', outputFormat: 'pdf', autoSend: false, receivers: '' }
+  form.params = { timeRange: '7d', outputFormat: 'pdf', autoSend: false, receivers: 'primary'}
   formRef.value?.resetFields()
 }
 
@@ -370,7 +371,7 @@ function openEditDialog(row: any) {
   form.type = row.type || ''
   form.description = row.description || ''
   form.sections = row.sections || []
-  form.params = row.params || { timeRange: '7d', outputFormat: 'pdf', autoSend: false, receivers: '' }
+  form.params = row.params || { timeRange: '7d', outputFormat: 'pdf', autoSend: false, receivers: 'primary'}
   dialogVisible.value = true
 }
 

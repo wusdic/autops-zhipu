@@ -7,20 +7,15 @@
     </div>
 
     <!-- Stat Cards -->
-    <el-row :gutter="16" class="stat-row">
+    <el-row :gutter="16" class="metric-row">
       <el-col :span="6" v-for="stat in statCards" :key="stat.label">
-        <el-card shadow="hover" class="autops-metric-card" v-loading="statsLoading">
-          <div class="stat-card-inner">
-            <div class="stat-icon-wrap" :style="{ background: stat.bgColor }">
-              <el-icon :size="24" :style="{ color: stat.color }">
-                <component :is="stat.icon" />
-              </el-icon>
-            </div>
-            <div class="stat-info">
-              <el-statistic :title="stat.label" :value="stat.value" />
-            </div>
+        <div class="autops-metric-card" v-loading="statsLoading">
+          <div class="metric-icon" :class="stat.bgClass">
+            <el-icon :size="20"><component :is="stat.icon" /></el-icon>
           </div>
-        </el-card>
+          <div class="metric-label">{{ stat.label }}</div>
+          <div class="metric-value">{{ stat.value }}</div>
+        </div>
       </el-col>
     </el-row>
 
@@ -49,14 +44,14 @@
         </el-table-column>
         <el-table-column prop="category" label="分类" width="120">
           <template #default="{ row }">
-            <el-tag size="small" :type="getCategoryTagType(row.category)">
+            <el-tag size="small" :type="(getCategoryTagType(row.category)) as TagType">
               {{ row.category || '未分类' }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="getStatusTagType(row.status)">
+            <el-tag size="small" :type="(getStatusTagType(row.status)) as TagType">
               {{ getStatusLabel(row.status) }}
             </el-tag>
           </template>
@@ -132,10 +127,11 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Document, Checked, EditPen, StarFilled, ArrowRight, Upload, List, View as Review, Notebook } from '@element-plus/icons-vue'
+import { Document, CircleCheck, Edit, Star, ArrowRight, Upload, List, View as Review, Notebook } from '@element-plus/icons-vue'
 import { knowledgeService } from '@/shared/api'
 
 const router = useRouter()
@@ -146,10 +142,10 @@ const tableLoading = ref(false)
 const recentItems = ref<any[]>([])
 
 const statCards = reactive([
-  { label: '知识总数', value: 0, icon: Document, color: '#165dff', bgColor: '#e8f3ff' },
-  { label: '已发布', value: 0, icon: Checked, color: '#00b42a', bgColor: '#e8ffea' },
-  { label: '草稿', value: 0, icon: EditPen, color: '#ff7d00', bgColor: '#fff7e8' },
-  { label: '平均评分', value: 0, icon: StarFilled, color: '#722ed1', bgColor: '#f5e8ff' },
+  { label: '知识总数', value: 0, icon: Document, bgClass: 'bg-brand' },
+  { label: '已发布', value: 0, icon: CircleCheck, bgClass: 'bg-success' },
+  { label: '草稿', value: 0, icon: Edit, bgClass: 'bg-info' },
+  { label: '平均评分', value: 0, icon: Star, bgClass: 'bg-warning' },
 ])
 
 const categories = ref<{ name: string; count: number; percentage: number; color: string }[]>([])
@@ -202,15 +198,15 @@ function formatTime(val: string | number | null | undefined): string {
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes())
 }
 
-function getStatusTagType(status: string): '' | 'success' | 'warning' | 'danger' | 'info' {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+function getStatusTagType(status: string): TagType {
+  const map: Record<string, TagType> = {
     published: 'success',
     draft: 'warning',
-    review: '',
+    review: 'primary',
     rejected: 'danger',
     archived: 'info',
   }
-  return map[status] || 'info'
+  return (map[status] || 'info') as TagType
 }
 
 function getStatusLabel(status: string): string {
@@ -224,15 +220,15 @@ function getStatusLabel(status: string): string {
   return map[status] || status || '未知'
 }
 
-function getCategoryTagType(category: string): '' | 'success' | 'warning' | 'danger' | 'info' {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+function getCategoryTagType(category: string): TagType {
+  const map: Record<string, TagType> = {
     故障处理: 'danger',
     标准方案: 'success',
     经验沉淀: 'warning',
-    操作指南: '',
+    操作指南: 'primary',
     FAQ: 'info',
   }
-  return map[category] || 'info'
+  return (map[category] || 'info') as TagType
 }
 
 // --- Data Fetching ---
@@ -292,34 +288,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
-
-.stat-row {
-  margin-bottom: var(--autops-space-lg);
-}
-
-
-
-.autops-metric-card-inner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--autops-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-info {
-  flex: 1;
-}
-
 .main-card {
   margin-bottom: var(--autops-space-lg);
   border-radius: var(--autops-radius-md);

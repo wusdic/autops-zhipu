@@ -1,5 +1,5 @@
 <template>
-  <div class="ticket-detail">
+  <div class="autops-page-container">
     <!-- ─── Page Header ─── -->
     <div class="autops-page-header">
       <div>
@@ -16,7 +16,7 @@
       <div class="detail-title-area">
         <h2 style="margin: 0 0 0 12px">{{ ticket?.title || '工单详情' }}</h2>
         <StatusBadge v-if="ticket" :status="ticket.status" show-icon style="margin-left: 12px" />
-        <el-tag v-if="ticket" :type="priorityType(ticket?.priority)" style="margin-left: 8px">
+        <el-tag v-if="ticket" :type="(priorityType(ticket?.priority)) as TagType" style="margin-left: 8px">
           {{ ticket?.priority || '-' }}
         </el-tag>
         <!-- SLA 倒计时 -->
@@ -34,7 +34,7 @@
       </div>
     </div>
 
-    <div v-loading="loading" style="margin-top: 16px">
+    <div v-loading="loading" class="mt-lg">
       <template v-if="ticket">
         <el-tabs v-model="activeTab" type="border-card">
           <!-- 基本信息 -->
@@ -46,7 +46,7 @@
                 <StatusBadge :status="ticket.status" show-icon />
               </el-descriptions-item>
               <el-descriptions-item label="优先级">
-                <el-tag :type="priorityType(ticket.priority)">{{ ticket.priority }}</el-tag>
+                <el-tag :type="(priorityType(ticket.priority)) as TagType">{{ ticket.priority }}</el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="负责人">
                 <span>{{ ticket.assigned_to || '未分配' }}</span>
@@ -63,7 +63,7 @@
             </el-descriptions>
 
             <!-- 上下文信息 -->
-            <div v-if="ticket.context" style="margin-top: 16px">
+            <div v-if="ticket.context" class="mt-lg">
               <h4>上下文信息</h4>
               <el-input type="textarea" :rows="4" :model-value="formatJson(ticket.context)" readonly />
             </div>
@@ -147,7 +147,7 @@
 
           <!-- 评论 -->
           <el-tab-pane label="评论" name="comments">
-            <div style="margin-bottom: 16px">
+            <div class="mb-lg">
               <el-input
                 v-model="newComment"
                 type="textarea"
@@ -305,6 +305,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, WarningFilled, Document, Upload } from '@element-plus/icons-vue'
@@ -362,8 +363,8 @@ const knowledgeConverting = ref(false)
 const knowledgeDialogVisible = ref(false)
 const knowledgeSubmitting = ref(false)
 const knowledgeForm = ref({
-  title: '',
-  content: '',
+  title: 'primary',
+  content: 'primary',
   type: 'incident' as string,
   tags: [] as string[],
 })
@@ -665,9 +666,9 @@ function formatJson(obj: any) {
   try { return JSON.stringify(obj, null, 2) } catch { return String(obj) }
 }
 
-function priorityType(p: string) {
-  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: '', low: 'success' }
-  return map[p] || ''
+function priorityType(p: string): TagType {
+  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: 'primary', low: 'success' }
+  return (map[p] ?? undefined) as TagType
 }
 
 function ticketTypeLabel(t: string) {

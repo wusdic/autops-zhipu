@@ -1,10 +1,8 @@
 <template>
-  <div class="execution-list-page">
+  <div class="autops-page-container">
     <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">执行历史</div>
-        <div class="autops-page-desc">查看所有自动化执行记录与状态</div>
-      </div>
+      <div class="autops-page-title">执行历史</div>
+      <div class="autops-page-desc">查看所有自动化执行记录与状态</div>
     </div>
 
     <!-- ========== Statistics Row ========== -->
@@ -73,7 +71,7 @@
       <MetricChart
         :multiple="trendSeries"
         chart-type="bar"
-        height="260px"
+        :height="260"
       />
     </div>
 
@@ -193,7 +191,7 @@
         </el-table-column>
         <el-table-column prop="trigger_source" label="触发来源" width="110" align="center">
           <template #default="{ row }">
-            <el-tag :type="triggerSourceType(row.trigger_source)" size="small" effect="plain">
+            <el-tag :type="(triggerSourceType(row.trigger_source)) as TagType" size="small" effect="plain">
               {{ triggerSourceLabel(row.trigger_source) }}
             </el-tag>
           </template>
@@ -216,7 +214,7 @@
           <template #default="{ row }">
             <el-tag
               v-if="row.risk_level"
-              :type="riskLevelType(row.risk_level)"
+              :type="(riskLevelType(row.risk_level)) as TagType"
               size="small"
             >
               {{ riskLevelLabel(row.risk_level) }}
@@ -305,6 +303,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -345,11 +344,11 @@ const stats = reactive({
 const trendSeries = ref<Array<{ name: string; data: Array<{ time: string; value: number }>; color: string }>>([])
 
 const filters = reactive({
-  status: '',
-  triggerSource: '',
-  riskLevel: '',
+  status: 'primary',
+  triggerSource: 'primary',
+  riskLevel: 'primary',
   dateRange: null as [string, string] | null,
-  keyword: '',
+  keyword: 'primary',
 })
 
 const pagination = reactive({
@@ -395,11 +394,11 @@ function truncateId(id: string | undefined): string {
   return id.length > 12 ? id.slice(0, 8) + '...' + id.slice(-4) : id
 }
 
-function triggerSourceType(source: string): string {
+function triggerSourceType(source: string): TagType {
   const map: Record<string, string> = {
-    manual: '', policy: 'success', aiops: 'warning', ticket: 'info',
+    manual: 'primary', policy: 'success', aiops: 'warning', ticket: 'info',
   }
-  return map[source] || 'info'
+  return (map[source] || 'info') as TagType
 }
 
 function triggerSourceLabel(source: string): string {
@@ -409,11 +408,11 @@ function triggerSourceLabel(source: string): string {
   return map[source] || source || '-'
 }
 
-function riskLevelType(level: string): string {
+function riskLevelType(level: string): TagType {
   const map: Record<string, string> = {
     low: 'info', medium: 'warning', high: 'danger', critical: 'danger',
   }
-  return map[level] || 'info'
+  return (map[level] || 'info') as TagType
 }
 
 function riskLevelLabel(level: string): string {

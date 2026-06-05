@@ -66,7 +66,7 @@
       </div>
     </div>
 
-    <div v-loading="loading" style="margin-top: 16px">
+    <div v-loading="loading" class="mt-lg">
       <template v-if="alert">
         <el-tabs v-model="activeTab" type="border-card">
 
@@ -101,7 +101,7 @@
                   </el-descriptions-item>
                 </el-descriptions>
                 <!-- Annotations -->
-                <div v-if="alert.annotations" style="margin-top: 16px">
+                <div v-if="alert.annotations" class="mt-lg">
                   <h4>注解</h4>
                   <el-input type="textarea" :rows="4" :model-value="formatJson(alert.annotations)" readonly />
                 </div>
@@ -129,7 +129,7 @@
                 </div>
 
                 <!-- Asset Info -->
-                <div class="autops-card side-card" style="margin-top: 12px">
+                <div class="autops-card side-card mt-lg">
                   <div class="autops-card-header">
                     <span class="autops-card-title">💻 关联资产</span>
                     <el-tag size="small" type="info">{{ relatedAssets.length }}</el-tag>
@@ -188,7 +188,7 @@
                 :class="'log-level-' + (log.level || 'info').toLowerCase()"
               >
                 <span class="log-time">{{ formatTime(log.timestamp || log.created_at) }}</span>
-                <el-tag :type="logLevelType(log.level)" size="small" style="margin: 0 8px">{{ log.level || 'info' }}</el-tag>
+                <el-tag :type="(logLevelType(log.level)) as TagType" size="small" style="margin: 0 8px">{{ log.level || 'info' }}</el-tag>
                 <span class="log-source" v-if="log.source">[{{ log.source }}]</span>
                 <span class="log-message">{{ log.message || log.content }}</span>
               </div>
@@ -200,7 +200,7 @@
           <el-tab-pane label="时间线" name="timeline">
             <div v-loading="timelineLoading">
             <!-- Alert lifecycle steps -->
-            <div class="autops-card" style="margin-bottom: 16px">
+            <div class="autops-card" class="mb-lg">
               <div class="autops-card-header">
                 <span class="autops-card-title">🔄 告警生命周期</span>
               </div>
@@ -313,12 +313,12 @@
               <el-col :span="8">
                 <el-statistic title="影响等级">
                   <template #default>
-                    <el-tag :type="severityType(alert.severity)" effect="dark">{{ alert.severity }}</el-tag>
+                    <el-tag :type="(severityType(alert.severity)) as TagType" effect="dark">{{ alert.severity }}</el-tag>
                   </template>
                 </el-statistic>
               </el-col>
             </el-row>
-            <div v-if="impactData.relatedServices.length" style="margin-top: 12px">
+            <div v-if="impactData.relatedServices.length" class="mt-lg">
               <span style="font-size: 13px; color: #86909c; margin-right: 8px">关联服务:</span>
               <el-tag
                 v-for="svc in impactData.relatedServices"
@@ -346,11 +346,11 @@
                   :key="idx"
                   :timestamp="formatTime(ev.timestamp || ev.created_at)"
                   placement="top"
-                  :type="evidenceType(ev.type)"
+                  :type="(evidenceType(ev.type)) as TagType"
                 >
                   <div class="evidence-item">
                     <div class="evidence-header">
-                      <el-tag size="small" :type="evidenceType(ev.type)">{{ ev.type || '事件' }}</el-tag>
+                      <el-tag size="small" :type="(evidenceType(ev.type)) as TagType">{{ ev.type || '事件' }}</el-tag>
                       <span class="evidence-title">{{ ev.title || ev.source || '证据 ' + idx + 1 }}</span>
                     </div>
                     <div class="evidence-desc" v-if="ev.description || ev.detail">
@@ -404,7 +404,7 @@
               <el-button
                 type="primary"
                 size="small"
-                style="margin-top: 8px"
+                class="mt-lg"
                 @click="addComment"
                 :disabled="!newComment.trim()"
               >
@@ -424,6 +424,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Warning } from '@element-plus/icons-vue'
@@ -545,19 +546,19 @@ function formatJson(obj: any) {
   try { return JSON.stringify(obj, null, 2) } catch { return String(obj) }
 }
 
-function severityType(severity: string) {
+function severityType(severity: string): TagType {
   const map: Record<string, string> = { critical: 'danger', high: 'danger', warning: 'warning', info: 'info' }
-  return map[severity] || 'info'
+  return (map[severity] || 'info') as TagType
 }
 
-function logLevelType(level?: string) {
-  const map: Record<string, string> = { error: 'danger', warning: 'warning', warn: 'warning', info: 'info', debug: 'info' }
-  return map[(level || 'info').toLowerCase()] || 'info'
+function logLevelType(level: string): TagType {
+  const map: Record<string, TagType> = { error: 'danger', warning: 'warning', warn: 'warning', info: 'info', debug: 'info' }
+  return (map[(level || 'info').toLowerCase()] ?? 'info') as TagType
 }
 
-function evidenceType(type?: string) {
+function evidenceType(type: string): TagType {
   const map: Record<string, string> = { event: 'primary', state_change: 'warning', config_change: 'danger', alert: 'danger' }
-  return map[type || ''] || 'info'
+  return (map[type || ''] || 'info') as TagType
 }
 
 // ─── Data Loading ───

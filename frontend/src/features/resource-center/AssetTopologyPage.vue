@@ -145,7 +145,7 @@
         <div v-if="selectedNode" class="autops-card" style="margin-top:12px">
           <div class="autops-card-header">
             <span class="autops-card-title">{{ selectedNode.name }}</span>
-            <el-tag :type="healthTagType(selectedNode.health_status || selectedNode.status)" size="small">{{ selectedNode.health_status || selectedNode.status || 'unknown' }}</el-tag>
+            <el-tag :type="(healthTagType(selectedNode.health_status || selectedNode.status)) as TagType" size="small">{{ selectedNode.health_status || selectedNode.status || 'unknown' }}</el-tag>
           </div>
           <div class="autops-card-body">
           <el-descriptions :column="1" size="small" border>
@@ -185,7 +185,7 @@
           </div>
           <div class="autops-card-body">
           <div class="minimap" ref="minimapRef">
-            <svg width="100%" height="120" :viewBox="minimapViewBox">
+            <svg width="100%" height="120" :viewBox="String(minimapViewBox)">
               <g v-for="node in filteredNodes" :key="'m'+node.id">
                 <circle :cx="node.x" :cy="node.y" r="4"
                   :fill="node.id===selectedNode?.id?'#165dff':isImpactNode(node)?'#f53f3f':typeColor(node.asset_type)" />
@@ -205,6 +205,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -273,7 +274,7 @@ const minimapViewBox = computed(() => {
   const ys = nodes.value.map(n => n.y)
   const minX = Math.min(...xs) - 20, maxX = Math.max(...xs) + 20
   const minY = Math.min(...ys) - 20, maxY = Math.max(...ys) + 20
-  return minX + ' ' + minY + ' ' + maxX - minX + ' ' + maxY - minY
+  return `${minX} ${minY} ${maxX - minX} ${maxY - minY}`
 })
 
 function getNode(id: string) { return nodes.value.find(n => n.id === id) }
@@ -287,7 +288,7 @@ function typeColor(t: string) { return typeColors[t] || '#4e5969' }
 function typeLabel(t: string) { return ({ linux_server:'Linux', windows_server:'Windows', database:'数据库', web_service:'Web服务', network_device:'网络设备', security_device:'安全设备' })[t] || t }
 function relationLabel(r: string) { return ({ depends_on:'依赖', contains:'包含', connected_to:'连接', hosts:'承载', backs_up:'备份' })[r] || r }
 function healthColor(s: string) { return ({ healthy:'#00b42a', warning:'#ff7d00', critical:'#f53f3f' })[s] || '#86909c' }
-function healthTagType(s: string) { return ({ healthy:'success', warning:'warning', critical:'danger' })[s] || 'info' }
+function healthTagType(s: string): TagType { return (({ healthy:'success', warning:'warning', critical:'danger' })[s] ?? 'info') as TagType }
 function truncate(s: string, n: number) { return s?.length > n ? s.substring(0, n) + '…' : s || '' }
 
 function getNodeFill(node: any) {

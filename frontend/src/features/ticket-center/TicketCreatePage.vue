@@ -1,5 +1,11 @@
 <template>
-  <div class="ticket-create-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">创建工单</div>
+      <div class="autops-page-desc">新建运维工单</div>
+    </div>
+
     <el-card shadow="never">
       <template #header>
         <div class="autops-card-header">
@@ -71,7 +77,7 @@
                   :value="item.value"
                 >
                   <div class="priority-option">
-                    <el-tag :type="item.tagType" size="small" effect="dark">
+                    <el-tag :type="(item.tagType as TagType)" size="small" effect="dark">
                       {{ item.label }}
                     </el-tag>
                     <span class="priority-desc">{{ item.desc }}</span>
@@ -127,7 +133,7 @@
 
         <el-form-item label="附件">
           <el-upload
-            v-model:file-list="formData.attachments"
+            v-model:file-list="(formData.attachments as any[])"
             action="#"
             :auto-upload="false"
             :limit="5"
@@ -165,7 +171,7 @@
                   :value="alert.id"
                 >
                   <div class="alert-option">
-                    <el-tag :type="alertSeverityMap[alert.severity]" size="small">
+                    <el-tag :type="(alertSeverityMap[alert.severity]) as TagType" size="small">
                       {{ alert.severity }}
                     </el-tag>
                     <span>{{ alert.name || alert.title }}</span>
@@ -251,6 +257,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -321,14 +328,14 @@ const ticketTypes = [
 const priorityLevels = [
   { value: 'critical', label: '紧急', tagType: 'danger', desc: '系统不可用或核心业务中断' },
   { value: 'high', label: '高', tagType: 'warning', desc: '功能严重受损，影响较大' },
-  { value: 'medium', label: '中', tagType: '', desc: '功能部分受影响' },
+  { value: 'medium', label: '中', tagType: 'primary', desc: '功能部分受影响' },
   { value: 'low', label: '低', tagType: 'info', desc: '轻微问题或建议' },
 ]
 
-const alertSeverityMap: Record<string, string> = {
+const alertSeverityMap: Record<string, TagType> = {
   critical: 'danger',
   high: 'warning',
-  medium: '',
+  medium: 'primary',
   low: 'info',
   info: 'info',
 }
@@ -338,14 +345,14 @@ const formRef = ref<FormInstance>()
 const submitting = ref(false)
 
 const formData = reactive<TicketFormData>({
-  title: '',
-  description: '',
-  type: '',
-  priority: '',
+  title: 'primary',
+  description: 'primary',
+  type: 'primary',
+  priority: 'primary',
   assignee_id: undefined,
   related_alert_id: undefined,
   related_asset_id: undefined,
-  expected_resolve_at: '',
+  expected_resolve_at: 'primary',
   notify_channels: ['email'],
   attachments: [],
 })
@@ -378,7 +385,7 @@ async function searchAssignees(query: string) {
   if (!query) return
   assigneeLoading.value = true
   try {
-    const res = await client.get(API.USERS ?? '/api/users', { params: { keyword: query, page_size: 20 } })
+    const res = await client.get(API.GOVERNANCE.USERS ?? '/api/users', { params: { keyword: query, page_size: 20 } })
     const data = res.data?.data ?? res.data
     assigneeOptions.value = Array.isArray(data) ? data : data?.items ?? []
   } catch {

@@ -18,8 +18,8 @@
     <div v-if="recommendations?.length">
       <div :style="{ fontWeight: 600, marginBottom: '4px' }">建议操作</div>
       <el-timeline>
-        <el-timeline-item v-for="(rec, idx) in recommendations" :key="idx" :type="rec.risk === 'high' ? 'danger' : rec.risk === 'medium' ? 'warning' : 'primary'">
-          {{ rec.action || rec.description || rec }}
+        <el-timeline-item v-for="(rec, idx) in recommendations" :key="idx" :type="(rec as any).risk === 'high' ? 'danger' : (rec as any).risk === 'medium' ? 'warning' : 'primary'">
+          {{ (rec as any).action || (rec as any).description || rec }}
         </el-timeline-item>
       </el-timeline>
     </div>

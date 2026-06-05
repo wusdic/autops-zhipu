@@ -234,9 +234,7 @@ onMounted(() => {
   padding: 24px;
 }
 
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 
 .mt-md {
   margin-top: 12px;

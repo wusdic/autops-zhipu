@@ -64,7 +64,7 @@
 
     <!-- 审计日志表格 -->
     <div class="autops-card">
-      <div class="autops-card-body" style="padding: 0">
+      <div class="autops-card-body p-0">
         <el-table stripe :data="logs"v-loading="loading" empty-text="暂无审计记录">
           <el-table-column prop="created_at" label="时间" width="170">
             <template #default="{ row }">
@@ -78,7 +78,7 @@
           </el-table-column>
           <el-table-column prop="action" label="操作" width="180">
             <template #default="{ row }">
-              <el-tag :type="actionColor(row.action)" size="small">{{ actionLabel(row.action) }}</el-tag>
+              <el-tag :type="(actionColor(row.action)) as TagType" size="small">{{ actionLabel(row.action) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="resource_type" label="目标类型" width="110">
@@ -126,6 +126,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Download } from '@element-plus/icons-vue'
@@ -139,10 +140,10 @@ const pageSize = ref(20)
 const total = ref(0)
 
 const filter = reactive({
-  user: '',
-  action: '',
-  resource: '',
-  result: '',
+  user: 'primary',
+  action: 'primary',
+  resource: 'primary',
+  result: 'primary',
   dateRange: [] as string[],
 })
 
@@ -153,9 +154,9 @@ const actionLabelMap: Record<string, string> = {
 }
 const actionLabel = (a: string) => actionLabelMap[a] || a
 
-const actionColorMap: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
-  create: 'success', update: '', delete: 'danger',
-  login: 'info', execute: 'warning', export: '', approve: '',
+const actionColorMap: Record<string, TagType> = {
+  create: 'success', update: 'primary', delete: 'danger',
+  login: 'info', execute: 'warning', export: 'primary', approve: 'primary',
 }
 const actionColor = (a: string) => actionColorMap[a] || 'info'
 
@@ -232,9 +233,7 @@ onMounted(() => search())
 </script>
 
 <style scoped>
-.mb-lg {
-  margin-bottom: var(--autops-space-lg);
-}
+
 .text-tertiary {
   color: var(--autops-info);
   font-size: var(--autops-font-12);

@@ -5,8 +5,8 @@
       <div class="autops-page-title" v-if="asset">
         <el-button @click="goBack" :icon="ArrowLeft">返回资产列表</el-button>
         <span style="margin-left: 12px">{{ asset.name }}</span>
-        <el-tag :type="statusType(asset.status)" size="small" style="margin-left: 8px">{{ asset.status }}</el-tag>
-        <el-tag :type="healthType(asset.health_status)" size="small" style="margin-left: 4px">{{ asset.health_status }}</el-tag>
+        <el-tag :type="(statusType(asset.status)) as TagType" size="small" style="margin-left: 8px">{{ asset.status }}</el-tag>
+        <el-tag :type="(healthType(asset.health_status)) as TagType" size="small" style="margin-left: 4px">{{ asset.health_status }}</el-tag>
       </div>
       <div class="autops-toolbar-right" v-if="asset">
         <el-button type="primary" plain @click="$router.push('/assets/' + asset.id + '/topology')">
@@ -76,10 +76,10 @@
                 <el-descriptions-item label="IP">{{ asset.ip }}</el-descriptions-item>
                 <el-descriptions-item label="端口">{{ asset.port || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="状态">
-                  <el-tag :type="statusType(asset.status)" size="small">{{ asset.status }}</el-tag>
+                  <el-tag :type="(statusType(asset.status)) as TagType" size="small">{{ asset.status }}</el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="健康状态">
-                  <el-tag :type="healthType(asset.health_status)" size="small">{{ asset.health_status }}</el-tag>
+                  <el-tag :type="(healthType(asset.health_status)) as TagType" size="small">{{ asset.health_status }}</el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="操作系统">{{ asset.os_type || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="环境">{{ asset.environment || '-' }}</el-descriptions-item>
@@ -313,7 +313,7 @@
                   <el-table-column prop="trigger_condition" label="触发条件" min-width="160" show-overflow-tooltip />
                   <el-table-column prop="risk_level" label="风险等级" width="100">
                     <template #default="{ row }">
-                      <el-tag :type="riskLevelType(row.risk_level)" size="small">{{ row.risk_level || '-' }}</el-tag>
+                      <el-tag :type="(riskLevelType(row.risk_level)) as TagType" size="small">{{ row.risk_level || '-' }}</el-tag>
                     </template>
                   </el-table-column>
                   <el-table-column prop="enabled" label="启用状态" width="100">
@@ -321,7 +321,7 @@
                       <el-switch
                         :model-value="row.enabled"
                         size="small"
-                        @change="(val: boolean) => togglePolicyEnabled(row.id, val)"
+                        @change="(val: string | number | boolean) => togglePolicyEnabled(row.id, val as boolean)"
                       />
                     </template>
                   </el-table-column>
@@ -373,6 +373,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Plus, Connection, Setting } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -422,7 +423,7 @@ const selectedPolicyId = ref('')
 const allPolicies = ref<any[]>([])
 const allPoliciesLoading = ref(false)
 
-function formatType(t: string) {
+function formatType(t: string): string {
   const map: Record<string, string> = {
     linux_server: 'Linux', windows_server: 'Windows', database: '数据库',
     network_device: '网络设备', web_service: 'Web服务',
@@ -430,7 +431,7 @@ function formatType(t: string) {
   return map[t] || t || '-'
 }
 
-function formatRelationType(t: string) {
+function formatRelationType(t: string): string {
   const map: Record<string, string> = {
     depends: '依赖', connected: '连接', hosted_on: '部署于', contains: '包含',
     parent: '父级', child: '子级',
@@ -438,19 +439,19 @@ function formatRelationType(t: string) {
   return map[t] || t
 }
 
-function statusType(s: string) {
-  return s === 'active' ? 'success' : s === 'inactive' ? 'danger' : 'warning'
+function statusType(s: string): TagType {
+  return (s === 'active' ? 'success' : s === 'inactive' ? 'danger' : 'warning') as TagType
 }
 
-function healthType(h: string) {
-  return h === 'healthy' ? 'success' : h === 'warning' ? 'warning' : h === 'critical' ? 'danger' : 'info'
+function healthType(h: string): TagType {
+  return (h === 'healthy' ? 'success' : h === 'warning' ? 'warning' : h === 'critical' ? 'danger' : 'info') as TagType
 }
 
-function riskLevelType(level: string) {
+function riskLevelType(level: string): TagType {
   const map: Record<string, string> = {
     critical: 'danger', high: 'danger', medium: 'warning', low: 'success', info: 'info',
   }
-  return map[level] || 'info'
+  return (map[level] || 'info') as TagType
 }
 
 function formatTime(t: string) {

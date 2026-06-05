@@ -7,20 +7,15 @@
     </div>
 
     <!-- Stat Cards -->
-    <el-row :gutter="16" class="stat-row">
+    <el-row :gutter="16" class="metric-row">
       <el-col :span="6" v-for="stat in statCards" :key="stat.label">
-        <el-card shadow="hover" class="autops-metric-card" v-loading="statsLoading">
-          <div class="stat-card-inner">
-            <div class="stat-icon-wrap" :style="{ background: stat.bgColor }">
-              <el-icon :size="24" :style="{ color: stat.color }">
-                <component :is="stat.icon" />
-              </el-icon>
-            </div>
-            <div class="stat-info">
-              <el-statistic :title="stat.label" :value="stat.value" />
-            </div>
+        <div class="autops-metric-card" v-loading="statsLoading">
+          <div class="metric-icon" :class="stat.bgClass">
+            <el-icon :size="20"><component :is="stat.icon" /></el-icon>
           </div>
-        </el-card>
+          <div class="metric-label">{{ stat.label }}</div>
+          <div class="metric-value">{{ stat.value }}</div>
+        </div>
       </el-col>
     </el-row>
 
@@ -106,7 +101,7 @@
         </el-table-column>
         <el-table-column prop="asset_type" label="类型" width="120">
           <template #default="{ row }">
-            <el-tag size="small" :type="getAssetTypeTagType(row.asset_type)">
+            <el-tag size="small" :type="(getAssetTypeTagType(row.asset_type)) as TagType">
               {{ getAssetTypeLabel(row.asset_type) }}
             </el-tag>
           </template>
@@ -118,7 +113,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="getStatusTagType(row.status || row.reachability)">
+            <el-tag size="small" :type="(getStatusTagType(row.status || row.reachability)) as TagType">
               {{ getStatusLabel(row.status || row.reachability) }}
             </el-tag>
           </template>
@@ -157,6 +152,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -165,6 +161,7 @@ import {
   Connection,
   Warning,
   CircleCheck,
+  Remove,
   ArrowRight,
   Search,
   SetUp,
@@ -207,10 +204,10 @@ interface StatusDistItem {
 }
 
 const statCards = reactive([
-  { label: '资产总数', value: 0, icon: Monitor, color: '#165dff', bgColor: '#e8f3ff' },
-  { label: '在线', value: 0, icon: CircleCheck, color: '#00b42a', bgColor: '#e8ffea' },
-  { label: '离线', value: 0, icon: Connection, color: '#86909c', bgColor: '#f2f3f5' },
-  { label: '告警中', value: 0, icon: Warning, color: '#f53f3f', bgColor: '#ffece8' },
+  { label: '资产总数', value: 0, icon: Monitor, bgClass: 'bg-brand' },
+  { label: '在线', value: 0, icon: CircleCheck, bgClass: 'bg-success' },
+  { label: '离线', value: 0, icon: Remove, bgClass: 'bg-info' },
+  { label: '告警中', value: 0, icon: Warning, bgClass: 'bg-danger' },
 ])
 
 const quickLinks = [
@@ -279,25 +276,25 @@ function getAssetTypeLabel(type: string): string {
   return map[type] || type || '未知'
 }
 
-function getAssetTypeTagType(type: string): '' | 'success' | 'warning' | 'danger' | 'info' {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
-    server: '',
-    linux_server: '',
-    windows_server: '',
+function getAssetTypeTagType(type: string): TagType {
+  const map: Record<string, TagType> = {
+    server: 'primary',
+    linux_server: 'primary',
+    windows_server: 'primary',
     web_server: 'success',
     network: 'success',
     storage: 'warning',
     database: 'danger',
     middleware: 'info',
-    vm: '',
+    vm: 'primary',
     container: 'success',
     cloud: 'warning',
   }
-  return map[type] || 'info'
+  return (map[type] || 'info') as TagType
 }
 
-function getStatusTagType(status: string): '' | 'success' | 'warning' | 'danger' | 'info' {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+function getStatusTagType(status: string): TagType {
+  const map: Record<string, TagType> = {
     online: 'success',
     active: 'success',
     reachable: 'success',
@@ -308,7 +305,7 @@ function getStatusTagType(status: string): '' | 'success' | 'warning' | 'danger'
     alarming: 'warning',
     maintenance: 'warning',
   }
-  return map[status] || 'info'
+  return (map[status] || 'info') as TagType
 }
 
 function getStatusLabel(status: string): string {
@@ -523,29 +520,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.stat-row {
-  margin-bottom: var(--autops-space-lg);
-}
-.autops-metric-card-inner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-icon-wrap {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--autops-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-info {
-  flex: 1;
-}
-
 .section-row {
   margin-bottom: var(--autops-space-lg);
 }

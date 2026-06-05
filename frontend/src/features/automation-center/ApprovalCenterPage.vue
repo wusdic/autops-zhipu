@@ -20,7 +20,7 @@
       </el-tabs>
 
       <!-- Filter Row -->
-      <el-row :gutter="16" align="middle" style="margin-bottom: 16px;">
+      <el-row :gutter="16" align="middle" class="mb-lg">
         <el-col :span="6">
           <el-input
             v-model="searchKeyword"
@@ -74,7 +74,7 @@
         </el-table-column>
         <el-table-column prop="risk_level" label="风险等级" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="riskTagType(row.risk_level)" size="small" effect="light">
+            <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small" effect="light">
               {{ riskLabel(row.risk_level) }}
             </el-tag>
           </template>
@@ -96,7 +96,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status)" size="small" effect="light">
+            <el-tag :type="(statusTagType(row.status)) as TagType" size="small" effect="light">
               {{ statusLabel(row.status) }}
             </el-tag>
           </template>
@@ -142,11 +142,11 @@
       @closed="resetActionForm"
     >
       <div class="action-dialog-content">
-        <el-descriptions :column="1" border size="small" style="margin-bottom: 16px;">
+        <el-descriptions :column="1" border size="small" class="mb-lg">
           <el-descriptions-item label="请求名称">{{ currentAction?.name || currentAction?.title || '-' }}</el-descriptions-item>
           <el-descriptions-item label="类型">{{ typeLabel(currentAction?.type || currentAction?.execution_type) }}</el-descriptions-item>
           <el-descriptions-item label="风险等级">
-            <el-tag :type="riskTagType(currentAction?.risk_level)" size="small">
+            <el-tag :type="(riskTagType(currentAction?.risk_level ?? '')) as TagType" size="small">
               {{ riskLabel(currentAction?.risk_level) }}
             </el-tag>
           </el-descriptions-item>
@@ -186,12 +186,12 @@
           <el-descriptions-item label="请求名称">{{ currentDetail.name || currentDetail.title || '-' }}</el-descriptions-item>
           <el-descriptions-item label="类型">{{ typeLabel(currentDetail.type || currentDetail.execution_type) }}</el-descriptions-item>
           <el-descriptions-item label="风险等级">
-            <el-tag :type="riskTagType(currentDetail.risk_level)" size="small">
+            <el-tag :type="(riskTagType(currentDetail.risk_level)) as TagType" size="small">
               {{ riskLabel(currentDetail.risk_level) }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="statusTagType(currentDetail.status)" size="small">
+            <el-tag :type="(statusTagType(currentDetail.status)) as TagType" size="small">
               {{ statusLabel(currentDetail.status) }}
             </el-tag>
           </el-descriptions-item>
@@ -204,7 +204,7 @@
         </el-descriptions>
 
         <!-- Execution Targets -->
-        <div v-if="currentDetail.targets && currentDetail.targets.length" style="margin-top: 20px;">
+        <div v-if="currentDetail.targets && currentDetail.targets.length" class="mt-lg">
           <div class="section-title">执行目标</div>
           <el-table stripe  :data="currentDetail.targets" size="small" border>
             <el-table-column prop="name" label="名称" min-width="120" />
@@ -214,7 +214,7 @@
         </div>
 
         <!-- Quick Actions for Pending -->
-        <div v-if="currentDetail.status === 'pending'" style="margin-top: 24px; display: flex; gap: 12px;">
+        <div v-if="currentDetail.status === 'pending'" class="mt-lg" style="display: flex; gap: 12px;">
           <el-button type="success" @click="openActionDialog(currentDetail, 'approve'); drawerVisible = false">
             批准
           </el-button>
@@ -228,6 +228,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
@@ -294,9 +295,9 @@ function typeLabel(type?: string) {
   return map[type || ''] || type || '-'
 }
 
-function riskTagType(level?: string) {
+function riskTagType(level: string): TagType {
   const map: Record<string, string> = { high: 'danger', medium: 'warning', low: 'success' }
-  return map[level || ''] || 'info'
+  return (map[level || ''] || 'info') as TagType
 }
 
 function riskLabel(level?: string) {
@@ -304,9 +305,9 @@ function riskLabel(level?: string) {
   return map[level || ''] || '未知'
 }
 
-function statusTagType(status?: string) {
+function statusTagType(status: string): TagType {
   const map: Record<string, string> = { pending: 'warning', approved: 'success', rejected: 'danger' }
-  return map[status || ''] || 'info'
+  return (map[status || ''] || 'info') as TagType
 }
 
 function statusLabel(status?: string) {
@@ -374,18 +375,18 @@ function resetFilters() {
 
 function handleSortChange({ prop, order }: any) {
   sortField.value = prop || ''
-  sortOrder.value = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : ''
+  sortOrder.value = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : 'primary'
   fetchApprovals()
 }
 
 // ---------- Detail ----------
-function viewDetail(row: Approval) {
+function viewDetail(row: any) {
   currentDetail.value = row
   drawerVisible.value = true
 }
 
 // ---------- Approve / Reject ----------
-function openActionDialog(row: Approval, type: 'approve' | 'reject') {
+function openActionDialog(row: any, type: 'approve' | 'reject') {
   currentAction.value = row
   actionType.value = type
   actionComment.value = ''

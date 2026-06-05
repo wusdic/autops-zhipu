@@ -32,7 +32,7 @@
       <el-table-column prop="author_name" label="创建者" width="100" />
       <el-table-column prop="status" label="状态" width="100">
         <template #default="{ row }">
-          <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+          <el-tag size="small" :type="(statusType(row.status)) as TagType">{{ statusLabel(row.status) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="created_at" label="创建时间" width="170">
@@ -86,7 +86,7 @@
       <el-descriptions :column="1" border v-if="currentItem">
         <el-descriptions-item label="标题">{{ currentItem.title }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="statusType(currentItem.status)">{{ statusLabel(currentItem.status) }}</el-tag>
+          <el-tag :type="(statusType(currentItem.status)) as TagType">{{ statusLabel(currentItem.status) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="创建者">{{ currentItem.author_name || '-' }}</el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ formatTime(currentItem.created_at) }}</el-descriptions-item>
@@ -104,6 +104,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Refresh } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -124,11 +125,11 @@ const editingId = ref<string | null>(null)
 const currentItem = ref<any>(null)
 const formRef = ref<FormInstance>()
 
-const form = ref({ title: '', alert_ids: '', content: '', status: 'draft' })
+const form = ref({ title: 'primary', alert_ids: 'primary', content: 'primary', status: 'draft' })
 const rules: FormRules = { title: [{ required: true, message: '请输入标题', trigger: 'blur' }] }
 
-function statusType(s: string) {
-  return { draft: 'info', in_progress: 'warning', completed: 'success' }[s] || 'info'
+function statusType(s: string): TagType {
+  return ({ draft: 'info', in_progress: 'warning', completed: 'success' }[s] || 'info') as TagType
 }
 function statusLabel(s: string) {
   return { draft: '草稿', in_progress: '进行中', completed: '已完成' }[s] || s || '-'
@@ -154,7 +155,7 @@ async function fetchList() {
 
 function handleCreate() {
   editingId.value = null
-  form.value = { title: '', alert_ids: '', content: '', status: 'draft' }
+  form.value = { title: 'primary', alert_ids: 'primary', content: 'primary', status: 'draft' }
   dialogVisible.value = true
 }
 

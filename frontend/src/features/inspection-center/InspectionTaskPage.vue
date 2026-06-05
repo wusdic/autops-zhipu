@@ -44,7 +44,7 @@
       </el-table-column>
       <el-table-column prop="status" label="状态" width="100" align="center">
         <template #default="{ row }">
-          <el-tag :type="statusTagType(row.status)" size="small" effect="light">
+          <el-tag :type="(statusTagType(row.status)) as TagType" size="small" effect="light">
             <el-icon v-if="row.status === 'running'" class="is-loading" style="margin-right: 2px"><Loading /></el-icon>
             {{ statusLabel(row.status) }}
           </el-tag>
@@ -164,7 +164,7 @@
           <el-descriptions-item label="任务名称">{{ taskDetail.name }}</el-descriptions-item>
           <el-descriptions-item label="关联计划">{{ taskDetail.plan_name || taskDetail.plan_id || '-' }}</el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="statusTagType(taskDetail.status)" size="small">{{ statusLabel(taskDetail.status) }}</el-tag>
+            <el-tag :type="(statusTagType(taskDetail.status)) as TagType" size="small">{{ statusLabel(taskDetail.status) }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="执行资产数">{{ taskDetail.asset_count ?? taskDetail.total_assets ?? '-' }}</el-descriptions-item>
           <el-descriptions-item label="开始时间">{{ taskDetail.started_at || '-' }}</el-descriptions-item>
@@ -178,7 +178,7 @@
             <el-table-column prop="asset_name" label="资产" min-width="140" show-overflow-tooltip />
             <el-table-column prop="status" label="状态" width="90">
               <template #default="{ row }">
-                <el-tag :type="statusTagType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+                <el-tag :type="(statusTagType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column prop="message" label="结果信息" min-width="200" show-overflow-tooltip />
@@ -195,6 +195,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -223,8 +224,8 @@ const pagination = reactive({
 })
 
 const triggerForm = reactive({
-  name: '',
-  plan_id: '',
+  name: 'primary',
+  plan_id: 'primary',
 })
 
 const triggerFormRules: FormRules = {
@@ -241,15 +242,15 @@ const statusMap: Record<string, { label: string; type: string }> = {
   cancelled: { label: '已取消', type: 'info' },
 }
 
-function statusTagType(status: string): string {
-  return statusMap[status]?.type ?? 'info'
+function statusTagType(status: string): TagType {
+  return (statusMap[status]?.type ?? 'info') as TagType
 }
 
 function statusLabel(status: string): string {
   return statusMap[status]?.label ?? status ?? '-'
 }
 
-function progressStatus(row: any): string {
+function progressStatus(row: any): '' | 'success' | 'warning' | 'exception' | undefined {
   if (row.status === 'failed') return 'exception'
   if (row.progress >= 100) return 'success'
   return ''
@@ -325,7 +326,7 @@ async function triggerTask(data: Record<string, any>) {
 
 // ---------- 操作 ----------
 function handleTriggerTask() {
-  triggerForm.name = '手动巡检_' + new Date().toLocaleString('zh-CN', { hour12: false  + ').replace(/[\/:]/g, '-').replace(/\s/g, '_')}'
+  triggerForm.name = '手动巡检_' + new Date().toLocaleString('zh-CN', { hour12: false }).replace(/[/:]/g, '-').replace(/\s/g, '_')
   triggerDialogVisible.value = true
 }
 

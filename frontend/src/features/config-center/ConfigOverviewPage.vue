@@ -1,36 +1,33 @@
 <template>
-  <div class="config-overview-page">
-    <div class="autops-page-header">
-      <div class="autops-page-title-row">
-        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <span class="autops-page-title">配置总览</span>
+  <div class="autops-page-container">
+    <div class="autops-page-header autops-page-header--between">
+      <div>
+        <div class="autops-page-title">配置总览</div>
+        <div class="autops-page-desc">统一管理发现模板、巡检规则、阈值规则、通知规则和配置版本</div>
       </div>
-      <div class="autops-page-desc">统一管理发现模板、巡检规则、阈值规则、通知规则和配置版本</div>
-    </div>
-    <div style="display: flex; gap: 8px; margin-bottom: 16px">
-      <el-button type="primary" @click="showQuickCreate = true">
-        <el-icon><Plus /></el-icon> 快速创建
-      </el-button>
+      <div class="autops-header-actions">
+        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+        <el-button type="primary" @click="showQuickCreate = true">
+          <el-icon><Plus /></el-icon> 快速创建
+        </el-button>
+      </div>
     </div>
 
     <!-- 统计卡片 -->
-    <el-row :gutter="16" class="mt-4">
+    <el-row :gutter="16" class="mt-lg">
       <el-col :span="6" v-for="stat in stats" :key="stat.label">
-        <el-card shadow="hover" class="autops-metric-card" @click="stat.click">
-          <div class="stat-value" :style="{ color: stat.color }">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
-          <div class="stat-footer">
-            <span :class="stat.trend > 0 ? 'trend-up' : 'trend-down'">
-              {{ stat.trend > 0 ? '+' : '' }}{{ stat.trend }}%
-            </span>
-            <span class="trend-label">较上周</span>
+        <div class="autops-metric-card" style="cursor: pointer" @click="stat.click">
+          <div class="metric-icon" :class="stat.bgClass">
+            <el-icon size="20"><component :is="stat.icon" /></el-icon>
           </div>
-        </el-card>
+          <div class="metric-label">{{ stat.label }}</div>
+          <div class="metric-value" :class="stat.textClass">{{ stat.value }}</div>
+        </div>
       </el-col>
     </el-row>
 
     <!-- 配置分类 Tab -->
-    <el-tabs v-model="activeTab" class="mt-4">
+    <el-tabs v-model="activeTab" class="mt-lg">
       <el-tab-pane label="发现模板" name="discovery">
         <el-table stripe :data="discoveryTemplates" v-loading="loading">
           <el-table-column prop="name" label="模板名称" min-width="180" />
@@ -70,7 +67,7 @@
           </el-table-column>
           <el-table-column prop="severity" label="严重度" width="100">
             <template #default="{ row }">
-              <el-tag :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag>
+              <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="asset_count" label="适用资产" width="100" />
@@ -168,9 +165,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, ArrowLeft } from '@element-plus/icons-vue'
+import { Plus, ArrowLeft, Monitor, Search, Warning, Bell } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
@@ -181,10 +179,10 @@ const showQuickCreate = ref(false)
 const creating = ref(false)
 
 const stats = ref([
-  { label: '发现模板', value: 0, color: '#165dff', trend: 0, click: () => { activeTab.value = 'discovery' } },
-  { label: '巡检规则', value: 0, color: '#00b42a', trend: 0, click: () => { activeTab.value = 'inspection' } },
-  { label: '阈值规则', value: 0, color: '#ff7d00', trend: 0, click: () => { activeTab.value = 'threshold' } },
-  { label: '通知规则', value: 0, color: '#f53f3f', trend: 0, click: () => { activeTab.value = 'notification' } },
+  { label: '发现模板', value: 0, icon: Monitor, bgClass: 'bg-brand', textClass: 'text-brand', click: () => { activeTab.value = 'discovery' } },
+  { label: '巡检规则', value: 0, icon: Search, bgClass: 'bg-success', textClass: 'text-success', click: () => { activeTab.value = 'inspection' } },
+  { label: '阈值规则', value: 0, icon: Warning, bgClass: 'bg-warning', textClass: 'text-warning', click: () => { activeTab.value = 'threshold' } },
+  { label: '通知规则', value: 0, icon: Bell, bgClass: 'bg-danger', textClass: 'text-danger', click: () => { activeTab.value = 'notification' } },
 ])
 
 const discoveryTemplates = ref<any[]>([])
@@ -193,16 +191,16 @@ const thresholdRules = ref<any[]>([])
 const notificationRules = ref<any[]>([])
 const configVersions = ref<any[]>([])
 
-const createForm = reactive({ type: '', name: '', description: '' })
+const createForm = reactive({ type: 'primary', name: 'primary', description: 'primary'})
 
 const categoryMap: Record<string, string> = {
   page_check: '页面检查', config_check: '配置检查',
   log_check: '日志检查', baseline_check: '基线检查',
 }
 
-function severityType(severity: string) {
-  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: '', low: 'info' }
-  return map[severity] || 'info'
+function severityType(severity: string): TagType {
+  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }
+  return (map[severity] || 'info') as TagType
 }
 
 function unwrapItems(res: any): any[] {
@@ -305,11 +303,5 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.config-overview-page { padding: var(--autops-space-xl); }
-.autops-metric-card:hover { transform: translateY(-2px); }
-.stat-footer { margin-top: 8px; font-size: var(--autops-font-12); }
-.trend-up { color: var(--autops-success); }
-.trend-down { color: var(--autops-danger); }
-.trend-label { color: var(--autops-text-4); margin-left: 4px; }
-.mt-4 { margin-top: var(--autops-space-lg); }
+.mt-lg { margin-top: var(--autops-space-lg); }
 </style>

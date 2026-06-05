@@ -38,7 +38,7 @@
       </el-table-column>
       <el-table-column label="权限范围" min-width="200">
         <template #default="{ row }">
-          <el-tag v-for="s in (row.scopes || []).slice(0,3)" :key="s" size="small" style="margin-right:4px" :type="scopeType(s)">{{ scopeLabels[s] || s }}</el-tag>
+          <el-tag v-for="s in (row.scopes || []).slice(0,3)" :key="s" size="small" style="margin-right:4px" :type="(scopeType(s)) as TagType">{{ scopeLabels[s] || s }}</el-tag>
           <el-tag v-if="(row.scopes||[]).length > 3" size="small" type="info">+{{ row.scopes.length - 3 }}</el-tag>
         </template>
       </el-table-column>
@@ -46,7 +46,7 @@
         <template #default="{ row }">
           <div v-if="row.expires_at" class="expiry-cell">
             <el-progress :percentage="expiryPercent(row)" :color="expiryColor(row)" :stroke-width="6" :show-text="false" style="width:80px" />
-            <el-tag :type="expiryTagType(row)" size="small">{{ expiryLabel(row) }}</el-tag>
+            <el-tag :type="(expiryTagType(row)) as TagType" size="small">{{ expiryLabel(row) }}</el-tag>
           </div>
           <el-tag v-else type="info" size="small">永久</el-tag>
         </template>
@@ -84,7 +84,7 @@
           <div class="scope-groups">
             <div v-for="group in scopeGroups" :key="group.name" class="scope-group">
               <div class="scope-group-header">
-                <el-checkbox :indeterminate="isGroupIndeterminate(group)" v-model="groupChecked[group.name]" @change="(v:boolean) => toggleGroup(group, v)">{{ group.name }}</el-checkbox>
+                <el-checkbox :indeterminate="isGroupIndeterminate(group)" v-model="groupChecked[group.name]" @change="(v: any) => toggleGroup(group, v)">{{ group.name }}</el-checkbox>
               </div>
               <div class="scope-group-items">
                 <el-checkbox v-for="opt in group.items" :key="opt.value" v-model="scopeChecked[opt.value]" :label="opt.value" @change="updateGroupState(group)">{{ opt.label }}</el-checkbox>
@@ -150,7 +150,7 @@
           <div v-for="group in getDetailScopeGroups" :key="group.name" class="scope-group-mini">
             <div class="scope-group-name">{{ group.name }}</div>
             <div>
-              <el-tag v-for="s in group.items" :key="s" size="small" :type="scopeType(s)" style="margin:2px">{{ scopeLabels[s] || s }}</el-tag>
+              <el-tag v-for="s in group.items" :key="s" size="small" :type="(scopeType(s)) as TagType" style="margin:2px">{{ scopeLabels[s] || s }}</el-tag>
             </div>
           </div>
         </div>
@@ -180,6 +180,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
@@ -223,7 +224,7 @@ function updateGroupState(group: any) {
 }
 
 const stats = reactive({ total: 0, active: 0, expired: 0, expiringSoon: 0 })
-const filters = reactive({ keyword: '', status: '', scope: '' })
+const filters = reactive({ keyword: 'primary', status: 'primary', scope: 'primary'})
 const loading = ref(false)
 const apiKeys = ref<any[]>([])
 const page = ref(1)
@@ -233,8 +234,8 @@ const total = ref(0)
 const dialogVisible = ref(false)
 const secretDialogVisible = ref(false)
 const saving = ref(false)
-const formData = reactive({ name: '', scopes: [] as string[], expires_at: '' })
-const createdKey = reactive({ name: '', key_id: '', secret: '' })
+const formData = reactive({ name: 'primary', scopes: [] as string[], expires_at: 'primary'})
+const createdKey = reactive({ name: 'primary', key_id: 'primary', secret: 'primary'})
 
 const showDetail = ref(false)
 const detailData = ref<any>(null)
@@ -277,7 +278,7 @@ function resetFilters() { filters.keyword = ''; filters.status = ''; filters.sco
 function setExpiry(days: number) { const d = new Date(); d.setDate(d.getDate() + days); formData.expires_at = d.toISOString() }
 function isExpired(row: any) { return row.expires_at && new Date(row.expires_at) < new Date() }
 function isExpiringSoon(row: any) { return row.expires_at && !isExpired(row) && (new Date(row.expires_at).getTime() - Date.now()) < 7 * 86400000 }
-function scopeType(s: string) { return s.includes('write') || s === 'admin' ? 'warning' : 'info' }
+function scopeType(s: string): TagType { return s.includes('write') || s === 'admin' ? 'warning' : 'info' }
 function fmt(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '-' }
 function fmtDate(t: string) { return t ? new Date(t).toLocaleDateString('zh-CN') : '-' }
 
@@ -294,10 +295,10 @@ function expiryColor(row: any) {
   return '#00b42a'
 }
 
-function expiryTagType(row: any) {
-  if (isExpired(row)) return 'danger'
-  if (isExpiringSoon(row)) return 'warning'
-  return 'success'
+function expiryTagType(key: any): TagType {
+  if (isExpired(key)) return ('danger') as TagType
+  if (isExpiringSoon(key)) return ('warning') as TagType
+  return ('success') as TagType
 }
 
 function expiryLabel(row: any) {
@@ -352,7 +353,7 @@ async function handleCreate() {
 }
 
 async function viewDetail(row: any) {
-  try { const { data } = await api.get(API.API_KEY_DETAIL(row.id)); detailData.value = data?.code === 0 ? data.data : row } catch { detailData.value = row }
+  try { const { data } = await api.get(API.GOVERNANCE.API_KEY_DETAIL(row.id)); detailData.value = data?.code === 0 ? data.data : row } catch { detailData.value = row }
   showDetail.value = true
   loadAudit(row.id)
 }
@@ -360,7 +361,7 @@ async function viewDetail(row: any) {
 async function loadAudit(keyId: string) {
   auditLoading.value = true
   try {
-    const { data } = await api.get(R.AUDIT, { params: { api_key_id: keyId, page_size: 20 } })
+    const { data } = await api.get(API.AUDIT, { params: { api_key_id: keyId, page_size: 20 } })
     auditLogs.value = data?.data?.items || data?.data || []
   } catch { auditLogs.value = [] }
   finally { auditLoading.value = false }
@@ -368,14 +369,14 @@ async function loadAudit(keyId: string) {
 
 async function toggleEnabled(row: any) {
   try {
-    await api.patch(API.API_KEY_DETAIL(row.id), { disabled: !row.disabled })
+    await api.patch(API.GOVERNANCE.API_KEY_DETAIL(row.id), { disabled: !row.disabled })
     ElMessage.success(row.disabled ? '已启用' : '已禁用'); load()
   } catch { ElMessage.error('操作失败') }
 }
 
 async function handleDelete(row: any) {
   await ElMessageBox.confirm('确定删除「' + row.name + '」？所有请求将被拒绝。', '确认', { type: 'warning' })
-  try { await api.delete(API.API_KEY_DETAIL(row.id)); ElMessage.success('已删除'); load() }
+  try { await api.delete(API.GOVERNANCE.API_KEY_DETAIL(row.id)); ElMessage.success('已删除'); load() }
   catch (e: any) { ElMessage.error(e.response?.data?.message || '删除失败') }
 }
 

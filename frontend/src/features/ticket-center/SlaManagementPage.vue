@@ -1,5 +1,11 @@
 <template>
-  <div class="sla-management-page">
+  <div class="autops-page-container">
+    <!-- 页面头部 -->
+    <div class="autops-page-header">
+      <div class="autops-page-title">SLA 管理</div>
+      <div class="autops-page-desc">配置工单服务级别协议</div>
+    </div>
+
     <!-- 搜索与操作栏 -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="filterForm" @submit.prevent="handleSearch">
@@ -64,7 +70,7 @@
         </el-table-column>
         <el-table-column prop="ticket_type" label="工单类型" min-width="110">
           <template #default="{ row }">
-            <el-tag :type="ticketTypeTagMap[row.ticket_type] || 'info'" size="small">
+            <el-tag :type="(ticketTypeTagMap[row.ticket_type] || 'info') as TagType" size="small">
               {{ ticketTypeLabelMap[row.ticket_type] || row.ticket_type }}
             </el-tag>
           </template>
@@ -85,7 +91,7 @@
               <el-tag
                 v-for="p in row.priority_scope"
                 :key="p"
-                :type="priorityTagMap[p]"
+                :type="(priorityTagMap[p]) as TagType"
                 size="small"
                 style="margin-right: 4px"
               >
@@ -107,7 +113,7 @@
               active-text="启用"
               inactive-text="禁用"
               inline-prompt
-              @change="(val: boolean) => handleToggleStatus(row, val)"
+              @change="(val: string | number | boolean) => handleToggleStatus(row, val as boolean)"
             />
           </template>
         </el-table-column>
@@ -273,6 +279,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -323,10 +330,10 @@ const ticketTypeLabelMap: Record<string, string> = {
   security: '安全事件',
 }
 
-const ticketTypeTagMap: Record<string, string> = {
+const ticketTypeTagMap: Record<string, TagType> = {
   incident: 'danger',
   problem: 'warning',
-  change: '',
+  change: 'primary',
   request: 'success',
   security: 'danger',
 }
@@ -338,10 +345,10 @@ const priorityLabelMap: Record<string, string> = {
   low: '低',
 }
 
-const priorityTagMap: Record<string, string> = {
+const priorityTagMap: Record<string, TagType> = {
   critical: 'danger',
   high: 'warning',
-  medium: '',
+  medium: 'primary',
   low: 'info',
 }
 
@@ -350,9 +357,9 @@ const loading = ref(false)
 const tableData = ref<SlaPolicy[]>([])
 
 const filterForm = reactive({
-  keyword: '',
-  ticket_type: '',
-  status: '',
+  keyword: 'primary',
+  ticket_type: 'primary',
+  status: 'primary',
 })
 
 const pagination = reactive({
@@ -368,13 +375,13 @@ const isEditing = ref(false)
 const dialogFormRef = ref<FormInstance>()
 
 const defaultDialogForm = (): DialogFormData => ({
-  name: '',
-  ticket_type: '',
+  name: 'primary',
+  ticket_type: 'primary',
   response_hours: 4,
   resolve_hours: 24,
   priority_scope: ['critical', 'high', 'medium', 'low'],
   status: 'enabled',
-  description: '',
+  description: 'primary',
   work_hours_only: false,
   notify_on: ['approaching', 'breached'],
   escalate_to: 'supervisor',
@@ -472,7 +479,7 @@ function handleCreate() {
   dialogVisible.value = true
 }
 
-function handleEdit(row: SlaPolicy) {
+function handleEdit(row: any) {
   isEditing.value = true
   Object.assign(dialogForm, {
     id: row.id,
@@ -521,7 +528,7 @@ function resetDialogForm() {
 }
 
 // ─── 状态切换 ────────────────────────────────────────
-async function handleToggleStatus(row: SlaPolicy, enabled: boolean) {
+async function handleToggleStatus(row: any, enabled: boolean) {
   const newStatus = enabled ? 'enabled' : 'disabled'
   try {
     await client.patch(slaApiUrl + '/' + row.id, { status: newStatus })
@@ -534,7 +541,7 @@ async function handleToggleStatus(row: SlaPolicy, enabled: boolean) {
 }
 
 // ─── 删除 ────────────────────────────────────────────
-async function handleDelete(row: SlaPolicy) {
+async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm(
       '确定删除策略「' + row.name + '」？此操作不可撤销。',

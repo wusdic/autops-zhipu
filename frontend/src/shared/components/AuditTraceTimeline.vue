@@ -2,7 +2,7 @@
   <div class="audit-trace-timeline">
     <el-timeline v-if="events.length">
       <el-timeline-item v-for="(evt, idx) in events" :key="idx"
-        :timestamp="evt.time" :type="eventType(evt)" placement="top">
+        :timestamp="evt.time" :type="(eventType(evt)) as TagType" placement="top">
         <div class="trace-event">
           <span class="trace-user">{{ evt.user || "系统" }}</span>
           <span class="trace-action">{{ evt.action }}</span>
@@ -16,12 +16,13 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 defineProps<{ events: { time: string; user?: string; action: string; resource?: string; detail?: string; type?: string }[] }>()
 
-function eventType(evt: any): string {
-  if (evt.type) return evt.type
-  const map: Record<string, string> = { create: "success", update: "primary", delete: "danger", login: "warning" }
-  return map[evt.action] || "info"
+function eventType(evt: any): TagType {
+  if (evt.type) return (evt.type) as TagType
+  const map: Record<string, TagType> = { create: "success", update: "primary", delete: "danger", login: "warning" }
+  return (map[evt.action] ?? "info") as TagType
 }
 </script>
 

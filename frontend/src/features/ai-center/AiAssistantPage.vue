@@ -1,8 +1,8 @@
 <template>
-  <div class="ai-assistant-page">
+  <div class="autops-page-container">
     <div class="autops-page-header">
-      <h1 class="autops-page-title">AI 助手</h1>
-      <p class="autops-page-desc">通过自然语言对话查询平台信息、分析问题、调度功能执行操作</p>
+      <div class="autops-page-title">AI 助手</div>
+      <div class="autops-page-desc">通过自然语言对话查询平台信息、分析问题、调度功能执行操作</div>
     </div>
 
     <div class="chat-container">

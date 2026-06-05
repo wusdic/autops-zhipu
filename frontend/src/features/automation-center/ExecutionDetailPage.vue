@@ -1,5 +1,5 @@
 <template>
-  <div class="execution-detail">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title-row">
         <el-button link @click="$router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
@@ -42,7 +42,7 @@
         <el-descriptions-item label="执行ID">{{ execution.id }}</el-descriptions-item>
         <el-descriptions-item label="策略名称">{{ execution.policy_name || '-' }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="statusType(execution.status)">{{ statusLabel(execution.status) }}</el-tag>
+          <el-tag :type="(statusType(execution.status)) as TagType">{{ statusLabel(execution.status) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="开始时间">{{ execution.started_at || '-' }}</el-descriptions-item>
         <el-descriptions-item label="结束时间">{{ execution.finished_at || '-' }}</el-descriptions-item>
@@ -57,7 +57,7 @@
     </div>
 
     <!-- Steps -->
-    <div class="autops-card" style="margin-top: 16px">
+    <div class="autops-card mt-lg">
       <div class="autops-card-header">
                 <span>执行步骤</span>
       </div>
@@ -82,7 +82,7 @@
         <el-table-column prop="action_type" label="动作类型" width="140" />
         <el-table-column prop="status" label="状态" width="110" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+            <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="started_at" label="开始时间" width="180" />
@@ -93,7 +93,7 @@
     </div>
 
     <!-- Realtime Logs -->
-    <div class="autops-card" style="margin-top: 16px">
+    <div class="autops-card mt-lg">
       
         <div class="autops-card-header">
           <span>实时日志</span>
@@ -110,7 +110,7 @@
     </div>
 
     <!-- Approve Action -->
-    <div class="autops-card" v-if="execution && execution.status === 'pending'" style="margin-top: 16px">
+    <div class="autops-card" v-if="execution && execution.status === 'pending'" class="mt-lg">
       <div class="autops-card-header">
                 <span>审批操作</span>
       </div>
@@ -126,7 +126,7 @@
     </div>
 
     <!-- Execution Result Summary -->
-    <div class="autops-card" v-if="execution && (execution.status === 'completed' || execution.status === 'failed')" style="margin-top: 16px">
+    <div class="autops-card" v-if="execution && (execution.status === 'completed' || execution.status === 'failed')" class="mt-lg">
       <div class="autops-card-header">
                 <span>执行结果</span>
       </div>
@@ -137,16 +137,16 @@
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="结果详情" v-if="execution.result_detail">
-          <pre style="margin: 0; font-family: monospace; font-size: 13px; white-space: pre-wrap">{{ execution.result_detail }}</pre>
+          <pre class="result-detail-pre">{{ execution.result_detail }}</pre>
         </el-descriptions-item>
         <el-descriptions-item label="错误信息" v-if="execution.error_message">
-          <span style="color: #f53f3f">{{ execution.error_message }}</span>
+          <span class="text-danger">{{ execution.error_message }}</span>
         </el-descriptions-item>
       </el-descriptions>
     </div>
 
     <!-- Verification Result Section -->
-    <div class="autops-card" v-if="execution && (execution.status === 'completed' || execution.status === 'failed')" style="margin-top: 16px" v-loading="verificationLoading">
+    <div class="autops-card" v-if="execution && (execution.status === 'completed' || execution.status === 'failed')" class="mt-lg" v-loading="verificationLoading">
       
         <div class="autops-card-header">
           <span>验证结果</span>
@@ -154,7 +154,7 @@
         </div>
       
       <template v-if="verification">
-        <el-descriptions :column="2" border style="margin-bottom: 16px">
+        <el-descriptions :column="2" border class="mb-lg">
           <el-descriptions-item label="验证状态">
             <el-tag
               :type="verification.passed ? 'success' : 'danger'"
@@ -239,6 +239,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, onUnmounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
@@ -280,11 +281,11 @@ const steps = computed(() => execution.value?.steps || [])
 
 let logTimer: ReturnType<typeof setInterval> | null = null
 
-function statusType(s: string) {
+function statusType(s: string): TagType {
   const map: Record<string, string> = {
-    pending: 'warning', running: '', completed: 'success', failed: 'danger', cancelled: 'info',
+    pending: 'warning', running: 'primary', completed: 'success', failed: 'danger', cancelled: 'info',
   }
-  return map[s] || 'info'
+  return (map[s] || 'info') as TagType
 }
 
 function statusLabel(s: string) {
@@ -508,6 +509,13 @@ watch(
 </script>
 
 <style scoped>
+.result-detail-pre {
+  margin: 0;
+  font-family: monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
 .log-container {
   max-height: 400px;
   overflow-y: auto;
