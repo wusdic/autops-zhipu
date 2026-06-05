@@ -56,6 +56,7 @@ from app.api.platform_extra import (
     tenant_router,
 )
 from app.api.aiops_extra import router as aiops_extra_router
+from app.api.exports import router as exports_router
 from app.api.search import router as search_router
 from app.domains.alert.threshold_api import router as threshold_rule_router
 from app.domains.notification.rule_api import router as notification_rule_router
@@ -182,3 +183,6 @@ api_router.include_router(notification_rule_router)
 
 # Discovery Templates
 api_router.include_router(discovery_template_router)
+
+# Exports
+api_router.include_router(exports_router)

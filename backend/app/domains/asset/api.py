@@ -94,6 +94,49 @@ async def create_asset(data: AssetCreate, svc: AssetService = Depends(_get_servi
     return success(_to_dict(asset))
 
 
+# --- 资产导入（必须在 /{asset_id} 之前注册，否则 "import" 会被当作 asset_id） ---
+@router.get("/import")
+async def list_import_tasks(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    """查询资产导入任务列表."""
+    from sqlalchemy import select, func, text
+    try:
+        cnt = (await db.execute(text("SELECT COUNT(*) FROM asset_import_tasks"))).scalar() or 0
+        rows = (await db.execute(
+            text("SELECT * FROM asset_import_tasks ORDER BY created_at DESC LIMIT :l OFFSET :o"),
+            {"l": page_size, "o": (page - 1) * page_size}
+        )).fetchall()
+        items = [dict(r._mapping) for r in rows]
+    except Exception:
+        items = []
+        cnt = 0
+    return paginate(items, cnt, page, page_size)
+
+
+@router.get("/import/{task_id}/report")
+async def get_import_report(task_id: str, db: AsyncSession = Depends(get_db)):
+    """获取导入任务报告."""
+    from sqlalchemy import text
+    try:
+        row = (await db.execute(text("SELECT * FROM asset_import_tasks WHERE id = :id"), {"id": task_id})).fetchone()
+        if row:
+            return success(dict(row._mapping))
+    except Exception:
+        pass
+    return success({"id": task_id, "status": "unknown", "total": 0, "succeeded": 0, "failed": 0})
+
+
+@router.post("/import")
+async def import_assets(
+    items: list[AssetImportItem], svc: AssetService = Depends(_get_service)
+):
+    created = await svc.import_assets(items)
+    return success({"imported": len(created)})
+
+
 @router.get("/{asset_id}")
 async def get_asset(asset_id: str, svc: AssetService = Depends(_get_service)):
     asset = await svc.get_asset(asset_id)
@@ -112,14 +155,6 @@ async def update_asset(
 async def delete_asset(asset_id: str, svc: AssetService = Depends(_get_service)):
     await svc.delete_asset(asset_id)
     return success(message="删除成功")
-
-
-@router.post("/import")
-async def import_assets(
-    items: list[AssetImportItem], svc: AssetService = Depends(_get_service)
-):
-    created = await svc.import_assets(items)
-    return success({"imported": len(created)})
 
 
 # --- 资产关系 ---
