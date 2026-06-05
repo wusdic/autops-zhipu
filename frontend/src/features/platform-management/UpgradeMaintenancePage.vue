@@ -229,7 +229,7 @@ async function fetchHistory() {
   loading.value = true
   try {
     // Try the upgrade history API first
-    var res = await api.get('/api/v1/platform/upgrade-history')
+    var res = await api.get(API.PLATFORM.UPGRADE_HISTORY)
     if (res.data?.code === 0) {
       upgradeHistory.value = res.data.data?.items || res.data.data || []
     }

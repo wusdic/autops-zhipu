@@ -47,6 +47,8 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Loading, CircleCheck, CircleClose, Clock } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
+import { THEME_COLORS } from '@/shared/config'
 
 const router = useRouter()
 const loading = ref(false)
@@ -56,7 +58,7 @@ let pollTimer: ReturnType<typeof setInterval> | null = null
 const runningCount = computed(() => tasks.value.filter(t => t.status === 'running' || t.status === 'pending').length)
 
 function statusColor(status: string) {
-  return { running: '#165dff', completed: '#00b42a', failed: '#f53f3f', pending: '#ff9a2e' }[status] || '#86909c'
+  return THEME_COLORS.STATUS[status] || THEME_COLORS.GRAY
 }
 
 function statusTagType(status: string) {
@@ -81,7 +83,7 @@ function formatTime(ts: string) {
 async function loadTasks() {
   loading.value = true
   try {
-    const res = await api.get('/api/v1/executions', { params: { page: 1, page_size: 10 } })
+    const res = await api.get(API.EXECUTIONS, { params: { page: 1, page_size: 10 } })
     const data = res.data?.data
     tasks.value = data?.items || data || []
   } catch { tasks.value = [] }

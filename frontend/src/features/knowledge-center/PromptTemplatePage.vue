@@ -192,9 +192,6 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
-// ─── Constants ───────────────────────────────────────────────────────
-const TEMPLATE_API = '/api/v1/aiops/prompt-templates'
-
 // ─── State ───────────────────────────────────────────────────────────
 const loading = ref(false)
 const saving = ref(false)
@@ -275,7 +272,7 @@ async function loadList() {
     if (filters.keyword) params.keyword = filters.keyword
     if (filters.usage) params.usage = filters.usage
 
-    const { data } = await client.get(TEMPLATE_API, { params })
+    const { data } = await client.get(API.AIOPS.PROMPT_TEMPLATES, { params })
     if (data.code === 0) {
       const result = data.data
       tableData.value = result.items || result || []
@@ -336,9 +333,9 @@ async function handleSave() {
     const payload = { ...form }
     let res: any
     if (isEditing.value) {
-      res = await client.put(TEMPLATE_API + '/' + editingId.value, payload)
+      res = await client.put(API.AIOPS.PROMPT_TEMPLATE_DETAIL(editingId.value), payload)
     } else {
-      res = await client.post(TEMPLATE_API, payload)
+      res = await client.post(API.AIOPS.PROMPT_TEMPLATES, payload)
     }
     if (res.data.code === 0) {
       ElMessage.success(isEditing.value ? '模板已更新' : '模板已创建')
@@ -361,7 +358,7 @@ async function handleDelete(row: any) {
       '确认删除',
       { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' }
     )
-    const { data } = await client.delete(TEMPLATE_API + '/' + row.id)
+    const { data } = await client.delete(API.AIOPS.PROMPT_TEMPLATE_DETAIL(row.id))
     if (data.code === 0) {
       ElMessage.success('已删除')
       loadList()
@@ -409,7 +406,7 @@ async function runTest() {
       return
     }
 
-    const { data } = await client.post(TEMPLATE_API + '/' + testTemplateData.id + '/test', { variables })
+    const { data } = await client.post(API.AIOPS.PROMPT_TEMPLATE_TEST(testTemplateData.id), { variables })
     if (data.code === 0) {
       testResult.value = data.data?.output || data.data?.result || JSON.stringify(data.data, null, 2)
     } else {

@@ -4,8 +4,8 @@ import { API } from './routes'
 export const platformService = {
   dictionaries: (params?: Record<string, any>) => client.get(API.PLATFORM.DICTIONARIES, { params }),
   dictionaryCreate: (data: Record<string, any>) => client.post(API.PLATFORM.DICTIONARIES, data),
-  dictionaryUpdate: (id: string, data: Record<string, any>) => client.put('/api/v1/dictionaries/' + id, data),
-  dictionaryDelete: (id: string) => client.delete('/api/v1/dictionaries/' + id),
+  dictionaryUpdate: (id: string, data: Record<string, any>) => client.put(API.PLATFORM.DICTIONARY_DETAIL(id), data),
+  dictionaryDelete: (id: string) => client.delete(API.PLATFORM.DICTIONARY_DETAIL(id)),
   integrations: (params?: Record<string, any>) => client.get(API.PLATFORM.INTEGRATIONS, { params }),
   integrationTest: (name: string) => client.post(API.PLATFORM.INTEGRATION_TEST(name)),
   taskQueue: (params?: Record<string, any>) => client.get(API.PLATFORM.TASK_QUEUE, { params }),
