@@ -121,19 +121,19 @@ onUnmounted(() => {
 .task-progress-panel { min-height: 100px; }
 .task-header {
   display: flex; justify-content: space-between; align-items: center;
-  padding-bottom: 8px; border-bottom: 1px solid #f2f3f5; margin-bottom: 8px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--autops-bg-3); margin-bottom: var(--autops-space-sm);
 }
-.task-header .title { font-size: 14px; font-weight: 600; color: #1d2129; }
+.task-header .title { font-size: var(--autops-font-14); font-weight: 600; color: var(--autops-text-1); }
 .task-list { max-height: 400px; overflow-y: auto; }
 .task-item {
   display: flex; gap: 10px; padding: 10px 0;
-  border-bottom: 1px solid #f7f8fa; cursor: pointer; transition: background 0.15s;
+  border-bottom: 1px solid var(--autops-bg-2); cursor: pointer; transition: background 0.15s;
 }
-.task-item:hover { background: #f7f8fa; }
+.task-item:hover { background: var(--autops-bg-2); }
 .task-item:last-child { border-bottom: none; }
 .task-icon { flex-shrink: 0; display: flex; align-items: flex-start; padding-top: 2px; }
 .task-content { flex: 1; min-width: 0; }
-.task-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; }
+.task-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: var(--autops-font-13); }
 .task-progress { margin-top: 6px; }
-.task-time { font-size: 12px; color: #86909c; margin-top: 4px; }
+.task-time { font-size: var(--autops-font-12); color: var(--autops-info); margin-top: 4px; }
 </style>

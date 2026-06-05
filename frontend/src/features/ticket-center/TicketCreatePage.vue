@@ -2,7 +2,7 @@
   <div class="ticket-create-page">
     <el-card shadow="never">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span class="title">创建工单</span>
           <el-button :icon="Back" @click="handleBack">返回列表</el-button>
         </div>
@@ -496,9 +496,9 @@ onMounted(() => {
 
 <style scoped>
 .ticket-create-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
-.card-header .title {
+.autops-card-header .title {
   font-size: 18px;
   font-weight: 600;
 }
@@ -509,7 +509,7 @@ onMounted(() => {
 
 .ticket-form :deep(.el-divider__text) {
   font-weight: 600;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 
 .type-option {
@@ -525,8 +525,8 @@ onMounted(() => {
 }
 
 .priority-desc {
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
 }
 
 .user-option {
@@ -536,8 +536,8 @@ onMounted(() => {
 
 .user-role {
   margin-left: auto;
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
 }
 
 .alert-option {
@@ -554,11 +554,11 @@ onMounted(() => {
 
 .asset-ip {
   font-family: monospace;
-  color: #4e5969;
+  color: var(--autops-text-2);
 }
 
 .asset-name {
-  color: #86909c;
+  color: var(--autops-info);
 }
 
 .form-actions {

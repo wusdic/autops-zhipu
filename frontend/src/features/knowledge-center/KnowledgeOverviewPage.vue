@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- Page Header -->
     <div class="autops-page-header">
       <div class="autops-page-title">知识总览</div>
@@ -9,7 +9,7 @@
     <!-- Stat Cards -->
     <el-row :gutter="16" class="stat-row">
       <el-col :span="6" v-for="stat in statCards" :key="stat.label">
-        <el-card shadow="hover" class="stat-card" v-loading="statsLoading">
+        <el-card shadow="hover" class="autops-metric-card" v-loading="statsLoading">
           <div class="stat-card-inner">
             <div class="stat-icon-wrap" :style="{ background: stat.bgColor }">
               <el-icon :size="24" :style="{ color: stat.color }">
@@ -27,7 +27,7 @@
     <!-- Recent Knowledge Table -->
     <el-card class="main-card" shadow="never">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span class="card-title">最近更新的知识</span>
           <el-button type="primary" plain @click="router.push({ name: 'knowledge' })">
             查看全部 <el-icon class="el-icon--right"><ArrowRight /></el-icon>
@@ -295,12 +295,12 @@ onMounted(() => {
 
 
 .stat-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 
 
-.stat-card-inner {
+.autops-metric-card-inner {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -309,7 +309,7 @@ onMounted(() => {
 .stat-icon-wrap {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--autops-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -321,8 +321,8 @@ onMounted(() => {
 }
 
 .main-card {
-  margin-bottom: 16px;
-  border-radius: 8px;
+  margin-bottom: var(--autops-space-lg);
+  border-radius: var(--autops-radius-md);
 }
 
 
@@ -341,7 +341,7 @@ onMounted(() => {
 .category-row {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .category-row:last-child {
@@ -350,14 +350,14 @@ onMounted(() => {
 
 .category-name {
   width: 80px;
-  font-size: 14px;
-  color: #4e5969;
+  font-size: var(--autops-font-14);
+  color: var(--autops-text-2);
   flex-shrink: 0;
 }
 
 .category-count {
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
   flex-shrink: 0;
   width: 50px;
   text-align: right;
@@ -374,13 +374,13 @@ onMounted(() => {
   display: flex;
   align-items: center;
   padding: 14px 16px;
-  border-radius: 8px;
+  border-radius: var(--autops-radius-md);
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .quick-link-item:hover {
-  background-color: #f2f3f5;
+  background-color: var(--autops-bg-3);
 }
 
 .quick-link-icon {
@@ -399,24 +399,24 @@ onMounted(() => {
 }
 
 .quick-link-title {
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   font-weight: 500;
-  color: #1d2129;
+  color: var(--autops-text-1);
   margin-bottom: 2px;
 }
 
 .quick-link-desc {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
 }
 
 .quick-link-arrow {
-  color: #c9cdd4;
-  font-size: 14px;
+  color: var(--autops-text-4);
+  font-size: var(--autops-font-14);
 }
 
 .text-muted {
-  color: #86909c;
-  font-size: 13px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-13);
 }
 </style>

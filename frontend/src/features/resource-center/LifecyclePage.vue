@@ -1,8 +1,8 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <el-card shadow="never">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span>资产生命周期管理</span>
           <el-button type="primary" @click="showCreateDialog = true">
             <el-icon><Plus /></el-icon>新建规则
@@ -203,8 +203,8 @@ const showCreateDialog = ref(false)
 </script>
 
 <style scoped>
-.stat-row { margin-bottom: 20px; }
-.filter-row { margin-bottom: 16px; }
-.data-table { margin-bottom: 16px; }
+.stat-row { margin-bottom: var(--autops-space-xl); }
+.filter-row { margin-bottom: var(--autops-space-lg); }
+.data-table { margin-bottom: var(--autops-space-lg); }
 .pagination { display: flex; justify-content: flex-end; }
 </style>

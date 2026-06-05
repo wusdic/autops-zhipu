@@ -120,13 +120,13 @@ function emitFilter() {
 .timeline-view { width: 100%; }
 .timeline-header {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
-.timeline-title { font-size: 16px; font-weight: 600; color: #1d2129; }
-.timeline-filter { margin-bottom: 12px; }
+.timeline-title { font-size: var(--autops-font-16); font-weight: 600; color: var(--autops-text-1); }
+.timeline-filter { margin-bottom: var(--autops-space-md); }
 .timeline-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.timeline-item-title { font-weight: 600; color: #1d2129; }
-.timeline-item-desc { color: #4e5969; font-size: 13px; line-height: 1.5; }
-.timeline-item-meta { color: #86909c; font-size: 12px; margin-top: 4px; }
+.timeline-item-title { font-weight: 600; color: var(--autops-text-1); }
+.timeline-item-desc { color: var(--autops-text-2); font-size: var(--autops-font-13); line-height: 1.5; }
+.timeline-item-meta { color: var(--autops-info); font-size: var(--autops-font-12); margin-top: 4px; }
 .timeline-load-more { text-align: center; margin-top: 12px; }
 </style>

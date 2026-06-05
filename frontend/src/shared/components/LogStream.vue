@@ -80,30 +80,30 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  background: #f7f8fa;
-  border-bottom: 1px solid #e5e6eb;
+  padding: var(--autops-space-sm) 12px;
+  background: var(--autops-bg-2);
+  border-bottom: 1px solid var(--autops-bg-4);
 }
 
 .log-stream__count {
   margin-left: auto;
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
 }
 
 .log-stream__content {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 12px;
+  padding: var(--autops-space-sm) 12px;
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-  font-size: 12px;
+  font-size: var(--autops-font-12);
   line-height: 1.8;
-  background: #1d1d1f;
-  color: #d4d4d4;
+  background: var(--autops-terminal-bg);
+  color: var(--autops-text-4);
 }
 
 .log-stream__empty {
-  color: #666;
+  color: var(--autops-text-2);
   text-align: center;
   padding: 40px 0;
 }
@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
 }
 
 .log-stream__time {
-  color: #86909c;
+  color: var(--autops-info);
   white-space: nowrap;
 }
 
@@ -124,10 +124,10 @@ onBeforeUnmount(() => {
   white-space: nowrap;
 }
 
-.log-stream__level--info { color: #52c41a; }
-.log-stream__level--warn { color: #faad14; }
-.log-stream__level--error { color: #ff4d4f; }
-.log-stream__level--debug { color: #86909c; }
+.log-stream__level--info { color: var(--autops-success); }
+.log-stream__level--warn { color: var(--autops-gold); }
+.log-stream__level--error { color: var(--autops-danger); }
+.log-stream__level--debug { color: var(--autops-info); }
 
 .log-stream__msg {
   word-break: break-all;

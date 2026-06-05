@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- ── API Not Available: Coming Soon ────────────────── -->
     <div v-if="apiNotAvailable" class="coming-soon-wrapper">
       <el-empty :image-size="160" description=" ">
@@ -362,35 +362,35 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 /* Category bar */
 .category-bar {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
   flex-wrap: wrap;
 }
 .category-tag {
   display: inline-flex;
   align-items: center;
   padding: 6px 14px;
-  border: 1px solid #e5e6eb;
+  border: 1px solid var(--autops-bg-4);
   border-radius: 20px;
   cursor: pointer;
-  font-size: 13px;
-  color: #4e5969;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-2);
   transition: all 0.15s;
-  background: #fff;
+  background: var(--autops-bg-1);
 }
 .category-tag:hover {
-  border-color: #165dff;
-  color: #165dff;
+  border-color: var(--autops-primary);
+  color: var(--autops-primary);
 }
 .category-tag.active {
-  background: #e8f3ff;
-  border-color: #165dff;
-  color: #165dff;
+  background: var(--autops-primary-light-5);
+  border-color: var(--autops-primary);
+  color: var(--autops-primary);
 }
 .category-badge {
   margin-left: 4px;
@@ -398,28 +398,28 @@ onMounted(() => {
 
 /* Check grid */
 .check-grid {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .check-card {
-  background: #fff;
-  border: 1px solid #e5e6eb;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-  border-left: 3px solid #86909c;
+  background: var(--autops-bg-1);
+  border: 1px solid var(--autops-bg-4);
+  border-radius: var(--autops-radius-md);
+  padding: var(--autops-space-lg);
+  margin-bottom: var(--autops-space-lg);
+  border-left: 3px solid var(--autops-info);
   transition: all 0.2s;
 }
 .check-card.ok {
-  border-left-color: #00b42a;
+  border-left-color: var(--autops-success);
 }
 .check-card.error {
-  border-left-color: #f53f3f;
+  border-left-color: var(--autops-danger);
 }
 .check-card.warning {
-  border-left-color: #ff7d00;
+  border-left-color: var(--autops-warning);
 }
 .check-card.pending {
-  border-left-color: #86909c;
+  border-left-color: var(--autops-info);
 }
 .check-card-header {
   display: flex;
@@ -430,19 +430,19 @@ onMounted(() => {
 .check-name {
   flex: 1;
   font-weight: 600;
-  font-size: 14px;
-  color: #1d2129;
+  font-size: var(--autops-font-14);
+  color: var(--autops-text-1);
 }
 .check-status-tag {
   margin-left: auto;
 }
 .check-detail {
-  font-size: 13px;
-  color: #4e5969;
-  margin-bottom: 8px;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-2);
+  margin-bottom: var(--autops-space-sm);
 }
 .detail-label {
-  color: #86909c;
+  color: var(--autops-info);
 }
 .check-meta {
   display: flex;
@@ -450,22 +450,22 @@ onMounted(() => {
   align-items: center;
 }
 .check-time {
-  font-size: 12px;
-  color: #c9cdd4;
+  font-size: var(--autops-font-12);
+  color: var(--autops-text-4);
 }
 .check-extra {
-  font-size: 12px;
-  color: #4e5969;
+  font-size: var(--autops-font-12);
+  color: var(--autops-text-2);
   margin-top: 4px;
 }
 .extra-label {
-  color: #86909c;
+  color: var(--autops-info);
 }
 .extra-label.error {
-  color: #f53f3f;
+  color: var(--autops-danger);
 }
 .error-text {
-  color: #f53f3f;
+  color: var(--autops-danger);
 }
 
 /* Summary bar */
@@ -473,11 +473,11 @@ onMounted(() => {
   display: flex;
   gap: 24px;
   align-items: center;
-  padding: 12px 16px;
-  background: #f7f8fa;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #4e5969;
+  padding: var(--autops-space-md) 16px;
+  background: var(--autops-bg-2);
+  border-radius: var(--autops-radius-md);
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-2);
 }
 .summary-item {
   display: flex;
@@ -490,21 +490,21 @@ onMounted(() => {
   height: 8px;
   border-radius: 50%;
 }
-.summary-dot.success { background: #00b42a; }
-.summary-dot.error { background: #f53f3f; }
-.summary-dot.warning { background: #ff7d00; }
-.summary-dot.pending { background: #c9cdd4; }
+.summary-dot.success { background: var(--autops-success); }
+.summary-dot.error { background: var(--autops-danger); }
+.summary-dot.warning { background: var(--autops-warning); }
+.summary-dot.pending { background: var(--autops-text-4); }
 .summary-time {
   margin-left: auto;
-  color: #86909c;
+  color: var(--autops-info);
 }
 
 /* Section title */
 .section-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1d2129;
-  margin-bottom: 12px;
+  color: var(--autops-text-1);
+  margin-bottom: var(--autops-space-md);
 }
 
 /* Coming soon */
@@ -516,12 +516,12 @@ onMounted(() => {
 .coming-soon-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1d2129;
-  margin-bottom: 8px;
+  color: var(--autops-text-1);
+  margin-bottom: var(--autops-space-sm);
 }
 .coming-soon-desc {
-  font-size: 14px;
-  color: #86909c;
+  font-size: var(--autops-font-14);
+  color: var(--autops-info);
   line-height: 1.6;
   max-width: 420px;
   text-align: center;

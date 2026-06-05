@@ -159,20 +159,20 @@ onUnmounted(() => { if (unsubscribe) unsubscribe() })
 
 <style scoped>
 .notification-panel { margin: -12px; }
-.notification-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #e5e6eb; }
+.notification-header { display: flex; justify-content: space-between; align-items: center; padding: var(--autops-space-sm) 12px; border-bottom: 1px solid var(--autops-bg-4); }
 .notification-header .title { font-weight: bold; font-size: 15px; }
 .notification-list { max-height: 400px; overflow-y: auto; }
-.notification-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #f2f3f5; cursor: pointer; transition: background 0.2s; }
-.notification-item:hover { background: #f7f8fa; }
-.notification-item.unread { background: #ecf5ff; }
-.notification-item.unread:hover { background: #d9ecff; }
+.notification-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--autops-bg-3); cursor: pointer; transition: background 0.2s; }
+.notification-item:hover { background: var(--autops-bg-2); }
+.notification-item.unread { background: var(--autops-primary-light-5); }
+.notification-item.unread:hover { background: var(--autops-primary-light-5); }
 .notification-icon { flex-shrink: 0; margin-top: 2px; }
 .notification-content { flex: 1; min-width: 0; }
-.notification-title { font-size: 13px; font-weight: 500; color: #1d2129; }
-.notification-desc { font-size: 12px; color: #86909c; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.notification-time { font-size: 11px; color: #c9cdd4; margin-top: 4px; }
-.empty-state { padding: 20px; }
-.notification-footer { padding: 8px 12px; text-align: center; border-top: 1px solid #e5e6eb; }
+.notification-title { font-size: var(--autops-font-13); font-weight: 500; color: var(--autops-text-1); }
+.notification-desc { font-size: var(--autops-font-12); color: var(--autops-info); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.notification-time { font-size: 11px; color: var(--autops-text-4); margin-top: 4px; }
+.empty-state { padding: var(--autops-space-xl); }
+.notification-footer { padding: var(--autops-space-sm) 12px; text-align: center; border-top: 1px solid var(--autops-bg-4); }
 .tab-badge { margin-left: 4px; }
 .tab-badge :deep(.el-badge__content) { font-size: 10px; }
 </style>

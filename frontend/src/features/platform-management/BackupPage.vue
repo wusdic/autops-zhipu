@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- ── API Not Available: Coming Soon ────────────────── -->
     <div v-if="apiNotAvailable" class="coming-soon-wrapper">
       <el-empty :image-size="160" description=" ">
@@ -564,15 +564,15 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.page-header h2 { margin: 0; font-size: 20px; color: #1d2129; }
-.storage-card { margin-bottom: 16px; }
-.storage-body { padding: 4px 0; }
-.storage-detail { margin-top: 12px; color: #4e5969; font-size: 13px; }
-.storage-detail strong { color: #1d2129; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--autops-space-xl); }
+.page-header h2 { margin: 0; font-size: var(--autops-font-20); color: var(--autops-text-1); }
+.storage-card { margin-bottom: var(--autops-space-lg); }
+.storage-body { padding: var(--autops-space-xs) 0; }
+.storage-detail { margin-top: 12px; color: var(--autops-text-2); font-size: var(--autops-font-13); }
+.storage-detail strong { color: var(--autops-text-1); }
 
-.settings-card { margin-bottom: 16px; }
-.form-hint { color: #86909c; font-size: 13px; }
+.settings-card { margin-bottom: var(--autops-space-lg); }
+.form-hint { color: var(--autops-info); font-size: var(--autops-font-13); }
 
 /* Coming soon */
 .coming-soon-wrapper {
@@ -583,12 +583,12 @@ onUnmounted(() => {
 .coming-soon-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1d2129;
-  margin-bottom: 8px;
+  color: var(--autops-text-1);
+  margin-bottom: var(--autops-space-sm);
 }
 .coming-soon-desc {
-  font-size: 14px;
-  color: #86909c;
+  font-size: var(--autops-font-14);
+  color: var(--autops-info);
   line-height: 1.6;
   max-width: 420px;
   text-align: center;

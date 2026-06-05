@@ -389,13 +389,13 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .filter-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .title-text {
-  color: #165dff;
+  color: var(--autops-primary);
   cursor: pointer;
   font-weight: 500;
 }
@@ -403,19 +403,19 @@ onMounted(() => {
   text-decoration: underline;
 }
 .pagination-wrapper {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
   display: flex;
   justify-content: flex-end;
 }
 .review-content {
-  background: #f7f8fa;
-  padding: 12px;
+  background: var(--autops-bg-2);
+  padding: var(--autops-space-md);
   border-radius: 6px;
   max-height: 300px;
   overflow: auto;
   white-space: pre-wrap;
   line-height: 1.6;
-  font-size: 13px;
+  font-size: var(--autops-font-13);
 }
 .tab-badge {
   margin-left: 4px;

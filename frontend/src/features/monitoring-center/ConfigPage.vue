@@ -624,11 +624,11 @@ onMounted(() => loadConfigs())
 
 <style scoped>
 .config-page .value-preview {
-  background: #f7f8fa;
-  border: 1px solid #e5e6eb;
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 13px;
+  background: var(--autops-bg-2);
+  border: 1px solid var(--autops-bg-4);
+  border-radius: var(--autops-radius-sm);
+  padding: var(--autops-space-md);
+  font-size: var(--autops-font-13);
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   white-space: pre-wrap;
   word-break: break-all;

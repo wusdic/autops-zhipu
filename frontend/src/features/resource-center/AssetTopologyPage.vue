@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- 页面头部 -->
     <div class="autops-page-header">
       <span class="autops-page-title">拓扑视图</span>
@@ -7,12 +7,12 @@
 
     <!-- 统计卡片 -->
     <el-row :gutter="12" class="stat-row mb-md">
-      <el-col :span="4"><el-card shadow="hover" class="stat-card"><div class="stat-value">{{ nodes.length }}</div><div class="stat-label">节点总数</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card"><div class="stat-value">{{ nodes.length }}</div><div class="stat-label">节点总数</div></el-card></el-col>
       <el-col :span="4"><el-card shadow="hover" class="stat-card success"><div class="stat-value">{{ edges.length }}</div><div class="stat-label">关系总数</div></el-card></el-col>
       <el-col :span="4"><el-card shadow="hover" class="stat-card primary"><div class="stat-value">{{ healthyCount }}</div><div class="stat-label">健康节点</div></el-card></el-col>
       <el-col :span="4"><el-card shadow="hover" class="stat-card warning"><div class="stat-value">{{ warningCount }}</div><div class="stat-label">告警节点</div></el-card></el-col>
       <el-col :span="4"><el-card shadow="hover" class="stat-card danger"><div class="stat-value">{{ criticalCount }}</div><div class="stat-label">故障节点</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="stat-card"><div class="stat-value">{{ typeCount }}</div><div class="stat-label">资产类型</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card"><div class="stat-value">{{ typeCount }}</div><div class="stat-label">资产类型</div></el-card></el-col>
     </el-row>
 
     <!-- 工具栏 -->
@@ -472,25 +472,25 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.stat-row { margin-bottom: 16px; }
-.stat-card 
-.stat-card.success .stat-value { color: #00b42a; }
-.stat-card.primary .stat-value { color: #165dff; }
-.stat-card.warning .stat-value { color: #ff7d00; }
-.stat-card.danger .stat-value { color: #f53f3f; }
-.stat-card 
-.toolbar { margin-bottom: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.topology-canvas { border: 1px solid #e5e6eb; border-radius: 8px; overflow: hidden; cursor: grab; user-select: none; position: relative; }
+.stat-row { margin-bottom: var(--autops-space-lg); }
+.autops-metric-card 
+.autops-metric-card.success .stat-value { color: var(--autops-success); }
+.autops-metric-card.primary .stat-value { color: var(--autops-primary); }
+.autops-metric-card.warning .stat-value { color: var(--autops-warning); }
+.autops-metric-card.danger .stat-value { color: var(--autops-danger); }
+.autops-metric-card 
+.toolbar { margin-bottom: var(--autops-space-md); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.topology-canvas { border: 1px solid var(--autops-bg-4); border-radius: var(--autops-radius-md); overflow: hidden; cursor: grab; user-select: none; position: relative; }
 .topology-canvas:active { cursor: grabbing; }
-.zoom-indicator { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.5); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+.zoom-indicator { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.5); color: var(--autops-bg-1); padding: 2px 8px; border-radius: var(--autops-radius-sm); font-size: var(--autops-font-12); }
 
-.legend-card { font-size: 13px; }
+.legend-card { font-size: var(--autops-font-13); }
 .legend-section { margin-bottom: 10px; }
 .legend-section:last-child { margin-bottom: 0; }
-.legend-title { font-weight: bold; color: #4e5969; margin-bottom: 4px; font-size: 12px; }
-.legend-item { display: flex; align-items: center; gap: 6px; padding: 2px 0; font-size: 12px; color: #4e5969; }
+.legend-title { font-weight: bold; color: var(--autops-text-2); margin-bottom: 4px; font-size: var(--autops-font-12); }
+.legend-item { display: flex; align-items: center; gap: 6px; padding: 2px 0; font-size: var(--autops-font-12); color: var(--autops-text-2); }
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-.legend-line { width: 20px; border-top: 2px solid #c9cdd4; display: inline-block; }
+.legend-line { width: 20px; border-top: 2px solid var(--autops-text-4); display: inline-block; }
 
-.minimap { background: #f7f8fa; border-radius: 4px; border: 1px solid #e5e6eb; }
+.minimap { background: var(--autops-bg-2); border-radius: var(--autops-radius-sm); border: 1px solid var(--autops-bg-4); }
 </style>

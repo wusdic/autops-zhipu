@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- 页面头部 -->
     <div class="autops-page-header">
       <div class="autops-page-title">日志巡检</div>
@@ -165,39 +165,39 @@ onMounted(() => {
 }
 
 .page-desc {
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
   margin: 0 0 16px 0;
 }
 .page-toolbar {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .page-pagination {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 .text-tertiary {
-  color: #86909c;
-  font-size: 13px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-13);
 }
 .log-path {
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-  font-size: 13px;
-  color: #4e5969;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-2);
 }
 .count-value {
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--autops-font-14);
 }
 .count-value.danger {
-  color: #f53f3f;
+  color: var(--autops-danger);
 }
 .count-value.warning {
-  color: #ff7d00;
+  color: var(--autops-warning);
 }
 .count-badge {
   display: inline-flex;

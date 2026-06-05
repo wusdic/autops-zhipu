@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">任务队列</div>
@@ -362,32 +362,32 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .filter-bar {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
   flex-wrap: wrap;
 }
 
 .summary-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .summary-card {
-  background: #fff;
-  border: 1px solid #e5e6eb;
-  border-radius: 8px;
-  padding: 16px;
-  border-left: 3px solid #86909c;
+  background: var(--autops-bg-1);
+  border: 1px solid var(--autops-bg-4);
+  border-radius: var(--autops-radius-md);
+  padding: var(--autops-space-lg);
+  border-left: 3px solid var(--autops-info);
 }
 .summary-value {
   font-size: 28px;
   font-weight: 700;
 }
 .summary-label {
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
   margin-top: 4px;
 }
 
@@ -395,8 +395,8 @@ onMounted(() => {
   font-weight: 500;
 }
 .text-secondary {
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
 }
 .pagination-wrap {
   display: flex;
@@ -405,10 +405,10 @@ onMounted(() => {
 }
 
 .json-pre {
-  font-size: 12px;
-  background: #f7f8fa;
-  padding: 8px;
-  border-radius: 4px;
+  font-size: var(--autops-font-12);
+  background: var(--autops-bg-2);
+  padding: var(--autops-space-sm);
+  border-radius: var(--autops-radius-sm);
   max-height: 200px;
   overflow-y: auto;
   white-space: pre-wrap;

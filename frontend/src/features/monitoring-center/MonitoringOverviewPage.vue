@@ -450,33 +450,33 @@ onMounted(() => {
   margin-bottom: 0;
 }
 
-.stat-card-inner {
+.autops-metric-card-inner {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.stat-card-info {
+.autops-metric-card-info {
   display: flex;
   flex-direction: column;
 }
 
-.stat-card-value {
+.autops-metric-card-value {
   font-size: 28px;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .stat-unit {
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   font-weight: 400;
-  color: #86909c;
+  color: var(--autops-info);
   margin-left: 2px;
 }
 
-.stat-card-label {
-  font-size: 13px;
-  color: #86909c;
+.autops-metric-card-label {
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
   margin-top: 2px;
 }
 
@@ -492,7 +492,7 @@ onMounted(() => {
   align-items: flex-start;
   gap: 10px;
   padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--autops-bg-3);
 }
 
 .recent-event-item:last-child {
@@ -507,7 +507,7 @@ onMounted(() => {
 }
 
 .recent-event-title {
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -515,8 +515,8 @@ onMounted(() => {
 }
 
 .recent-event-time {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   margin-top: 4px;
 }
 
@@ -530,16 +530,16 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 0;
+  padding: var(--autops-space-sm) 0;
 }
 
 .top-asset-rank {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #f7f8fa;
-  color: #4e5969;
-  font-size: 12px;
+  background: var(--autops-bg-2);
+  color: var(--autops-text-2);
+  font-size: var(--autops-font-12);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -548,22 +548,22 @@ onMounted(() => {
 }
 
 .top-asset-item:nth-child(1) .top-asset-rank {
-  background: #fef0f0;
-  color: #f53f3f;
+  background: var(--autops-danger-light);
+  color: var(--autops-danger);
 }
 
 .top-asset-item:nth-child(2) .top-asset-rank {
-  background: #fdf6ec;
-  color: #ff7d00;
+  background: var(--autops-warning-light);
+  color: var(--autops-warning);
 }
 
 .top-asset-item:nth-child(3) .top-asset-rank {
-  background: #ecf5ff;
-  color: #165dff;
+  background: var(--autops-primary-light-5);
+  color: var(--autops-primary);
 }
 
 .top-asset-name {
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   font-weight: 500;
   min-width: 0;
   max-width: 100px;
@@ -583,15 +583,15 @@ onMounted(() => {
 
 .top-asset-bar {
   height: 8px;
-  border-radius: 4px;
+  border-radius: var(--autops-radius-sm);
   transition: width 0.4s ease;
   min-width: 4px;
 }
 
 .top-asset-count {
-  font-size: 13px;
+  font-size: var(--autops-font-13);
   font-weight: 600;
-  color: #4e5969;
+  color: var(--autops-text-2);
   flex-shrink: 0;
 }
 </style>

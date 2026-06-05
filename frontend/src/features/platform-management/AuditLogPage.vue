@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">审计日志</div>
@@ -287,30 +287,30 @@ onMounted(() => loadLogs())
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
-  padding: 12px 16px;
-  background: #f7f8fa;
+  margin-bottom: var(--autops-space-lg);
+  padding: var(--autops-space-md) 16px;
+  background: var(--autops-bg-2);
   border-radius: 6px;
 }
 
-.timeline-wrapper { padding: 8px 0; max-height: 600px; overflow-y: auto; }
+.timeline-wrapper { padding: var(--autops-space-sm) 0; max-height: 600px; overflow-y: auto; }
 
 .timeline-card { cursor: pointer; }
-.timeline-card :deep(.el-card__body) { padding: 12px 16px; }
+.timeline-card :deep(.el-card__body) { padding: var(--autops-space-md) 16px; }
 .timeline-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.timeline-user { color: #4e5969; font-weight: 500; }
-.timeline-resource { color: #86909c; font-size: 13px; }
-.timeline-detail { color: #1d2129; font-size: 13px; margin-bottom: 6px; }
-.timeline-meta { color: #86909c; font-size: 12px; display: flex; gap: 16px; }
+.timeline-user { color: var(--autops-text-2); font-weight: 500; }
+.timeline-resource { color: var(--autops-info); font-size: var(--autops-font-13); }
+.timeline-detail { color: var(--autops-text-1); font-size: var(--autops-font-13); margin-bottom: 6px; }
+.timeline-meta { color: var(--autops-info); font-size: var(--autops-font-12); display: flex; gap: 16px; }
 
 .detail-json pre {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-all;
-  font-size: 13px;
-  background: #f7f8fa;
-  padding: 8px;
-  border-radius: 4px;
+  font-size: var(--autops-font-13);
+  background: var(--autops-bg-2);
+  padding: var(--autops-space-sm);
+  border-radius: var(--autops-radius-sm);
   max-height: 300px;
   overflow-y: auto;
 }

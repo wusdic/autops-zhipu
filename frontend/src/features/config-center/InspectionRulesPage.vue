@@ -261,6 +261,6 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.inspection-rules-page { padding: 20px; }
-.mt-4 { margin-top: 16px; }
+.inspection-rules-page { padding: var(--autops-space-xl); }
+.mt-4 { margin-top: var(--autops-space-lg); }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">租户管理</div>
@@ -421,12 +421,12 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .filter-bar {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
   flex-wrap: wrap;
 }
 
@@ -435,8 +435,8 @@ onMounted(() => {
 }
 
 .text-secondary {
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
 }
 .quota-cell {
   display: flex;
@@ -445,13 +445,13 @@ onMounted(() => {
 .quota-item {
   display: flex;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--autops-font-12);
 }
 .quota-label {
-  color: #86909c;
+  color: var(--autops-info);
 }
 .quota-value {
-  color: #4e5969;
+  color: var(--autops-text-2);
   font-weight: 500;
 }
 

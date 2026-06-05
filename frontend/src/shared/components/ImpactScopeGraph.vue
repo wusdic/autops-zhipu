@@ -32,13 +32,13 @@ const centerColor = computed(() => ({ critical: "#f53f3f", high: "#ff7d00", medi
 
 <style scoped>
 .impact-scope-graph { position: relative; min-height: 300px; display: flex; align-items: center; justify-content: center; }
-.isg-center { width: 80px; height: 80px; border-radius: 50%; border: 3px solid; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 2; background: #fff; }
-.isg-center-name { font-size: 12px; font-weight: 600; color: #1d2129; }
-.isg-center-status { font-size: 11px; color: #86909c; }
+.isg-center { width: 80px; height: 80px; border-radius: 50%; border: 3px solid; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 2; background: var(--autops-bg-1); }
+.isg-center-name { font-size: var(--autops-font-12); font-weight: 600; color: var(--autops-text-1); }
+.isg-center-status { font-size: 11px; color: var(--autops-info); }
 .isg-rings { position: absolute; width: 100%; height: 100%; }
 .isg-node { position: absolute; width: 70px; text-align: center; top: 50%; left: calc(50% - 35px); }
-.isg-node-name { font-size: 11px; font-weight: 500; color: #1d2129; }
-.isg-node-type { font-size: 10px; color: #86909c; }
-.isg-node.impact-critical { color: #f53f3f; } .isg-node.impact-high { color: #ff7d00; }
-.isg-node.impact-medium { color: #ffc40f; } .isg-node.impact-low { color: #00b42a; }
+.isg-node-name { font-size: 11px; font-weight: 500; color: var(--autops-text-1); }
+.isg-node-type { font-size: 10px; color: var(--autops-info); }
+.isg-node.impact-critical { color: var(--autops-danger); } .isg-node.impact-high { color: var(--autops-warning); }
+.isg-node.impact-medium { color: var(--autops-gold); } .isg-node.impact-low { color: var(--autops-success); }
 </style>

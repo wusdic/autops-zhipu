@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">集成管理</div>
@@ -335,7 +335,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 
@@ -343,7 +343,7 @@ onMounted(() => {
 .filter-bar {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
   flex-wrap: wrap;
 }
 
@@ -354,8 +354,8 @@ onMounted(() => {
 }
 
 .text-secondary {
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
 }
 
 .pagination-wrap {

@@ -323,36 +323,36 @@ onMounted(function() {
 
 <style scoped>
 .evidence-archive-page {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 }
 .filter-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .alert-info-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .table-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 .detail-content-section {
-  margin-top: 20px;
+  margin-top: var(--autops-space-xl);
 }
 .detail-content-section h4 {
-  margin-bottom: 8px;
-  color: #1d2129;
-  font-size: 14px;
+  margin-bottom: var(--autops-space-sm);
+  color: var(--autops-text-1);
+  font-size: var(--autops-font-14);
 }
 .raw-content {
-  background: #1e1e1e;
-  color: #c9cdd4;
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 12px;
+  background: var(--autops-terminal-bg);
+  color: var(--autops-text-4);
+  border-radius: var(--autops-radius-sm);
+  padding: var(--autops-space-md);
+  font-size: var(--autops-font-12);
   line-height: 1.5;
   max-height: 400px;
   overflow: auto;

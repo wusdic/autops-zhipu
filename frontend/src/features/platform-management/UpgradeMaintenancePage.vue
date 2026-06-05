@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">升级维护</div>
@@ -407,15 +407,15 @@ onMounted(function() {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
+.autops-page-container {
+  padding: var(--autops-space-xl);
 }
 .op-log {
-  background: #1e1e1e;
-  color: #c9cdd4;
-  padding: 16px;
+  background: var(--autops-terminal-bg);
+  color: var(--autops-text-4);
+  padding: var(--autops-space-lg);
   border-radius: 6px;
-  font-size: 12px;
+  font-size: var(--autops-font-12);
   max-height: 400px;
   overflow: auto;
   white-space: pre-wrap;
@@ -426,6 +426,6 @@ onMounted(function() {
   text-align: center;
 }
 .autops-card-body {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 }
 </style>

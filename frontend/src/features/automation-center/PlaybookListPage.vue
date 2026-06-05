@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">剧本库</div>
@@ -309,21 +309,21 @@ onMounted(() => { load(); loadScripts() })
 
 <style scoped>
 
-.stat-row { margin-bottom: 20px; }
+.stat-row { margin-bottom: var(--autops-space-xl); }
 
-.stat-card 
-.stat-card.success .stat-value { color: #00b42a; }
-.stat-card.primary .stat-value { color: #165dff; }
-.stat-card.warning .stat-value { color: #ff7d00; }
-.stat-card 
-.toolbar { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.pagination { margin-top: 16px; display: flex; justify-content: flex-end; }
-.step-orchestrator { background: #f7f8fa; padding: 12px; border-radius: 4px; }
-.step-item { background: #fff; border: 1px solid #e5e6eb; border-radius: 4px; padding: 10px; margin-bottom: 8px; }
+.autops-metric-card 
+.autops-metric-card.success .stat-value { color: var(--autops-success); }
+.autops-metric-card.primary .stat-value { color: var(--autops-primary); }
+.autops-metric-card.warning .stat-value { color: var(--autops-warning); }
+.autops-metric-card 
+.toolbar { margin-bottom: var(--autops-space-lg); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pagination { margin-top: var(--autops-space-lg); display: flex; justify-content: flex-end; }
+.step-orchestrator { background: var(--autops-bg-2); padding: var(--autops-space-md); border-radius: var(--autops-radius-sm); }
+.step-item { background: var(--autops-bg-1); border: 1px solid var(--autops-bg-4); border-radius: var(--autops-radius-sm); padding: 10px; margin-bottom: var(--autops-space-sm); }
 .step-header { display: flex; gap: 6px; align-items: center; }
-.step-number { width: 24px; height: 24px; background: #165dff; color: #fff; border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px; flex-shrink: 0; }
+.step-number { width: 24px; height: 24px; background: var(--autops-primary); color: var(--autops-bg-1); border-radius: 50%; text-align: center; line-height: 24px; font-size: var(--autops-font-12); flex-shrink: 0; }
 .step-params { display: flex; margin-top: 8px; padding-left: 30px; }
-.flow-preview { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 8px; background: #fafafa; border-radius: 4px; }
-.flow-box { background: #165dff; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px; }
-.flow-arrow { color: #86909c; font-size: 16px; }
+.flow-preview { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: var(--autops-space-sm); background: var(--autops-bg-1); border-radius: var(--autops-radius-sm); }
+.flow-box { background: var(--autops-primary); color: var(--autops-bg-1); padding: var(--autops-space-xs) 12px; border-radius: var(--autops-radius-sm); font-size: var(--autops-font-12); }
+.flow-arrow { color: var(--autops-info); font-size: var(--autops-font-16); }
 </style>

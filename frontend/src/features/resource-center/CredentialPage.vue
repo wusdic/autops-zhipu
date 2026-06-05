@@ -452,6 +452,6 @@ onMounted(() => loadCredentials())
 
 <style scoped>
 .filter-form {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 </style>

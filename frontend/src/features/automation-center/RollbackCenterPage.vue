@@ -50,7 +50,7 @@
     <!-- 概览统计 -->
     <el-row :gutter="16" class="stat-row">
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-content">
             <div class="stat-label">总执行数</div>
             <div class="stat-value">{{ total }}</div>
@@ -58,7 +58,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-content">
             <div class="stat-label">可回滚</div>
             <div class="stat-value success">{{ rollbackAvailableCount }}</div>
@@ -66,7 +66,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-content">
             <div class="stat-label">已回滚</div>
             <div class="stat-value warning">{{ rolledBackCount }}</div>
@@ -74,7 +74,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-content">
             <div class="stat-label">回滚中</div>
             <div class="stat-value primary">{{ rollingBackCount }}</div>
@@ -86,7 +86,7 @@
     <!-- 回滚列表表格 -->
     <el-card class="table-card" shadow="never">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span>回滚中心</span>
           <el-button type="success" :icon="Refresh" @click="fetchRollbackList">刷新</el-button>
         </div>
@@ -504,26 +504,26 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .rollback-center-page {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 
   .filter-card {
-    margin-bottom: 16px;
+    margin-bottom: var(--autops-space-lg);
   }
 
   .stat-row {
-    margin-bottom: 16px;
+    margin-bottom: var(--autops-space-lg);
   }
 
   .table-card {
     
     .expand-content {
-      padding: 12px 20px;
+      padding: var(--autops-space-md) 20px;
     }
 
     .pagination-wrapper {
       display: flex;
       justify-content: flex-end;
-      margin-top: 16px;
+      margin-top: var(--autops-space-lg);
     }
   }
 
@@ -532,22 +532,22 @@ onMounted(() => {
   }
 
   .text-muted {
-    color: #c9cdd4;
-    font-size: 13px;
+    color: var(--autops-text-4);
+    font-size: var(--autops-font-13);
   }
 
   .form-tip {
     margin-left: 8px;
-    color: #86909c;
-    font-size: 12px;
+    color: var(--autops-info);
+    font-size: var(--autops-font-12);
   }
 
   :deep(.row-rolling-back) {
-    background-color: #fdf6ec !important;
+    background-color: var(--autops-warning-light) !important;
   }
 
   :deep(.row-rolled-back) {
-    background-color: #f0f9eb !important;
+    background-color: var(--autops-success-light) !important;
   }
 }
 </style>

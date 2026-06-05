@@ -383,7 +383,7 @@ onMounted(() => {
 .page-top {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .top-actions {
   margin-left: auto;
@@ -391,14 +391,14 @@ onMounted(() => {
   gap: 8px;
 }
 .stats-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
-.stat-card :deep(.el-card__body) {
+.autops-metric-card :deep(.el-card__body) {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 16px 20px;
+  padding: var(--autops-space-lg) 20px;
 }
 .stat-content {
   display: flex;
@@ -411,7 +411,7 @@ onMounted(() => {
   margin-bottom: 0;
 }
 .title-link {
-  color: #165dff;
+  color: var(--autops-primary);
   text-decoration: none;
   font-weight: 500;
 }
@@ -419,11 +419,11 @@ onMounted(() => {
   text-decoration: underline;
 }
 .pagination-wrapper {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
   display: flex;
   justify-content: flex-end;
 }
 .text-muted {
-  color: #c9cdd4;
+  color: var(--autops-text-4);
 }
 </style>

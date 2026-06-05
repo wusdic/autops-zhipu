@@ -28,6 +28,22 @@
   --autops-info:          #86909c;
   --autops-info-light:    #f2f3f5;
 
+  /* 辅助色（扩展） */
+  --autops-purple:        #722ed1;
+  --autops-purple-light:  #f5e8ff;
+  --autops-cyan:          #0fc6c2;
+  --autops-cyan-light:    #e8fffb;
+  --autops-gold:          #faad14;
+  --autops-gold-light:    #fffbe6;
+
+  /* 表格/UI 交互色 */
+  --autops-table-hover:   #f2f7ff;
+  --autops-table-header:  #fafbfc;
+
+  /* 终端/代码编辑器背景（非通用界面色，仅用于 log/code 区域） */
+  --autops-terminal-bg:   #1e1e1e;
+  --autops-terminal-text: #c9d1d9;
+
   /* 文字色阶（4级） */
   --autops-text-1:    #1d2129;   /* 标题、主文字 */
   --autops-text-2:    #4e5969;   /* 次要文字 */

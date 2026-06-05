@@ -50,7 +50,7 @@
     <!-- 操作栏 -->
     <el-card shadow="never" class="table-card">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span class="title">发现结果列表</span>
           <div class="actions">
           <el-button
@@ -439,11 +439,11 @@ onMounted(() => {
 
 <style scoped>
 .discovery-result-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 
 .filter-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .filter-card :deep(.el-card__body) {
@@ -454,7 +454,7 @@ onMounted(() => {
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
-  padding: 4px 0;
+  margin-top: var(--autops-space-lg);
+  padding: var(--autops-space-xs) 0;
 }
 </style>

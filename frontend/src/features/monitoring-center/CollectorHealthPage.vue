@@ -258,12 +258,12 @@ onMounted(() => {
 
 <style scoped>
 .collector-health-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 
 /* ── Statistics Cards ── */
 .stats-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .stat-card__body {
   display: flex;
@@ -274,7 +274,7 @@ onMounted(() => {
 .stat-card__icon {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
+  border-radius: var(--autops-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -293,38 +293,38 @@ onMounted(() => {
 }
 
 .stat-card__label {
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
   margin-top: 4px;
 }
 
-.stat-card--healthy .stat-card__icon {
+.autops-metric-card--healthy .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
-  color: #00b42a;
+  color: var(--autops-success);
 }
-.stat-card--healthy .stat-card__value {
-  color: #00b42a;
+.autops-metric-card--healthy .stat-card__value {
+  color: var(--autops-success);
 }
 
-.stat-card--degraded .stat-card__icon {
+.autops-metric-card--degraded .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
-  color: #ff7d00;
+  color: var(--autops-warning);
 }
-.stat-card--degraded .stat-card__value {
-  color: #ff7d00;
+.autops-metric-card--degraded .stat-card__value {
+  color: var(--autops-warning);
 }
 
-.stat-card--down .stat-card__icon {
+.autops-metric-card--down .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
-  color: #f53f3f;
+  color: var(--autops-danger);
 }
-.stat-card--down .stat-card__value {
-  color: #f53f3f;
+.autops-metric-card--down .stat-card__value {
+  color: var(--autops-danger);
 }
 
 /* ── Main Card ── */
 .main-card {
-  border-radius: 8px;
+  border-radius: var(--autops-radius-md);
 }
 
 .health-table {
@@ -341,19 +341,19 @@ onMounted(() => {
 }
 
 .rate-good {
-  color: #00b42a;
+  color: var(--autops-success);
 }
 
 .rate-warn {
-  color: #ff7d00;
+  color: var(--autops-warning);
 }
 
 .rate-bad {
-  color: #f53f3f;
+  color: var(--autops-danger);
 }
 
 .text-danger {
-  color: #f53f3f;
+  color: var(--autops-danger);
   font-weight: 500;
 }
 </style>

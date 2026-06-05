@@ -307,10 +307,10 @@ onMounted(() => {
 
 <style scoped>
 .closure-verification-page {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 }
 .filter-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .filter-header {
   display: flex;
@@ -320,19 +320,19 @@ onMounted(() => {
   margin-bottom: -16px;
 }
 .table-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 .text-muted {
-  color: #c9cdd4;
+  color: var(--autops-text-4);
 }
 .drawer-actions {
-  margin-top: 20px;
+  margin-top: var(--autops-space-xl);
   padding-top: 16px;
-  border-top: 1px solid #e5e6eb;
+  border-top: 1px solid var(--autops-bg-4);
 }
 </style>

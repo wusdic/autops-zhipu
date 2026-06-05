@@ -304,14 +304,14 @@ function scrollToBottom() {
 }
 
 .sidebar-header {
-  padding: 12px;
+  padding: var(--autops-space-md);
   border-bottom: 1px solid var(--autops-bg-4);
 }
 
 .conversation-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: var(--autops-space-sm);
 }
 
 .conversation-item {
@@ -323,7 +323,7 @@ function scrollToBottom() {
   cursor: pointer;
   transition: background 0.15s;
   color: var(--autops-text-2);
-  font-size: 13px;
+  font-size: var(--autops-font-13);
 }
 
 .conversation-item:hover {
@@ -352,7 +352,7 @@ function scrollToBottom() {
 .message-list {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 24px;
+  padding: var(--autops-space-xl) 24px;
 }
 
 .welcome-area {
@@ -366,13 +366,13 @@ function scrollToBottom() {
 }
 
 .welcome-area h3 {
-  font-size: 20px;
+  font-size: var(--autops-font-20);
   color: var(--autops-text-1);
   margin: 8px 0 0;
 }
 
 .welcome-area p {
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   color: var(--autops-text-3);
   margin: 0;
 }
@@ -389,7 +389,7 @@ function scrollToBottom() {
 .message-item {
   display: flex;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: var(--autops-space-xl);
 }
 
 .message-item.user {
@@ -398,20 +398,20 @@ function scrollToBottom() {
 
 .message-item.user .message-content {
   background: var(--autops-primary);
-  color: #ffffff;
-  border-radius: 12px 12px 2px 12px;
+  color: var(--autops-bg-1);
+  border-radius: var(--autops-radius-lg) 12px 2px 12px;
 }
 
 .message-item.assistant .message-content {
   background: var(--autops-bg-3);
   color: var(--autops-text-1);
-  border-radius: 12px 12px 12px 2px;
+  border-radius: var(--autops-radius-lg) 12px 12px 2px;
 }
 
 .message-content {
   padding: 10px 16px;
   max-width: 70%;
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   line-height: 1.6;
   word-break: break-word;
 }
@@ -452,7 +452,7 @@ function scrollToBottom() {
 .chat-input-area {
   display: flex;
   gap: 8px;
-  padding: 16px 24px;
+  padding: var(--autops-space-lg) 24px;
   border-top: 1px solid var(--autops-bg-4);
   align-items: flex-end;
 }

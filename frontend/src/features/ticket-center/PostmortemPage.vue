@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title">故障复盘</div>
       <el-button type="primary" @click="handleCreate" :icon="Plus">新建复盘</el-button>

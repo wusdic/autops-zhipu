@@ -36,11 +36,11 @@ const contentRef = ref<HTMLElement>()
 </script>
 
 <style scoped>
-.report-preview { background: #fff; border-radius: 8px; border: 1px solid #e5e6eb; }
-.rp-toolbar { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid #f2f3f5; }
+.report-preview { background: var(--autops-bg-1); border-radius: var(--autops-radius-md); border: 1px solid var(--autops-bg-4); }
+.rp-toolbar { display: flex; gap: 8px; padding: var(--autops-space-md) 16px; border-bottom: 1px solid var(--autops-bg-3); }
 .rp-content { padding: 32px 48px; min-height: 400px; }
-.rp-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #1d2129; }
-.rp-title { font-size: 24px; font-weight: 700; color: #1d2129; margin: 0 0 8px; }
-.rp-meta { font-size: 13px; color: #86909c; display: flex; justify-content: center; gap: 24px; }
+.rp-header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--autops-text-1); }
+.rp-title { font-size: 24px; font-weight: 700; color: var(--autops-text-1); margin: 0 0 8px; }
+.rp-meta { font-size: var(--autops-font-13); color: var(--autops-info); display: flex; justify-content: center; gap: 24px; }
 .rp-body { line-height: 1.8; }
 </style>

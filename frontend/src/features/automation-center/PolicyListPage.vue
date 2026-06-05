@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">策略管理</div>
@@ -338,22 +338,22 @@ onMounted(() => { load(); loadGroups() })
 
 <style scoped>
 
-.stat-row { margin-bottom: 20px; }
+.stat-row { margin-bottom: var(--autops-space-xl); }
 
-.stat-card 
-.stat-card.success .stat-value { color: #00b42a; }
-.stat-card.danger .stat-value { color: #f53f3f; }
-.stat-card.warning .stat-value { color: #ff7d00; }
-.stat-card 
-.toolbar { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.pagination { margin-top: 16px; display: flex; justify-content: flex-end; }
-.condition-builder { background: #f7f8fa; padding: 12px; border-radius: 4px; }
+.autops-metric-card 
+.autops-metric-card.success .stat-value { color: var(--autops-success); }
+.autops-metric-card.danger .stat-value { color: var(--autops-danger); }
+.autops-metric-card.warning .stat-value { color: var(--autops-warning); }
+.autops-metric-card 
+.toolbar { margin-bottom: var(--autops-space-lg); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pagination { margin-top: var(--autops-space-lg); display: flex; justify-content: flex-end; }
+.condition-builder { background: var(--autops-bg-2); padding: var(--autops-space-md); border-radius: var(--autops-radius-sm); }
 .condition-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
-.action-chain { background: #f7f8fa; padding: 12px; border-radius: 4px; }
+.action-chain { background: var(--autops-bg-2); padding: var(--autops-space-md); border-radius: var(--autops-radius-sm); }
 .action-item { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
-.action-num { width: 22px; height: 22px; background: #ff7d00; color: #fff; border-radius: 50%; text-align: center; line-height: 22px; font-size: 11px; }
+.action-num { width: 22px; height: 22px; background: var(--autops-warning); color: var(--autops-bg-1); border-radius: 50%; text-align: center; line-height: 22px; font-size: 11px; }
 .cond-display { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-.cond-op { color: #86909c; font-weight: bold; }
-.cond-dur { color: #165dff; font-size: 12px; }
-.cond-logic { margin-top: 6px; color: #4e5969; font-size: 13px; }
+.cond-op { color: var(--autops-info); font-weight: bold; }
+.cond-dur { color: var(--autops-primary); font-size: var(--autops-font-12); }
+.cond-logic { margin-top: 6px; color: var(--autops-text-2); font-size: var(--autops-font-13); }
 </style>
