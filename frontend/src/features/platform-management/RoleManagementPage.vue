@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">角色管理</div>
@@ -299,14 +299,14 @@ onMounted(() => { loadRoles() })
 </script>
 
 <style scoped>
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.page-header h2 { margin: 0; font-size: 20px; color: #1d2129; }
-.text-muted { color: #86909c; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--autops-space-xl); }
+.page-header h2 { margin: 0; font-size: var(--autops-font-20); color: var(--autops-text-1); }
+.text-muted { color: var(--autops-info); }
 
 .permission-tree-wrapper {
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 8px 12px;
+  border: 1px solid var(--autops-bg-4);
+  border-radius: var(--autops-radius-sm);
+  padding: var(--autops-space-sm) 12px;
   max-height: 320px;
   overflow-y: auto;
   width: 100%;

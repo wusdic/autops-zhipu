@@ -416,7 +416,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .top-actions {
   display: flex;
@@ -435,10 +435,10 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 .text-muted {
-  color: #c9cdd4;
+  color: var(--autops-text-4);
 }
 .pagination-wrapper {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
   display: flex;
   justify-content: flex-end;
 }

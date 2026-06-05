@@ -2,7 +2,7 @@
   <div class="policy-edit-page">
     <el-card shadow="never">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span>{{ isEdit ? '编辑策略' : '新建策略' }}</span>
           <el-button @click="handleBack">返回列表</el-button>
         </div>
@@ -268,25 +268,25 @@ onMounted(() => {
 
 <style scoped>
 .policy-edit-page {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 }
 .form-tip {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   margin-top: 4px;
   line-height: 1.4;
 }
 .json-preview {
-  background: #f7f8fa;
-  border: 1px solid #e5e6eb;
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 13px;
+  background: var(--autops-bg-2);
+  border: 1px solid var(--autops-bg-4);
+  border-radius: var(--autops-radius-sm);
+  padding: var(--autops-space-md);
+  font-size: var(--autops-font-13);
   line-height: 1.6;
   max-height: 400px;
   overflow: auto;
   white-space: pre-wrap;
   word-break: break-all;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 </style>

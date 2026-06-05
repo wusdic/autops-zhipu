@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title">故障工作台</div>
       <div>
@@ -254,12 +254,12 @@ onMounted(fetchIncidents)
 
 <style scoped>
 .incident-card {
-  padding: 12px; border: 1px solid #e5e6eb; border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;
+  padding: var(--autops-space-md); border: 1px solid var(--autops-bg-4); border-radius: 6px; margin-bottom: var(--autops-space-sm); cursor: pointer; transition: all 0.2s;
 }
-.incident-card:hover { border-color: #165dff; box-shadow: 0 2px 8px rgba(22,93,255,0.12); }
-.incident-card.active { border-color: #165dff; background: #f2f7ff; }
+.incident-card:hover { border-color: var(--autops-primary); box-shadow: 0 2px 8px rgba(22,93,255,0.12); }
+.incident-card.active { border-color: var(--autops-primary); background: var(--autops-table-hover); }
 .incident-header { display: flex; gap: 6px; margin-bottom: 6px; }
-.incident-title { font-weight: 500; font-size: 14px; margin-bottom: 4px; }
-.incident-meta { font-size: 12px; color: #86909c; display: flex; gap: 12px; }
+.incident-title { font-weight: 500; font-size: var(--autops-font-14); margin-bottom: 4px; }
+.incident-meta { font-size: var(--autops-font-12); color: var(--autops-info); display: flex; gap: 12px; }
 .incident-meta .el-icon { margin-right: 2px; }
 </style>

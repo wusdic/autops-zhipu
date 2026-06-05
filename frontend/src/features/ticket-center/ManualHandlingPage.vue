@@ -175,7 +175,7 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.manual-handling-page { padding: 20px; }
-.mt-4 { margin-top: 16px; }
-.sla-warning { color: #f53f3f; font-weight: bold; }
+.manual-handling-page { padding: var(--autops-space-xl); }
+.mt-4 { margin-top: var(--autops-space-lg); }
+.sla-warning { color: var(--autops-danger); font-weight: bold; }
 </style>

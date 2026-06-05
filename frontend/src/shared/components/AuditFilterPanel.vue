@@ -51,6 +51,6 @@ function updateField(field: string, value: any) {
 </script>
 
 <style scoped>
-.audit-filter-panel { padding: 12px 16px; background: #fff; border-radius: 8px; border: 1px solid #e5e6eb; margin-bottom: 16px; }
+.audit-filter-panel { padding: var(--autops-space-md) 16px; background: var(--autops-bg-1); border-radius: var(--autops-radius-md); border: 1px solid var(--autops-bg-4); margin-bottom: var(--autops-space-lg); }
 .audit-filter-panel :deep(.el-form-item) { margin-bottom: 0; }
 </style>

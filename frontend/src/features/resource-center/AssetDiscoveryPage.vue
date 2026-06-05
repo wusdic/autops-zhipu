@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- 页面头部 -->
     <div class="autops-page-header">
       <span class="autops-page-title">资产发现</span>
@@ -7,7 +7,7 @@
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="stat-row mb-lg">
-      <el-col :span="6"><el-card shadow="hover" class="stat-card">
+      <el-col :span="6"><el-card shadow="hover" class="autops-metric-card">
         <div class="stat-value">{{ stats.total_discovered }}</div>
         <div class="stat-label">已发现资产</div>
       </el-card></el-col>
@@ -528,18 +528,18 @@ onMounted(() => { loadTasks(); loadResults(); loadStats(); loadCredentials(); lo
 </script>
 
 <style scoped>
-.stat-row { margin-bottom: 20px; }
-.stat-card 
-.stat-card.success .stat-value { color: #00b42a; }
-.stat-card.warning .stat-value { color: #ff7d00; }
-.stat-card.primary .stat-value { color: #165dff; }
-.stat-card 
-.toolbar { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; }
-.pagination { margin-top: 16px; display: flex; justify-content: flex-end; }
+.stat-row { margin-bottom: var(--autops-space-xl); }
+.autops-metric-card 
+.autops-metric-card.success .stat-value { color: var(--autops-success); }
+.autops-metric-card.warning .stat-value { color: var(--autops-warning); }
+.autops-metric-card.primary .stat-value { color: var(--autops-primary); }
+.autops-metric-card 
+.toolbar { margin-bottom: var(--autops-space-lg); display: flex; gap: 8px; align-items: center; }
+.pagination { margin-top: var(--autops-space-lg); display: flex; justify-content: flex-end; }
 .wizard-steps { margin: 20px 0; }
-.wizard-content { padding: 20px; min-height: 300px; }
+.wizard-content { padding: var(--autops-space-xl); min-height: 300px; }
 .wizard-actions { margin-top: 24px; display: flex; justify-content: flex-end; gap: 8px; }
-.wizard-assets-preview { margin-top: 20px; }
-.wizard-assets-preview h4 { margin-bottom: 10px; color: #4e5969; }
-.main-tabs { margin-top: 16px; }
+.wizard-assets-preview { margin-top: var(--autops-space-xl); }
+.wizard-assets-preview h4 { margin-bottom: 10px; color: var(--autops-text-2); }
+.main-tabs { margin-top: var(--autops-space-lg); }
 </style>

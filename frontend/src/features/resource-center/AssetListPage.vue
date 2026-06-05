@@ -835,7 +835,7 @@ onMounted(() => loadAssets())
 
 <style scoped>
 .filter-form {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .quick-action-btn {
   margin-left: 4px;
@@ -848,17 +848,17 @@ onMounted(() => loadAssets())
   left: 50%;
   transform: translateX(-50%);
   z-index: 999;
-  background: #fff;
-  border: 1px solid #e5e6eb;
-  border-radius: 8px;
+  background: var(--autops-bg-1);
+  border: 1px solid var(--autops-bg-4);
+  border-radius: var(--autops-radius-md);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  padding: 12px 24px;
+  padding: var(--autops-space-md) 24px;
   display: flex;
   align-items: center;
   gap: 12px;
 }
 .batch-info {
-  color: #4e5969;
+  color: var(--autops-text-2);
   margin-right: 8px;
   white-space: nowrap;
 }
@@ -876,6 +876,6 @@ onMounted(() => loadAssets())
 
 /* Import preview */
 .import-preview {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 </style>

@@ -746,7 +746,7 @@ onMounted(async () => {
 .page-top {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .asset-title {
   margin-left: 16px;
@@ -758,34 +758,34 @@ onMounted(async () => {
   font-weight: 600;
 }
 .summary-card {
-  background: linear-gradient(135deg, #f7f8fa 0%, #e5e6eb 100%);
+  background: linear-gradient(135deg, var(--autops-bg-2) 0%, var(--autops-bg-4) 100%);
 }
 .summary-item {
   text-align: center;
 }
 .summary-item .label {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   margin-bottom: 4px;
 }
 .summary-item .value {
-  font-size: 16px;
+  font-size: var(--autops-font-16);
   font-weight: 600;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 .section-block {
   margin-top: 24px;
 }
 .section-block h4 {
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: #1d2129;
-  border-left: 3px solid #165dff;
+  margin-bottom: var(--autops-space-md);
+  font-size: var(--autops-font-14);
+  color: var(--autops-text-1);
+  border-left: 3px solid var(--autops-primary);
   padding-left: 8px;
 }
 .tab-toolbar {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 </style>

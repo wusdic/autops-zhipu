@@ -302,17 +302,17 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .log-search-page {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 
   .filter-card {
-    margin-bottom: 16px;
+    margin-bottom: var(--autops-space-lg);
   }
 
   .table-card {
     .pagination-wrapper {
       display: flex;
       justify-content: flex-end;
-      margin-top: 16px;
+      margin-top: var(--autops-space-lg);
     }
   }
 
@@ -322,7 +322,7 @@ onMounted(() => {
     white-space: pre-wrap;
     word-break: break-all;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 13px;
+    font-size: var(--autops-font-13);
     line-height: 1.6;
   }
 
@@ -331,11 +331,11 @@ onMounted(() => {
     overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-all;
-    font-size: 12px;
+    font-size: var(--autops-font-12);
     line-height: 1.5;
-    background: #f7f8fa;
-    padding: 8px;
-    border-radius: 4px;
+    background: var(--autops-bg-2);
+    padding: var(--autops-space-sm);
+    border-radius: var(--autops-radius-sm);
     margin: 0;
   }
 }

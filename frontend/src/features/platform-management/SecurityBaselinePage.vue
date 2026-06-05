@@ -209,24 +209,24 @@ onMounted(() => {
 
 <style scoped>
 .security-baseline-page {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 }
 .filter-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .table-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 .detail-section {
-  margin-top: 20px;
+  margin-top: var(--autops-space-xl);
 }
 .detail-section h4 {
   margin-bottom: 10px;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 </style>

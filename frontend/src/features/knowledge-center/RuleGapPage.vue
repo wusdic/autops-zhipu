@@ -341,7 +341,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .top-actions {
   display: flex;
@@ -354,17 +354,17 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
 }
-.text-muted { color: #c9cdd4; }
+.text-muted { color: var(--autops-text-4); }
 .autops-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 .autops-card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 .event-type-cell {
   display: flex;
@@ -374,15 +374,15 @@ onMounted(() => {
   font-weight: 500;
 }
 .suggestion-cell {
-  font-size: 13px;
-  color: #4e5969;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-2);
 }
 .coverage-legend {
   margin-top: 8px;
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
 }
 .table-filter-row {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 </style>

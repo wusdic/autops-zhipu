@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">平台健康</div>
@@ -35,7 +35,7 @@
     <!-- Component Health Cards -->
     <div class="status-grid" v-loading="loading">
       <div class="autops-card status-card" v-for="comp in components" :key="comp.key" :class="{ 'status-card-unhealthy': comp.status === 'unhealthy' }">
-        <div class="card-header">
+        <div class="autops-card-header">
           <span class="card-icon">{{ comp.icon }}</span>
           <span class="card-title">{{ comp.label }}</span>
           <el-tag :type="getTagType(comp.status)" size="small" effect="dark">
@@ -298,8 +298,8 @@ onUnmounted(() => { stopAutoRefresh() })
 
 <style scoped>
 
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px; }
-.page-header h2 { margin: 0; font-size: 20px; color: #1d2129; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--autops-space-xl); flex-wrap: wrap; gap: 8px; }
+.page-header h2 { margin: 0; font-size: var(--autops-font-20); color: var(--autops-text-1); }
 
 .auto-refresh-control {
   display: flex;
@@ -307,8 +307,8 @@ onUnmounted(() => { stopAutoRefresh() })
   gap: 6px;
 }
 .refresh-countdown {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   min-width: 28px;
 }
 
@@ -319,37 +319,37 @@ onUnmounted(() => { stopAutoRefresh() })
 }
 
 .status-card {
-  border-radius: 8px;
+  border-radius: var(--autops-radius-md);
   transition: border-color 0.3s;
 }
 .status-card-unhealthy {
-  border-color: #f53f3f;
+  border-color: var(--autops-danger);
 }
 .status-card :deep(.el-card__body) {
-  padding: 16px 20px;
+  padding: var(--autops-space-lg) 20px;
 }
 
-.card-header {
+.autops-card-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
   font-size: 15px;
   font-weight: 600;
 }
 .card-icon { font-size: 22px; }
 
 
-.card-body { font-size: 13px; }
+.card-body { font-size: var(--autops-font-13); }
 .detail-row {
   display: flex;
   justify-content: space-between;
-  padding: 4px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: var(--autops-space-xs) 0;
+  border-bottom: 1px solid var(--autops-bg-3);
 }
 .detail-row:last-child { border-bottom: none; }
-.detail-key { color: #86909c; }
-.detail-val { color: #1d2129; font-weight: 500; }
+.detail-key { color: var(--autops-info); }
+.detail-val { color: var(--autops-text-1); font-weight: 500; }
 
 .card-footer {
   display: flex;
@@ -357,14 +357,14 @@ onUnmounted(() => { stopAutoRefresh() })
   align-items: center;
   margin-top: 10px;
   padding-top: 8px;
-  border-top: 1px solid #f0f0f0;
-  font-size: 13px;
+  border-top: 1px solid var(--autops-bg-3);
+  font-size: var(--autops-font-13);
 }
-.latency-label { color: #86909c; }
-.latency-value { color: #00b42a; font-weight: 600; }
-.latency-warn { color: #ff7d00; }
+.latency-label { color: var(--autops-info); }
+.latency-value { color: var(--autops-success); font-weight: 600; }
+.latency-warn { color: var(--autops-warning); }
 
-.text-muted { color: #86909c; font-size: 13px; }
+.text-muted { color: var(--autops-info); font-size: var(--autops-font-13); }
 
 .chart-container { min-height: 80px; }
 .chart-placeholder {
@@ -379,13 +379,13 @@ onUnmounted(() => { stopAutoRefresh() })
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #f5f5f5;
+  padding: var(--autops-space-sm) 0;
+  border-bottom: 1px solid var(--autops-bg-3);
 }
 .history-row:last-child { border-bottom: none; }
 .history-time {
-  font-size: 13px;
-  color: #4e5969;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-2);
   white-space: nowrap;
   min-width: 160px;
 }
@@ -397,8 +397,8 @@ onUnmounted(() => { stopAutoRefresh() })
   display: inline-block;
   cursor: default;
 }
-.dot-healthy { background-color: #00b42a; }
-.dot-degraded { background-color: #ff7d00; }
-.dot-unhealthy { background-color: #f53f3f; }
-.dot-unknown { background-color: #c9cdd4; }
+.dot-healthy { background-color: var(--autops-success); }
+.dot-degraded { background-color: var(--autops-warning); }
+.dot-unhealthy { background-color: var(--autops-danger); }
+.dot-unknown { background-color: var(--autops-text-4); }
 </style>

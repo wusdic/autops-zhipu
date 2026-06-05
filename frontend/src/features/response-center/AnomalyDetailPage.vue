@@ -380,5 +380,5 @@ onMounted(() => fetchAnomaly())
 </script>
 
 <style scoped>
-.text-tertiary { color: #86909c; font-size: 12px; }
+.text-tertiary { color: var(--autops-info); font-size: var(--autops-font-12); }
 </style>

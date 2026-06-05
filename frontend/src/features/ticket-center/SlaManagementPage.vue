@@ -49,7 +49,7 @@
     <!-- SLA 策略表格 -->
     <el-card shadow="never" class="table-card">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span class="title">SLA 策略管理</span>
           <el-button type="primary" :icon="Plus" @click="handleCreate">新建策略</el-button>
         </div>
@@ -570,11 +570,11 @@ onMounted(() => {
 
 <style scoped>
 .sla-management-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 
 .filter-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .filter-card :deep(.el-card__body) {
@@ -588,8 +588,8 @@ onMounted(() => {
 }
 
 .form-item-tip {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   line-height: 1.2;
   margin-top: 2px;
 }
@@ -597,7 +597,7 @@ onMounted(() => {
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
-  padding: 4px 0;
+  margin-top: var(--autops-space-lg);
+  padding: var(--autops-space-xs) 0;
 }
 </style>

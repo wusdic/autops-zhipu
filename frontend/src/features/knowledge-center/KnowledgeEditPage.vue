@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">编辑知识</div>
@@ -259,12 +259,12 @@ onMounted(() => { const id = route.params.id as string; if (id) loadKnowledge(id
 
 <style scoped>
 
-.toolbar { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; }
-.step-block { background: #f7f8fa; padding: 8px; border-radius: 4px; margin-bottom: 8px; }
-.step-num { width: 22px; height: 22px; background: #165dff; color: #fff; border-radius: 50%; text-align: center; line-height: 22px; font-size: 11px; display: inline-block; }
-.action-num { background: #ff7d00; }
-.verify-num { background: #00b42a; }
-.richtext-toolbar { padding: 8px; border: 1px solid #dcdfe6; border-bottom: none; border-radius: 4px 4px 0 0; background: #f7f8fa; }
-.richtext-editor { min-height: 400px; border: 1px solid #dcdfe6; border-radius: 0 0 4px 4px; padding: 12px; outline: none; font-size: 14px; line-height: 1.8; }
-.richtext-editor:focus { border-color: #165dff; }
+.toolbar { margin-bottom: var(--autops-space-lg); display: flex; gap: 8px; align-items: center; }
+.step-block { background: var(--autops-bg-2); padding: var(--autops-space-sm); border-radius: var(--autops-radius-sm); margin-bottom: var(--autops-space-sm); }
+.step-num { width: 22px; height: 22px; background: var(--autops-primary); color: var(--autops-bg-1); border-radius: 50%; text-align: center; line-height: 22px; font-size: 11px; display: inline-block; }
+.action-num { background: var(--autops-warning); }
+.verify-num { background: var(--autops-success); }
+.richtext-toolbar { padding: var(--autops-space-sm); border: 1px solid var(--autops-bg-4); border-bottom: none; border-radius: var(--autops-radius-sm) 4px 0 0; background: var(--autops-bg-2); }
+.richtext-editor { min-height: 400px; border: 1px solid var(--autops-bg-4); border-radius: 0 0 4px 4px; padding: var(--autops-space-md); outline: none; font-size: var(--autops-font-14); line-height: 1.8; }
+.richtext-editor:focus { border-color: var(--autops-primary); }
 </style>

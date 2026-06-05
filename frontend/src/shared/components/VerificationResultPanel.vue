@@ -41,13 +41,13 @@ const allPass = computed(() => props.items.length > 0 && passCount.value === pro
 </script>
 
 <style scoped>
-.verification-panel { border: 1px solid #e5e6eb; border-radius: 8px; background: #fff; }
-.vp-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f2f3f5; }
-.vp-title { font-weight: 600; color: #1d2129; }
-.vp-summary { padding: 12px 16px; font-size: 18px; font-weight: 700; text-align: center; }
+.verification-panel { border: 1px solid var(--autops-bg-4); border-radius: var(--autops-radius-md); background: var(--autops-bg-1); }
+.vp-header { display: flex; justify-content: space-between; align-items: center; padding: var(--autops-space-md) 16px; border-bottom: 1px solid var(--autops-bg-3); }
+.vp-title { font-weight: 600; color: var(--autops-text-1); }
+.vp-summary { padding: var(--autops-space-md) 16px; font-size: 18px; font-weight: 700; text-align: center; }
 .vp-items { padding: 0 16px 12px; }
-.vp-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f7f8fa; }
+.vp-item { display: flex; align-items: flex-start; gap: 8px; padding: var(--autops-space-sm) 0; border-bottom: 1px solid var(--autops-bg-2); }
 .vp-item:last-child { border-bottom: none; }
-.vp-item-name { font-size: 13px; color: #1d2129; }
-.vp-item-detail { font-size: 12px; color: #86909c; margin-top: 2px; }
+.vp-item-name { font-size: var(--autops-font-13); color: var(--autops-text-1); }
+.vp-item-detail { font-size: var(--autops-font-12); color: var(--autops-info); margin-top: 2px; }
 </style>

@@ -31,12 +31,12 @@ const riskTagType = computed(() => ({ low: "success", medium: "warning", high: "
 </script>
 
 <style scoped>
-.risk-decision-card { border-radius: 8px; border: 1px solid #e5e6eb; background: #fff; overflow: hidden; }
-.risk-decision-card.risk-critical { border-color: #f53f3f; }
-.risk-decision-card.risk-high { border-color: #ff7d00; }
-.risk-decision-card.risk-medium { border-color: #ffc40f; }
-.rdc-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f2f3f5; }
-.rdc-title { font-weight: 600; color: #1d2129; }
-.rdc-body { padding: 16px; }
-.rdc-footer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid #f2f3f5; background: #fafafa; }
+.risk-decision-card { border-radius: var(--autops-radius-md); border: 1px solid var(--autops-bg-4); background: var(--autops-bg-1); overflow: hidden; }
+.risk-decision-card.risk-critical { border-color: var(--autops-danger); }
+.risk-decision-card.risk-high { border-color: var(--autops-warning); }
+.risk-decision-card.risk-medium { border-color: var(--autops-gold); }
+.rdc-header { display: flex; justify-content: space-between; align-items: center; padding: var(--autops-space-md) 16px; border-bottom: 1px solid var(--autops-bg-3); }
+.rdc-title { font-weight: 600; color: var(--autops-text-1); }
+.rdc-body { padding: var(--autops-space-lg); }
+.rdc-footer { display: flex; gap: 8px; padding: var(--autops-space-md) 16px; border-top: 1px solid var(--autops-bg-3); background: var(--autops-bg-1); }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title">阈值规则</div>
       <el-button type="primary" @click="openCreateDialog">
@@ -272,7 +272,7 @@ onMounted(fetchData)
 
 <style scoped>
 
-.mb-md { margin-bottom: 16px; }
-.text-tertiary { color: #86909c; }
-.font-12 { font-size: 12px; }
+.mb-md { margin-bottom: var(--autops-space-lg); }
+.text-tertiary { color: var(--autops-info); }
+.font-12 { font-size: var(--autops-font-12); }
 </style>

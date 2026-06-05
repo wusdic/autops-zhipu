@@ -130,14 +130,14 @@ watch(() => [props.assetId, props.groupId, props.configType], () => { loadInheri
 .config-inheritance { margin-top: 12px; }
 .inheritance-chain { padding-left: 8px; }
 .inheritance-level { display: flex; gap: 12px; margin-bottom: 0; }
-.inheritance-level.active .level-content { border-color: #165dff; }
+.inheritance-level.active .level-content { border-color: var(--autops-primary); }
 .level-indicator { display: flex; flex-direction: column; align-items: center; width: 20px; flex-shrink: 0; }
-.level-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #dcdfe6; }
-.level-line { width: 2px; flex: 1; background: #dcdfe6; margin: 4px 0; min-height: 20px; }
-.level-content { flex: 1; padding: 8px 12px; border: 1px solid #e5e6eb; border-radius: 4px; margin-bottom: 8px; background: #fff; }
+.level-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--autops-bg-1); box-shadow: 0 0 0 1px var(--autops-bg-4); }
+.level-line { width: 2px; flex: 1; background: var(--autops-bg-4); margin: 4px 0; min-height: 20px; }
+.level-content { flex: 1; padding: var(--autops-space-sm) 12px; border: 1px solid var(--autops-bg-4); border-radius: var(--autops-radius-sm); margin-bottom: var(--autops-space-sm); background: var(--autops-bg-1); }
 .level-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.level-name { font-weight: 500; font-size: 13px; }
+.level-name { font-weight: 500; font-size: var(--autops-font-13); }
 .level-values { margin-top: 4px; }
-.old-value { color: #f53f3f; text-decoration: line-through; margin-right: 6px; }
-.new-value { color: #00b42a; font-weight: 500; }
+.old-value { color: var(--autops-danger); text-decoration: line-through; margin-right: 6px; }
+.new-value { color: var(--autops-success); font-weight: 500; }
 </style>

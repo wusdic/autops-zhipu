@@ -373,20 +373,20 @@ onMounted(() => {
 
 <style scoped>
 .automation-report-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 .mb-lg {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .stats-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .stat-card__body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 0;
+  padding: var(--autops-space-xs) 0;
 }
 
 .stat-card__icon {
@@ -411,27 +411,27 @@ onMounted(() => {
 }
 
 .stat-card__label {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   margin-top: 2px;
 }
 
-.stat-card--total .stat-card__icon { background: rgba(64, 158, 255, 0.12); color: #165dff; }
-.stat-card--total .stat-card__value { color: #165dff; }
-.stat-card--success .stat-card__icon { background: rgba(103, 194, 58, 0.12); color: #00b42a; }
-.stat-card--success .stat-card__value { color: #00b42a; }
-.stat-card--failed .stat-card__icon { background: rgba(245, 108, 108, 0.12); color: #f53f3f; }
-.stat-card--failed .stat-card__value { color: #f53f3f; }
-.stat-card--duration .stat-card__icon { background: rgba(144, 147, 153, 0.12); color: #86909c; }
-.stat-card--duration .stat-card__value { color: #4e5969; }
+.autops-metric-card--total .stat-card__icon { background: rgba(64, 158, 255, 0.12); color: var(--autops-primary); }
+.autops-metric-card--total .stat-card__value { color: var(--autops-primary); }
+.autops-metric-card--success .stat-card__icon { background: rgba(103, 194, 58, 0.12); color: var(--autops-success); }
+.autops-metric-card--success .stat-card__value { color: var(--autops-success); }
+.autops-metric-card--failed .stat-card__icon { background: rgba(245, 108, 108, 0.12); color: var(--autops-danger); }
+.autops-metric-card--failed .stat-card__value { color: var(--autops-danger); }
+.autops-metric-card--duration .stat-card__icon { background: rgba(144, 147, 153, 0.12); color: var(--autops-info); }
+.autops-metric-card--duration .stat-card__value { color: var(--autops-text-2); }
 .filter-form {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e6eb;
+  border-bottom: 1px solid var(--autops-bg-4);
 }
 
 .filter-form :deep(.el-form-item) {
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 
 .breakdown-table,
@@ -442,6 +442,6 @@ onMounted(() => {
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 </style>

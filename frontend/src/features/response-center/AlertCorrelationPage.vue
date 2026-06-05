@@ -319,10 +319,10 @@ onMounted(() => fetchAlerts())
 <style scoped>
 
 .mb-lg {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .text-tertiary {
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
 }
 </style>

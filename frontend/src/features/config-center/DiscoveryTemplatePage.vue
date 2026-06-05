@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title">发现模板</div>
       <el-button type="primary" @click="openCreateDialog">
@@ -247,6 +247,6 @@ onMounted(fetchData)
 
 <style scoped>
 
-.mb-md { margin-bottom: 16px; }
-.text-tertiary { color: #86909c; }
+.mb-md { margin-bottom: var(--autops-space-lg); }
+.text-tertiary { color: var(--autops-info); }
 </style>

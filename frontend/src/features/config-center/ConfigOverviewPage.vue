@@ -16,7 +16,7 @@
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="mt-4">
       <el-col :span="6" v-for="stat in stats" :key="stat.label">
-        <el-card shadow="hover" class="stat-card" @click="stat.click">
+        <el-card shadow="hover" class="autops-metric-card" @click="stat.click">
           <div class="stat-value" :style="{ color: stat.color }">{{ stat.value }}</div>
           <div class="stat-label">{{ stat.label }}</div>
           <div class="stat-footer">
@@ -305,11 +305,11 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.config-overview-page { padding: 20px; }
-.stat-card:hover { transform: translateY(-2px); }
-.stat-footer { margin-top: 8px; font-size: 12px; }
-.trend-up { color: #00b42a; }
-.trend-down { color: #f53f3f; }
-.trend-label { color: #C0C4CC; margin-left: 4px; }
-.mt-4 { margin-top: 16px; }
+.config-overview-page { padding: var(--autops-space-xl); }
+.autops-metric-card:hover { transform: translateY(-2px); }
+.stat-footer { margin-top: 8px; font-size: var(--autops-font-12); }
+.trend-up { color: var(--autops-success); }
+.trend-down { color: var(--autops-danger); }
+.trend-label { color: var(--autops-text-4); margin-left: 4px; }
+.mt-4 { margin-top: var(--autops-space-lg); }
 </style>

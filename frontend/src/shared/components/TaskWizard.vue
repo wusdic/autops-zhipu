@@ -94,11 +94,11 @@ defineExpose({ currentStep, formData, nextStep, prevStep })
 </script>
 
 <style scoped>
-.task-wizard { padding: 20px; }
+.task-wizard { padding: var(--autops-space-xl); }
 .wizard-steps { margin-bottom: 24px; }
 .wizard-content {
-  min-height: 200px; padding: 20px; border: 1px solid #f2f3f5;
-  border-radius: 8px; background: #fafbfc; margin-bottom: 20px;
+  min-height: 200px; padding: var(--autops-space-xl); border: 1px solid var(--autops-bg-3);
+  border-radius: var(--autops-radius-md); background: var(--autops-bg-1); margin-bottom: var(--autops-space-xl);
 }
 .wizard-default-content { display: flex; justify-content: center; align-items: center; min-height: 200px; }
 .wizard-footer { display: flex; justify-content: flex-end; gap: 8px; }

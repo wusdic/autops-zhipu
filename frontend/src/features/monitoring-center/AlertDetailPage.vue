@@ -850,7 +850,7 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 
 .detail-title-area {
@@ -869,7 +869,7 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 
 /* Metrics */
 .metrics-grid {
-  padding: 8px 0;
+  padding: var(--autops-space-sm) 0;
 }
 
 /* Logs */
@@ -877,20 +877,20 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 
 .logs-scroll {
   max-height: 480px;
   overflow-y: auto;
   font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
-  font-size: 13px;
+  font-size: var(--autops-font-13);
   line-height: 1.6;
 }
 
 .log-entry {
   padding: 6px 0;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid var(--autops-bg-3);
   display: flex;
   align-items: baseline;
 }
@@ -900,15 +900,15 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 }
 
 .log-time {
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
   white-space: nowrap;
   min-width: 160px;
 }
 
 .log-source {
-  color: #165dff;
-  font-size: 12px;
+  color: var(--autops-primary);
+  font-size: var(--autops-font-12);
   margin-right: 4px;
 }
 
@@ -918,19 +918,19 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 }
 
 .log-level-error .log-message {
-  color: #f53f3f;
+  color: var(--autops-danger);
 }
 
 .log-level-warning .log-message {
-  color: #ff7d00;
+  color: var(--autops-warning);
 }
 
 .log-level-info .log-message {
-  color: #4e5969;
+  color: var(--autops-text-2);
 }
 
 .log-level-debug .log-message {
-  color: #86909c;
+  color: var(--autops-info);
 }
 
 /* Side cards */
@@ -951,17 +951,17 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
   align-items: center;
   gap: 4px;
   margin: 6px 0;
-  font-size: 13px;
+  font-size: var(--autops-font-13);
 }
 
 /* Section cards */
 .section-card {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 
 /* Evidence chain */
 .evidence-item {
-  padding: 4px 0;
+  padding: var(--autops-space-xs) 0;
 }
 
 .evidence-header {
@@ -973,19 +973,19 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 
 .evidence-title {
   font-weight: 600;
-  font-size: 14px;
-  color: #1d2129;
+  font-size: var(--autops-font-14);
+  color: var(--autops-text-1);
 }
 
 .evidence-desc {
-  color: #4e5969;
-  font-size: 13px;
+  color: var(--autops-text-2);
+  font-size: var(--autops-font-13);
   line-height: 1.5;
 }
 
 .evidence-change {
   margin-top: 4px;
-  font-size: 13px;
+  font-size: var(--autops-font-13);
 }
 
 .evidence-config {
@@ -995,12 +995,12 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 }
 
 .old-value {
-  color: #f53f3f;
+  color: var(--autops-danger);
   text-decoration: line-through;
 }
 
 .new-value {
-  color: #00b42a;
+  color: var(--autops-success);
   font-weight: 600;
 }
 
@@ -1008,12 +1008,12 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 .comments-area {
   max-height: 300px;
   overflow-y: auto;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .comment-item {
   padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--autops-bg-3);
 }
 
 .comment-item:last-child {
@@ -1029,24 +1029,24 @@ watch(() => route.params.id, () => { if (route.params.id) loadAlert() })
 
 .comment-author {
   font-weight: 600;
-  font-size: 13px;
-  color: #1d2129;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-1);
 }
 
 .comment-time {
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
 }
 
 .comment-content {
-  font-size: 13px;
-  color: #4e5969;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-2);
   line-height: 1.5;
   white-space: pre-wrap;
 }
 
 .comment-input {
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--autops-bg-3);
   padding-top: 12px;
 }
 </style>

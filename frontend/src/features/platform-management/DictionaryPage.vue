@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">字典管理</div>
@@ -331,7 +331,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 
@@ -344,9 +344,9 @@ onMounted(() => {
   width: 240px;
   min-width: 200px;
   flex-shrink: 0;
-  background: #fff;
-  border: 1px solid #e5e6eb;
-  border-radius: 8px;
+  background: var(--autops-bg-1);
+  border: 1px solid var(--autops-bg-4);
+  border-radius: var(--autops-radius-md);
   display: flex;
   flex-direction: column;
 }
@@ -360,18 +360,18 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  border-bottom: 1px solid #f2f3f5;
+  padding: var(--autops-space-md);
+  border-bottom: 1px solid var(--autops-bg-3);
 }
 .panel-title {
   font-weight: 600;
-  font-size: 14px;
-  color: #1d2129;
+  font-size: var(--autops-font-14);
+  color: var(--autops-text-1);
 }
 .group-list {
   flex: 1;
   overflow-y: auto;
-  padding: 4px 0;
+  padding: var(--autops-space-xs) 0;
 }
 .group-item {
   display: flex;
@@ -382,16 +382,16 @@ onMounted(() => {
   border-left: 3px solid transparent;
 }
 .group-item:hover {
-  background: #f7f8fa;
+  background: var(--autops-bg-2);
 }
 .group-item.active {
-  background: #e8f3ff;
-  border-left-color: #165dff;
+  background: var(--autops-primary-light-5);
+  border-left-color: var(--autops-primary);
 }
 .group-name {
   flex: 1;
-  font-size: 13px;
-  color: #4e5969;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -405,7 +405,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 .toolbar-left {
   display: flex;

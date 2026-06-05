@@ -228,14 +228,14 @@ onMounted(() => {
 
 <style scoped>
 .report-preview-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 .loading-wrapper {
   padding: 24px;
 }
 
 .mb-lg {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .mt-md {
@@ -243,13 +243,13 @@ onMounted(() => {
 }
 
 .report-header {
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 
 .report-title {
-  font-size: 20px;
+  font-size: var(--autops-font-20);
   font-weight: 600;
-  color: #1d2129;
+  color: var(--autops-text-1);
   margin: 0 0 8px;
 }
 
@@ -261,8 +261,8 @@ onMounted(() => {
 }
 
 .meta-text {
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
 }
 
 .section-table {
@@ -270,8 +270,8 @@ onMounted(() => {
 }
 
 .section-text {
-  font-size: 14px;
-  color: #4e5969;
+  font-size: var(--autops-font-14);
+  color: var(--autops-text-2);
   line-height: 1.8;
   white-space: pre-wrap;
 }

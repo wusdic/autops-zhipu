@@ -56,7 +56,7 @@
     <!-- 统计概览 -->
     <el-row :gutter="16" class="stat-row">
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-content">
             <div class="stat-label">检查总数</div>
             <div class="stat-value">{{ total }}</div>
@@ -92,7 +92,7 @@
     <!-- 检查结果表格 -->
     <el-card class="table-card" shadow="never">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span>巡检结果</span>
           <div class="header-actions">
             <el-button-group>
@@ -518,14 +518,14 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .inspection-result-page {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 
   .filter-card {
-    margin-bottom: 16px;
+    margin-bottom: var(--autops-space-lg);
   }
 
   .stat-row {
-    margin-bottom: 16px;
+    margin-bottom: var(--autops-space-lg);
   }
 
   .table-card {
@@ -539,7 +539,7 @@ onMounted(() => {
     .pagination-wrapper {
       display: flex;
       justify-content: flex-end;
-      margin-top: 16px;
+      margin-top: var(--autops-space-lg);
     }
   }
 
@@ -547,8 +547,8 @@ onMounted(() => {
     .group-header {
       display: flex;
       align-items: center;
-      padding: 8px 0;
-      font-size: 14px;
+      padding: var(--autops-space-sm) 0;
+      font-size: var(--autops-font-14);
       font-weight: 600;
 
       .group-name {

@@ -246,21 +246,21 @@ onMounted(() => {
 
 <style scoped>
 .collection-result-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 
 .main-card {
-  border-radius: 8px;
+  border-radius: var(--autops-radius-md);
 }
 
 .filter-form {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e6eb;
+  border-bottom: 1px solid var(--autops-bg-4);
 }
 
 .filter-form :deep(.el-form-item) {
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 
 .result-table {
@@ -270,16 +270,16 @@ onMounted(() => {
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 .raw-data-pre {
   max-height: 200px;
   overflow: auto;
   margin: 0;
-  padding: 8px;
-  background: #f7f8fa;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: var(--autops-space-sm);
+  background: var(--autops-bg-2);
+  border-radius: var(--autops-radius-sm);
+  font-size: var(--autops-font-12);
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-all;

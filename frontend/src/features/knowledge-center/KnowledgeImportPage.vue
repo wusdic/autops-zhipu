@@ -794,10 +794,10 @@ async function checkExisting() {
 }
 
 .preview-section {
-  margin-top: 16px;
-  padding: 12px;
-  background: #f7f8fa;
-  border-radius: 4px;
+  margin-top: var(--autops-space-lg);
+  padding: var(--autops-space-md);
+  background: var(--autops-bg-2);
+  border-radius: var(--autops-radius-sm);
 }
 .preview-summary {
   margin-top: 8px;
@@ -806,27 +806,27 @@ async function checkExisting() {
 }
 
 .progress-container {
-  padding: 8px 0;
+  padding: var(--autops-space-sm) 0;
 }
 .progress-stats {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
   display: flex;
   align-items: center;
 }
 .progress-errors {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 .error-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #f53f3f;
-  font-size: 13px;
+  color: var(--autops-danger);
+  font-size: var(--autops-font-13);
   padding: 2px 0;
 }
 
 .standard-actions {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
   display: flex;
   gap: 8px;
 }

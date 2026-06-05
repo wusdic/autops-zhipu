@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title">配置巡检</div>
       <div>
@@ -248,8 +248,8 @@ onMounted(fetchItems)
 
 <style scoped>
 
-.diff-content { border-radius: 4px; overflow: hidden; }
+.diff-content { border-radius: var(--autops-radius-sm); overflow: hidden; }
 
 
-.text-muted { color: #86909c; }
+.text-muted { color: var(--autops-info); }
 </style>

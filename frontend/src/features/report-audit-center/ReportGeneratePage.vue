@@ -342,11 +342,11 @@ onMounted(() => {
 
 <style scoped>
 .report-generate-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 
 .mb-lg {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .task-table {

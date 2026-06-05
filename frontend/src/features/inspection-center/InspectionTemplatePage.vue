@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- 页面头部 -->
     <div class="autops-page-header">
       <div class="autops-page-title">巡检模板</div>
@@ -322,26 +322,26 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .page-toolbar {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .page-pagination {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 .text-tertiary {
-  color: #86909c;
-  font-size: 13px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-13);
 }
 .check-item-count {
   font-weight: 600;
-  color: #165dff;
+  color: var(--autops-primary);
 }
 </style>

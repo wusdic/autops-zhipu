@@ -341,11 +341,11 @@ onMounted(() => fetchAnomalies())
 
 <style scoped>
 .mb-lg {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .text-tertiary {
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
 }
 
 /* Blast radius */
@@ -355,29 +355,29 @@ onMounted(() => fetchAnomalies())
   gap: 16px;
 }
 .blast-level-title {
-  margin-bottom: 8px;
+  margin-bottom: var(--autops-space-sm);
 }
 .blast-nodes {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   padding-left: 20px;
-  border-left: 2px solid #e5e6eb;
+  border-left: 2px solid var(--autops-bg-4);
 }
 .blast-node {
   border-radius: 6px;
   padding: 10px 14px;
   min-width: 100px;
-  border: 1px solid #e5e6eb;
+  border: 1px solid var(--autops-bg-4);
 }
-.blast-node.blast-critical { border-left: 4px solid #f53f3f; background: #fff5f3; }
-.blast-node.blast-high { border-left: 4px solid #ff7d00; background: #fffbf0; }
-.blast-node.blast-medium { border-left: 4px solid #165dff; background: #f0f5ff; }
-.blast-node.blast-low { border-left: 4px solid #00b42a; background: #f8fff9; }
-.blast-node-name { font-weight: 600; font-size: 13px; color: #1d2129; }
-.blast-node-type { font-size: 12px; color: #86909c; margin-top: 2px; }
+.blast-node.blast-critical { border-left: 4px solid var(--autops-danger); background: var(--autops-danger-light); }
+.blast-node.blast-high { border-left: 4px solid var(--autops-warning); background: var(--autops-warning-light); }
+.blast-node.blast-medium { border-left: 4px solid var(--autops-primary); background: var(--autops-primary-light-5); }
+.blast-node.blast-low { border-left: 4px solid var(--autops-success); background: var(--autops-success-light); }
+.blast-node-name { font-weight: 600; font-size: var(--autops-font-13); color: var(--autops-text-1); }
+.blast-node-type { font-size: var(--autops-font-12); color: var(--autops-info); margin-top: 2px; }
 
 /* Distribution */
-.dist-item { margin-bottom: 12px; }
-.dist-label { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; }
+.dist-item { margin-bottom: var(--autops-space-md); }
+.dist-label { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: var(--autops-font-13); }
 </style>

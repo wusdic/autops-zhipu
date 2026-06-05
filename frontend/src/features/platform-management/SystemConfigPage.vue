@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">系统配置</div>
@@ -521,11 +521,11 @@ onMounted(() => {
 .system-info-panel {
   display: flex;
   gap: 32px;
-  padding: 16px 24px;
-  margin-bottom: 16px;
-  background: linear-gradient(135deg, #f7f8fa 0%, #e8ecf1 100%);
-  border-radius: 8px;
-  border: 1px solid #e5e6eb;
+  padding: var(--autops-space-lg) 24px;
+  margin-bottom: var(--autops-space-lg);
+  background: linear-gradient(135deg, var(--autops-bg-2) 0%, var(--autops-bg-4) 100%);
+  border-radius: var(--autops-radius-md);
+  border: 1px solid var(--autops-bg-4);
   flex-wrap: wrap;
 }
 .info-item {
@@ -535,24 +535,24 @@ onMounted(() => {
   min-width: 120px;
 }
 .info-label {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
 }
 .info-value {
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   font-weight: 600;
-  color: #1d2129;
+  color: var(--autops-text-1);
   display: flex;
   align-items: center;
   gap: 4px;
 }
-.status-ok { color: #00b42a; }
-.status-warn { color: #ff7d00; }
+.status-ok { color: var(--autops-success); }
+.status-warn { color: var(--autops-warning); }
 
 /* ── Action Bar ──────────────────────────── */
 /* ── Tabs ─────────────────────────────────── */
 .config-tabs {
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 .tab-label {
   display: inline-flex;
@@ -571,11 +571,11 @@ onMounted(() => {
 
 /* ── Table ────────────────────────────────── */
 .config-key {
-  font-size: 13px;
-  background: #f7f8fa;
+  font-size: var(--autops-font-13);
+  background: var(--autops-bg-2);
   padding: 2px 6px;
   border-radius: 3px;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 
 /* ── Inline Edit ──────────────────────────── */
@@ -592,7 +592,7 @@ onMounted(() => {
 .value-text {
   flex: 1;
   word-break: break-all;
-  font-size: 13px;
+  font-size: var(--autops-font-13);
 }
 
 /* ── Delete Confirm ───────────────────────── */
@@ -600,14 +600,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   line-height: 1.6;
 }
 .delete-confirm-body code {
-  background: #fef0f0;
+  background: var(--autops-danger-light);
   padding: 2px 6px;
   border-radius: 3px;
-  color: #f53f3f;
+  color: var(--autops-danger);
   font-weight: 600;
 }
 </style>

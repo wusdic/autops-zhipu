@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title">工单报告</div>
       <div>
@@ -227,5 +227,5 @@ onMounted(() => { fetchData(); fetchTrend() })
 .trend-bars { display: flex; align-items: flex-end; gap: 4px; height: 200px; padding: 0 8px; }
 .trend-bar-group { flex: 1; display: flex; gap: 2px; align-items: flex-end; flex-direction: column; position: relative; justify-content: flex-end; align-items: center; }
 .trend-bar { width: 16px; border-radius: 3px 3px 0 0; min-height: 2px; }
-.trend-label { font-size: 10px; color: #86909c; position: absolute; bottom: -18px; white-space: nowrap; }
+.trend-label { font-size: 10px; color: var(--autops-info); position: absolute; bottom: -18px; white-space: nowrap; }
 </style>

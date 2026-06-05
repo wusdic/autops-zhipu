@@ -385,11 +385,11 @@ onMounted(() => {
   margin-bottom: 4px;
 }
 .group-item:hover {
-  background: #f7f8fa;
+  background: var(--autops-bg-2);
 }
 .group-item.active {
-  background: #ecf5ff;
-  border: 1px solid #b3d8ff;
+  background: var(--autops-primary-light-5);
+  border: 1px solid var(--autops-primary-light-4);
 }
 .group-info {
   flex: 1;
@@ -397,7 +397,7 @@ onMounted(() => {
 }
 .group-name {
   font-weight: 500;
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   display: flex;
   align-items: center;
 }
@@ -409,9 +409,9 @@ onMounted(() => {
   margin-left: 8px;
 }
 .group-desc {
-  margin-bottom: 12px;
-  padding: 8px 12px;
-  background: #f7f8fa;
-  border-radius: 4px;
+  margin-bottom: var(--autops-space-md);
+  padding: var(--autops-space-sm) 12px;
+  background: var(--autops-bg-2);
+  border-radius: var(--autops-radius-sm);
 }
 </style>

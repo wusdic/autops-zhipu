@@ -462,7 +462,7 @@ onMounted(() => loadArticle())
 .page-top {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .knowledge-title {
   margin-left: 16px;
@@ -484,21 +484,21 @@ onMounted(() => loadArticle())
 }
 .markdown-body h2 {
   margin: 16px 0 8px;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 .markdown-body h3 {
   margin: 12px 0 6px;
-  color: #4e5969;
+  color: var(--autops-text-2);
 }
 .markdown-body code {
-  background: #f7f8fa;
+  background: var(--autops-bg-2);
   padding: 2px 6px;
   border-radius: 3px;
 }
 
 /* Feedback Section */
 .feedback-section {
-  padding: 8px 0;
+  padding: var(--autops-space-sm) 0;
 }
 .feedback-row {
   display: flex;
@@ -506,14 +506,14 @@ onMounted(() => loadArticle())
   gap: 16px;
 }
 .feedback-label {
-  font-size: 14px;
-  color: #4e5969;
+  font-size: var(--autops-font-14);
+  color: var(--autops-text-2);
   white-space: nowrap;
 }
 .feedback-stats {
   margin-top: 8px;
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
 }
 .feedback-quick {
   margin-top: 4px;
@@ -521,7 +521,7 @@ onMounted(() => loadArticle())
 
 /* Related Articles */
 .related-title {
-  color: #165dff;
+  color: var(--autops-primary);
   cursor: pointer;
 }
 .related-title:hover {
@@ -533,7 +533,7 @@ onMounted(() => loadArticle())
   margin-bottom: 0;
 }
 .version-card :deep(.el-card__body) {
-  padding: 12px 16px;
+  padding: var(--autops-space-md) 16px;
 }
 .version-header {
   display: flex;
@@ -542,11 +542,11 @@ onMounted(() => loadArticle())
   margin-bottom: 4px;
 }
 .version-author {
-  font-size: 13px;
-  color: #4e5969;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-2);
 }
 .version-summary {
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
 }
 </style>

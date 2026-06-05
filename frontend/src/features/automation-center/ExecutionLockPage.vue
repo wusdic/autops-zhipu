@@ -42,7 +42,7 @@
     <!-- 统计概览 -->
     <el-row :gutter="16" class="stat-row">
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-content">
             <div class="stat-label">执行总数</div>
             <div class="stat-value primary">{{ total }}</div>
@@ -50,7 +50,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-content">
             <div class="stat-label">已完成</div>
             <div class="stat-value success">{{ completedCount }}</div>
@@ -58,7 +58,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-content">
             <div class="stat-label">运行中/待执行</div>
             <div class="stat-value warning">{{ runningCount }}</div>
@@ -66,7 +66,7 @@
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-content">
             <div class="stat-label">失败数</div>
             <div class="stat-value danger">{{ failedCount }}</div>
@@ -78,7 +78,7 @@
     <!-- 执行锁列表表格 -->
     <el-card class="table-card" shadow="never">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span>执行记录列表</span>
           <el-button type="danger" plain :icon="Unlock" :disabled="!selectedRows.length" @click="handleBatchRelease">
             批量释放 ({{ selectedRows.length }})
@@ -415,14 +415,14 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 .execution-lock-page {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 
   .filter-card {
-    margin-bottom: 16px;
+    margin-bottom: var(--autops-space-lg);
   }
 
   .stat-row {
-    margin-bottom: 16px;
+    margin-bottom: var(--autops-space-lg);
   }
 
   .table-card {
@@ -436,12 +436,12 @@ onBeforeUnmount(() => {
     .pagination-wrapper {
       display: flex;
       justify-content: flex-end;
-      margin-top: 16px;
+      margin-top: var(--autops-space-lg);
     }
   }
 
   .text-danger {
-    color: #f53f3f;
+    color: var(--autops-danger);
     font-weight: 600;
   }
 }

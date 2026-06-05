@@ -139,32 +139,32 @@ function clearAll() {
 <style scoped>
 .action-bar {
   display: flex; justify-content: flex-end; gap: 8px;
-  margin-bottom: 8px; padding: 0 4px;
+  margin-bottom: var(--autops-space-sm); padding: 0 4px;
 }
 .notification-list { max-height: calc(100vh - 250px); overflow-y: auto; }
 .notification-item {
-  display: flex; gap: 12px; padding: 12px 8px;
-  border-bottom: 1px solid #f2f3f5; cursor: pointer; transition: background 0.15s;
+  display: flex; gap: 12px; padding: var(--autops-space-md) 8px;
+  border-bottom: 1px solid var(--autops-bg-3); cursor: pointer; transition: background 0.15s;
 }
-.notification-item:hover { background: #f7f8fa; }
-.notification-item.unread { background: #e8f3ff; }
-.notification-item.unread:hover { background: #dceeff; }
+.notification-item:hover { background: var(--autops-bg-2); }
+.notification-item.unread { background: var(--autops-primary-light-5); }
+.notification-item.unread:hover { background: var(--autops-primary-light-5); }
 .notification-icon {
-  width: 32px; height: 32px; border-radius: 8px;
+  width: 32px; height: 32px; border-radius: var(--autops-radius-md);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .notification-content { flex: 1; min-width: 0; }
 .notification-title {
   display: flex; align-items: center; gap: 8px;
-  font-size: 14px; font-weight: 500; color: #1d2129;
+  font-size: var(--autops-font-14); font-weight: 500; color: var(--autops-text-1);
 }
 .notification-desc {
-  font-size: 13px; color: #4e5969; margin-top: 4px;
+  font-size: var(--autops-font-13); color: var(--autops-text-2); margin-top: 4px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .notification-meta {
   display: flex; gap: 12px; margin-top: 6px;
-  font-size: 12px; color: #86909c;
+  font-size: var(--autops-font-12); color: var(--autops-info);
 }
 .tab-badge { margin-left: 4px; }
 </style>

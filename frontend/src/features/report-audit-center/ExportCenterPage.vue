@@ -187,6 +187,6 @@ onMounted(loadExports)
 </script>
 
 <style scoped>
-.export-center-page { padding: 20px; }
-.mt-4 { margin-top: 16px; }
+.export-center-page { padding: var(--autops-space-xl); }
+.mt-4 { margin-top: var(--autops-space-lg); }
 </style>

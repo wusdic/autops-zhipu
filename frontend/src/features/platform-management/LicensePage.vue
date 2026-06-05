@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- 后端不可用时的引导页面 -->
     <div v-if="backendUnavailable" class="autops-card guide-card">
       <el-empty description="授权许可功能需要配置后端许可服务">
@@ -31,7 +31,7 @@
       <!-- ── License Info Card ────────────────────────────── -->
       <el-col :span="14">
         <div class="autops-card">
-          <div class="card-header">
+          <div class="autops-card-header">
             <span class="card-title">当前授权</span>
             <el-tag
               :type="license.expired ? 'danger' : 'success'"
@@ -136,7 +136,7 @@
       <!-- ── Update License Card ──────────────────────────── -->
       <el-col :span="10">
         <div class="autops-card">
-          <div class="card-header">
+          <div class="autops-card-header">
             <span class="card-title">更新授权</span>
           </div>
           <div class="card-body">
@@ -342,47 +342,47 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 
 .autops-card {
-  background: #fff;
-  border: 1px solid #e5e6eb;
-  border-radius: 8px;
+  background: var(--autops-bg-1);
+  border: 1px solid var(--autops-bg-4);
+  border-radius: var(--autops-radius-md);
   overflow: hidden;
 }
 
 
 .card-body {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 }
 
 .text-secondary {
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
 }
 .text-danger {
-  color: #f53f3f;
+  color: var(--autops-danger);
 }
 .text-success {
-  color: #00b42a;
+  color: var(--autops-success);
 }
 
 .usage-hint {
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
 }
 
 /* Module section */
 .module-section {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 .module-title {
-  font-size: 13px;
+  font-size: var(--autops-font-13);
   font-weight: 600;
-  color: #4e5969;
-  margin-bottom: 8px;
+  color: var(--autops-text-2);
+  margin-bottom: var(--autops-space-sm);
 }
 .module-list {
   display: flex;
@@ -390,36 +390,36 @@ onMounted(() => {
   gap: 6px;
 }
 .module-tag {
-  font-size: 12px;
+  font-size: var(--autops-font-12);
 }
 
 /* Usage section */
 .usage-section {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 .usage-item {
   margin-bottom: 10px;
 }
 .usage-label {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   margin-bottom: 4px;
 }
 
 /* Info section */
 .info-section {
-  font-size: 13px;
+  font-size: var(--autops-font-13);
 }
 .info-title {
   font-weight: 600;
-  color: #4e5969;
+  color: var(--autops-text-2);
   margin-bottom: 6px;
 }
 .info-list {
   margin: 0;
   padding-left: 18px;
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
   line-height: 1.8;
 }
 
@@ -437,17 +437,17 @@ onMounted(() => {
 }
 
 .guide-title {
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   font-weight: 600;
-  color: #4e5969;
-  margin-bottom: 8px;
+  color: var(--autops-text-2);
+  margin-bottom: var(--autops-space-sm);
 }
 
 .guide-list {
   margin: 0;
   padding-left: 18px;
-  color: #86909c;
-  font-size: 13px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-13);
   line-height: 2;
 }
 </style>

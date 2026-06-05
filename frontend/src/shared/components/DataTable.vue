@@ -49,9 +49,9 @@ const currentPageSize = computed({ get: () => props.pageSize, set: v => emit("up
 </script>
 
 <style scoped>
-.data-table-wrapper { background: #fff; border-radius: 8px; border: 1px solid #e5e6eb; }
-.dt-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f2f3f5; }
-.dt-title { font-size: 15px; font-weight: 600; color: #1d2129; }
-.dt-pagination { display: flex; justify-content: flex-end; padding: 12px 16px; }
-.data-table-wrapper :deep(.el-table) { --el-table-border-color: #f2f3f5; }
+.data-table-wrapper { background: var(--autops-bg-1); border-radius: var(--autops-radius-md); border: 1px solid var(--autops-bg-4); }
+.dt-header { display: flex; justify-content: space-between; align-items: center; padding: var(--autops-space-md) 16px; border-bottom: 1px solid var(--autops-bg-3); }
+.dt-title { font-size: 15px; font-weight: 600; color: var(--autops-text-1); }
+.dt-pagination { display: flex; justify-content: flex-end; padding: var(--autops-space-md) 16px; }
+.data-table-wrapper :deep(.el-table) { --el-table-border-color: var(--autops-bg-3); }
 </style>
