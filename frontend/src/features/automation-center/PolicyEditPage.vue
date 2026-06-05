@@ -140,12 +140,12 @@ const policyId = computed(() => (route.query.id as string) || '')
 const isEdit = computed(() => !!policyId.value)
 
 const formData = reactive<PolicyForm>({
-  name: '',
-  description: '',
-  trigger_type: '',
-  conditions: '',
-  actions: '',
-  risk_level: '',
+  name: 'primary',
+  description: 'primary',
+  trigger_type: 'primary',
+  conditions: 'primary',
+  actions: 'primary',
+  risk_level: 'primary',
   enabled: true,
 })
 
@@ -217,7 +217,7 @@ async function loadPolicy() {
     formData.name = data.name ?? ''
     formData.description = data.description ?? ''
     formData.trigger_type = data.trigger_type ?? ''
-    formData.conditions = data.conditions ? JSON.stringify(data.conditions, null, 2) : ''
+    formData.conditions = data.conditions ? JSON.stringify(data.conditions, null, 2) : 'primary'
     formData.actions = Array.isArray(data.actions) ? data.actions.join('\n') : (data.actions ?? '')
     formData.risk_level = data.risk_level ?? ''
     formData.enabled = data.enabled ?? true

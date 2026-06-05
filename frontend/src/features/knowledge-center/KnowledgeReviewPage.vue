@@ -66,7 +66,7 @@
         </el-table-column>
         <el-table-column label="分类" width="130">
           <template #default="{ row }">
-            <el-tag :type="categoryTagType(row.category)" size="small">
+            <el-tag :type="(categoryTagType(row.category)) as TagType" size="small">
               {{ categoryLabel(row.category) }}
             </el-tag>
           </template>
@@ -77,7 +77,7 @@
         </el-table-column>
         <el-table-column label="状态" width="110">
           <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status)" size="small">
+            <el-tag :type="(statusTagType(row.status)) as TagType" size="small">
               {{ statusLabel(row.status) }}
             </el-tag>
           </template>
@@ -120,7 +120,7 @@
         <el-descriptions-item label="标题" :span="2">{{ currentItem.title }}</el-descriptions-item>
         <el-descriptions-item label="分类">{{ categoryLabel(currentItem.category) }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="statusTagType(currentItem.status)" size="small">{{ statusLabel(currentItem.status) }}</el-tag>
+          <el-tag :type="(statusTagType(currentItem.status)) as TagType" size="small">{{ statusLabel(currentItem.status) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="提交者">{{ currentItem.submitted_by }}</el-descriptions-item>
         <el-descriptions-item label="提交时间">{{ formatTime(currentItem.submitted_at || currentItem.created_at) }}</el-descriptions-item>
@@ -148,6 +148,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Reading, Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -164,18 +165,18 @@ const activeTab = ref('pending_review')
 const pendingCount = ref(0)
 
 const currentItem = reactive<any>({
-  id: '',
-  title: '',
-  content: '',
-  category: '',
-  status: '',
-  submitted_by: '',
-  submitted_at: '',
+  id: 'primary',
+  title: 'primary',
+  content: 'primary',
+  category: 'primary',
+  status: 'primary',
+  submitted_by: 'primary',
+  submitted_at: 'primary',
 })
 
 const filters = reactive({
-  keyword: '',
-  category: '',
+  keyword: 'primary',
+  category: 'primary',
 })
 
 const pagination = reactive({
@@ -198,14 +199,14 @@ function statusLabel(status: string): string {
   return map[status] || status || '-'
 }
 
-function statusTagType(status: string): string {
+function statusTagType(status: string): TagType {
   const map: Record<string, string> = {
     draft: 'info',
     pending_review: 'warning',
     published: 'success',
     rejected: 'danger',
   }
-  return map[status] || 'info'
+  return (map[status] || 'info') as TagType
 }
 
 function categoryLabel(cat: string): string {
@@ -221,17 +222,17 @@ function categoryLabel(cat: string): string {
   return map[cat] || cat || '-'
 }
 
-function categoryTagType(cat: string): string {
+function categoryTagType(cat: string): TagType {
   const map: Record<string, string> = {
     incident_summary: 'warning',
     runbook: 'success',
-    standard_solution: '',
+    standard_solution: 'primary',
     faq: 'info',
-    best_practice: '',
+    best_practice: 'primary',
     postmortem: 'danger',
-    response_plan: '',
+    response_plan: 'primary',
   }
-  return map[cat] || ''
+  return (map[cat] ?? undefined) as TagType
 }
 
 function formatTime(t: string): string {
@@ -285,7 +286,7 @@ function handleTabChange() {
   loadList()
 }
 
-function onSortChange({ prop, order }: { prop: string; order: string | null }) {
+function onSortChange({ prop, order }: { prop: string | null; order: string | null }) {
   if (prop) {
     sortBy.value = prop
     sortOrder.value = order === 'ascending' ? 'asc' : 'desc'

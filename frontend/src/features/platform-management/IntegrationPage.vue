@@ -58,7 +58,7 @@
       </el-table-column>
       <el-table-column prop="type" label="类型" width="110">
         <template #default="{ row }">
-          <el-tag size="small" :type="typeTagMap[row.type] ?? 'info'">
+          <el-tag size="small" :type="(typeTagMap[row.type] ?? 'info') as TagType">
             {{ typeLabelMap[row.type] ?? row.type }}
           </el-tag>
         </template>
@@ -66,7 +66,7 @@
       <el-table-column prop="status" label="状态" width="100" align="center">
         <template #default="{ row }">
           <el-tag
-            :type="statusTagMap[row.status] ?? 'info'"
+            :type="(statusTagMap[row.status] ?? 'info') as TagType"
             size="small"
             effect="dark"
           >
@@ -174,6 +174,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance } from 'element-plus'
@@ -188,19 +189,19 @@ const typeLabelMap: Record<string, string> = {
   event: '事件',
   data: '数据',
 }
-const typeTagMap: Record<string, string> = {
+const typeTagMap: Record<string, TagType> = {
   auth: 'primary',
   notification: 'success',
   monitoring: 'warning',
   event: 'danger',
-  data: '',
+  data: 'primary',
 }
 const statusLabelMap: Record<string, string> = {
   connected: '已连接',
   disconnected: '未连接',
   error: '错误',
 }
-const statusTagMap: Record<string, string> = {
+const statusTagMap: Record<string, TagType> = {
   connected: 'success',
   disconnected: 'info',
   error: 'danger',
@@ -235,10 +236,10 @@ const configuringName = ref('')
 const savingConfig = ref(false)
 const configFormRef = ref<FormInstance>()
 const configForm = reactive({
-  endpoint: '',
-  username: '',
-  password: '',
-  extra: '',
+  endpoint: 'primary',
+  username: 'primary',
+  password: 'primary',
+  extra: 'primary',
 })
 
 // ── Data Loading ─────────────────────────────────────────
@@ -305,7 +306,7 @@ function openConfigDialog(row: any) {
   configForm.endpoint = row.endpoint ?? ''
   configForm.username = row.username ?? ''
   configForm.password = ''
-  configForm.extra = row.extra ? JSON.stringify(row.extra, null, 2) : ''
+  configForm.extra = row.extra ? JSON.stringify(row.extra, null, 2) : 'primary'
   configDialogVisible.value = true
 }
 

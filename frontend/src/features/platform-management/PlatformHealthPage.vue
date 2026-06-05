@@ -38,7 +38,7 @@
         <div class="autops-card-header">
           <span class="card-icon">{{ comp.icon }}</span>
           <span class="card-title">{{ comp.label }}</span>
-          <el-tag :type="getTagType(comp.status)" size="small" effect="dark">
+          <el-tag :type="(getTagType(comp.status)) as TagType" size="small" effect="dark">
             {{ statusLabels[comp.status] || comp.status || '未知' }}
           </el-tag>
         </div>
@@ -100,7 +100,7 @@
         <el-descriptions :column="1" border class="mt-lg">
           <el-descriptions-item v-for="item in selfCheckResult.items" :key="item.key" :label="item.label">
             <div style="display:flex;align-items:center;gap:8px">
-              <el-tag :type="getTagType(item.status)" size="small">{{ statusLabels[item.status] || item.status }}</el-tag>
+              <el-tag :type="(getTagType(item.status)) as TagType" size="small">{{ statusLabels[item.status] || item.status }}</el-tag>
               <span style="color:#86909c;font-size:13px">{{ item.message || '' }}</span>
             </div>
           </el-descriptions-item>
@@ -111,6 +111,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh, CircleCheck } from '@element-plus/icons-vue'
@@ -160,7 +161,7 @@ const countdown = ref(30)
 let refreshTimer: ReturnType<typeof setInterval> | null = null
 let countdownTimer: ReturnType<typeof setInterval> | null = null
 
-function toggleAutoRefresh(val: boolean) {
+function toggleAutoRefresh(val: string | number | boolean) {
   if (val) {
     startAutoRefresh()
   } else {

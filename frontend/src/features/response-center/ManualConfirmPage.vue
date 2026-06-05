@@ -60,12 +60,12 @@
         </el-table-column>
         <el-table-column prop="source" label="来源" width="110">
           <template #default="{ row }">
-            <el-tag :type="sourceType(row.source)" size="small">{{ sourceName(row.source) }}</el-tag>
+            <el-tag :type="(sourceType(row.source)) as TagType" size="small">{{ sourceName(row.source) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="risk_level" label="风险" width="80">
           <template #default="{ row }">
-            <el-tag :type="riskType(row.risk_level)" size="small">{{ row.risk_level }}</el-tag>
+            <el-tag :type="(riskType(row.risk_level)) as TagType" size="small">{{ row.risk_level }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="asset_name" label="关联资产" width="140" />
@@ -116,6 +116,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, ArrowLeft } from '@element-plus/icons-vue'
@@ -127,15 +128,15 @@ const detailVisible = ref(false)
 const items = ref<any[]>([])
 const detailData = ref<any>({})
 
-const filters = reactive({ status: 'pending', source: '', risk: '' })
+const filters = reactive({ status: 'pending', source: 'primary', risk: 'primary'})
 const pagination = reactive({ page: 1, size: 20, total: 0 })
 
 const pendingCount = computed(() => items.value.filter(i => i.status === 'pending').length)
 
 const sourceMap: Record<string, string> = { automation: '自动处置', ai: 'AI建议', policy: '策略触发' }
 function sourceName(s: string) { return sourceMap[s] || s }
-function sourceType(s: string) { return { automation: 'warning', ai: 'success', policy: 'primary' }[s] || 'info' }
-function riskType(r: string) { return { high: 'danger', medium: 'warning', low: 'info' }[r] || 'info' }
+function sourceType(s: string): TagType { return ({ automation: 'warning', ai: 'success', policy: 'primary' }[s] || 'info') as TagType }
+function riskType(r: string): TagType { return ({ high: 'danger', medium: 'warning', low: 'info' }[r] || 'info') as TagType }
 
 async function loadData() {
   loading.value = true

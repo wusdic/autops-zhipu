@@ -87,12 +87,12 @@
         <el-table-column prop="ip" label="IP" width="140" />
         <el-table-column prop="status" label="状态" width="90">
           <template #default="{ row }">
-            <el-tag :type="statusType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+            <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="health_status" label="健康" width="90">
           <template #default="{ row }">
-            <el-tag :type="healthType(row.health_status)" size="small">{{ healthLabel(row.health_status) }}</el-tag>
+            <el-tag :type="(healthType(row.health_status)) as TagType" size="small">{{ healthLabel(row.health_status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="reachability" label="可达性" width="90">
@@ -109,7 +109,7 @@
         </el-table-column>
         <el-table-column prop="environment" label="环境" width="90">
           <template #default="{ row }">
-            <el-tag size="small" :type="envType(row.environment)" effect="plain">{{ formatEnv(row.environment) }}</el-tag>
+            <el-tag size="small" :type="(envType(row.environment)) as TagType" effect="plain">{{ formatEnv(row.environment) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
@@ -232,10 +232,10 @@
           <el-descriptions-item label="IP">{{ currentAsset.ip }}</el-descriptions-item>
           <el-descriptions-item label="端口">{{ currentAsset.port || '-' }}</el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="statusType(currentAsset.status)">{{ currentAsset.status }}</el-tag>
+            <el-tag :type="(statusType(currentAsset.status)) as TagType">{{ currentAsset.status }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="健康状态">
-            <el-tag :type="healthType(currentAsset.health_status)">{{ currentAsset.health_status }}</el-tag>
+            <el-tag :type="(healthType(currentAsset.health_status)) as TagType">{{ currentAsset.health_status }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="可达性">
             <el-tag :type="currentAsset.reachability === 'reachable' ? 'success' : 'danger'">
@@ -367,6 +367,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import {
   Plus, Upload, UploadFilled, Delete, Key, FolderAdd,
   ArrowDown, VideoPlay, Monitor,
@@ -389,11 +390,11 @@ const tableRef = ref()
 
 // Filters
 const filters = reactive({
-  search: '',
-  asset_type: '',
-  status: '',
-  environment: '',
-  health_status: '',
+  search: 'primary',
+  asset_type: 'primary',
+  status: 'primary',
+  environment: 'primary',
+  health_status: 'primary',
   tags: [] as string[],
 })
 const availableTags = ref<string[]>([])
@@ -428,13 +429,13 @@ const quickBindCredId = ref('')
 
 // ---------- Form ----------
 const defaultForm = {
-  name: '', asset_type: 'linux_server', ip: '', port: undefined as number | undefined,
-  os_type: 'linux', description: '', environment: 'production', status: 'active',
+  name: 'primary', asset_type: 'linux_server', ip: 'primary', port: undefined as number | undefined,
+  os_type: 'linux', description: 'primary', environment: 'production', status: 'active',
 }
 const formData = reactive({ ...defaultForm })
 
 // ---------- Helpers ----------
-function formatType(t: string) {
+function formatType(t: string): string {
   const map: Record<string, string> = {
     linux_server: 'Linux', windows_server: 'Windows', database: '数据库',
     network_device: '网络', web_service: 'Web', server: '服务器',
@@ -444,25 +445,25 @@ function formatType(t: string) {
   return map[t] || t
 }
 
-function statusType(s: string) {
-  return s === 'active' ? 'success' : s === 'inactive' ? 'danger' : 'warning'
+function statusType(s: string): TagType {
+  return (s === 'active' ? 'success' : s === 'inactive' ? 'danger' : 'warning') as TagType
 }
 function statusLabel(s: string) {
   return ({ active: '活跃', inactive: '停用', maintenance: '维护', provisioning: '配置中' })[s] ?? s ?? '-'
 }
 
-function healthType(h: string) {
-  return h === 'healthy' ? 'success' : h === 'warning' ? 'warning' : h === 'critical' ? 'danger' : 'info'
+function healthType(h: string): TagType {
+  return (h === 'healthy' ? 'success' : h === 'warning' ? 'warning' : h === 'critical' ? 'danger' : 'info') as TagType
 }
 function healthLabel(h: string) {
   return ({ healthy: '健康', warning: '警告', critical: '严重', unknown: '未知' })[h] ?? h ?? '-'
 }
 
-function lifecycleType(ls: string) {
+function lifecycleType(ls: string): TagType {
   const map: Record<string, string> = {
-    managed: '', online: 'success', maintenance: 'warning', retired: 'danger',
+    managed: 'primary', online: 'success', maintenance: 'warning', retired: 'danger',
   }
-  return map[ls] || 'info'
+  return (map[ls] || 'info') as TagType
 }
 
 function formatLifecycle(ls: string) {
@@ -484,10 +485,10 @@ function formatEnv(e: string) {
   return map[e.toLowerCase()] || e
 }
 
-function envType(e: string) {
-  if (!e) return 'info'
-  const map: Record<string, string> = { production: 'danger', prod: 'danger', staging: 'warning', testing: '', test: '', development: 'success', dev: 'success' }
-  return map[e.toLowerCase()] || 'info'
+function envType(e: string): TagType {
+  if (!e) return ('info') as TagType
+  const map: Record<string, string> = { production: 'danger', prod: 'danger', staging: 'warning', testing: 'primary', test: 'primary', development: 'success', dev: 'success' }
+  return (map[e.toLowerCase()] || 'info') as TagType
 }
 
 // ---------- Load ----------

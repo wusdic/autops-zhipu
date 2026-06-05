@@ -11,7 +11,7 @@
     <!-- Evidence stats -->
     <div v-if="evidences.length" class="ep-stats">
       <el-tag size="small">共 {{ evidences.length }} 条证据</el-tag>
-      <el-tag v-for="g in groupStats" :key="g.type" size="small" :type="g.tagType">
+      <el-tag v-for="g in groupStats" :key="g.type" size="small" :type="(g.tagType as TagType)">
         {{ g.type }}: {{ g.count }}
       </el-tag>
     </div>
@@ -26,8 +26,8 @@
         <div v-for="(item, iIdx) in group.items" :key="iIdx" class="ep-item" :class="{ 'ep-item-critical': item.severity === 'critical' }">
           <div class="ep-item-header">
             <div class="ep-item-source">
-              <el-tag size="small" :type="sourceType(item.source)">{{ item.source }}</el-tag>
-              <el-tag v-if="item.severity" size="small" :type="severityType(item.severity)">{{ item.severity }}</el-tag>
+              <el-tag size="small" :type="(sourceType(item.source)) as TagType">{{ item.source }}</el-tag>
+              <el-tag v-if="item.severity" size="small" :type="(severityType(item.severity)) as TagType">{{ item.severity }}</el-tag>
             </div>
             <span class="ep-time">{{ formatTime(item.collected_at) }}</span>
           </div>
@@ -50,6 +50,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { computed, reactive } from 'vue'
 import { ArrowDown, ArrowUp, Monitor, Warning, Document, Connection } from '@element-plus/icons-vue'
 
@@ -94,11 +95,11 @@ const groupStats = computed(() => {
 })
 
 function severityType(s: string) {
-  return { critical: 'danger', high: 'warning', medium: '', low: 'info' }[s] || 'info'
+  return { critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }[s] || 'info'
 }
 
 function sourceType(s: string) {
-  return { collector: '', ai: 'success', manual: 'warning', system: 'info' }[s] || ''
+  return { collector: 'primary', ai: 'success', manual: 'warning', system: 'info' }[s] || ''
 }
 
 function getGroupIcon(type: string) {

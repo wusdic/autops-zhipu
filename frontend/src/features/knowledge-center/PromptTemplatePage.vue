@@ -55,7 +55,7 @@
         </el-table-column>
         <el-table-column label="用途" width="130">
           <template #default="{ row }">
-            <el-tag :type="usageTagType(row.usage)" size="small">
+            <el-tag :type="(usageTagType(row.usage)) as TagType" size="small">
               {{ usageLabel(row.usage) }}
             </el-tag>
           </template>
@@ -186,6 +186,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Plus, Search, Notebook } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
@@ -207,8 +208,8 @@ const testResult = ref('')
 const testTemplateData = reactive<any>({})
 
 const filters = reactive({
-  keyword: '',
-  usage: '',
+  keyword: 'primary',
+  usage: 'primary',
 })
 
 const pagination = reactive({
@@ -220,13 +221,13 @@ const pagination = reactive({
 const formRef = ref<FormInstance>()
 
 const form = reactive({
-  name: '',
-  usage: '',
-  model: '',
+  name: 'primary',
+  usage: 'primary',
+  model: 'primary',
   temperature: 70,
-  system_prompt: '',
-  user_prompt: '',
-  description: '',
+  system_prompt: 'primary',
+  user_prompt: 'primary',
+  description: 'primary',
 })
 
 const formRules: FormRules = {
@@ -247,14 +248,14 @@ function usageLabel(usage: string): string {
   return map[usage] || usage || '-'
 }
 
-function usageTagType(usage: string): string {
+function usageTagType(usage: string): TagType {
   const map: Record<string, string> = {
     diagnosis: 'danger',
     remediation: 'warning',
     summary: 'success',
-    log_analysis: '',
+    log_analysis: 'primary',
   }
-  return map[usage] || ''
+  return (map[usage] ?? undefined) as TagType
 }
 
 function formatTime(t: string): string {
@@ -297,13 +298,13 @@ function openCreate() {
   isEditing.value = false
   editingId.value = ''
   Object.assign(form, {
-    name: '',
-    usage: '',
-    model: '',
+    name: 'primary',
+    usage: 'primary',
+    model: 'primary',
     temperature: 70,
-    system_prompt: '',
-    user_prompt: '',
-    description: '',
+    system_prompt: 'primary',
+    user_prompt: 'primary',
+    description: 'primary',
   })
   dialogVisible.value = true
 }

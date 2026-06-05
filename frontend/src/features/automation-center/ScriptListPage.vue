@@ -120,14 +120,14 @@
         </el-table-column>
         <el-table-column prop="script_type" label="分类" width="120">
           <template #default="{ row }">
-            <el-tag size="small" :type="categoryTagMap[row.script_type] || 'info'">
+            <el-tag size="small" :type="(categoryTagMap[row.script_type] || 'info') as TagType">
               {{ formatCategory(row.script_type) }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="risk_level" label="风险等级" width="110">
           <template #default="{ row }">
-            <el-tag size="small" :type="riskTagMap[row.risk_level] || 'info'" effect="dark">
+            <el-tag size="small" :type="(riskTagMap[row.risk_level] || 'info') as TagType" effect="dark">
               {{ formatRiskLevel(row.risk_level) }}
             </el-tag>
           </template>
@@ -354,12 +354,12 @@
         <el-descriptions :column="2" border>
           <el-descriptions-item label="名称">{{ currentScript.name }}</el-descriptions-item>
           <el-descriptions-item label="分类">
-            <el-tag size="small" :type="categoryTagMap[currentScript.script_type] || 'info'">
+            <el-tag size="small" :type="(categoryTagMap[currentScript.script_type] || 'info') as TagType">
               {{ formatCategory(currentScript.script_type) }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="风险等级">
-            <el-tag size="small" :type="riskTagMap[currentScript.risk_level] || 'info'" effect="dark">
+            <el-tag size="small" :type="(riskTagMap[currentScript.risk_level] || 'info') as TagType" effect="dark">
               {{ formatRiskLevel(currentScript.risk_level) }}
             </el-tag>
           </el-descriptions-item>
@@ -515,6 +515,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { Plus, Refresh, Delete } from '@element-plus/icons-vue'
@@ -550,12 +551,12 @@ interface Script {
 }
 
 // ---------- Constants ----------
-const categoryTagMap: Record<string, string> = {
-  shell: '', python: 'success', powershell: 'warning', sql: 'danger', rest_api: 'info',
+const categoryTagMap: Record<string, TagType> = {
+  shell: 'primary', python: 'success', powershell: 'warning', sql: 'danger', rest_api: 'info',
 }
 
-const riskTagMap: Record<string, string> = {
-  low: 'success', medium: 'warning', high: 'danger', critical: 'dark',
+const riskTagMap: Record<string, TagType> = {
+  low: 'success', medium: 'warning', high: 'danger', critical: 'danger',
 }
 
 const categoryLabels: Record<string, string> = {
@@ -573,10 +574,10 @@ const deleting = ref(false)
 const scripts = ref<Script[]>([])
 
 const filters = reactive({
-  search: '',
-  script_type: '',
-  risk_level: '',
-  tag: '',
+  search: 'primary',
+  script_type: 'primary',
+  risk_level: 'primary',
+  tag: 'primary',
 })
 const pagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
@@ -600,10 +601,10 @@ const tagInputRef = ref<InstanceType<typeof import('element-plus')['ElInput']>>(
 const lineNumbersRef = ref<HTMLElement>()
 
 const defaultFormData = () => ({
-  name: '',
+  name: 'primary',
   script_type: 'shell',
-  description: '',
-  content: '',
+  description: 'primary',
+  content: 'primary',
   risk_level: 'low',
   version: 1,
   tags: [] as string[],
@@ -733,7 +734,7 @@ function openCreateDialog() {
   showFormDialog.value = true
 }
 
-function openEditDialog(row: Script) {
+function openEditDialog(row: any) {
   isEditing.value = true
   editingId.value = row.id
   Object.assign(formData, {
@@ -818,11 +819,11 @@ function removeTag(tag: string) {
 // ---------- Parameters ----------
 function addParam() {
   formData.parameters.push({
-    name: '',
+    name: 'primary',
     type: 'string',
-    default_value: '',
+    default_value: 'primary',
     required: false,
-    description: '',
+    description: 'primary',
   })
 }
 
@@ -831,7 +832,7 @@ function removeParam(index: number) {
 }
 
 // ---------- Detail Drawer ----------
-async function openDetailDrawer(row: Script) {
+async function openDetailDrawer(row: any) {
   currentScript.value = row
   showDetailDrawer.value = true
   versionHistory.value = []
@@ -869,7 +870,7 @@ async function openDetailDrawer(row: Script) {
 }
 
 // ---------- Delete ----------
-async function confirmDeleteScript(row: Script) {
+async function confirmDeleteScript(row: any) {
   deletingScript.value = row
   deleteUsage.playbookCount = 0
   deleteUsage.recentExecutions = 0
@@ -913,7 +914,7 @@ async function doDeleteScript() {
 }
 
 // ---------- Duplicate ----------
-async function duplicateScript(row: Script) {
+async function duplicateScript(row: any) {
   try {
     const payload = {
       name: row.name + ' (副本)',
@@ -923,7 +924,7 @@ async function duplicateScript(row: Script) {
       risk_level: row.risk_level,
       version: 1,
       tags: [...(row.tags || [])],
-      parameters: (row.parameters || []).map((p) => ({ ...p })),
+      parameters: (row.parameters || []).map((p: any) => ({ ...p })),
     }
     const { data } = await api.post(API.SCRIPTS, payload)
     if (data.code === 0) {
@@ -939,7 +940,7 @@ async function duplicateScript(row: Script) {
 }
 
 // ---------- Quick Execute ----------
-function quickExecute(row: Script) {
+function quickExecute(row: any) {
   router.push({
     name: 'executions',
     query: {

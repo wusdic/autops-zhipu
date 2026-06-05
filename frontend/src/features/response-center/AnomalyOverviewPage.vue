@@ -24,7 +24,7 @@
             <el-icon :size="20"><component :is="stat.icon" /></el-icon>
           </div>
           <div class="metric-label">{{ stat.label }}</div>
-          <div class="metric-value">{{ stat.value }}<span v-if="stat.suffix" class="metric-suffix">{{ stat.suffix }}</span></div>
+          <div class="metric-value">{{ stat.value }}<span v-if="(stat as any).suffix" class="metric-suffix">{{ (stat as any).suffix }}</span></div>
         </div>
       </el-col>
     </el-row>
@@ -53,7 +53,7 @@
         </el-table-column>
         <el-table-column prop="severity" label="严重度" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="severityType(row.severity)" size="small" effect="light">
+            <el-tag :type="(severityType(row.severity)) as TagType" size="small" effect="light">
               {{ severityLabel(row.severity) }}
             </el-tag>
           </template>
@@ -65,7 +65,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusType(row.status)" size="small" effect="light">
+            <el-tag :type="(statusType(row.status)) as TagType" size="small" effect="light">
               {{ statusLabel(row.status) }}
             </el-tag>
           </template>
@@ -117,6 +117,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -220,8 +221,8 @@ const severityMap: Record<string, { type: '' | 'success' | 'warning' | 'danger' 
   info: { type: 'info', label: '信息' },
 }
 
-function severityType(severity: string) {
-  return severityMap[severity]?.type ?? 'info'
+function severityType(severity: string): TagType {
+  return (severityMap[severity]?.type ?? 'info') as TagType
 }
 
 function severityLabel(severity: string) {
@@ -242,8 +243,8 @@ const statusMap: Record<string, { type: '' | 'success' | 'warning' | 'danger' | 
   cancelled: { type: 'info', label: '已取消' },
 }
 
-function statusType(status: string) {
-  return statusMap[status]?.type ?? 'info'
+function statusType(status: string): TagType {
+  return (statusMap[status]?.type ?? 'info') as TagType
 }
 
 function statusLabel(status: string) {

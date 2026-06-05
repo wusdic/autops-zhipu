@@ -44,14 +44,14 @@
         </el-table-column>
         <el-table-column prop="category" label="分类" width="120">
           <template #default="{ row }">
-            <el-tag size="small" :type="getCategoryTagType(row.category)">
+            <el-tag size="small" :type="(getCategoryTagType(row.category)) as TagType">
               {{ row.category || '未分类' }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="getStatusTagType(row.status)">
+            <el-tag size="small" :type="(getStatusTagType(row.status)) as TagType">
               {{ getStatusLabel(row.status) }}
             </el-tag>
           </template>
@@ -127,6 +127,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -197,15 +198,15 @@ function formatTime(val: string | number | null | undefined): string {
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes())
 }
 
-function getStatusTagType(status: string): '' | 'success' | 'warning' | 'danger' | 'info' {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+function getStatusTagType(status: string): TagType {
+  const map: Record<string, TagType> = {
     published: 'success',
     draft: 'warning',
-    review: '',
+    review: 'primary',
     rejected: 'danger',
     archived: 'info',
   }
-  return map[status] || 'info'
+  return (map[status] || 'info') as TagType
 }
 
 function getStatusLabel(status: string): string {
@@ -219,15 +220,15 @@ function getStatusLabel(status: string): string {
   return map[status] || status || '未知'
 }
 
-function getCategoryTagType(category: string): '' | 'success' | 'warning' | 'danger' | 'info' {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+function getCategoryTagType(category: string): TagType {
+  const map: Record<string, TagType> = {
     故障处理: 'danger',
     标准方案: 'success',
     经验沉淀: 'warning',
-    操作指南: '',
+    操作指南: 'primary',
     FAQ: 'info',
   }
-  return map[category] || 'info'
+  return (map[category] || 'info') as TagType
 }
 
 // --- Data Fetching ---

@@ -198,7 +198,7 @@
                 <el-table-column prop="article_type" label="类型" width="120" />
                 <el-table-column prop="risk_level" label="风险" width="80">
                   <template #default="{ row }">
-                    <el-tag :type="riskTagType(row.risk_level)" size="small">{{ row.risk_level }}</el-tag>
+                    <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small">{{ row.risk_level }}</el-tag>
                   </template>
                 </el-table-column>
               </el-table>
@@ -240,11 +240,11 @@
               <el-timeline-item
                 v-for="(ev, idx) in analysisResult.evidence"
                 :key="idx"
-                :type="ev.type === 'critical' ? 'danger' : ev.type === 'warning' ? 'warning' : 'primary'"
+                :type="(ev as any).type === 'critical' ? 'danger' : (ev as any).type === 'warning' ? 'warning' : 'primary'"
               >
                 <div class="evidence-item">
-                  <strong v-if="ev.source">{{ ev.source }}：</strong>
-                  {{ ev.description || ev.content || ev }}
+                  <strong v-if="(ev as any).source">{{ (ev as any).source }}：</strong>
+                  {{ (ev as any).description || (ev as any).content || ev }}
                 </div>
               </el-timeline-item>
             </el-timeline>
@@ -259,7 +259,7 @@
                   <div class="action-header">
                     <span class="action-index">#{{ idx + 1 }}</span>
                     <span class="action-title">{{ action.title || action.name }}</span>
-                    <el-tag :type="riskTagType(action.risk_level)" size="small">{{ riskLabel(action.risk_level) }}风险</el-tag>
+                    <el-tag :type="(riskTagType(action.risk_level)) as TagType" size="small">{{ riskLabel(action.risk_level) }}风险</el-tag>
                     <el-tag v-if="action.approval_required" type="warning" size="small" effect="dark">需要审批</el-tag>
                     <el-tag v-else type="success" size="small">自动执行</el-tag>
                   </div>
@@ -392,7 +392,7 @@
                 <div class="history-item-header">
                   <span class="history-alert-title">{{ item.alert_title || item.title || '分析 #' + item.id }}</span>
                   <el-tag
-                    :type="item.confidence > 0.8 ? 'success' : item.confidence > 0.5 ? 'warning' : 'info'"
+                    :type="(item.confidence ?? 0) > 0.8 ? 'success' : (item.confidence ?? 0) > 0.5 ? 'warning' : 'info'"
                     size="small"
                   >
                     {{ item.confidence ? (item.confidence * 100).toFixed(0) + '%' : '-' }}
@@ -594,6 +594,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import {
   MagicStick, Bell, Refresh, Cpu, FolderOpened, Warning, Monitor,
@@ -894,10 +895,10 @@ function formatTime(t: string | undefined): string {
   return t ? new Date(t).toLocaleString('zh-CN') : '-'
 }
 
-function riskTagType(level: string): string {
-  if (level === 'high') return 'danger'
-  if (level === 'medium') return 'warning'
-  return 'info'
+function riskTagType(level: string): TagType {
+  if (level === 'high') return ('danger') as TagType
+  if (level === 'medium') return ('warning') as TagType
+  return ('info') as TagType
 }
 
 function riskLabel(level: string): string {

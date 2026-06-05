@@ -31,7 +31,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="statusType(row.status)" size="small">{{ statusLabels[row.status] || row.status }}</el-tag>
+            <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabels[row.status] || row.status }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="progress" label="进度" width="150">
@@ -101,6 +101,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
@@ -114,7 +115,7 @@ const dialogVisible = ref(false)
 const exports = ref<any[]>([])
 
 const pagination = reactive({ page: 1, size: 20, total: 0 })
-const form = reactive({ name: '', type: 'assets', format: 'xlsx', dateRange: null as any })
+const form = reactive({ name: 'primary', type: 'assets', format: 'xlsx', dateRange: null as any })
 
 const typeLabels: Record<string, string> = {
   assets: '资产列表', alerts: '告警记录', inspections: '巡检结果',
@@ -123,8 +124,8 @@ const typeLabels: Record<string, string> = {
 const statusLabels: Record<string, string> = {
   pending: '等待中', processing: '处理中', completed: '已完成', failed: '失败', cancelled: '已取消',
 }
-function statusType(s: string) {
-  return { pending: 'warning', processing: '', completed: 'success', failed: 'danger', cancelled: 'info' }[s] || 'info'
+function statusType(s: string): TagType {
+  return ({ pending: 'warning', processing: 'primary', completed: 'success', failed: 'danger', cancelled: 'info' }[s] || 'info') as TagType
 }
 
 function formatSize(bytes: number) {
@@ -145,7 +146,7 @@ async function loadExports() {
 }
 
 function createExport() {
-  Object.assign(form, { name: '', type: 'assets', format: 'xlsx', dateRange: null })
+  Object.assign(form, { name: 'primary', type: 'assets', format: 'xlsx', dateRange: null })
   dialogVisible.value = true
 }
 

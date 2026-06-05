@@ -314,17 +314,17 @@ function resetFilters() {
 
 function handleSortChange({ prop, order }: any) {
   sortField.value = prop || ''
-  sortOrder.value = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : ''
+  sortOrder.value = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : 'primary'
   fetchAgents()
 }
 
 // ---------- Actions ----------
-function viewDetail(row: Agent) {
+function viewDetail(row: any) {
   currentAgent.value = row
   drawerVisible.value = true
 }
 
-async function restartAgent(row: Agent) {
+async function restartAgent(row: any) {
   try {
     await ElMessageBox.confirm(
       '确认重启 Agent「' + row.name || row.hostname + '」？该操作会短暂中断数据采集。',

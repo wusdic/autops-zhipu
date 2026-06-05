@@ -9,7 +9,7 @@
         <el-button type="primary" @click="showUpgradeDialog"><el-icon><Upload /></el-icon> 系统升级</el-button>
         <el-button @click="showRollbackDialog" :disabled="!canRollback"><el-icon><RefreshLeft /></el-icon> 回滚</el-button>
         <el-button @click="runSelfCheck" :loading="checking"><el-icon><Monitor /></el-icon> 自检</el-button>
-        <el-button @click="toggleMaintenanceMode" :type="maintenanceMode ? 'danger' : ''">
+        <el-button @click="toggleMaintenanceMode" :type="maintenanceMode ? 'danger' : 'primary'">
           <el-icon><Setting /></el-icon>
           {{ maintenanceMode ? '退出维护模式' : '维护模式' }}
         </el-button>
@@ -187,7 +187,7 @@ var systemInfo = reactive({
 
 var platformComponents = ref<Record<string, any>>({})
 
-var upgradeForm = reactive({ description: '' })
+var upgradeForm = reactive({ description: 'primary'})
 var upgradeHistory = ref<any[]>([])
 
 function componentStatus(name: string): string {

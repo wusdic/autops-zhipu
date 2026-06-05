@@ -289,7 +289,7 @@
             <el-table stripe :data="pendingTasks"size="small" :max-height="200" empty-text="暂无待办">
               <el-table-column prop="type" label="类型" width="90">
                 <template #default="{ row }">
-                  <el-tag size="small" :type="pendingTypeTag(row.type)">{{ row.type }}</el-tag>
+                  <el-tag size="small" :type="(pendingTypeTag(row.type)) as TagType">{{ row.type }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="title" label="内容" min-width="180" show-overflow-tooltip />
@@ -343,6 +343,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
@@ -572,7 +573,7 @@ function renderChart() {
         const idx = params[0]?.dataIndex
         if (idx == null || idx >= chartRawData.value.length) return ''
         const d = chartRawData.value[idx]
-        return d.time + '<br/>成功率: ' + d.total > 0 ? d.success + '%' : '无数据' + '<br/>任务数: ' + d.total
+        return d.time + '<br/>成功率: ' + (d.total > 0 ? d.success + '%' : '无数据') + '<br/>任务数: ' + d.total
       },
     },
     grid: { left: 40, right: 20, top: 16, bottom: 30 },
@@ -656,14 +657,14 @@ function formatTime(t: string): string {
   } catch { return t }
 }
 
-function pendingTypeTag(type: string): string {
+function pendingTypeTag(type: string): TagType {
   const map: Record<string, string> = {
     '执行审批': 'warning',
     '待确认资产': 'info',
     '待处理异常': 'danger',
-    '待审核报告': '',
+    '待审核报告': 'primary',
   }
-  return map[type] || 'info'
+  return (map[type] || 'info') as TagType
 }
 
 // ─── Lifecycle ───

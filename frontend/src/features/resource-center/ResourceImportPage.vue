@@ -143,7 +143,7 @@
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
             <el-tag
-              :type="historyStatusMap[row.status] || 'info'"
+              :type="(historyStatusMap[row.status] || 'info') as TagType"
               size="small"
               effect="dark"
             >
@@ -221,8 +221,8 @@
           <el-table-column prop="value" label="值" width="140" show-overflow-tooltip />
           <el-table-column prop="message" label="错误信息" show-overflow-tooltip />
         </el-table>
-        <div v-if="detailData.errors?.length > 50" class="more-errors">
-          仅展示前 50 条，共 {{ detailData.errors.length }} 条错误
+        <div v-if="(detailData.errors?.length ?? 0) > 50" class="more-errors">
+          仅展示前 50 条，共 {{ detailData.errors?.length ?? 0 }} 条错误
         </div>
       </template>
       <template #footer>
@@ -233,6 +233,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { UploadInstance, UploadRawFile, UploadFile } from 'element-plus'
@@ -284,13 +285,13 @@ const historyData = ref<ImportHistory[]>([])
 const detailDialogVisible = ref(false)
 const detailData = ref<ImportHistory | null>(null)
 
-const historyFilter = reactive({ keyword: '' })
+const historyFilter = reactive({ keyword: 'primary'})
 const historyPagination = reactive({ page: 1, page_size: 10, total: 0 })
 
 // ─── 映射表 ──────────────────────────────────────────
-const historyStatusMap: Record<string, string> = {
+const historyStatusMap: Record<string, TagType> = {
   pending: 'warning',
-  processing: '',
+  processing: 'primary',
   completed: 'success',
   partial: 'warning',
   failed: 'danger',
@@ -361,7 +362,7 @@ async function handleUpload() {
   try {
     const res = await client.post(API.ASSET_IMPORT, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: (e: ProgressEvent) => {
+      onUploadProgress: (e: any) => {
         if (e.total) {
           uploadProgress.value = Math.round((e.loaded * 100) / e.total)
         }
@@ -439,13 +440,13 @@ function handleHistoryPageChange(page: number) {
 }
 
 // ─── 查看详情 ────────────────────────────────────────
-function handleViewDetail(row: ImportHistory) {
+function handleViewDetail(row: any) {
   detailData.value = row
   detailDialogVisible.value = true
 }
 
 // ─── 下载报告 ────────────────────────────────────────
-async function handleDownloadReport(row: ImportHistory) {
+async function handleDownloadReport(row: any) {
   try {
     const res = await client.get(API.ASSET_IMPORT + '/' + row.id + '/report', {
       responseType: 'blob',

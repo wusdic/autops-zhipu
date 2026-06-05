@@ -262,7 +262,7 @@ function resetSearch() {
   hasSearched.value = false
 }
 
-function onSortChange({ prop, order }: { prop: string; order: string | null }) {
+function onSortChange({ prop, order }: { prop: string | null; order: string | null }) {
   if (!prop) return
   const multiplier = order === 'ascending' ? 1 : -1
   searchResults.value.sort((a: any, b: any) => ((a[prop] || 0) - (b[prop] || 0)) * multiplier)

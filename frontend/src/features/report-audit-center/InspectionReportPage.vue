@@ -125,7 +125,7 @@
           </el-table-column>
           <el-table-column prop="severity" label="严重级别" width="100" align="center">
             <template #default="{ row }">
-              <el-tag v-if="row.severity" :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag>
+              <el-tag v-if="row.severity" :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag>
               <span v-else>-</span>
             </template>
           </el-table-column>
@@ -142,6 +142,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
@@ -155,7 +156,7 @@ const detailVisible = ref(false)
 const detailData = ref<any>(null)
 
 const filters = reactive({
-  keyword: '',
+  keyword: 'primary',
 })
 
 const pagination = reactive({
@@ -179,9 +180,9 @@ function rateColor(rate: number): string {
   return '#f53f3f'
 }
 
-function severityType(severity: string): string {
-  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: '', low: 'info' }
-  return map[severity] || 'info'
+function severityType(severity: string): TagType {
+  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }
+  return (map[severity] || 'info') as TagType
 }
 
 // ── Data Loading ───────────────────────────────────────────────────

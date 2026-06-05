@@ -52,7 +52,7 @@
         <div class="notification-content">
           <div class="notification-title">
             <span>{{ item.title }}</span>
-            <el-tag v-if="getPriorityTag(item.priority)" :type="getPriorityTag(item.priority)" size="small">
+            <el-tag v-if="getPriorityTag(item.priority)" :type="(getPriorityTag(item.priority)) as TagType" size="small">
               {{ item.priority }}
             </el-tag>
           </div>
@@ -75,6 +75,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -110,8 +111,7 @@ const iconMap: Record<string, any> = { alert: Warning, execution: Cpu, approval:
 const iconBgMap: Record<string, string> = { alert: '#f53f3f', execution: '#165dff', approval: '#ff7d00', system: '#86909c' }
 const getIcon = (t: string) => iconMap[t] || Bell
 const getIconBg = (t: string) => iconBgMap[t] || '#86909c'
-const getPriorityTag = (p: string) => p === '高' ? 'danger' : p === '中' ? 'warning' : p === '低' ? 'info' : ''
-
+const getPriorityTag = (p: string) => p === '高' ? 'danger' : p === '中' ? 'warning' : p === '低' ? 'info' : 'primary'
 function handleTabChange() {}
 
 function handleNotificationClick(item: any) {

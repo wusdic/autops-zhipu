@@ -52,7 +52,7 @@
           </el-table-column>
           <el-table-column label="状态" width="120">
             <template #default="{ row }">
-              <el-tag :type="taskStatusType(row.status)" size="small">{{ taskStatusLabel(row.status) }}</el-tag>
+              <el-tag :type="(taskStatusType(row.status)) as TagType" size="small">{{ taskStatusLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="discovered_count" label="发现数" width="90" />
@@ -112,7 +112,7 @@
           <el-table-column prop="os_info" label="操作系统" min-width="140" />
           <el-table-column label="状态" width="100">
             <template #default="{ row }">
-              <el-tag :type="resultStatusType(row.status)" size="small">{{ resultStatusLabel(row.status) }}</el-tag>
+              <el-tag :type="(resultStatusType(row.status)) as TagType" size="small">{{ resultStatusLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="discovered_at" label="发现时间" width="170">
@@ -278,6 +278,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, Search } from '@element-plus/icons-vue'
@@ -303,10 +304,10 @@ const taskPagination = reactive({ page: 1, pageSize: 20 })
 const showCreateDialog = ref(false)
 const taskFormRef = ref()
 const newTask = reactive({
-  name: '', ipMode: 'range' as 'range' | 'cidr',
-  ip_start: '', ip_end: '', cidr: '',
-  protocols: ['ICMP'] as string[], ports: '',
-  credential_id: '', timeout: 30,
+  name: 'primary', ipMode: 'range' as 'range' | 'cidr',
+  ip_start: 'primary', ip_end: 'primary', cidr: 'primary',
+  protocols: ['ICMP'] as string[], ports: 'primary',
+  credential_id: 'primary', timeout: 30,
 })
 const taskRules = { name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }] }
 
@@ -314,7 +315,7 @@ const taskRules = { name: [{ required: true, message: '请输入任务名称', t
 const results = ref<any[]>([])
 const resultLoading = ref(false)
 const selectedResults = ref<any[]>([])
-const resultFilter = reactive({ status: '', asset_type: '', keyword: '' })
+const resultFilter = reactive({ status: 'primary', asset_type: 'primary', keyword: 'primary'})
 
 // === 纳管向导 ===
 const wizardActive = ref(false)
@@ -503,16 +504,16 @@ async function executeOnboard() {
 }
 
 // === 辅助 ===
-function taskStatusType(s: string) {
-  const m: Record<string, string> = { pending: 'info', running: 'warning', completed: 'success', failed: 'danger' }
+function taskStatusType(s: string): TagType {
+  const m: Record<string, TagType> = { pending: 'info', running: 'warning', completed: 'success', failed: 'danger' }
   return m[s] || 'info'
 }
 function taskStatusLabel(s: string) {
   const m: Record<string, string> = { pending: '待执行', running: '执行中', completed: '已完成', failed: '失败' }
   return m[s] || s
 }
-function resultStatusType(s: string) {
-  const m: Record<string, string> = { new: 'warning', discovered: 'warning', managed: 'success', onboarded: 'success', changed: 'danger', ignored: 'info' }
+function resultStatusType(s: string): TagType {
+  const m: Record<string, TagType> = { new: 'warning', discovered: 'warning', managed: 'success', onboarded: 'success', changed: 'danger', ignored: 'info' }
   return m[s] || 'info'
 }
 function resultStatusLabel(s: string) {

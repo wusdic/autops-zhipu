@@ -242,7 +242,7 @@
               clearable
               :loading="searchLoading"
               @keydown.enter="handleSearch"
-              @blur="() => setTimeout(() => showSearchDropdown = false, 200)"
+              @blur="hideSearchDropdown"
             />
             <div v-if="showSearchDropdown && searchResults.length" class="search-dropdown">
               <div
@@ -471,7 +471,6 @@ const groupMap: Record<string, string> = {
   '/inspection/results': '巡检中心', '/inspection/page-check': '巡检中心',
   '/inspection/config-check': '巡检中心', '/inspection/log-check': '巡检中心',
   '/inspection/baseline-check': '巡检中心', '/inspection/reports': '巡检中心',
-  '/inspection/templates': '巡检中心',
   '/monitoring': '监控告警', '/monitoring/collectors': '监控告警',
   '/monitoring/collection-results': '监控告警', '/monitoring/collector-health': '监控告警',
   '/monitoring/metrics': '监控告警', '/monitoring/states': '监控告警',
@@ -496,8 +495,7 @@ const groupMap: Record<string, string> = {
   '/asset-report': '报表审计', '/inspection-report': '报表审计', '/compliance-report': '报表审计',
   '/audit': '报表审计', '/logs/search': '报表审计', '/evidence': '报表审计',
   '/ai-assistant': 'AI 助手',
-  '/config/overview': '配置中心', '/credentials': '配置中心', '/config/versions': '配置中心',
-  '/config/discovery-templates': '配置中心', '/inspection/templates': '配置中心',
+  '/credentials': '配置中心', '/config/versions': '配置中心',
   '/config/inspection-rules': '配置中心', '/config/threshold-rules': '配置中心',
   '/config/notification-rules': '配置中心',
   '/users': '平台管理', '/roles': '平台管理', '/tenants': '平台管理', '/api-keys': '平台管理',
@@ -539,7 +537,7 @@ const breadcrumbs = computed(() => {
   if (!title) title = (route.meta?.title as string) || (route.name as string) || path
 
   const crumbs: { path: string; title: string }[] = []
-  if (group) crumbs.push({ path: '', title: group })
+  if (group) crumbs.push({ path: 'primary', title: group })
   crumbs.push({ path, title })
   return crumbs
 })
@@ -588,6 +586,7 @@ interface SearchResult {
 }
 const searchResults = ref<SearchResult[]>([])
 const showSearchDropdown = ref(false)
+function hideSearchDropdown() { setTimeout(() => { showSearchDropdown.value = false }, 200) }
 
 async function handleSearch() {
   const kw = searchKeyword.value.trim()

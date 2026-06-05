@@ -92,7 +92,7 @@
           </el-table-column>
           <el-table-column prop="trigger_source" label="触发来源" width="120" show-overflow-tooltip>
             <template #default="{ row }">
-              <el-tag size="small" :type="triggerSourceType(row.trigger_source)" effect="plain">{{ triggerSourceLabel(row.trigger_source) }}</el-tag>
+              <el-tag size="small" :type="(triggerSourceType(row.trigger_source)) as TagType" effect="plain">{{ triggerSourceLabel(row.trigger_source) }}</el-tag>
             </template>
           </el-table-column>
         </el-table>
@@ -118,6 +118,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft, Right } from '@element-plus/icons-vue'
@@ -129,8 +130,8 @@ const loading = ref(false)
 const tableData = ref<any[]>([])
 
 const filters = reactive({
-  keyword: '',
-  attribute: '',
+  keyword: 'primary',
+  attribute: 'primary',
   dateRange: null as [string, string] | null,
 })
 
@@ -250,14 +251,14 @@ function triggerSourceLabel(source: string | null | undefined): string {
   return TRIGGER_SOURCE_MAP[source || ''] || source || '-'
 }
 
-function triggerSourceType(source: string | null | undefined): string {
+function triggerSourceType(source: string | null | undefined): TagType {
   var map: Record<string, string> = {
-    collector: '', monitoring: '', agent: '',
+    collector: 'primary', monitoring: 'primary', agent: 'primary',
     manual: 'warning', system: 'info', policy: 'success',
-    alert: 'danger', api: 'info', schedule: '',
-    discovery: 'success', execution: '',
+    alert: 'danger', api: 'info', schedule: 'primary',
+    discovery: 'success', execution: 'primary',
   }
-  return map[source || ''] || 'info'
+  return (map[source || ''] || 'info') as TagType
 }
 
 function formatTime(val: string | null | undefined): string {

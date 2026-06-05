@@ -85,7 +85,7 @@
         <el-table-column prop="assetType" label="类型" width="130" />
         <el-table-column prop="phase" label="当前阶段" width="120">
           <template #default="{ row }">
-            <el-tag :type="phaseTagType(row.phase)" size="small">{{ phaseLabel(row.phase) }}</el-tag>
+            <el-tag :type="(phaseTagType(row.phase)) as TagType" size="small">{{ phaseLabel(row.phase) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="enterPhaseTime" label="进入阶段时间" width="170" />
@@ -162,12 +162,13 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Plus, CircleCheck, Clock, Remove, List } from '@element-plus/icons-vue'
 
 const stats = reactive({ active: 128, retiring: 12, retired: 35, rules: 8 })
-const filters = reactive({ keyword: '', phase: '', assetType: '' })
+const filters = reactive({ keyword: 'primary', phase: 'primary', assetType: 'primary'})
 const tableData = ref<any[]>([])
 const page = ref(1)
 const pageSize = ref(20)
@@ -177,7 +178,7 @@ const phaseLabelMap: Record<string, string> = {
   planning: '规划中', procurement: '采购中', deployment: '部署中',
   running: '运行中', maintenance: '维护中', retiring: '即将退役', retired: '已退役',
 }
-const phaseTagTypeMap: Record<string, string> = {
+const phaseTagTypeMap: Record<string, TagType> = {
   planning: 'info', procurement: 'info', deployment: 'warning',
   running: 'success', maintenance: 'warning', retiring: 'danger', retired: 'info',
 }
@@ -188,7 +189,7 @@ function handleSearch() { page.value = 1 }
 function resetFilters() { filters.keyword = ''; filters.phase = ''; filters.assetType = '' }
 
 const phaseDialogVisible = ref(false)
-const phaseForm = reactive({ name: '', currentPhase: '', targetPhase: '', reason: '', assetId: '' })
+const phaseForm = reactive({ name: 'primary', currentPhase: 'primary', targetPhase: 'primary', reason: 'primary', assetId: 'primary'})
 function changePhase(row: any) {
   phaseForm.name = row.name
   phaseForm.currentPhase = row.phase

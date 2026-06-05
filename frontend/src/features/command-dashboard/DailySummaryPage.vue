@@ -43,7 +43,7 @@
                 v-for="(item, idx) in recentActivities"
                 :key="idx"
                 :timestamp="item.time"
-                :type="activityType(item.type)"
+                :type="(activityType(item.type)) as TagType"
                 placement="top"
               >
                 <div style="font-weight: 500; font-size: 13px">{{ item.summary }}</div>
@@ -72,12 +72,12 @@
               <el-table-column prop="title" label="告警" min-width="180" show-overflow-tooltip />
               <el-table-column prop="severity" label="级别" width="70">
                 <template #default="{ row }">
-                  <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
+                  <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="status" label="状态" width="70">
                 <template #default="{ row }">
-                  <el-tag :type="alertStatusType(row.status)" size="small">{{ alertStatusLabel(row.status) }}</el-tag>
+                  <el-tag :type="(alertStatusType(row.status)) as TagType" size="small">{{ alertStatusLabel(row.status) }}</el-tag>
                 </template>
               </el-table-column>
             </el-table>
@@ -99,12 +99,12 @@
               <el-table-column prop="title" label="异常" min-width="180" show-overflow-tooltip />
               <el-table-column prop="severity" label="级别" width="70">
                 <template #default="{ row }">
-                  <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
+                  <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="status" label="状态" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="anomalyStatusType(row.status)" size="small">{{ anomalyStatusLabel(row.status) }}</el-tag>
+                  <el-tag :type="(anomalyStatusType(row.status)) as TagType" size="small">{{ anomalyStatusLabel(row.status) }}</el-tag>
                 </template>
               </el-table-column>
             </el-table>
@@ -130,7 +130,7 @@
               </el-table-column>
               <el-table-column prop="status" label="状态" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="execStatusType(row.status)" size="small">{{ row.status }}</el-tag>
+                  <el-tag :type="(execStatusType(row.status)) as TagType" size="small">{{ row.status }}</el-tag>
                 </template>
               </el-table-column>
             </el-table>
@@ -142,6 +142,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Warning, CircleCheck, VideoPlay, Document } from '@element-plus/icons-vue'
@@ -171,7 +172,7 @@ const recentActivities = ref<any[]>([])
 const severityMap: Record<string, string> = { critical: '严重', high: '高', medium: '中', low: '低' }
 const severityLabel = (s: string) => severityMap[s] || s
 const severityType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ critical: 'danger', high: 'warning', medium: '', low: 'info' } as any)[s] || 'info'
+  ({ critical: 'danger', high: 'warning', medium: 'primary', low: 'info' } as any)[s] || 'info'
 
 const alertStatusLabel = (s: string) => ({ firing: '告警中', resolved: '已恢复', acknowledged: '已确认' } as any)[s] || s
 const alertStatusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
@@ -179,13 +180,13 @@ const alertStatusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'in
 
 const anomalyStatusLabel = (s: string) => ({ open: '新建', acknowledged: '已确认', assigned: '已分配', closed: '已关闭' } as any)[s] || s
 const anomalyStatusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ open: 'danger', acknowledged: 'warning', assigned: '', closed: 'success' } as any)[s] || 'info'
+  ({ open: 'danger', acknowledged: 'warning', assigned: 'primary', closed: 'success' } as any)[s] || 'info'
 
 const execStatusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
   ({ success: 'success', failed: 'danger', running: 'warning', pending: 'info' } as any)[s] || 'info'
 
 const activityType = (t: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ alert: 'danger', anomaly: 'warning', execution: '', ticket: 'success' } as any)[t] || 'info'
+  ({ alert: 'danger', anomaly: 'warning', execution: 'primary', ticket: 'success' } as any)[t] || 'info'
 
 function formatTime(t: string) {
   if (!t) return '-'
@@ -244,7 +245,7 @@ async function fetchTodayAlerts() {
         time: a.created_at,
         type: 'alert',
         summary: '告警: ' + a.title,
-        detail: a.asset_name ? '资产: ' + a.asset_name : '',
+        detail: a.asset_name ? '资产: ' + a.asset_name : 'primary',
       })
     })
   } catch {
@@ -270,7 +271,7 @@ async function fetchTodayAnomalies() {
         time: a.created_at || a.discovered_at,
         type: 'anomaly',
         summary: '异常: ' + a.title,
-        detail: a.asset_name ? '资产: ' + a.asset_name : '',
+        detail: a.asset_name ? '资产: ' + a.asset_name : 'primary',
       })
     })
   } catch {

@@ -43,7 +43,7 @@
           {{ cat.label }}
           <el-badge
             :value="getCategoryCount(cat.key)"
-            :type="getCategoryBadgeType(cat.key)"
+            :type="(getCategoryBadgeType(cat.key)) as TagType"
             class="category-badge"
           />
         </span>
@@ -59,7 +59,7 @@
               </el-icon>
               <span class="check-name">{{ item.name }}</span>
               <el-tag
-                :type="statusTagType(item.status)"
+                :type="(statusTagType(item.status)) as TagType"
                 size="small"
                 effect="dark"
                 class="check-status-tag"
@@ -159,6 +159,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
@@ -213,11 +214,11 @@ function getCategoryCount(cat: string): number {
   return checkResults.value.filter((r) => r.category === cat).length
 }
 
-function getCategoryBadgeType(cat: string): string {
+function getCategoryBadgeType(cat: string): TagType {
   if (cat === 'all') {
-    if (failCount.value > 0) return 'danger'
-    if (warnCount.value > 0) return 'warning'
-    return 'success'
+    if (failCount.value > 0) return ('danger') as TagType
+    if (warnCount.value > 0) return ('warning') as TagType
+    return ('success') as TagType
   }
   const items = checkResults.value.filter((r) => r.category === cat)
   if (items.some((r) => r.status === 'error')) return 'danger'
@@ -237,9 +238,9 @@ function statusIcon(s: string) {
   return map[s] ?? Clock
 }
 
-function statusTagType(s: string): string {
+function statusTagType(s: string): TagType {
   const map: Record<string, string> = { ok: 'success', error: 'danger', warning: 'warning', pending: 'info' }
-  return map[s] ?? 'info'
+  return (map[s] ?? 'info') as TagType
 }
 
 function statusLabel(s: string): string {
@@ -346,7 +347,7 @@ function viewHistoryDetail(row: any) {
   // Populate check results from a history entry if available
   if (row.results && Array.isArray(row.results)) {
     checkResults.value = row.results
-    lastCheckTime.value = row.checked_at ? new Date(row.checked_at).toLocaleString('zh-CN') : ''
+    lastCheckTime.value = row.checked_at ? new Date(row.checked_at).toLocaleString('zh-CN') : 'primary'
     activeCategory.value = 'all'
   }
 }

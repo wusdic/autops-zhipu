@@ -83,7 +83,7 @@
             <template #default="{ row }">
               <el-tag
                 v-if="row.network_status"
-                :type="networkTagType(row.network_status)"
+                :type="(networkTagType(row.network_status)) as TagType"
                 size="small"
                 effect="light"
               >
@@ -109,7 +109,7 @@
             <template #default="{ row }">
               <el-tag
                 v-if="row.health"
-                :type="healthTagType(row.health)"
+                :type="(healthTagType(row.health)) as TagType"
                 size="small"
                 effect="light"
               >
@@ -138,6 +138,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
@@ -149,7 +150,7 @@ const loadFailed = ref(false)
 const tableData = ref<any[]>([])
 
 const filters = reactive({
-  keyword: '',
+  keyword: 'primary',
 })
 
 const pagination = reactive({
@@ -173,13 +174,13 @@ function usageClass(usage: number): string {
   return 'usage-normal'
 }
 
-function networkTagType(status: string): '' | 'success' | 'danger' | 'warning' | 'info' {
-  const map: Record<string, '' | 'success' | 'danger' | 'warning' | 'info'> = {
+function networkTagType(status: string): TagType {
+  const map: Record<string, TagType> = {
     normal: 'success',
     degraded: 'warning',
     down: 'danger',
   }
-  return map[status] || 'info'
+  return (map[status] || 'info') as TagType
 }
 
 function networkLabel(status: string): string {
@@ -191,13 +192,13 @@ function networkLabel(status: string): string {
   return map[status] || status
 }
 
-function healthTagType(health: string): '' | 'success' | 'danger' | 'warning' | 'info' {
-  const map: Record<string, '' | 'success' | 'danger' | 'warning' | 'info'> = {
+function healthTagType(health: string): TagType {
+  const map: Record<string, TagType> = {
     healthy: 'success',
     degraded: 'warning',
     unhealthy: 'danger',
   }
-  return map[health] || 'info'
+  return (map[health] || 'info') as TagType
 }
 
 function healthLabel(health: string): string {

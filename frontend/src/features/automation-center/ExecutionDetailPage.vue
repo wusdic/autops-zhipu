@@ -42,7 +42,7 @@
         <el-descriptions-item label="执行ID">{{ execution.id }}</el-descriptions-item>
         <el-descriptions-item label="策略名称">{{ execution.policy_name || '-' }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="statusType(execution.status)">{{ statusLabel(execution.status) }}</el-tag>
+          <el-tag :type="(statusType(execution.status)) as TagType">{{ statusLabel(execution.status) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="开始时间">{{ execution.started_at || '-' }}</el-descriptions-item>
         <el-descriptions-item label="结束时间">{{ execution.finished_at || '-' }}</el-descriptions-item>
@@ -82,7 +82,7 @@
         <el-table-column prop="action_type" label="动作类型" width="140" />
         <el-table-column prop="status" label="状态" width="110" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+            <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="started_at" label="开始时间" width="180" />
@@ -239,6 +239,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, onUnmounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
@@ -280,11 +281,11 @@ const steps = computed(() => execution.value?.steps || [])
 
 let logTimer: ReturnType<typeof setInterval> | null = null
 
-function statusType(s: string) {
+function statusType(s: string): TagType {
   const map: Record<string, string> = {
-    pending: 'warning', running: '', completed: 'success', failed: 'danger', cancelled: 'info',
+    pending: 'warning', running: 'primary', completed: 'success', failed: 'danger', cancelled: 'info',
   }
-  return map[s] || 'info'
+  return (map[s] || 'info') as TagType
 }
 
 function statusLabel(s: string) {

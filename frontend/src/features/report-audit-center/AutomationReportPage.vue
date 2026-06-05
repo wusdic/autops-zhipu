@@ -169,7 +169,7 @@
           </el-table-column>
           <el-table-column prop="status" label="状态" width="100" align="center">
             <template #default="{ row }">
-              <el-tag :type="execStatusType(row.status)" size="small">{{ execStatusLabel(row.status) }}</el-tag>
+              <el-tag :type="(execStatusType(row.status)) as TagType" size="small">{{ execStatusLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="trigger_source" label="触发方式" width="100" align="center">
@@ -208,6 +208,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
@@ -230,8 +231,8 @@ const stats = reactive({
 })
 
 const execFilters = reactive({
-  status: '',
-  keyword: '',
+  status: 'primary',
+  keyword: 'primary',
 })
 
 const execPagination = reactive({
@@ -259,9 +260,9 @@ function formatDuration(seconds: number | null | undefined): string {
   return hr + 'h' + min % 60 + 'm'
 }
 
-function execStatusType(s: string): string {
+function execStatusType(s: string): TagType {
   const map: Record<string, string> = { success: 'success', failed: 'danger', running: 'warning', timeout: 'info', cancelled: 'info' }
-  return map[s] || 'info'
+  return (map[s] || 'info') as TagType
 }
 
 function execStatusLabel(s: string): string {

@@ -47,7 +47,7 @@
         </el-table-column>
         <el-table-column prop="risk_level" label="风险等级" width="100">
           <template #default="{ row }">
-            <el-tag :type="riskType(row.risk_level)" size="small">{{ riskLabel(row.risk_level) }}</el-tag>
+            <el-tag :type="(riskType(row.risk_level)) as TagType" size="small">{{ riskLabel(row.risk_level) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="steps_count" label="执行步骤" width="100" />
@@ -122,7 +122,7 @@
               </el-col>
             </el-row>
           </div>
-          <el-button @click="form.steps.push({ name: '', command: '' })" size="small">+ 添加步骤</el-button>
+          <el-button @click="form.steps.push({ name: 'primary', command: 'primary'})" size="small">+ 添加步骤</el-button>
         </el-form-item>
         <el-form-item label="验证条件">
           <el-input v-model="form.verification" type="textarea" :rows="2" placeholder="执行后验证条件" />
@@ -148,6 +148,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
@@ -160,13 +161,13 @@ const editing = ref<any>(null)
 const templates = ref<any[]>([])
 const formRef = ref()
 
-const filters = reactive({ keyword: '', scenario: '' })
+const filters = reactive({ keyword: 'primary', scenario: 'primary'})
 const pagination = reactive({ page: 1, size: 20, total: 0 })
 
 const form = reactive({
-  name: '', scenario: '', risk_level: 'low', asset_types: [] as string[],
-  steps: [{ name: '', command: '' }] as { name: string; command: string }[],
-  verification: '', rollback_action: '', requires_approval: false, description: '',
+  name: 'primary', scenario: 'primary', risk_level: 'low', asset_types: [] as string[],
+  steps: [{ name: 'primary', command: 'primary'}] as { name: string; command: string }[],
+  verification: 'primary', rollback_action: 'primary', requires_approval: false, description: 'primary',
 })
 const formRules = {
   name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
@@ -175,7 +176,7 @@ const formRules = {
 
 const scenarioMap: Record<string, string> = { disk_full: '磁盘空间', service_down: '服务异常', port_unreachable: '端口不可达', connection_high: '连接数过高', cert_expiry: '证书过期' }
 function scenarioName(s: string) { return scenarioMap[s] || s }
-function riskType(r: string) { return { low: 'info', medium: '', high: 'warning', critical: 'danger' }[r] || 'info' }
+function riskType(r: string): TagType { return ({ low: 'info', medium: 'primary', high: 'warning', critical: 'danger' }[r] || 'info') as TagType }
 function riskLabel(r: string) { return { low: '低', medium: '中', high: '高', critical: '极高' }[r] || r }
 
 async function loadData() {
@@ -186,7 +187,7 @@ async function loadData() {
 function openDialog(row?: any) {
   editing.value = row || null
   if (row) Object.assign(form, row)
-  else Object.assign(form, { name: '', scenario: '', risk_level: 'low', asset_types: [], steps: [{ name: '', command: '' }], verification: '', rollback_action: '', requires_approval: false, description: '' })
+  else Object.assign(form, { name: 'primary', scenario: 'primary', risk_level: 'low', asset_types: [], steps: [{ name: 'primary', command: 'primary'}], verification: 'primary', rollback_action: 'primary', requires_approval: false, description: 'primary'})
   dialogVisible.value = true
 }
 

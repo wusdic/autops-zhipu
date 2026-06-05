@@ -35,7 +35,7 @@ export const useTicketStore = defineStore('ticket', () => {
   }
 
   async function changeStatus(id: string, status: string, comment?: string) {
-    await ticketService.changeStatus(id, { status, comment })
+    await ticketService.update(id, { status, comment })
     await fetchDetail(id)
   }
 

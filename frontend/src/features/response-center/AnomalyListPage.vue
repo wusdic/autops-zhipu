@@ -49,7 +49,7 @@
           </el-table-column>
           <el-table-column prop="severity" label="严重级别" width="100">
             <template #default="{ row }">
-              <el-tag :type="severityType(row.severity)" size="small">
+              <el-tag :type="(severityType(row.severity)) as TagType" size="small">
                 {{ severityLabel(row.severity) }}
               </el-tag>
             </template>
@@ -66,7 +66,7 @@
           </el-table-column>
           <el-table-column prop="status" label="状态" width="100">
             <template #default="{ row }">
-              <el-tag :type="statusType(row.status)" size="small">
+              <el-tag :type="(statusType(row.status)) as TagType" size="small">
                 {{ statusLabel(row.status) }}
               </el-tag>
             </template>
@@ -122,6 +122,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -143,13 +144,13 @@ const actionMap = reactive<Record<string, string>>({})
 const severityMap: Record<string, string> = { critical: '严重', high: '高', medium: '中', low: '低' }
 const severityLabel = (s: string) => severityMap[s] || s
 const severityType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ critical: 'danger', high: 'warning', medium: '', low: 'info' } as any)[s] || 'info'
+  ({ critical: 'danger', high: 'warning', medium: 'primary', low: 'info' } as any)[s] || 'info'
 
 // Status helpers
 const statusMap: Record<string, string> = { open: '新建', acknowledged: '已确认', assigned: '已分配', closed: '已关闭' }
 const statusLabel = (s: string) => statusMap[s] || s
 const statusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ open: 'danger', acknowledged: 'warning', assigned: '', closed: 'success' } as any)[s] || 'info'
+  ({ open: 'danger', acknowledged: 'warning', assigned: 'primary', closed: 'success' } as any)[s] || 'info'
 
 async function fetchList() {
   loading.value = true

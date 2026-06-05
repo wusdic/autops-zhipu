@@ -178,11 +178,11 @@ const pagination = reactive({
 })
 
 const form = reactive({
-  name: '',
-  template_id: '',
+  name: 'primary',
+  template_id: 'primary',
   cron: '0 8 * * *',
   enabled: true,
-  description: '',
+  description: 'primary',
 })
 
 const formRules: FormRules = {

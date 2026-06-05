@@ -85,7 +85,7 @@
                     <el-tag
                       v-for="action in (perm.actions || [])"
                       :key="action"
-                      :type="actionTagType(action)"
+                      :type="(actionTagType(action)) as TagType"
                       size="small"
                       style="margin-right: 6px"
                     >
@@ -121,7 +121,7 @@
             <el-tag
               v-for="action in (row.actions || [])"
               :key="action"
-              :type="actionTagType(action)"
+              :type="(actionTagType(action)) as TagType"
               size="small"
               style="margin: 2px"
             >
@@ -155,7 +155,7 @@
             <el-switch
               :model-value="row.enabled"
               size="small"
-              @change="(val: boolean) => handleToggleEnabled(row, val)"
+              @change="(val: string | number | boolean) => handleToggleEnabled(row, val as boolean)"
             />
           </template>
         </el-table-column>
@@ -246,7 +246,7 @@
               <el-tag type="success" size="small">创建 (C)</el-tag>
             </el-checkbox>
             <el-checkbox label="read">
-              <el-tag type="" size="small">读取 (R)</el-tag>
+              <el-tag type="primary" size="small">读取 (R)</el-tag>
             </el-checkbox>
             <el-checkbox label="update">
               <el-tag type="warning" size="small">更新 (U)</el-tag>
@@ -296,6 +296,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -381,21 +382,21 @@ const total = ref(0)
 const formRef = ref<FormInstance>()
 
 const queryParams = reactive<QueryParams>({
-  name: '',
-  resource_type: '',
-  enabled: '',
-  role_id: '',
+  name: 'primary',
+  resource_type: 'primary',
+  enabled: 'primary',
+  role_id: 'primary',
   page: 1,
   pageSize: 20,
 })
 
 const policyForm = reactive<PolicyForm>({
-  name: '',
-  description: '',
-  resource_type: '',
+  name: 'primary',
+  description: 'primary',
+  resource_type: 'primary',
   actions: [],
   role_ids: [],
-  condition: '',
+  condition: 'primary',
   enabled: true,
 })
 
@@ -438,14 +439,14 @@ const actionLabel = (action: string): string => {
   return map[action] || action
 }
 
-const actionTagType = (action: string): '' | 'success' | 'warning' | 'danger' | 'info' => {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+const actionTagType = (action: string): TagType => {
+  const map: Record<string, TagType> = {
     create: 'success',
-    read: '',
+    read: 'primary',
     update: 'warning',
     delete: 'danger',
   }
-  return map[action] || 'info'
+  return (map[action] || 'info') as TagType
 }
 
 // ---------- 数据请求 ----------
@@ -523,7 +524,7 @@ const handleCreate = () => {
   dialogVisible.value = true
 }
 
-const handleEdit = (row: PolicyEntry) => {
+const handleEdit = (row: any) => {
   resetForm()
   isEdit.value = true
   policyForm.id = row.id
@@ -537,7 +538,7 @@ const handleEdit = (row: PolicyEntry) => {
   dialogVisible.value = true
 }
 
-const handleClone = (row: PolicyEntry) => {
+const handleClone = (row: any) => {
   resetForm()
   isEdit.value = false
   policyForm.name = row.name + ' (副本)'
@@ -577,7 +578,7 @@ const handleSubmit = async () => {
   }
 }
 
-const handleToggleEnabled = async (row: PolicyEntry, val: boolean) => {
+const handleToggleEnabled = async (row: any, val: boolean) => {
   try {
     await client.patch(API.GOVERNANCE.ROLES + row.id + '/', { enabled: val })
     row.enabled = val
@@ -587,7 +588,7 @@ const handleToggleEnabled = async (row: PolicyEntry, val: boolean) => {
   }
 }
 
-const handleDelete = async (row: PolicyEntry) => {
+const handleDelete = async (row: any) => {
   try {
     await client.delete(API.GOVERNANCE.ROLES + row.id + '/')
     ElMessage.success('策略已删除')

@@ -116,14 +116,14 @@
         </el-table-column>
         <el-table-column label="类型" width="130">
           <template #default="{ row }">
-            <el-tag :type="typeTagColor(row.article_type)" size="small">
+            <el-tag :type="(typeTagColor(row.article_type)) as TagType" size="small">
               {{ typeLabel(row.article_type) }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="风险等级" width="100">
           <template #default="{ row }">
-            <el-tag :type="riskTagType(row.risk_level)" size="small">{{ row.risk_level || '-' }}</el-tag>
+            <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small">{{ row.risk_level || '-' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="90">
@@ -173,6 +173,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
@@ -191,10 +192,10 @@ const exporting = ref(false)
 const knowledgeList = ref<any[]>([])
 
 const filters = reactive({
-  keyword: '',
-  article_type: '',
-  risk_level: '',
-  status: '',
+  keyword: 'primary',
+  article_type: 'primary',
+  risk_level: 'primary',
+  status: 'primary',
 })
 
 const sortBy = ref('updated_at')
@@ -233,17 +234,17 @@ function typeTagColor(t: string) {
   const m: Record<string, string> = {
     incident_summary: 'warning',
     runbook: 'success',
-    standard_solution: '',
+    standard_solution: 'primary',
     faq: 'info',
-    best_practice: '',
+    best_practice: 'primary',
   }
   return m[t] || ''
 }
 
-function riskTagType(level: string) {
-  if (level === 'high') return 'danger'
-  if (level === 'medium') return 'warning'
-  return 'info'
+function riskTagType(level: string): TagType {
+  if (level === 'high') return ('danger') as TagType
+  if (level === 'medium') return ('warning') as TagType
+  return ('info') as TagType
 }
 
 function formatTime(t: string) {
@@ -307,7 +308,7 @@ async function loadStats() {
   }
 }
 
-function onSortChange({ prop, order }: { prop: string; order: string | null }) {
+function onSortChange({ prop, order }: { prop: string | null; order: string | null }) {
   if (prop) {
     sortBy.value = prop
     sortOrder.value = order || 'descending'

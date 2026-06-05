@@ -52,7 +52,7 @@
           <el-table-column prop="status" label="状态" width="100" align="center">
             <template #default="{ row }">
               <el-tag
-                :type="statusTagType(row.status)"
+                :type="(statusTagType(row.status)) as TagType"
                 size="small"
                 effect="light"
               >
@@ -105,7 +105,7 @@
         <el-descriptions-item label="资产名">{{ currentRow.asset_name }}</el-descriptions-item>
         <el-descriptions-item label="采集器类型">{{ currentRow.collector_type }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="statusTagType(currentRow.status)" size="small">
+          <el-tag :type="(statusTagType(currentRow.status)) as TagType" size="small">
             {{ statusLabel(currentRow.status) }}
           </el-tag>
         </el-descriptions-item>
@@ -129,6 +129,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
@@ -141,8 +142,8 @@ const detailVisible = ref(false)
 const currentRow = ref<any>(null)
 
 const filters = reactive({
-  keyword: '',
-  status: '',
+  keyword: 'primary',
+  status: 'primary',
 })
 
 const pagination = reactive({
@@ -170,13 +171,13 @@ function formatDuration(ms: number | null | undefined): string {
   return minutes + 'm' + remainSeconds + 's'
 }
 
-function statusTagType(status: string): '' | 'success' | 'danger' | 'warning' | 'info' {
-  const map: Record<string, '' | 'success' | 'danger' | 'warning' | 'info'> = {
+function statusTagType(status: string): TagType {
+  const map: Record<string, TagType> = {
     success: 'success',
     failed: 'danger',
     timeout: 'warning',
   }
-  return map[status] || 'info'
+  return (map[status] || 'info') as TagType
 }
 
 function statusLabel(status: string): string {

@@ -78,7 +78,7 @@
                 <el-tag
                   v-for="(cond, idx) in row.conditions"
                   :key="idx"
-                  :type="conditionTypeTagMap[cond.type] || 'info'"
+                  :type="(conditionTypeTagMap[cond.type] || 'info') as TagType"
                   size="small"
                   style="margin: 2px 4px 2px 0"
                 >
@@ -131,7 +131,7 @@
               active-text="启用"
               inactive-text="禁用"
               inline-prompt
-              @change="(val: boolean) => handleToggleStatus(row, val)"
+              @change="(val: string | number | boolean) => handleToggleStatus(row, val as boolean)"
             />
           </template>
         </el-table-column>
@@ -363,6 +363,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -410,8 +411,8 @@ const conditionTypeLabelMap: Record<string, string> = {
   source: '来源',
 }
 
-const conditionTypeTagMap: Record<string, string> = {
-  asset_type: '',
+const conditionTypeTagMap: Record<string, TagType> = {
+  asset_type: 'primary',
   priority: 'danger',
   keyword: 'warning',
   ticket_type: 'success',
@@ -423,9 +424,9 @@ const loading = ref(false)
 const tableData = ref<AssignmentRule[]>([])
 
 const filterForm = reactive({
-  keyword: '',
-  condition_type: '',
-  status: '',
+  keyword: 'primary',
+  condition_type: 'primary',
+  status: 'primary',
 })
 
 const pagination = reactive({
@@ -448,13 +449,13 @@ const reorderLoading = ref(false)
 const reorderList = ref<AssignmentRule[]>([])
 
 const defaultDialogForm = (): DialogFormData => ({
-  name: '',
-  conditions: [{ type: '', value: '' }],
-  assign_to: '',
+  name: 'primary',
+  conditions: [{ type: 'primary', value: 'primary'}],
+  assign_to: 'primary',
   assign_to_type: 'role',
   priority: 10,
   status: 'enabled',
-  description: '',
+  description: 'primary',
 })
 
 const dialogForm = reactive<DialogFormData>(defaultDialogForm())
@@ -529,13 +530,13 @@ function handlePageChange(page: number) {
 
 // ─── 条件编辑器 ──────────────────────────────────────
 function addCondition() {
-  dialogForm.conditions.push({ type: '', value: '' })
+  dialogForm.conditions.push({ type: 'primary', value: 'primary'})
 }
 
 function removeCondition(index: number) {
   dialogForm.conditions.splice(index, 1)
   if (!dialogForm.conditions.length) {
-    dialogForm.conditions.push({ type: '', value: '' })
+    dialogForm.conditions.push({ type: 'primary', value: 'primary'})
   }
 }
 
@@ -544,7 +545,7 @@ async function searchUsers(query: string) {
   if (!query) return
   userSearchLoading.value = true
   try {
-    const res = await client.get(API.USERS ?? '/api/users', { params: { keyword: query, page_size: 20 } })
+    const res = await client.get(API.GOVERNANCE.USERS ?? '/api/users', { params: { keyword: query, page_size: 20 } })
     const data = res.data?.data ?? res.data
     userOptions.value = Array.isArray(data) ? data : data?.items ?? []
   } catch {
@@ -561,12 +562,12 @@ function handleCreate() {
   dialogVisible.value = true
 }
 
-function handleEdit(row: AssignmentRule) {
+function handleEdit(row: any) {
   isEditing.value = true
   Object.assign(dialogForm, {
     id: row.id,
     name: row.name,
-    conditions: row.conditions?.length ? row.conditions.map(c => ({ ...c })) : [{ type: '', value: '' }],
+    conditions: row.conditions?.length ? row.conditions.map((c: any) => ({ ...c })) : [{ type: 'primary', value: 'primary'}],
     assign_to: row.assign_to,
     assign_to_type: row.assign_to_type,
     priority: row.priority,
@@ -616,7 +617,7 @@ function resetDialogForm() {
 }
 
 // ─── 复制规则 ────────────────────────────────────────
-async function handleDuplicate(row: AssignmentRule) {
+async function handleDuplicate(row: any) {
   try {
     await client.post(ruleApiUrl, {
       ...row,
@@ -633,7 +634,7 @@ async function handleDuplicate(row: AssignmentRule) {
 }
 
 // ─── 状态切换 ────────────────────────────────────────
-async function handleToggleStatus(row: AssignmentRule, enabled: boolean) {
+async function handleToggleStatus(row: any, enabled: boolean) {
   const newStatus = enabled ? 'enabled' : 'disabled'
   try {
     await client.patch(ruleApiUrl + '/' + row.id, { status: newStatus })
@@ -646,7 +647,7 @@ async function handleToggleStatus(row: AssignmentRule, enabled: boolean) {
 }
 
 // ─── 删除 ────────────────────────────────────────────
-async function handleDelete(row: AssignmentRule) {
+async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm(
       '确定删除规则「' + row.name + '」？此操作不可撤销。',

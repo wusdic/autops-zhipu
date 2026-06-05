@@ -6,6 +6,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -16,7 +17,7 @@ const props = defineProps<{
   dot?: boolean
 }>()
 
-const typeMap: Record<string, string> = {
+const typeMap: Record<string, TagType> = {
   // 通用状态
   active: 'success',
   inactive: 'info',

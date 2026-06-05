@@ -49,14 +49,14 @@
         </el-table-column>
         <el-table-column prop="type" label="类型" width="120" align="center">
           <template #default="{ row }">
-            <el-tag :type="typeTagType(row.type)" size="small" effect="light">
+            <el-tag :type="(typeTagType(row.type)) as TagType" size="small" effect="light">
               {{ typeLabel(row.type) }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusType(row.status)" size="small" effect="light">
+            <el-tag :type="(statusType(row.status)) as TagType" size="small" effect="light">
               {{ statusLabel(row.status) }}
             </el-tag>
           </template>
@@ -127,6 +127,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -221,20 +222,20 @@ const quickLinks = [
 ]
 
 // ── 类型映射 ──
-const typeMap: Record<string, { type: '' | 'success' | 'warning' | 'danger' | 'info'; label: string }> = {
+const typeMap: Record<string, { type: TagType; label: string }> = {
   inspection: { type: 'primary', label: '巡检报告' },
   asset: { type: 'success', label: '资产台账' },
   sla: { type: 'warning', label: 'SLA报告' },
   audit: { type: 'danger', label: '审计报告' },
   operation: { type: 'info', label: '运维报告' },
   custom: { type: 'info', label: '自定义报告' },
-  daily: { type: '', label: '日报' },
+  daily: { type: 'primary', label: '日报' },
   weekly: { type: 'warning', label: '周报' },
   monthly: { type: 'success', label: '月报' },
 }
 
-function typeTagType(t: string) {
-  return typeMap[t]?.type ?? 'info'
+function typeTagType(t: string): TagType {
+  return (typeMap[t]?.type ?? 'info') as TagType
 }
 
 function typeLabel(t: string) {
@@ -242,7 +243,7 @@ function typeLabel(t: string) {
 }
 
 // ── 状态映射 ──
-const statusMap: Record<string, { type: '' | 'success' | 'warning' | 'danger' | 'info'; label: string }> = {
+const statusMap: Record<string, { type: TagType; label: string }> = {
   pending: { type: 'info', label: '待生成' },
   queued: { type: 'info', label: '队列中' },
   generating: { type: 'warning', label: '生成中' },
@@ -256,8 +257,8 @@ const statusMap: Record<string, { type: '' | 'success' | 'warning' | 'danger' | 
   cancelled: { type: 'info', label: '已取消' },
 }
 
-function statusType(status: string) {
-  return statusMap[status]?.type ?? 'info'
+function statusType(status: string): TagType {
+  return (statusMap[status]?.type ?? 'info') as TagType
 }
 
 function statusLabel(status: string) {

@@ -139,7 +139,7 @@
 
         <el-table-column prop="original_status" label="原始状态" width="120" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status)" size="small">
+            <el-tag :type="(statusTagType(row.status)) as TagType" size="small">
               {{ statusLabel(row.status) }}
             </el-tag>
           </template>
@@ -148,7 +148,7 @@
         <el-table-column prop="rollback_status" label="回滚状态" width="140" align="center">
           <template #default="{ row }">
             <template v-if="row.rollback_status">
-              <el-tag :type="rollbackStatusType(row.rollback_status)" size="small" effect="dark">
+              <el-tag :type="(rollbackStatusType(row.rollback_status)) as TagType" size="small" effect="dark">
                 {{ rollbackStatusLabel(row.rollback_status) }}
               </el-tag>
             </template>
@@ -263,13 +263,13 @@
         <el-descriptions-item label="执行名">{{ currentExecution.name }}</el-descriptions-item>
         <el-descriptions-item label="执行ID">{{ currentExecution.id }}</el-descriptions-item>
         <el-descriptions-item label="原始状态">
-          <el-tag :type="statusTagType(currentExecution.status)" size="small">
+          <el-tag :type="(statusTagType(currentExecution.status)) as TagType" size="small">
             {{ statusLabel(currentExecution.status) }}
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="回滚状态">
           <template v-if="currentExecution.rollback_status">
-            <el-tag :type="rollbackStatusType(currentExecution.rollback_status)" size="small">
+            <el-tag :type="(rollbackStatusType(currentExecution.rollback_status)) as TagType" size="small">
               {{ rollbackStatusLabel(currentExecution.rollback_status) }}
             </el-tag>
           </template>
@@ -285,6 +285,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -330,14 +331,14 @@ const rollbackLoading = ref(false)
 const rollbackTarget = ref<ExecutionEntry | null>(null)
 
 const rollbackForm = reactive({
-  reason: '',
+  reason: 'primary',
   force: false,
 })
 
 const queryParams = reactive<QueryParams>({
-  name: '',
-  original_status: '',
-  rollback_available: '',
+  name: 'primary',
+  original_status: 'primary',
+  rollback_available: 'primary',
   dateRange: null,
   page: 1,
   pageSize: 20,
@@ -356,15 +357,15 @@ const formatTime = (ts?: string): string => {
   return d.toLocaleString('zh-CN', { hour12: false })
 }
 
-const statusTagType = (status?: string): '' | 'success' | 'warning' | 'danger' | 'info' => {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+const statusTagType = (status?: string): TagType => {
+  const map: Record<string, TagType> = {
     success: 'success',
     failed: 'danger',
     partial: 'warning',
-    running: '',
+    running: 'primary',
     pending: 'info',
   }
-  return map[status || ''] || 'info'
+  return (map[status || ''] || 'info') as TagType
 }
 
 const statusLabel = (status?: string): string => {
@@ -378,14 +379,14 @@ const statusLabel = (status?: string): string => {
   return map[status || ''] || status || '-'
 }
 
-const rollbackStatusType = (status?: string): 'success' | 'warning' | 'danger' | 'info' => {
-  const map: Record<string, 'success' | 'warning' | 'danger' | 'info'> = {
+const rollbackStatusType = (status?: string): TagType => {
+  const map: Record<string, TagType> = {
     completed: 'success',
     running: 'warning',
     failed: 'danger',
     cancelled: 'info',
   }
-  return map[status || ''] || 'info'
+  return (map[status || ''] || 'info') as TagType
 }
 
 const rollbackStatusLabel = (status?: string): string => {
@@ -452,12 +453,12 @@ const handleReset = () => {
   fetchRollbackList()
 }
 
-const handleViewDetail = (row: ExecutionEntry) => {
+const handleViewDetail = (row: any) => {
   currentExecution.value = row
   detailVisible.value = true
 }
 
-const handleRollback = (row: ExecutionEntry) => {
+const handleRollback = (row: any) => {
   rollbackTarget.value = row
   rollbackForm.reason = ''
   rollbackForm.force = false
@@ -469,7 +470,7 @@ const confirmRollback = async () => {
   rollbackLoading.value = true
   try {
     const id = rollbackTarget.value.id
-    await client.post(API.EXECUTION_ROLLBACK(id), {
+    await client.post(API.EXECUTION_ROLLBACK(String(id)), {
       reason: rollbackForm.reason,
       force: rollbackForm.force,
     })
@@ -484,7 +485,7 @@ const confirmRollback = async () => {
   }
 }
 
-const handleCancelRollback = async (row: ExecutionEntry) => {
+const handleCancelRollback = async (row: any) => {
   try {
     await ElMessageBox.confirm('确定取消回滚操作吗？', '取消确认', {
       type: 'warning',
@@ -497,7 +498,7 @@ const handleCancelRollback = async (row: ExecutionEntry) => {
   }
 }
 
-const handleRollbackLog = (row: ExecutionEntry) => {
+const handleRollbackLog = (row: any) => {
   // Could navigate to log page or open log dialog
   console.log('View rollback log for:', row.id)
 }

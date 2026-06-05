@@ -101,7 +101,7 @@
         </el-table-column>
         <el-table-column prop="asset_type" label="类型" width="120">
           <template #default="{ row }">
-            <el-tag size="small" :type="getAssetTypeTagType(row.asset_type)">
+            <el-tag size="small" :type="(getAssetTypeTagType(row.asset_type)) as TagType">
               {{ getAssetTypeLabel(row.asset_type) }}
             </el-tag>
           </template>
@@ -113,7 +113,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="getStatusTagType(row.status || row.reachability)">
+            <el-tag size="small" :type="(getStatusTagType(row.status || row.reachability)) as TagType">
               {{ getStatusLabel(row.status || row.reachability) }}
             </el-tag>
           </template>
@@ -152,6 +152,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -275,25 +276,25 @@ function getAssetTypeLabel(type: string): string {
   return map[type] || type || '未知'
 }
 
-function getAssetTypeTagType(type: string): '' | 'success' | 'warning' | 'danger' | 'info' {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
-    server: '',
-    linux_server: '',
-    windows_server: '',
+function getAssetTypeTagType(type: string): TagType {
+  const map: Record<string, TagType> = {
+    server: 'primary',
+    linux_server: 'primary',
+    windows_server: 'primary',
     web_server: 'success',
     network: 'success',
     storage: 'warning',
     database: 'danger',
     middleware: 'info',
-    vm: '',
+    vm: 'primary',
     container: 'success',
     cloud: 'warning',
   }
-  return map[type] || 'info'
+  return (map[type] || 'info') as TagType
 }
 
-function getStatusTagType(status: string): '' | 'success' | 'warning' | 'danger' | 'info' {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+function getStatusTagType(status: string): TagType {
+  const map: Record<string, TagType> = {
     online: 'success',
     active: 'success',
     reachable: 'success',
@@ -304,7 +305,7 @@ function getStatusTagType(status: string): '' | 'success' | 'warning' | 'danger'
     alarming: 'warning',
     maintenance: 'warning',
   }
-  return map[status] || 'info'
+  return (map[status] || 'info') as TagType
 }
 
 function getStatusLabel(status: string): string {

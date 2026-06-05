@@ -84,7 +84,7 @@
 
         <el-table-column prop="level" label="级别" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="levelTagType(row.level)" size="small" effect="dark">
+            <el-tag :type="(levelTagType(row.level)) as TagType" size="small" effect="dark">
               {{ row.level?.toUpperCase() }}
             </el-tag>
           </template>
@@ -123,7 +123,7 @@
       <el-descriptions :column="2" border>
         <el-descriptions-item label="时间">{{ formatTime(currentLog?.timestamp) }}</el-descriptions-item>
         <el-descriptions-item label="级别">
-          <el-tag :type="levelTagType(currentLog?.level)" size="small" effect="dark">
+          <el-tag :type="(levelTagType(currentLog?.level)) as TagType" size="small" effect="dark">
             {{ currentLog?.level?.toUpperCase() }}
           </el-tag>
         </el-descriptions-item>
@@ -140,6 +140,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Search, Refresh, Download } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -177,10 +178,10 @@ const detailVisible = ref(false)
 const currentLog = ref<LogEntry | null>(null)
 
 const queryParams = reactive<QueryParams>({
-  keyword: '',
-  level: '',
+  keyword: 'primary',
+  level: 'primary',
   dateRange: null,
-  source: '',
+  source: 'primary',
   page: 1,
   pageSize: 50,
   orderBy: 'timestamp',
@@ -188,14 +189,14 @@ const queryParams = reactive<QueryParams>({
 })
 
 // ---------- 工具函数 ----------
-const levelTagType = (level?: string): '' | 'success' | 'warning' | 'danger' | 'info' => {
-  const map: Record<string, '' | 'success' | 'warning' | 'danger' | 'info'> = {
+const levelTagType = (level?: string): TagType => {
+  const map: Record<string, TagType> = {
     debug: 'info',
     info: 'success',
     warn: 'warning',
     error: 'danger',
   }
-  return map[level?.toLowerCase() || ''] || 'info'
+  return (map[level?.toLowerCase() || ''] || 'info') as TagType
 }
 
 const formatTime = (ts?: string): string => {
@@ -255,13 +256,13 @@ const handleReset = () => {
   fetchLogList()
 }
 
-const handleSortChange = ({ prop, order }: { prop: string; order: string | null }) => {
+const handleSortChange = ({ prop, order }: { prop: string | null; order: string | null }) => {
   queryParams.orderBy = prop || 'timestamp'
   queryParams.orderDir = order === 'ascending' ? 'asc' : 'desc'
   fetchLogList()
 }
 
-const handleViewDetail = (row: LogEntry) => {
+const handleViewDetail = (row: any) => {
   currentLog.value = row
   detailVisible.value = true
 }

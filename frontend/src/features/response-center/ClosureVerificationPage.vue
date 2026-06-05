@@ -43,7 +43,7 @@
         </el-table-column>
         <el-table-column prop="verification_status" label="验证状态" width="120" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusTagType(row.verification_status)" effect="dark" size="small">
+            <el-tag :type="(statusTagType(row.verification_status)) as TagType" effect="dark" size="small">
               {{ statusLabel(row.verification_status) }}
             </el-tag>
           </template>
@@ -105,7 +105,7 @@
           <el-descriptions-item label="工单标题">{{ currentRow.title }}</el-descriptions-item>
           <el-descriptions-item label="关联告警">{{ currentRow.alert_name || '-' }}</el-descriptions-item>
           <el-descriptions-item label="验证状态">
-            <el-tag :type="statusTagType(currentRow.verification_status)" effect="dark">
+            <el-tag :type="(statusTagType(currentRow.verification_status)) as TagType" effect="dark">
               {{ statusLabel(currentRow.verification_status) }}
             </el-tag>
           </el-descriptions-item>
@@ -138,6 +138,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -166,7 +167,7 @@ const activeTab = ref('pending')
 const verifyRemark = ref('')
 
 const queryForm = reactive({
-  title: '',
+  title: 'primary',
 })
 
 const pagination = reactive({
@@ -178,13 +179,13 @@ const pagination = reactive({
 // Local verification tracking
 const verificationMap = reactive<Record<string | number, { status: string; verifier: string; time: string; remark: string }>>({})
 
-function statusTagType(status: string): '' | 'success' | 'danger' | 'warning' {
-  const map: Record<string, '' | 'success' | 'danger' | 'warning'> = {
+function statusTagType(status: string): TagType {
+  const map: Record<string, TagType> = {
     pending: 'warning',
     verified: 'success',
     failed: 'danger',
   }
-  return map[status] || ''
+  return map[status] ?? undefined
 }
 
 function statusLabel(status: string): string {
@@ -201,7 +202,7 @@ function formatTime(t: string | undefined): string {
   return new Date(t).toLocaleString('zh-CN')
 }
 
-function getEffectiveStatus(row: TicketRecord): string {
+function getEffectiveStatus(row: any): string {
   const local = verificationMap[row.id]
   if (local) return local.status
   return row.verification_status || 'pending'
@@ -227,7 +228,7 @@ async function fetchData() {
     const data = res.data?.data ?? res.data ?? {}
     let items = data.items ?? data.records ?? data.list ?? []
     // Merge local verification state
-    items = items.map((row: TicketRecord) => {
+    items = items.map((row: any) => {
       const local = verificationMap[row.id]
       if (local) {
         return { ...row, verification_status: local.status, verifier: local.verifier, verification_time: local.time, verification_remark: local.remark }
@@ -262,13 +263,13 @@ function handleTabChange() {
   fetchData()
 }
 
-function handleDetail(row: TicketRecord) {
+function handleDetail(row: any) {
   currentRow.value = row
   verifyRemark.value = row.verification_remark || ''
   drawerVisible.value = true
 }
 
-function handleVerify(row: TicketRecord, status: 'verified' | 'failed') {
+function handleVerify(row: any, status: 'verified' | 'failed') {
   const action = status === 'verified' ? '通过' : '不通过'
   ElMessageBox.confirm(
     '确认将工单「' + row.title + '」标记为验证' + action + '？',

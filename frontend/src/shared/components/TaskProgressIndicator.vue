@@ -28,7 +28,7 @@
           <div class="task-content">
             <div class="task-title">
               <span>{{ task.title || task.name || task.type }}</span>
-              <el-tag :type="statusTagType(task.status)" size="small">{{ statusLabel(task.status) }}</el-tag>
+              <el-tag :type="(statusTagType(task.status)) as TagType" size="small">{{ statusLabel(task.status) }}</el-tag>
             </div>
             <div v-if="task.progress !== undefined" class="task-progress">
               <el-progress :percentage="task.progress" :status="task.status === 'failed' ? 'exception' : undefined" :stroke-width="4" />
@@ -42,6 +42,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -62,7 +63,7 @@ function statusColor(status: string) {
 }
 
 function statusTagType(status: string) {
-  return { running: '', completed: 'success', failed: 'danger', pending: 'warning' }[status] || 'info'
+  return { running: 'primary', completed: 'success', failed: 'danger', pending: 'warning' }[status] || 'info'
 }
 
 function statusLabel(status: string) {

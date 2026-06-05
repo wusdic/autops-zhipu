@@ -1,16 +1,17 @@
 <template>
-  <el-tag :type="typeMap[severity] || 'info'" effect="dark" :size="size">
+  <el-tag :type="(typeMap[severity] || 'info') as TagType" effect="dark" :size="size">
     {{ labelMap[severity] || severity }}
   </el-tag>
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 defineProps<{ severity: string; size?: 'large' | 'default' | 'small' }>()
 
-const typeMap: Record<string, string> = {
+const typeMap: Record<string, TagType> = {
   critical: 'danger', severe: 'danger',
   high: 'warning', major: 'warning',
-  warning: 'warning', medium: '', minor: '',
+  warning: 'warning', medium: 'primary', minor: 'primary',
   low: 'info', info: 'info', normal: 'success',
 }
 

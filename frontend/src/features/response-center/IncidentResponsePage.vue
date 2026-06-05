@@ -6,7 +6,7 @@
         <div class="header-left">
           <div class="autops-page-title">故障工作台</div>
           <span v-if="selectedAlert" class="header-alert-tag">
-            <el-tag :type="severityType(selectedAlert.severity)" effect="dark" size="small">
+            <el-tag :type="(severityType(selectedAlert.severity)) as TagType" effect="dark" size="small">
               {{ selectedAlert.severity }}
             </el-tag>
             <span class="alert-title-text">{{ selectedAlert.title }}</span>
@@ -42,7 +42,7 @@
       >
         <el-table-column prop="severity" label="级别" width="80">
           <template #default="{ row }">
-            <el-tag :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag>
+            <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="title" label="告警标题" min-width="240" show-overflow-tooltip />
@@ -126,7 +126,7 @@
             <el-descriptions :column="2" border size="small">
               <el-descriptions-item label="告警标题" :span="2">{{ selectedAlert.title }}</el-descriptions-item>
               <el-descriptions-item label="严重程度">
-                <el-tag :type="severityType(selectedAlert.severity)" size="small">{{ selectedAlert.severity }}</el-tag>
+                <el-tag :type="(severityType(selectedAlert.severity)) as TagType" size="small">{{ selectedAlert.severity }}</el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="状态">
                 <StatusBadge :status="selectedAlert.status" size="small" show-icon />
@@ -151,7 +151,7 @@
             <el-table stripe  :data="relatedAlerts" size="small" max-height="200">
               <el-table-column prop="severity" label="级别" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag>
+                  <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="title" label="告警标题" min-width="180" show-overflow-tooltip />
@@ -177,7 +177,7 @@
             <div class="related-logs-scroll">
               <div v-for="(log, idx) in relatedLogs" :key="idx" class="log-entry" :class="'log-level-' + (log.level || 'info').toLowerCase()">
                 <span class="log-time">{{ formatTime(log.timestamp || log.created_at) }}</span>
-                <el-tag :type="logLevelType(log.level)" size="small" style="margin: 0 8px">{{ log.level || 'info' }}</el-tag>
+                <el-tag :type="(logLevelType(log.level)) as TagType" size="small" style="margin: 0 8px">{{ log.level || 'info' }}</el-tag>
                 <span class="log-message">{{ log.message || log.content }}</span>
               </div>
               <el-empty v-if="!relatedLogs.length" description="暂无关联日志" :image-size="60" />
@@ -423,7 +423,7 @@
           <template #default="{ row }">
             <el-switch
               :model-value="row.enabled"
-              @change="(val: boolean) => toggleChannel(row.name, val)"
+              @change="(val: string | number | boolean) => toggleChannel(row.name, val as boolean)"
               size="small"
             />
           </template>
@@ -457,6 +457,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { MagicStick, Loading, Bell } from '@element-plus/icons-vue'
@@ -572,8 +573,7 @@ const relatedEvents = ref<any[]>([])
 
 // ─── Helpers ───
 function formatTime(t: string) {
-  return t ? new Date(t).toLocaleString('zh-CN') : ''
-}
+  return t ? new Date(t).toLocaleString('zh-CN') : 'primary'}
 
 function parseActionChain(s: string) {
   try {
@@ -583,14 +583,14 @@ function parseActionChain(s: string) {
   }
 }
 
-function severityType(severity: string) {
+function severityType(severity: string): TagType {
   const map: Record<string, string> = { critical: 'danger', high: 'danger', warning: 'warning', info: 'info' }
-  return map[severity] || 'info'
+  return (map[severity] || 'info') as TagType
 }
 
-function logLevelType(level?: string) {
-  const map: Record<string, string> = { error: 'danger', warning: 'warning', warn: 'warning', info: 'info', debug: 'info' }
-  return map[(level || 'info').toLowerCase()] || 'info'
+function logLevelType(level: string): TagType {
+  const map: Record<string, TagType> = { error: 'danger', warning: 'warning', warn: 'warning', info: 'info', debug: 'info' }
+  return (map[(level || 'info').toLowerCase()] ?? 'info') as TagType
 }
 
 function parseTriggerConditions(raw: string | undefined | any[]) {

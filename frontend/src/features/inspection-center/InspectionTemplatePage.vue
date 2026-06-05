@@ -134,6 +134,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -157,10 +158,10 @@ const pagination = reactive({
 })
 
 const form = reactive({
-  name: '',
-  check_type: '',
-  asset_type: '',
-  description: '',
+  name: 'primary',
+  check_type: 'primary',
+  asset_type: 'primary',
+  description: 'primary',
 })
 
 const formRules: FormRules = {

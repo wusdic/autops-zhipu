@@ -103,7 +103,7 @@
         </el-table-column>
         <el-table-column label="风险等级" width="110">
           <template #default="{ row }">
-            <el-tag :type="riskTagType(row.risk_level)" size="small" effect="dark">
+            <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small" effect="dark">
               {{ riskLabel(row.risk_level) }}
             </el-tag>
           </template>
@@ -150,7 +150,7 @@
           <div class="detail-content">{{ currentKnowledge.content || '暂无内容' }}</div>
         </el-descriptions-item>
         <el-descriptions-item label="风险等级">
-          <el-tag :type="riskTagType(currentKnowledge.risk_level)" size="small">
+          <el-tag :type="(riskTagType(currentKnowledge.risk_level)) as TagType" size="small">
             {{ riskLabel(currentKnowledge.risk_level) }}
           </el-tag>
         </el-descriptions-item>
@@ -160,6 +160,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { MagicStick, CircleCheckFilled } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -189,13 +190,13 @@ function riskLabel(level: string): string {
   return map[level] || level || '-'
 }
 
-function riskTagType(level: string): string {
+function riskTagType(level: string): TagType {
   const map: Record<string, string> = {
     high: 'danger',
     medium: 'warning',
     low: 'info',
   }
-  return map[level] || 'info'
+  return (map[level] || 'info') as TagType
 }
 
 // ─── Data Loading ────────────────────────────────────────────────────

@@ -85,7 +85,7 @@
         </el-table-column>
         <el-table-column label="风险等级" width="110">
           <template #default="{ row }">
-            <el-tag :type="riskTagType(row.risk_level)" size="small" effect="dark">
+            <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small" effect="dark">
               {{ riskLabel(row.risk_level) }}
             </el-tag>
           </template>
@@ -206,6 +206,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Plus, Search, SetUp, Monitor } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
@@ -234,8 +235,8 @@ const pagination = reactive({
 const formRef = ref<FormInstance>()
 
 const form = reactive({
-  tool_name: '',
-  description: '',
+  tool_name: 'primary',
+  description: 'primary',
   allowed_scope: [] as string[],
   risk_level: 'medium',
   requires_approval: false,
@@ -254,9 +255,9 @@ function riskLabel(level: string): string {
   return map[level] || level || '-'
 }
 
-function riskTagType(level: string): string {
+function riskTagType(level: string): TagType {
   const map: Record<string, string> = { high: 'danger', medium: 'warning', low: 'info' }
-  return map[level] || 'info'
+  return (map[level] || 'info') as TagType
 }
 
 function formatTime(t: string): string {
@@ -325,8 +326,8 @@ function openCreate() {
   isEditing.value = false
   editingId.value = ''
   Object.assign(form, {
-    tool_name: '',
-    description: '',
+    tool_name: 'primary',
+    description: 'primary',
     allowed_scope: [],
     risk_level: 'medium',
     requires_approval: false,

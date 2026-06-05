@@ -34,7 +34,7 @@
           style="flex: 1"
           :format="(p: number) => p + '分'"
         />
-        <el-tag :type="healthTagType(overallHealth)" size="large">
+        <el-tag :type="(healthTagType(overallHealth)) as TagType" size="large">
           {{ healthText(overallHealth) }}
         </el-tag>
       </div>
@@ -103,7 +103,7 @@
         <div class="autops-card" v-if="selectedSystem">
           <div class="autops-card-header">
             <div class="autops-card-title">{{ selectedSystem.name }} 详情</div>
-            <el-tag :type="healthTagTypeFromStr(selectedSystem.health)" size="small">
+            <el-tag :type="(healthTagTypeFromStr(selectedSystem.health)) as TagType" size="small">
               {{ healthLabel(selectedSystem.health) }}
             </el-tag>
           </div>
@@ -140,7 +140,7 @@
                 <el-table-column prop="title" label="告警" min-width="120" show-overflow-tooltip />
                 <el-table-column prop="severity" label="级别" width="60">
                   <template #default="{ row }">
-                    <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
+                    <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
                   </template>
                 </el-table-column>
               </el-table>
@@ -154,6 +154,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { CircleCheck, Warning, CircleClose, QuestionFilled } from '@element-plus/icons-vue'
@@ -198,7 +199,7 @@ const healthLabel = (h: string) => healthLabelMap[h] || h
 const severityMap: Record<string, string> = { critical: '严重', high: '高', medium: '中', low: '低' }
 const severityLabel = (s: string) => severityMap[s] || s
 const severityType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ critical: 'danger', high: 'warning', medium: '', low: 'info' } as any)[s] || 'info'
+  ({ critical: 'danger', high: 'warning', medium: 'primary', low: 'info' } as any)[s] || 'info'
 
 function healthColor(p: number) {
   if (p >= 90) return '#00b42a'
@@ -212,13 +213,13 @@ function healthText(p: number) {
   if (p >= 50) return '一般'
   return '较差'
 }
-function healthTagType(p: number): '' | 'success' | 'warning' | 'danger' | 'info' {
-  if (p >= 90) return 'success'
-  if (p >= 70) return ''
-  if (p >= 50) return 'warning'
-  return 'danger'
+function healthTagType(p: number): TagType {
+  if (p >= 90) return ('success') as TagType
+  if (p >= 70) return ('') as TagType
+  if (p >= 50) return ('warning') as TagType
+  return ('danger') as TagType
 }
-function healthTagTypeFromStr(h: string): '' | 'success' | 'warning' | 'danger' | 'info' {
+function healthTagTypeFromStr(h: string): TagType {
   return ({ healthy: 'success', warning: 'warning', critical: 'danger', unknown: 'info' } as any)[h] || 'info'
 }
 function healthColorStr(h: string) {

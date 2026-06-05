@@ -55,7 +55,7 @@
       </el-table-column>
       <el-table-column prop="status" label="状态" width="100" align="center">
         <template #default="{ row }">
-          <el-tag :type="statusTagType(row.status)" size="small" effect="light">
+          <el-tag :type="(statusTagType(row.status)) as TagType" size="small" effect="light">
             {{ statusLabel(row.status) }}
           </el-tag>
         </template>
@@ -79,6 +79,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh } from '@element-plus/icons-vue'
@@ -104,8 +105,8 @@ const statusMap: Record<string, { label: string; type: string }> = {
   warn: { label: '警告', type: 'warning' },
 }
 
-function statusTagType(status: string): string {
-  return statusMap[status]?.type ?? 'info'
+function statusTagType(status: string): TagType {
+  return (statusMap[status]?.type ?? 'info') as TagType
 }
 
 function statusLabel(status: string): string {

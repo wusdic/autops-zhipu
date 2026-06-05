@@ -11,7 +11,7 @@
     <div class="autops-toolbar">
       <el-button @click="$router.back()"><el-icon><ArrowLeft /></el-icon> 返回策略列表</el-button>
       <div style="flex:1" />
-      <el-tag v-if="policyDetail" :type="riskTagType(policyDetail.risk_level)" size="large">
+      <el-tag v-if="policyDetail" :type="(riskTagType(policyDetail.risk_level)) as TagType" size="large">
         风险: {{ policyDetail.risk_level || 'low' }}
       </el-tag>
     </div>
@@ -259,11 +259,11 @@
             <span style="font-weight:bold">预期执行动作链</span>
             <el-timeline>
               <el-timeline-item v-for="(act, idx) in simulateResult.actions" :key="idx"
-                :type="getActionColor(act.type)" :hollow="false" size="large"
+                :type="(getActionColor(act.type)) as TagType" :hollow="false" size="large"
                 :timestamp="'步骤 ' + idx+1">
                 <div class="action-preview-card">
                   <div class="action-preview-header">
-                    <el-tag :type="getActionColor(act.type)">{{ actionTypeLabel(act.type) }}</el-tag>
+                    <el-tag :type="(getActionColor(act.type)) as TagType">{{ actionTypeLabel(act.type) }}</el-tag>
                     <span style="font-weight:bold;margin-left:8px">{{ act.target || act.name || '-' }}</span>
                   </div>
                   <div v-if="act.params" class="action-params">
@@ -283,11 +283,11 @@
             <div class="flow-chain">
               <div v-for="(act, idx) in simulateResult.actions" :key="idx" class="flow-step">
                 <div class="flow-step-box" :style="{borderColor: getActionColor(act.type) === 'danger' ? '#f53f3f' : getActionColor(act.type) === 'warning' ? '#ff7d00' : '#165dff'}">
-                  <div class="flow-step-num">{{ idx + 1 }}</div>
+                  <div class="flow-step-num">{{ Number(idx) + 1 }}</div>
                   <div class="flow-step-name">{{ actionTypeLabel(act.type) }}</div>
                   <div class="flow-step-target">{{ act.target || '-' }}</div>
                 </div>
-                <div v-if="idx < simulateResult.actions.length - 1" class="flow-connector">
+                <div v-if="Number(idx) < simulateResult.actions.length - 1" class="flow-connector">
                   <div class="flow-line"></div>
                   <div class="flow-arrow-down">▼</div>
                 </div>
@@ -302,7 +302,7 @@
               <el-descriptions-item label="影响资产数">{{ simulateResult.impact.affected_assets || 1 }}</el-descriptions-item>
               <el-descriptions-item label="预估影响时间">{{ simulateResult.impact.estimated_duration || '未知' }}</el-descriptions-item>
               <el-descriptions-item label="影响等级">
-                <el-tag :type="riskTagType(simulateResult.impact.impact_level || 'low')" size="small">
+                <el-tag :type="(riskTagType(simulateResult.impact.impact_level || 'low')) as TagType" size="small">
                   {{ simulateResult.impact.impact_level || 'low' }}
                 </el-tag>
               </el-descriptions-item>
@@ -317,6 +317,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -338,19 +339,19 @@ const assetOptions = ref<any[]>([])
 const selectedAsset = ref<any>(null)
 
 const simParams = reactive({
-  asset_id: '',
-  alert_type: '',
-  severity: '',
-  extra_json: '',
+  asset_id: 'primary',
+  alert_type: 'primary',
+  severity: 'primary',
+  extra_json: 'primary',
 })
 
 const simMetrics = reactive<{ key: string; value: number; unit: string }[]>([
   { key: 'cpu_usage', value: 95, unit: '%' },
 ])
 
-function riskTagType(level: string) {
+function riskTagType(level: string): TagType {
   const map: Record<string, string> = { low: 'info', medium: 'warning', high: 'danger', critical: 'danger' }
-  return map[level] || 'info'
+  return (map[level] || 'info') as TagType
 }
 
 function triggerLabel(s: string) {
@@ -365,8 +366,8 @@ function actionTypeLabel(t: string) {
   return ({ script: '执行脚本', playbook: '执行Playbook', notification: '发送通知', ticket: '创建工单', suppress: '抑制告警' })[t] || t
 }
 
-function getActionColor(t: string) {
-  return ({ script: 'warning', playbook: 'danger', notification: 'primary', ticket: 'success', suppress: 'info' })[t] || 'primary'
+function getActionColor(t: string): TagType {
+  return (({ script: 'warning', playbook: 'danger', notification: 'primary', ticket: 'success', suppress: 'info' } as Record<string, TagType>)[t] ?? 'primary') as TagType
 }
 
 async function loadPolicy() {

@@ -40,7 +40,7 @@
         <template #default="{ row }"><el-tag :type="row.status==='active'?'success':row.status==='draft'?'info':'warning'" size="small">{{ statusLabel(row.status) }}</el-tag></template>
       </el-table-column>
       <el-table-column prop="risk_level" label="风险" width="90">
-        <template #default="{ row }"><el-tag :type="riskType(row.risk_level)" size="small">{{ row.risk_level || 'low' }}</el-tag></template>
+        <template #default="{ row }"><el-tag :type="(riskType(row.risk_level)) as TagType" size="small">{{ row.risk_level || 'low' }}</el-tag></template>
       </el-table-column>
       <el-table-column label="关联策略" width="90" align="center">
         <template #default="{ row }">{{ row.policy_count || 0 }}</template>
@@ -124,7 +124,7 @@
         <el-descriptions :column="2" border>
           <el-descriptions-item label="名称">{{ detail.name }}</el-descriptions-item>
           <el-descriptions-item label="状态"><el-tag :type="detail.status==='active'?'success':'info'" size="small">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
-          <el-descriptions-item label="风险等级"><el-tag :type="riskType(detail.risk_level)" size="small">{{ detail.risk_level }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="风险等级"><el-tag :type="(riskType(detail.risk_level)) as TagType" size="small">{{ detail.risk_level }}</el-tag></el-descriptions-item>
           <el-descriptions-item label="步骤数">{{ detail.steps?.length || 0 }}</el-descriptions-item>
           <el-descriptions-item label="描述" :span="2">{{ detail.description || '-' }}</el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ fmt(detail.created_at) }}</el-descriptions-item>
@@ -165,6 +165,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Delete } from '@element-plus/icons-vue'
@@ -174,7 +175,7 @@ import { API } from '@/shared/api/routes'
 const router = useRouter()
 
 const stats = reactive({ total: 0, active: 0, withScripts: 0, avgSteps: 0 })
-const filters = reactive({ keyword: '', status: '', risk_level: '' })
+const filters = reactive({ keyword: 'primary', status: 'primary', risk_level: 'primary'})
 const items = ref<any[]>([])
 const loading = ref(false)
 const page = ref(1)
@@ -185,7 +186,7 @@ const scripts = ref<any[]>([])
 const showDialog = ref(false)
 const editing = ref(false)
 const editId = ref('')
-const form = reactive({ name: '', description: '', status: 'draft', risk_level: 'low', steps: [] as any[] })
+const form = reactive({ name: 'primary', description: 'primary', status: 'draft', risk_level: 'low', steps: [] as any[] })
 
 const showDetail = ref(false)
 const detail = ref<any>(null)
@@ -227,7 +228,7 @@ async function loadScripts() {
 }
 
 function addStep() {
-  form.steps.push({ name: '', script_id: '', timeout: 300, on_failure: 'stop', params_json: '', condition: '' })
+  form.steps.push({ name: 'primary', script_id: 'primary', timeout: 300, on_failure: 'stop', params_json: 'primary', condition: 'primary'})
 }
 
 function moveStep(idx: number, dir: number) {
@@ -301,7 +302,7 @@ async function remove(row: any) {
 
 function getScriptName(id: string) { return scripts.value.find(s => s.id === id)?.name || id || '-' }
 function statusLabel(s: string) { return ({ draft:'草稿', active:'已激活', deprecated:'已废弃' })[s] || s }
-function riskType(r: string) { return ({ low:'info', medium:'warning', high:'danger', critical:'danger' })[r] || 'info' }
+function riskType(r: string): TagType { return (({ low:'info', medium:'warning', high:'danger', critical:'danger' })[r] ?? 'info') as TagType }
 function fmt(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '-' }
 
 onMounted(() => { load(); loadScripts() })

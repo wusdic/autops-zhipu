@@ -17,7 +17,7 @@
           <el-descriptions-item label="巡检任务ID">{{ taskDetail?.id?.slice(0, 8) || '-' }}</el-descriptions-item>
           <el-descriptions-item label="巡检模板">{{ taskDetail?.template_name || taskDetail?.inspection_type || '-' }}</el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="statusTag(taskDetail?.status)" effect="dark">{{ statusLabel(taskDetail?.status) }}</el-tag>
+            <el-tag :type="(statusTag(taskDetail?.status)) as TagType" effect="dark">{{ statusLabel(taskDetail?.status) }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="资产数量">{{ taskDetail?.asset_count || taskDetail?.target_assets?.length || 0 }}</el-descriptions-item>
           <el-descriptions-item label="开始时间">{{ formatTime(taskDetail?.started_at) }}</el-descriptions-item>
@@ -80,12 +80,12 @@
           </el-table-column>
           <el-table-column prop="result" label="结果" width="80">
             <template #default="{ row }">
-              <el-tag :type="resultTag(row.result)" size="small">{{ resultLabel(row.result) }}</el-tag>
+              <el-tag :type="(resultTag(row.result)) as TagType" size="small">{{ resultLabel(row.result) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="severity" label="严重度" width="80">
             <template #default="{ row }">
-              <el-tag v-if="row.result === 'fail'" :type="severityTag(row.severity)" size="small">{{ row.severity || '-' }}</el-tag>
+              <el-tag v-if="row.result === 'fail'" :type="(severityTag(row.severity)) as TagType" size="small">{{ row.severity || '-' }}</el-tag>
               <span v-else>-</span>
             </template>
           </el-table-column>
@@ -115,6 +115,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Refresh, Warning, Document, DataAnalysis, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
@@ -154,7 +155,7 @@ async function fetchDetail() {
   if (!taskId.value) return
   loading.value = true
   try {
-    const res = await api.get(API.INSPECTION_TASKS + '/' + taskId.value)
+    const res = await api.get(API.INSPECTION.TASKS + '/' + taskId.value)
     const data = res.data
     if (data?.code === 0) {
       taskDetail.value = data.data
@@ -179,7 +180,7 @@ async function fetchDetail() {
 async function rerunInspection() {
   rerunning.value = true
   try {
-    await api.post(API.INSPECTION_TASKS, { template_id: taskDetail.value?.template_id, asset_ids: taskDetail.value?.target_assets })
+    await api.post(API.INSPECTION.TASKS, { template_id: taskDetail.value?.template_id, asset_ids: taskDetail.value?.target_assets })
     ElMessage.success('已触发重新巡检')
   } catch (e) {
     ElMessage.error('触发失败')
@@ -192,25 +193,25 @@ function handleExpand(row: any) { /* expanded */ }
 
 function goBack() { router.back() }
 
-function statusTag(s: string) {
-  const map: Record<string, string> = { running: 'warning', completed: 'success', failed: 'danger', pending: 'info' }
-  return map[s] || 'info'
+function statusTag(s: string): TagType {
+  const map: Record<string, TagType> = { running: 'warning', completed: 'success', failed: 'danger', pending: 'info' }
+  return (map[s] || 'info') as TagType
 }
 function statusLabel(s: string) {
   const map: Record<string, string> = { running: '执行中', completed: '已完成', failed: '失败', pending: '待执行' }
   return map[s] || s || '-'
 }
-function resultTag(r: string) {
-  const map: Record<string, string> = { pass: 'success', fail: 'danger', warning: 'warning', skip: 'info' }
-  return map[r] || 'info'
+function resultTag(r: string): TagType {
+  const map: Record<string, TagType> = { pass: 'success', fail: 'danger', warning: 'warning', skip: 'info' }
+  return (map[r] || 'info') as TagType
 }
 function resultLabel(r: string) {
   const map: Record<string, string> = { pass: '通过', fail: '失败', warning: '警告', skip: '跳过' }
   return map[r] || r || '-'
 }
-function severityTag(s: string) {
-  const map: Record<string, string> = { critical: 'danger', high: 'danger', medium: 'warning', low: 'info' }
-  return map[s] || 'info'
+function severityTag(s: string): TagType {
+  const map: Record<string, TagType> = { critical: 'danger', high: 'danger', medium: 'warning', low: 'info' }
+  return (map[s] || 'info') as TagType
 }
 function typeLabel(t: string) {
   const map: Record<string, string> = { page: '页面巡检', log: '日志巡检', config: '配置巡检', performance: '性能巡检', security: '安全巡检', baseline: '基线巡检' }

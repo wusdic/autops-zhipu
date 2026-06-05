@@ -16,7 +16,7 @@
           <div class="autops-card">
             <div class="autops-card-header">
               <div class="autops-card-title">异常信息</div>
-              <el-tag :type="severityType(anomaly.severity)" size="large">
+              <el-tag :type="(severityType(anomaly.severity)) as TagType" size="large">
                 {{ severityLabel(anomaly.severity) }}
               </el-tag>
             </div>
@@ -26,12 +26,12 @@
                   {{ anomaly.title }}
                 </el-descriptions-item>
                 <el-descriptions-item label="严重级别">
-                  <el-tag :type="severityType(anomaly.severity)" size="small">
+                  <el-tag :type="(severityType(anomaly.severity)) as TagType" size="small">
                     {{ severityLabel(anomaly.severity) }}
                   </el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="状态">
-                  <el-tag :type="statusType(anomaly.status)" size="small">
+                  <el-tag :type="(statusType(anomaly.status)) as TagType" size="small">
                     {{ statusLabel(anomaly.status) }}
                   </el-tag>
                 </el-descriptions-item>
@@ -65,7 +65,7 @@
                   v-for="(item, idx) in timeline"
                   :key="idx"
                   :timestamp="item.time"
-                  :type="timelineType(item.type)"
+                  :type="(timelineType(item.type)) as TagType"
                   placement="top"
                 >
                   <div style="font-weight: 500">{{ item.action }}</div>
@@ -90,7 +90,7 @@
                 <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
                 <el-table-column prop="severity" label="级别" width="80">
                   <template #default="{ row }">
-                    <el-tag :type="severityType(row.severity)" size="small">
+                    <el-tag :type="(severityType(row.severity)) as TagType" size="small">
                       {{ severityLabel(row.severity) }}
                     </el-tag>
                   </template>
@@ -98,7 +98,7 @@
                 <el-table-column prop="asset_name" label="资产" width="140" show-overflow-tooltip />
                 <el-table-column prop="status" label="状态" width="90">
                   <template #default="{ row }">
-                    <el-tag :type="alertStatusType(row.status)" size="small">
+                    <el-tag :type="(alertStatusType(row.status)) as TagType" size="small">
                       {{ alertStatusLabel(row.status) }}
                     </el-tag>
                   </template>
@@ -212,6 +212,7 @@
  </div>
 </template>
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -237,13 +238,13 @@ const assigneeId = ref('')
 const severityMap: Record<string, string> = { critical: '严重', high: '高', medium: '中', low: '低' }
 const severityLabel = (s: string) => severityMap[s] || s
 const severityType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ critical: 'danger', high: 'warning', medium: '', low: 'info' } as any)[s] || 'info'
+  ({ critical: 'danger', high: 'warning', medium: 'primary', low: 'info' } as any)[s] || 'info'
 
 // Status helpers
 const statusMap: Record<string, string> = { open: '新建', acknowledged: '已确认', assigned: '已分配', closed: '已关闭' }
 const statusLabel = (s: string) => statusMap[s] || s
 const statusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ open: 'danger', acknowledged: 'warning', assigned: '', closed: 'success' } as any)[s] || 'info'
+  ({ open: 'danger', acknowledged: 'warning', assigned: 'primary', closed: 'success' } as any)[s] || 'info'
 
 // Alert status helpers
 const alertStatusLabel = (s: string) => ({ firing: '告警中', resolved: '已恢复', acknowledged: '已确认', suppressed: '已抑制' } as any)[s] || s
@@ -252,7 +253,7 @@ const alertStatusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'in
 
 // Timeline type
 const timelineType = (t: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ created: 'primary', acknowledged: 'warning', assigned: '', escalated: 'danger', closed: 'success' } as any)[t] || 'info'
+  ({ created: 'primary', acknowledged: 'warning', assigned: 'primary', escalated: 'danger', closed: 'success' } as any)[t] || 'info'
 
 // Fetch anomaly detail
 async function fetchAnomaly() {
@@ -290,10 +291,10 @@ async function fetchRelatedAlerts(detail: Record<string, any>) {
 // Build timeline from anomaly data
 function buildTimeline(data: Record<string, any>) {
   const items: any[] = []
-  if (data.created_at) items.push({ time: data.created_at, action: '异常创建', type: 'created', detail: data.source ? '来源: ' + data.source : '' })
-  if (data.acknowledged_at) items.push({ time: data.acknowledged_at, action: '已确认', type: 'acknowledged', detail: data.acknowledged_by ? '操作人: ' + data.acknowledged_by : '' })
-  if (data.assigned_at) items.push({ time: data.assigned_at, action: '已分配', type: 'assigned', detail: data.assignee_name ? '处理人: ' + data.assignee_name : '' })
-  if (data.escalated_at) items.push({ time: data.escalated_at, action: '已升级', type: 'escalated', detail: '' })
+  if (data.created_at) items.push({ time: data.created_at, action: '异常创建', type: 'created', detail: data.source ? '来源: ' + data.source : 'primary'})
+  if (data.acknowledged_at) items.push({ time: data.acknowledged_at, action: '已确认', type: 'acknowledged', detail: data.acknowledged_by ? '操作人: ' + data.acknowledged_by : 'primary'})
+  if (data.assigned_at) items.push({ time: data.assigned_at, action: '已分配', type: 'assigned', detail: data.assignee_name ? '处理人: ' + data.assignee_name : 'primary'})
+  if (data.escalated_at) items.push({ time: data.escalated_at, action: '已升级', type: 'escalated', detail: 'primary'})
   if (data.closed_at) items.push({ time: data.closed_at, action: '已关闭', type: 'closed', detail: data.close_reason || '' })
   // Sort by time desc
   items.sort((a, b) => (b.time || '').localeCompare(a.time || ''))

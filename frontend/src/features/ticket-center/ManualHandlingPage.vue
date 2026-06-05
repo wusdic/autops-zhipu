@@ -89,12 +89,12 @@
         <el-table-column prop="title" label="处置标题" min-width="250" />
         <el-table-column prop="priority" label="优先级" width="90">
           <template #default="{ row }">
-            <el-tag :type="priorityType(row.priority)" size="small">{{ priorityLabel(row.priority) }}</el-tag>
+            <el-tag :type="(priorityType(row.priority)) as TagType" size="small">{{ priorityLabel(row.priority) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="statusType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+            <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="handler" label="处置人" width="100" />
@@ -147,6 +147,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Plus, Refresh, ArrowLeft, Clock, Loading, CircleCheck, Timer } from '@element-plus/icons-vue'
@@ -159,12 +160,12 @@ const items = ref<any[]>([])
 const detailData = ref<any>({})
 
 const stats = reactive({ pending: 0, in_progress: 0, completed_today: 0, avg_duration: 0 })
-const filters = reactive({ status: '', priority: '', handler: '' })
+const filters = reactive({ status: 'primary', priority: 'primary', handler: 'primary'})
 const pagination = reactive({ page: 1, size: 20, total: 0 })
 
-function priorityType(p: string) { return { urgent: 'danger', high: 'warning', medium: '', low: 'info' }[p] || 'info' }
+function priorityType(p: string): TagType { return ({ urgent: 'danger', high: 'warning', medium: 'primary', low: 'info' }[p] || 'info') as TagType }
 function priorityLabel(p: string) { return { urgent: '紧急', high: '高', medium: '中', low: '低' }[p] || p }
-function statusType(s: string) { return { pending: 'warning', in_progress: 'primary', completed: 'success', closed: 'info' }[s] || 'info' }
+function statusType(s: string): TagType { return ({ pending: 'warning', in_progress: 'primary', completed: 'success', closed: 'info' }[s] || 'info') as TagType }
 function statusLabel(s: string) { return { pending: '待处置', in_progress: '进行中', completed: '已完成', closed: '已关闭' }[s] || s }
 
 async function loadData() {

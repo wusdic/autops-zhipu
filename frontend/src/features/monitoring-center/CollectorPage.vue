@@ -57,7 +57,7 @@
         <el-table-column prop="name" label="名称" min-width="150" show-overflow-tooltip />
         <el-table-column prop="collector_type" label="类型" width="110">
           <template #default="{ row }">
-            <el-tag size="small" :type="typeTagMap[row.collector_type] || 'info'">
+            <el-tag size="small" :type="(typeTagMap[row.collector_type] || 'info') as TagType">
               {{ formatCollectorType(row.collector_type) }}
             </el-tag>
           </template>
@@ -373,7 +373,7 @@
               <template #default="{ row }">
                 <el-tag
                   size="small"
-                  :type="edgeStatusTagType(row.status)"
+                  :type="(edgeStatusTagType(row.status)) as TagType"
                 >
                   {{ edgeStatusLabel(row.status) }}
                 </el-tag>
@@ -428,7 +428,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="edgeTaskStatusTagType(row.status)">{{ row.status || '-' }}</el-tag>
+            <el-tag size="small" :type="(edgeTaskStatusTagType(row.status)) as TagType">{{ row.status || '-' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="created_at" label="创建时间" width="170">
@@ -443,6 +443,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Refresh, VideoPlay } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -515,8 +516,8 @@ const collectorTypes = [
   { label: '证书', value: 'cert' },
 ]
 
-const typeTagMap: Record<string, string> = {
-  ssh: '', wmi: 'success', http: 'warning', tcp: 'info', db: 'danger', cert: '',
+const typeTagMap: Record<string, TagType> = {
+  ssh: 'primary', wmi: 'success', http: 'warning', tcp: 'info', db: 'danger', cert: 'primary',
 }
 
 const jobTypeMap: Record<string, string> = {
@@ -530,16 +531,16 @@ const jobTypeMap: Record<string, string> = {
 const collectorLoading = ref(false)
 const collectors = ref<Collector[]>([])
 const collectorFilters = reactive({
-  search: '',
-  collector_type: '',
-  status: '',
+  search: 'primary',
+  collector_type: 'primary',
+  status: 'primary',
 })
 const collectorPagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
 // ---------- Job State ----------
 const jobLoading = ref(false)
 const jobs = ref<CollectionJob[]>([])
-const jobFilters = reactive({ status: '' })
+const jobFilters = reactive({ status: 'primary'})
 const jobPagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
 // ---------- Dialog State ----------
@@ -557,10 +558,10 @@ const jobLogs = ref<string>('')
 const showTriggerDialog = ref(false)
 const triggering = ref(false)
 const triggerForm = reactive({
-  collector_id: '',
-  asset_id: '',
+  collector_id: 'primary',
+  asset_id: 'primary',
   job_type: 'full_collect',
-  params: '',
+  params: 'primary',
 })
 
 // ---------- Tab State ----------
@@ -582,13 +583,13 @@ function formatTime(t: string | undefined | null): string {
   return new Date(t).toLocaleString('zh-CN')
 }
 
-function formatCollectorType(type: string): string {
+function formatCollectorType(type: string): TagType {
   const found = collectorTypes.find(t => t.value === type)
-  return found ? found.label : type
+  return (found ? found.label : type) as TagType
 }
 
-function formatJobType(type: string): string {
-  return jobTypeMap[type] || type
+function formatJobType(type: string): TagType {
+  return (jobTypeMap[type] || type) as TagType
 }
 
 function calcRunningDuration(startedAt: string): string {
@@ -638,7 +639,7 @@ async function deleteCollector(id: string) {
 }
 
 // ---------- Collector Detail ----------
-async function openDetailDialog(row: Collector) {
+async function openDetailDialog(row: any) {
   currentCollector.value = row
   showDetailDialog.value = true
   healthChecks.value = []
@@ -656,7 +657,7 @@ async function openDetailDialog(row: Collector) {
 }
 
 // ---------- Trigger Single Collector ----------
-function triggerSingleCollector(row: Collector) {
+function triggerSingleCollector(row: any) {
   triggerForm.collector_id = row.id
   triggerForm.asset_id = ''
   triggerForm.job_type = 'full_collect'
@@ -732,7 +733,7 @@ async function loadJobs() {
   }
 }
 
-async function viewJobResult(job: CollectionJob) {
+async function viewJobResult(job: any) {
   currentJob.value = job
   jobResultData.value = null
   showResultDialog.value = true
@@ -750,7 +751,7 @@ async function viewJobResult(job: CollectionJob) {
   }
 }
 
-async function viewJobLogs(job: CollectionJob) {
+async function viewJobLogs(job: any) {
   currentJob.value = job
   jobLogs.value = ''
   showLogDialog.value = true
@@ -768,7 +769,7 @@ async function viewJobLogs(job: CollectionJob) {
   }
 }
 
-async function retryJob(job: CollectionJob) {
+async function retryJob(job: any) {
   try {
     await ElMessageBox.confirm(
       '确定重试采集任务「' + job.collector_name + ' - ' + job.asset_name + '」？',
@@ -800,12 +801,12 @@ const edgeOfflineCount = computed(() => {
 })
 
 // ---------- Edge Helpers ----------
-function edgeStatusTagType(status: string): string {
+function edgeStatusTagType(status: string): TagType {
   switch (status) {
-    case 'healthy': return 'success'
-    case 'degraded': return 'warning'
-    case 'offline': return 'danger'
-    default: return 'info'
+    case 'healthy': return ('success') as TagType
+    case 'degraded': return ('warning') as TagType
+    case 'offline': return ('danger') as TagType
+    default: return ('info') as TagType
   }
 }
 
@@ -818,13 +819,13 @@ function edgeStatusLabel(status: string): string {
   }
 }
 
-function edgeTaskStatusTagType(status: string): string {
+function edgeTaskStatusTagType(status: string): TagType {
   switch (status) {
-    case 'success': return 'success'
-    case 'running': return ''
-    case 'pending': return 'info'
-    case 'failed': return 'danger'
-    default: return 'info'
+    case 'success': return ('success') as TagType
+    case 'running': return ('') as TagType
+    case 'pending': return ('info') as TagType
+    case 'failed': return ('danger') as TagType
+    default: return ('info') as TagType
   }
 }
 
@@ -844,7 +845,7 @@ async function loadEdgeCollectors() {
   }
 }
 
-async function viewEdgeStatus(row: EdgeCollector) {
+async function viewEdgeStatus(row: any) {
   edgeStatusData.value = null
   showEdgeStatusDialog.value = true
   try {
@@ -857,7 +858,7 @@ async function viewEdgeStatus(row: EdgeCollector) {
   }
 }
 
-async function viewEdgeTasks(row: EdgeCollector) {
+async function viewEdgeTasks(row: any) {
   currentEdgeCollector.value = row
   edgeTasks.value = []
   edgeTasksLoading.value = true

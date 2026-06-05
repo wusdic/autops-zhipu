@@ -51,7 +51,7 @@
         <el-table stripe :data="logs" v-loading="loading"@row-click="openDetail" style="cursor:pointer">
           <el-table-column prop="action" label="操作" width="180">
             <template #default="{ row }">
-              <el-tag :type="getActionTagType(row.action)" size="small">{{ row.action }}</el-tag>
+              <el-tag :type="(getActionTagType(row.action)) as TagType" size="small">{{ row.action }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="resource_type" label="资源类型" width="120" />
@@ -75,13 +75,13 @@
               :key="log.id"
               :timestamp="formatTime(log.created_at)"
               placement="top"
-              :type="getTimelineColor(log.action)"
+              :type="(getTimelineColor(log.action)) as TagType"
               @click="openDetail(log)"
               style="cursor:pointer"
             >
               <div class="autops-card timeline-card">
                 <div class="timeline-header">
-                  <el-tag :type="getActionTagType(log.action)" size="small">{{ log.action }}</el-tag>
+                  <el-tag :type="(getActionTagType(log.action)) as TagType" size="small">{{ log.action }}</el-tag>
                   <span class="timeline-user">{{ log.user_id }}</span>
                   <span class="timeline-resource">{{ log.resource_type }} / {{ log.resource_id }}</span>
                 </div>
@@ -113,7 +113,7 @@
       <template v-if="detailEntry">
         <el-descriptions :column="1" border size="default">
           <el-descriptions-item label="操作">
-            <el-tag :type="getActionTagType(detailEntry.action)">{{ detailEntry.action }}</el-tag>
+            <el-tag :type="(getActionTagType(detailEntry.action)) as TagType">{{ detailEntry.action }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="资源类型">{{ detailEntry.resource_type }}</el-descriptions-item>
           <el-descriptions-item label="资源ID">{{ detailEntry.resource_id }}</el-descriptions-item>
@@ -133,6 +133,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Download } from '@element-plus/icons-vue'
@@ -148,7 +149,7 @@ const total = ref(0)
 const dateRange = ref<any>(null)
 const viewMode = ref<'table' | 'timeline'>('table')
 
-const filters = reactive({ user: '', action: '', resource_type: '' })
+const filters = reactive({ user: 'primary', action: 'primary', resource_type: 'primary'})
 
 // Filter options
 const actionTypes = ['create', 'update', 'delete', 'login', 'logout', 'execute', 'import', 'export', 'config_change']
@@ -158,7 +159,7 @@ const resourceTypes = ['user', 'role', 'asset', 'policy', 'script', 'alert', 'ap
 const drawerVisible = ref(false)
 const detailEntry = ref<any>(null)
 
-function formatTime(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '' }
+function formatTime(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : 'primary'}
 
 function formatDetail(detail: any) {
   if (!detail) return ''
@@ -168,17 +169,17 @@ function formatDetail(detail: any) {
   return JSON.stringify(detail, null, 2)
 }
 
-function getActionTagType(action: string): '' | 'success' | 'warning' | 'danger' | 'info' {
+function getActionTagType(action: string): TagType {
   if (!action) return 'info'
   const a = action.toLowerCase()
   if (a.includes('delete') || a.includes('remove')) return 'danger'
   if (a.includes('create') || a.includes('add')) return 'success'
   if (a.includes('update') || a.includes('edit') || a.includes('change')) return 'warning'
-  if (a.includes('login')) return ''
+  if (a.includes('login')) return undefined
   return 'info'
 }
 
-function getTimelineColor(action: string): '' | 'success' | 'warning' | 'danger' | 'info' | 'primary' {
+function getTimelineColor(action: string): TagType {
   if (!action) return 'info'
   const a = action.toLowerCase()
   if (a.includes('delete')) return 'danger'

@@ -68,7 +68,7 @@
         </el-table-column>
         <el-table-column prop="risk_level" label="风险级别" width="100" sortable>
           <template #default="{ row }">
-            <el-tag :type="riskTag(row.risk_level)" effect="dark" size="small">{{ riskLabel(row.risk_level) }}</el-tag>
+            <el-tag :type="(riskTag(row.risk_level)) as TagType" effect="dark" size="small">{{ riskLabel(row.risk_level) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="risk_factors" label="风险因素" min-width="200" show-overflow-tooltip>
@@ -113,7 +113,7 @@
           <el-descriptions-item label="资产名称">{{ currentItem.asset_name }}</el-descriptions-item>
           <el-descriptions-item label="资产类型">{{ assetTypeLabel(currentItem.asset_type) }}</el-descriptions-item>
           <el-descriptions-item label="风险级别">
-            <el-tag :type="riskTag(currentItem.risk_level)" effect="dark">{{ riskLabel(currentItem.risk_level) }}</el-tag>
+            <el-tag :type="(riskTag(currentItem.risk_level)) as TagType" effect="dark">{{ riskLabel(currentItem.risk_level) }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="可能性">{{ currentItem.likelihood || '-' }} / 5</el-descriptions-item>
           <el-descriptions-item label="影响度">{{ currentItem.impact || '-' }} / 5</el-descriptions-item>
@@ -137,6 +137,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { Refresh, Download } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -237,9 +238,9 @@ function riskLabel(l: string) {
   const map: Record<string, string> = { high: '高', medium: '中', low: '低', unknown: '未知' }
   return map[l] || l || '-'
 }
-function riskTag(l: string) {
-  const map: Record<string, string> = { high: 'danger', medium: 'warning', low: 'success', unknown: 'info' }
-  return map[l] || 'info'
+function riskTag(l: string): TagType {
+  const map: Record<string, TagType> = { high: 'danger', medium: 'warning', low: 'success', unknown: 'info' }
+  return (map[l] || 'info') as TagType
 }
 function assetTypeLabel(t: string) {
   const map: Record<string, string> = { linux: 'Linux', windows: 'Windows', database: '数据库', web: 'Web服务' }

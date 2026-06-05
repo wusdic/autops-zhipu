@@ -114,7 +114,7 @@ import client from '@/shared/api/client'
 const router = useRouter()
 const loading = ref(false)
 const reports = ref<any[]>([])
-const filters = ref({ standard: '' })
+const filters = ref({ standard: 'primary'})
 const pagination = reactive({ page: 1, size: 10, total: 0 })
 
 const complianceScore = ref(0)

@@ -38,13 +38,13 @@
           <el-table-column prop="title" label="异常标题" min-width="200" show-overflow-tooltip />
           <el-table-column prop="severity" label="级别" width="80">
             <template #default="{ row }">
-              <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
+              <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="asset_name" label="资产" width="140" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="90">
             <template #default="{ row }">
-              <el-tag :type="statusType(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+              <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
         </el-table>
@@ -89,7 +89,7 @@
               <el-table-column prop="asset_type" label="资产类型" width="120" />
               <el-table-column prop="impact_type" label="影响类型" width="100">
                 <template #default="{ row }">
-                  <el-tag :type="impactTypeTag(row.impact_type)" size="small">{{ row.impact_type }}</el-tag>
+                  <el-tag :type="(impactTypeTag(row.impact_type)) as TagType" size="small">{{ row.impact_type }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="impact_level" label="影响程度" width="100">
@@ -114,7 +114,7 @@
             <div class="blast-grid">
               <div v-for="(level, lidx) in blastRadius" :key="lidx" class="blast-level">
                 <div class="blast-level-title">
-                  <el-tag :type="levelColor(lidx)" size="small">第 {{ lidx + 1 }} 层</el-tag>
+                  <el-tag :type="(levelColor(lidx)) as TagType" size="small">第 {{ lidx + 1 }} 层</el-tag>
                   <span style="margin-left: 8px; font-weight: 500">{{ level.length }} 个资产</span>
                 </div>
                 <div class="blast-nodes">
@@ -189,6 +189,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { anomalyService } from '@/shared/api'
@@ -222,19 +223,19 @@ const impactStats = reactive({
 const severityMap: Record<string, string> = { critical: '严重', high: '高', medium: '中', low: '低' }
 const severityLabel = (s: string) => severityMap[s] || s
 const severityType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ critical: 'danger', high: 'warning', medium: '', low: 'info' } as any)[s] || 'info'
+  ({ critical: 'danger', high: 'warning', medium: 'primary', low: 'info' } as any)[s] || 'info'
 
 const statusMap: Record<string, string> = { open: '新建', acknowledged: '已确认', assigned: '已分配', closed: '已关闭' }
 const statusLabel = (s: string) => statusMap[s] || s
 const statusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ open: 'danger', acknowledged: 'warning', assigned: '', closed: 'success' } as any)[s] || 'info'
+  ({ open: 'danger', acknowledged: 'warning', assigned: 'primary', closed: 'success' } as any)[s] || 'info'
 
 const levelLabel = (l: number) => ['低', '中', '高', '严重'][l] || '-'
 const levelColor = (l: number) => ['#00b42a', '#165dff', '#ff7d00', '#f53f3f'][l] || '#86909c'
 const severityFromLevel = (l: number) => (['low', 'medium', 'high', 'critical'] as const)[l] || 'low'
 
 const impactTypeTag = (t: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ direct: 'danger', indirect: 'warning', cascade: '' } as any)[t] || 'info'
+  ({ direct: 'danger', indirect: 'warning', cascade: 'primary'} as any)[t] || 'info'
 
 // Fetch anomaly list
 async function fetchAnomalies() {

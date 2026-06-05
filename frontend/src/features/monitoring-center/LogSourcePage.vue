@@ -56,7 +56,7 @@
           <el-table-column prop="name" label="名称" min-width="180" show-overflow-tooltip />
           <el-table-column prop="type" label="类型" width="100" align="center">
             <template #default="{ row }">
-              <el-tag :type="typeTagType(row.type)" size="small" effect="plain">
+              <el-tag :type="(typeTagType(row.type)) as TagType" size="small" effect="plain">
                 {{ typeLabel(row.type) }}
               </el-tag>
             </template>
@@ -113,6 +113,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
@@ -123,9 +124,9 @@ const loading = ref(false)
 const tableData = ref<any[]>([])
 
 const filters = reactive({
-  keyword: '',
-  type: '',
-  status: '',
+  keyword: 'primary',
+  type: 'primary',
+  status: 'primary',
 })
 
 const pagination = reactive({
@@ -149,13 +150,13 @@ function formatNumber(num: number): string {
   return String(num)
 }
 
-function typeTagType(type: string): '' | 'success' | 'warning' | 'info' | 'danger' {
-  const map: Record<string, '' | 'success' | 'warning' | 'info' | 'danger'> = {
+function typeTagType(type: string): TagType {
+  const map: Record<string, TagType> = {
     syslog: 'success',
     file: 'warning',
-    api: '',
+    api: 'primary',
   }
-  return map[type] || 'info'
+  return (map[type] || 'info') as TagType
 }
 
 function typeLabel(type: string): string {

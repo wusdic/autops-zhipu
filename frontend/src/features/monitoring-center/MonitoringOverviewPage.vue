@@ -78,7 +78,7 @@
                 :multiple="trendSeries"
                 :data="[]"
                 title="每小时事件数"
-                height="320px"
+                :height="320"
                 unit=" 次"
               />
             </div>
@@ -97,7 +97,7 @@
                 :data="severityData"
                 title=""
                 chart-type="pie"
-                height="300px"
+                :height="300"
               />
             </div>
           </div>
@@ -428,8 +428,7 @@ async function loadChanges() {
 
 // ===================== 工具函数 =====================
 function formatTime(t: string) {
-  return t ? new Date(t).toLocaleString('zh-CN') : ''
-}
+  return t ? new Date(t).toLocaleString('zh-CN') : 'primary'}
 
 // ===================== 初始化 =====================
 onMounted(() => {

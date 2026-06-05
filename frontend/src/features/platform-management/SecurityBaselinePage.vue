@@ -144,9 +144,9 @@ const drawerVisible = ref(false)
 const currentRow = ref<BaselineRecord | null>(null)
 
 const queryForm = reactive({
-  asset_name: '',
-  baseline_name: '',
-  status: '',
+  asset_name: 'primary',
+  baseline_name: 'primary',
+  status: 'primary',
 })
 
 const pagination = reactive({
@@ -203,7 +203,7 @@ function handleReset() {
   handleSearch()
 }
 
-function handleDetail(row: BaselineRecord) {
+function handleDetail(row: any) {
   currentRow.value = row
   drawerVisible.value = true
 }

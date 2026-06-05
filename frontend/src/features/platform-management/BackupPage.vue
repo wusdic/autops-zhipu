@@ -106,14 +106,14 @@
       </el-table-column>
       <el-table-column prop="type" label="类型" width="110" align="center">
         <template #default="{ row }">
-          <el-tag :type="row.type === 'full' ? '' : 'info'" size="small">
+          <el-tag :type="row.type === 'full' ? undefined : 'info'" size="small">
             {{ typeLabels[row.type] || row.type }}
           </el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="status" label="状态" width="110" align="center">
         <template #default="{ row }">
-          <el-tag :type="statusTagType(row.status)" size="small">
+          <el-tag :type="(statusTagType(row.status)) as TagType" size="small">
             {{ statusLabels[row.status] || row.status }}
           </el-tag>
         </template>
@@ -242,6 +242,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
@@ -281,23 +282,23 @@ const settings = reactive({
 
 // Create dialog
 const createDialogVisible = ref(false)
-const createForm = reactive({ type: 'full', description: '' })
+const createForm = reactive({ type: 'full', description: 'primary'})
 
 // Restore dialog
 const restoreDialogVisible = ref(false)
 const confirmText = ref('')
 const restoreTarget = reactive({
-  id: '',
-  filename: '',
-  created_at: '',
-  type: '',
+  id: 'primary',
+  filename: 'primary',
+  created_at: 'primary',
+  type: 'primary',
   size: 0,
 })
 const restoreProgress = reactive({
   active: false,
   percent: 0,
   status: '' as '' | 'success' | 'exception',
-  message: '',
+  message: 'primary',
 })
 
 let restoreTimer: ReturnType<typeof setInterval> | null = null

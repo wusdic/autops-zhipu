@@ -36,7 +36,7 @@
               <div class="result-content">
                 <div class="result-title" v-html="highlightKeyword(item.title)" />
                 <div class="result-meta">
-                  <el-tag size="small" :type="moduleTagType(item.module)">{{ item.module }}</el-tag>
+                  <el-tag size="small" :type="(moduleTagType(item.module)) as TagType">{{ item.module }}</el-tag>
                   <span class="result-group">{{ item.group }}</span>
                 </div>
               </div>
@@ -64,6 +64,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search, Clock, DataBoard, Box, Checked, TrendCharts, Warning, Cpu, MagicStick, Tickets, Document, Tools } from '@element-plus/icons-vue'
@@ -109,7 +110,7 @@ const recentPages = ref(allPages.slice(0, 5))
 const iconMap: Record<string, any> = { M1: DataBoard, M2: Box, M3: Checked, M4: TrendCharts, M5: Warning, M6: Cpu, M7: MagicStick, M8: Tickets, M9: Document, M10: Tools }
 const getIcon = (m: string) => iconMap[m] || Document
 const moduleTagType = (m: string) => {
-  const map: Record<string, string> = { M1: '', M2: 'success', M3: 'info', M4: 'warning', M5: 'danger', M6: '', M7: 'success', M8: 'info', M9: 'warning', M10: 'danger' }
+  const map: Record<string, string> = { M1: 'primary', M2: 'success', M3: 'info', M4: 'warning', M5: 'danger', M6: 'primary', M7: 'success', M8: 'info', M9: 'warning', M10: 'danger' }
   return map[m] || 'info'
 }
 

@@ -65,7 +65,7 @@
         </el-table-column>
         <el-table-column prop="severity" label="严重度" width="100">
           <template #default="{ row }">
-            <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
+            <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="asset_count" label="适用资产" width="100" />
@@ -162,6 +162,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
@@ -177,13 +178,13 @@ const activeCategory = ref('all')
 const rules = ref<any[]>([])
 const formRef = ref()
 
-const filters = reactive({ keyword: '', severity: '' })
+const filters = reactive({ keyword: 'primary', severity: 'primary'})
 const pagination = reactive({ page: 1, size: 20, total: 0 })
 const simResult = ref<any>({})
 
 const form = reactive({
-  name: '', category: '', check_target: '', condition: '',
-  severity: 'medium', asset_types: [] as string[], remediation: '', description: '',
+  name: 'primary', category: 'primary', check_target: 'primary', condition: 'primary',
+  severity: 'medium', asset_types: [] as string[], remediation: 'primary', description: 'primary',
 })
 const formRules = {
   name: [{ required: true, message: '请输入规则名称', trigger: 'blur' }],
@@ -195,8 +196,8 @@ const categoryMap: Record<string, string> = {
   page_check: '页面检查', config_check: '配置检查',
   log_check: '日志检查', baseline_check: '基线检查', api_check: 'API检查',
 }
-function severityType(s: string) {
-  return { critical: 'danger', high: 'warning', medium: '', low: 'info' }[s] || 'info'
+function severityType(s: string): TagType {
+  return ({ critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }[s] || 'info') as TagType
 }
 function severityLabel(s: string) {
   return { critical: '紧急', high: '高危', medium: '中危', low: '低危' }[s] || s
@@ -221,7 +222,7 @@ async function loadData() {
 function openDialog(row?: any) {
   editing.value = row || null
   if (row) Object.assign(form, row)
-  else Object.assign(form, { name: '', category: '', check_target: '', condition: '', severity: 'medium', asset_types: [], remediation: '', description: '' })
+  else Object.assign(form, { name: 'primary', category: 'primary', check_target: 'primary', condition: 'primary', severity: 'medium', asset_types: [], remediation: 'primary', description: 'primary'})
   dialogVisible.value = true
 }
 

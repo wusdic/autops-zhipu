@@ -39,12 +39,12 @@
         </el-table-column>
         <el-table-column prop="check_type" label="检查类型" width="120">
           <template #default="{ row }">
-            <el-tag :type="checkTypeTag(row.check_type)" size="small">{{ checkTypeLabel(row.check_type) }}</el-tag>
+            <el-tag :type="(checkTypeTag(row.check_type)) as TagType" size="small">{{ checkTypeLabel(row.check_type) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="statusTag(row.status)" size="small">{{ statusLabel(row.status) }}</el-tag>
+            <el-tag :type="(statusTag(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="last_checked_at" label="最后检查" width="170" sortable="custom">
@@ -91,7 +91,7 @@
         </el-descriptions-item>
         <el-descriptions-item label="检查类型">{{ checkTypeLabel(currentItem.check_type) }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="statusTag(currentItem.status)">{{ statusLabel(currentItem.status) }}</el-tag>
+          <el-tag :type="(statusTag(currentItem.status)) as TagType">{{ statusLabel(currentItem.status) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="最后检查">{{ formatTime(currentItem.last_checked_at) }}</el-descriptions-item>
         <el-descriptions-item label="基线版本">{{ currentItem.baseline_version || '-' }}</el-descriptions-item>
@@ -121,6 +121,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { Search, VideoPlay } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -189,7 +190,7 @@ async function fetchItems() {
 async function handleRunInspection() {
   runLoading.value = true
   try {
-    await api.post(API.INSPECTION_TASKS, { type: 'config', template_ids: filteredItems.value.filter(i => i.id).map(i => i.id) })
+    await api.post(API.INSPECTION.TASKS, { type: 'config', template_ids: filteredItems.value.filter(i => i.id).map(i => i.id) })
     ElMessage.success('配置巡检任务已创建')
     setTimeout(fetchItems, 2000)
   } catch (e) {
@@ -202,7 +203,7 @@ async function handleRunInspection() {
 async function runSingle(item: any) {
   item._running = true
   try {
-    await api.post(API.INSPECTION_TASKS, { type: 'config', template_id: item.id })
+    await api.post(API.INSPECTION.TASKS, { type: 'config', template_id: item.id })
     ElMessage.success('巡检项 ' + item.name + ' 已触发')
     setTimeout(fetchItems, 2000)
   } catch (e) {
@@ -232,17 +233,17 @@ function checkTypeLabel(t: string) {
   const map: Record<string, string> = { drift: '配置漂移', compliance: '合规检查', baseline: '基线对比' }
   return map[t] || t || '-'
 }
-function checkTypeTag(t: string) {
-  const map: Record<string, string> = { drift: 'warning', compliance: '', baseline: 'info' }
-  return map[t] || 'info'
+function checkTypeTag(t: string): TagType {
+  const map: Record<string, TagType> = { drift: 'warning', compliance: 'primary', baseline: 'info' }
+  return (map[t] || 'info') as TagType
 }
 function statusLabel(s: string) {
   const map: Record<string, string> = { normal: '正常', abnormal: '异常', pending: '未执行' }
   return map[s] || s || '-'
 }
-function statusTag(s: string) {
-  const map: Record<string, string> = { normal: 'success', abnormal: 'danger', pending: 'info' }
-  return map[s] || 'info'
+function statusTag(s: string): TagType {
+  const map: Record<string, TagType> = { normal: 'success', abnormal: 'danger', pending: 'info' }
+  return (map[s] || 'info') as TagType
 }
 function formatTime(t: string) {
   return t ? new Date(t).toLocaleString('zh-CN') : '-'

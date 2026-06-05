@@ -39,7 +39,7 @@
         <template #default="{ row }"><el-tag size="small">{{ triggerLabel(row.trigger_type) }}</el-tag></template>
       </el-table-column>
       <el-table-column prop="risk_level" label="风险" width="80">
-        <template #default="{ row }"><el-tag :type="riskType(row.risk_level)" size="small">{{ row.risk_level }}</el-tag></template>
+        <template #default="{ row }"><el-tag :type="(riskType(row.risk_level)) as TagType" size="small">{{ row.risk_level }}</el-tag></template>
       </el-table-column>
       <el-table-column prop="status" label="状态" width="90">
         <template #default="{ row }"><el-tag :type="row.status==='active'?'success':'info'" size="small">{{ statusLabel(row.status) }}</el-tag></template>
@@ -164,7 +164,7 @@
         <el-descriptions :column="2" border>
           <el-descriptions-item label="名称">{{ detail.name }}</el-descriptions-item>
           <el-descriptions-item label="触发源"><el-tag size="small">{{ triggerLabel(detail.trigger_source) }}</el-tag></el-descriptions-item>
-          <el-descriptions-item label="风险等级"><el-tag :type="riskType(detail.risk_level)" size="small">{{ detail.risk_level }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="风险等级"><el-tag :type="(riskType(detail.risk_level)) as TagType" size="small">{{ detail.risk_level }}</el-tag></el-descriptions-item>
           <el-descriptions-item label="状态"><el-tag :type="detail.status==='active'?'success':'info'" size="small">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
           <el-descriptions-item label="需要审批">{{ detail.requires_approval ? '是' : '否' }}</el-descriptions-item>
           <el-descriptions-item label="最大影响面">{{ detail.max_impact || '-' }}</el-descriptions-item>
@@ -207,6 +207,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Delete } from '@element-plus/icons-vue'
@@ -215,7 +216,7 @@ import { API } from '@/shared/api/routes'
 
 const router = useRouter()
 const stats = reactive({ total: 0, active: 0, highRisk: 0, pendingApproval: 0 })
-const filters = reactive({ keyword: '', status: '', risk_level: '', trigger_source: '' })
+const filters = reactive({ keyword: 'primary', status: 'primary', risk_level: 'primary', trigger_source: 'primary'})
 const items = ref<any[]>([])
 const loading = ref(false)
 const page = ref(1)
@@ -227,7 +228,7 @@ const showDialog = ref(false)
 const editing = ref(false)
 const editId = ref('')
 const form = reactive({
-  name: '', description: '', trigger_source: 'event', condition_logic: 'AND',
+  name: 'primary', description: 'primary', trigger_source: 'event', condition_logic: 'AND',
   conditions: [] as any[], scope_groups: [] as string[], scope_asset_types: [] as string[],
   actions: [] as any[], risk_level: 'low', requires_approval: false, max_impact: 10,
 })
@@ -269,8 +270,8 @@ async function loadGroups() {
   } catch {}
 }
 
-function addCondition() { form.conditions.push({ field: '', operator: 'gt', value: '', duration: '' }) }
-function addAction() { form.actions.push({ type: 'script', target: '', params_json: '' }) }
+function addCondition() { form.conditions.push({ field: 'primary', operator: 'gt', value: 'primary', duration: 'primary'}) }
+function addAction() { form.actions.push({ type: 'script', target: 'primary', params_json: 'primary'}) }
 
 function openCreate() {
   editing.value = false; editId.value = ''
@@ -330,7 +331,7 @@ function getGroupName(id: string) { return groups.value.find(g => g.id === id)?.
 function triggerLabel(s: string) { return ({ event:'事件', alert:'告警', state_change:'状态变更', manual:'手动', schedule:'定时' })[s] || s }
 function actionTypeLabel(t: string) { return ({ script:'脚本', playbook:'Playbook', notification:'通知', ticket:'工单', suppress:'抑制' })[t] || t }
 function statusLabel(s: string) { return ({ draft:'草稿', active:'已激活', deprecated:'已废弃' })[s] || s }
-function riskType(r: string) { return ({ low:'info', medium:'warning', high:'danger', critical:'danger' })[r] || 'info' }
+function riskType(r: string): TagType { return (({ low:'info', medium:'warning', high:'danger', critical:'danger' })[r] ?? 'info') as TagType }
 function fmt(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '-' }
 
 onMounted(() => { load(); loadGroups() })

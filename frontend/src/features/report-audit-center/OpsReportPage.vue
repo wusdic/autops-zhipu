@@ -137,7 +137,7 @@ async function fetchData() {
   try {
     const params: any = { page: page.value, page_size: pageSize.value }
     if (moduleFilter.value) params.report_type = moduleFilter.value
-    const res = await api.get(API.REPORTS, { params })
+    const res = await api.get(API.REPORT.TASKS, { params })
     if (res.data?.code === 0) {
       reports.value = (res.data.data?.items || []).map((r: any) => ({
         ...r,
@@ -159,7 +159,7 @@ function generateReport() { genVisible.value = true }
 async function doGenerate() {
   generating.value = true
   try {
-    await api.post(API.REPORTS, genForm)
+    await api.post(API.REPORT.TASKS, genForm)
     ElMessage.success('报告生成任务已创建')
     genVisible.value = false
     setTimeout(fetchData, 2000)

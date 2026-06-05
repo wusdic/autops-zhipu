@@ -58,7 +58,7 @@
         </el-table-column>
         <el-table-column prop="severity" label="严重级别" width="100">
           <template #default="{ row }">
-            <el-tag :type="severityTag(row.severity)" size="small">{{ severityText(row.severity) }}</el-tag>
+            <el-tag :type="(severityTag(row.severity)) as TagType" size="small">{{ severityText(row.severity) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="enabled" label="状态" width="80">
@@ -150,6 +150,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
@@ -161,7 +162,7 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = 20
 
-const filters = reactive({ metric_name: '', severity: '', asset_type: '', enabled: null as boolean | null })
+const filters = reactive({ metric_name: 'primary', severity: 'primary', asset_type: 'primary', enabled: null as boolean | null })
 
 const metricOptions = ['cpu_usage', 'memory_usage', 'disk_usage', 'disk_io', 'network_in', 'network_out', 'response_time', 'connection_count', 'process_count', 'load_avg']
 
@@ -190,13 +191,13 @@ const dialogVisible = ref(false)
 const editingRule = ref<any>(null)
 const submitting = ref(false)
 const formData = reactive({
-  name: '', metric_name: '', asset_type: '', condition: 'gt',
-  threshold_value: 90, duration_seconds: 0, severity: 'warning', description: '',
+  name: 'primary', metric_name: 'primary', asset_type: 'primary', condition: 'gt',
+  threshold_value: 90, duration_seconds: 0, severity: 'warning', description: 'primary',
 })
 
 function openCreateDialog() {
   editingRule.value = null
-  Object.assign(formData, { name: '', metric_name: '', asset_type: '', condition: 'gt', threshold_value: 90, duration_seconds: 0, severity: 'warning', description: '' })
+  Object.assign(formData, { name: 'primary', metric_name: 'primary', asset_type: 'primary', condition: 'gt', threshold_value: 90, duration_seconds: 0, severity: 'warning', description: 'primary'})
   dialogVisible.value = true
 }
 
@@ -262,9 +263,9 @@ function severityText(s: string) {
   return map[s] || s
 }
 
-function severityTag(s: string) {
-  const map: Record<string, string> = { critical: 'danger', high: 'warning', warning: '', info: 'info' }
-  return map[s] || 'info'
+function severityTag(s: string): TagType {
+  const map: Record<string, TagType> = { critical: 'danger', high: 'warning', warning: 'primary', info: 'info' }
+  return (map[s] || 'info') as TagType
 }
 
 onMounted(fetchData)

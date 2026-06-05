@@ -103,14 +103,14 @@
           <div class="header-actions">
             <el-button-group>
               <el-button
-                :type="viewMode === 'table' ? 'primary' : ''"
+                :type="viewMode === 'table' ? 'primary' : 'default'"
                 size="small"
                 @click="viewMode = 'table'"
               >
                 表格
               </el-button>
               <el-button
-                :type="viewMode === 'group' ? 'primary' : ''"
+                :type="viewMode === 'group' ? 'primary' : 'default'"
                 size="small"
                 @click="viewMode = 'group'"
               >
@@ -146,7 +146,7 @@
 
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="statusTagType(row.status)" size="small" effect="dark">
+            <el-tag :type="(statusTagType(row.status)) as TagType" size="small" effect="dark">
               {{ statusLabel(row.status) }}
             </el-tag>
           </template>
@@ -197,7 +197,7 @@
             <el-tag
               v-for="stat in group.stats"
               :key="stat.label"
-              :type="stat.type"
+              :type="(stat.type as TagType)"
               size="small"
               style="margin-left: 8px"
             >
@@ -212,7 +212,7 @@
             </el-table-column>
             <el-table-column prop="status" label="状态" width="100" align="center">
               <template #default="{ row }">
-                <el-tag :type="statusTagType(row.status)" size="small" effect="dark">
+                <el-tag :type="(statusTagType(row.status)) as TagType" size="small" effect="dark">
                   {{ statusLabel(row.status) }}
                 </el-tag>
               </template>
@@ -253,7 +253,7 @@
           <el-tag size="small" type="info">{{ checkTypeLabel(currentResult.check_type) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="statusTagType(currentResult.status)" size="small" effect="dark">
+          <el-tag :type="(statusTagType(currentResult.status)) as TagType" size="small" effect="dark">
             {{ statusLabel(currentResult.status) }}
           </el-tag>
         </el-descriptions-item>
@@ -273,13 +273,13 @@
        <el-button @click="detailVisible = false">关闭</el-button>
        <el-button
          type="warning"
-         @click="navToAnomalyFromInspection(currentResult?.task_id)"
+         @click="navToAnomalyFromInspection(currentResult?.task_id ?? '')"
        >
          <el-icon><Warning /></el-icon> 查看异常
        </el-button>
        <el-button
          type="primary"
-         @click="navToReportFromInspection(currentResult?.task_id)"
+         @click="navToReportFromInspection(currentResult?.task_id ?? '')"
        >
          <el-icon><Document /></el-icon> 生成报告
        </el-button>
@@ -289,6 +289,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Search, Refresh, Download, Monitor } from '@element-plus/icons-vue'
 import { Warning, Document } from '@element-plus/icons-vue'
@@ -359,9 +360,9 @@ const viewMode = ref<'table' | 'group'>('table')
 const { navToAnomalyFromInspection, navToReportFromInspection } = useWorkflowNav()
 
 const queryParams = reactive<QueryParams>({
-  keyword: '',
-  status: '',
-  check_type: '',
+  keyword: 'primary',
+  status: 'primary',
+  check_type: 'primary',
   dateRange: null,
   page: 1,
   pageSize: 20,
@@ -400,13 +401,13 @@ const formatTime = (ts?: string): string => {
   return d.toLocaleString('zh-CN', { hour12: false })
 }
 
-const statusTagType = (status?: string): 'success' | 'warning' | 'danger' => {
-  const map: Record<string, 'success' | 'warning' | 'danger'> = {
+const statusTagType = (status?: string): TagType => {
+  const map: Record<string, TagType> = {
     pass: 'success',
     fail: 'danger',
     warn: 'warning',
   }
-  return map[status || ''] || 'warning'
+  return (map[status || ''] || 'warning') as TagType
 }
 
 const statusLabel = (status?: string): string => {
@@ -469,18 +470,18 @@ const handleReset = () => {
   fetchResultList()
 }
 
-const handleSortChange = ({ prop, order }: { prop: string; order: string | null }) => {
+const handleSortChange = ({ prop, order }: { prop: string | null; order: string | null }) => {
   queryParams.orderBy = prop || 'checked_at'
   queryParams.orderDir = order === 'ascending' ? 'asc' : 'desc'
   fetchResultList()
 }
 
-const handleViewDetail = (row: InspectionResult) => {
+const handleViewDetail = (row: any) => {
   currentResult.value = row
   detailVisible.value = true
 }
 
-const handleCreateTicket = (row: InspectionResult) => {
+const handleCreateTicket = (row: any) => {
   ElMessage.info('创建工单: ' + row.check_item || row.item_name + ' - ' + row.asset_name || row.asset?.name)
 }
 

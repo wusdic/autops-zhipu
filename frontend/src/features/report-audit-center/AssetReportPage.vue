@@ -184,7 +184,7 @@
           <el-table-column prop="ip" label="IP地址" width="140" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="90" align="center">
             <template #default="{ row }">
-              <el-tag :type="assetStatusType(row.status)" size="small">{{ assetStatusLabel(row.status) }}</el-tag>
+              <el-tag :type="(assetStatusType(row.status)) as TagType" size="small">{{ assetStatusLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作系统" min-width="140" show-overflow-tooltip>
@@ -214,6 +214,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft, Download } from '@element-plus/icons-vue'
@@ -237,9 +238,9 @@ const summaryStats = reactive({
 })
 
 const filters = reactive({
-  type: '',
-  status: '',
-  keyword: '',
+  type: 'primary',
+  status: 'primary',
+  keyword: 'primary',
 })
 
 const pagination = reactive({
@@ -272,9 +273,9 @@ function assetTypeLabel(t: string): string {
   return map[t] || t || '-'
 }
 
-function assetStatusType(s: string): string {
+function assetStatusType(s: string): TagType {
   const map: Record<string, string> = { online: 'success', offline: 'info', abnormal: 'danger', unknown: 'warning' }
-  return map[s] || 'info'
+  return (map[s] || 'info') as TagType
 }
 
 function assetStatusLabel(s: string): string {

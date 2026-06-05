@@ -180,8 +180,8 @@ const dialogVisible = ref(false)
 const editingRole = ref<any>(null)
 const permTreeRef = ref<InstanceType<typeof ElTree>>()
 const formData = ref<any>({
-  name: '',
-  description: '',
+  name: 'primary',
+  description: 'primary',
   permissions: [],
 })
 
@@ -213,7 +213,7 @@ async function loadRoles() {
 
 function showCreateDialog() {
   editingRole.value = null
-  formData.value = { name: '', description: '', permissions: [] }
+  formData.value = { name: 'primary', description: 'primary', permissions: [] }
   dialogVisible.value = true
 }
 

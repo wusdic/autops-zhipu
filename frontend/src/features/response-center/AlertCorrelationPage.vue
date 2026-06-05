@@ -35,13 +35,13 @@
           <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
           <el-table-column prop="severity" label="级别" width="80">
             <template #default="{ row }">
-              <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
+              <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="asset_name" label="资产" width="140" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="90">
             <template #default="{ row }">
-              <el-tag :type="alertStatusType(row.status)" size="small">{{ alertStatusLabel(row.status) }}</el-tag>
+              <el-tag :type="(alertStatusType(row.status)) as TagType" size="small">{{ alertStatusLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="created_at" label="时间" width="160">
@@ -120,7 +120,7 @@
               <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
               <el-table-column prop="severity" label="级别" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="severityType(row.severity)" size="small">{{ severityLabel(row.severity) }}</el-tag>
+                  <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="asset_name" label="资产" width="140" show-overflow-tooltip />
@@ -164,6 +164,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { alertService } from '@/shared/api'
@@ -197,7 +198,7 @@ const correlationStats = reactive({
 const severityMap: Record<string, string> = { critical: '严重', high: '高', medium: '中', low: '低' }
 const severityLabel = (s: string) => severityMap[s] || s
 const severityType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>
-  ({ critical: 'danger', high: 'warning', medium: '', low: 'info' } as any)[s] || 'info'
+  ({ critical: 'danger', high: 'warning', medium: 'primary', low: 'info' } as any)[s] || 'info'
 
 const alertStatusLabel = (s: string) => ({ firing: '告警中', resolved: '已恢复', acknowledged: '已确认', suppressed: '已抑制' } as any)[s] || s
 const alertStatusType = (s: string): '' | 'success' | 'warning' | 'danger' | 'info' =>

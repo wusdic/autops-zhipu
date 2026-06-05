@@ -63,7 +63,7 @@
         </el-table-column>
         <el-table-column prop="health_status" label="健康状态" width="110" align="center">
           <template #default="{ row }">
-            <el-tag :type="healthTagType(row.health_status)" size="small" effect="light">
+            <el-tag :type="(healthTagType(row.health_status)) as TagType" size="small" effect="light">
               {{ healthLabel(row.health_status) }}
             </el-tag>
           </template>
@@ -154,7 +154,7 @@
             <el-tag size="small">{{ currentSystem.asset_count ?? 0 }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="健康状态">
-            <el-tag :type="healthTagType(currentSystem.health_status)" size="small">
+            <el-tag :type="(healthTagType(currentSystem.health_status)) as TagType" size="small">
               {{ healthLabel(currentSystem.health_status) }}
             </el-tag>
           </el-descriptions-item>
@@ -168,6 +168,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
@@ -210,10 +211,10 @@ const pagination = reactive({
 })
 
 const formData = reactive({
-  name: '',
-  owner: '',
-  contact: '',
-  description: '',
+  name: 'primary',
+  owner: 'primary',
+  contact: 'primary',
+  description: 'primary',
 })
 
 const formRules: FormRules = {
@@ -222,9 +223,9 @@ const formRules: FormRules = {
 }
 
 // ---------- Helpers ----------
-function healthTagType(status: string) {
+function healthTagType(status: string): TagType {
   const map: Record<string, string> = { healthy: 'success', warning: 'warning', error: 'danger', unknown: 'info' }
-  return map[status] || 'info'
+  return (map[status] || 'info') as TagType
 }
 
 function healthLabel(status: string) {
@@ -284,7 +285,7 @@ function resetFilters() {
 
 function handleSortChange({ prop, order }: any) {
   sortField.value = prop || ''
-  sortOrder.value = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : ''
+  sortOrder.value = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : 'primary'
   fetchSystems()
 }
 
@@ -295,7 +296,7 @@ function openCreateDialog() {
   dialogVisible.value = true
 }
 
-function openEditDialog(row: BusinessSystem) {
+function openEditDialog(row: any) {
   isEditing.value = true
   editingId.value = row.id
   Object.assign(formData, {
@@ -308,7 +309,7 @@ function openEditDialog(row: BusinessSystem) {
 }
 
 function resetForm() {
-  Object.assign(formData, { name: '', owner: '', contact: '', description: '' })
+  Object.assign(formData, { name: 'primary', owner: 'primary', contact: 'primary', description: 'primary'})
   formRef.value?.resetFields()
 }
 
@@ -336,12 +337,12 @@ async function handleSubmit() {
 }
 
 // ---------- Actions ----------
-function viewSystem(row: BusinessSystem) {
+function viewSystem(row: any) {
   currentSystem.value = row
   drawerVisible.value = true
 }
 
-async function handleDelete(row: BusinessSystem) {
+async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm('确认删除业务系统「' + row.name + '」？此操作不可撤销。', '删除确认', {
       type: 'warning',

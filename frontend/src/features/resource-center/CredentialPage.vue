@@ -187,6 +187,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { Plus, View, Hide, Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -196,7 +197,7 @@ import { API as R } from '@/shared/api/routes'
 // 列表
 const loading = ref(false)
 const credentials = ref<any[]>([])
-const filters = reactive({ credential_type: '', search: '' })
+const filters = reactive({ credential_type: 'primary', search: 'primary'})
 const pagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
 // 表单
@@ -207,14 +208,14 @@ const saving = ref(false)
 const formRef = ref<FormInstance>()
 
 const defaultForm = {
-  name: '',
+  name: 'primary',
   credential_type: 'ssh_password',
-  username: '',
-  password: '',
-  secret: '',
-  token: '',
+  username: 'primary',
+  password: 'primary',
+  secret: 'primary',
+  token: 'primary',
   port: 22 as number | undefined,
-  description: '',
+  description: 'primary',
 }
 const formData = reactive({ ...defaultForm })
 
@@ -241,7 +242,7 @@ const selectedBindAssets = ref<any[]>([])
 const bindAssetLoading = ref(false)
 const binding = ref(false)
 
-function formatCredentialType(t: string) {
+function formatCredentialType(t: string): string {
   const map: Record<string, string> = {
     ssh_password: 'SSH密码', ssh_key: 'SSH密钥', snmp: 'SNMP',
     windows: 'Windows', database: '数据库', api_token: 'API Token',
@@ -302,9 +303,9 @@ function openEditDialog(row: any) {
     name: row.name,
     credential_type: row.credential_type,
     username: row.username || '',
-    password: '', // 编辑时不回填密码
-    secret: '',
-    token: '',
+    password: 'primary', // 编辑时不回填密码
+    secret: 'primary',
+    token: 'primary',
     port: row.port,
     description: row.description || '',
   })

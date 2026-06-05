@@ -40,8 +40,8 @@
               @click="selectIncident(inc)"
             >
               <div class="incident-header">
-                <el-tag :type="severityType(inc.severity)" size="small" effect="dark">{{ severityLabel(inc.severity) }}</el-tag>
-                <el-tag :type="statusType(inc.status)" size="small">{{ statusLabel(inc.status) }}</el-tag>
+                <el-tag :type="(severityType(inc.severity)) as TagType" size="small" effect="dark">{{ severityLabel(inc.severity) }}</el-tag>
+                <el-tag :type="(statusType(inc.status)) as TagType" size="small">{{ statusLabel(inc.status) }}</el-tag>
               </div>
               <div class="incident-title">{{ inc.title || inc.alert_name || '事件 #' + inc.id?.slice(0,8) }}</div>
               <div class="incident-meta">
@@ -65,8 +65,8 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
               <h3 style="margin: 0">{{ selectedIncident.title || '事件详情' }}</h3>
               <div>
-                <el-tag :type="severityType(selectedIncident.severity)" effect="dark">{{ severityLabel(selectedIncident.severity) }}</el-tag>
-                <el-tag :type="statusType(selectedIncident.status)" style="margin-left: 8px">{{ statusLabel(selectedIncident.status) }}</el-tag>
+                <el-tag :type="(severityType(selectedIncident.severity)) as TagType" effect="dark">{{ severityLabel(selectedIncident.severity) }}</el-tag>
+                <el-tag :type="(statusType(selectedIncident.status)) as TagType" style="margin-left: 8px">{{ statusLabel(selectedIncident.status) }}</el-tag>
               </div>
             </div>
 
@@ -140,6 +140,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { Refresh, Loading, Box, Clock, InfoFilled, CircleCheck, MagicStick, VideoPlay, Tickets, Setting, Close } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
@@ -229,17 +230,17 @@ async function closeIncident() {
   } catch { /* cancelled */ }
 }
 
-function severityType(s: string) {
-  const map: Record<string, string> = { critical: 'danger', major: 'warning', minor: '', info: 'info' }
-  return map[s] || 'info'
+function severityType(s: string): TagType {
+  const map: Record<string, string> = { critical: 'danger', major: 'warning', minor: 'primary', info: 'info' }
+  return (map[s] || 'info') as TagType
 }
 function severityLabel(s: string) {
   const map: Record<string, string> = { critical: '紧急', major: '严重', minor: '一般', info: '提示' }
   return map[s] || s || '-'
 }
-function statusType(s: string) {
+function statusType(s: string): TagType {
   const map: Record<string, string> = { open: 'danger', in_progress: 'warning', resolved: 'success', closed: 'info' }
-  return map[s] || 'info'
+  return (map[s] || 'info') as TagType
 }
 function statusLabel(s: string) {
   const map: Record<string, string> = { open: '待处理', in_progress: '处理中', resolved: '已解决', closed: '已关闭', firing: '触发中' }

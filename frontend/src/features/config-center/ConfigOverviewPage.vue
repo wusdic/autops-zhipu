@@ -67,7 +67,7 @@
           </el-table-column>
           <el-table-column prop="severity" label="严重度" width="100">
             <template #default="{ row }">
-              <el-tag :type="severityType(row.severity)" size="small">{{ row.severity }}</el-tag>
+              <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="asset_count" label="适用资产" width="100" />
@@ -165,6 +165,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, ArrowLeft, Monitor, Search, Warning, Bell } from '@element-plus/icons-vue'
@@ -190,16 +191,16 @@ const thresholdRules = ref<any[]>([])
 const notificationRules = ref<any[]>([])
 const configVersions = ref<any[]>([])
 
-const createForm = reactive({ type: '', name: '', description: '' })
+const createForm = reactive({ type: 'primary', name: 'primary', description: 'primary'})
 
 const categoryMap: Record<string, string> = {
   page_check: '页面检查', config_check: '配置检查',
   log_check: '日志检查', baseline_check: '基线检查',
 }
 
-function severityType(severity: string) {
-  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: '', low: 'info' }
-  return map[severity] || 'info'
+function severityType(severity: string): TagType {
+  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }
+  return (map[severity] || 'info') as TagType
 }
 
 function unwrapItems(res: any): any[] {

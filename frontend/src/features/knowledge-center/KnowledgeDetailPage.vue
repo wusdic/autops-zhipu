@@ -49,7 +49,7 @@
               <el-tag size="small">{{ typeLabel(article.article_type) }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="风险等级">
-              <el-tag :type="riskTagType(article.risk_level)" size="small">{{ article.risk_level }}</el-tag>
+              <el-tag :type="(riskTagType(article.risk_level)) as TagType" size="small">{{ article.risk_level }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="状态">
               <el-tag :type="article.status === 'published' ? 'success' : 'info'" size="small">
@@ -137,12 +137,12 @@
             </el-table-column>
             <el-table-column label="类型" width="130">
               <template #default="{ row }">
-                <el-tag :type="typeTagColor(row.article_type)" size="small">{{ typeLabel(row.article_type) }}</el-tag>
+                <el-tag :type="(typeTagColor(row.article_type)) as TagType" size="small">{{ typeLabel(row.article_type) }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="风险" width="80">
               <template #default="{ row }">
-                <el-tag :type="riskTagType(row.risk_level)" size="small">{{ row.risk_level }}</el-tag>
+                <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small">{{ row.risk_level }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="浏览" width="80" align="center">
@@ -178,6 +178,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
@@ -227,18 +228,18 @@ function typeTagColor(t: string) {
   const m: Record<string, string> = {
     incident_summary: 'warning',
     runbook: 'success',
-    standard_solution: '',
+    standard_solution: 'primary',
     faq: 'info',
-    best_practice: '',
+    best_practice: 'primary',
   }
   return m[t] || ''
 }
 
 /** 风险等级 Tag 类型 */
-function riskTagType(level: string) {
-  if (level === 'high') return 'danger'
-  if (level === 'medium') return 'warning'
-  return 'info'
+function riskTagType(level: string): TagType {
+  if (level === 'high') return ('danger') as TagType
+  if (level === 'medium') return ('warning') as TagType
+  return ('info') as TagType
 }
 
 /** 简易 Markdown 渲染 */

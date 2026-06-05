@@ -35,7 +35,7 @@
           <div class="autops-card" class="mb-lg">
             <div class="autops-card-header">
               <div class="autops-card-title"><el-icon><Warning /></el-icon> 诊断结论</div>
-              <el-tag :type="riskTag(diagnosisResult.risk_level)" effect="dark">风险级别: {{ riskLabel(diagnosisResult.risk_level) }}</el-tag>
+              <el-tag :type="(riskTag(diagnosisResult.risk_level)) as TagType" effect="dark">风险级别: {{ riskLabel(diagnosisResult.risk_level) }}</el-tag>
             </div>
             <el-descriptions :column="2" border size="small" class="mt-md">
               <el-descriptions-item label="异常ID">{{ diagnosisResult.anomaly_id }}</el-descriptions-item>
@@ -56,7 +56,7 @@
               <el-table-column prop="action" label="动作" min-width="180" show-overflow-tooltip />
               <el-table-column prop="risk" label="风险" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="riskTag(row.risk)" size="small">{{ riskLabel(row.risk) }}</el-tag>
+                  <el-tag :type="(riskTag(row.risk)) as TagType" size="small">{{ riskLabel(row.risk) }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="confidence" label="置信度" width="80">
@@ -124,6 +124,7 @@
 </template>
 
 <script setup lang="ts">
+import type { TagType } from '@/shared/types'
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { MagicStick, Warning, VideoPlay, Link, Setting, Tickets, Connection, Loading, Select, SemiSelect, CloseBold } from '@element-plus/icons-vue'
@@ -199,9 +200,9 @@ function submitFeedback(type: string) {
   ElMessage.success('感谢反馈，将用于提升 AI 诊断准确度')
 }
 
-function riskTag(r: string) {
-  const map: Record<string, string> = { high: 'danger', medium: 'warning', low: 'success' }
-  return map[r] || 'info'
+function riskTag(r: string): TagType {
+  const map: Record<string, TagType> = { high: 'danger', medium: 'warning', low: 'success' }
+  return (map[r] || 'info') as TagType
 }
 function riskLabel(r: string) {
   const map: Record<string, string> = { high: '高', medium: '中', low: '低' }

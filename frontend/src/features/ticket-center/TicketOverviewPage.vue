@@ -38,7 +38,7 @@
         <el-table-column prop="title" label="工单标题" min-width="200" show-overflow-tooltip />
         <el-table-column prop="priority" label="优先级" width="80">
           <template #default="{ row }">
-            <el-tag size="small" :type="priorityType(row.priority)">{{ row.priority }}</el-tag>
+            <el-tag size="small" :type="(priorityType(row.priority)) as TagType">{{ row.priority }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="assignee_name" label="处理人" width="100" />
@@ -61,9 +61,9 @@
         <div class="autops-card-header">
           <span>工单状态分布</span>
           <el-button-group>
-            <el-button :type="timeView === 'day' ? 'primary' : ''" size="small" @click="timeView = 'day'">今日</el-button>
-            <el-button :type="timeView === 'week' ? 'primary' : ''" size="small" @click="timeView = 'week'">本周</el-button>
-            <el-button :type="timeView === 'month' ? 'primary' : ''" size="small" @click="timeView = 'month'">本月</el-button>
+            <el-button :type="timeView === 'day' ? 'primary' : 'default'" size="small" @click="timeView = 'day'">今日</el-button>
+            <el-button :type="timeView === 'week' ? 'primary' : 'default'" size="small" @click="timeView = 'week'">本周</el-button>
+            <el-button :type="timeView === 'month' ? 'primary' : 'default'" size="small" @click="timeView = 'month'">本月</el-button>
           </el-button-group>
         </div>
       </template>
@@ -96,12 +96,12 @@
         </el-table-column>
         <el-table-column prop="priority" label="优先级" width="80">
           <template #default="{ row }">
-            <el-tag size="small" :type="priorityType(row.priority)">{{ row.priority || '-' }}</el-tag>
+            <el-tag size="small" :type="(priorityType(row.priority)) as TagType">{{ row.priority || '-' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+            <el-tag size="small" :type="(statusType(row.status)) as TagType">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="created_at" label="创建时间" width="170">
@@ -124,7 +124,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+            <el-tag size="small" :type="(statusType(row.status)) as TagType">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="assignee_name" label="处理人" width="100" />
@@ -138,6 +138,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Warning, Document, Loading, CircleCheck, Plus } from '@element-plus/icons-vue'
@@ -172,11 +173,11 @@ const slaWarnings = computed(() => {
   return myTickets.value.filter((t: any) => t.sla_remaining && t.status !== 'closed' && t.status !== 'resolved').slice(0, 5)
 })
 
-function priorityType(p: string) {
-  return { critical: 'danger', high: 'danger', medium: 'warning', low: 'info' }[p] || 'info'
+function priorityType(p: string): TagType {
+  return ({ critical: 'danger', high: 'danger', medium: 'warning', low: 'info' }[p] || 'info') as TagType
 }
-function statusType(s: string) {
-  return { open: 'warning', in_progress: '', pending: 'info', resolved: 'success', closed: 'success', cancelled: 'info' }[s] || 'info'
+function statusType(s: string): TagType {
+  return ({ open: 'warning', in_progress: 'primary', pending: 'info', resolved: 'success', closed: 'success', cancelled: 'info' }[s] || 'info') as TagType
 }
 function statusLabel(s: string) {
   return { open: '待处理', in_progress: '处理中', pending: '待分配', resolved: '已解决', closed: '已关闭', cancelled: '已取消' }[s] || s || '-'
