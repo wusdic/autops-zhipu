@@ -205,6 +205,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh, CircleCheck } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 // ── State ────────────────────────────────────────────────
 const loading = ref(false)
@@ -266,7 +267,7 @@ async function loadLicense() {
   loading.value = true
   backendUnavailable.value = false
   try {
-    const res = await client.get('/api/v1/platform/license')
+    const res = await client.get(API.PLATFORM.LICENSE)
     const data = res.data?.data ?? res.data
     if (data && typeof data === 'object') {
       Object.assign(license, {
@@ -313,7 +314,7 @@ async function activateLicense() {
     if (licenseKey.value) payload.license_key = licenseKey.value
     if (fileList.value.length > 0) payload.has_file = true
 
-    await client.post('/api/v1/platform/license', payload)
+    await client.post(API.PLATFORM.LICENSE, payload)
     ElMessage.success('授权已激活')
     licenseKey.value = ''
     fileList.value = []

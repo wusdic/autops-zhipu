@@ -177,6 +177,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 const router = useRouter()
 const loading = ref(false)
@@ -216,7 +217,7 @@ function statusLabel(s: string) { return { active: '正常', error: '异常', in
 async function loadData() {
   loading.value = true
   try {
-    const res = await client.get('/api/v1/aiops/agents')
+    const res = await client.get(API.AIOPS.MODEL_AGENTS)
     const data = res.data?.data ?? res.data
     models.value = data?.items || []
   } catch { models.value = [] } finally { loading.value = false }
@@ -234,9 +235,9 @@ async function handleSubmit() {
   submitting.value = true
   try {
     if (editing.value) {
-      await client.put('/api/v1/aiops/agents/' + editing.value.id, form)
+      await client.put(API.AIOPS.MODEL_AGENT_DETAIL(editing.value.id), form)
     } else {
-      await client.post('/api/v1/aiops/agents', form)
+      await client.post(API.AIOPS.MODEL_AGENTS, form)
     }
     ElMessage.success('保存成功')
     dialogVisible.value = false
@@ -249,7 +250,7 @@ async function testModel(row: any) {
   testResultVisible.value = true
   try {
     const startTime = Date.now()
-    const res = await client.post('/api/v1/aiops/agents/' + row.id + '/test')
+    const res = await client.post(API.AIOPS.MODEL_AGENT_TEST(row.id))
     const elapsed = Date.now() - startTime
     const result = res.data?.data || res.data
     testResultData.value = {
@@ -280,7 +281,7 @@ function viewMetrics(row: any) {
 async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm('确认删除模型「' + row.name + '」？', '删除确认', { type: 'warning' })
-    await client.delete('/api/v1/aiops/agents/' + row.id)
+    await client.delete(API.AIOPS.MODEL_AGENT_DETAIL(row.id))
     ElMessage.success('已删除'); loadData()
   } catch { /* cancelled */ }
 }
@@ -288,7 +289,7 @@ async function handleDelete(row: any) {
 async function saveConfig() {
   saving.value = true
   try {
-    await client.post('/api/v1/aiops/model-config', {
+    await client.post(API.AIOPS.MODEL_CONFIG, {
       default_model: globalConfig.default_model,
       timeout: globalConfig.timeout,
       max_tokens: globalConfig.max_tokens,

@@ -137,6 +137,17 @@ export const API = {
     AGENT_RUN: '/api/v1/aiops/agent/run',
     AGENT_RESULTS: '/api/v1/aiops/agent/results',
     AGENT_APPROVE: (id: string) => '/api/v1/aiops/agent/' + id + '/approve',
+    // 模型服务
+    MODEL_AGENTS: '/api/v1/aiops/agents',
+    MODEL_AGENT_DETAIL: (id: string) => '/api/v1/aiops/agents/' + id,
+    MODEL_AGENT_TEST: (id: string) => '/api/v1/aiops/agents/' + id + '/test',
+    MODEL_CONFIG: '/api/v1/aiops/model-config',
+    // 知识库 AI 工具
+    TOOL_POLICIES: '/api/v1/aiops/tool-policies',
+    TOOL_POLICY_DETAIL: (id: string) => '/api/v1/aiops/tool-policies/' + id,
+    PROMPT_TEMPLATES: '/api/v1/aiops/prompt-templates',
+    PROMPT_TEMPLATE_DETAIL: (id: string) => '/api/v1/aiops/prompt-templates/' + id,
+    PROMPT_TEMPLATE_TEST: (id: string) => '/api/v1/aiops/prompt-templates/' + id + '/test',
   },
 
   // 证据链
@@ -282,13 +293,21 @@ export const API = {
   // M10 平台管理
   PLATFORM: {
     DICTIONARIES: '/api/v1/dictionaries',
+    DICTIONARY_DETAIL: (id: string) => '/api/v1/dictionaries/' + id,
     INTEGRATIONS: '/api/v1/integrations',
     INTEGRATION_TEST: (name: string) => '/api/v1/integrations/' + name + '/test',
     TASK_QUEUE: '/api/v1/task-queue',
     SELF_CHECK: '/api/v1/platform/self-check',
     TENANTS: '/api/v1/tenants',
     TENANT_DETAIL: (id: string) => '/api/v1/tenants/' + id,
+    LICENSE: '/api/v1/platform/license',
+    UPGRADE_HISTORY: '/api/v1/platform/upgrade-history',
   },
+
+  // 导出中心
+  EXPORTS: '/api/v1/exports',
+  EXPORT_DETAIL: (id: string) => '/api/v1/exports/' + id,
+  EXPORT_CANCEL: (id: string) => '/api/v1/exports/' + id + '/cancel',
 
   // G0 全局搜索
   GLOBAL_SEARCH: '/api/v1/search',

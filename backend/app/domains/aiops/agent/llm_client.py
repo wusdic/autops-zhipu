@@ -5,31 +5,39 @@ import asyncio
 import hashlib
 import json
 import logging
+import time
 from collections import OrderedDict
 from typing import Any, AsyncIterator
 
 import httpx
 
+from app.common.exceptions import AppError, ErrorCode
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# 内存 LRU 缓存 (Redis 不可用时的降级方案)
+# 内存 LRU 缓存 (Redis 不可用时的降级方案)，带 TTL 防止内存泄漏
 # ---------------------------------------------------------------------------
 _MAX_LRU_SIZE = 100
-_lru_cache: OrderedDict[str, str] = OrderedDict()
+_LRU_TTL = 300  # 缓存条目存活秒数
+_lru_cache: OrderedDict[str, tuple[str, float]] = OrderedDict()
 
 
 def _lru_get(key: str) -> str | None:
     if key in _lru_cache:
-        _lru_cache.move_to_end(key)
-        return _lru_cache[key]
+        value, ts = _lru_cache[key]
+        if time.monotonic() - ts < _LRU_TTL:
+            _lru_cache.move_to_end(key)
+            return value
+        del _lru_cache[key]
     return None
 
 
 def _lru_set(key: str, value: str) -> None:
+    entry = (value, time.monotonic())
     if key in _lru_cache:
         _lru_cache.move_to_end(key)
-    _lru_cache[key] = value
+    _lru_cache[key] = entry
     while len(_lru_cache) > _MAX_LRU_SIZE:
         _lru_cache.popitem(last=False)
 
@@ -43,7 +51,10 @@ async def _redis_get(key: str) -> str | None:
         from app.infra.redis_client import get_redis
         redis = await get_redis()
         return await redis.get(key)
+    except ImportError:
+        return None
     except Exception:
+        logger.debug("Redis get skipped (unavailable): %s", key[:24])
         return None
 
 
@@ -53,8 +64,10 @@ async def _redis_set(key: str, value: str, ttl: int = 300) -> None:
         from app.infra.redis_client import get_redis
         redis = await get_redis()
         await redis.setex(key, ttl, value)
-    except Exception:
+    except ImportError:
         pass
+    except Exception:
+        logger.debug("Redis set skipped (unavailable): %s", key[:24])
 
 
 # ---------------------------------------------------------------------------
@@ -175,7 +188,7 @@ class LLMClient:
                 if resp.status_code != 200:
                     error_text = await resp.aread()
                     logger.error("LLM stream error: %s %s", resp.status_code, error_text[:200])
-                    raise Exception(f"LLM stream returned status {resp.status_code}")
+                    raise AppError(ErrorCode.AI_UNAVAILABLE_ANALYSIS, f"LLM stream returned status {resp.status_code}", 502)
 
                 async for line in resp.aiter_lines():
                     # SSE 格式: "data: {...}" 或 "data: [DONE]"
@@ -231,7 +244,7 @@ class LLMClient:
                 data = resp.json()
                 return data["choices"][0]["message"]["content"]
             logger.error("LLM error: %s %s", resp.status_code, resp.text[:200])
-            raise Exception(f"LLM returned status {resp.status_code}")
+            raise AppError(ErrorCode.AI_UNAVAILABLE_ANALYSIS, f"LLM returned status {resp.status_code}", 502)
 
     async def _get_cache(self, key: str) -> str | None:
         """优先 Redis → 降级 LRU."""

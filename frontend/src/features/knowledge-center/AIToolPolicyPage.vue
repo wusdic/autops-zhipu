@@ -212,9 +212,6 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
-// ─── Constants ───────────────────────────────────────────────────────
-const TOOL_POLICY_API = '/api/v1/aiops/tool-policies'
-
 // ─── State ───────────────────────────────────────────────────────────
 const loading = ref(false)
 const saving = ref(false)
@@ -278,7 +275,7 @@ async function loadList() {
     if (filterRisk.value) params.risk_level = filterRisk.value
     if (filterApproval.value !== '') params.requires_approval = filterApproval.value
 
-    const { data } = await client.get(TOOL_POLICY_API, { params })
+    const { data } = await client.get(API.AIOPS.TOOL_POLICIES, { params })
     if (data.code === 0) {
       const result = data.data
       tableData.value = (result.items || result || []).map((item: any) => ({
@@ -306,7 +303,7 @@ function resetFilters() {
 async function toggleApproval(row: any) {
   row._toggling = true
   try {
-    const { data } = await client.put(TOOL_POLICY_API + '/' + row.id, {
+    const { data } = await client.put(API.AIOPS.TOOL_POLICY_DETAIL(row.id), {
       requires_approval: row.requires_approval,
     })
     if (data.code === 0) {
@@ -364,9 +361,9 @@ async function handleSave() {
     const payload = { ...form }
     let res: any
     if (isEditing.value) {
-      res = await client.put(TOOL_POLICY_API + '/' + editingId.value, payload)
+      res = await client.put(API.AIOPS.TOOL_POLICY_DETAIL(editingId.value), payload)
     } else {
-      res = await client.post(TOOL_POLICY_API, payload)
+      res = await client.post(API.AIOPS.TOOL_POLICIES, payload)
     }
     if (res.data.code === 0) {
       ElMessage.success(isEditing.value ? '策略已更新' : '策略已创建')
@@ -389,7 +386,7 @@ async function handleDelete(row: any) {
       '确认删除',
       { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' }
     )
-    const { data } = await client.delete(TOOL_POLICY_API + '/' + row.id)
+    const { data } = await client.delete(API.AIOPS.TOOL_POLICY_DETAIL(row.id))
     if (data.code === 0) {
       ElMessage.success('已删除')
       loadList()

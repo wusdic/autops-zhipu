@@ -9,7 +9,7 @@ import httpx
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.common.exceptions import NotFoundError
+from app.common.exceptions import AppError, ErrorCode, NotFoundError
 from app.common.repository import BaseRepository
 from app.infra.config import get_config
 from app.domains.aiops.models import AIAnalysis
@@ -36,7 +36,7 @@ class AIOpsService:
             analysis_type=data.analysis_type,
             alert_id=data.alert_id,
             asset_ids=json.dumps(data.asset_ids) if data.asset_ids else None,
-            model_name=getattr(config, 'model_name', getattr(config, 'llm_model', 'default')),
+            model_name=config.llm.model_name,
             status="running",
         )
         await self.session.flush()
@@ -73,8 +73,8 @@ class AIOpsService:
 
     async def _call_llm(self, analysis: AIAnalysis) -> dict:
         config = self.llm_config
-        base_url = getattr(config, 'llm_base_url', '')
-        model = getattr(config, 'model_name', getattr(config, 'llm_model', 'default'))
+        base_url = config.llm.base_url
+        model = config.llm.model_name
 
         prompt = f"""你是运维分析专家。请分析以下问题并给出结构化的JSON响应。
 分析类型: {analysis.analysis_type}
@@ -111,7 +111,7 @@ class AIOpsService:
                         pass
                     return {"summary": content, "root_causes": [], "recommended_actions": []}
                 else:
-                    raise Exception(f"LLM 返回状态码 {resp.status_code}")
+                    raise AppError(ErrorCode.AI_UNAVAILABLE_ANALYSIS, f"LLM 返回状态码 {resp.status_code}", 502)
         except httpx.ConnectError:
             # Model unavailable - graceful degradation
             return {
@@ -155,7 +155,7 @@ class AIOpsService:
         """检查 LLM 服务是否可用."""
         try:
             config = get_config()
-            base_url = getattr(config, 'llm_base_url', '')
+            base_url = config.llm.base_url
             async with httpx.AsyncClient(timeout=5) as client:
                 resp = await client.get(f"{base_url}/models")
                 if resp.status_code == 200:
@@ -217,8 +217,8 @@ class AIOpsService:
 
         # 自由问答模式
         config = self.llm_config
-        base_url = getattr(config, 'llm_base_url', '')
-        model = getattr(config, 'model_name', getattr(config, 'llm_model', 'default'))
+        base_url = config.llm.base_url
+        model = config.llm.model_name
 
         system_prompt = """你是 AUTOPS 自治运维系统的 AI 运维分析专家。你的职责是：
 1. 分析运维问题的根因

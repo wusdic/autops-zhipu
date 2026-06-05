@@ -105,6 +105,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 const router = useRouter()
 const loading = ref(false)
@@ -135,7 +136,7 @@ function formatSize(bytes: number) {
 async function loadExports() {
   loading.value = true
   try {
-    const res = await api.get('/api/v1/exports', { params: { page: pagination.page, page_size: pagination.size } })
+    const res = await api.get(API.EXPORTS, { params: { page: pagination.page, page_size: pagination.size } })
     const data = res.data?.data
     exports.value = data?.items || []
     pagination.total = data?.total || 0
@@ -152,7 +153,7 @@ async function handleSubmit() {
   if (!form.name) { ElMessage.warning('请输入导出名称'); return }
   submitting.value = true
   try {
-    await api.post('/api/v1/exports', form)
+    await api.post(API.EXPORTS, form)
     ElMessage.success('导出任务已创建')
     dialogVisible.value = false
     loadExports()
@@ -167,7 +168,7 @@ function downloadExport(row: any) {
 
 async function cancelExport(row: any) {
   try {
-    await api.post('/api/v1/exports/' + row.id + '/cancel')
+    await api.post(API.EXPORT_CANCEL(row.id))
     ElMessage.success('导出已取消')
     loadExports()
   } catch { ElMessage.error('取消失败') }
@@ -176,7 +177,7 @@ async function cancelExport(row: any) {
 async function deleteExport(row: any) {
   try {
     await ElMessageBox.confirm('确认删除此导出记录？', '删除确认', { type: 'warning' })
-    await api.delete('/api/v1/exports/' + row.id)
+    await api.delete(API.EXPORT_DETAIL(row.id))
     ElMessage.success('已删除')
     loadExports()
   } catch { /* cancelled */ }

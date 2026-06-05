@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { automationService } from '@/shared/api'
+import { APP_CONFIG } from '@/shared/config'
 
 export const useExecutionStore = defineStore('execution', () => {
   const executions = ref<any[]>([])
@@ -32,9 +33,7 @@ export const useExecutionStore = defineStore('execution', () => {
 
   function connectLogs(executionId: string) {
     disconnectLogs()
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const host = window.location.hostname
-    const ws = new WebSocket(protocol + '//' + host + ':8001/api/v1/ws/execution/' + executionId + '/logs')
+    const ws = new WebSocket(APP_CONFIG.WS_URL + '/execution/' + executionId + '/logs')
     ws.onmessage = (event) => {
       realtimeLogs.value.push(event.data)
     }
