@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- Page Header -->
     <div class="autops-page-header">
       <div class="autops-page-title">业务系统</div>
@@ -366,11 +366,11 @@ onMounted(() => {
 
 <style scoped>
 .filter-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .filter-card :deep(.el-card__body) {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 }
 
 .table-card :deep(.el-card__body) {
@@ -378,7 +378,7 @@ onMounted(() => {
 }
 
 .system-name {
-  color: #165dff;
+  color: var(--autops-primary);
   cursor: pointer;
   font-weight: 500;
 }
@@ -388,13 +388,13 @@ onMounted(() => {
 }
 
 .text-tertiary {
-  color: #86909c;
-  font-size: 13px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-13);
 }
 
 .pagination-wrap {
   display: flex;
   justify-content: flex-end;
-  padding: 16px;
+  padding: var(--autops-space-lg);
 }
 </style>

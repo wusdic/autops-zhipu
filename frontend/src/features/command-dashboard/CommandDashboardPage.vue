@@ -67,9 +67,9 @@
             <div class="autops-card-title"><el-icon><Search /></el-icon> 资产发现</div>
           </div>
           <div class="autops-card-body v3-card-body">
-            <div class="v3-stat"><span class="v3-stat-num">{{ discoveryStats.todayFound }}</span><span class="v3-stat-label">今日发现</span></div>
-            <div class="v3-stat"><span class="v3-stat-num text-warning">{{ discoveryStats.pendingConfirm }}</span><span class="v3-stat-label">待确认</span></div>
-            <div class="v3-stat"><span class="v3-stat-num text-success">{{ discoveryStats.managed }}</span><span class="v3-stat-label">已纳管</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num">{{ discoveryStats.todayFound }}</span><span class="autops-metric-card-label">今日发现</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num text-warning">{{ discoveryStats.pendingConfirm }}</span><span class="autops-metric-card-label">待确认</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num text-success">{{ discoveryStats.managed }}</span><span class="autops-metric-card-label">已纳管</span></div>
           </div>
         </div>
       </el-col>
@@ -80,9 +80,9 @@
             <div class="autops-card-title"><el-icon><CircleCheck /></el-icon> 巡检实况</div>
           </div>
           <div class="autops-card-body v3-card-body">
-            <div class="v3-stat"><span class="v3-stat-num text-primary">{{ inspectionStats.running }}</span><span class="v3-stat-label">正在巡检</span></div>
-            <div class="v3-stat"><span class="v3-stat-num text-danger">{{ inspectionStats.failed }}</span><span class="v3-stat-label">巡检失败</span></div>
-            <div class="v3-stat"><span class="v3-stat-num text-warning">{{ inspectionStats.abnormalItems }}</span><span class="v3-stat-label">异常巡检项</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num text-primary">{{ inspectionStats.running }}</span><span class="autops-metric-card-label">正在巡检</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num text-danger">{{ inspectionStats.failed }}</span><span class="autops-metric-card-label">巡检失败</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num text-warning">{{ inspectionStats.abnormalItems }}</span><span class="autops-metric-card-label">异常巡检项</span></div>
           </div>
         </div>
       </el-col>
@@ -93,9 +93,9 @@
             <div class="autops-card-title"><el-icon><VideoPlay /></el-icon> 自动处置</div>
           </div>
           <div class="autops-card-body v3-card-body">
-            <div class="v3-stat"><span class="v3-stat-num text-success">{{ remediationStats.autoHandled }}</span><span class="v3-stat-label">自动处理</span></div>
-            <div class="v3-stat"><span class="v3-stat-num text-warning">{{ remediationStats.rollbackCount }}</span><span class="v3-stat-label">回滚</span></div>
-            <div class="v3-stat"><span class="v3-stat-num">{{ remediationStats.successRate }}%</span><span class="v3-stat-label">成功率</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num text-success">{{ remediationStats.autoHandled }}</span><span class="autops-metric-card-label">自动处理</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num text-warning">{{ remediationStats.rollbackCount }}</span><span class="autops-metric-card-label">回滚</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num">{{ remediationStats.successRate }}%</span><span class="autops-metric-card-label">成功率</span></div>
           </div>
         </div>
       </el-col>
@@ -106,9 +106,9 @@
             <div class="autops-card-title"><el-icon><Document /></el-icon> 报告任务</div>
           </div>
           <div class="autops-card-body v3-card-body">
-            <div class="v3-stat"><span class="v3-stat-num text-primary">{{ reportStats.generating }}</span><span class="v3-stat-label">生成中</span></div>
-            <div class="v3-stat"><span class="v3-stat-num text-success">{{ reportStats.completed }}</span><span class="v3-stat-label">已完成</span></div>
-            <div class="v3-stat"><span class="v3-stat-num text-danger">{{ reportStats.failed }}</span><span class="v3-stat-label">失败</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num text-primary">{{ reportStats.generating }}</span><span class="autops-metric-card-label">生成中</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num text-success">{{ reportStats.completed }}</span><span class="autops-metric-card-label">已完成</span></div>
+            <div class="autops-metric-card"><span class="autops-metric-card-num text-danger">{{ reportStats.failed }}</span><span class="autops-metric-card-label">失败</span></div>
           </div>
         </div>
       </el-col>
@@ -717,10 +717,10 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-.health-dot-healthy { background: #00b42a; }
-.health-dot-warning { background: #ff7d00; }
-.health-dot-critical { background: #f53f3f; }
-.health-dot-unknown { background: #86909c; }
+.health-dot-healthy { background: var(--autops-success); }
+.health-dot-warning { background: var(--autops-warning); }
+.health-dot-critical { background: var(--autops-danger); }
+.health-dot-unknown { background: var(--autops-info); }
 
 /* 执行统计 */
 .exec-stats {
@@ -731,9 +731,9 @@ onUnmounted(() => {
 .exec-stat-item {
   flex: 1;
   text-align: center;
-  padding: 12px;
-  background: #f7f8fa;
-  border-radius: 8px;
+  padding: var(--autops-space-md);
+  background: var(--autops-bg-2);
+  border-radius: var(--autops-radius-md);
 }
 
 /* 快捷操作 */
@@ -748,21 +748,21 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 16px 8px;
-  border-radius: 8px;
+  padding: var(--autops-space-lg) 8px;
+  border-radius: var(--autops-radius-md);
   cursor: pointer;
   transition: all 0.2s;
-  background: #f7f8fa;
+  background: var(--autops-bg-2);
 }
 
 .quick-action-btn:hover {
-  background: #e8f3ff;
+  background: var(--autops-primary-light-5);
   transform: translateY(-2px);
 }
 
 .quick-action-btn span {
-  font-size: 12px;
-  color: #4e5969;
+  font-size: var(--autops-font-12);
+  color: var(--autops-text-2);
 }
 
 .autops-status-tag {
@@ -770,45 +770,45 @@ onUnmounted(() => {
   align-items: center;
   gap: 4px;
   padding: 2px 10px;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: var(--autops-radius-sm);
+  font-size: var(--autops-font-12);
   font-weight: 500;
   line-height: 20px;
 }
-.status-failed { background: #ffece8; color: #f53f3f; }
-.status-warning { background: #fff7e8; color: #ff7d00; }
-.status-info { background: #f2f3f5; color: #86909c; }
-.status-active { background: #ffece8; color: #f53f3f; }
-.status-acknowledged { background: #fff7e8; color: #ff7d00; }
-.status-resolved { background: #e8ffea; color: #00b42a; }
-.status-suppressed { background: #f2f3f5; color: #86909c; }
+.status-failed { background: var(--autops-danger-light); color: var(--autops-danger); }
+.status-warning { background: var(--autops-warning-light); color: var(--autops-warning); }
+.status-info { background: var(--autops-bg-3); color: var(--autops-info); }
+.status-active { background: var(--autops-danger-light); color: var(--autops-danger); }
+.status-acknowledged { background: var(--autops-warning-light); color: var(--autops-warning); }
+.status-resolved { background: var(--autops-success-light); color: var(--autops-success); }
+.status-suppressed { background: var(--autops-bg-3); color: var(--autops-info); }
 
 /* V3 主线卡片 */
-.v3-card { cursor: pointer; transition: all 0.2s; }
-.v3-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-.v3-card-body { display: flex; justify-content: space-around; padding: 16px 8px !important; }
-.v3-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.v3-stat-num { font-size: 22px; font-weight: 600; line-height: 1.2; }
-.v3-stat-label { font-size: 12px; color: #86909c; }
-.text-tertiary { color: #86909c; }
-.font-12 { font-size: 12px; }
+.autops-card { cursor: pointer; transition: all 0.2s; }
+.autops-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.autops-card-body { display: flex; justify-content: space-around; padding: var(--autops-space-lg) 8px !important; }
+.autops-metric-card { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.autops-metric-card-num { font-size: 22px; font-weight: 600; line-height: 1.2; }
+.autops-metric-card-label { font-size: var(--autops-font-12); color: var(--autops-info); }
+.text-tertiary { color: var(--autops-info); }
+.font-12 { font-size: var(--autops-font-12); }
 
 /* 平台健康 */
 .platform-health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .health-item { display: flex; align-items: center; gap: 6px; padding: 6px 0; }
-.health-dot-healthy { background: #00b42a; }
-.health-dot-warning { background: #ff7d00; }
-.health-dot-error { background: #f53f3f; }
-.health-dot-offline { background: #c9cdd4; }
+.health-dot-healthy { background: var(--autops-success); }
+.health-dot-warning { background: var(--autops-warning); }
+.health-dot-error { background: var(--autops-danger); }
+.health-dot-offline { background: var(--autops-text-4); }
 
 /* 今日摘要 */
 .today-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.summary-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; background: #f7f8fa; border-radius: 6px; }
-.summary-label { font-size: 12px; color: #86909c; }
+.summary-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: var(--autops-space-sm); background: var(--autops-bg-2); border-radius: 6px; }
+.summary-label { font-size: var(--autops-font-12); color: var(--autops-info); }
 .summary-val { font-size: 18px; font-weight: 600; }
 
 /* 优先级 */
-.priority-high { color: #f53f3f; font-weight: 500; }
-.priority-medium { color: #ff7d00; font-weight: 500; }
-.priority-low { color: #00b42a; font-weight: 500; }
+.priority-high { color: var(--autops-danger); font-weight: 500; }
+.priority-medium { color: var(--autops-warning); font-weight: 500; }
+.priority-low { color: var(--autops-success); font-weight: 500; }
 </style>

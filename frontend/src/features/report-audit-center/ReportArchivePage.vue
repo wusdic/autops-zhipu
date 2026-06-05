@@ -283,20 +283,20 @@ onMounted(() => {
 
 <style scoped>
 .report-archive-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 
 .main-card {
-  border-radius: 8px;
+  border-radius: var(--autops-radius-md);
 }
 .filter-form {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e6eb;
+  border-bottom: 1px solid var(--autops-bg-4);
 }
 
 .filter-form :deep(.el-form-item) {
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 
 .archive-table {
@@ -306,6 +306,6 @@ onMounted(() => {
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 </style>

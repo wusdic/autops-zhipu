@@ -875,12 +875,12 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .event-list-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 
 /* ── Statistics Cards ── */
 .stats-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .stat-card__body {
   display: flex;
@@ -891,7 +891,7 @@ onBeforeUnmount(() => {
 .stat-card__icon {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
+  border-radius: var(--autops-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -910,56 +910,56 @@ onBeforeUnmount(() => {
 }
 
 .stat-card__label {
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
   margin-top: 4px;
 }
 
-.stat-card--total .stat-card__icon {
+.autops-metric-card--total .stat-card__icon {
   background: rgba(64, 158, 255, 0.12);
-  color: #165dff;
+  color: var(--autops-primary);
 }
-.stat-card--total .stat-card__value {
-  color: #165dff;
+.autops-metric-card--total .stat-card__value {
+  color: var(--autops-primary);
 }
 
-.stat-card--today .stat-card__icon {
+.autops-metric-card--today .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
-  color: #00b42a;
+  color: var(--autops-success);
 }
-.stat-card--today .stat-card__value {
-  color: #00b42a;
+.autops-metric-card--today .stat-card__value {
+  color: var(--autops-success);
 }
 
-.stat-card--pending .stat-card__icon {
+.autops-metric-card--pending .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
-  color: #ff7d00;
+  color: var(--autops-warning);
 }
-.stat-card--pending .stat-card__value {
-  color: #ff7d00;
+.autops-metric-card--pending .stat-card__value {
+  color: var(--autops-warning);
 }
 
-.stat-card--critical .stat-card__icon {
+.autops-metric-card--critical .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
-  color: #f53f3f;
+  color: var(--autops-danger);
 }
-.stat-card--critical .stat-card__value {
-  color: #f53f3f;
+.autops-metric-card--critical .stat-card__value {
+  color: var(--autops-danger);
 }
 
 /* ── Main Card ── */
 .main-card {
-  border-radius: 8px;
+  border-radius: var(--autops-radius-md);
 }
 /* ── Filter Form ── */
 .filter-form {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e6eb;
+  border-bottom: 1px solid var(--autops-bg-4);
 }
 
 .filter-form :deep(.el-form-item) {
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 
 /* ── Event Table ── */
@@ -968,35 +968,35 @@ onBeforeUnmount(() => {
 }
 
 .event-table :deep(.row--critical) {
-  background-color: #fef0f0 !important;
+  background-color: var(--autops-danger-light) !important;
 }
 
 .event-table :deep(.row--critical:hover > td) {
-  background-color: #fde2e2 !important;
+  background-color: var(--autops-danger-light) !important;
 }
 
 .event-table :deep(.el-table__expanded-cell) {
-  padding: 16px 24px;
+  padding: var(--autops-space-lg) 24px;
 }
 
 .time-cell {
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-  font-size: 13px;
-  color: #4e5969;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-2);
 }
 
 /* ── Expand Content ── */
 .expand-content {
-  padding: 4px 0;
+  padding: var(--autops-space-xs) 0;
 }
 
 .expand-description {
-  background: #f7f8fa;
-  padding: 12px;
+  background: var(--autops-bg-2);
+  padding: var(--autops-space-md);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: var(--autops-font-13);
   line-height: 1.6;
-  color: #4e5969;
+  color: var(--autops-text-2);
   white-space: pre-wrap;
   word-break: break-all;
 }
@@ -1005,7 +1005,7 @@ onBeforeUnmount(() => {
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 
 /* ── Tab Badge ── */
@@ -1021,7 +1021,7 @@ onBeforeUnmount(() => {
 }
 
 .log-item {
-  background: #f7f8fa;
+  background: var(--autops-bg-2);
   border-radius: 6px;
   padding: 10px 12px;
 }
@@ -1034,14 +1034,14 @@ onBeforeUnmount(() => {
 }
 
 .log-item__time {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
 }
 
 .log-item__message {
-  font-size: 13px;
-  color: #1d2129;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-1);
   white-space: pre-wrap;
   word-break: break-all;
   line-height: 1.5;

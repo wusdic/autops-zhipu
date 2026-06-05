@@ -173,8 +173,8 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.compliance-report-page { padding: 20px; }
-.mt-4 { margin-top: 16px; }
-.score-circle { text-align: center; padding: 20px; }
-.score-label { margin-top: 12px; font-size: 16px; color: #4e5969; }
+.compliance-report-page { padding: var(--autops-space-xl); }
+.mt-4 { margin-top: var(--autops-space-lg); }
+.score-circle { text-align: center; padding: var(--autops-space-xl); }
+.score-label { margin-top: 12px; font-size: var(--autops-font-16); color: var(--autops-text-2); }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title">通知规则</div>
       <div class="autops-page-desc">配置告警和事件的通知规则和发送渠道</div>
@@ -263,5 +263,5 @@ onMounted(fetchData)
 
 <style scoped>
 
-.mb-md { margin-bottom: 16px; }
+.mb-md { margin-bottom: var(--autops-space-lg); }
 </style>

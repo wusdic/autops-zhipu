@@ -26,10 +26,10 @@ function eventType(evt: any): string {
 </script>
 
 <style scoped>
-.audit-trace-timeline { padding: 8px 0; }
-.trace-event { font-size: 13px; }
-.trace-user { font-weight: 600; color: #165dff; margin-right: 6px; }
-.trace-action { color: #1d2129; margin-right: 6px; }
-.trace-resource { color: #86909c; }
-.trace-detail { color: #86909c; font-size: 12px; margin-top: 4px; padding: 4px 8px; background: #f7f8fa; border-radius: 4px; }
+.audit-trace-timeline { padding: var(--autops-space-sm) 0; }
+.trace-event { font-size: var(--autops-font-13); }
+.trace-user { font-weight: 600; color: var(--autops-primary); margin-right: 6px; }
+.trace-action { color: var(--autops-text-1); margin-right: 6px; }
+.trace-resource { color: var(--autops-info); }
+.trace-detail { color: var(--autops-info); font-size: var(--autops-font-12); margin-top: 4px; padding: var(--autops-space-xs) 8px; background: var(--autops-bg-2); border-radius: var(--autops-radius-sm); }
 </style>

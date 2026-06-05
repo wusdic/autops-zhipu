@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- Page Header -->
     <div class="autops-page-header">
       <div class="autops-page-title">审批中心</div>
@@ -438,11 +438,11 @@ onMounted(() => {
 
 
 .tabs-card :deep(.el-card__body) {
-  padding: 16px 20px;
+  padding: var(--autops-space-lg) 20px;
 }
 
 .request-name {
-  color: #165dff;
+  color: var(--autops-primary);
   cursor: pointer;
   font-weight: 500;
 }
@@ -452,14 +452,14 @@ onMounted(() => {
 }
 
 .text-tertiary {
-  color: #86909c;
-  font-size: 13px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-13);
 }
 
 .pagination-wrap {
   display: flex;
   justify-content: flex-end;
-  padding: 16px 0 0;
+  padding: var(--autops-space-lg) 0 0;
 }
 
 .tab-badge {
@@ -475,9 +475,9 @@ onMounted(() => {
 }
 
 .section-title {
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   font-weight: 600;
-  color: #1d2129;
-  margin-bottom: 12px;
+  color: var(--autops-text-1);
+  margin-bottom: var(--autops-space-md);
 }
 </style>

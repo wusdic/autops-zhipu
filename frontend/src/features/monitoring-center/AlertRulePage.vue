@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- ========== Page Header ========== -->
     <div class="autops-page-header">
       <div>
@@ -305,15 +305,15 @@ onMounted(() => { load() })
 
 <style scoped>
 
-.stat-row { margin-bottom: 20px; }
+.stat-row { margin-bottom: var(--autops-space-xl); }
 
-.stat-card 
-.stat-card.success .stat-value { color: #00b42a; }
-.stat-card.warning .stat-value { color: #ff7d00; }
-.stat-card.primary .stat-value { color: #165dff; font-size: 16px; }
-.stat-card 
-.toolbar { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.pagination { margin-top: 16px; display: flex; justify-content: flex-end; }
-.condition-editor { background: #f7f8fa; padding: 12px; border-radius: 4px; }
+.autops-metric-card 
+.autops-metric-card.success .stat-value { color: var(--autops-success); }
+.autops-metric-card.warning .stat-value { color: var(--autops-warning); }
+.autops-metric-card.primary .stat-value { color: var(--autops-primary); font-size: var(--autops-font-16); }
+.autops-metric-card 
+.toolbar { margin-bottom: var(--autops-space-lg); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pagination { margin-top: var(--autops-space-lg); display: flex; justify-content: flex-end; }
+.condition-editor { background: var(--autops-bg-2); padding: var(--autops-space-md); border-radius: var(--autops-radius-sm); }
 .cond-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
 </style>

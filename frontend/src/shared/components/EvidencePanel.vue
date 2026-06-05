@@ -114,38 +114,38 @@ function formatTime(ts: string) {
 </script>
 
 <style scoped>
-.evidence-panel { border: 1px solid #e5e6eb; border-radius: 8px; background: #fff; }
+.evidence-panel { border: 1px solid var(--autops-bg-4); border-radius: var(--autops-radius-md); background: var(--autops-bg-1); }
 .ep-header {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 16px; border-bottom: 1px solid #f2f3f5;
+  padding: var(--autops-space-md) 16px; border-bottom: 1px solid var(--autops-bg-3);
 }
-.ep-title { font-weight: 600; color: #1d2129; font-size: 14px; }
+.ep-title { font-weight: 600; color: var(--autops-text-1); font-size: var(--autops-font-14); }
 .ep-actions { display: flex; gap: 4px; }
-.ep-stats { display: flex; gap: 6px; padding: 8px 16px; border-bottom: 1px solid #f7f8fa; flex-wrap: wrap; }
-.ep-body { padding: 12px 16px; max-height: 600px; overflow-y: auto; }
-.ep-group { margin-bottom: 12px; }
+.ep-stats { display: flex; gap: 6px; padding: var(--autops-space-sm) 16px; border-bottom: 1px solid var(--autops-bg-2); flex-wrap: wrap; }
+.ep-body { padding: var(--autops-space-md) 16px; max-height: 600px; overflow-y: auto; }
+.ep-group { margin-bottom: var(--autops-space-md); }
 .ep-group-title {
-  font-size: 13px; font-weight: 600; color: #86909c; margin-bottom: 8px;
-  padding-left: 8px; border-left: 3px solid #165dff; display: flex; align-items: center; gap: 6px;
+  font-size: var(--autops-font-13); font-weight: 600; color: var(--autops-info); margin-bottom: var(--autops-space-sm);
+  padding-left: 8px; border-left: 3px solid var(--autops-primary); display: flex; align-items: center; gap: 6px;
 }
-.ep-group-count { background: #f2f3f5; padding: 0 6px; border-radius: 10px; font-size: 11px; }
+.ep-group-count { background: var(--autops-bg-3); padding: 0 6px; border-radius: 10px; font-size: 11px; }
 .ep-item {
-  padding: 10px 12px; border: 1px solid #f2f3f5; border-radius: 6px; margin-bottom: 6px;
+  padding: 10px 12px; border: 1px solid var(--autops-bg-3); border-radius: 6px; margin-bottom: 6px;
   transition: border-color 0.2s;
 }
-.ep-item:hover { border-color: #c9cdd4; }
-.ep-item-critical { border-left: 3px solid #f53f3f; }
+.ep-item:hover { border-color: var(--autops-text-4); }
+.ep-item-critical { border-left: 3px solid var(--autops-danger); }
 .ep-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .ep-item-source { display: flex; gap: 4px; }
-.ep-time { font-size: 12px; color: #c9cdd4; }
-.ep-summary { font-size: 13px; color: #1d2129; line-height: 1.5; }
+.ep-time { font-size: var(--autops-font-12); color: var(--autops-text-4); }
+.ep-summary { font-size: var(--autops-font-13); color: var(--autops-text-1); line-height: 1.5; }
 .ep-detail-toggle {
-  display: flex; align-items: center; gap: 4px; font-size: 12px; color: #165dff;
+  display: flex; align-items: center; gap: 4px; font-size: var(--autops-font-12); color: var(--autops-primary);
   cursor: pointer; margin-top: 6px;
 }
 .ep-detail pre {
-  font-size: 12px; white-space: pre-wrap; background: #f7f8fa;
-  padding: 8px 10px; border-radius: 4px; margin-top: 4px; max-height: 300px; overflow-y: auto;
+  font-size: var(--autops-font-12); white-space: pre-wrap; background: var(--autops-bg-2);
+  padding: var(--autops-space-sm) 10px; border-radius: var(--autops-radius-sm); margin-top: 4px; max-height: 300px; overflow-y: auto;
   font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
 }
 </style>

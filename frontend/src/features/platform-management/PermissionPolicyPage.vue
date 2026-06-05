@@ -52,7 +52,7 @@
     <!-- 策略列表表格 -->
     <el-card class="table-card" shadow="never">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span>权限策略</span>
           <el-button type="primary" :icon="Plus" @click="handleCreate">新建策略</el-button>
         </div>
@@ -600,38 +600,38 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .permission-policy-page {
-  padding: 16px;
+  padding: var(--autops-space-lg);
 
   .filter-card {
-    margin-bottom: 16px;
+    margin-bottom: var(--autops-space-lg);
   }
 
   .table-card {
     
     .policy-name {
       font-weight: 500;
-      color: #1d2129;
+      color: var(--autops-text-1);
     }
 
     .expand-content {
-      padding: 12px 20px;
+      padding: var(--autops-space-md) 20px;
 
       h4 {
-        font-size: 14px;
-        color: #4e5969;
+        font-size: var(--autops-font-14);
+        color: var(--autops-text-2);
       }
     }
 
     .pagination-wrapper {
       display: flex;
       justify-content: flex-end;
-      margin-top: 16px;
+      margin-top: var(--autops-space-lg);
     }
   }
 
   .text-muted {
-    color: #c9cdd4;
-    font-size: 13px;
+    color: var(--autops-text-4);
+    font-size: var(--autops-font-13);
   }
 }
 </style>

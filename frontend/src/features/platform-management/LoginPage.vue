@@ -72,11 +72,11 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, var(--autops-terminal-bg) 0%, var(--autops-terminal-bg) 50%, var(--autops-terminal-bg) 100%);
 }
 .login-card {
   width: 400px;
-  border-radius: 12px;
+  border-radius: var(--autops-radius-lg);
 }
 .login-header {
   text-align: center;
@@ -84,11 +84,11 @@ async function handleLogin() {
 .login-header h1 {
   margin: 0;
   font-size: 28px;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 .login-header p {
   margin: 4px 0 0;
-  color: #86909c;
-  font-size: 14px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-14);
 }
 </style>

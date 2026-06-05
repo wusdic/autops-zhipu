@@ -3,7 +3,7 @@
     <!-- 上传区域 -->
     <el-card shadow="never" class="upload-card">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span class="title">
             <el-icon><UploadFilled /></el-icon>
             资产导入
@@ -485,11 +485,11 @@ onMounted(() => {
 
 <style scoped>
 .resource-import-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 
 .upload-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .upload-card 
@@ -502,13 +502,13 @@ onMounted(() => {
 }
 
 .upload-actions {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
   display: flex;
   gap: 8px;
 }
 
 .history-card 
-.history-card .card-header .actions {
+.history-card .autops-card-header .actions {
   display: flex;
   align-items: center;
 }
@@ -522,14 +522,14 @@ onMounted(() => {
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
-  padding: 4px 0;
+  margin-top: var(--autops-space-lg);
+  padding: var(--autops-space-xs) 0;
 }
 
 .more-errors {
   text-align: center;
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
   margin-top: 8px;
 }
 </style>

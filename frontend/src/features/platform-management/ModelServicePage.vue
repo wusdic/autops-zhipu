@@ -19,7 +19,7 @@
     <!-- 模型总览 -->
     <el-row :gutter="16" class="mt-4">
       <el-col :span="6" v-for="stat in overviewStats" :key="stat.label">
-        <el-card shadow="hover" class="stat-card">
+        <el-card shadow="hover" class="autops-metric-card">
           <div class="stat-value" :style="{ color: stat.color }">{{ stat.value }}</div>
           <div class="stat-label">{{ stat.label }}</div>
         </el-card>
@@ -305,7 +305,7 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.model-service-page { padding: 20px; }
-.mt-4 { margin-top: 16px; }
-.text-xs { font-size: 12px; }
+.model-service-page { padding: var(--autops-space-xl); }
+.mt-4 { margin-top: var(--autops-space-lg); }
+.text-xs { font-size: var(--autops-font-12); }
 </style>

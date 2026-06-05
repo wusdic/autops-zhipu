@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">API 密钥</div>
@@ -388,34 +388,34 @@ onMounted(() => { load() })
 
 <style scoped>
 
-.stat-row { margin-bottom: 20px; }
+.stat-row { margin-bottom: var(--autops-space-xl); }
 
-.stat-card 
-.stat-card.success .stat-value { color: #00b42a; }
-.stat-card.danger .stat-value { color: #f53f3f; }
-.stat-card.warning .stat-value { color: #ff7d00; }
-.stat-card 
-.toolbar { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.pagination { margin-top: 16px; display: flex; justify-content: flex-end; }
+.autops-metric-card 
+.autops-metric-card.success .stat-value { color: var(--autops-success); }
+.autops-metric-card.danger .stat-value { color: var(--autops-danger); }
+.autops-metric-card.warning .stat-value { color: var(--autops-warning); }
+.autops-metric-card 
+.toolbar { margin-bottom: var(--autops-space-lg); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pagination { margin-top: var(--autops-space-lg); display: flex; justify-content: flex-end; }
 
 .expiry-cell { display: flex; align-items: center; gap: 6px; }
 .usage-cell { text-align: center; }
 
 .secret-row { display: flex; align-items: center; gap: 8px; width: 100%; }
-.secret-row code { flex: 1; padding: 6px 10px; background: #f7f8fa; border-radius: 4px; font-size: 13px; word-break: break-all; }
-.secret-value { color: #ff7d00; font-weight: bold; }
+.secret-row code { flex: 1; padding: 6px 10px; background: var(--autops-bg-2); border-radius: var(--autops-radius-sm); font-size: var(--autops-font-13); word-break: break-all; }
+.secret-value { color: var(--autops-warning); font-weight: bold; }
 
 .scope-groups { width: 100%; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.scope-group { background: #f7f8fa; border-radius: 6px; padding: 8px; border: 1px solid #e5e6eb; }
+.scope-group { background: var(--autops-bg-2); border-radius: 6px; padding: var(--autops-space-sm); border: 1px solid var(--autops-bg-4); }
 .scope-group-header { margin-bottom: 4px; font-weight: bold; }
 .scope-group-items { display: flex; flex-direction: column; gap: 2px; }
 
 .detail-scopes { display: flex; flex-direction: column; gap: 8px; }
-.scope-group-mini { background: #f7f8fa; padding: 8px; border-radius: 4px; }
-.scope-group-name { font-weight: bold; font-size: 12px; color: #4e5969; margin-bottom: 4px; }
+.scope-group-mini { background: var(--autops-bg-2); padding: var(--autops-space-sm); border-radius: var(--autops-radius-sm); }
+.scope-group-name { font-weight: bold; font-size: var(--autops-font-12); color: var(--autops-text-2); margin-bottom: 4px; }
 
-.usage-chart { display: flex; align-items: flex-end; gap: 8px; height: 60px; padding: 0 8px; background: #f7f8fa; border-radius: 4px; padding-top: 8px; }
+.usage-chart { display: flex; align-items: flex-end; gap: 8px; height: 60px; padding: 0 8px; background: var(--autops-bg-2); border-radius: var(--autops-radius-sm); padding-top: 8px; }
 .usage-bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
 .usage-bar { width: 100%; border-radius: 2px 2px 0 0; min-height: 2px; transition: height 0.3s; }
-.usage-bar-label { font-size: 9px; color: #86909c; margin-top: 2px; }
+.usage-bar-label { font-size: 9px; color: var(--autops-info); margin-top: 2px; }
 </style>

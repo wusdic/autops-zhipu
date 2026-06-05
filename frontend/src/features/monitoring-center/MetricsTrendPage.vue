@@ -235,12 +235,12 @@ onMounted(() => {
 
 <style scoped>
 .metrics-trend-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 
 .filter-card {
-  border-radius: 8px;
-  margin-bottom: 16px;
+  border-radius: var(--autops-radius-md);
+  margin-bottom: var(--autops-space-lg);
 }
 
 .filter-form {
@@ -248,12 +248,12 @@ onMounted(() => {
 }
 
 .filter-form :deep(.el-form-item) {
-  margin-bottom: 8px;
+  margin-bottom: var(--autops-space-sm);
 }
 
 .chart-card {
-  border-radius: 8px;
-  margin-bottom: 16px;
+  border-radius: var(--autops-radius-md);
+  margin-bottom: var(--autops-space-lg);
 }
 
 .chart-placeholder-body {
@@ -271,8 +271,8 @@ onMounted(() => {
 }
 
 .chart-empty-text {
-  font-size: 14px;
-  color: #86909c;
+  font-size: var(--autops-font-14);
+  color: var(--autops-info);
 }
 
 .chart-area {
@@ -284,25 +284,25 @@ onMounted(() => {
 }
 
 .chart-placeholder-text {
-  font-size: 14px;
-  color: #86909c;
+  font-size: var(--autops-font-14);
+  color: var(--autops-info);
   padding: 40px 0;
 }
 
 .table-card {
-  border-radius: 8px;
+  border-radius: var(--autops-radius-md);
 }
 
 .metrics-table {
   width: 100%;
 }
 .text-muted {
-  color: #86909c;
+  color: var(--autops-info);
 }
 
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 </style>

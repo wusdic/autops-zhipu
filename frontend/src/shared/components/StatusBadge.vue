@@ -104,8 +104,8 @@ const text = computed(() => {
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: var(--autops-radius-sm);
+  font-size: var(--autops-font-12);
   line-height: 20px;
   white-space: nowrap;
 }
@@ -117,42 +117,42 @@ const text = computed(() => {
 }
 
 .status-badge--success {
-  color: #52c41a;
-  background: #f6ffed;
+  color: var(--autops-success);
+  background: var(--autops-success-light);
 }
 .status-badge--success .status-badge__dot {
-  background: #52c41a;
+  background: var(--autops-success);
 }
 
 .status-badge--danger {
-  color: #ff4d4f;
-  background: #fff2f0;
+  color: var(--autops-danger);
+  background: var(--autops-danger-light);
 }
 .status-badge--danger .status-badge__dot {
-  background: #ff4d4f;
+  background: var(--autops-danger);
 }
 
 .status-badge--warning {
-  color: #faad14;
-  background: #fffbe6;
+  color: var(--autops-gold);
+  background: var(--autops-gold-light);
 }
 .status-badge--warning .status-badge__dot {
-  background: #faad14;
+  background: var(--autops-gold);
 }
 
 .status-badge--primary {
-  color: #165dff;
-  background: #e8f3ff;
+  color: var(--autops-primary);
+  background: var(--autops-primary-light-5);
 }
 .status-badge--primary .status-badge__dot {
-  background: #165dff;
+  background: var(--autops-primary);
 }
 
 .status-badge--info {
-  color: #86909c;
-  background: #f2f3f5;
+  color: var(--autops-info);
+  background: var(--autops-bg-3);
 }
 .status-badge--info .status-badge__dot {
-  background: #86909c;
+  background: var(--autops-info);
 }
 </style>

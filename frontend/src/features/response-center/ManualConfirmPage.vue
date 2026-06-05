@@ -171,11 +171,11 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.manual-confirm-page { padding: 20px; }
-.mt-4 { margin-top: 16px; }
+.manual-confirm-page { padding: var(--autops-space-xl); }
+.mt-4 { margin-top: var(--autops-space-lg); }
 .mr-1 { margin-right: 4px; }
 .mr-4 { margin-right: 16px; }
 .confirm-title { display: flex; align-items: center; }
-.action-pre { background: #f7f8fa; padding: 8px; border-radius: 4px; font-size: 13px; white-space: pre-wrap; }
-.ai-analysis { background: #ecf5ff; padding: 8px; border-radius: 4px; font-size: 13px; }
+.action-pre { background: var(--autops-bg-2); padding: var(--autops-space-sm); border-radius: var(--autops-radius-sm); font-size: var(--autops-font-13); white-space: pre-wrap; }
+.ai-analysis { background: var(--autops-primary-light-5); padding: var(--autops-space-sm); border-radius: var(--autops-radius-sm); font-size: var(--autops-font-13); }
 </style>

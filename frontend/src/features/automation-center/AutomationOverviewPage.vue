@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- 页面头部 -->
     <div class="autops-page-header">
       <div class="autops-page-title">自动化总览</div>
@@ -18,7 +18,7 @@
       <el-col :span="6" v-for="stat in statCards" :key="stat.key">
         <el-card
           shadow="hover"
-          class="stat-card"
+          class="autops-metric-card"
           :class="{ 'stat-card-clickable': stat.route }"
           v-loading="statsLoading"
           @click="stat.route && router.push(stat.route)"
@@ -370,20 +370,20 @@ onMounted(() => {
 
 
 .stat-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 
 
-.stat-card-clickable {
+.autops-metric-card-clickable {
   cursor: pointer;
 }
 
-.stat-card-clickable:hover {
+.autops-metric-card-clickable:hover {
   transform: translateY(-2px);
 }
 
-.stat-card-inner {
+.autops-metric-card-inner {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -392,7 +392,7 @@ onMounted(() => {
 .stat-icon-wrap {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--autops-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -404,19 +404,19 @@ onMounted(() => {
 }
 
 .stat-body :deep(.el-statistic__head) {
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
   margin-bottom: 4px;
 }
 
 .stat-body :deep(.el-statistic__content) {
   font-size: 24px;
   font-weight: 600;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 
 .main-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 
@@ -424,13 +424,13 @@ onMounted(() => {
 
 
 .text-muted {
-  color: #86909c;
-  font-size: 13px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-13);
 }
 
 /* 快速导航 */
 .quick-links-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .quick-link-card {
@@ -447,7 +447,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 4px 0;
+  padding: var(--autops-space-xs) 0;
 }
 
 .quick-link-text {
@@ -457,12 +457,12 @@ onMounted(() => {
 .quick-link-label {
   font-size: 15px;
   font-weight: 600;
-  color: #1d2129;
+  color: var(--autops-text-1);
   margin-bottom: 2px;
 }
 
 .quick-link-desc {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
 }
 </style>

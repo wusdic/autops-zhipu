@@ -20,15 +20,34 @@ export const APP_CONFIG = {
   DEFAULT_PAGE_SIZE: Number(import.meta.env.VITE_DEFAULT_PAGE_SIZE || 20),
 } as const
 
-/** 全局主题色板 — 所有页面必须从此处引用，禁止硬编码颜色值 */
+/**
+ * 全局主题色板 — 与 global.css CSS 变量保持同步
+ * 仅用于 JS/TS 上下文（:color 属性、ECharts、Canvas 等）
+ * CSS 中一律使用 var(--autops-*) 变量，禁止硬编码颜色值
+ */
 export const THEME_COLORS = {
-  PRIMARY:  '#165dff',
-  SUCCESS:  '#00b42a',
-  WARNING:  '#ff7d00',
-  DANGER:   '#f53f3f',
-  PURPLE:   '#722ed1',
-  CYAN:     '#0fc6c2',
-  GRAY:     '#86909c',
+  PRIMARY:        '#165dff',
+  PRIMARY_DARK:   '#114bcc',
+  PRIMARY_LIGHT:  '#e8f2ff',
+  SUCCESS:        '#00b42a',
+  SUCCESS_LIGHT:  '#e8ffea',
+  WARNING:        '#ff7d00',
+  WARNING_LIGHT:  '#fff7e8',
+  DANGER:         '#f53f3f',
+  DANGER_LIGHT:   '#ffece8',
+  PURPLE:         '#722ed1',
+  PURPLE_LIGHT:   '#f5e8ff',
+  CYAN:           '#0fc6c2',
+  GOLD:           '#faad14',
+  GRAY:           '#86909c',
+  TEXT_1:         '#1d2129',
+  TEXT_2:         '#4e5969',
+  TEXT_3:         '#86909c',
+  TEXT_4:         '#c9cdd4',
+  BG_1:           '#ffffff',
+  BG_2:           '#f7f8fa',
+  BG_3:           '#f2f3f5',
+  BG_4:           '#e5e6eb',
   /** 按执行/任务状态映射的颜色 */
   STATUS: {
     running:   '#165dff',

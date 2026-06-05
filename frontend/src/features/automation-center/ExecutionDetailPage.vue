@@ -511,24 +511,24 @@ watch(
 .log-container {
   max-height: 400px;
   overflow-y: auto;
-  background: #1e1e1e;
-  border-radius: 4px;
-  padding: 12px;
+  background: var(--autops-terminal-bg);
+  border-radius: var(--autops-radius-sm);
+  padding: var(--autops-space-md);
 }
 .log-content {
   margin: 0;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 13px;
-  color: #c9cdd4;
+  font-size: var(--autops-font-13);
+  color: var(--autops-text-4);
   white-space: pre-wrap;
   word-break: break-all;
 }
 .step-log-container {
-  padding: 8px 16px;
+  padding: var(--autops-space-sm) 16px;
   max-height: 300px;
   overflow-y: auto;
-  background: #1e1e1e;
-  border-radius: 4px;
+  background: var(--autops-terminal-bg);
+  border-radius: var(--autops-radius-sm);
   margin: 4px 0;
 }
 :deep(.step-row--clickable) {

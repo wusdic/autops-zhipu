@@ -43,14 +43,14 @@ const borderStyle = computed(() => props.borderColor ? { borderLeft: '4px solid 
 <style scoped>
 .overview-card {
   display: flex; align-items: center; gap: 12px;
-  padding: 16px 20px; background: #fff; border-radius: 8px;
-  border: 1px solid #e5e6eb; transition: box-shadow 0.2s;
+  padding: var(--autops-space-lg) 20px; background: var(--autops-bg-1); border-radius: var(--autops-radius-md);
+  border: 1px solid var(--autops-bg-4); transition: box-shadow 0.2s;
 }
 .overview-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-.oc-icon { width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.oc-label { font-size: 13px; color: #86909c; margin-bottom: 4px; }
+.oc-icon { width: 44px; height: 44px; border-radius: var(--autops-radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.oc-label { font-size: var(--autops-font-13); color: var(--autops-info); margin-bottom: 4px; }
 .oc-value { font-size: 24px; font-weight: 700; line-height: 1.2; }
-.oc-footer { font-size: 12px; margin-top: 4px; display: flex; align-items: center; gap: 8px; }
-.trend-up { color: #00b42a; } .trend-down { color: #f53f3f; }
-.oc-sub { color: #c9cdd4; }
+.oc-footer { font-size: var(--autops-font-12); margin-top: 4px; display: flex; align-items: center; gap: 8px; }
+.trend-up { color: var(--autops-success); } .trend-down { color: var(--autops-danger); }
+.oc-sub { color: var(--autops-text-4); }
 </style>

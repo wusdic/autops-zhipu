@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- 页面头部 -->
     <div class="autops-page-header">
       <div class="autops-page-title">基线巡检</div>
@@ -182,31 +182,31 @@ onMounted(() => {
 }
 
 .page-desc {
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
   margin: 0 0 16px 0;
 }
 .page-toolbar {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .page-pagination {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 .text-tertiary {
-  color: #86909c;
-  font-size: 13px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-13);
 }
 .value-text {
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-  font-size: 13px;
+  font-size: var(--autops-font-13);
 }
 .value-drift {
-  color: #f53f3f;
+  color: var(--autops-danger);
   font-weight: 600;
 }
 
@@ -215,9 +215,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 24px;
-  padding: 12px 20px;
-  margin-bottom: 16px;
-  background: #f7f8fa;
+  padding: var(--autops-space-md) 20px;
+  margin-bottom: var(--autops-space-lg);
+  background: var(--autops-bg-2);
   border-radius: 6px;
 }
 .summary-item {
@@ -226,18 +226,18 @@ onMounted(() => {
   gap: 6px;
 }
 .summary-label {
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
 }
 .summary-value {
-  font-size: 16px;
+  font-size: var(--autops-font-16);
   font-weight: 700;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 .summary-value.success {
-  color: #00b42a;
+  color: var(--autops-success);
 }
 .summary-value.danger {
-  color: #f53f3f;
+  color: var(--autops-danger);
 }
 </style>

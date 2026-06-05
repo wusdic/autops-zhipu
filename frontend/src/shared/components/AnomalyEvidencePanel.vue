@@ -49,15 +49,15 @@ const grouped = computed(() => {
 </script>
 
 <style scoped>
-.evidence-panel { border: 1px solid #e5e6eb; border-radius: 8px; background: #fff; }
-.ep-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f2f3f5; }
-.ep-title { font-weight: 600; color: #1d2129; }
-.ep-body { padding: 12px 16px; max-height: 500px; overflow-y: auto; }
-.ep-group { margin-bottom: 12px; }
-.ep-group-title { font-size: 13px; font-weight: 600; color: #86909c; margin-bottom: 8px; padding-left: 8px; border-left: 3px solid #165dff; }
-.ep-item { padding: 8px 12px; border: 1px solid #f2f3f5; border-radius: 6px; margin-bottom: 6px; }
+.evidence-panel { border: 1px solid var(--autops-bg-4); border-radius: var(--autops-radius-md); background: var(--autops-bg-1); }
+.ep-header { display: flex; justify-content: space-between; align-items: center; padding: var(--autops-space-md) 16px; border-bottom: 1px solid var(--autops-bg-3); }
+.ep-title { font-weight: 600; color: var(--autops-text-1); }
+.ep-body { padding: var(--autops-space-md) 16px; max-height: 500px; overflow-y: auto; }
+.ep-group { margin-bottom: var(--autops-space-md); }
+.ep-group-title { font-size: var(--autops-font-13); font-weight: 600; color: var(--autops-info); margin-bottom: var(--autops-space-sm); padding-left: 8px; border-left: 3px solid var(--autops-primary); }
+.ep-item { padding: var(--autops-space-sm) 12px; border: 1px solid var(--autops-bg-3); border-radius: 6px; margin-bottom: 6px; }
 .ep-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.ep-time { font-size: 12px; color: #c9cdd4; }
-.ep-summary { font-size: 13px; color: #1d2129; }
-.ep-detail { font-size: 12px; color: #165dff; cursor: pointer; margin-top: 4px; white-space: pre-wrap; background: #f7f8fa; padding: 6px 8px; border-radius: 4px; max-height: 200px; overflow-y: auto; }
+.ep-time { font-size: var(--autops-font-12); color: var(--autops-text-4); }
+.ep-summary { font-size: var(--autops-font-13); color: var(--autops-text-1); }
+.ep-detail { font-size: var(--autops-font-12); color: var(--autops-primary); cursor: pointer; margin-top: 4px; white-space: pre-wrap; background: var(--autops-bg-2); padding: 6px 8px; border-radius: var(--autops-radius-sm); max-height: 200px; overflow-y: auto; }
 </style>

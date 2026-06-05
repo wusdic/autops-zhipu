@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <!-- Page Header -->
     <div class="autops-page-header">
       <div class="autops-page-title">资源总览</div>
@@ -9,7 +9,7 @@
     <!-- Stat Cards -->
     <el-row :gutter="16" class="stat-row">
       <el-col :span="6" v-for="stat in statCards" :key="stat.label">
-        <el-card shadow="hover" class="stat-card" v-loading="statsLoading">
+        <el-card shadow="hover" class="autops-metric-card" v-loading="statsLoading">
           <div class="stat-card-inner">
             <div class="stat-icon-wrap" :style="{ background: stat.bgColor }">
               <el-icon :size="24" :style="{ color: stat.color }">
@@ -29,7 +29,7 @@
       <el-col :span="14">
         <el-card class="main-card" shadow="never">
           <template #header>
-            <div class="card-header">
+            <div class="autops-card-header">
               <span class="card-title">资产类型分布</span>
             </div>
           </template>
@@ -524,9 +524,9 @@ onMounted(() => {
 
 <style scoped>
 .stat-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
-.stat-card-inner {
+.autops-metric-card-inner {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -535,7 +535,7 @@ onMounted(() => {
 .stat-icon-wrap {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+  border-radius: var(--autops-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -547,12 +547,12 @@ onMounted(() => {
 }
 
 .section-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .main-card {
-  margin-bottom: 16px;
-  border-radius: 8px;
+  margin-bottom: var(--autops-space-lg);
+  border-radius: var(--autops-radius-md);
 }
 /* Type Distribution Grid */
 .type-grid {
@@ -566,22 +566,22 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px;
-  border-radius: 8px;
-  background: #fafbfc;
-  border: 1px solid #f2f3f5;
+  padding: var(--autops-space-lg);
+  border-radius: var(--autops-radius-md);
+  background: var(--autops-bg-1);
+  border: 1px solid var(--autops-bg-3);
   transition: all 0.2s;
 }
 
 .type-card:hover {
-  border-color: #e5e6eb;
+  border-color: var(--autops-bg-4);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .type-card-icon {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: var(--autops-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -593,15 +593,15 @@ onMounted(() => {
 }
 
 .type-card-label {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   margin-bottom: 2px;
 }
 
 .type-card-value {
-  font-size: 20px;
+  font-size: var(--autops-font-20);
   font-weight: 600;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 
 /* Status Distribution */
@@ -611,7 +611,7 @@ onMounted(() => {
   flex-direction: column;
   justify-content: center;
   gap: 20px;
-  padding: 8px 0;
+  padding: var(--autops-space-sm) 0;
 }
 
 .status-row {
@@ -628,8 +628,8 @@ onMounted(() => {
 }
 
 .status-label {
-  font-size: 14px;
-  color: #4e5969;
+  font-size: var(--autops-font-14);
+  color: var(--autops-text-2);
   width: 50px;
   flex-shrink: 0;
 }
@@ -637,22 +637,22 @@ onMounted(() => {
 .status-bar-wrap {
   flex: 1;
   height: 8px;
-  background: #f2f3f5;
-  border-radius: 4px;
+  background: var(--autops-bg-3);
+  border-radius: var(--autops-radius-sm);
   overflow: hidden;
 }
 
 .status-bar {
   height: 100%;
-  border-radius: 4px;
+  border-radius: var(--autops-radius-sm);
   transition: width 0.6s ease;
   min-width: 2px;
 }
 
 .status-value {
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   font-weight: 600;
-  color: #1d2129;
+  color: var(--autops-text-1);
   width: 40px;
   text-align: right;
   flex-shrink: 0;
@@ -662,14 +662,14 @@ onMounted(() => {
 .quick-link-item {
   display: flex;
   align-items: center;
-  padding: 16px 12px;
-  border-radius: 8px;
+  padding: var(--autops-space-lg) 12px;
+  border-radius: var(--autops-radius-md);
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .quick-link-item:hover {
-  background-color: #f2f3f5;
+  background-color: var(--autops-bg-3);
 }
 
 .quick-link-icon {
@@ -689,9 +689,9 @@ onMounted(() => {
 }
 
 .quick-link-title {
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   font-weight: 500;
-  color: #1d2129;
+  color: var(--autops-text-1);
   margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -699,21 +699,21 @@ onMounted(() => {
 }
 
 .quick-link-desc {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .quick-link-arrow {
-  color: #c9cdd4;
-  font-size: 14px;
+  color: var(--autops-text-4);
+  font-size: var(--autops-font-14);
   flex-shrink: 0;
 }
 
 .text-muted {
-  color: #86909c;
-  font-size: 13px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-13);
 }
 </style>

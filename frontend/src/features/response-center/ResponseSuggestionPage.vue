@@ -311,13 +311,13 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .input-panel {
   margin-bottom: 0;
 }
 .summary-row {
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 .stat-content {
   display: flex;
@@ -327,12 +327,12 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 .autops-card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 .suggestion-text {
   display: flex;
@@ -340,30 +340,30 @@ onMounted(() => {
 }
 .applied-text {
   text-decoration: line-through;
-  color: #86909c;
+  color: var(--autops-info);
 }
 .basis-text {
-  color: #4e5969;
-  font-size: 13px;
+  color: var(--autops-text-2);
+  font-size: var(--autops-font-13);
 }
 .knowledge-link {
-  color: #165dff;
+  color: var(--autops-primary);
   cursor: pointer;
 }
 .knowledge-link:hover {
   text-decoration: underline;
 }
 .text-muted {
-  color: #c9cdd4;
+  color: var(--autops-text-4);
 }
 .detail-content {
-  background: #f7f8fa;
-  padding: 12px;
+  background: var(--autops-bg-2);
+  padding: var(--autops-space-md);
   border-radius: 6px;
   max-height: 400px;
   overflow: auto;
   white-space: pre-wrap;
   line-height: 1.6;
-  font-size: 13px;
+  font-size: var(--autops-font-13);
 }
 </style>

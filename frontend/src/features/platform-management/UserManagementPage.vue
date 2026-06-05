@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">用户管理</div>
@@ -291,17 +291,17 @@ onMounted(() => { loadUsers(); loadRoles() })
 </script>
 
 <style scoped>
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.page-header h2 { margin: 0; font-size: 20px; color: #1d2129; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--autops-space-lg); }
+.page-header h2 { margin: 0; font-size: var(--autops-font-20); color: var(--autops-text-1); }
 
 .filter-bar {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
-  padding: 12px 16px;
-  background: #f7f8fa;
+  margin-bottom: var(--autops-space-lg);
+  padding: var(--autops-space-md) 16px;
+  background: var(--autops-bg-2);
   border-radius: 6px;
 }
 </style>

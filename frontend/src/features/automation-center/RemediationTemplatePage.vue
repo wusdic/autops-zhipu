@@ -220,9 +220,9 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.remediation-template-page { padding: 20px; }
-.mt-4 { margin-top: 16px; }
-.step-item { margin-bottom: 8px; }
+.remediation-template-page { padding: var(--autops-space-xl); }
+.mt-4 { margin-top: var(--autops-space-lg); }
+.step-item { margin-bottom: var(--autops-space-sm); }
 .ml-2 { margin-left: 8px; }
-.text-muted { color: #86909c; }
+.text-muted { color: var(--autops-info); }
 </style>

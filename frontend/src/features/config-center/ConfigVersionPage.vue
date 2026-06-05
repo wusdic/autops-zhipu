@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">配置版本</div>
@@ -372,19 +372,19 @@ onMounted(fetchDefinitions)
 </script>
 
 <style scoped>
-.mb-md { margin-bottom: 16px; }
-.text-tertiary { color: #86909c; }
-.font-12 { font-size: 12px; }
+.mb-md { margin-bottom: var(--autops-space-lg); }
+.text-tertiary { color: var(--autops-info); }
+.font-12 { font-size: var(--autops-font-12); }
 .empty-state { padding: 40px 0; text-align: center; }
-.version-number { font-size: 14px; font-weight: 600; color: #165dff; }
+.version-number { font-size: var(--autops-font-14); font-weight: 600; color: var(--autops-primary); }
 .version-table { width: 100%; }
-.diff-result h4 { margin-bottom: 8px; font-size: 14px; color: #1d2129; }
+.diff-result h4 { margin-bottom: var(--autops-space-sm); font-size: var(--autops-font-14); color: var(--autops-text-1); }
 .diff-code {
-  background: #1e1e1e;
-  color: #c9cdd4;
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 12px;
+  background: var(--autops-terminal-bg);
+  color: var(--autops-text-4);
+  border-radius: var(--autops-radius-sm);
+  padding: var(--autops-space-md);
+  font-size: var(--autops-font-12);
   line-height: 1.5;
   max-height: 400px;
   overflow: auto;

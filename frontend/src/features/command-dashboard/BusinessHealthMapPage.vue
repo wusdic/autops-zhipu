@@ -304,11 +304,11 @@ onMounted(() => fetchSystems())
 <style scoped>
 
 .mb-lg {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .text-tertiary {
-  color: #86909c;
-  font-size: 12px;
+  color: var(--autops-info);
+  font-size: var(--autops-font-12);
 }
 
 .health-grid {
@@ -317,31 +317,31 @@ onMounted(() => fetchSystems())
   gap: 12px;
 }
 .health-card {
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: var(--autops-radius-md);
+  padding: var(--autops-space-lg);
   cursor: pointer;
   transition: all 0.2s;
-  border: 1px solid #e5e6eb;
+  border: 1px solid var(--autops-bg-4);
 }
 .health-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 .health-card.healthy {
-  border-left: 4px solid #00b42a;
-  background: #f8fff9;
+  border-left: 4px solid var(--autops-success);
+  background: var(--autops-success-light);
 }
 .health-card.warning {
-  border-left: 4px solid #ff7d00;
-  background: #fffbf0;
+  border-left: 4px solid var(--autops-warning);
+  background: var(--autops-warning-light);
 }
 .health-card.critical {
-  border-left: 4px solid #f53f3f;
-  background: #fff5f3;
+  border-left: 4px solid var(--autops-danger);
+  background: var(--autops-danger-light);
 }
 .health-card.unknown {
-  border-left: 4px solid #86909c;
-  background: #fafafa;
+  border-left: 4px solid var(--autops-info);
+  background: var(--autops-bg-1);
 }
 .health-card-header {
   display: flex;
@@ -354,25 +354,25 @@ onMounted(() => fetchSystems())
   height: 8px;
   border-radius: 50%;
 }
-.indicator-healthy { background: #00b42a; }
-.indicator-warning { background: #ff7d00; }
-.indicator-critical { background: #f53f3f; }
-.indicator-unknown { background: #86909c; }
+.indicator-healthy { background: var(--autops-success); }
+.indicator-warning { background: var(--autops-warning); }
+.indicator-critical { background: var(--autops-danger); }
+.indicator-unknown { background: var(--autops-info); }
 .health-name {
   font-weight: 600;
-  color: #1d2129;
+  color: var(--autops-text-1);
 }
 .health-status {
-  font-size: 13px;
+  font-size: var(--autops-font-13);
   margin-bottom: 4px;
 }
 .health-meta {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
 }
 .health-sla {
-  font-size: 12px;
-  color: #165dff;
+  font-size: var(--autops-font-12);
+  color: var(--autops-primary);
   margin-top: 4px;
 }
 </style>

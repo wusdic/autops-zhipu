@@ -49,7 +49,7 @@
     <!-- 规则表格 -->
     <el-card shadow="never" class="table-card">
       <template #header>
-        <div class="card-header">
+        <div class="autops-card-header">
           <span class="title">自动分派规则</span>
           <div class="actions">
             <el-button type="primary" :icon="Plus" @click="handleCreate">新建规则</el-button>
@@ -698,11 +698,11 @@ onMounted(() => {
 
 <style scoped>
 .assignment-rule-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 
 .filter-card {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 
 .filter-card :deep(.el-card__body) {
@@ -717,7 +717,7 @@ onMounted(() => {
 }
 
 .text-muted {
-  color: #c9cdd4;
+  color: var(--autops-text-4);
 }
 
 .conditions-editor {
@@ -728,42 +728,42 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: var(--autops-space-sm);
 }
 
 .condition-tip {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   margin-top: 4px;
 }
 
 .priority-hint {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   margin-left: 8px;
 }
 
 .reorder-tip {
-  font-size: 13px;
-  color: #86909c;
-  margin-bottom: 12px;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
+  margin-bottom: var(--autops-space-md);
 }
 
 .reorder-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
-  border: 1px solid #e5e6eb;
-  border-radius: 4px;
+  padding: var(--autops-space-sm) 12px;
+  border: 1px solid var(--autops-bg-4);
+  border-radius: var(--autops-radius-sm);
   margin-bottom: 6px;
-  background: #fff;
+  background: var(--autops-bg-1);
   cursor: move;
 }
 
 .reorder-item .drag-handle {
   cursor: grab;
-  color: #c9cdd4;
+  color: var(--autops-text-4);
 }
 
 .reorder-item .reorder-name {
@@ -773,7 +773,7 @@ onMounted(() => {
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
-  padding: 4px 0;
+  margin-top: var(--autops-space-lg);
+  padding: var(--autops-space-xs) 0;
 }
 </style>

@@ -1007,12 +1007,12 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .ticket-list-page {
-  padding: 20px;
+  padding: var(--autops-space-xl);
 }
 
 /* ── Statistics Cards ── */
 .stats-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
 }
 .stat-card__body {
   display: flex;
@@ -1042,63 +1042,63 @@ onBeforeUnmount(() => {
 }
 
 .stat-card__label {
-  font-size: 12px;
-  color: #86909c;
+  font-size: var(--autops-font-12);
+  color: var(--autops-info);
   margin-top: 2px;
 }
 
-.stat-card--total .stat-card__icon {
+.autops-metric-card--total .stat-card__icon {
   background: rgba(144, 147, 153, 0.12);
-  color: #86909c;
+  color: var(--autops-info);
 }
-.stat-card--total .stat-card__value {
-  color: #4e5969;
+.autops-metric-card--total .stat-card__value {
+  color: var(--autops-text-2);
 }
 
-.stat-card--open .stat-card__icon {
+.autops-metric-card--open .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
-  color: #ff7d00;
+  color: var(--autops-warning);
 }
-.stat-card--open .stat-card__value {
-  color: #ff7d00;
+.autops-metric-card--open .stat-card__value {
+  color: var(--autops-warning);
 }
 
-.stat-card--progress .stat-card__icon {
+.autops-metric-card--progress .stat-card__icon {
   background: rgba(64, 158, 255, 0.12);
-  color: #165dff;
+  color: var(--autops-primary);
 }
-.stat-card--progress .stat-card__value {
-  color: #165dff;
+.autops-metric-card--progress .stat-card__value {
+  color: var(--autops-primary);
 }
 
-.stat-card--closed .stat-card__icon {
+.autops-metric-card--closed .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
-  color: #00b42a;
+  color: var(--autops-success);
 }
-.stat-card--closed .stat-card__value {
-  color: #00b42a;
+.autops-metric-card--closed .stat-card__value {
+  color: var(--autops-success);
 }
 
-.stat-card--overdue .stat-card__icon {
+.autops-metric-card--overdue .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
-  color: #f53f3f;
+  color: var(--autops-danger);
 }
-.stat-card--overdue .stat-card__value {
-  color: #f53f3f;
+.autops-metric-card--overdue .stat-card__value {
+  color: var(--autops-danger);
 }
 
-.stat-card--sla .stat-card__icon {
+.autops-metric-card--sla .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
-  color: #00b42a;
+  color: var(--autops-success);
 }
-.stat-card--sla .stat-card__value {
-  color: #00b42a;
+.autops-metric-card--sla .stat-card__value {
+  color: var(--autops-success);
 }
 
 /* ── SLA Summary Bar ── */
 .sla-bar-card {
-  margin-bottom: 16px;
-  border-radius: 8px;
+  margin-bottom: var(--autops-space-lg);
+  border-radius: var(--autops-radius-md);
 }
 
 .sla-bar {
@@ -1108,31 +1108,31 @@ onBeforeUnmount(() => {
 }
 
 .sla-bar__label {
-  font-size: 14px;
+  font-size: var(--autops-font-14);
   font-weight: 500;
-  color: #4e5969;
+  color: var(--autops-text-2);
   white-space: nowrap;
 }
 
 .sla-bar__detail {
-  font-size: 13px;
-  color: #86909c;
+  font-size: var(--autops-font-13);
+  color: var(--autops-info);
   white-space: nowrap;
 }
 
 /* ── Main Card ── */
 .main-card {
-  border-radius: 8px;
+  border-radius: var(--autops-radius-md);
 }
 /* ── Filter Form ── */
 .filter-form {
-  margin-bottom: 16px;
+  margin-bottom: var(--autops-space-lg);
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e6eb;
+  border-bottom: 1px solid var(--autops-bg-4);
 }
 
 .filter-form :deep(.el-form-item) {
-  margin-bottom: 12px;
+  margin-bottom: var(--autops-space-md);
 }
 
 /* ── Batch Operations Bar ── */
@@ -1141,16 +1141,16 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  margin-bottom: 12px;
-  background: #ecf5ff;
-  border: 1px solid #d9ecff;
+  margin-bottom: var(--autops-space-md);
+  background: var(--autops-primary-light-5);
+  border: 1px solid var(--autops-primary-light-5);
   border-radius: 6px;
 }
 
 .batch-bar__info {
   margin-right: auto;
-  font-size: 14px;
-  color: #4e5969;
+  font-size: var(--autops-font-14);
+  color: var(--autops-text-2);
 }
 
 /* ── Table ── */
@@ -1164,7 +1164,7 @@ onBeforeUnmount(() => {
 
 .ticket-title {
   cursor: pointer;
-  color: #165dff;
+  color: var(--autops-primary);
 }
 
 .ticket-title:hover {
@@ -1175,7 +1175,7 @@ onBeforeUnmount(() => {
 .pagination-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: var(--autops-space-lg);
 }
 
 /* ── Responsive ── */

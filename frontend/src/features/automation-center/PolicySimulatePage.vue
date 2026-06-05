@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
         <div class="autops-page-title">策略模拟</div>
@@ -442,15 +442,15 @@ onMounted(() => { loadPolicy() })
 
 <style scoped>
 
-.toolbar { margin-bottom: 16px; display: flex; gap: 8px; align-items: center; }
-.summary-card { margin-bottom: 16px; }
+.toolbar { margin-bottom: var(--autops-space-lg); display: flex; gap: 8px; align-items: center; }
+.summary-card { margin-bottom: var(--autops-space-lg); }
 .summary-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; text-align: center; }
-.summary-item { padding: 8px 0; }
-.summary-label { font-size: 12px; color: #86909c; margin-bottom: 4px; }
+.summary-item { padding: var(--autops-space-sm) 0; }
+.summary-label { font-size: var(--autops-font-12); color: var(--autops-info); margin-bottom: 4px; }
 .summary-value { font-size: 15px; font-weight: 600; }
 
-.asset-info-box { margin: -8px 0 12px 89px; padding: 10px; background: #f7f8fa; border-radius: 6px; border: 1px solid #e5e6eb; }
-.metric-inputs { background: #f7f8fa; padding: 10px; border-radius: 4px; }
+.asset-info-box { margin: -8px 0 12px 89px; padding: 10px; background: var(--autops-bg-2); border-radius: 6px; border: 1px solid var(--autops-bg-4); }
+.metric-inputs { background: var(--autops-bg-2); padding: 10px; border-radius: var(--autops-radius-sm); }
 .metric-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
 
 .result-placeholder { min-height: 400px; display: flex; align-items: center; justify-content: center; }
@@ -458,32 +458,32 @@ onMounted(() => { loadPolicy() })
 .rotating { animation: rotate 1.5s linear infinite; }
 @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-.result-card { border-radius: 8px; transition: all 0.3s; }
-.result-card.matched { border-left: 4px solid #00b42a; }
-.result-card.unmatched { border-left: 4px solid #86909c; }
+.result-card { border-radius: var(--autops-radius-md); transition: all 0.3s; }
+.result-card.matched { border-left: 4px solid var(--autops-success); }
+.result-card.unmatched { border-left: 4px solid var(--autops-info); }
 .result-header { display: flex; gap: 16px; align-items: center; }
-.mini-stat { text-align: center; padding: 8px; background: #f7f8fa; border-radius: 6px; }
-.mini-value { font-size: 16px; font-weight: bold; color: #1d2129; }
-.mini-label { font-size: 12px; color: #86909c; margin-top: 2px; }
+.mini-stat { text-align: center; padding: var(--autops-space-sm); background: var(--autops-bg-2); border-radius: 6px; }
+.mini-value { font-size: var(--autops-font-16); font-weight: bold; color: var(--autops-text-1); }
+.mini-label { font-size: var(--autops-font-12); color: var(--autops-info); margin-top: 2px; }
 
-.explanation-box { padding: 4px; }
+.explanation-box { padding: var(--autops-space-xs); }
 .reason-list { list-style: none; padding: 0; }
-.reason-list li { padding: 6px 0; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; }
+.reason-list li { padding: 6px 0; border-bottom: 1px solid var(--autops-bg-3); display: flex; align-items: center; gap: 8px; }
 
-.action-preview-card { background: #fafbfc; padding: 10px; border-radius: 6px; border: 1px solid #e5e6eb; }
+.action-preview-card { background: var(--autops-bg-1); padding: 10px; border-radius: 6px; border: 1px solid var(--autops-bg-4); }
 .action-preview-header { display: flex; align-items: center; }
-.action-params { margin-top: 6px; background: #f5f5f5; padding: 6px 8px; border-radius: 4px; }
-.action-params code { font-size: 12px; color: #4e5969; white-space: pre-wrap; }
-.action-meta { margin-top: 6px; display: flex; gap: 12px; color: #86909c; font-size: 12px; }
+.action-params { margin-top: 6px; background: var(--autops-bg-3); padding: 6px 8px; border-radius: var(--autops-radius-sm); }
+.action-params code { font-size: var(--autops-font-12); color: var(--autops-text-2); white-space: pre-wrap; }
+.action-meta { margin-top: 6px; display: flex; gap: 12px; color: var(--autops-info); font-size: var(--autops-font-12); }
 .action-meta span { display: flex; align-items: center; gap: 4px; }
 
-.flow-chain { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 16px; }
+.flow-chain { display: flex; flex-direction: column; align-items: center; gap: 0; padding: var(--autops-space-lg); }
 .flow-step { display: flex; flex-direction: column; align-items: center; }
-.flow-step-box { border: 2px solid #165dff; border-radius: 8px; padding: 12px 20px; text-align: center; min-width: 180px; background: #fff; }
-.flow-step-num { font-size: 18px; font-weight: bold; color: #165dff; }
-.flow-step-name { font-size: 13px; font-weight: 600; margin-top: 2px; }
-.flow-step-target { font-size: 11px; color: #86909c; margin-top: 2px; }
+.flow-step-box { border: 2px solid var(--autops-primary); border-radius: var(--autops-radius-md); padding: var(--autops-space-md) 20px; text-align: center; min-width: 180px; background: var(--autops-bg-1); }
+.flow-step-num { font-size: 18px; font-weight: bold; color: var(--autops-primary); }
+.flow-step-name { font-size: var(--autops-font-13); font-weight: 600; margin-top: 2px; }
+.flow-step-target { font-size: 11px; color: var(--autops-info); margin-top: 2px; }
 .flow-connector { display: flex; flex-direction: column; align-items: center; }
-.flow-line { width: 2px; height: 16px; background: #dcdfe6; }
-.flow-arrow-down { color: #dcdfe6; font-size: 10px; line-height: 1; }
+.flow-line { width: 2px; height: 16px; background: var(--autops-bg-4); }
+.flow-arrow-down { color: var(--autops-bg-4); font-size: 10px; line-height: 1; }
 </style>

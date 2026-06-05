@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container">
+  <div class="autops-page-container">
     <div class="autops-page-header">
       <div class="autops-page-title">风险分级</div>
       <div>
@@ -253,28 +253,28 @@ onMounted(fetchData)
 </script>
 
 <style scoped>
-.risk-matrix { display: flex; align-items: center; padding: 16px; }
-.matrix-y-label { writing-mode: vertical-lr; text-orientation: mixed; font-size: 12px; color: #86909c; margin-right: 8px; }
+.risk-matrix { display: flex; align-items: center; padding: var(--autops-space-lg); }
+.matrix-y-label { writing-mode: vertical-lr; text-orientation: mixed; font-size: var(--autops-font-12); color: var(--autops-info); margin-right: 8px; }
 .matrix-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 4px; flex: 1; }
 .matrix-cell { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; min-width: 48px; min-height: 48px; }
 .matrix-cell:hover { transform: scale(1.05); }
-.matrix-cell.high { background: #ffece8; color: #f53f3f; }
-.matrix-cell.medium { background: #fff7e8; color: #ff7d00; }
-.matrix-cell.low { background: #e8ffea; color: #00b42a; }
+.matrix-cell.high { background: var(--autops-danger-light); color: var(--autops-danger); }
+.matrix-cell.medium { background: var(--autops-warning-light); color: var(--autops-warning); }
+.matrix-cell.low { background: var(--autops-success-light); color: var(--autops-success); }
 .cell-count { font-size: 18px; font-weight: 600; }
-.matrix-x-label { font-size: 12px; color: #86909c; margin-left: 8px; writing-mode: horizontal-tb; }
-.matrix-legend { display: flex; gap: 16px; justify-content: center; padding: 8px; }
-.legend-item { font-size: 12px; padding: 2px 8px; border-radius: 4px; }
-.legend-item.high { background: #ffece8; color: #f53f3f; }
-.legend-item.medium { background: #fff7e8; color: #ff7d00; }
-.legend-item.low { background: #e8ffea; color: #00b42a; }
+.matrix-x-label { font-size: var(--autops-font-12); color: var(--autops-info); margin-left: 8px; writing-mode: horizontal-tb; }
+.matrix-legend { display: flex; gap: 16px; justify-content: center; padding: var(--autops-space-sm); }
+.legend-item { font-size: var(--autops-font-12); padding: 2px 8px; border-radius: var(--autops-radius-sm); }
+.legend-item.high { background: var(--autops-danger-light); color: var(--autops-danger); }
+.legend-item.medium { background: var(--autops-warning-light); color: var(--autops-warning); }
+.legend-item.low { background: var(--autops-success-light); color: var(--autops-success); }
 .risk-summary { display: flex; justify-content: space-around; padding: 32px 16px; }
 .risk-stat { text-align: center; }
 .risk-stat-num { font-size: 36px; font-weight: 700; }
-.risk-stat-num.high { color: #f53f3f; }
-.risk-stat-num.medium { color: #ff7d00; }
-.risk-stat-num.low { color: #00b42a; }
-.risk-stat-num.unknown { color: #86909c; }
-.risk-stat-label { font-size: 13px; color: #86909c; margin-top: 4px; }
-.text-muted { color: #86909c; font-size: 12px; }
+.risk-stat-num.high { color: var(--autops-danger); }
+.risk-stat-num.medium { color: var(--autops-warning); }
+.risk-stat-num.low { color: var(--autops-success); }
+.risk-stat-num.unknown { color: var(--autops-info); }
+.risk-stat-label { font-size: var(--autops-font-13); color: var(--autops-info); margin-top: 4px; }
+.text-muted { color: var(--autops-info); font-size: var(--autops-font-12); }
 </style>

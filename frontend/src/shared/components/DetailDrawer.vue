@@ -26,5 +26,5 @@ function handleClose(done: () => void) { done() }
 
 <style scoped>
 .detail-drawer-body { padding: 0 4px; }
-.detail-drawer-body :deep(.el-descriptions) { margin-bottom: 16px; }
+.detail-drawer-body :deep(.el-descriptions) { margin-bottom: var(--autops-space-lg); }
 </style>
