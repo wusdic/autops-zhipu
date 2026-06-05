@@ -24,6 +24,33 @@ async def create_snapshot(data: StateSnapshotCreate, svc: StateService = Depends
     return success(model_to_dict(snap))
 
 
+@router.get("/snapshots")
+async def list_snapshots(
+    asset_id: str | None = None,
+    state_type: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    """查询状态快照列表."""
+    from sqlalchemy import select, func, text
+    from app.domains.state.models import StateSnapshot
+
+    q = select(StateSnapshot).order_by(StateSnapshot.created_at.desc())
+    count_q = select(func.count()).select_from(StateSnapshot)
+    if asset_id:
+        q = q.where(StateSnapshot.asset_id == asset_id)
+        count_q = count_q.where(StateSnapshot.asset_id == asset_id)
+    if state_type:
+        q = q.where(StateSnapshot.state_type == state_type)
+        count_q = count_q.where(StateSnapshot.state_type == state_type)
+
+    total = (await db.execute(count_q)).scalar() or 0
+    q = q.offset((page - 1) * page_size).limit(page_size)
+    rows = (await db.execute(q)).scalars().all()
+    return paginate([model_to_dict(r) for r in rows], total, page, page_size)
+
+
 @router.get("/latest/{asset_id}")
 async def get_latest_states(asset_id: str, svc: StateService = Depends(_get_svc)):
     items = await svc.get_latest_states(asset_id)
