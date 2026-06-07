@@ -270,8 +270,8 @@ async function loadGroups() {
   } catch {}
 }
 
-function addCondition() { form.conditions.push({ field: 'primary', operator: 'gt', value: 'primary', duration: 'primary'}) }
-function addAction() { form.actions.push({ type: 'script', target: 'primary', params_json: 'primary'}) }
+function addCondition() { form.conditions.push({ field: '', operator: 'gt', value: '', duration: ''}) }
+function addAction() { form.actions.push({ type: 'script', target: '', params_json: ''}) }
 
 function openCreate() {
   editing.value = false; editId.value = ''

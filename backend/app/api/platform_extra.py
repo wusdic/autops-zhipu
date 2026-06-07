@@ -6,8 +6,11 @@
 from __future__ import annotations
 
 import json
+import logging
 import uuid
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -80,8 +83,8 @@ async def list_integrations(db: AsyncSession = Depends(get_db)):
                 "enabled": bool(r.get("is_enabled", 1)),
                 "category": "notification",
             })
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("list_integrations: notification_channels query failed: %s", e)
 
     # Config-based integrations (LLM, LDAP, etc.)
     try:
@@ -95,8 +98,8 @@ async def list_integrations(db: AsyncSession = Depends(get_db)):
                 "config": r["value"],
                 "category": "external",
             })
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("list_integrations: configs query failed: %s", e)
 
     return success(integrations)
 
@@ -153,7 +156,8 @@ async def task_queue_status(db: AsyncSession = Depends(get_db)):
             text("SELECT COUNT(*) FROM event_outbox WHERE processed = 0")
         )).scalar() or 0
         queue_items.append({"queue": "event_outbox", "pending": count, "status": "normal" if count < 100 else "backlog"})
-    except Exception:
+    except Exception as _e:
+        logger.warning("task_queue_status: event_outbox query failed: %s", _e)
         queue_items.append({"queue": "event_outbox", "pending": 0, "status": "unknown"})
 
     # Inspection tasks
@@ -162,7 +166,8 @@ async def task_queue_status(db: AsyncSession = Depends(get_db)):
             text("SELECT COUNT(*) FROM inspection_tasks WHERE status IN ('pending', 'running')")
         )).scalar() or 0
         queue_items.append({"queue": "inspection_tasks", "pending": count, "status": "normal" if count < 50 else "backlog"})
-    except Exception:
+    except Exception as _e:
+        logger.warning("task_queue_status: inspection_tasks query failed: %s", _e)
         queue_items.append({"queue": "inspection_tasks", "pending": 0, "status": "unknown"})
 
     # Report tasks
@@ -171,7 +176,8 @@ async def task_queue_status(db: AsyncSession = Depends(get_db)):
             text("SELECT COUNT(*) FROM report_tasks WHERE status IN ('pending', 'running')")
         )).scalar() or 0
         queue_items.append({"queue": "report_tasks", "pending": count, "status": "normal"})
-    except Exception:
+    except Exception as _e:
+        logger.warning("task_queue_status: report_tasks query failed: %s", _e)
         queue_items.append({"queue": "report_tasks", "pending": 0, "status": "unknown"})
 
     # Executions
@@ -180,7 +186,8 @@ async def task_queue_status(db: AsyncSession = Depends(get_db)):
             text("SELECT COUNT(*) FROM executions WHERE status IN ('pending', 'running', 'pending_approval')")
         )).scalar() or 0
         queue_items.append({"queue": "executions", "pending": count, "status": "normal" if count < 20 else "backlog"})
-    except Exception:
+    except Exception as _e:
+        logger.warning("task_queue_status: executions query failed: %s", _e)
         queue_items.append({"queue": "executions", "pending": 0, "status": "unknown"})
 
     total_pending = sum(q["pending"] for q in queue_items)

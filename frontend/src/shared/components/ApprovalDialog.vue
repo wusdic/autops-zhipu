@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps<{ modelValue: boolean; title?: string }>()
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])

@@ -5,7 +5,10 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -50,7 +53,8 @@ async def list_collection_results(
 
         items = [model_to_dict(r) for r in rows]
         return paginate(items, total, page, page_size)
-    except Exception:
+    except Exception as _e:
+        logger.warning("monitoring endpoint query failed: %s", _e)
         return paginate([], 0, page, page_size)
 
 

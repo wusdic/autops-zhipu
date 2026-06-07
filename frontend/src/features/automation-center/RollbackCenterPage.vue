@@ -500,7 +500,7 @@ const handleCancelRollback = async (row: any) => {
 
 const handleRollbackLog = (row: any) => {
   // Could navigate to log page or open log dialog
-  console.log('View rollback log for:', row.id)
+
 }
 
 // ---------- 生命周期 ----------

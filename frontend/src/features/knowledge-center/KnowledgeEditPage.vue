@@ -225,7 +225,7 @@ async function loadKnowledge(id: string) {
       form.related_policy_id = d.related_policy_id || ''; form.related_playbook_id = d.related_playbook_id || ''
       form.related_script_id = d.related_script_id || ''
     }
-  } catch {}
+  } catch { ElMessage.error('加载文章失败') }
 }
 
 async function save() {

@@ -228,7 +228,7 @@ async function loadScripts() {
 }
 
 function addStep() {
-  form.steps.push({ name: 'primary', script_id: 'primary', timeout: 300, on_failure: 'stop', params_json: 'primary', condition: 'primary'})
+  form.steps.push({ name: '', script_id: '', timeout: 300, on_failure: 'stop', params_json: '', condition: ''})
 }
 
 function moveStep(idx: number, dir: number) {
@@ -297,7 +297,7 @@ async function remove(row: any) {
     await ElMessageBox.confirm('确定删除此 Playbook？关联策略将失效。', '确认删除', { type: 'warning' })
     await api.delete(API.PLAYBOOKS + '/' + row.id)
     ElMessage.success('已删除'); load()
-  } catch {}
+  } catch (e: any) { if (e !== 'cancel') ElMessage.error('删除失败') }
 }
 
 function getScriptName(id: string) { return scripts.value.find(s => s.id === id)?.name || id || '-' }

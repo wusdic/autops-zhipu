@@ -17,10 +17,10 @@ const props = withDefaults(defineProps<{
   direction?: "rtl" | "ltr" | "ttb" | "btt"
 }>(), { title: "详情", size: "600px", direction: "rtl" })
 
+import { computed } from "vue"
+
 const emit = defineEmits<{ "update:modelValue": [v: boolean] }>()
 const visible = computed({ get: () => props.modelValue, set: v => emit("update:modelValue", v) })
-
-import { computed } from "vue"
 function handleClose(done: () => void) { done() }
 </script>
 

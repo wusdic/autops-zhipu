@@ -55,7 +55,7 @@ async def global_search(
                 select(Alert).where(
                     or_(
                         Alert.title.ilike(keyword),
-                        Alert.message.ilike(keyword),
+                        Alert.context.ilike(keyword),
                     )
                 ).limit(page_size)
             )).scalars().all()

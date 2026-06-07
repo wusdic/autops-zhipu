@@ -195,7 +195,7 @@ async function handleDelete(row: any) {
     await knowledgeService.delete(row.id)
     ElMessage.success('删除成功')
     fetchList()
-  } catch {}
+  } catch (e: any) { if (e !== 'cancel') ElMessage.error('删除失败') }
 }
 
 function viewDetail(row: any) {

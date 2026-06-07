@@ -434,7 +434,7 @@ async function deleteTask(task: any) {
     await api.delete(API.DISCOVERY_TASKS + '/' + task.id)
     ElMessage.success('已删除')
     loadTasks()
-  } catch {}
+  } catch (e: any) { if (e !== 'cancel') ElMessage.error('删除失败') }
 }
 
 function viewResults(task: any) {
