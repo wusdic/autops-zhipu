@@ -200,7 +200,7 @@
           <el-tab-pane label="时间线" name="timeline">
             <div v-loading="timelineLoading">
             <!-- Alert lifecycle steps -->
-            <div class="autops-card" class="mb-lg">
+            <div class="autops-card mb-lg">
               <div class="autops-card-header">
                 <span class="autops-card-title">🔄 告警生命周期</span>
               </div>

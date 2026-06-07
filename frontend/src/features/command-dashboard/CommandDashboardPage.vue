@@ -201,7 +201,7 @@
               <div class="health-bar-label">
                 <span :class="'health-dot health-dot-' + item.key"></span>
                 <span class="font-14">{{ item.label }}</span>
-                <span class="font-12 text-tertiary" class="ml-auto">{{ item.count }}</span>
+                <span class="font-12 text-tertiary ml-auto">{{ item.count }}</span>
               </div>
               <el-progress
                 :percentage="item.percent"
@@ -315,7 +315,7 @@
               <div v-for="comp in platformHealth" :key="comp.name" class="health-item">
                 <span class="health-dot" :class="'health-dot-' + comp.status"></span>
                 <span class="font-12">{{ comp.name }}</span>
-                <span class="font-12 text-tertiary" class="ml-auto">{{ comp.latency }}</span>
+                <span class="font-12 text-tertiary ml-auto">{{ comp.latency }}</span>
               </div>
             </div>
           </div>

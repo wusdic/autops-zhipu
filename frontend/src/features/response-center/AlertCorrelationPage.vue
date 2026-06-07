@@ -90,7 +90,7 @@
         </div>
 
         <!-- 收敛统计 -->
-        <div class="autops-card" class="mt-lg" v-if="correlationStats.raw_count > 0">
+        <div class="autops-card mt-lg" v-if="correlationStats.raw_count > 0">
           <div class="autops-card-header">
             <div class="autops-card-title">收敛统计</div>
           </div>

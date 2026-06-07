@@ -106,7 +106,7 @@
         </div>
 
         <!-- 爆炸半径可视化 -->
-        <div class="autops-card" class="mt-lg" v-if="blastRadius.length">
+        <div class="autops-card mt-lg" v-if="blastRadius.length">
           <div class="autops-card-header">
             <div class="autops-card-title">爆炸半径</div>
           </div>
@@ -146,7 +146,7 @@
         </div>
 
         <!-- 严重度分布 -->
-        <div class="autops-card" class="mt-lg" v-if="severityDistribution.length">
+        <div class="autops-card mt-lg" v-if="severityDistribution.length">
           <div class="autops-card-header">
             <div class="autops-card-title">严重度分布</div>
           </div>
@@ -167,7 +167,7 @@
         </div>
 
         <!-- 业务系统影响 -->
-        <div class="autops-card" class="mt-lg" v-if="businessImpact.length">
+        <div class="autops-card mt-lg" v-if="businessImpact.length">
           <div class="autops-card-header">
             <div class="autops-card-title">业务系统影响</div>
           </div>

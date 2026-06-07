@@ -55,7 +55,7 @@
           </div>
 
           <!-- 处置时间线 -->
-          <div class="autops-card" class="mt-lg">
+          <div class="autops-card mt-lg">
             <div class="autops-card-header">
               <div class="autops-card-title">处置时间线</div>
             </div>
@@ -77,7 +77,7 @@
           </div>
 
           <!-- 关联告警 -->
-          <div class="autops-card" class="mt-lg">
+          <div class="autops-card mt-lg">
             <div class="autops-card-header">
               <div class="autops-card-title">关联告警</div>
             </div>
@@ -169,7 +169,7 @@
           </div>
 
           <!-- 快速信息 -->
-          <div class="autops-card" class="mt-lg">
+          <div class="autops-card mt-lg">
             <div class="autops-card-header">
               <div class="autops-card-title">快速信息</div>
             </div>

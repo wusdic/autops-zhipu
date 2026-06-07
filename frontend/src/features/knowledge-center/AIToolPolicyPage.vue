@@ -48,7 +48,7 @@
     </div>
 
     <!-- Policy Table -->
-    <div class="autops-card" class="mt-lg">
+    <div class="autops-card mt-lg">
       <el-table stripe
  v-loading="loading"
  :data="tableData"style="width: 100%"

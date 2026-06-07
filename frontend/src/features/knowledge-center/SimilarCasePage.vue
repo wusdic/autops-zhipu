@@ -87,7 +87,7 @@
     </el-row>
 
     <!-- Results Table -->
-    <div class="autops-card" class="mt-lg">
+    <div class="autops-card mt-lg">
       <div class="autops-card-header" v-if="hasSearched">
         <div class="autops-card-title">搜索结果</div>
         <el-tag type="info" size="small">共 {{ searchResults.length }} 条</el-tag>

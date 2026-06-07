@@ -88,7 +88,7 @@
         </div>
 
         <!-- Rating / Useful Feedback -->
-        <div class="autops-card" class="mt-lg">
+        <div class="autops-card mt-lg">
           <span class="autops-card-title">评价与反馈</span>
           <div class="feedback-section">
             <div class="feedback-row">
@@ -127,7 +127,7 @@
         </div>
 
         <!-- Related Articles -->
-        <div class="autops-card" class="mt-lg" v-if="relatedArticles.length> 0">
+        <div class="autops-card mt-lg" v-if="relatedArticles.length> 0">
           <span class="autops-card-title">相关文章</span>
           <el-table stripe :data="relatedArticles"size="small" @row-click="goToRelated">
             <el-table-column prop="title" label="标题" min-width="260" show-overflow-tooltip>

@@ -61,7 +61,7 @@
     </el-row>
 
     <!-- 工单趋势 -->
-    <div class="autops-card" class="mb-lg">
+    <div class="autops-card mb-lg">
       <div class="autops-card-header">
         <div class="autops-card-title">工单趋势</div>
         <el-radio-group v-model="trendPeriod" size="small" @change="fetchTrend">
