@@ -18,39 +18,39 @@
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row">
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--primary">
           <div class="stat-content">
             <div class="stat-value">{{ stats.total }}</div>
             <div class="stat-label">知识总数</div>
           </div>
-          <el-icon class="stat-icon" :size="40" color="#165dff"><Document /></el-icon>
+          <el-icon class="stat-icon" :size="40" <Document /></el-icon>
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--success">
           <div class="stat-content">
             <div class="stat-value">{{ stats.published }}</div>
             <div class="stat-label">已发布</div>
           </div>
-          <el-icon class="stat-icon" :size="40" color="#00b42a"><CircleCheck /></el-icon>
+          <el-icon class="stat-icon" :size="40" <CircleCheck /></el-icon>
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--warning">
           <div class="stat-content">
             <div class="stat-value">{{ stats.draft }}</div>
             <div class="stat-label">草稿</div>
           </div>
-          <el-icon class="stat-icon" :size="40" color="#ff7d00"><EditPen /></el-icon>
+          <el-icon class="stat-icon" :size="40" <EditPen /></el-icon>
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--info">
           <div class="stat-content">
             <div class="stat-value">{{ stats.total - stats.published - stats.draft }}</div>
             <div class="stat-label">其他状态</div>
           </div>
-          <el-icon class="stat-icon" :size="40" color="#86909c"><InfoFilled /></el-icon>
+          <el-icon class="stat-icon" :size="40" <InfoFilled /></el-icon>
         </div>
       </el-col>
     </el-row>
@@ -406,8 +406,14 @@ onMounted(() => {
   flex-direction: column;
 }
 .stat-icon {
-  opacity: 0.6;
+  opacity: 0.8;
 }
+.stat-card--primary .stat-value, .stat-card--primary .stat-icon { color: var(--autops-primary); }
+.stat-card--success .stat-value, .stat-card--success .stat-icon { color: var(--autops-success); }
+.stat-card--warning .stat-value, .stat-card--warning .stat-icon { color: var(--autops-warning); }
+.stat-card--info .stat-value, .stat-card--info .stat-icon { color: var(--autops-info); }
+.stat-card--danger .stat-value, .stat-card--danger .stat-icon { color: var(--autops-danger); }
+
 .filter-card {
   margin-bottom: 0;
 }

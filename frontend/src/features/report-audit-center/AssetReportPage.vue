@@ -432,14 +432,14 @@ onMounted(() => {
   margin-top: 2px;
 }
 
-.autops-metric-card--total .stat-card__icon { background: rgba(64, 158, 255, 0.12); color: var(--autops-primary); }
-.autops-metric-card--total .stat-card__value { color: var(--autops-primary); }
-.autops-metric-card--online .stat-card__icon { background: rgba(103, 194, 58, 0.12); color: var(--autops-success); }
-.autops-metric-card--online .stat-card__value { color: var(--autops-success); }
-.autops-metric-card--offline .stat-card__icon { background: rgba(144, 147, 153, 0.12); color: var(--autops-info); }
-.autops-metric-card--offline .stat-card__value { color: var(--autops-info); }
-.autops-metric-card--abnormal .stat-card__icon { background: rgba(245, 108, 108, 0.12); color: var(--autops-danger); }
-.autops-metric-card--abnormal .stat-card__value { color: var(--autops-danger); }
+.stat-card--total .stat-card__icon { background: rgba(64, 158, 255, 0.12); color: var(--autops-primary); }
+.stat-card--total .stat-card__value { color: var(--autops-primary); }
+.stat-card--online .stat-card__icon { background: rgba(103, 194, 58, 0.12); color: var(--autops-success); }
+.stat-card--online .stat-card__value { color: var(--autops-success); }
+.stat-card--offline .stat-card__icon { background: rgba(144, 147, 153, 0.12); color: var(--autops-info); }
+.stat-card--offline .stat-card__value { color: var(--autops-info); }
+.stat-card--abnormal .stat-card__icon { background: rgba(245, 108, 108, 0.12); color: var(--autops-danger); }
+.stat-card--abnormal .stat-card__value { color: var(--autops-danger); }
 
 .filter-form {
   margin-bottom: var(--autops-space-lg);

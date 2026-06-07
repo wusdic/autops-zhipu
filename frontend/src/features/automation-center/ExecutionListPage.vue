@@ -770,35 +770,35 @@ onBeforeUnmount(() => {
   margin-top: 4px;
 }
 
-.autops-metric-card--today .stat-card__icon {
+.stat-card--today .stat-card__icon {
   background: rgba(64, 158, 255, 0.12);
   color: var(--autops-primary);
 }
-.autops-metric-card--today .stat-card__value {
+.stat-card--today .stat-card__value {
   color: var(--autops-primary);
 }
 
-.autops-metric-card--running .stat-card__icon {
+.stat-card--running .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
   color: var(--autops-warning);
 }
-.autops-metric-card--running .stat-card__value {
+.stat-card--running .stat-card__value {
   color: var(--autops-warning);
 }
 
-.autops-metric-card--success .stat-card__icon {
+.stat-card--success .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
   color: var(--autops-success);
 }
-.autops-metric-card--success .stat-card__value {
+.stat-card--success .stat-card__value {
   color: var(--autops-success);
 }
 
-.autops-metric-card--failed .stat-card__icon {
+.stat-card--failed .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
   color: var(--autops-danger);
 }
-.autops-metric-card--failed .stat-card__value {
+.stat-card--failed .stat-card__value {
   color: var(--autops-danger);
 }
 

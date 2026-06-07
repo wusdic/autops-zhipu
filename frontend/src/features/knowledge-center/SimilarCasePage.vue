@@ -53,7 +53,7 @@
     <!-- Statistics -->
     <el-row :gutter="16" class="stats-row" v-if="hasSearched">
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--primary">
           <div class="stat-content">
             <div class="stat-value">{{ searchResults.length }}</div>
             <div class="stat-label">匹配案例</div>
@@ -61,7 +61,7 @@
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--info">
           <div class="stat-content">
             <div class="stat-value">{{ avgSimilarity }}%</div>
             <div class="stat-label">平均相似度</div>
@@ -69,7 +69,7 @@
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--success">
           <div class="stat-content">
             <div class="stat-value">{{ highSimilarityCount }}</div>
             <div class="stat-label">高相似度 (≥80%)</div>
@@ -77,7 +77,7 @@
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--warning">
           <div class="stat-content">
             <div class="stat-value">{{ resolvedCount }}</div>
             <div class="stat-label">已解决</div>
@@ -350,4 +350,9 @@ onMounted(() => {
   line-height: 1.6;
   font-size: var(--autops-font-13);
 }
+.stat-card--primary .stat-value, .stat-card--primary .stat-icon { color: var(--autops-primary); }
+.stat-card--success .stat-value, .stat-card--success .stat-icon { color: var(--autops-success); }
+.stat-card--warning .stat-value, .stat-card--warning .stat-icon { color: var(--autops-warning); }
+.stat-card--info .stat-value, .stat-card--info .stat-icon { color: var(--autops-info); }
+.stat-card--danger .stat-value, .stat-card--danger .stat-icon { color: var(--autops-danger); }
 </style>

@@ -2,26 +2,25 @@
   <div class="autops-page-container">
     <div class="autops-page-header">
       <div>
-        <div class="autops-page-title">审计日志</div>
-        <div class="autops-page-desc">查看系统操作审计日志</div>
+        <div class="autops-page-title">审计查询</div>
+        <div class="autops-page-desc">查询和审阅系统操作审计记录</div>
+      </div>
+      <div class="header-actions">
+        <el-radio-group v-model="viewMode" size="small">
+          <el-radio-button value="table">表格</el-radio-button>
+          <el-radio-button value="timeline">时间线</el-radio-button>
+        </el-radio-group>
+        <el-button @click="exportLogs" :loading="exporting" size="small">
+          <el-icon><Download /></el-icon>
+          导出
+        </el-button>
       </div>
     </div>
 
     <div class="autops-card">
-      
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-          <span style="font-size:18px;font-weight:600">审计日志</span>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <el-radio-group v-model="viewMode" size="small">
-              <el-radio-button value="table">表格</el-radio-button>
-              <el-radio-button value="timeline">时间线</el-radio-button>
-            </el-radio-group>
-            <el-button @click="exportLogs" :loading="exporting" size="small">
-              <el-icon><Download /></el-icon>
-              导出
-            </el-button>
-          </div>
-        </div>
+      <div class="autops-card-header">
+        <span class="autops-card-title">审计记录</span>
+      </div>
       
 
       <!-- Advanced Filters -->

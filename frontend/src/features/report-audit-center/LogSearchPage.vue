@@ -70,6 +70,9 @@
 
     <!-- 日志表格区 -->
     <el-card class="table-card" shadow="never">
+      <template #header>
+        <span style="font-weight:600;font-size:15px">搜索结果</span>
+      </template>
       <el-table stripe
  v-loading="loading"
  :data="logList"border

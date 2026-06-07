@@ -341,11 +341,10 @@ onMounted(() => { load(); loadGroups() })
 
 .stat-row { margin-bottom: var(--autops-space-xl); }
 
-.autops-metric-card 
-.autops-metric-card.success .stat-value { color: var(--autops-success); }
-.autops-metric-card.danger .stat-value { color: var(--autops-danger); }
-.autops-metric-card.warning .stat-value { color: var(--autops-warning); }
-.autops-metric-card 
+.stat-card--primary .stat-value { color: var(--autops-primary); }
+.stat-card--success .stat-value { color: var(--autops-success); }
+.stat-card--danger .stat-value { color: var(--autops-danger); }
+.stat-card--warning .stat-value { color: var(--autops-warning); } 
 .toolbar { margin-bottom: var(--autops-space-lg); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .pagination { margin-top: var(--autops-space-lg); display: flex; justify-content: flex-end; }
 .condition-builder { background: var(--autops-bg-2); padding: var(--autops-space-md); border-radius: var(--autops-radius-sm); }

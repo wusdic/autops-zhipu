@@ -18,33 +18,33 @@
     <!-- Summary Cards -->
     <el-row :gutter="16" class="summary-row" v-if="analysisDone">
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--primary">
           <div class="stat-content">
-            <div class="stat-value text-primary">{{ totalEventTypes }}</div>
+            <div class="stat-value">{{ totalEventTypes }}</div>
             <div class="stat-label">事件类型总数</div>
           </div>
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--success">
           <div class="stat-content">
-            <div class="stat-value text-success">{{ coveredTypes }}</div>
+            <div class="stat-value">{{ coveredTypes }}</div>
             <div class="stat-label">已覆盖</div>
           </div>
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--danger">
           <div class="stat-content">
-            <div class="stat-value text-danger">{{ gapResults.length }}</div>
+            <div class="stat-value">{{ gapResults.length }}</div>
             <div class="stat-label">存在缺口</div>
           </div>
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--warning">
           <div class="stat-content">
-            <div class="stat-value text-warning">{{ coveragePercent }}%</div>
+            <div class="stat-value">{{ coveragePercent }}%</div>
             <div class="stat-label">覆盖率</div>
           </div>
         </div>
@@ -385,4 +385,9 @@ onMounted(() => {
 .table-filter-row {
   margin-top: var(--autops-space-lg);
 }
+.stat-card--primary .stat-value, .stat-card--primary .stat-icon { color: var(--autops-primary); }
+.stat-card--success .stat-value, .stat-card--success .stat-icon { color: var(--autops-success); }
+.stat-card--warning .stat-value, .stat-card--warning .stat-icon { color: var(--autops-warning); }
+.stat-card--info .stat-value, .stat-card--info .stat-icon { color: var(--autops-info); }
+.stat-card--danger .stat-value, .stat-card--danger .stat-icon { color: var(--autops-danger); }
 </style>

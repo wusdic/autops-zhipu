@@ -1048,51 +1048,51 @@ onBeforeUnmount(() => {
   margin-top: 2px;
 }
 
-.autops-metric-card--total .stat-card__icon {
+.stat-card--total .stat-card__icon {
   background: rgba(144, 147, 153, 0.12);
   color: var(--autops-info);
 }
-.autops-metric-card--total .stat-card__value {
+.stat-card--total .stat-card__value {
   color: var(--autops-text-2);
 }
 
-.autops-metric-card--open .stat-card__icon {
+.stat-card--open .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
   color: var(--autops-warning);
 }
-.autops-metric-card--open .stat-card__value {
+.stat-card--open .stat-card__value {
   color: var(--autops-warning);
 }
 
-.autops-metric-card--progress .stat-card__icon {
+.stat-card--progress .stat-card__icon {
   background: rgba(64, 158, 255, 0.12);
   color: var(--autops-primary);
 }
-.autops-metric-card--progress .stat-card__value {
+.stat-card--progress .stat-card__value {
   color: var(--autops-primary);
 }
 
-.autops-metric-card--closed .stat-card__icon {
+.stat-card--closed .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
   color: var(--autops-success);
 }
-.autops-metric-card--closed .stat-card__value {
+.stat-card--closed .stat-card__value {
   color: var(--autops-success);
 }
 
-.autops-metric-card--overdue .stat-card__icon {
+.stat-card--overdue .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
   color: var(--autops-danger);
 }
-.autops-metric-card--overdue .stat-card__value {
+.stat-card--overdue .stat-card__value {
   color: var(--autops-danger);
 }
 
-.autops-metric-card--sla .stat-card__icon {
+.stat-card--sla .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
   color: var(--autops-success);
 }
-.autops-metric-card--sla .stat-card__value {
+.stat-card--sla .stat-card__value {
   color: var(--autops-success);
 }
 

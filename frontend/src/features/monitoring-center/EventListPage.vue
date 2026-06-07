@@ -916,35 +916,35 @@ onBeforeUnmount(() => {
   margin-top: 4px;
 }
 
-.autops-metric-card--total .stat-card__icon {
+.stat-card--total .stat-card__icon {
   background: rgba(64, 158, 255, 0.12);
   color: var(--autops-primary);
 }
-.autops-metric-card--total .stat-card__value {
+.stat-card--total .stat-card__value {
   color: var(--autops-primary);
 }
 
-.autops-metric-card--today .stat-card__icon {
+.stat-card--today .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
   color: var(--autops-success);
 }
-.autops-metric-card--today .stat-card__value {
+.stat-card--today .stat-card__value {
   color: var(--autops-success);
 }
 
-.autops-metric-card--pending .stat-card__icon {
+.stat-card--pending .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
   color: var(--autops-warning);
 }
-.autops-metric-card--pending .stat-card__value {
+.stat-card--pending .stat-card__value {
   color: var(--autops-warning);
 }
 
-.autops-metric-card--critical .stat-card__icon {
+.stat-card--critical .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
   color: var(--autops-danger);
 }
-.autops-metric-card--critical .stat-card__value {
+.stat-card--critical .stat-card__value {
   color: var(--autops-danger);
 }
 

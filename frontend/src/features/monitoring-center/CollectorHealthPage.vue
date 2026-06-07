@@ -298,27 +298,27 @@ onMounted(() => {
   margin-top: 4px;
 }
 
-.autops-metric-card--healthy .stat-card__icon {
+.stat-card--healthy .stat-card__icon {
   background: rgba(103, 194, 58, 0.12);
   color: var(--autops-success);
 }
-.autops-metric-card--healthy .stat-card__value {
+.stat-card--healthy .stat-card__value {
   color: var(--autops-success);
 }
 
-.autops-metric-card--degraded .stat-card__icon {
+.stat-card--degraded .stat-card__icon {
   background: rgba(230, 162, 60, 0.12);
   color: var(--autops-warning);
 }
-.autops-metric-card--degraded .stat-card__value {
+.stat-card--degraded .stat-card__value {
   color: var(--autops-warning);
 }
 
-.autops-metric-card--down .stat-card__icon {
+.stat-card--down .stat-card__icon {
   background: rgba(245, 108, 108, 0.12);
   color: var(--autops-danger);
 }
-.autops-metric-card--down .stat-card__value {
+.stat-card--down .stat-card__value {
   color: var(--autops-danger);
 }
 

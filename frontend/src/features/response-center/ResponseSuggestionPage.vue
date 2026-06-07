@@ -40,7 +40,7 @@
     <!-- Suggestion Summary -->
     <el-row :gutter="16" class="summary-row" v-if="suggestions.length > 0">
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--primary">
           <div class="stat-content">
             <div class="stat-value">{{ suggestions.length }}</div>
             <div class="stat-label">建议数</div>
@@ -48,25 +48,25 @@
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--danger">
           <div class="stat-content">
-            <div class="stat-value text-danger">{{ highRiskCount }}</div>
+            <div class="stat-value">{{ highRiskCount }}</div>
             <div class="stat-label">高风险</div>
           </div>
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--warning">
           <div class="stat-content">
-            <div class="stat-value text-warning">{{ mediumRiskCount }}</div>
+            <div class="stat-value">{{ mediumRiskCount }}</div>
             <div class="stat-label">中风险</div>
           </div>
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="autops-card stat-card">
+        <div class="autops-card stat-card stat-card--success">
           <div class="stat-content">
-            <div class="stat-value text-success">{{ appliedCount }}</div>
+            <div class="stat-value">{{ appliedCount }}</div>
             <div class="stat-label">已应用</div>
           </div>
         </div>
@@ -367,4 +367,9 @@ onMounted(() => {
   line-height: 1.6;
   font-size: var(--autops-font-13);
 }
+.stat-card--primary .stat-value, .stat-card--primary .stat-icon { color: var(--autops-primary); }
+.stat-card--success .stat-value, .stat-card--success .stat-icon { color: var(--autops-success); }
+.stat-card--warning .stat-value, .stat-card--warning .stat-icon { color: var(--autops-warning); }
+.stat-card--info .stat-value, .stat-card--info .stat-icon { color: var(--autops-info); }
+.stat-card--danger .stat-value, .stat-card--danger .stat-icon { color: var(--autops-danger); }
 </style>
