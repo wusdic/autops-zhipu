@@ -23,7 +23,7 @@
             <div class="stat-value">{{ stats.total }}</div>
             <div class="stat-label">知识总数</div>
           </div>
-          <el-icon class="stat-icon" :size="40" <Document /></el-icon>
+          <el-icon class="stat-icon" :size="40"><Document /></el-icon>
         </div>
       </el-col>
       <el-col :span="6">
@@ -32,7 +32,7 @@
             <div class="stat-value">{{ stats.published }}</div>
             <div class="stat-label">已发布</div>
           </div>
-          <el-icon class="stat-icon" :size="40" <CircleCheck /></el-icon>
+          <el-icon class="stat-icon" :size="40"><CircleCheck /></el-icon>
         </div>
       </el-col>
       <el-col :span="6">
@@ -41,7 +41,7 @@
             <div class="stat-value">{{ stats.draft }}</div>
             <div class="stat-label">草稿</div>
           </div>
-          <el-icon class="stat-icon" :size="40" <EditPen /></el-icon>
+          <el-icon class="stat-icon" :size="40"><EditPen /></el-icon>
         </div>
       </el-col>
       <el-col :span="6">
@@ -50,7 +50,7 @@
             <div class="stat-value">{{ stats.total - stats.published - stats.draft }}</div>
             <div class="stat-label">其他状态</div>
           </div>
-          <el-icon class="stat-icon" :size="40" <InfoFilled /></el-icon>
+          <el-icon class="stat-icon" :size="40"><InfoFilled /></el-icon>
         </div>
       </el-col>
     </el-row>
