@@ -216,7 +216,7 @@ import { API } from '@/shared/api/routes'
 
 const router = useRouter()
 const stats = reactive({ total: 0, active: 0, highRisk: 0, pendingApproval: 0 })
-const filters = reactive({ keyword: 'primary', status: 'primary', risk_level: 'primary', trigger_source: 'primary'})
+const filters = reactive({ keyword: '', status: '', risk_level: '', trigger_source: ''})
 const items = ref<any[]>([])
 const loading = ref(false)
 const page = ref(1)
@@ -228,7 +228,7 @@ const showDialog = ref(false)
 const editing = ref(false)
 const editId = ref('')
 const form = reactive({
-  name: 'primary', description: 'primary', trigger_source: 'event', condition_logic: 'AND',
+  name: '', description: '', trigger_source: 'event', condition_logic: 'AND',
   conditions: [] as any[], scope_groups: [] as string[], scope_asset_types: [] as string[],
   actions: [] as any[], risk_level: 'low', requires_approval: false, max_impact: 10,
 })
@@ -270,8 +270,8 @@ async function loadGroups() {
   } catch {}
 }
 
-function addCondition() { form.conditions.push({ field: 'primary', operator: 'gt', value: 'primary', duration: 'primary'}) }
-function addAction() { form.actions.push({ type: 'script', target: 'primary', params_json: 'primary'}) }
+function addCondition() { form.conditions.push({ field: '', operator: 'gt', value: '', duration: ''}) }
+function addAction() { form.actions.push({ type: 'script', target: '', params_json: ''}) }
 
 function openCreate() {
   editing.value = false; editId.value = ''

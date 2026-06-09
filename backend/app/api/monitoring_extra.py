@@ -5,7 +5,11 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession

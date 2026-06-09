@@ -192,7 +192,7 @@ async function fetchStats() {
   try {
     const res = await client.get(API.TICKET_STATS)
     stats.value = res.data?.data ?? res.data ?? {}
-  } catch {} finally { statsLoading.value = false }
+  } catch { ElMessage.error('加载统计失败') } finally { statsLoading.value = false }
 }
 
 async function fetchMyTickets() {
@@ -201,7 +201,7 @@ async function fetchMyTickets() {
     const res = await client.get(API.TICKETS, { params: { page_size: 20, status: 'open,in_progress' } })
     const d = res.data?.data ?? res.data
     myTickets.value = d?.items ?? d?.results ?? (Array.isArray(d) ? d : [])
-  } catch {} finally { myLoading.value = false }
+  } catch { ElMessage.error('加载我的工单失败') } finally { myLoading.value = false }
 }
 
 async function fetchRecent() {
@@ -210,7 +210,7 @@ async function fetchRecent() {
     const res = await client.get(API.TICKETS, { params: { page: 1, page_size: 10 } })
     const d = res.data?.data ?? res.data
     recentTickets.value = d?.items ?? d?.results ?? (Array.isArray(d) ? d : [])
-  } catch {} finally { recentLoading.value = false }
+  } catch { ElMessage.error('加载最近工单失败') } finally { recentLoading.value = false }
 }
 
 onMounted(() => { fetchStats(); fetchMyTickets(); fetchRecent() })

@@ -102,8 +102,7 @@
             <template #default="{ row }">
               <span
                 v-if="row.success_rate != null"
-                :class="rateClass(row.success_rate)"
-                class="rate-value"
+                :class="['rate-value', rateClass(row.success_rate)]"
               >
                 {{ (row.success_rate * 100).toFixed(1) }}%
               </span>

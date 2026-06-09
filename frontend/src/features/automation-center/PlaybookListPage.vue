@@ -175,7 +175,7 @@ import { API } from '@/shared/api/routes'
 const router = useRouter()
 
 const stats = reactive({ total: 0, active: 0, withScripts: 0, avgSteps: 0 })
-const filters = reactive({ keyword: 'primary', status: 'primary', risk_level: 'primary'})
+const filters = reactive({ keyword: '', status: '', risk_level: ''})
 const items = ref<any[]>([])
 const loading = ref(false)
 const page = ref(1)
@@ -186,7 +186,7 @@ const scripts = ref<any[]>([])
 const showDialog = ref(false)
 const editing = ref(false)
 const editId = ref('')
-const form = reactive({ name: 'primary', description: 'primary', status: 'draft', risk_level: 'low', steps: [] as any[] })
+const form = reactive({ name: '', description: '', status: 'draft', risk_level: 'low', steps: [] as any[] })
 
 const showDetail = ref(false)
 const detail = ref<any>(null)
@@ -224,11 +224,11 @@ async function loadScripts() {
   try {
     const res = await api.get(API.SCRIPTS, { params: { page_size: 100 } })
     if (res.data?.code === 0) scripts.value = res.data.data?.items || res.data.data || []
-  } catch {}
+  } catch { /* background load, non-critical */ }
 }
 
 function addStep() {
-  form.steps.push({ name: 'primary', script_id: 'primary', timeout: 300, on_failure: 'stop', params_json: 'primary', condition: 'primary'})
+  form.steps.push({ name: '', script_id: '', timeout: 300, on_failure: 'stop', params_json: '', condition: ''})
 }
 
 function moveStep(idx: number, dir: number) {
@@ -297,7 +297,7 @@ async function remove(row: any) {
     await ElMessageBox.confirm('确定删除此 Playbook？关联策略将失效。', '确认删除', { type: 'warning' })
     await api.delete(API.PLAYBOOKS + '/' + row.id)
     ElMessage.success('已删除'); load()
-  } catch {}
+  } catch (e: any) { if (e !== 'cancel') ElMessage.error('删除失败') }
 }
 
 function getScriptName(id: string) { return scripts.value.find(s => s.id === id)?.name || id || '-' }

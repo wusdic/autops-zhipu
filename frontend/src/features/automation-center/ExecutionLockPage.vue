@@ -374,7 +374,6 @@ var handleSelectionChange = (rows: LockEntry[]) => {
 }
 
 var handleViewExecution = (row: any) => {
-  console.log('View execution:', row.id)
 }
 
 var handleViewDetail = (row: any) => {
