@@ -64,25 +64,25 @@
         </div>
 
         <!-- 正文内容 -->
-        <div class="autops-card" v-if="article.content" class="mt-lg">
+        <div v-if="article.content" class="autops-card mt-lg">
           <span class="autops-card-title">内容</span>
           <div v-html="renderMarkdown(article.content)" class="markdown-body" />
         </div>
 
         <!-- 诊断步骤 -->
-        <div class="autops-card" v-if="article.diagnosis_steps" class="mt-lg">
+        <div v-if="article.diagnosis_steps" class="autops-card mt-lg">
           <span class="autops-card-title">诊断步骤</span>
           <div v-html="renderMarkdown(article.diagnosis_steps)" class="markdown-body" />
         </div>
 
         <!-- 处置步骤 -->
-        <div class="autops-card" v-if="article.resolution_steps" class="mt-lg">
+        <div v-if="article.resolution_steps" class="autops-card mt-lg">
           <span class="autops-card-title">处置步骤</span>
           <div v-html="renderMarkdown(article.resolution_steps)" class="markdown-body" />
         </div>
 
         <!-- 验证步骤 -->
-        <div class="autops-card" v-if="article.verification_steps" class="mt-lg">
+        <div v-if="article.verification_steps" class="autops-card mt-lg">
           <span class="autops-card-title">验证步骤</span>
           <div v-html="renderMarkdown(article.verification_steps)" class="markdown-body" />
         </div>
@@ -187,6 +187,7 @@ import {
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
+import { sanitizeHtml } from '@/shared/utils/sanitize'
 
 const route = useRoute()
 const router = useRouter()
@@ -244,12 +245,14 @@ function riskTagType(level: string): TagType {
 
 /** 简易 Markdown 渲染 */
 function renderMarkdown(text: string) {
-  return text
+  const html = text
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/`(.+?)`/g, '<code>$1</code>')
     .replace(/\n/g, '<br/>')
+  // 净化 HTML 防止 XSS 攻击（知识库内容可能含恶意脚本）
+  return sanitizeHtml(html)
 }
 
 /** 格式化时间 */

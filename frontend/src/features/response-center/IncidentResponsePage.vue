@@ -284,7 +284,7 @@
           </el-card>
 
           <!-- 匹配策略卡片 -->
-          <el-card shadow="hover" class="col-card" v-if="matchedPolicy" class="mb-lg">
+          <el-card v-if="matchedPolicy" shadow="hover" class="col-card mb-lg">
             <template #header>
               <div class="col-header">
                 <span>🎯 匹配策略</span>

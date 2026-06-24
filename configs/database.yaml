@@ -3,7 +3,7 @@ dialect: mysql
 host: 127.0.0.1
 port: 3306
 user: autops
-db_pass: autops_2026
+db_pass: autops_dev_2026
 database: autops
 pool_size: 10
 max_overflow: 20

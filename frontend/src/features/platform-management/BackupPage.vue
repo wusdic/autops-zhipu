@@ -247,6 +247,7 @@ import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
+import { APP_CONFIG } from '@/shared/config'
 
 // ── Constants ──────────────────────────────────────────────
 const typeLabels: Record<string, string> = { full: '全量备份', incremental: '增量备份' }
@@ -453,7 +454,7 @@ async function doCreateBackup() {
 function handleDownload(row: any) {
   // Open download in new window/tab — the browser will handle the file download
   const url = R.BACKUP_DOWNLOAD(row.id)
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem(APP_CONFIG.TOKEN_KEY)
   const link = document.createElement('a')
   link.href = token ? url + '?token=' + encodeURIComponent(token) : url
   link.target = '_blank'

@@ -309,6 +309,7 @@ import type { TagType } from '@/shared/types'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, WarningFilled, Document, Upload } from '@element-plus/icons-vue'
+import { APP_CONFIG } from '@/shared/config'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
@@ -505,7 +506,7 @@ const attachmentsLoading = ref(false)
 
 const uploadUrl = computed(() => R.TICKET_ATTACHMENTS(ticketId()))
 const uploadHeaders = computed(() => {
-  const token = localStorage.getItem('token') || ''
+  const token = localStorage.getItem(APP_CONFIG.TOKEN_KEY) || ''
   return token ? { Authorization: 'Bearer ' + token } : {}
 })
 

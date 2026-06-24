@@ -51,7 +51,12 @@ def get_session_factory() -> async_sessionmaker[AsyncSession]:
 
 
 async def get_db() -> AsyncSession:
-    """FastAPI 依赖注入：获取数据库会话."""
+    """FastAPI 依赖注入：获取数据库会话.
+
+    请求结束后自动 commit；异常时 rollback。
+    注意：SQLAlchemy AsyncSession 不支持在 yield 之后检查 dirty/new/deleted
+    集合（会触发 IllegalStateChangeError），因此无条件 commit。
+    """
     if async_session_factory is None:
         init_db_engine()
     async with async_session_factory() as session:

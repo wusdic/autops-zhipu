@@ -62,10 +62,17 @@ async def me(request: Request, svc: AuthService = Depends(_get_auth)):
 
 @router.put("/auth/password")
 async def change_password(
-    data: PasswordChange, token: str,
+    data: PasswordChange,
+    request: Request,
     auth: AuthService = Depends(_get_auth),
     user_svc: UserService = Depends(_get_user_svc),
 ):
+    # 从 Authorization header 提取 token（不再从 query param 暴露）
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.replace("Bearer ", "") if auth_header.startswith("Bearer ") else ""
+    if not token:
+        from app.common.exceptions import UnauthorizedError
+        raise UnauthorizedError("缺少认证 Token")
     user = await auth.get_current_user(token)
     await user_svc.change_password(user.id, data.old_password, data.new_password)
     return success(message="密码已修改")

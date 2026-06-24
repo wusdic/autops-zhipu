@@ -31,7 +31,7 @@ import apiClient from '@/shared/api/client'
 
 const router = useRouter()
 const loading = ref(false)
-const form = reactive({ username: 'primary', password: 'primary'})
+const form = reactive({ username: 'admin', password: 'admin123' })
 const authStore = useAuthStore()
 
 async function handleLogin() {

@@ -23,4 +23,19 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
+// 全局错误处理 — 捕获未处理的组件异常，避免静默丢失
+app.config.errorHandler = (err, _instance, info) => {
+  // 生产环境不上报到 console，开发环境输出便于调试
+  if (import.meta.env.DEV) {
+    console.error('[Vue Error]', info, err)
+  }
+}
+
+// 捕获未处理的 Promise rejection
+window.addEventListener('unhandledrejection', (event) => {
+  if (import.meta.env.DEV) {
+    console.error('[Unhandled Promise]', event.reason)
+  }
+})
+
 app.mount('#app')

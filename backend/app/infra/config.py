@@ -172,21 +172,25 @@ class AppConfig(BaseSettings):
 
         # --- 从yaml文件覆盖配置 (env vars always win) ---
         yaml_sources = {
-            "database": _load_yaml("database.yaml"),
-            "redis": _load_yaml("redis.yaml"),
-            "llm": _load_yaml("llm.yaml"),
-            "security": _load_yaml("security.yaml"),
+            "database": (_load_yaml("database.yaml"), "DB_"),
+            "redis": (_load_yaml("redis.yaml"), "REDIS_"),
+            "llm": (_load_yaml("llm.yaml"), "LLM_"),
+            "security": (_load_yaml("security.yaml"), "SECURITY_"),
         }
 
-        for attr_name, yaml_data in yaml_sources.items():
+        for attr_name, (yaml_data, env_prefix) in yaml_sources.items():
             if not yaml_data:
                 continue
             obj = getattr(self, attr_name)
             for k, v in yaml_data.items():
                 if not hasattr(obj, k):
                     continue
-                # Skip if field was explicitly set from env var — env wins over yaml
-                if k in obj.model_fields_set:
+                # Env vars always win over yaml — check os.environ directly.
+                # pydantic-settings model_fields_set is unreliable for this purpose
+                # when no env_file is configured (the default).
+                env_key = (env_prefix + k).upper()
+                # Handle pydantic field name → env var name mapping (e.g. db_pass → DB_PASS)
+                if env_key in os.environ:
                     continue
                 setattr(obj, k, v)
 

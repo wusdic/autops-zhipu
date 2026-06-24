@@ -110,7 +110,7 @@
     </div>
 
     <!-- Approve Action -->
-    <div class="autops-card" v-if="execution && execution.status === 'pending'" class="mt-lg">
+    <div v-if="execution && execution.status === 'pending'" class="autops-card mt-lg">
       <div class="autops-card-header">
                 <span>审批操作</span>
       </div>
@@ -126,7 +126,7 @@
     </div>
 
     <!-- Execution Result Summary -->
-    <div class="autops-card" v-if="execution && (execution.status === 'completed' || execution.status === 'failed')" class="mt-lg">
+    <div v-if="execution && (execution.status === 'completed' || execution.status === 'failed')" class="autops-card mt-lg">
       <div class="autops-card-header">
                 <span>执行结果</span>
       </div>
@@ -146,7 +146,7 @@
     </div>
 
     <!-- Verification Result Section -->
-    <div class="autops-card" v-if="execution && (execution.status === 'completed' || execution.status === 'failed')" class="mt-lg" v-loading="verificationLoading">
+    <div v-if="execution && (execution.status === 'completed' || execution.status === 'failed')" class="autops-card mt-lg" v-loading="verificationLoading">
       
         <div class="autops-card-header">
           <span>验证结果</span>

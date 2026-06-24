@@ -29,6 +29,7 @@ from app.api.router import api_router
 from app.api.health import router as health_router
 from app.common.exceptions import AppError, app_error_handler, generic_error_handler
 from app.common.trace import TraceIdMiddleware
+from app.common.auth_middleware import AuthMiddleware
 from app.api.websocket import register_ws_event_bridges
 from app.infra.config import get_config
 from app.infra.database import init_db_engine, close_db_engine
@@ -73,14 +74,20 @@ def create_app() -> FastAPI:
     )
 
     # 中间件
+    # CORS: 当 allow_credentials=True 时，allow_origins 不能是 ["*"]（浏览器规范）
+    # 如果 cors_origins 为 ["*"]，则关闭 credentials 以兼容
+    cors_origins = config.cors_origins
+    allow_credentials = "*" not in cors_origins
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=config.cors_origins,
-        allow_credentials=True,
+        allow_origins=cors_origins,
+        allow_credentials=allow_credentials,
         allow_methods=["*"],
         allow_headers=["*"],
     )
     app.add_middleware(TraceIdMiddleware)
+    # JWT 认证中间件 — 放行 login/refresh/health/docs，保护其余所有 /api/ 路由
+    app.add_middleware(AuthMiddleware)
 
     # 异常处理
     app.add_exception_handler(AppError, app_error_handler)

@@ -106,6 +106,7 @@ import { ref, nextTick, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, ChatLineSquare, Promotion } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { sanitizeHtml } from '@/shared/utils/sanitize'
 
 interface MessageAction {
   label: string
@@ -264,9 +265,10 @@ async function executeAction(action: MessageAction) {
 }
 
 function renderMarkdown(text: string): string {
-  return text
+  const html = text
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\n/g, '<br>')
+  return sanitizeHtml(html)
 }
 
 function scrollToBottom() {
