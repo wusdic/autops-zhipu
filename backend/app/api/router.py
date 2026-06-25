@@ -58,6 +58,11 @@ from app.api.platform_extra import (
 from app.api.aiops_extra import router as aiops_extra_router
 from app.api.exports import router as exports_router
 from app.api.search import router as search_router
+from app.api.ai_assistant import router as ai_router
+from app.api.model_service import (
+    agents_router as model_agents_router,
+    config_router as model_config_router,
+)
 from app.domains.alert.threshold_api import router as threshold_rule_router
 from app.domains.notification.rule_api import router as notification_rule_router
 from app.domains.asset.discovery_template_api import router as discovery_template_router
@@ -114,6 +119,12 @@ api_router.include_router(knowledge_router)
 api_router.include_router(aiops_router)
 api_router.include_router(agent_router, prefix="/aiops")
 api_router.include_router(aiops_extra_router, prefix="/aiops")
+# 模型服务（前端 ModelServicePage）：/aiops/agents、/aiops/model-config
+api_router.include_router(model_agents_router, prefix="/aiops")
+api_router.include_router(model_config_router, prefix="/aiops")
+
+# AI 助手对话：/ai/chat、/ai/execute
+api_router.include_router(ai_router)
 
 # Anomalies
 api_router.include_router(anomaly_router)

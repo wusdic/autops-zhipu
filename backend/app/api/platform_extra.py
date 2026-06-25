@@ -68,6 +68,65 @@ async def get_dictionary_by_type(
     return success(items)
 
 
+class DictItemCreate(BaseModel):
+    type: str = Field(..., max_length=64)
+    code: str = Field(..., max_length=128)
+    label: str = Field(..., max_length=256)
+    value: str | None = None
+    sort_order: int = 0
+
+
+class DictItemUpdate(BaseModel):
+    code: str | None = None
+    label: str | None = None
+    value: str | None = None
+    sort_order: int | None = None
+    is_active: bool | None = None
+
+
+@dict_router.post("", dependencies=[Depends(require_admin)])
+async def create_dictionary(data: DictItemCreate, db: AsyncSession = Depends(get_db)):
+    """新增字典项."""
+    did = str(uuid.uuid4())
+    await db.execute(
+        text(
+            "INSERT INTO dictionaries (id, type, code, label, value, sort_order, is_active) "
+            "VALUES (:id, :type, :code, :label, :value, :so, 1)"
+        ),
+        {
+            "id": did, "type": data.type, "code": data.code, "label": data.label,
+            "value": data.value, "so": data.sort_order,
+        },
+    )
+    await db.flush()
+    return success({"id": did, "type": data.type, "code": data.code})
+
+
+@dict_router.put("/{dict_id}", dependencies=[Depends(require_admin)])
+async def update_dictionary(dict_id: str, data: DictItemUpdate, db: AsyncSession = Depends(get_db)):
+    """更新字典项（PUT 与按 type 的 GET 同模板不冲突，方法不同）."""
+    updates = data.model_dump(exclude_unset=True)
+    if not updates:
+        return success({"id": dict_id, "updated": False})
+    set_clauses, params = [], {"id": dict_id}
+    for k, v in updates.items():
+        set_clauses.append(f"{k} = :{k}")
+        params[k] = v
+    await db.execute(
+        text(f"UPDATE dictionaries SET {', '.join(set_clauses)} WHERE id = :id"), params
+    )
+    await db.flush()
+    return success({"id": dict_id, "updated": True})
+
+
+@dict_router.delete("/{dict_id}", dependencies=[Depends(require_admin)])
+async def delete_dictionary(dict_id: str, db: AsyncSession = Depends(get_db)):
+    """删除字典项."""
+    await db.execute(text("DELETE FROM dictionaries WHERE id = :id"), {"id": dict_id})
+    await db.flush()
+    return success({"id": dict_id, "deleted": True})
+
+
 # ======================================================================
 # Integrations — 集成管理
 # ======================================================================
@@ -198,7 +257,7 @@ async def task_queue_status(db: AsyncSession = Depends(get_db)):
     try:
         count = (
             await db.execute(
-                text("SELECT COUNT(*) FROM event_outbox WHERE processed = 0")
+                text("SELECT COUNT(*) FROM event_outbox WHERE status = 'pending'")
             )
         ).scalar() or 0
         queue_items.append(
@@ -357,6 +416,94 @@ async def platform_self_check(db: AsyncSession = Depends(get_db)):
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     )
+
+
+# ======================================================================
+# License — 许可证（LicensePage）
+# ======================================================================
+class LicenseActivate(BaseModel):
+    license_key: str
+    licensed_to: str | None = None
+    edition: str | None = "enterprise"
+    max_assets: int | None = None
+
+
+@selfcheck_router.get("/license")
+async def get_license(db: AsyncSession = Depends(get_db)):
+    """当前许可证（取最近一条激活记录，无则社区版默认）."""
+    row = (
+        (
+            await db.execute(
+                text(
+                    "SELECT * FROM licenses WHERE status = 'active' "
+                    "ORDER BY created_at DESC LIMIT 1"
+                )
+            )
+        )
+        .mappings()
+        .first()
+    )
+    if not row:
+        return success(
+            {
+                "edition": "community",
+                "status": "active",
+                "licensed_to": "未授权（社区版）",
+                "max_assets": None,
+                "expires_at": None,
+            }
+        )
+    d = dict(row)
+    # 不回显完整 key
+    if d.get("license_key"):
+        d["license_key"] = d["license_key"][:8] + "***"
+    return success(d)
+
+
+@selfcheck_router.post("/license", dependencies=[Depends(require_admin)])
+async def activate_license(data: LicenseActivate, db: AsyncSession = Depends(get_db)):
+    """激活许可证（之前激活的置为 inactive）."""
+    await db.execute(text("UPDATE licenses SET status = 'inactive' WHERE status = 'active'"))
+    lid = str(uuid.uuid4())
+    await db.execute(
+        text(
+            "INSERT INTO licenses (id, license_key, licensed_to, edition, max_assets, status) "
+            "VALUES (:id, :key, :to, :ed, :max, 'active')"
+        ),
+        {
+            "id": lid, "key": data.license_key, "to": data.licensed_to,
+            "ed": data.edition or "enterprise", "max": data.max_assets,
+        },
+    )
+    await db.flush()
+    return success({"id": lid, "edition": data.edition, "status": "active"})
+
+
+# ======================================================================
+# Upgrade History — 升级历史（UpgradeMaintenancePage）
+# ======================================================================
+@selfcheck_router.get("/upgrade-history")
+async def upgrade_history(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    """升级历史记录."""
+    total = (await db.execute(text("SELECT COUNT(*) FROM upgrade_history"))).scalar() or 0
+    rows = (
+        (
+            await db.execute(
+                text(
+                    "SELECT * FROM upgrade_history ORDER BY created_at DESC "
+                    "LIMIT :limit OFFSET :offset"
+                ),
+                {"limit": page_size, "offset": (page - 1) * page_size},
+            )
+        )
+        .mappings()
+        .all()
+    )
+    return paginate([dict(r) for r in rows], total, page, page_size)
 
 
 # ======================================================================
