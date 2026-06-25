@@ -4,21 +4,16 @@ from __future__ import annotations
 
 import asyncio
 import ipaddress
-import json
 import logging
-import socket
-import struct
-import subprocess
-import time
 from datetime import datetime, timezone
 
-from sqlalchemy import select, func, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.crud_service import model_to_dict
-from app.common.events import DomainEvent, get_event_bus, AssetEvents
+from app.common.events import AssetEvents, DomainEvent, get_event_bus
+from app.domains.asset.discovery_models import DiscoveryResult, DiscoveryTask
 from app.domains.asset.models import Asset
-from app.domains.asset.discovery_models import DiscoveryTask, DiscoveryResult
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +150,10 @@ class DiscoveryService:
         self.db = db
 
     async def create_task(self, data: dict) -> dict:
-        """创建发现任务（DB持久化）."""
+        """创建发现任务（DB持久化）.
+
+        当 auto_onboard=True（默认）时，创建后自动启动扫描。
+        """
         ip_range = data.get("ip_range") or data.get("cidr") or ""
         if not ip_range:
             ip_range = "127.0.0.1"
@@ -169,6 +167,7 @@ class DiscoveryService:
             ports=data.get("ports"),
             credential_id=data.get("credential_id"),
             timeout=data.get("timeout", 30),
+            auto_onboard=data.get("auto_onboard", True),
             status="pending",
             discovered_count=0,
             onboarded_count=0,
@@ -176,6 +175,22 @@ class DiscoveryService:
         )
         self.db.add(task)
         await self.db.flush()
+        await self.db.refresh(task)
+
+        # 自动纳管模式：创建后立即启动扫描（fire-and-forget 后台执行）
+        if task.auto_onboard:
+            try:
+                start_result = await self.start_task(str(task.id))
+                logger.info(
+                    "auto_onboard: 任务 %s 已自动启动扫描: %s",
+                    task.id,
+                    start_result,
+                )
+            except Exception:
+                logger.exception("auto_onboard: 自动启动扫描失败 task=%s", task.id)
+                # 自启动失败不影响任务创建，用户仍可手动启动
+
+        # 重新查询以返回最新状态（start_task 已 commit 改为 running）
         await self.db.refresh(task)
         return model_to_dict(task)
 
@@ -303,6 +318,24 @@ class DiscoveryService:
                 logger.info(
                     "Discovery scan completed: task=%s, found=%d", task_id, discovered
                 )
+
+                # 自动纳管：扫描成功后，若任务开启 auto_onboard，
+                # 将全部 discovered 状态的结果纳管为资产。
+                # onboard_results 天然幂等（状态门槛 + IP 去重），重复纳管安全。
+                if task.auto_onboard and discovered > 0:
+                    try:
+                        onboard_svc = DiscoveryService(session)
+                        onboard_result = await onboard_svc._auto_onboard_task(task_id)
+                        logger.info(
+                            "auto_onboard: 任务 %s 自动纳管完成: %s",
+                            task_id,
+                            onboard_result,
+                        )
+                    except Exception:
+                        logger.exception(
+                            "auto_onboard: 自动纳管失败 task=%s（扫描结果已保存，可手动纳管）",
+                            task_id,
+                        )
 
             except Exception as e:
                 logger.error("Discovery scan failed: task=%s, error=%s", task_id, e)
@@ -457,6 +490,25 @@ class DiscoveryService:
 
         await self.db.flush()
         return {"onboarded": onboarded, "errors": errors, "total": len(result_ids)}
+
+    async def _auto_onboard_task(self, task_id: str) -> dict:
+        """自动纳管指定任务的全部 discovered 结果（由 _run_scan 扫描完成后调用）.
+
+        复用 onboard_results 的幂等逻辑，自动查询该 task 下所有 discovered 状态的结果。
+        用 self.db（即 _run_scan 的 session）提交，纳管后由调用方统一 commit。
+        """
+        result = await self.db.execute(
+            select(DiscoveryResult).where(
+                DiscoveryResult.task_id == task_id,
+                DiscoveryResult.status == "discovered",
+            )
+        )
+        result_ids = [str(r.id) for r in result.scalars().all()]
+        if not result_ids:
+            return {"onboarded": 0, "errors": 0, "total": 0, "message": "无可纳管结果"}
+        onboard_result = await self.onboard_results(result_ids, asset_type="auto")
+        await self.db.commit()
+        return onboard_result
 
     async def import_asset(self, data: dict) -> Asset:
         """导入单个资产."""

@@ -1,10 +1,11 @@
 """资产发现 数据模型."""
+
 from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import JSON, DateTime, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infra.database import Base
@@ -25,6 +26,8 @@ class DiscoveryTask(Base):
     ports: Mapped[str | None] = mapped_column(String(200), nullable=True)
     credential_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     timeout: Mapped[int] = mapped_column(Integer, default=30)
+    # 是否自动纳管：开启后建任务即自动启动扫描，扫描完成自动纳管全部存活IP
+    auto_onboard: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     status: Mapped[str] = mapped_column(
         String(20), default="pending"
     )  # pending/running/completed/failed

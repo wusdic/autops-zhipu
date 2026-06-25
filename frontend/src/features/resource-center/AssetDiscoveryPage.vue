@@ -267,6 +267,10 @@
         <el-form-item label="超时(秒)">
           <el-input-number v-model="newTask.timeout" :min="5" :max="600" />
         </el-form-item>
+        <el-form-item label="自动纳管">
+          <el-switch v-model="newTask.auto_onboard" />
+          <span style="margin-left:8px;color:var(--autops-text-3);font-size:12px">开启后建任务即自动扫描，扫描完成自动纳管全部存活IP</span>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showCreateDialog = false">取消</el-button>
@@ -308,6 +312,7 @@ const newTask = reactive({
   ip_start: '', ip_end: '', cidr: '',
   protocols: ['ICMP'] as string[], ports: '',
   credential_id: '', timeout: 30,
+  auto_onboard: true,
 })
 const taskRules = { name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }] }
 
@@ -398,13 +403,16 @@ async function loadAssetGroups() {
 async function createTask() {
   try {
     await taskFormRef.value?.validate()
-    const payload: any = { name: newTask.name, protocols: newTask.protocols, timeout: newTask.timeout }
+    const payload: any = {
+      name: newTask.name, protocols: newTask.protocols,
+      timeout: newTask.timeout, auto_onboard: newTask.auto_onboard,
+    }
     if (newTask.ipMode === 'range') { payload.ip_start = newTask.ip_start; payload.ip_end = newTask.ip_end }
     else { payload.cidr = newTask.cidr }
     if (newTask.ports) payload.ports = newTask.ports
     if (newTask.credential_id) payload.credential_id = newTask.credential_id
     await api.post(API.DISCOVERY_TASKS, payload)
-    ElMessage.success('任务创建成功')
+    ElMessage.success(newTask.auto_onboard ? '任务已创建并自动启动扫描' : '任务创建成功')
     showCreateDialog.value = false
     loadTasks()
   } catch (e: any) { ElMessage.error(e?.message || '创建失败') }

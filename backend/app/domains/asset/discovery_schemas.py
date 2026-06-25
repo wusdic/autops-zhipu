@@ -1,4 +1,5 @@
 """资产发现 Schemas - 对齐前端字段."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
@@ -16,6 +17,8 @@ class DiscoveryTaskCreate(BaseModel):
     ports: str | None = Field(default=None, description="端口范围: 22,80,443")
     credential_id: str | None = Field(default=None, description="绑定凭证ID")
     timeout: int = Field(default=30, description="超时秒数")
+    # 自动纳管：开启后建任务即自动启动扫描，扫描完成自动纳管全部存活IP
+    auto_onboard: bool = Field(default=True, description="自动发现并纳管存活IP")
     # 兼容旧字段
     ip_range: str | None = Field(default=None, description="IP范围(兼容)")
     scan_type: str | None = Field(default="ping", description="扫描类型(兼容)")
