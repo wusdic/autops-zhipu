@@ -4,7 +4,9 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.common.response import paginate, success, error
+from app.common.auth_dependency import require_admin
+from app.common.exceptions import NotFoundError, ValidationError
+from app.common.response import paginate, success
 from app.infra.database import get_db
 from app.domains.asset.discovery_schemas import (
     DiscoveryTaskCreate,
@@ -12,7 +14,8 @@ from app.domains.asset.discovery_schemas import (
 )
 from app.domains.asset.discovery_service import DiscoveryService
 
-router = APIRouter(prefix="/discovery", tags=["资产发现"])
+# 资产发现会发起网段扫描并自动建资产，属高危操作，全模块要求管理员权限。
+router = APIRouter(prefix="/discovery", tags=["资产发现"], dependencies=[Depends(require_admin)])
 
 
 def _get_svc(db: AsyncSession = Depends(get_db)) -> DiscoveryService:
@@ -31,7 +34,7 @@ async def start_discovery_task(task_id: str, svc: DiscoveryService = Depends(_ge
     """启动发现任务 - 开始真实扫描."""
     result = await svc.start_task(task_id)
     if "error" in result:
-        return error(result["error"])
+        raise ValidationError(result["error"])
     return success(result)
 
 
@@ -40,7 +43,7 @@ async def get_discovery_task(task_id: str, svc: DiscoveryService = Depends(_get_
     """获取任务详情."""
     task = await svc.get_task(task_id)
     if not task:
-        return error("任务不存在", 404)
+        raise NotFoundError("任务不存在")
     return success(task)
 
 
@@ -87,7 +90,7 @@ async def onboard_discovered_assets(
     except Exception as e:
         import logging
         logging.getLogger(__name__).error(f"Onboard error: {e}", exc_info=True)
-        return error(str(e))
+        raise ValidationError(str(e))
 
 
 @router.post("/import")
@@ -101,4 +104,4 @@ async def import_asset(
         from app.common.crud_service import model_to_dict
         return success(model_to_dict(asset))
     except ValueError as e:
-        return error(str(e))
+        raise ValidationError(str(e))

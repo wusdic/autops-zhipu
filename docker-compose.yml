@@ -93,7 +93,6 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:8000/v1}
       LLM_MODEL_NAME: ${LLM_MODEL_NAME:-qwen3.5-0.8b}
-      AUTOPS_ENABLE_SCHEDULER: "false"
     depends_on:
       mysql:
         condition: service_healthy
@@ -104,7 +103,8 @@ services:
     volumes:
       - ./configs:/app/configs:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      # python:slim 镜像不带 curl，改用标准库探活，避免健康检查恒失败
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8001/health', timeout=3).status==200 else sys.exit(1)"]
       interval: 30s
       timeout: 10s
       retries: 3

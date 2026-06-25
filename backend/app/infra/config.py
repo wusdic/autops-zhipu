@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import ClassVar, Literal
 
 import yaml
-from pydantic import Field, field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -47,7 +47,12 @@ class DatabaseConfig(BaseSettings):
     host: str = "127.0.0.1"
     port: int = 3306
     user: str = "autops"
-    db_pass: str = ""
+    # env_prefix="DB_" + 字段名 db_pass 会映射成 DB_DB_PASS，与 .env / compose 使用的
+    # DB_PASS 不一致。显式 alias 兼容 DB_PASS（推荐）与 DB_DB_PASS（历史）两种写法。
+    db_pass: str = Field(
+        default="",
+        validation_alias=AliasChoices("DB_PASS", "DB_DB_PASS"),
+    )
     database: str = "autops"
     pool_size: int = 10
     max_overflow: int = 20
@@ -73,7 +78,11 @@ class DatabaseConfig(BaseSettings):
 class RedisConfig(BaseSettings):
     host: str = "127.0.0.1"
     port: int = 6379
-    redis_pass: str = ""
+    # 同 db_pass：REDIS_ + redis_pass = REDIS_REDIS_PASS，与 .env 的 REDIS_PASS 不一致。
+    redis_pass: str = Field(
+        default="",
+        validation_alias=AliasChoices("REDIS_PASS", "REDIS_REDIS_PASS"),
+    )
     db: int = 0
 
     @property
@@ -102,7 +111,11 @@ class SecurityConfig(BaseSettings):
     }
 
     jwt_secret: str = "change-me-in-production"
-    jwt_algorithm: str = "HS256"
+    # 兼容 .env 中的 JWT_ALGORITHM（否则 env_prefix 会要求 SECURITY_JWT_ALGORITHM）。
+    jwt_algorithm: str = Field(
+        default="HS256",
+        validation_alias=AliasChoices("JWT_ALGORITHM", "SECURITY_JWT_ALGORITHM"),
+    )
     access_token_expire_minutes: int = 1440
     refresh_token_expire_days: int = 7
     # 凭证加密主密钥（独立于 JWT 密钥）。优先读 CREDENTIAL_ENCRYPT_KEY，

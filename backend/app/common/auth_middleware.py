@@ -78,6 +78,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return _unauthorized("Token 无效或已过期")
         # 其它异常（如配置错误）不应被静默当作 401，上抛由通用处理器兜底
 
+        # 仅接受 access token；refresh token（7天长效）不得用于访问业务接口
+        if payload.get("type") not in (None, "access"):
+            return _unauthorized("Token 类型无效")
+
         user_id = payload.get("sub")
         if not user_id:
             return _unauthorized("Token 中缺少用户标识")

@@ -27,6 +27,7 @@ async def on_alert_created_match_policy(event: DomainEvent) -> None:
 
         from app.infra.database import async_session_factory
         from app.domains.policy.service import PolicyService
+        from app.common.jsonutil import parse_json_field
 
         matched_policies = []
         async with async_session_factory() as session:
@@ -34,7 +35,11 @@ async def on_alert_created_match_policy(event: DomainEvent) -> None:
             policies, _ = await svc.list_policies(status="active")
             for policy in policies:
                 trigger_type = getattr(policy, "trigger_type", "")
-                trigger_cond = getattr(policy, "trigger_condition", {}) or {}
+                # trigger_condition / action_chain 以 JSON 字符串存储，必须解析，
+                # 否则对字符串调用 .get()/下标会抛异常并被吞掉，策略链路静默失效。
+                trigger_cond = parse_json_field(getattr(policy, "trigger_condition", None), {})
+                if not isinstance(trigger_cond, dict):
+                    trigger_cond = {}
                 matched = False
                 if trigger_type == "alert_severity":
                     target_sev = trigger_cond.get("severity", "")
@@ -47,10 +52,13 @@ async def on_alert_created_match_policy(event: DomainEvent) -> None:
                 elif trigger_type == "any_alert":
                     matched = True
                 if matched:
+                    action_chain = parse_json_field(getattr(policy, "action_chain", None), [])
+                    if not isinstance(action_chain, list):
+                        action_chain = []
                     matched_policies.append({
                         "policy_id": str(policy.id),
                         "policy_name": getattr(policy, "name", ""),
-                        "action_chain": getattr(policy, "action_chain", []) or [],
+                        "action_chain": action_chain,
                         "requires_approval": getattr(policy, "requires_approval", False),
                         "risk_level": getattr(policy, "risk_level", "low"),
                         "matched_assets": asset_ids,
@@ -78,8 +86,12 @@ async def on_policy_approved_trigger_execution(event: DomainEvent) -> None:
     """策略审批通过时触发执行."""
     payload = event.payload
     try:
+        from app.common.jsonutil import parse_json_field
+
         policy_id = payload.get("policy_id", "")
-        action_chain = payload.get("action_chain", [])
+        action_chain = parse_json_field(payload.get("action_chain"), [])
+        if not isinstance(action_chain, list):
+            action_chain = []
         asset_ids = payload.get("matched_assets", [])
         alert_id = payload.get("alert_id", "")
 

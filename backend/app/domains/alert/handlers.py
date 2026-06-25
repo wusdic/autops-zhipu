@@ -66,15 +66,21 @@ async def on_event_created_match_rules(event: DomainEvent) -> None:
         from app.domains.alert.service import AlertService
         from app.common.events import AlertEvents as _AE
 
+        from app.common.jsonutil import parse_json_field
+
         async with async_session_factory() as session:
             svc = AlertService(session)
-            rules = await svc.list_rules(enabled_only=True)
+            rules = await svc.list_rules(enabled=True)
             matched_alerts = []
             for rule in rules:
-                rule_types = (
-                    rule.event_types if isinstance(rule.event_types, list) else []
-                )
-                rule_assets = rule.asset_ids if isinstance(rule.asset_ids, list) else []
+                # event_types / asset_ids 以 JSON 字符串存储，需解析后再匹配，
+                # 否则 isinstance(..., list) 恒为 False，导致规则过滤条件失效。
+                rule_types = parse_json_field(rule.event_types, [])
+                rule_assets = parse_json_field(rule.asset_ids, [])
+                if not isinstance(rule_types, list):
+                    rule_types = []
+                if not isinstance(rule_assets, list):
+                    rule_assets = []
                 type_match = event_type in rule_types or not rule_types
                 asset_match = asset_id in rule_assets if rule_assets else True
                 if type_match and asset_match:
@@ -121,13 +127,18 @@ async def on_state_recovered_auto_resolve(event: DomainEvent) -> None:
         from app.infra.database import async_session_factory
         from app.domains.alert.service import AlertService
 
+        from app.common.jsonutil import parse_json_field
+
         async with async_session_factory() as session:
             svc = AlertService(session)
-            # 查找该资产的活跃告警
-            active_alerts = await svc.list_alerts(
-                asset_id=asset_id,
-                status="active",
-            )
+            # list_alerts 不支持 asset_id 过滤且返回 (items, total)，
+            # 这里取未恢复告警后在内存按资产过滤（asset_ids 为 JSON 字符串）。
+            firing_alerts, _ = await svc.list_alerts(status="firing", page_size=200)
+            active_alerts = [
+                a
+                for a in firing_alerts
+                if asset_id in parse_json_field(a.asset_ids, [])
+            ]
             resolved_count = 0
             for alert in active_alerts:
                 try:

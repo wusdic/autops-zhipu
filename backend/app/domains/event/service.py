@@ -41,7 +41,14 @@ class EventService:
         return result.scalar_one_or_none()
 
     async def create_event(self, **kwargs) -> Event:
-        """创建事件，支持5分钟窗口内自动去重."""
+        """创建事件，支持5分钟窗口内自动去重.
+
+        创建成功后发布 ``event.created`` 领域事件（命中去重则发布
+        ``event.deduplicated``），驱动后续告警规则匹配链路。outbox 写入复用
+        当前 session，与事件落库保持同一事务，保证一致性。
+        """
+        from app.common.events import DomainEvent, EventEvents, get_event_bus
+
         fingerprint = self._generate_fingerprint(
             event_type=kwargs.get("event_type", ""),
             source=kwargs.get("source", ""),
@@ -56,11 +63,40 @@ class EventService:
             dup.is_deduplicated = True
             await self.session.flush()
             await self.session.refresh(dup)
+            await get_event_bus().publish(
+                DomainEvent(
+                    event_type=EventEvents.EVENT_DEDUPLICATED,
+                    domain="event",
+                    payload={
+                        "event_id": str(dup.id),
+                        "original_event_id": str(dup.id),
+                        "event_type": dup.event_type,
+                        "asset_id": dup.asset_id,
+                    },
+                    source="event",
+                ),
+                session=self.session,
+            )
             return dup
 
         event = await self.repo.create(**kwargs)
         await self.session.flush()
         await self.session.refresh(event)
+        await get_event_bus().publish(
+            DomainEvent(
+                event_type=EventEvents.EVENT_CREATED,
+                domain="event",
+                payload={
+                    "event_id": str(event.id),
+                    "event_type": event.event_type,
+                    "asset_id": event.asset_id,
+                    "severity": event.severity,
+                    "source": event.source,
+                },
+                source="event",
+            ),
+            session=self.session,
+        )
         return event
 
     async def list_events(

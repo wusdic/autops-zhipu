@@ -17,8 +17,12 @@ async def on_policy_triggered_create_execution(event: DomainEvent) -> None:
     """策略触发时创建自动化执行."""
     payload = event.payload
     try:
+        from app.common.jsonutil import parse_json_field
+
         policy_id = payload.get("policy_id", "")
-        action_chain = payload.get("action_chain", [])
+        action_chain = parse_json_field(payload.get("action_chain"), [])
+        if not isinstance(action_chain, list):
+            action_chain = []
         requires_approval = payload.get("requires_approval", False)
         asset_ids = payload.get("matched_assets", [])
         alert_id = payload.get("alert_id", "")

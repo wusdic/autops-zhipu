@@ -28,9 +28,18 @@ class PageData(BaseModel, Generic[T]):
     total_pages: int
 
 
-def success(data: Any = None, trace_id: str = "") -> Response:
-    """成功响应."""
-    return Response(code=0, message="success", data=data, trace_id=trace_id)
+def success(data: Any = None, message: str = "success", trace_id: str = "") -> Response:
+    """成功响应.
+
+    兼容两种调用方式::
+
+        success(data)
+        success(message="已删除")
+
+    历史上大量删除/登出类路由使用 ``success(message=...)``，因此 ``message``
+    必须作为显式参数存在，否则会在运行时抛 ``TypeError``。
+    """
+    return Response(code=0, message=message, data=data, trace_id=trace_id)
 
 
 def error(code: int, message: str, trace_id: str = "") -> Response:

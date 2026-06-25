@@ -45,8 +45,11 @@ export const useAuthStore = defineStore('auth', () => {
           display_name: data.display_name || data.username,
           email: data.email,
           status: data.status,
-          // roles 可能不在 /auth/me 响应中，默认空数组
-          roles: (data as any).roles || [],
+          // 后端 roles 是角色对象数组（{name,...}），权限指令按字符串比较，
+          // 这里统一归一化为角色名字符串数组，否则 includes('admin') 永远 false。
+          roles: ((data as any).roles || []).map((r: any) =>
+            typeof r === 'string' ? r : r?.name
+          ).filter(Boolean),
         }
         isAuthenticated.value = true
         return user.value

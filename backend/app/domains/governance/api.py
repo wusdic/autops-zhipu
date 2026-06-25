@@ -53,9 +53,14 @@ async def logout():
     return success(message="已登出")
 
 
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
 @router.post("/auth/refresh")
-async def refresh(token: str, svc: AuthService = Depends(_get_auth)):
-    result = await svc.refresh_token(token)
+async def refresh(data: RefreshRequest, svc: AuthService = Depends(_get_auth)):
+    # refresh_token 从请求体获取，不再走 query 参数（避免 token 进入日志/历史）
+    result = await svc.refresh_token(data.refresh_token)
     return success(result)
 
 
@@ -95,7 +100,8 @@ async def change_password(
 
 
 # --- 用户 CRUD ---
-@user_router.get("")
+# 用户信息属敏感数据，所有读写均要求管理员权限，防止越权读取 PII / 改他人角色提权。
+@user_router.get("", dependencies=[Depends(require_admin)])
 async def list_users(
     page: int = 1,
     page_size: int = 20,
@@ -116,13 +122,13 @@ async def create_user(data: UserCreate, svc: UserService = Depends(_get_user_svc
     return success(UserResponse.model_validate(user).model_dump())
 
 
-@user_router.get("/{user_id}")
+@user_router.get("/{user_id}", dependencies=[Depends(require_admin)])
 async def get_user(user_id: str, svc: UserService = Depends(_get_user_svc)):
     user = await svc.get_user(user_id)
     return success(UserResponse.model_validate(user).model_dump())
 
 
-@user_router.put("/{user_id}")
+@user_router.put("/{user_id}", dependencies=[Depends(require_admin)])
 async def update_user(
     user_id: str, data: UserUpdate, svc: UserService = Depends(_get_user_svc)
 ):
@@ -137,7 +143,7 @@ async def delete_user(user_id: str, svc: UserService = Depends(_get_user_svc)):
 
 
 # --- 角色 ---
-@role_router.get("")
+@role_router.get("", dependencies=[Depends(require_admin)])
 async def list_roles(
     page: int = 1,
     page_size: int = 20,
@@ -189,13 +195,24 @@ async def list_api_keys(request: Request, auth: AuthService = Depends(_get_auth)
     return success([ApiKeyResponse.model_validate(k).model_dump() for k in keys])
 
 
+async def _current_user_from_header(request: Request, auth: AuthService):
+    """从 Authorization Bearer 头解析当前用户（不再用 query token）."""
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header[7:] if auth_header.startswith("Bearer ") else ""
+    if not token:
+        from app.common.exceptions import UnauthorizedError
+
+        raise UnauthorizedError("缺少认证 Token")
+    return await auth.get_current_user(token)
+
+
 @apikey_router.post("")
 async def create_api_key(
     data: ApiKeyCreate,
-    token: str,
+    request: Request,
     auth: AuthService = Depends(_get_auth),
 ):
-    user = await auth.get_current_user(token)
+    user = await _current_user_from_header(request, auth)
     svc = ApiKeyService(auth.session)
     api_key, raw_key = await svc.create_key(user.id, data)
     resp = ApiKeyCreateResponse.model_validate(api_key).model_dump()
@@ -205,9 +222,9 @@ async def create_api_key(
 
 @apikey_router.delete("/{key_id}")
 async def revoke_api_key(
-    key_id: str, token: str, auth: AuthService = Depends(_get_auth)
+    key_id: str, request: Request, auth: AuthService = Depends(_get_auth)
 ):
-    user = await auth.get_current_user(token)
+    user = await _current_user_from_header(request, auth)
     svc = ApiKeyService(auth.session)
     await svc.revoke_key(key_id, user.id)
     return success(message="API Key 已撤销")
@@ -223,11 +240,11 @@ class ApiKeyPatch(BaseModel):
 async def patch_api_key(
     key_id: str,
     data: ApiKeyPatch,
-    token: str,
+    request: Request,
     auth: AuthService = Depends(_get_auth),
 ):
     """部分更新 API Key."""
-    user = await auth.get_current_user(token)
+    user = await _current_user_from_header(request, auth)
     svc = ApiKeyService(auth.session)
     updated = await svc.update_key(
         key_id, user.id, **data.model_dump(exclude_unset=True)
