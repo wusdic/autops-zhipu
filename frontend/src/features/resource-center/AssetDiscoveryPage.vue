@@ -252,8 +252,10 @@
         </el-form-item>
         <el-form-item label="协议">
           <el-checkbox-group v-model="newTask.protocols">
-            <el-checkbox value="ICMP" /><el-checkbox value="TCP" />
-            <el-checkbox value="SNMP" /><el-checkbox value="SSH" />
+            <el-checkbox value="ICMP">ICMP（Ping发现）</el-checkbox>
+            <el-checkbox value="TCP">TCP（端口扫描）</el-checkbox>
+            <el-checkbox value="SNMP">SNMP（网络设备）</el-checkbox>
+            <el-checkbox value="SSH">SSH（主机探测）</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
         <el-form-item label="端口范围">
