@@ -8,70 +8,90 @@
 ## 1. 连接
 
 ```
-ws://{host}/ws/events?token={jwt_token}
+ws://{host}/api/v1/ws?token={jwt_token}
 ```
 
-认证：连接时通过 query 参数传递 JWT Token。
+**强制鉴权**：连接时必须通过 query 参数 `token` 传递有效 JWT。
+- 无 token、token 无效或 token 中缺少 `sub`：服务端以 close code `4001` 立即关闭连接，禁止匿名连接。
 
 ---
 
-## 2. 事件类型
+## 2. 频道与订阅
 
-### 2.1 状态事件
+客户端**必须先订阅频道才能收到对应推送**；未订阅任何频道时不会收到任何业务消息。
+
+### 可用频道
+
+| 频道 | 内容 |
+|------|------|
+| `alerts` | 告警创建/升级/恢复 |
+| `executions` | 执行启动/完成/失败/步骤进度/日志 |
+| `events` | 事件流 |
+| `notifications` | 通知、工单更新 |
+
+### 订阅消息格式
 
 ```json
-{"type": "state.change", "data": {"asset_id": "xxx", "state_type": "disk", "old_status": "normal", "new_status": "warning", "value": {"usage_pct": 92}}}
+{"type": "subscribe", "payload": {"channels": ["alerts", "executions"]}}
 ```
 
-### 2.2 告警事件
+服务端确认：
 
 ```json
-{"type": "alert.new", "data": {"id": "xxx", "title": "磁盘空间异常", "severity": "warning", "asset_ids": ["asset-001"]}}
-{"type": "alert.update", "data": {"id": "xxx", "status": "acknowledged", "updated_by": "user-001"}}
-{"type": "alert.resolved", "data": {"id": "xxx", "resolved_by": "user-001"}}
-```
-
-### 2.3 执行事件
-
-```json
-{"type": "execution.log", "data": {"execution_id": "xxx", "step_id": "yyy", "stream_type": "stdout", "content": "...", "offset": 1234}}
-{"type": "execution.status", "data": {"execution_id": "xxx", "status": "running", "current_step": 2}}
-{"type": "execution.completed", "data": {"execution_id": "xxx", "status": "success", "duration_ms": 5000}}
-```
-
-### 2.4 AI 事件
-
-```json
-{"type": "aiops.analysis", "data": {"id": "xxx", "status": "completed", "summary": "..."}}
-```
-
-### 2.5 通知事件
-
-```json
-{"type": "notification", "data": {"level": "info", "title": "操作成功", "message": "采集任务已完成"}}
-```
-
-### 2.6 平台事件
-
-```json
-{"type": "platform.health", "data": {"component": "mysql", "status": "unhealthy", "message": "连接超时"}}
+{"type": "subscribed", "payload": {"channels": ["alerts", "executions"]}, "timestamp": "..."}
 ```
 
 ---
 
-## 3. 订阅过滤
+## 3. 事件类型
 
-连接后可发送订阅过滤消息：
+所有推送消息统一结构：`{"type": "<type>", "payload": {...}, "timestamp": "<iso8601>"}`。
+
+### 3.1 告警（alerts 频道）
 
 ```json
-{"action": "subscribe", "channels": ["alerts", "executions"]}
-{"action": "unsubscribe", "channels": ["state.change"]}
+{"type": "alert:new", "payload": {"alert_id": "xxx", "severity": "warning", ...}}
+{"type": "alert:new", "payload": {...}}   // 升级/恢复也走 alert:new（按事件类型区分）
+```
+
+### 3.2 执行（executions 频道）
+
+```json
+{"type": "execution:started", "payload": {"execution_id": "xxx", ...}}
+{"type": "execution:completed", "payload": {"execution_id": "xxx", ...}}
+{"type": "execution:failed", "payload": {"execution_id": "xxx", "error_message": "...", ...}}
+{"type": "execution:progress", "payload": {"execution_id": "xxx", ...}}   // 步骤完成/失败
+{"type": "execution:log", "payload": {"execution_id": "xxx", ...}}
+```
+
+### 3.3 事件流（events 频道）
+
+```json
+{"type": "event:new", "payload": {...}}
+```
+
+### 3.4 通知（notifications 频道 / 定向推送）
+
+- 含 `user_id` 的通知定向推送给该用户的所有连接（`send_to_user`）
+- 无 `user_id` 的通知广播到 `notifications` 频道
+
+```json
+{"type": "notification", "payload": {"user_id": "...", ...}}
+{"type": "ticket:updated", "payload": {...}}
 ```
 
 ---
 
 ## 4. 心跳
 
-- 服务端每 30 秒发送 ping
-- 客户端必须回复 pong
-- 60 秒无响应断开连接
+客户端发送 ping，服务端回复 pong（服务端不主动发心跳）：
+
+```json
+// 客户端发
+{"type": "ping"}
+// 或
+{"type": "_ping"}
+
+// 服务端回
+{"type": "_pong", "payload": {}, "timestamp": "..."}
+```

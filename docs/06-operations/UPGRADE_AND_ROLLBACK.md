@@ -8,7 +8,7 @@
 ## 1. 升级
 
 ```bash
-./upgrade.sh --version x.y.z
+./deploy/scripts/upgrade.sh
 ```
 
 ### 流程
@@ -17,7 +17,7 @@
 2. 升级前自动备份（数据库+配置）
 3. 停止服务
 4. 加载新版本镜像/代码
-5. 执行数据库迁移
+5. 执行数据库迁移（`alembic upgrade head`，会应用到最新 head，含 `0004_discovery_auto_onboard` 等）
 6. 配置差异合并（保留自定义配置）
 7. 启动服务
 8. 自动自检
@@ -26,13 +26,14 @@
 ### 注意事项
 
 - 升级前确认备份完成
+- 升级到含 `0004_discovery_auto_onboard` 的版本时，会为 `discovery_tasks` 表新增 `auto_onboard` 列（默认 true）
 - 大版本升级注意破坏性变更说明
 - 升级期间服务不可用
 
 ## 2. 回滚
 
 ```bash
-./rollback.sh --version x.y.z
+./deploy/scripts/rollback.sh
 ```
 
 ### 流程
@@ -48,4 +49,6 @@
 ### 注意事项
 
 - 只能回滚到已备份的版本
+- 若回滚跨越 `0004_discovery_auto_onboard` 迁移，需先手动 `alembic downgrade` 该迁移（删除 `auto_onboard` 列）再降级代码
 - 回滚后数据可能丢失（升级后的变更）
+

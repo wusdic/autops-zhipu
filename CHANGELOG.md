@@ -4,6 +4,56 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.6.0] - 2026-06-25
+
+### 全面安全加固、Bug 修复、自动纳管、文档同步
+
+#### Added — 自动发现并纳管
+- **auto_onboard 自动纳管**：发现任务新增 `auto_onboard` 字段（默认开启），创建任务即自动启动扫描，扫描完成自动纳管全部存活 IP（幂等），纳管后立即采集+定期采集，全程无人值守
+- 新增 alembic 迁移 `0004_discovery_auto_onboard`
+- 前端创建对话框新增"自动纳管"开关
+
+#### Added — RBAC 鉴权层
+- 新增 `require_admin` 授权依赖（复用现有 Role 表，零迁移）
+- `UserResponse` 新增 `roles` 字段，`/auth/me` 返回角色信息
+- 高危端点（用户/角色/资产/脚本/Playbook 增删、执行审批/回滚、审计日志、备份恢复、租户管理）挂载 require_admin
+
+#### Fixed — 阻断性 Bug
+- `CRUDService.list_paginated` 引用不存在的 `model_class` 致必崩 → 改用 `self.repo.model`
+- WebSocket 匿名连接 + 广播逻辑反转（未订阅反收全部平台数据）→ 强制鉴权 + 仅订阅频道接收
+- 健康检查 `anext(get_db())` 连接泄漏；`get_redis()` 漏 await
+- CertCollector 误用私有 API 功能失效；Ping 写死 `-c/-W` 在 Windows 失效
+
+#### Fixed — 安全加固
+- 凭证加密改用独立 `CREDENTIAL_ENCRYPT_KEY` + 每条随机盐（Fernet/PBKDF2），与 JWT 密钥分离
+- 命令策略相对路径绕过、AI Agent 工具 JSON 注入与执行旁路
+- 前端 XSS：净化器改用 DOMPurify；知识库/搜索 v-html 全部净化
+- Redis/后端端口绑定 `127.0.0.1`；configs 移除硬编码密钥；初始口令改为随机生成
+
+#### Fixed — 事件一致性与并发
+- outbox 写入支持复用业务事务（原子提交）
+- `run_execution` 同步阻塞事件总线 → 改后台 task
+- 幂等去重 `clear()` 全量清空 → OrderedDict LRU；发布版本竞态加行锁
+
+#### Fixed — 前端系统性问题
+- 清除 `'primary'` 占位符污染（666 处，90+ 文件），根因是表单初始值/查询参数被注入垃圾值导致加载数据错误
+- API 客户端 baseURL 硬编码、拦截器错误结构丢失
+- 运算符优先级 bug、路由 404、ElMessageBox cancel 判断、对话框状态不重置等
+
+#### Changed — 代码质量
+- 全局 `datetime.utcnow()` → `datetime.now(timezone.utc)`（31 处）
+- 收敛吞异常为日志；通用异常处理器补 traceback
+- Dockerfile 非 root 用户、CI 加扫描（建议）
+
+#### Docs — 文档与代码一致性同步
+- README：默认口令改为随机/环境变量、补充 RBAC 与 auto_onboard、Redis 版本 7.0+
+- 部署运维：端口统一 8001、废弃 compose 提示、curl 健康检查说明、备份/自检/升级脚本路径与命令修正
+- API 契约：补 require_admin 权限列、/auth/me roles、discovery 端点与 auto_onboard 字段、分页 total_pages
+- WebSocket：路径 `/api/v1/ws`、强制鉴权、订阅语义、事件 type 与心跳对齐代码
+- 安全架构：凭证加密方案改为 Fernet/PBKDF2 实际实现、补充中间件白名单与 require_admin
+- 错误码：00010 HTTP 改 422、00103 补 require_admin 说明
+- `.env.example`：补 `MYSQL_ROOT_PASSWORD`/`ADMIN_INITIAL_PASSWORD`/`FRONTEND_PORT`/`CREDENTIAL_ENCRYPT_KEY`，删死变量 `JWT_EXPIRE_MINUTES`
+
 ## [0.5.0] - 2026-06-01
 
 ### 执行层实现 + 集成修复

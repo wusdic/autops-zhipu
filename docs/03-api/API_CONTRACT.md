@@ -19,6 +19,10 @@
 | 认证 | Bearer Token (JWT) |
 | Content-Type | `application/json` |
 
+**认证机制**：全局由 HTTP 中间件 `AuthMiddleware` 强制。公开端点白名单：`/auth/login`、`/auth/refresh`、`/auth/logout`、`/health`、`/ready`、`/docs`、`/redoc`、`/openapi.json`；其余 `/api/v1/*` 均需有效 Bearer Token。
+
+**权限**：除登录态外，部分高危端点（用户/角色 CRUD、资产增删、脚本/Playbook 增删、执行审批/回滚、审计日志、备份恢复、租户管理等）通过 `require_admin` 依赖额外要求 `super_admin` 或 `admin` 角色，否则返回 403。下表"权限"列标注 `admin` 的即属此类。
+
 ### 1.2 统一响应结构
 
 ```json
@@ -43,7 +47,8 @@
   "items": [...],
   "total": 100,
   "page": 1,
-  "page_size": 20
+  "page_size": 20,
+  "total_pages": 5
 }
 ```
 
@@ -76,41 +81,70 @@
 | 方法 | 路径 | 说明 | 认证 |
 |---|---|---|---|
 | POST | `/api/v1/auth/login` | 用户登录 | 否 |
-| POST | `/api/v1/auth/logout` | 用户登出 | 是 |
-| POST | `/api/v1/auth/refresh` | 刷新 Token | 是 |
-| GET | `/api/v1/auth/me` | 获取当前用户 | 是 |
+| POST | `/api/v1/auth/logout` | 用户登出 | 否（白名单） |
+| POST | `/api/v1/auth/refresh` | 刷新 Token | 否（白名单） |
+| GET | `/api/v1/auth/me` | 获取当前用户（含 roles 数组） | 是 |
 | PUT | `/api/v1/auth/password` | 修改密码 | 是 |
+
+`/auth/me` 响应的 `data` 字段（`UserResponse`）：
+
+```json
+{
+  "id": "...", "username": "admin", "display_name": "管理员",
+  "email": null, "status": "active",
+  "roles": [{"id": "...", "name": "super_admin", "display_name": "超级管理员", "permissions": ["*:*"], ...}],
+  "last_login_at": "...", "created_at": "..."
+}
+```
 
 ---
 
-## 4. 资产中心 (assets / asset-groups)
+## 4. 资产中心 (assets / asset-groups / discovery)
 
-| 方法 | 路径 | 说明 |
-|---|---|---|
-| GET | `/api/v1/assets` | 资产列表（分页、筛选） |
-| POST | `/api/v1/assets` | 创建资产 |
-| GET | `/api/v1/assets/{asset_id}` | 资产详情 |
-| PUT | `/api/v1/assets/{asset_id}` | 更新资产 |
-| DELETE | `/api/v1/assets/{asset_id}` | 删除资产 |
-| POST | `/api/v1/assets/import` | 批量导入资产 |
-| GET | `/api/v1/assets/{asset_id}/relations` | 资产关系图 |
-| POST | `/api/v1/assets/{asset_id}/relations` | 创建资产关系 |
-| DELETE | `/api/v1/assets/{asset_id}/relations/{relation_id}` | 删除关系 |
-| GET | `/api/v1/assets/{asset_id}/timeline` | 资产时间线 |
-| GET | `/api/v1/assets/{asset_id}/credentials` | 资产绑定凭证 |
-| DELETE | `/api/v1/assets/{asset_id}/credentials/{cred_id}` | 解绑凭证 |
-| GET | `/api/v1/assets/{asset_id}/policies` | 资产绑定策略 |
-| DELETE | `/api/v1/assets/{asset_id}/policies/{policy_id}` | 解绑策略 |
-| GET | `/api/v1/assets/{asset_id}/collection-configs` | 采集配置 |
-| POST | `/api/v1/assets/{asset_id}/collection-trigger` | 触发采集 |
-| GET | `/api/v1/asset-groups` | 资产分组列表 |
-| POST | `/api/v1/asset-groups` | 创建分组 |
-| GET | `/api/v1/asset-groups/{group_id}` | 分组详情 |
-| POST | `/api/v1/asset-groups/{group_id}/members` | 添加组成员 |
-| DELETE | `/api/v1/asset-groups/{group_id}/members/{asset_id}` | 移除组成员 |
-| GET | `/api/v1/discovery/tasks` | 资产发现任务 |
-| POST | `/api/v1/discovery/tasks` | 创建发现任务 |
-| GET | `/api/v1/discovery/results` | 发现结果 |
+| 方法 | 路径 | 说明 | 权限 |
+|---|---|---|---|
+| GET | `/api/v1/assets` | 资产列表（分页、筛选） | 登录 |
+| POST | `/api/v1/assets` | 创建资产 | admin |
+| GET | `/api/v1/assets/{asset_id}` | 资产详情 | 登录 |
+| PUT | `/api/v1/assets/{asset_id}` | 更新资产 | 登录 |
+| DELETE | `/api/v1/assets/{asset_id}` | 删除资产 | admin |
+| POST | `/api/v1/assets/import` | 批量导入资产（返回 imported/skipped/errors） | admin |
+| GET | `/api/v1/assets/{asset_id}/relations` | 资产关系图 | 登录 |
+| POST | `/api/v1/assets/{asset_id}/relations` | 创建资产关系 | 登录 |
+| DELETE | `/api/v1/assets/{asset_id}/relations/{relation_id}` | 删除关系 | 登录 |
+| GET | `/api/v1/assets/{asset_id}/timeline` | 资产时间线 | 登录 |
+| GET | `/api/v1/assets/{asset_id}/credentials` | 资产绑定凭证 | 登录 |
+| DELETE | `/api/v1/assets/{asset_id}/credentials/{cred_id}` | 解绑凭证 | admin |
+| GET | `/api/v1/assets/{asset_id}/policies` | 资产绑定策略 | 登录 |
+| DELETE | `/api/v1/assets/{asset_id}/policies/{policy_id}` | 解绑策略 | 登录 |
+| GET | `/api/v1/assets/{asset_id}/collection-configs` | 采集配置 | 登录 |
+| POST | `/api/v1/assets/{asset_id}/collection-trigger` | 触发采集 | 登录 |
+| GET | `/api/v1/asset-groups` | 资产分组列表 | 登录 |
+| POST | `/api/v1/asset-groups` | 创建分组 | 登录 |
+| GET | `/api/v1/asset-groups/{group_id}` | 分组详情 | 登录 |
+| POST | `/api/v1/asset-groups/{group_id}/members` | 添加组成员 | 登录 |
+| DELETE | `/api/v1/asset-groups/{group_id}/members/{asset_id}` | 移除组成员 | 登录 |
+| GET | `/api/v1/discovery/tasks` | 发现任务列表 | 登录 |
+| POST | `/api/v1/discovery/tasks` | 创建发现任务（见下方字段说明） | 登录 |
+| GET | `/api/v1/discovery/tasks/{task_id}` | 发现任务详情 | 登录 |
+| POST | `/api/v1/discovery/tasks/{task_id}/start` | 启动发现任务扫描 | 登录 |
+| GET | `/api/v1/discovery/results` | 发现结果（可按 task_id 过滤） | 登录 |
+| POST | `/api/v1/discovery/onboard` | 纳管发现结果（result_ids 为空则纳管全部 discovered） | 登录 |
+| POST | `/api/v1/discovery/import` | 手动导入单个资产 | 登录 |
+
+**`POST /discovery/tasks` 请求体**（`DiscoveryTaskCreate`）：
+
+| 字段 | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `name` | string | 必填 | 任务名称 |
+| `ip_mode` | string | `cidr` | `cidr` 或 `range` |
+| `cidr` | string | - | CIDR，如 `10.0.0.0/24`（cidr 模式） |
+| `ip_start`/`ip_end` | string | - | 起止 IP（range 模式） |
+| `protocols` | string[] | `["icmp"]` | 探测协议 |
+| `ports` | string | - | 端口，如 `22,80,443` |
+| `credential_id` | string | - | 绑定凭证 |
+| `timeout` | int | 30 | 超时秒数 |
+| `auto_onboard` | bool | `true` | **自动发现并纳管**：为 true 时建任务即自动启动扫描，扫描完成自动纳管全部存活 IP（幂等，重复 IP 不会重复建资产） |
 
 ---
 
@@ -179,29 +213,30 @@
 
 ## 9. 自动化引擎 (scripts / playbooks / policies / executions)
 
-| 方法 | 路径 | 说明 |
-|---|---|---|
-| GET | `/api/v1/scripts` | 脚本列表 |
-| POST | `/api/v1/scripts` | 创建脚本 |
-| PUT | `/api/v1/scripts/{script_id}` | 更新脚本 |
-| DELETE | `/api/v1/scripts/{script_id}` | 删除脚本 |
-| GET | `/api/v1/playbooks` | Playbook 列表 |
-| POST | `/api/v1/playbooks` | 创建 Playbook |
-| GET | `/api/v1/playbooks/{playbook_id}` | Playbook 详情 |
-| PUT | `/api/v1/playbooks/{playbook_id}` | 更新 Playbook |
-| DELETE | `/api/v1/playbooks/{playbook_id}` | 删除 Playbook |
-| GET | `/api/v1/policies` | 策略列表 |
-| POST | `/api/v1/policies` | 创建策略 |
-| GET | `/api/v1/policies/{policy_id}` | 策略详情 |
-| PUT | `/api/v1/policies/{policy_id}` | 更新策略 |
-| DELETE | `/api/v1/policies/{policy_id}` | 删除策略 |
-| POST | `/api/v1/policies/{policy_id}/simulate` | 模拟策略 |
-| GET | `/api/v1/executions` | 执行列表 |
-| POST | `/api/v1/executions` | 创建执行 |
-| GET | `/api/v1/executions/{exec_id}` | 执行详情 |
-| POST | `/api/v1/executions/{exec_id}/approve` | 审批执行 |
-| POST | `/api/v1/executions/{exec_id}/cancel` | 取消执行 |
-| GET | `/api/v1/executions/{exec_id}/verification` | 验证结果 |
+| 方法 | 路径 | 说明 | 权限 |
+|---|---|---|---|
+| GET | `/api/v1/scripts` | 脚本列表 | 登录 |
+| POST | `/api/v1/scripts` | 创建脚本 | admin |
+| PUT | `/api/v1/scripts/{script_id}` | 更新脚本 | 登录 |
+| DELETE | `/api/v1/scripts/{script_id}` | 删除脚本 | admin |
+| GET | `/api/v1/playbooks` | Playbook 列表 | 登录 |
+| POST | `/api/v1/playbooks` | 创建 Playbook | admin |
+| GET | `/api/v1/playbooks/{playbook_id}` | Playbook 详情 | 登录 |
+| PUT | `/api/v1/playbooks/{playbook_id}` | 更新 Playbook | 登录 |
+| DELETE | `/api/v1/playbooks/{playbook_id}` | 删除 Playbook | admin |
+| GET | `/api/v1/policies` | 策略列表 | 登录 |
+| POST | `/api/v1/policies` | 创建策略 | 登录 |
+| GET | `/api/v1/policies/{policy_id}` | 策略详情 | 登录 |
+| PUT | `/api/v1/policies/{policy_id}` | 更新策略 | 登录 |
+| DELETE | `/api/v1/policies/{policy_id}` | 删除策略 | 登录 |
+| POST | `/api/v1/policies/{policy_id}/simulate` | 模拟策略 | 登录 |
+| GET | `/api/v1/executions` | 执行列表 | 登录 |
+| POST | `/api/v1/executions` | 创建执行 | 登录 |
+| GET | `/api/v1/executions/{exec_id}` | 执行详情 | 登录 |
+| POST | `/api/v1/executions/{exec_id}/approve` | 审批执行 | admin |
+| POST | `/api/v1/executions/{exec_id}/cancel` | 取消执行 | admin |
+| POST | `/api/v1/executions/{exec_id}/rollback` | 回滚执行 | admin |
+| GET | `/api/v1/executions/{exec_id}/verification` | 验证结果 | 登录 |
 
 ---
 
@@ -269,28 +304,28 @@
 
 ## 14. 平台治理 (users / roles / api-keys / audit-logs / backups / platform)
 
-| 方法 | 路径 | 说明 |
-|---|---|---|
-| GET | `/api/v1/users` | 用户列表 |
-| POST | `/api/v1/users` | 创建用户 |
-| GET | `/api/v1/users/{user_id}` | 用户详情 |
-| PUT | `/api/v1/users/{user_id}` | 更新用户 |
-| DELETE | `/api/v1/users/{user_id}` | 删除用户 |
-| GET | `/api/v1/roles` | 角色列表 |
-| POST | `/api/v1/roles` | 创建角色 |
-| GET | `/api/v1/api-keys` | API Key 列表 |
-| POST | `/api/v1/api-keys` | 创建 API Key |
-| PATCH | `/api/v1/api-keys/{key_id}` | 更新 API Key |
-| DELETE | `/api/v1/api-keys/{key_id}` | 删除 API Key |
-| GET | `/api/v1/audit-logs` | 审计日志 |
-| GET | `/api/v1/platform/status` | 平台状态 |
-| GET | `/api/v1/backups` | 备份列表 |
-| POST | `/api/v1/backups` | 创建备份 |
-| GET | `/api/v1/backups/{backup_id}` | 备份详情 |
-| GET | `/api/v1/backups/{backup_id}/download` | 下载备份 |
-| POST | `/api/v1/backups/{backup_id}/restore` | 恢复备份 |
-| GET | `/api/v1/backups/settings` | 备份设置 |
-| GET | `/api/v1/backups/storage` | 存储信息 |
+| 方法 | 路径 | 说明 | 权限 |
+|---|---|---|---|
+| GET | `/api/v1/users` | 用户列表 | 登录 |
+| POST | `/api/v1/users` | 创建用户 | admin |
+| GET | `/api/v1/users/{user_id}` | 用户详情 | 登录 |
+| PUT | `/api/v1/users/{user_id}` | 更新用户 | 登录 |
+| DELETE | `/api/v1/users/{user_id}` | 删除用户 | admin |
+| GET | `/api/v1/roles` | 角色列表 | 登录 |
+| POST | `/api/v1/roles` | 创建角色 | admin |
+| GET | `/api/v1/api-keys` | API Key 列表 | 登录 |
+| POST | `/api/v1/api-keys` | 创建 API Key | 登录 |
+| PATCH | `/api/v1/api-keys/{key_id}` | 更新 API Key | 登录 |
+| DELETE | `/api/v1/api-keys/{key_id}` | 删除 API Key | 登录 |
+| GET | `/api/v1/audit-logs` | 审计日志（含全平台操作明细） | admin |
+| GET | `/api/v1/platform/status` | 平台状态 | 登录 |
+| POST | `/api/v1/platform/self-check` | 完整自检 | 登录 |
+| GET | `/api/v1/backups` | 备份列表 | admin |
+| POST | `/api/v1/backups` | 创建备份 | admin |
+| GET | `/api/v1/backups/{backup_id}` | 备份详情 | admin |
+| GET | `/api/v1/backups/{backup_id}/download` | 下载备份 | admin |
+| POST | `/api/v1/backups/{backup_id}/restore` | 恢复备份 | admin |
+| 租户管理（`/api/v1/tenants/*`） | 增删改查 | admin（router 级 require_admin） |
 
 ---
 

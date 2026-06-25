@@ -30,19 +30,26 @@ tar xzf autops-offline-*.tar.gz
 
 ## 3. install.sh 执行流程
 
-1. 环境检查（OS、磁盘、端口）
+1. 环境检查（OS、磁盘、端口、root 权限）
 2. 安装 Docker（如未安装）
 3. 加载镜像
 4. 创建配置文件（交互式）
 5. 创建数据目录
-6. 执行数据库迁移
-7. 导入初始数据
-8. 启动服务
+6. 执行数据库迁移（`alembic upgrade head`，含 0004 auto_onboard 等迁移）
+7. 导入初始数据（创建内置角色 + admin 用户）
+   - 初始 admin 口令：若设置了 `ADMIN_INITIAL_PASSWORD` 环境变量则用该值；
+     否则随机生成 16 位口令并打印到安装日志（仅显示一次）
+8. 启动服务（生成并启动 `autops-backend` systemd 单元）
+   - 注意：当前 install.sh **仅部署后端**，worker 进程（采集调度器）需另行配置
 9. 健康检查
-10. 输出访问信息
+10. 输出访问信息（前端地址、后端地址 8001、初始口令获取方式）
 
 ## 4. 注意事项
 
 - 确保目标服务器磁盘空间充足（至少 20GB）
 - 确保 Docker 和 Docker Compose 已安装
-- 配置文件中的密码必须修改默认值
+- 配置文件中的密码必须修改默认值（`MYSQL_ROOT_PASSWORD`、`DB_PASS`、`JWT_SECRET`、`CREDENTIAL_ENCRYPT_KEY`）
+- `JWT_SECRET` 生产环境必须 ≥32 字符，否则启动报错
+- 初始 admin 口令从安装日志获取后请立即登录修改；如需指定可在安装前设置 `ADMIN_INITIAL_PASSWORD`
+- MySQL/Redis/后端端口仅绑定 `127.0.0.1`，对外由前端 nginx 反代 `/api/` 到后端
+

@@ -17,9 +17,12 @@
 - 用户名（唯一）
 - 邮箱（唯一，可选）
 - 显示名
-- 密码（bcrypt/argon2 哈希）
+- 密码（**bcrypt 哈希**，仅存储哈希，不出现在任何 API 响应中）
 - 状态（active/disabled/locked）
+- 角色（多对多，通过 user_roles 关联）
 - 最后登录时间
+
+`/auth/me` 等 `UserResponse` 响应字段：`id, username, display_name, email, status, roles[], last_login_at, created_at`（不含密码）。
 
 ### 2.2 用户操作
 

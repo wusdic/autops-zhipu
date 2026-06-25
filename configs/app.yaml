@@ -1,4 +1,8 @@
 # AUTOPS 应用配置
+# 注意：生产环境（AUTOPS_ENV=prod）cors_origins 不能为 ["*"]，否则启动报错，
+# 需改为具体前端域名，例如：
+#   cors_origins:
+#     - "https://autops.example.com"
 app:
   name: AUTOPS
   version: 0.1.0

@@ -40,11 +40,13 @@ discovered → registered → active → maintenance → inactive → decommissi
 
 ### 3.2 资产发现
 
-- 支持 IP 段扫描（ICMP/TCP）
-- 支持 SNMP 发现
-- 支持 Agent 注册
-- 支持 CSV/Excel 导入
-- 支持 API 批量导入
+- 支持 CIDR 网段 / IP 范围扫描（ICMP ping + TCP 端口）
+- 根据开放端口自动推断资产类型（3389→Windows、22→Linux、3306/5432→数据库 等）
+- **自动纳管（auto_onboard）**：发现任务支持 `auto_onboard` 开关（默认开启）
+  - 开启时：创建任务即自动启动扫描，扫描完成自动纳管全部存活 IP（幂等，重复 IP 不会重复建资产）
+  - 关闭时：需手动启动扫描 + 手动走纳管向导
+- 纳管后自动触发：立即采集一次 + 每 5 分钟定期采集（ping 状态/端口/协议信息）
+- 支持 CSV/Excel 导入、API 批量导入
 
 ### 3.3 资产分组
 
@@ -96,8 +98,12 @@ discovered → registered → active → maintenance → inactive → decommissi
 | GET | /api/v1/assets/{id}/timeline | 资产时间线 |
 | GET | /api/v1/asset-groups | 分组列表 |
 | POST | /api/v1/asset-groups | 创建分组 |
-| POST | /api/v1/discovery-tasks | 创建发现任务 |
-| GET | /api/v1/discovery-tasks/{id} | 发现任务状态 |
+| POST | /api/v1/discovery/tasks | 创建发现任务（含 auto_onboard 字段） |
+| GET | /api/v1/discovery/tasks | 发现任务列表 |
+| GET | /api/v1/discovery/tasks/{id} | 发现任务详情 |
+| POST | /api/v1/discovery/tasks/{id}/start | 启动发现任务扫描 |
+| GET | /api/v1/discovery/results | 发现结果（可按 task_id 过滤） |
+| POST | /api/v1/discovery/onboard | 纳管发现结果 |
 
 ## 6. 领域事件
 
