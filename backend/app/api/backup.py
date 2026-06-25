@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
 
@@ -30,8 +30,8 @@ async def list_backups():
                 "type": "full",
                 "status": "completed",
                 "size": 52428800,
-                "created_at": datetime.utcnow().isoformat(),
-                "finished_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "finished_at": datetime.now(timezone.utc).isoformat(),
                 "description": "初始全量备份",
             }
         )
@@ -42,7 +42,7 @@ async def list_backups():
 async def create_backup(body: dict | None = None):
     """创建备份."""
     backup_id = str(uuid.uuid4())
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     backup = {
         "id": backup_id,
         "type": (body or {}).get("type", "full"),
@@ -56,7 +56,7 @@ async def create_backup(body: dict | None = None):
     # Simulate completion
     backup["status"] = "completed"
     backup["size"] = 31457280
-    backup["finished_at"] = datetime.utcnow().isoformat()
+    backup["finished_at"] = datetime.now(timezone.utc).isoformat()
     return success(backup)
 
 

@@ -50,15 +50,21 @@ async def list_business_systems(
         Asset.asset_type == "business_system",
         Asset.is_deleted == False,
     )
-    total = (await db.execute(
-        select(func.count()).select_from(base.subquery())
-    )).scalar() or 0
+    total = (
+        await db.execute(select(func.count()).select_from(base.subquery()))
+    ).scalar() or 0
 
-    rows = (await db.execute(
-        base.order_by(Asset.created_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )).scalars().all()
+    rows = (
+        (
+            await db.execute(
+                base.order_by(Asset.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+            )
+        )
+        .scalars()
+        .all()
+    )
 
     items = [model_to_dict(r) for r in rows]
     return paginate(items, total, page, page_size)
@@ -97,13 +103,15 @@ async def get_business_system(
     """获取业务系统详情."""
     from app.domains.asset.models import Asset
 
-    row = (await db.execute(
-        select(Asset).where(
-            Asset.id == system_id,
-            Asset.asset_type == "business_system",
-            Asset.is_deleted == False,
+    row = (
+        await db.execute(
+            select(Asset).where(
+                Asset.id == system_id,
+                Asset.asset_type == "business_system",
+                Asset.is_deleted == False,
+            )
         )
-    )).scalar_one_or_none()
+    ).scalar_one_or_none()
     if not row:
         return success(None, message="业务系统不存在")
     return success(model_to_dict(row))
@@ -118,19 +126,22 @@ async def update_business_system(
     """更新业务系统."""
     from app.domains.asset.models import Asset
 
-    row = (await db.execute(
-        select(Asset).where(
-            Asset.id == system_id,
-            Asset.asset_type == "business_system",
-            Asset.is_deleted == False,
+    row = (
+        await db.execute(
+            select(Asset).where(
+                Asset.id == system_id,
+                Asset.asset_type == "business_system",
+                Asset.is_deleted == False,
+            )
         )
-    )).scalar_one_or_none()
+    ).scalar_one_or_none()
     if not row:
         return success(None, message="业务系统不存在")
 
     updates = data.model_dump(exclude_unset=True)
     if "tags" in updates and updates["tags"] is not None:
         import json
+
         updates["tags"] = json.dumps(updates["tags"])
 
     for k, v in updates.items():
@@ -148,19 +159,21 @@ async def delete_business_system(
 ):
     """删除业务系统(软删除)."""
     from app.domains.asset.models import Asset
-    from datetime import datetime
+    from datetime import datetime, timezone
 
-    row = (await db.execute(
-        select(Asset).where(
-            Asset.id == system_id,
-            Asset.asset_type == "business_system",
-            Asset.is_deleted == False,
+    row = (
+        await db.execute(
+            select(Asset).where(
+                Asset.id == system_id,
+                Asset.asset_type == "business_system",
+                Asset.is_deleted == False,
+            )
         )
-    )).scalar_one_or_none()
+    ).scalar_one_or_none()
     if not row:
         return success(None, message="业务系统不存在")
 
     row.is_deleted = True
-    row.deleted_at = datetime.utcnow()
+    row.deleted_at = datetime.now(timezone.utc)
     await db.flush()
     return success({"id": system_id, "deleted": True})

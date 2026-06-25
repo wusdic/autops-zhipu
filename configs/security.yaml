@@ -1,4 +1,6 @@
 # AUTOPS 安全配置
-jwt_secret: autops-dev-secret-2026
+# 注意：jwt_secret 必须通过环境变量 JWT_SECRET 注入（生产 >= 32 字符），切勿写入此文件。
+# config.py 加载时环境变量优先级高于本文件。
 jwt_algorithm: HS256
-jwt_expire_minutes: 480
+access_token_expire_minutes: 480
+refresh_token_expire_days: 7

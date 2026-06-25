@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from datetime import datetime, timezone
 
 import httpx
@@ -13,6 +14,8 @@ from app.common.exceptions import AppError, ErrorCode, NotFoundError
 from app.common.repository import BaseRepository
 from app.infra.config import get_config
 from app.domains.aiops.models import AIAnalysis
+
+logger = logging.getLogger(__name__)
 from app.domains.aiops.schemas import AIAnalysisRequest, AIFeedback
 
 
@@ -51,14 +54,20 @@ class AIOpsService:
             result = await self._call_llm(analysis)
             analysis.status = "completed"
             analysis.summary = result.get("summary", "")
-            analysis.root_causes = json.dumps(result.get("root_causes", []), ensure_ascii=False)
-            analysis.recommended_actions = json.dumps(result.get("recommended_actions", []), ensure_ascii=False)
+            analysis.root_causes = json.dumps(
+                result.get("root_causes", []), ensure_ascii=False
+            )
+            analysis.recommended_actions = json.dumps(
+                result.get("recommended_actions", []), ensure_ascii=False
+            )
             analysis.raw_output = json.dumps(result, ensure_ascii=False)
         except Exception as e:
             analysis.status = "failed"
             analysis.error_message = str(e)
 
-        analysis.duration_ms = int((datetime.now(timezone.utc) - analysis.created_at).total_seconds() * 1000)
+        analysis.duration_ms = int(
+            (datetime.now(timezone.utc) - analysis.created_at).total_seconds() * 1000
+        )
         await self.session.flush()
         await self.session.refresh(analysis)
         return analysis
@@ -109,9 +118,17 @@ class AIOpsService:
                             return json.loads(content[start:end])
                     except json.JSONDecodeError:
                         pass
-                    return {"summary": content, "root_causes": [], "recommended_actions": []}
+                    return {
+                        "summary": content,
+                        "root_causes": [],
+                        "recommended_actions": [],
+                    }
                 else:
-                    raise AppError(ErrorCode.AI_UNAVAILABLE_ANALYSIS, f"LLM 返回状态码 {resp.status_code}", 502)
+                    raise AppError(
+                        ErrorCode.AI_UNAVAILABLE_ANALYSIS,
+                        f"LLM 返回状态码 {resp.status_code}",
+                        502,
+                    )
         except httpx.ConnectError:
             # Model unavailable - graceful degradation
             return {
@@ -121,17 +138,26 @@ class AIOpsService:
             }
 
     async def list_analyses(
-        self, analysis_type: str | None = None, status: str | None = None,
-        page: int = 1, page_size: int = 20,
+        self,
+        analysis_type: str | None = None,
+        status: str | None = None,
+        page: int = 1,
+        page_size: int = 20,
     ):
         stmt = select(AIAnalysis)
         if analysis_type:
             stmt = stmt.where(AIAnalysis.analysis_type == analysis_type)
         if status:
             stmt = stmt.where(AIAnalysis.status == status)
-        total_result = await self.session.execute(select(func.count()).select_from(AIAnalysis))
+        total_result = await self.session.execute(
+            select(func.count()).select_from(AIAnalysis)
+        )
         total = total_result.scalar() or 0
-        result = await self.session.execute(stmt.order_by(AIAnalysis.created_at.desc()).offset((page-1)*page_size).limit(page_size))
+        result = await self.session.execute(
+            stmt.order_by(AIAnalysis.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
         return list(result.scalars().all()), total
 
     async def get_analysis(self, analysis_id: str) -> AIAnalysis:
@@ -163,7 +189,7 @@ class AIOpsService:
                     model_names = [m.get("id", "") for m in models]
                     return {"available": True, "models": model_names}
         except Exception:
-            pass
+            logger.debug("检查模型可用性失败", exc_info=True)
         return {"available": False, "models": []}
 
     # --- 快捷诊断 ---
@@ -203,14 +229,34 @@ class AIOpsService:
             result["recommendations"] = []
             if result.get("recommended_actions"):
                 try:
-                    actions = json.loads(result["recommended_actions"]) if isinstance(result["recommended_actions"], str) else result["recommended_actions"]
-                    result["recommendations"] = [{"action": act.get("action", str(act)), "risk": act.get("risk_level", "low"), "auto": True} for act in actions]
+                    actions = (
+                        json.loads(result["recommended_actions"])
+                        if isinstance(result["recommended_actions"], str)
+                        else result["recommended_actions"]
+                    )
+                    result["recommendations"] = [
+                        {
+                            "action": act.get("action", str(act)),
+                            "risk": act.get("risk_level", "low"),
+                            "auto": True,
+                        }
+                        for act in actions
+                    ]
                 except Exception:
-                    pass
+                    logger.debug(
+                        "解析 recommended_actions 失败，留空 recommendations",
+                        exc_info=True,
+                    )
             if result.get("raw_output"):
                 try:
-                    raw = json.loads(result["raw_output"]) if isinstance(result["raw_output"], str) else result["raw_output"]
-                    result["raw_response"] = json.dumps(raw, ensure_ascii=False, indent=2)
+                    raw = (
+                        json.loads(result["raw_output"])
+                        if isinstance(result["raw_output"], str)
+                        else result["raw_output"]
+                    )
+                    result["raw_response"] = json.dumps(
+                        raw, ensure_ascii=False, indent=2
+                    )
                 except Exception:
                     result["raw_response"] = result.get("raw_output", "")
             return result
@@ -262,8 +308,23 @@ class AIOpsService:
                         result["confidence"] = 50
                         result["recommendations"] = []
                     return result
-                return {"error": f"LLM 返回 {resp.status_code}", "root_cause": "模型服务暂时不可用", "confidence": 0, "recommendations": []}
+                return {
+                    "error": f"LLM 返回 {resp.status_code}",
+                    "root_cause": "模型服务暂时不可用",
+                    "confidence": 0,
+                    "recommendations": [],
+                }
         except httpx.ConnectError:
-            return {"error": "模型服务不可用", "root_cause": "vLLM 服务未启动", "confidence": 0, "recommendations": []}
+            return {
+                "error": "模型服务不可用",
+                "root_cause": "vLLM 服务未启动",
+                "confidence": 0,
+                "recommendations": [],
+            }
         except Exception as e:
-            return {"error": str(e), "root_cause": "分析失败", "confidence": 0, "recommendations": []}
+            return {
+                "error": str(e),
+                "root_cause": "分析失败",
+                "confidence": 0,
+                "recommendations": [],
+            }

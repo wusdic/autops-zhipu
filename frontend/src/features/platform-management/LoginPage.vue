@@ -31,7 +31,11 @@ import apiClient from '@/shared/api/client'
 
 const router = useRouter()
 const loading = ref(false)
-const form = reactive({ username: 'admin', password: 'admin123' })
+// 仅开发环境预填默认凭据，生产构建留空（避免暴露默认账号）
+const form = reactive({
+  username: import.meta.env.DEV ? 'admin' : '',
+  password: import.meta.env.DEV ? 'admin123' : '',
+})
 const authStore = useAuthStore()
 
 async function handleLogin() {

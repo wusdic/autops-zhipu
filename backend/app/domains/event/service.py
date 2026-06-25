@@ -19,31 +19,36 @@ class EventService:
         self.repo = BaseRepository(session, Event)
 
     @staticmethod
-    def _generate_fingerprint(event_type: str, source: str, asset_id: str | None, title: str) -> str:
+    def _generate_fingerprint(
+        event_type: str, source: str, asset_id: str | None, title: str
+    ) -> str:
         """生成事件指纹用于去重."""
         key = f"{event_type}|{source}|{asset_id or ''}|{title}"
         return hashlib.md5(key.encode()).hexdigest()
 
     async def _find_duplicate(self, fingerprint: str, minutes: int = 5):
         """查找指定时间窗口内的重复事件."""
-        from datetime import datetime, timedelta
-        cutoff = datetime.utcnow() - timedelta(minutes=minutes)
-        q = select(Event).where(
-            Event.fingerprint == fingerprint,
-            Event.created_at >= cutoff
-        ).order_by(Event.created_at.desc()).limit(1)
+        from datetime import datetime, timedelta, timezone
+
+        cutoff = datetime.now(timezone.utc) - timedelta(minutes=minutes)
+        q = (
+            select(Event)
+            .where(Event.fingerprint == fingerprint, Event.created_at >= cutoff)
+            .order_by(Event.created_at.desc())
+            .limit(1)
+        )
         result = await self.session.execute(q)
         return result.scalar_one_or_none()
 
     async def create_event(self, **kwargs) -> Event:
         """创建事件，支持5分钟窗口内自动去重."""
         fingerprint = self._generate_fingerprint(
-            event_type=kwargs.get('event_type', ''),
-            source=kwargs.get('source', ''),
-            asset_id=kwargs.get('asset_id'),
-            title=kwargs.get('title', ''),
+            event_type=kwargs.get("event_type", ""),
+            source=kwargs.get("source", ""),
+            asset_id=kwargs.get("asset_id"),
+            title=kwargs.get("title", ""),
         )
-        kwargs.setdefault('fingerprint', fingerprint)
+        kwargs.setdefault("fingerprint", fingerprint)
 
         # 查找5分钟内相同指纹的事件
         dup = await self._find_duplicate(fingerprint)
@@ -59,8 +64,12 @@ class EventService:
         return event
 
     async def list_events(
-        self, event_type: str | None = None, asset_id: str | None = None,
-        severity: str | None = None, page: int = 1, page_size: int = 20,
+        self,
+        event_type: str | None = None,
+        asset_id: str | None = None,
+        severity: str | None = None,
+        page: int = 1,
+        page_size: int = 20,
     ):
         stmt = select(Event)
         count_stmt = select(func.count()).select_from(Event)
@@ -75,12 +84,17 @@ class EventService:
             count_stmt = count_stmt.where(Event.severity == severity)
         total_result = await self.session.execute(count_stmt)
         total = total_result.scalar() or 0
-        result = await self.session.execute(stmt.order_by(Event.created_at.desc()).offset((page-1)*page_size).limit(page_size))
+        result = await self.session.execute(
+            stmt.order_by(Event.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
         return list(result.scalars().all()), total
 
     async def get_event(self, event_id: str) -> Event:
         event = await self.repo.get_by_id(event_id)
         if not event:
             from app.common.exceptions import NotFoundError
+
             raise NotFoundError(f"事件 {event_id} 不存在")
         return event

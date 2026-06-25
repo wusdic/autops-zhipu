@@ -1,9 +1,10 @@
 # AUTOPS 数据库配置
+# 注意：敏感字段（db_pass）必须通过环境变量 DB_PASS 注入，切勿写入此文件。
+# config.py 加载时环境变量优先级高于本文件。
 dialect: mysql
 host: 127.0.0.1
 port: 3306
 user: autops
-db_pass: autops_dev_2026
 database: autops
 pool_size: 10
 max_overflow: 20

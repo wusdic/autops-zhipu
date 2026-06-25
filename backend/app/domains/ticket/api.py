@@ -99,14 +99,14 @@ async def upload_attachment(
     """上传工单附件（stub）."""
     await svc.get_ticket(ticket_id)
     import uuid as _uuid
-    from datetime import datetime as _dt
+    from datetime import datetime as _dt, timezone
     return success({
         "id": str(_uuid.uuid4()),
         "ticket_id": ticket_id,
         "filename": body.filename,
         "content_type": body.content_type,
         "size": body.size,
-        "uploaded_at": _dt.utcnow().isoformat(),
+        "uploaded_at": _dt.now(timezone.utc).isoformat(),
     })
 
 

@@ -20,6 +20,7 @@ class BaseRepository(Generic[ModelType]):
     def __init__(self, session_or_model, model_or_session=None):
         # Support both BaseRepository(session, Model) and BaseRepository(Model, session)
         from sqlalchemy.ext.asyncio import AsyncSession as _AS
+
         if isinstance(session_or_model, _AS):
             # First arg is session: BaseRepository(session, Model)
             self.session = session_or_model
@@ -29,7 +30,9 @@ class BaseRepository(Generic[ModelType]):
             self.model = session_or_model
             self.session = model_or_session
         else:
-            raise TypeError(f"Expected (AsyncSession, Model) or (Model, AsyncSession), got ({type(session_or_model)}, {type(model_or_session)})")
+            raise TypeError(
+                f"Expected (AsyncSession, Model) or (Model, AsyncSession), got ({type(session_or_model)}, {type(model_or_session)})"
+            )
 
     async def get_by_id(self, id: str) -> ModelType | None:
         """根据 ID 获取单条记录."""
@@ -40,6 +43,7 @@ class BaseRepository(Generic[ModelType]):
         obj = await self.get_by_id(id)
         if obj is None:
             from app.common.exceptions import NotFoundError
+
             raise NotFoundError(f"{self.model.__name__} 不存在")
         return obj
 
@@ -103,9 +107,10 @@ class BaseRepository(Generic[ModelType]):
 
     async def soft_delete(self, id: str) -> ModelType:
         """软删除."""
-        from datetime import datetime
+        from datetime import datetime, timezone
+
         obj = await self.get_by_id_or_raise(id)
         obj.is_deleted = True
-        obj.deleted_at = datetime.utcnow()
+        obj.deleted_at = datetime.now(timezone.utc)
         await self.session.flush()
         return obj

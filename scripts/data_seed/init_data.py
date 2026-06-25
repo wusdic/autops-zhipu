@@ -4,8 +4,16 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import secrets
+import string
 import sys
-sys.path.insert(0, "/home/zcxx/autops/backend")
+from pathlib import Path
+
+# 允许从仓库根目录或 scripts/ 下运行：把 backend 加入 path
+_BACKEND_DIR = Path(__file__).resolve().parents[3] / "backend"
+if _BACKEND_DIR.exists():
+    sys.path.insert(0, str(_BACKEND_DIR))
 
 from app.common.auth import hash_password
 from app.infra.config import get_config
@@ -13,6 +21,12 @@ from app.infra.database import Base, init_db_engine
 from app.domains.governance.models import Role, User, UserRole
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+
+def _generate_random_password(length: int = 16) -> str:
+    """生成随机初始口令."""
+    alphabet = string.ascii_letters + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 async def seed():
@@ -67,10 +81,12 @@ async def seed():
         q = select(User).where(User.username == "admin")
         existing = (await session.execute(q)).scalar_one_or_none()
         if existing is None:
+            # 初始口令：优先用环境变量 ADMIN_INITIAL_PASSWORD，否则随机生成并打印一次
+            initial_password = os.getenv("ADMIN_INITIAL_PASSWORD") or _generate_random_password()
             admin = User(
                 username="admin",
                 display_name="管理员",
-                password_hash=hash_password("admin123"),
+                password_hash=hash_password(initial_password),
             )
             session.add(admin)
             await session.flush()
@@ -79,7 +95,8 @@ async def seed():
             q = select(Role).where(Role.name == "super_admin")
             super_admin_role = (await session.execute(q)).scalar_one()
             session.add(UserRole(user_id=admin.id, role_id=super_admin_role.id))
-            print(f"  Created admin user (password: admin123)")
+            print("  Created admin user")
+            print(f"  初始口令（仅显示一次，请立即登录修改）: {initial_password}")
         else:
             print("  Admin user already exists")
 

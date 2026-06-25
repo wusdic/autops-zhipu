@@ -107,7 +107,7 @@ class PolicyService:
 
         # 创建 PolicyExecution 记录
         import uuid as _uuid
-        from datetime import datetime as _dt
+        from datetime import datetime as _dt, timezone
         pe = PolicyExecution(
             id=str(_uuid.uuid4()),
             policy_id=best.id,
@@ -117,7 +117,7 @@ class PolicyService:
             matched_assets=json.dumps(asset_ids) if isinstance(asset_ids, list) else str(asset_ids),
             status="matched",
             result=json.dumps({"explanation": f"告警类型 '{event_type}' 严重级别 '{severity}' 匹配策略 '{best.name}'"}, ensure_ascii=False),
-            created_at=_dt.utcnow()
+            created_at=_dt.now(timezone.utc)
         )
         self.session.add(pe)
         await self.session.flush()

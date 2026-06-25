@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -275,7 +275,7 @@ async def task_queue_status(db: AsyncSession = Depends(get_db)):
         {
             "queues": queue_items,
             "total_pending": total_pending,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     )
 
@@ -354,7 +354,7 @@ async def platform_self_check(db: AsyncSession = Depends(get_db)):
             "passed": passed,
             "failed": failed,
             "items": checks,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     )
 

@@ -8,8 +8,12 @@
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import Request
 from fastapi.responses import JSONResponse
+
+logger = logging.getLogger(__name__)
 
 from app.common.response import error
 
@@ -20,6 +24,7 @@ class ErrorCode:
     格式：{模块2位}{级别1位}{序号2位}
     用字符串存储避免 Python 前导零语法错误，返回时转为 int。
     """
+
     # 通用 (00xxx)
     UNKNOWN = "00001"
     VALIDATION = "00010"
@@ -132,8 +137,18 @@ async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
 
 
 async def generic_error_handler(request: Request, exc: Exception) -> JSONResponse:
-    """通用异常处理器."""
+    """通用异常处理器.
+
+    记录完整 traceback 与请求上下文（路径/trace_id），便于线上定位；
+    对外只返回通用 500 文案，不泄漏内部错误结构。
+    """
     trace_id = getattr(request.state, "trace_id", "")
+    logger.exception(
+        "未处理异常 trace_id=%s path=%s method=%s",
+        trace_id,
+        request.url.path,
+        request.method,
+    )
     return JSONResponse(
         status_code=500,
         content=error(int(ErrorCode.UNKNOWN), "服务器内部错误", trace_id).model_dump(),

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
@@ -63,7 +63,7 @@ async def create_export(
     db: AsyncSession = Depends(get_db),
 ):
     """创建导出任务."""
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     item_id = str(uuid.uuid4())
     sql = text("""INSERT INTO exports
         (id, name, export_type, format, status, filters, created_by, created_at, updated_at)
@@ -103,7 +103,11 @@ async def cancel_export(
             text(
                 "UPDATE exports SET status = :status, updated_at = :updated_at WHERE id = :id"
             ),
-            {"status": "cancelled", "updated_at": datetime.utcnow(), "id": export_id},
+            {
+                "status": "cancelled",
+                "updated_at": datetime.now(timezone.utc),
+                "id": export_id,
+            },
         )
         await db.commit()
     except Exception:

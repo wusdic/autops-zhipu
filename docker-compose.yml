@@ -31,7 +31,8 @@ services:
     env_file:
       - .env
     ports:
-      - "6379:6379"
+      # 仅绑定到本机回环，避免 Redis 无认证对外暴露（生产应配合 requirepass）
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -75,7 +76,8 @@ services:
     env_file:
       - .env
     ports:
-      - "${BACKEND_PORT:-8001}:8001"
+      # 仅绑定本机回环，对外由 frontend nginx 反代 /api/ 到后端
+      - "127.0.0.1:${BACKEND_PORT:-8001}:8001"
     environment:
       AUTOPS_ENV: prod
       AUTOPS_PROCESS_ROLE: api

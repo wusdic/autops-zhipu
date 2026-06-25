@@ -11,16 +11,22 @@ export function useWebSocket(path: string = '/ws') {
   const error = ref<string | null>(null)
   let ws: WebSocket | null = null
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+  // 标记是否为主动关闭：避免 disconnect() 触发的 onclose 再次调度重连（幽灵重连）
+  let manualClose = false
+  let reconnectAttempts = 0
+  const MAX_RECONNECT_ATTEMPTS = 10
 
   function connect() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const wsUrl = protocol + '//' + window.location.host + path
 
+    manualClose = false
     ws = new WebSocket(wsUrl)
 
     ws.onopen = () => {
       connected.value = true
       error.value = null
+      reconnectAttempts = 0
     }
 
     ws.onmessage = (event) => {
@@ -38,8 +44,11 @@ export function useWebSocket(path: string = '/ws') {
 
     ws.onclose = () => {
       connected.value = false
-      // Auto reconnect after 3 seconds
-      reconnectTimer = setTimeout(connect, 3000)
+      // 仅在非主动关闭且未超最大重试次数时自动重连
+      if (!manualClose && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+        reconnectAttempts += 1
+        reconnectTimer = setTimeout(connect, 3000)
+      }
     }
 
     ws.onerror = () => {
@@ -48,6 +57,7 @@ export function useWebSocket(path: string = '/ws') {
   }
 
   function disconnect() {
+    manualClose = true
     if (reconnectTimer) {
       clearTimeout(reconnectTimer)
       reconnectTimer = null

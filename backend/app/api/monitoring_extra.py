@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -42,15 +42,21 @@ async def list_collection_results(
         if status:
             base = base.where(CollectionResult.status == status)
 
-        total = (await db.execute(
-            select(func.count()).select_from(base.subquery())
-        )).scalar() or 0
+        total = (
+            await db.execute(select(func.count()).select_from(base.subquery()))
+        ).scalar() or 0
 
-        rows = (await db.execute(
-            base.order_by(CollectionResult.created_at.desc())
-            .offset((page - 1) * page_size)
-            .limit(page_size)
-        )).scalars().all()
+        rows = (
+            (
+                await db.execute(
+                    base.order_by(CollectionResult.created_at.desc())
+                    .offset((page - 1) * page_size)
+                    .limit(page_size)
+                )
+            )
+            .scalars()
+            .all()
+        )
 
         items = [model_to_dict(r) for r in rows]
         return paginate(items, total, page, page_size)
@@ -72,23 +78,38 @@ async def metrics_trend(
     try:
         from app.domains.state.models import StateSnapshot
 
-        since = datetime.utcnow() - timedelta(hours=hours)
-        rows = (await db.execute(
-            select(StateSnapshot)
-            .where(StateSnapshot.asset_id == asset_id, StateSnapshot.created_at >= since)
-            .order_by(StateSnapshot.created_at.asc())
-            .limit(500)
-        )).scalars().all()
+        since = datetime.now(timezone.utc) - timedelta(hours=hours)
+        rows = (
+            (
+                await db.execute(
+                    select(StateSnapshot)
+                    .where(
+                        StateSnapshot.asset_id == asset_id,
+                        StateSnapshot.created_at >= since,
+                    )
+                    .order_by(StateSnapshot.created_at.asc())
+                    .limit(500)
+                )
+            )
+            .scalars()
+            .all()
+        )
 
         points = []
         for r in rows:
             data = model_to_dict(r)
-            points.append({
-                "timestamp": data.get("created_at"),
-                "value": data.get("metrics", {}).get(metric_type) if isinstance(data.get("metrics"), dict) else None,
-            })
+            points.append(
+                {
+                    "timestamp": data.get("created_at"),
+                    "value": data.get("metrics", {}).get(metric_type)
+                    if isinstance(data.get("metrics"), dict)
+                    else None,
+                }
+            )
 
-        return success({"asset_id": asset_id, "metric_type": metric_type, "points": points})
+        return success(
+            {"asset_id": asset_id, "metric_type": metric_type, "points": points}
+        )
     except Exception:
         return success({"asset_id": asset_id, "metric_type": metric_type, "points": []})
 
@@ -109,13 +130,15 @@ async def list_log_sources(
         base = select(ConfigDefinition).where(
             ConfigDefinition.config_type == "log_source"
         )
-        total = (await db.execute(
-            select(func.count()).select_from(base.subquery())
-        )).scalar() or 0
+        total = (
+            await db.execute(select(func.count()).select_from(base.subquery()))
+        ).scalar() or 0
 
-        rows = (await db.execute(
-            base.offset((page - 1) * page_size).limit(page_size)
-        )).scalars().all()
+        rows = (
+            (await db.execute(base.offset((page - 1) * page_size).limit(page_size)))
+            .scalars()
+            .all()
+        )
 
         items = [model_to_dict(r) for r in rows]
         return paginate(items, total, page, page_size)
@@ -133,31 +156,44 @@ async def collectors_health_summary(db: AsyncSession = Depends(get_db)):
     try:
         from app.domains.collector.models import Collector
 
-        total = (await db.execute(
-            select(func.count()).select_from(Collector)
-        )).scalar() or 0
+        total = (
+            await db.execute(select(func.count()).select_from(Collector))
+        ).scalar() or 0
 
-        online = (await db.execute(
-            select(func.count()).select_from(Collector)
-            .where(Collector.status == "online")
-        )).scalar() or 0
+        online = (
+            await db.execute(
+                select(func.count())
+                .select_from(Collector)
+                .where(Collector.status == "online")
+            )
+        ).scalar() or 0
 
-        offline = (await db.execute(
-            select(func.count()).select_from(Collector)
-            .where(Collector.status == "offline")
-        )).scalar() or 0
+        offline = (
+            await db.execute(
+                select(func.count())
+                .select_from(Collector)
+                .where(Collector.status == "offline")
+            )
+        ).scalar() or 0
 
-        error = (await db.execute(
-            select(func.count()).select_from(Collector)
-            .where(Collector.status == "error")
-        )).scalar() or 0
+        error = (
+            await db.execute(
+                select(func.count())
+                .select_from(Collector)
+                .where(Collector.status == "error")
+            )
+        ).scalar() or 0
 
-        return success({
-            "total": total,
-            "online": online,
-            "offline": offline,
-            "error": error,
-            "health_rate": round(online / max(total, 1) * 100, 1),
-        })
+        return success(
+            {
+                "total": total,
+                "online": online,
+                "offline": offline,
+                "error": error,
+                "health_rate": round(online / max(total, 1) * 100, 1),
+            }
+        )
     except Exception:
-        return success({"total": 0, "online": 0, "offline": 0, "error": 0, "health_rate": 0})
+        return success(
+            {"total": 0, "online": 0, "offline": 0, "error": 0, "health_rate": 0}
+        )

@@ -311,6 +311,7 @@ import {
 import api from '@/shared/api/client'
 import NotificationBell from '@/shared/components/NotificationBell.vue'
 import TaskProgressIndicator from '@/shared/components/TaskProgressIndicator.vue'
+import { useAuthStore } from '@/app/store/auth'
 import { API } from '@/shared/api/routes'
 import { APP_CONFIG } from '@/shared/config'
 
@@ -659,8 +660,12 @@ async function fetchUnread() {
   } catch { /* ignore */ }
 }
 
+const authStore = useAuthStore()
+
 onMounted(() => {
   username.value = localStorage.getItem('username') || 'admin'
+  // 恢复用户信息（含 roles），使 v-permission 指令在刷新后仍能正确工作
+  authStore.fetchUser().catch(() => {})
   fetchUnread()
   document.addEventListener('keydown', handleKeydown)
 })

@@ -244,7 +244,7 @@ async def create_dry_run(
     row.status = "dry_running"
     if hasattr(row, "mode"):
         row.mode = "dry_run"
-    row.updated_at = datetime.utcnow()
+    row.updated_at = datetime.now(timezone.utc)
     await db.flush()
     await db.refresh(row)
     return success(model_to_dict(row))

@@ -1,19 +1,24 @@
 """Edge Collector 管理器."""
+
 from __future__ import annotations
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 
 from app.domains.collector.edge.protocol import (
-    HeartbeatPayload, TaskPayload, ResultPayload, RegisterPayload
+    HeartbeatPayload,
+    TaskPayload,
+    ResultPayload,
+    RegisterPayload,
 )
 
 logger = logging.getLogger(__name__)
 
 # 心跳超时阈值
 HEARTBEAT_TIMEOUT_SECONDS = 120
+
 
 class EdgeCollectorManager:
     """远程采集器管理器."""
@@ -47,6 +52,7 @@ class EdgeCollectorManager:
         """处理心跳."""
         try:
             from app.infra.redis_client import get_redis
+
             redis = await get_redis()
             key = f"collector:heartbeat:{payload.collector_id}"
             data = {
@@ -54,7 +60,7 @@ class EdgeCollectorManager:
                 "cpu": str(payload.cpu_usage or 0),
                 "memory": str(payload.memory_usage or 0),
                 "tasks": str(payload.active_tasks),
-                "ts": payload.timestamp or datetime.utcnow().isoformat(),
+                "ts": payload.timestamp or datetime.now(timezone.utc).isoformat(),
             }
             await redis.hset(key, mapping=data)  # type: ignore
             await redis.expire(key, HEARTBEAT_TIMEOUT_SECONDS)  # type: ignore
@@ -66,10 +72,15 @@ class EdgeCollectorManager:
     async def get_pending_tasks(self, collector_id: str) -> list[dict]:
         """获取待执行任务."""
         from app.domains.collector.models import CollectionJob
-        q = select(CollectionJob).where(
-            CollectionJob.collector_id == collector_id,
-            CollectionJob.status == "pending"
-        ).limit(10)
+
+        q = (
+            select(CollectionJob)
+            .where(
+                CollectionJob.collector_id == collector_id,
+                CollectionJob.status == "pending",
+            )
+            .limit(10)
+        )
         result = await self.session.execute(q)
         jobs = result.scalars().all()
         return [
@@ -90,7 +101,7 @@ class EdgeCollectorManager:
         job = await self.session.get(CollectionJob, payload.task_id)
         if job:
             job.status = payload.status
-            job.last_run_at = datetime.utcnow()
+            job.last_run_at = datetime.now(timezone.utc)
 
         # 保存结果
         result = CollectionResult(
@@ -101,8 +112,8 @@ class EdgeCollectorManager:
             result_data=payload.data,
             error_message=payload.error_message,
             duration_ms=payload.duration_ms,
-            started_at=datetime.utcnow(),
-            completed_at=datetime.utcnow(),
+            started_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(timezone.utc),
         )
         self.session.add(result)
         await self.session.flush()
@@ -114,12 +125,18 @@ class EdgeCollectorManager:
         status = {"collector_id": collector_id, "alive": False}
         try:
             from app.infra.redis_client import get_redis
+
             redis = await get_redis()
             key = f"collector:heartbeat:{collector_id}"
             data = await redis.hgetall(key)  # type: ignore
             if data:
                 status["alive"] = True
-                status["heartbeat"] = {k.decode() if isinstance(k, bytes) else k: v.decode() if isinstance(v, bytes) else v for k, v in data.items()}
+                status["heartbeat"] = {
+                    k.decode() if isinstance(k, bytes) else k: v.decode()
+                    if isinstance(v, bytes)
+                    else v
+                    for k, v in data.items()
+                }
         except Exception:
             pass
         return status

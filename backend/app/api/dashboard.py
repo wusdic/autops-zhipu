@@ -81,7 +81,7 @@ async def dashboard_stats(db: AsyncSession = Depends(get_db)):
             "anomaly_open": anomaly_open,
             "execution_pending_approval": exec_pending,
             "ticket_open": ticket_open,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     )
 
@@ -101,7 +101,7 @@ async def asset_discovery_summary(db: AsyncSession = Depends(get_db)):
         )
     ).scalar() or 0
 
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     today_start = datetime(today.year, today.month, today.day)
 
     new_today = (
@@ -235,7 +235,7 @@ async def anomaly_summary(db: AsyncSession = Depends(get_db)):
     status_distribution = {r[0]: r[1] for r in status_rows}
 
     # 今日新增
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     today_start = datetime(today.year, today.month, today.day)
     new_today = (
         await db.execute(
