@@ -10,15 +10,14 @@ import logging
 import uuid
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
-
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import select, func, text
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.common.response import success, paginate
-from app.common.crud_service import model_to_dict
+logger = logging.getLogger(__name__)
+
+from app.common.response import paginate, success
 from app.infra.database import get_db
 
 # ======================================================================
@@ -52,10 +51,18 @@ async def get_dictionary_by_type(
     db: AsyncSession = Depends(get_db),
 ):
     """按类型查询字典项."""
-    rows = (await db.execute(
-        text("SELECT * FROM dictionaries WHERE type = :type AND is_active = 1 ORDER BY sort_order"),
-        {"type": dict_type},
-    )).mappings().all()
+    rows = (
+        (
+            await db.execute(
+                text(
+                    "SELECT * FROM dictionaries WHERE type = :type AND is_active = 1 ORDER BY sort_order"
+                ),
+                {"type": dict_type},
+            )
+        )
+        .mappings()
+        .all()
+    )
     items = [dict(r) for r in rows]
     return success(items)
 
@@ -73,31 +80,51 @@ async def list_integrations(db: AsyncSession = Depends(get_db)):
 
     # Notification channels
     try:
-        rows = (await db.execute(
-            text("SELECT name, channel_type, config, is_enabled FROM notification_channels")
-        )).mappings().all()
+        rows = (
+            (
+                await db.execute(
+                    text(
+                        "SELECT name, channel_type, config, is_enabled FROM notification_channels"
+                    )
+                )
+            )
+            .mappings()
+            .all()
+        )
         for r in rows:
-            integrations.append({
-                "name": r["name"],
-                "type": r["channel_type"],
-                "enabled": bool(r.get("is_enabled", 1)),
-                "category": "notification",
-            })
+            integrations.append(
+                {
+                    "name": r["name"],
+                    "type": r["channel_type"],
+                    "enabled": bool(r.get("is_enabled", 1)),
+                    "category": "notification",
+                }
+            )
     except Exception as e:
         logger.warning("list_integrations: notification_channels query failed: %s", e)
 
     # Config-based integrations (LLM, LDAP, etc.)
     try:
-        rows = (await db.execute(
-            text("SELECT key, value FROM configs WHERE key LIKE 'integration_%'")
-        )).mappings().all()
+        rows = (
+            (
+                await db.execute(
+                    text(
+                        "SELECT key, value FROM configs WHERE key LIKE 'integration_%'"
+                    )
+                )
+            )
+            .mappings()
+            .all()
+        )
         for r in rows:
-            integrations.append({
-                "name": r["key"].replace("integration_", ""),
-                "type": "config",
-                "config": r["value"],
-                "category": "external",
-            })
+            integrations.append(
+                {
+                    "name": r["key"].replace("integration_", ""),
+                    "type": "config",
+                    "config": r["value"],
+                    "category": "external",
+                }
+            )
     except Exception as e:
         logger.warning("list_integrations: configs query failed: %s", e)
 
@@ -107,10 +134,16 @@ async def list_integrations(db: AsyncSession = Depends(get_db)):
 @integration_router.get("/{name}")
 async def get_integration(name: str, db: AsyncSession = Depends(get_db)):
     """获取单个集成详情."""
-    row = (await db.execute(
-        text("SELECT * FROM notification_channels WHERE name = :name"),
-        {"name": name},
-    )).mappings().first()
+    row = (
+        (
+            await db.execute(
+                text("SELECT * FROM notification_channels WHERE name = :name"),
+                {"name": name},
+            )
+        )
+        .mappings()
+        .first()
+    )
     if row:
         return success(dict(row))
     return success(None, message="集成不存在")
@@ -121,20 +154,30 @@ async def test_integration(name: str, db: AsyncSession = Depends(get_db)):
     """测试集成连接."""
     # Basic connectivity test for known integrations
     try:
-        row = (await db.execute(
-            text("SELECT channel_type, config FROM notification_channels WHERE name = :name"),
-            {"name": name},
-        )).mappings().first()
+        row = (
+            (
+                await db.execute(
+                    text(
+                        "SELECT channel_type, config FROM notification_channels WHERE name = :name"
+                    ),
+                    {"name": name},
+                )
+            )
+            .mappings()
+            .first()
+        )
 
         if not row:
             return success({"connected": False, "message": "集成配置不存在"})
 
-        return success({
-            "connected": True,
-            "message": "连接测试成功",
-            "integration": name,
-            "type": row["channel_type"],
-        })
+        return success(
+            {
+                "connected": True,
+                "message": "连接测试成功",
+                "integration": name,
+                "type": row["channel_type"],
+            }
+        )
     except Exception as e:
         return success({"connected": False, "message": str(e)[:200]})
 
@@ -152,50 +195,88 @@ async def task_queue_status(db: AsyncSession = Depends(get_db)):
 
     # Outbox events
     try:
-        count = (await db.execute(
-            text("SELECT COUNT(*) FROM event_outbox WHERE processed = 0")
-        )).scalar() or 0
-        queue_items.append({"queue": "event_outbox", "pending": count, "status": "normal" if count < 100 else "backlog"})
+        count = (
+            await db.execute(
+                text("SELECT COUNT(*) FROM event_outbox WHERE processed = 0")
+            )
+        ).scalar() or 0
+        queue_items.append(
+            {
+                "queue": "event_outbox",
+                "pending": count,
+                "status": "normal" if count < 100 else "backlog",
+            }
+        )
     except Exception as _e:
         logger.warning("task_queue_status: event_outbox query failed: %s", _e)
         queue_items.append({"queue": "event_outbox", "pending": 0, "status": "unknown"})
 
     # Inspection tasks
     try:
-        count = (await db.execute(
-            text("SELECT COUNT(*) FROM inspection_tasks WHERE status IN ('pending', 'running')")
-        )).scalar() or 0
-        queue_items.append({"queue": "inspection_tasks", "pending": count, "status": "normal" if count < 50 else "backlog"})
+        count = (
+            await db.execute(
+                text(
+                    "SELECT COUNT(*) FROM inspection_tasks WHERE status IN ('pending', 'running')"
+                )
+            )
+        ).scalar() or 0
+        queue_items.append(
+            {
+                "queue": "inspection_tasks",
+                "pending": count,
+                "status": "normal" if count < 50 else "backlog",
+            }
+        )
     except Exception as _e:
         logger.warning("task_queue_status: inspection_tasks query failed: %s", _e)
-        queue_items.append({"queue": "inspection_tasks", "pending": 0, "status": "unknown"})
+        queue_items.append(
+            {"queue": "inspection_tasks", "pending": 0, "status": "unknown"}
+        )
 
     # Report tasks
     try:
-        count = (await db.execute(
-            text("SELECT COUNT(*) FROM report_tasks WHERE status IN ('pending', 'running')")
-        )).scalar() or 0
-        queue_items.append({"queue": "report_tasks", "pending": count, "status": "normal"})
+        count = (
+            await db.execute(
+                text(
+                    "SELECT COUNT(*) FROM report_tasks WHERE status IN ('pending', 'running')"
+                )
+            )
+        ).scalar() or 0
+        queue_items.append(
+            {"queue": "report_tasks", "pending": count, "status": "normal"}
+        )
     except Exception as _e:
         logger.warning("task_queue_status: report_tasks query failed: %s", _e)
         queue_items.append({"queue": "report_tasks", "pending": 0, "status": "unknown"})
 
     # Executions
     try:
-        count = (await db.execute(
-            text("SELECT COUNT(*) FROM executions WHERE status IN ('pending', 'running', 'pending_approval')")
-        )).scalar() or 0
-        queue_items.append({"queue": "executions", "pending": count, "status": "normal" if count < 20 else "backlog"})
+        count = (
+            await db.execute(
+                text(
+                    "SELECT COUNT(*) FROM executions WHERE status IN ('pending', 'running', 'pending_approval')"
+                )
+            )
+        ).scalar() or 0
+        queue_items.append(
+            {
+                "queue": "executions",
+                "pending": count,
+                "status": "normal" if count < 20 else "backlog",
+            }
+        )
     except Exception as _e:
         logger.warning("task_queue_status: executions query failed: %s", _e)
         queue_items.append({"queue": "executions", "pending": 0, "status": "unknown"})
 
     total_pending = sum(q["pending"] for q in queue_items)
-    return success({
-        "queues": queue_items,
-        "total_pending": total_pending,
-        "timestamp": datetime.utcnow().isoformat(),
-    })
+    return success(
+        {
+            "queues": queue_items,
+            "total_pending": total_pending,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    )
 
 
 # ======================================================================
@@ -212,29 +293,51 @@ async def platform_self_check(db: AsyncSession = Depends(get_db)):
     # 1. Database
     try:
         await db.execute(text("SELECT 1"))
-        checks.append({"item": "database", "status": "pass", "message": "数据库连接正常"})
-    except Exception as e:
-        checks.append({"item": "database", "status": "fail", "message": str(e)[:100]})
+        checks.append(
+            {"item": "database", "status": "pass", "message": "数据库连接正常"}
+        )
+    except Exception:
+        logger.exception("self-check: 数据库检查失败")
+        checks.append(
+            {"item": "database", "status": "fail", "message": "数据库连接异常"}
+        )
 
     # 2. Redis
     try:
         from app.infra.redis_client import get_redis
-        redis = get_redis()
+
+        redis = await get_redis()
         if redis:
             await redis.ping()
-            checks.append({"item": "redis", "status": "pass", "message": "Redis连接正常"})
+            checks.append(
+                {"item": "redis", "status": "pass", "message": "Redis连接正常"}
+            )
         else:
             checks.append({"item": "redis", "status": "warn", "message": "Redis未配置"})
-    except Exception as e:
-        checks.append({"item": "redis", "status": "fail", "message": str(e)[:100]})
+    except Exception:
+        logger.exception("self-check: Redis 检查失败")
+        checks.append({"item": "redis", "status": "fail", "message": "Redis连接异常"})
 
     # 3. Tables exist
     try:
-        result = await db.execute(text("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()"))
+        result = await db.execute(
+            text(
+                "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()"
+            )
+        )
         table_count = result.scalar() or 0
-        checks.append({"item": "tables", "status": "pass", "message": f"数据库包含 {table_count} 张表"})
-    except Exception as e:
-        checks.append({"item": "tables", "status": "fail", "message": str(e)[:100]})
+        checks.append(
+            {
+                "item": "tables",
+                "status": "pass",
+                "message": f"数据库包含 {table_count} 张表",
+            }
+        )
+    except Exception:
+        logger.exception("self-check: 表检查失败")
+        checks.append(
+            {"item": "tables", "status": "fail", "message": "数据库表查询异常"}
+        )
 
     # 4. API Server
     checks.append({"item": "api_server", "status": "pass", "message": "API服务运行中"})
@@ -243,14 +346,16 @@ async def platform_self_check(db: AsyncSession = Depends(get_db)):
     failed = sum(1 for c in checks if c["status"] == "fail")
     overall = "pass" if failed == 0 else "fail"
 
-    return success({
-        "overall": overall,
-        "total": len(checks),
-        "passed": passed,
-        "failed": failed,
-        "items": checks,
-        "timestamp": datetime.utcnow().isoformat(),
-    })
+    return success(
+        {
+            "overall": overall,
+            "total": len(checks),
+            "passed": passed,
+            "failed": failed,
+            "items": checks,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    )
 
 
 # ======================================================================
@@ -282,14 +387,20 @@ async def list_tenants(
     db: AsyncSession = Depends(get_db),
 ):
     """租户列表."""
-    total = (await db.execute(
-        text("SELECT COUNT(*) FROM tenants")
-    )).scalar() or 0
+    total = (await db.execute(text("SELECT COUNT(*) FROM tenants"))).scalar() or 0
 
-    rows = (await db.execute(
-        text("SELECT * FROM tenants ORDER BY created_at DESC LIMIT :limit OFFSET :offset"),
-        {"limit": page_size, "offset": (page - 1) * page_size},
-    )).mappings().all()
+    rows = (
+        (
+            await db.execute(
+                text(
+                    "SELECT * FROM tenants ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+                ),
+                {"limit": page_size, "offset": (page - 1) * page_size},
+            )
+        )
+        .mappings()
+        .all()
+    )
 
     items = [dict(r) for r in rows]
     return paginate(items, total, page, page_size)
@@ -315,7 +426,9 @@ async def create_tenant(
         },
     )
     await db.flush()
-    return success({"id": tid, "name": data.name, "code": data.code, "status": "active"})
+    return success(
+        {"id": tid, "name": data.name, "code": data.code, "status": "active"}
+    )
 
 
 @tenant_router.get("/{tenant_id}")
@@ -324,9 +437,15 @@ async def get_tenant(
     db: AsyncSession = Depends(get_db),
 ):
     """租户详情."""
-    row = (await db.execute(
-        text("SELECT * FROM tenants WHERE id = :id"), {"id": tenant_id}
-    )).mappings().first()
+    row = (
+        (
+            await db.execute(
+                text("SELECT * FROM tenants WHERE id = :id"), {"id": tenant_id}
+            )
+        )
+        .mappings()
+        .first()
+    )
     if not row:
         return success(None, message="租户不存在")
     return success(dict(row))
@@ -365,8 +484,6 @@ async def delete_tenant(
     db: AsyncSession = Depends(get_db),
 ):
     """删除租户."""
-    await db.execute(
-        text("DELETE FROM tenants WHERE id = :id"), {"id": tenant_id}
-    )
+    await db.execute(text("DELETE FROM tenants WHERE id = :id"), {"id": tenant_id})
     await db.flush()
     return success({"id": tenant_id, "deleted": True})

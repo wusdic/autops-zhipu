@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-import json
+from datetime import date, datetime
+from decimal import Decimal
 from typing import Any, Generic, TypeVar
+from uuid import UUID
 
-from sqlalchemy import Select, func, select
+from sqlalchemy import DateTime, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.exceptions import NotFoundError
@@ -36,20 +38,21 @@ class CRUDService(Generic[ModelType]):
         page_size: int = 20,
         order_by: str | None = None,
     ) -> tuple[list[ModelType], int]:
-        stmt = select(self.repo.model_class)
-        count_stmt = select(func.count()).select_from(self.repo.model_class)
+        model = self.repo.model
+        stmt = select(model)
+        count_stmt = select(func.count()).select_from(model)
 
         if filters:
             for key, value in filters.items():
-                if hasattr(self.repo.model_class, key) and value is not None:
-                    col = getattr(self.repo.model_class, key)
+                if hasattr(model, key) and value is not None:
+                    col = getattr(model, key)
                     stmt = stmt.where(col == value)
                     count_stmt = count_stmt.where(col == value)
 
-        if order_by and hasattr(self.repo.model_class, order_by):
-            stmt = stmt.order_by(getattr(self.repo.model_class, order_by).desc())
+        if order_by and hasattr(model, order_by):
+            stmt = stmt.order_by(getattr(model, order_by).desc())
         else:
-            stmt = stmt.order_by(self.repo.model_class.id.desc())
+            stmt = stmt.order_by(model.id.desc())
 
         total_result = await self.session.execute(count_stmt)
         total = total_result.scalar() or 0
@@ -83,13 +86,24 @@ class CRUDService(Generic[ModelType]):
 
 
 def model_to_dict(obj: Any) -> dict:
-    """将 SQLAlchemy model 转为 dict，处理 JSON 字段."""
-    result = {}
+    """将 SQLAlchemy model 转为 dict，处理 JSON/日期/UUID/Decimal 字段."""
+    result: dict[str, Any] = {}
     for col in obj.__table__.columns:
         val = getattr(obj, col.key)
-        if val is not None and isinstance(col.type, (
-            __import__("sqlalchemy").DateTime,
-        )):
-            val = val.isoformat() if hasattr(val, "isoformat") else str(val)
-        result[col.key] = val
+        if val is None:
+            result[col.key] = None
+        elif isinstance(val, (datetime, date)):
+            result[col.key] = val.isoformat()
+        elif isinstance(val, UUID):
+            result[col.key] = str(val)
+        elif isinstance(val, Decimal):
+            result[col.key] = float(val)
+        elif (
+            isinstance(val, (dict, list))
+            or isinstance(col.type, DateTime)
+            and isinstance(val, str)
+        ):
+            result[col.key] = val
+        else:
+            result[col.key] = val
     return result

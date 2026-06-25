@@ -9,6 +9,7 @@
   - notifications: 通知推送
   - system: 系统状态
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -26,9 +27,9 @@ from app.common.events import (
     AutomationEvents,
     DomainEvent,
     EventEvents,
-    get_event_bus,
     NotificationEvents,
     TicketEvents,
+    get_event_bus,
 )
 
 logger = logging.getLogger(__name__)
@@ -45,7 +46,9 @@ class ConnectionManager:
         self._user_connections: dict[str, set[str]] = {}  # user_id -> set of client_ids
         self._lock = asyncio.Lock()
 
-    async def connect(self, client_id: str, websocket: WebSocket, user_id: str = "") -> None:
+    async def connect(
+        self, client_id: str, websocket: WebSocket, user_id: str = ""
+    ) -> None:
         await websocket.accept()
         async with self._lock:
             self._connections[client_id] = websocket
@@ -72,20 +75,30 @@ class ConnectionManager:
                 self._subscriptions[client_id].update(channels)
 
     async def broadcast(self, channel: str, message: dict[str, Any]) -> None:
-        """向订阅了指定频道的所有客户端广播消息."""
+        """向订阅了指定频道的所有客户端广播消息.
+
+        只有明确订阅了该频道的客户端才会收到；未订阅的客户端不接收
+        （避免新连接意外收到全平台数据）。
+        """
         async with self._lock:
             disconnected = []
-            for client_id, ws in self._connections.items():
-                subs = self._subscriptions.get(client_id, set())
-                if not subs or channel in subs:
-                    try:
-                        if ws.client_state == WebSocketState.CONNECTED:
-                            await ws.send_json(message)
-                    except Exception:
-                        disconnected.append(client_id)
-            for cid in disconnected:
-                self._connections.pop(cid, None)
-                self._subscriptions.pop(cid, None)
+            targets = [
+                (client_id, ws)
+                for client_id, ws in self._connections.items()
+                if channel in self._subscriptions.get(client_id, set())
+            ]
+        # 锁外并发发送，避免单个慢客户端阻塞全局广播
+        for client_id, ws in targets:
+            try:
+                if ws.client_state == WebSocketState.CONNECTED:
+                    await ws.send_json(message)
+            except Exception:
+                disconnected.append(client_id)
+        if disconnected:
+            async with self._lock:
+                for cid in disconnected:
+                    self._connections.pop(cid, None)
+                    self._subscriptions.pop(cid, None)
 
     async def send_to_user(self, user_id: str, message: dict[str, Any]) -> None:
         """向指定用户的所有连接发送消息."""
@@ -119,14 +132,19 @@ async def websocket_endpoint(
     client_id = str(uuid.uuid4())
     user_id = ""
 
-    # 验证 token
-    if token:
-        try:
-            payload = decode_token(token)
-            user_id = payload.get("sub", "")
-        except Exception:
-            await websocket.close(code=4001, reason="认证失败")
+    # 验证 token（无 token 一律拒绝，禁止匿名连接）
+    if not token:
+        await websocket.close(code=4001, reason="缺少认证 Token")
+        return
+    try:
+        payload = decode_token(token)
+        user_id = payload.get("sub", "")
+        if not user_id:
+            await websocket.close(code=4001, reason="Token 中缺少用户标识")
             return
+    except Exception:
+        await websocket.close(code=4001, reason="认证失败")
+        return
 
     await manager.connect(client_id, websocket, user_id)
 
@@ -141,18 +159,22 @@ async def websocket_endpoint(
                 if msg_type == "subscribe":
                     channels = payload.get("channels", [])
                     await manager.subscribe(client_id, channels)
-                    await websocket.send_json({
-                        "type": "subscribed",
-                        "payload": {"channels": channels},
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                    })
+                    await websocket.send_json(
+                        {
+                            "type": "subscribed",
+                            "payload": {"channels": channels},
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                        }
+                    )
 
                 elif msg_type in ("ping", "_ping"):
-                    await websocket.send_json({
-                        "type": "_pong",
-                        "payload": {},
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                    })
+                    await websocket.send_json(
+                        {
+                            "type": "_pong",
+                            "payload": {},
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                        }
+                    )
 
             except json.JSONDecodeError:
                 pass
@@ -168,13 +190,17 @@ async def websocket_endpoint(
 # 事件总线 → WebSocket 推送桥接
 # ============================================================
 
+
 async def _on_alert_event(event: DomainEvent) -> None:
     """告警事件 → WebSocket 推送."""
-    await manager.broadcast("alerts", {
-        "type": "alert:new",
-        "payload": event.payload,
-        "timestamp": event.timestamp,
-    })
+    await manager.broadcast(
+        "alerts",
+        {
+            "type": "alert:new",
+            "payload": event.payload,
+            "timestamp": event.timestamp,
+        },
+    )
 
 
 async def _on_execution_event(event: DomainEvent) -> None:
@@ -189,46 +215,61 @@ async def _on_execution_event(event: DomainEvent) -> None:
         AutomationEvents.DRY_RUN_COMPLETED: "execution:completed",
     }
     msg_type = channel_map.get(event.event_type, "execution:update")
-    await manager.broadcast("executions", {
-        "type": msg_type,
-        "payload": event.payload,
-        "timestamp": event.timestamp,
-    })
+    await manager.broadcast(
+        "executions",
+        {
+            "type": msg_type,
+            "payload": event.payload,
+            "timestamp": event.timestamp,
+        },
+    )
 
 
 async def _on_event_event(event: DomainEvent) -> None:
     """事件流 → WebSocket 推送."""
-    await manager.broadcast("events", {
-        "type": "event:new",
-        "payload": event.payload,
-        "timestamp": event.timestamp,
-    })
+    await manager.broadcast(
+        "events",
+        {
+            "type": "event:new",
+            "payload": event.payload,
+            "timestamp": event.timestamp,
+        },
+    )
 
 
 async def _on_notification_event(event: DomainEvent) -> None:
     """通知事件 → WebSocket 推送到特定用户."""
     user_id = event.payload.get("user_id", "")
     if user_id:
-        await manager.send_to_user(user_id, {
-            "type": "notification",
-            "payload": event.payload,
-            "timestamp": event.timestamp,
-        })
+        await manager.send_to_user(
+            user_id,
+            {
+                "type": "notification",
+                "payload": event.payload,
+                "timestamp": event.timestamp,
+            },
+        )
     else:
-        await manager.broadcast("notifications", {
-            "type": "notification",
-            "payload": event.payload,
-            "timestamp": event.timestamp,
-        })
+        await manager.broadcast(
+            "notifications",
+            {
+                "type": "notification",
+                "payload": event.payload,
+                "timestamp": event.timestamp,
+            },
+        )
 
 
 async def _on_ticket_event(event: DomainEvent) -> None:
     """工单事件 → WebSocket 推送."""
-    await manager.broadcast("notifications", {
-        "type": "ticket:updated",
-        "payload": event.payload,
-        "timestamp": event.timestamp,
-    })
+    await manager.broadcast(
+        "notifications",
+        {
+            "type": "ticket:updated",
+            "payload": event.payload,
+            "timestamp": event.timestamp,
+        },
+    )
 
 
 def register_ws_event_bridges() -> None:
@@ -241,7 +282,6 @@ def register_ws_event_bridges() -> None:
 
     if bus.outbox_enabled:
         # 生产模式: 通过 Redis Pub/Sub 接收 Worker 的事件
-        import asyncio
         from app.common.realtime import start_api_realtime_subscriber
 
         async def _on_realtime_message(data: dict) -> None:
@@ -252,7 +292,9 @@ def register_ws_event_bridges() -> None:
             # 根据事件类型路由到对应频道
             if event_type.startswith("alert."):
                 await manager.broadcast("alerts", data)
-            elif event_type.startswith("automation.") or event_type.startswith("execution."):
+            elif event_type.startswith("automation.") or event_type.startswith(
+                "execution."
+            ):
                 await manager.broadcast("executions", data)
             elif event_type.startswith("event.") or event_type.startswith("state."):
                 await manager.broadcast("events", data)
@@ -265,11 +307,11 @@ def register_ws_event_bridges() -> None:
             elif event_type.startswith("ticket."):
                 await manager.broadcast("notifications", data)
             else:
-                # 广播到所有未设置订阅的客户端（通用频道）
-                await manager.broadcast("", data)
+                # 未知事件类型仅记录日志，不广播（避免泄漏给无关客户端）
+                logger.debug("未识别的 realtime 事件类型，已忽略: %s", event_type)
 
         # 需要在运行中的 event loop 内启动 subscriber
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         loop.create_task(
             start_api_realtime_subscriber(_on_realtime_message),
             name="realtime-ws-bridge",

@@ -2,13 +2,29 @@
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter
 from sqlalchemy import text
 
-from app.infra.database import get_db
+from app.infra.database import get_session_factory
 from app.infra.redis_client import get_redis
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(tags=["health"])
+
+
+async def _check_db() -> bool:
+    """检查数据库连通性，正确关闭会话避免连接泄漏."""
+    session_factory = get_session_factory()
+    try:
+        async with session_factory() as session:
+            await session.execute(text("SELECT 1"))
+        return True
+    except Exception:
+        logger.exception("健康检查：数据库连接失败")
+        return False
 
 
 @router.get("/health")
@@ -19,24 +35,21 @@ async def health():
 
 @router.get("/ready")
 async def ready():
-    """就绪检查：DB + Redis."""
-    checks = {}
+    """就绪检查：DB + Redis。
 
-    # 数据库
-    try:
-        db = await anext(get_db())
-        await db.execute(text("SELECT 1"))
-        checks["database"] = "ok"
-    except Exception as e:
-        checks["database"] = f"error: {e}"
+    对外只返回 ok/error 状态，不回显异常详情（避免泄漏内部拓扑）。
+    """
+    checks: dict[str, str] = {}
 
-    # Redis
+    checks["database"] = "ok" if await _check_db() else "error"
+
     try:
         redis = await get_redis()
         await redis.ping()
         checks["redis"] = "ok"
-    except Exception as e:
-        checks["redis"] = f"error: {e}"
+    except Exception:
+        logger.exception("健康检查：Redis 连接失败")
+        checks["redis"] = "error"
 
     all_ok = all(v == "ok" for v in checks.values())
     return {"status": "ready" if all_ok else "degraded", "checks": checks}
@@ -48,29 +61,29 @@ platform_router = APIRouter(prefix="/platform", tags=["平台管理"])
 
 @platform_router.get("/status")
 async def platform_status():
-    """平台组件状态."""
+    """平台组件状态。
+
+    对外只返回 ok/error 状态，不回显异常详情（避免泄漏内部拓扑）。
+    """
     from app.common.response import success
-    checks = {}
 
-    # 数据库
-    try:
-        db = await anext(get_db())
-        await db.execute(text("SELECT 1"))
-        checks["database"] = {"status": "ok"}
-    except Exception as e:
-        checks["database"] = {"status": "error", "message": str(e)}
+    checks: dict[str, dict] = {}
 
-    # Redis
+    checks["database"] = {"status": "ok" if await _check_db() else "error"}
+
     try:
         redis = await get_redis()
         await redis.ping()
         checks["redis"] = {"status": "ok"}
-    except Exception as e:
-        checks["redis"] = {"status": "error", "message": str(e)}
+    except Exception:
+        logger.exception("平台状态检查：Redis 连接失败")
+        checks["redis"] = {"status": "error"}
 
     all_ok = all(v.get("status") == "ok" for v in checks.values())
-    return success({
-        "status": "healthy" if all_ok else "degraded",
-        "components": checks,
-        "version": "1.0.0",
-    })
+    return success(
+        {
+            "status": "healthy" if all_ok else "degraded",
+            "components": checks,
+            "version": "1.0.0",
+        }
+    )
