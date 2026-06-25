@@ -75,8 +75,12 @@ async def generate_report(
     body: ReportGenerateRequest,
     svc: ReportService = Depends(_get_svc),
 ):
-    """生成报告（创建任务）."""
+    """生成报告（创建任务并后台渲染）."""
     task = await svc.generate_report(body)
+    await svc.session.commit()
+    from app.domains.report.generator import launch_report_build
+
+    launch_report_build(str(task.id))
     return success(model_to_dict(task))
 
 

@@ -70,6 +70,14 @@ class WorkerRunner:
             name="collection-scheduler",
         ))
 
+        # 3.5 启动巡检定时调度器（按 cron 触发巡检计划）
+        from app.workers.inspection_scheduler import get_inspection_scheduler
+        inspection_scheduler = get_inspection_scheduler()
+        self._tasks.append(asyncio.create_task(
+            inspection_scheduler.start(interval=60),
+            name="inspection-scheduler",
+        ))
+
         # 4. 启动 heartbeat loop
         self._tasks.append(asyncio.create_task(
             self._heartbeat_loop(),
@@ -83,6 +91,7 @@ class WorkerRunner:
         # Shutdown: stop consumer and scheduler
         outbox_consumer.stop()
         await scheduler.stop()
+        await inspection_scheduler.stop()
         logger.info("WorkerRunner stopped")
 
     async def _heartbeat_loop(self) -> None:

@@ -186,6 +186,11 @@ async def trigger_task(
     svc: InspectionService = Depends(_get_service),
 ):
     task = await svc.trigger_task(data)
+    # 确保任务落库后再启动后台执行（执行器使用独立 session 读取该任务）
+    await svc.session.commit()
+    from app.domains.inspection.executor import launch_inspection_task
+
+    launch_inspection_task(str(task.id))
     return success(_task_to_dict(task))
 
 
