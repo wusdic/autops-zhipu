@@ -97,6 +97,13 @@ class AlertService:
         await self.session.refresh(rule)
         return rule
 
+    async def delete_rule(self, rule_id: str) -> None:
+        rule = await self.rule_repo.get_by_id(rule_id)
+        if not rule:
+            raise NotFoundError(f"告警规则 {rule_id} 不存在")
+        await self.session.delete(rule)
+        await self.session.flush()
+
     async def test_rule(self, rule_id: str) -> dict:
         """测试告警规则（模拟触发）."""
         rule = await self.rule_repo.get_by_id(rule_id)

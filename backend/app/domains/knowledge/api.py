@@ -98,6 +98,12 @@ async def update_article(article_id: str, data: KnowledgeUpdate, svc: KnowledgeS
     return success(model_to_dict(a))
 
 
+@router.delete("/{article_id}")
+async def delete_article(article_id: str, svc: KnowledgeService = Depends(_get_svc)):
+    await svc.delete_article(article_id)
+    return success(message="知识文章已删除")
+
+
 @router.post("/{article_id}/publish")
 async def publish_article(article_id: str, svc: KnowledgeService = Depends(_get_svc)):
     a = await svc.publish_article(article_id)

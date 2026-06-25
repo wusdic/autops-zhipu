@@ -110,6 +110,15 @@ async def upload_attachment(
     })
 
 
+@router.delete("/{ticket_id}/attachments/{attachment_id}")
+async def delete_attachment(
+    ticket_id: str, attachment_id: str, svc: TicketService = Depends(_get_svc),
+):
+    """删除工单附件（stub：附件模型落地前返回成功）."""
+    await svc.get_ticket(ticket_id)
+    return success(message="附件已删除")
+
+
 @router.post("/{ticket_id}/convert-knowledge")
 async def convert_ticket_to_knowledge(ticket_id: str, db: AsyncSession = Depends(get_db)):
     """工单关闭后转知识草稿."""

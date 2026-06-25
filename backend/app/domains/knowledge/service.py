@@ -49,6 +49,11 @@ class KnowledgeService:
             raise NotFoundError(f"知识文章 {article_id} 不存在")
         return a
 
+    async def delete_article(self, article_id: str) -> None:
+        a = await self.get_article(article_id)
+        await self.session.delete(a)
+        await self.session.flush()
+
     async def update_article(self, article_id: str, data: KnowledgeUpdate) -> KnowledgeArticle:
         a = await self.get_article(article_id)
         update_data = data.model_dump(exclude_unset=True)

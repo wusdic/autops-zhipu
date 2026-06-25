@@ -69,6 +69,12 @@ async def patch_rule(rule_id: str, data: AlertRulePatch, svc: AlertService = Dep
     return success(model_to_dict(rule))
 
 
+@rule_router.delete("/{rule_id}")
+async def delete_rule(rule_id: str, svc: AlertService = Depends(_get_svc)):
+    await svc.delete_rule(rule_id)
+    return success(message="告警规则已删除")
+
+
 @rule_router.post("/{rule_id}/test")
 async def test_rule(rule_id: str, svc: AlertService = Depends(_get_svc)):
     """测试告警规则（模拟触发）."""

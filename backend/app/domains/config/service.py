@@ -272,6 +272,27 @@ class ConfigService:
             raise NotFoundError(f"""凭证 {cred_id} 不存在""")
         return cred
 
+    async def update_credential(
+        self, cred_id: str, name: str | None = None,
+        description: str | None = None, data: str | None = None,
+    ) -> Credential:
+        cred = await self.get_credential(cred_id)
+        if name is not None:
+            cred.name = name
+        if description is not None:
+            cred.description = description
+        if data:
+            cred.encrypted_data = encrypt_credential(data)
+            cred.test_status = "unknown"
+        await self.session.flush()
+        await self.session.refresh(cred)
+        return cred
+
+    async def delete_credential(self, cred_id: str) -> None:
+        cred = await self.get_credential(cred_id)
+        cred.is_deleted = True
+        await self.session.flush()
+
     async def bind_credential(
         self, credential_id: str, asset_id: str
     ) -> CredentialBinding:

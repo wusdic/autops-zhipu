@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.response import Response, paginate, success
@@ -119,6 +120,26 @@ async def create_credential(data: CredentialCreate, svc: ConfigService = Depends
 async def get_credential(cred_id: str, svc: ConfigService = Depends(_get_service)):
     cred = await svc.get_credential(cred_id)
     return success(model_to_dict(cred))
+
+
+class CredentialUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    data: str | None = None
+
+
+@cred_router.put("/{cred_id}")
+async def update_credential(cred_id: str, body: CredentialUpdate, svc: ConfigService = Depends(_get_service)):
+    cred = await svc.update_credential(
+        cred_id, name=body.name, description=body.description, data=body.data
+    )
+    return success(model_to_dict(cred))
+
+
+@cred_router.delete("/{cred_id}")
+async def delete_credential(cred_id: str, svc: ConfigService = Depends(_get_service)):
+    await svc.delete_credential(cred_id)
+    return success(message="凭证已删除")
 
 
 @cred_router.post("/{cred_id}/bind")

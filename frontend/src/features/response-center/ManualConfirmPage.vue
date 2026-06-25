@@ -141,7 +141,7 @@ function riskType(r: string): TagType { return ({ high: 'danger', medium: 'warni
 async function loadData() {
   loading.value = true
   try {
-    const res = await client.get('/api/v1/automation/approvals', { params: { status: filters.status, page: pagination.page, page_size: pagination.size } })
+    const res = await client.get('/api/v1/approvals', { params: { status: filters.status, page: pagination.page, page_size: pagination.size } })
     const data = res.data?.data ?? res.data
     items.value = data?.items || []
     pagination.total = data?.total || 0
@@ -153,7 +153,7 @@ function viewDetail(row: any) { detailData.value = row; detailVisible.value = tr
 async function handleConfirm(row: any) {
   try {
     await ElMessageBox.confirm('确认执行该操作？执行后不可撤销。', '确认执行', { type: 'warning' })
-    await client.post('/api/v1/automation/approvals/' + row.id + '/approve')
+    await client.post('/api/v1/approvals/' + row.id + '/approve')
     ElMessage.success('已确认执行')
     loadData()
   } catch { /* cancelled */ }
@@ -162,7 +162,7 @@ async function handleConfirm(row: any) {
 async function handleReject(row: any) {
   try {
     const { value } = await ElMessageBox.prompt('请输入拒绝原因', '拒绝确认', { type: 'warning', inputPlaceholder: '拒绝原因' })
-    await client.post('/api/v1/automation/approvals/' + row.id + '/reject', { reason: value })
+    await client.post('/api/v1/approvals/' + row.id + '/reject', { reason: value })
     ElMessage.success('已拒绝')
     loadData()
   } catch { /* cancelled */ }

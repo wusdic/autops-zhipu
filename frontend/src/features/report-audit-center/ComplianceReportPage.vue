@@ -134,7 +134,7 @@ function standardName(s: string) { return standardMap[s] || s }
 async function loadData() {
   loading.value = true
   try {
-    const res = await client.get('/api/v1/reports/archive', { params: { type: 'compliance', page: pagination.page, page_size: pagination.size } })
+    const res = await client.get('/api/v1/report/archive', { params: { type: 'compliance', page: pagination.page, page_size: pagination.size } })
     const data = res.data?.data ?? res.data
     reports.value = data?.items || []
     pagination.total = data?.total || 0
@@ -158,7 +158,7 @@ async function loadData() {
 
 async function generateReport() {
   try {
-    await client.post('/api/v1/reports/generate', { type: 'compliance', standard: filters.value.standard || 'mlps_2' })
+    await client.post('/api/v1/report/generate', { type: 'compliance', standard: filters.value.standard || 'mlps_2' })
     ElMessage.success('合规报告生成中...')
     setTimeout(loadData, 2000)
   } catch { ElMessage.error('生成失败') }
@@ -166,7 +166,7 @@ async function generateReport() {
 
 function viewReport(row: any) { router.push('/reports/archive/' + row.id) }
 async function downloadReport(row: any) {
-  window.open('/api/v1/reports/tasks/' + row.id + '/download', '_blank')
+  window.open('/api/v1/report/tasks/' + row.id + '/download', '_blank')
 }
 
 onMounted(loadData)

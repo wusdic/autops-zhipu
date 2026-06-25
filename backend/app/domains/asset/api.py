@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.auth_dependency import require_admin
@@ -239,6 +240,21 @@ async def get_asset_credentials(
 ):
     creds = await svc.get_asset_credentials(asset_id)
     return success([model_to_dict(c) for c in creds])
+
+
+class _AssetCredBind(BaseModel):
+    credential_id: str
+
+
+@router.post("/{asset_id}/credentials", dependencies=[Depends(require_admin)])
+async def bind_asset_credential(
+    asset_id: str, body: _AssetCredBind, db: AsyncSession = Depends(get_db)
+):
+    """绑定凭证到资产."""
+    from app.domains.config.service import ConfigService
+
+    binding = await ConfigService(db).bind_credential(body.credential_id, asset_id)
+    return success(model_to_dict(binding))
 
 
 # --- 资产策略 ---
