@@ -1,7 +1,9 @@
 """告警中心领域事件处理器."""
+
 from __future__ import annotations
 
 import logging
+from collections import OrderedDict
 
 from app.common.events import (
     DomainEvent,
@@ -18,21 +20,27 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Idempotency guard — 防止同一事件被同一处理器重复处理
 # ---------------------------------------------------------------------------
-_processed_events: set[str] = set()
+# 用 OrderedDict 实现 LRU 淘汰：达上限时按插入顺序移除最旧条目，
+# 而非全量 clear()（后者会在清空窗口内让重放事件被当作新事件重复处理）。
+# 注意：多 worker 部署下进程内去重无效，需迁移到 Redis SETNX（后续架构演进）。
+_processed_events: OrderedDict[str, None] = OrderedDict()
 _MAX_PROCESSED = 50_000  # 防止内存无限增长
 
 
 def idempotent_handler(func):
     """装饰器: 防止同一事件被同一处理器重复处理."""
+
     async def wrapper(event):
         key = f"{getattr(event, 'event_id', '')}:{func.__name__}"
         if key in _processed_events:
             logger.debug("alert: 跳过重复处理 key=%s", key)
             return
-        if len(_processed_events) > _MAX_PROCESSED:
-            _processed_events.clear()
-        _processed_events.add(key)
+        # LRU 淘汰：达上限时移除最旧的条目
+        if len(_processed_events) >= _MAX_PROCESSED:
+            _processed_events.popitem(last=False)
+        _processed_events[key] = None
         return await func(event)
+
     wrapper.__name__ = func.__name__
     wrapper.__qualname__ = func.__qualname__
     return wrapper
@@ -41,6 +49,7 @@ def idempotent_handler(func):
 # ---------------------------------------------------------------------------
 # 原有告警领域处理器
 # ---------------------------------------------------------------------------
+
 
 @idempotent_handler
 async def on_event_created_match_rules(event: DomainEvent) -> None:
@@ -62,30 +71,36 @@ async def on_event_created_match_rules(event: DomainEvent) -> None:
             rules = await svc.list_rules(enabled_only=True)
             matched_alerts = []
             for rule in rules:
-                rule_types = rule.event_types if isinstance(rule.event_types, list) else []
+                rule_types = (
+                    rule.event_types if isinstance(rule.event_types, list) else []
+                )
                 rule_assets = rule.asset_ids if isinstance(rule.asset_ids, list) else []
                 type_match = event_type in rule_types or not rule_types
                 asset_match = asset_id in rule_assets if rule_assets else True
                 if type_match and asset_match:
-                    matched_alerts.append({
-                        "title": f"[规则触发] {rule.name}",
-                        "severity": rule.severity,
-                        "rule_id": str(rule.id),
-                        "event_ids": [event.event_id],
-                        "asset_ids": [asset_id] if asset_id else [],
-                        "context": payload,
-                    })
+                    matched_alerts.append(
+                        {
+                            "title": f"[规则触发] {rule.name}",
+                            "severity": rule.severity,
+                            "rule_id": str(rule.id),
+                            "event_ids": [event.event_id],
+                            "asset_ids": [asset_id] if asset_id else [],
+                            "context": payload,
+                        }
+                    )
 
         if matched_alerts:
             bus = get_event_bus()
             for alert_data in matched_alerts:
-                await bus.publish(DomainEvent(
-                    event_type=_AE.ALERT_CREATED,
-                    domain="alert",
-                    payload=alert_data,
-                    source="alert_engine",
-                    correlation_id=event.correlation_id or event.event_id,
-                ))
+                await bus.publish(
+                    DomainEvent(
+                        event_type=_AE.ALERT_CREATED,
+                        domain="alert",
+                        payload=alert_data,
+                        source="alert_engine",
+                        correlation_id=event.correlation_id or event.event_id,
+                    )
+                )
             logger.info("alert: 事件创建匹配到 %d 条告警规则", len(matched_alerts))
         else:
             logger.debug("alert: 事件创建未匹配到告警规则 event_type=%s", event_type)
@@ -121,12 +136,14 @@ async def on_state_recovered_auto_resolve(event: DomainEvent) -> None:
                 except Exception as e:
                     logger.warning(
                         "alert: 自动resolve告警失败 alert_id=%s: %s",
-                        str(alert.id), e,
+                        str(alert.id),
+                        e,
                     )
             await session.commit()
             logger.info(
                 "alert: 状态恢复自动resolve %d 条告警 asset_id=%s",
-                resolved_count, asset_id,
+                resolved_count,
+                asset_id,
             )
     except Exception as e:
         logger.error("alert: 状态恢复自动resolve告警失败: %s", e)
@@ -152,23 +169,26 @@ async def on_event_deduplicated_suppress(event: DomainEvent) -> None:
 # 从 common/event_handlers.py 迁移的处理器
 # ---------------------------------------------------------------------------
 
+
 @idempotent_handler
 async def on_alert_notification(event) -> None:
     """告警/升级 → 发送通知."""
     payload = event.payload
     bus = get_event_bus()
-    await bus.publish(DomainEvent(
-        event_type=NotificationEvents.NOTIFICATION_SENT,
-        domain="notification",
-        payload={
-            "type": "alert",
-            "title": payload.get("title", "告警通知"),
-            "message": f"告警: {payload.get('title', '')} 严重度: {payload.get('severity', '')}",
-            "ref_id": payload.get("alert_id"),
-        },
-        source="handler",
-        correlation_id=event.event_id,
-    ))
+    await bus.publish(
+        DomainEvent(
+            event_type=NotificationEvents.NOTIFICATION_SENT,
+            domain="notification",
+            payload={
+                "type": "alert",
+                "title": payload.get("title", "告警通知"),
+                "message": f"告警: {payload.get('title', '')} 严重度: {payload.get('severity', '')}",
+                "ref_id": payload.get("alert_id"),
+            },
+            source="handler",
+            correlation_id=event.event_id,
+        )
+    )
 
 
 @idempotent_handler
@@ -178,7 +198,9 @@ async def on_execution_completed_resolve(event) -> None:
     # 更新告警状态为 resolved（如果有关联告警）
     alert_id = payload.get("alert_id")
     if alert_id:
-        await _resolve_alert(alert_id, "auto_resolved", event.payload.get("execution_id", ""))
+        await _resolve_alert(
+            alert_id, "auto_resolved", event.payload.get("execution_id", "")
+        )
 
 
 @idempotent_handler
@@ -187,17 +209,20 @@ async def on_alert_created_notify_external(event):
     try:
         from app.integrations.registry import NotificationRegistry
         from app.integrations.base import NotificationPayload
+
         payload = event.payload
         severity = payload.get("severity", "info")
         if severity in ("critical", "warning"):
             registry = NotificationRegistry.get_instance()
-            await registry.broadcast(NotificationPayload(
-                title=payload.get("title", "New Alert"),
-                severity=severity,
-                alert_id=payload.get("alert_id"),
-                asset_name=payload.get("asset_name"),
-                message=payload.get("detail"),
-            ))
+            await registry.broadcast(
+                NotificationPayload(
+                    title=payload.get("title", "New Alert"),
+                    severity=severity,
+                    alert_id=payload.get("alert_id"),
+                    asset_name=payload.get("asset_name"),
+                    message=payload.get("detail"),
+                )
+            )
     except Exception as e:
         logger.error("External notification failed: %s", e)
 
@@ -206,11 +231,13 @@ async def on_alert_created_notify_external(event):
 # 辅助函数
 # ---------------------------------------------------------------------------
 
+
 async def _resolve_alert(alert_id: str, reason: str, execution_id: str = "") -> None:
     """自动解决告警."""
     try:
         from app.infra.database import async_session_factory
         from app.domains.alert.service import AlertService
+
         async with async_session_factory() as session:
             svc = AlertService(session)
             await svc.resolve(alert_id=alert_id, user_id="system")
@@ -235,6 +262,7 @@ def _register_external_notification_channels() -> None:
 # ---------------------------------------------------------------------------
 # 注册入口
 # ---------------------------------------------------------------------------
+
 
 def register_handlers() -> None:
     """注册告警领域的事件处理器."""

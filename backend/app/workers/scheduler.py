@@ -1,4 +1,5 @@
 """采集调度器 - 定时+事件驱动采集."""
+
 from __future__ import annotations
 
 import asyncio
@@ -39,9 +40,7 @@ ASSET_TYPE_COLLECTOR_MAP: dict[str, list[str]] = {
 DEFAULT_COLLECTORS = ["ping"]
 
 
-def _get_applicable_collectors(
-    asset_type: str, ip: str
-) -> dict[str, object]:
+def _get_applicable_collectors(asset_type: str, ip: str) -> dict[str, object]:
     """根据资产类型返回适用的采集器子集."""
     types = ASSET_TYPE_COLLECTOR_MAP.get(asset_type, DEFAULT_COLLECTORS)
     applicable = {}
@@ -78,7 +77,10 @@ async def run_collection_for_asset(
 
     ip = asset.ip
     if not ip or ip == "0.0.0.0":
-        logger.debug("run_collection_for_asset: skip asset=%s (no valid IP)", getattr(asset, "id", "?"))
+        logger.debug(
+            "run_collection_for_asset: skip asset=%s (no valid IP)",
+            getattr(asset, "id", "?"),
+        )
         return None
 
     # 确保内置采集器已注册 & 建立 type→id 映射
@@ -95,13 +97,20 @@ async def run_collection_for_asset(
     asset_type = getattr(asset, "asset_type", "unknown") or "unknown"
     if collector_types is not None:
         # 调用方指定了采集器类型，只跑这些
-        applicable = {ct: COLLECTOR_REGISTRY[ct] for ct in collector_types if ct in COLLECTOR_REGISTRY}
+        applicable = {
+            ct: COLLECTOR_REGISTRY[ct]
+            for ct in collector_types
+            if ct in COLLECTOR_REGISTRY
+        }
     else:
         applicable = _get_applicable_collectors(asset_type, ip)
 
     logger.info(
         "run_collection_for_asset: asset=%s ip=%s trigger=%s collectors=%s",
-        getattr(asset, "hostname", "?"), ip, trigger, list(applicable.keys()),
+        getattr(asset, "hostname", "?"),
+        ip,
+        trigger,
+        list(applicable.keys()),
     )
 
     last_job = None
@@ -112,7 +121,12 @@ async def run_collection_for_asset(
             status = result_data.get("status", "error")
         except Exception as e:
             logger.warning("Collection %s error for %s: %s", ctype, ip, e)
-            result_data = {"error": str(e), "collector": ctype, "ip": ip, "status": "error"}
+            result_data = {
+                "error": str(e),
+                "collector": ctype,
+                "ip": ip,
+                "status": "error",
+            }
             status = "error"
 
         # --- 写入 DB: Job + Result ---
@@ -124,11 +138,13 @@ async def run_collection_for_asset(
 
             # 查找或创建 Job
             existing = await session.execute(
-                select(CollectionJob).where(
+                select(CollectionJob)
+                .where(
                     CollectionJob.asset_id == str(asset.id),
                     CollectionJob.collector_id == real_collector_id,
                     CollectionJob.status == "running",
-                ).limit(1)
+                )
+                .limit(1)
             )
             job_obj = existing.scalar_one_or_none()
             if not job_obj:
@@ -172,7 +188,9 @@ async def run_collection_for_asset(
 
             logger.info(
                 "Ping check: asset=%s was_online=%s is_alive=%s",
-                asset.hostname, was_online, is_alive,
+                asset.hostname,
+                was_online,
+                is_alive,
             )
 
             if was_online != is_alive:
@@ -180,25 +198,35 @@ async def run_collection_for_asset(
                 asset.status = new_status
                 await session.flush()
 
-                # 在同一事务中写 outbox（不单独 commit）
+                # 在同一事务中写 outbox（传入 session 复用业务事务，原子提交/回滚）
                 bus = get_event_bus()
-                logger.info("Publishing STATE_CHANGED: %s → %s (trigger=%s)", old_status, new_status, trigger)
-                await bus.publish(DomainEvent(
-                    domain="state",
-                    event_type=StateEvents.STATE_CHANGED,
-                    payload={
-                        "asset_id": str(asset.id),
-                        "asset_name": asset.hostname,
-                        "ip": ip,
-                        "old_status": old_status,
-                        "new_status": new_status,
-                        "source": "collector.ping",
-                        "metrics": result_data,
-                    },
-                ))
+                logger.info(
+                    "Publishing STATE_CHANGED: %s → %s (trigger=%s)",
+                    old_status,
+                    new_status,
+                    trigger,
+                )
+                await bus.publish(
+                    DomainEvent(
+                        domain="state",
+                        event_type=StateEvents.STATE_CHANGED,
+                        payload={
+                            "asset_id": str(asset.id),
+                            "asset_name": asset.hostname,
+                            "ip": ip,
+                            "old_status": old_status,
+                            "new_status": new_status,
+                            "source": "collector.ping",
+                            "metrics": result_data,
+                        },
+                    ),
+                    session=session,
+                )
                 logger.info(
                     "State change published: asset=%s %s → %s",
-                    asset.hostname, old_status, new_status,
+                    asset.hostname,
+                    old_status,
+                    new_status,
                 )
 
     await session.flush()
@@ -258,14 +286,19 @@ class CollectionScheduler:
                 if not self._running:
                     break
                 try:
-                    await run_collection_for_asset(
-                        asset, session, trigger="schedule"
-                    )
+                    await run_collection_for_asset(asset, session, trigger="schedule")
                 except Exception as e:
-                    logger.warning("Collection error: asset=%s, error=%s", asset.ip, e, exc_info=True)
+                    logger.warning(
+                        "Collection error: asset=%s, error=%s",
+                        asset.ip,
+                        e,
+                        exc_info=True,
+                    )
 
             await session.commit()
-            logger.info("CollectionScheduler: batch completed for %d assets", len(assets))
+            logger.info(
+                "CollectionScheduler: batch completed for %d assets", len(assets)
+            )
 
 
 async def on_asset_created_run_collection(event) -> None:
@@ -284,16 +317,12 @@ async def on_asset_created_run_collection(event) -> None:
 
     try:
         async with async_session_factory() as session:
-            result = await session.execute(
-                select(Asset).where(Asset.id == asset_id)
-            )
+            result = await session.execute(select(Asset).where(Asset.id == asset_id))
             asset = result.scalar_one_or_none()
             if not asset:
                 return
 
-            await run_collection_for_asset(
-                asset, session, trigger="asset_created"
-            )
+            await run_collection_for_asset(asset, session, trigger="asset_created")
             await session.commit()
 
     except Exception as e:

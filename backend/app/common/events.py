@@ -7,6 +7,7 @@
 - 支持事件优先级和过滤
 - 支持重试和死信
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -17,14 +18,18 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Callable, Coroutine
+from typing import TYPE_CHECKING, Any, Callable, Coroutine
 from functools import lru_cache
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
 
 class EventPriority(int, Enum):
     """事件优先级."""
+
     LOW = 0
     NORMAL = 1
     HIGH = 2
@@ -37,6 +42,7 @@ class DomainEvent:
 
     所有领域间通信的事件都继承此类。
     """
+
     event_type: str
     domain: str
     payload: dict[str, Any] = field(default_factory=dict)
@@ -100,7 +106,7 @@ class EventBus:
         self._handlers[event_type].append(handler)
         logger.debug(
             "EventBus: %s subscribed to %s",
-            handler.__name__ if hasattr(handler, '__name__') else handler,
+            handler.__name__ if hasattr(handler, "__name__") else handler,
             event_type,
         )
 
@@ -115,31 +121,43 @@ class EventBus:
                 h for h in self._handlers[event_type] if h != handler
             ]
 
-    async def publish(self, event: DomainEvent) -> None:
+    async def publish(
+        self, event: DomainEvent, session: AsyncSession | None = None
+    ) -> None:
         """发布事件.
 
         两种模式:
         - _outbox_enabled=False (dev mode): 直接触发handler（in-process dispatch）
         - _outbox_enabled=True  (prod/API): 仅写入outbox，不触发handler
+
+        Args:
+            event: 要发布的事件
+            session: 可选的业务会话。传入时 outbox 写入复用该会话的事务
+                （与业务数据原子提交/回滚）；不传则使用独立会话。
         """
         event_dict = event.to_dict()
 
         # 记录到内存日志
         self._event_log.append(event_dict)
         if len(self._event_log) > self._max_log_size:
-            self._event_log = self._event_log[-self._max_log_size:]
+            self._event_log = self._event_log[-self._max_log_size :]
 
         logger.info(
             "EventBus publish: [%s] %s (priority=%s, outbox=%s)",
-            event.domain, event.event_type, event.priority.name, self._outbox_enabled,
+            event.domain,
+            event.event_type,
+            event.priority.name,
+            self._outbox_enabled,
         )
 
         if self._outbox_enabled:
             # 生产模式: 仅持久化到outbox，不触发handler
             try:
-                await self._persist_to_outbox(event)
+                await self._persist_to_outbox(event, session)
             except Exception:
-                logger.exception("EventBus: outbox persist failed for %s", event.event_type)
+                logger.exception(
+                    "EventBus: outbox persist failed for %s", event.event_type
+                )
         else:
             # 开发模式: 直接触发handler（无outbox持久化）
             await self.dispatch_to_handlers(event)
@@ -157,37 +175,52 @@ class EventBus:
             except Exception:
                 logger.exception(
                     "EventBus handler %s failed for %s",
-                    handler.__name__ if hasattr(handler, '__name__') else handler,
+                    handler.__name__ if hasattr(handler, "__name__") else handler,
                     event.event_type,
                 )
 
-    async def _persist_to_outbox(self, event: DomainEvent) -> None:
-        """将事件持久化到 event_outbox 表."""
+    async def _persist_to_outbox(
+        self, event: DomainEvent, session: AsyncSession | None = None
+    ) -> None:
+        """将事件持久化到 event_outbox 表.
+
+        Args:
+            event: 要持久化的事件
+            session: 业务会话。传入时复用其事务（不自行 commit/关闭），
+                实现 outbox 与业务数据的原子性；不传则新建独立会话并提交。
+        """
+        from sqlalchemy import text
+
+        insert_sql = text("""
+            INSERT INTO event_outbox
+                (event_id, event_type, domain, payload, priority, source,
+                 correlation_id, status, created_at)
+            VALUES
+                (:eid, :etype, :domain, :payload, :priority, :source,
+                 :corr_id, 'pending', NOW())
+        """)
+        params = {
+            "eid": event.event_id,
+            "etype": event.event_type,
+            "domain": event.domain,
+            "payload": json.dumps(event.payload, ensure_ascii=False, default=str),
+            "priority": event.priority.value,
+            "source": event.source,
+            "corr_id": event.correlation_id or None,
+        }
+
+        if session is not None:
+            # 复用业务事务，由调用方统一 commit/rollback
+            await session.execute(insert_sql, params)
+            return
+
+        # 无外部 session：新建独立会话并提交
         from app.infra.database import get_session_factory
 
         session_factory = get_session_factory()
-        async with session_factory() as session:
-            from sqlalchemy import text
-            await session.execute(
-                text("""
-                    INSERT INTO event_outbox
-                        (event_id, event_type, domain, payload, priority, source,
-                         correlation_id, status, created_at)
-                    VALUES
-                        (:eid, :etype, :domain, :payload, :priority, :source,
-                         :corr_id, 'pending', NOW())
-                """),
-                {
-                    "eid": event.event_id,
-                    "etype": event.event_type,
-                    "domain": event.domain,
-                    "payload": json.dumps(event.payload, ensure_ascii=False, default=str),
-                    "priority": event.priority.value,
-                    "source": event.source,
-                    "corr_id": event.correlation_id or None,
-                },
-            )
-            await session.commit()
+        async with session_factory() as s:
+            await s.execute(insert_sql, params)
+            await s.commit()
 
     async def replay_pending(self) -> int:
         """重放所有 pending 状态的 outbox 事件（启动/恢复时调用）."""
@@ -197,8 +230,11 @@ class EventBus:
         replayed = 0
         async with session_factory() as session:
             from sqlalchemy import text
+
             result = await session.execute(
-                text("SELECT * FROM event_outbox WHERE status = 'pending' ORDER BY created_at")
+                text(
+                    "SELECT * FROM event_outbox WHERE status = 'pending' ORDER BY created_at"
+                )
             )
             rows = result.fetchall()
             for row in rows:
@@ -219,7 +255,9 @@ class EventBus:
                             await result
                     # 标记为已完成
                     await session.execute(
-                        text("UPDATE event_outbox SET status = 'done' WHERE event_id = :eid"),
+                        text(
+                            "UPDATE event_outbox SET status = 'done' WHERE event_id = :eid"
+                        ),
                         {"eid": row.event_id},
                     )
                     replayed += 1
@@ -258,8 +296,10 @@ def get_event_bus() -> EventBus:
 # 事件类型常量 — 按领域分组
 # ============================================================
 
+
 class AssetEvents:
     """资产中心事件."""
+
     ASSET_CREATED = "asset.created"
     ASSET_UPDATED = "asset.updated"
     ASSET_DELETED = "asset.deleted"
@@ -272,6 +312,7 @@ class AssetEvents:
 
 class ConfigEvents:
     """配置中心事件."""
+
     CONFIG_VERSION_CREATED = "config.version_created"
     CONFIG_VERSION_PUBLISHED = "config.version_published"
     CONFIG_BINDING_CREATED = "config.binding_created"
@@ -283,6 +324,7 @@ class ConfigEvents:
 
 class CollectorEvents:
     """采集中心事件."""
+
     COLLECTOR_REGISTERED = "collector.registered"
     COLLECTOR_HEALTH_CHANGED = "collector.health_changed"
     JOB_CREATED = "collector.job_created"
@@ -293,6 +335,7 @@ class CollectorEvents:
 
 class StateEvents:
     """状态中心事件."""
+
     SNAPSHOT_RECORDED = "state.snapshot_recorded"
     STATE_CHANGED = "state.status_changed"
     STATE_CRITICAL = "state.critical_detected"
@@ -301,12 +344,14 @@ class StateEvents:
 
 class EventEvents:
     """事件中心事件."""
+
     EVENT_CREATED = "event.created"
     EVENT_DEDUPLICATED = "event.deduplicated"
 
 
 class AlertEvents:
     """告警中心事件."""
+
     ALERT_RULE_CREATED = "alert.rule_created"
     ALERT_RULE_UPDATED = "alert.rule_updated"
     ALERT_CREATED = "alert.created"
@@ -318,6 +363,7 @@ class AlertEvents:
 
 class PolicyEvents:
     """策略中心事件."""
+
     POLICY_CREATED = "policy.created"
     POLICY_UPDATED = "policy.updated"
     POLICY_ACTIVATED = "policy.activated"
@@ -330,6 +376,7 @@ class PolicyEvents:
 
 class AutomationEvents:
     """自动化中心事件."""
+
     SCRIPT_CREATED = "automation.script_created"
     PLAYBOOK_CREATED = "automation.playbook_created"
     EXECUTION_CREATED = "automation.execution_created"
@@ -346,6 +393,7 @@ class AutomationEvents:
 
 class AIOpsEvents:
     """AIops中心事件."""
+
     ANALYSIS_REQUESTED = "aiops.analysis_requested"
     ANALYSIS_COMPLETED = "aiops.analysis_completed"
     ANALYSIS_FAILED = "aiops.analysis_failed"
@@ -355,6 +403,7 @@ class AIOpsEvents:
 
 class KnowledgeEvents:
     """知识中心事件."""
+
     ARTICLE_CREATED = "knowledge.article_created"
     ARTICLE_UPDATED = "knowledge.article_updated"
     ARTICLE_PUBLISHED = "knowledge.article_published"
@@ -364,6 +413,7 @@ class KnowledgeEvents:
 
 class TicketEvents:
     """工单中心事件."""
+
     TICKET_CREATED = "ticket.created"
     TICKET_UPDATED = "ticket.updated"
     TICKET_ASSIGNED = "ticket.assigned"
@@ -377,6 +427,7 @@ class TicketEvents:
 
 class GovernanceEvents:
     """治理中心事件."""
+
     USER_CREATED = "governance.user_created"
     USER_UPDATED = "governance.user_updated"
     USER_LOGIN = "governance.user_login"
@@ -389,18 +440,21 @@ class GovernanceEvents:
 
 class LogEvents:
     """日志中心事件."""
+
     LOG_ENTRY_CREATED = "log.entry_created"
     EXECUTION_LOG_STREAM = "log.execution_log_stream"
 
 
 class NotificationEvents:
     """通知中心事件."""
+
     NOTIFICATION_SENT = "notification.sent"
     NOTIFICATION_READ = "notification.read"
 
 
 class AnomalyEvents:
     """异常检测中心事件."""
+
     ANOMALY_DETECTED = "anomaly.detected"
     ANOMALY_ACKNOWLEDGED = "anomaly.acknowledged"
     ANOMALY_RESOLVED = "anomaly.resolved"
@@ -410,6 +464,7 @@ class AnomalyEvents:
 
 class InspectionEvents:
     """巡检中心事件."""
+
     PLAN_CREATED = "inspection.plan_created"
     PLAN_UPDATED = "inspection.plan_updated"
     TASK_STARTED = "inspection.task_started"
@@ -420,6 +475,7 @@ class InspectionEvents:
 
 class ReportEvents:
     """报表中心事件."""
+
     REPORT_GENERATION_REQUESTED = "report.generation_requested"
     REPORT_GENERATION_STARTED = "report.generation_started"
     REPORT_GENERATION_COMPLETED = "report.generation_completed"

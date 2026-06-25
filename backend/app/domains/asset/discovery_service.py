@@ -1,4 +1,5 @@
 """资产发现 Service - 真实网络扫描引擎."""
+
 from __future__ import annotations
 
 import asyncio
@@ -20,6 +21,9 @@ from app.domains.asset.models import Asset
 from app.domains.asset.discovery_models import DiscoveryTask, DiscoveryResult
 
 logger = logging.getLogger(__name__)
+
+# 后台扫描任务句柄集合，防止未被强引用的 task 被 GC 回收（导致扫描无故消失）
+_background_scan_tasks: set[asyncio.Task] = set()
 
 
 def _expand_ips(ip_range: str) -> list[str]:
@@ -61,7 +65,12 @@ async def _icmp_ping(ip: str, timeout: float = 2.0) -> bool:
     """ICMP Ping检测."""
     try:
         proc = await asyncio.create_subprocess_exec(
-            "ping", "-c", "1", "-W", str(int(timeout)), ip,
+            "ping",
+            "-c",
+            "1",
+            "-W",
+            str(int(timeout)),
+            ip,
             stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.DEVNULL,
         )
@@ -90,9 +99,11 @@ async def _tcp_scan(ip: str, ports: list[int], timeout: float = 2.0) -> list[int
         return []
     # 限制并发
     sem = asyncio.Semaphore(50)
+
     async def _limited(p):
         async with sem:
             await _check_port(p)
+
     await asyncio.gather(*[_limited(p) for p in ports])
     return sorted(open_ports)
 
@@ -149,7 +160,9 @@ class DiscoveryService:
         if not ip_range:
             ip_range = "127.0.0.1"
         task = DiscoveryTask(
-            name=data.get("name", "discovery-" + datetime.now().strftime("%Y%m%d%H%M%S")),
+            name=data.get(
+                "name", "discovery-" + datetime.now().strftime("%Y%m%d%H%M%S")
+            ),
             ip_range=ip_range,
             ip_mode=data.get("ip_mode", "cidr"),
             protocols=data.get("protocols", ["icmp"]),
@@ -181,9 +194,13 @@ class DiscoveryService:
         task.started_at = datetime.now(timezone.utc)
         task.error_message = None
         await self.db.flush()
+        # 显式 commit，确保 running 状态落库（_run_scan 用独立 session 查询）
+        await self.db.commit()
 
-        # 异步执行扫描
-        asyncio.create_task(self._run_scan(task_id))
+        # 异步执行扫描，保存 task 句柄防 GC
+        scan_task = asyncio.create_task(self._run_scan(task_id))
+        _background_scan_tasks.add(scan_task)
+        scan_task.add_done_callback(_background_scan_tasks.discard)
         return {"task_id": task_id, "status": "running"}
 
     async def _run_scan(self, task_id: str) -> None:
@@ -208,7 +225,9 @@ class DiscoveryService:
                     await session.commit()
                     return
 
-                logger.info("Discovery scan started: task=%s, ips=%d", task_id, len(ips))
+                logger.info(
+                    "Discovery scan started: task=%s, ips=%d", task_id, len(ips)
+                )
 
                 protocols = task.protocols or ["icmp"]
                 ports = _parse_ports(task.ports)
@@ -230,7 +249,9 @@ class DiscoveryService:
 
                         # TCP端口扫描
                         if "tcp" in protocols or ports:
-                            tcp_ports = await _tcp_scan(ip, ports, timeout=timeout / max(len(ports), 1))
+                            tcp_ports = await _tcp_scan(
+                                ip, ports, timeout=timeout / max(len(ports), 1)
+                            )
                             if tcp_ports:
                                 alive = True
                                 open_ports_list = tcp_ports
@@ -249,7 +270,10 @@ class DiscoveryService:
                             asset_type=asset_type,
                             open_ports=open_ports_list,
                             status="discovered",
-                            metadata_={"protocols": protocols, "scan_time": datetime.now(timezone.utc).isoformat()},
+                            metadata_={
+                                "protocols": protocols,
+                                "scan_time": datetime.now(timezone.utc).isoformat(),
+                            },
                         )
                         session.add(dr)
                         discovered += 1
@@ -257,7 +281,7 @@ class DiscoveryService:
                 # 分批扫描，避免太大并发
                 batch_size = 50
                 for i in range(0, len(ips), batch_size):
-                    batch = ips[i:i + batch_size]
+                    batch = ips[i : i + batch_size]
                     await asyncio.gather(*[_scan_host(ip) for ip in batch])
 
                 # 更新任务
@@ -269,15 +293,21 @@ class DiscoveryService:
 
                 # 发事件
                 bus = get_event_bus()
-                await bus.publish(DomainEvent(
-                    domain="asset",
-                    event_type="discovery.completed",
-                    payload={"task_id": task_id, "discovered_count": discovered},
-                ))
-                logger.info("Discovery scan completed: task=%s, found=%d", task_id, discovered)
+                await bus.publish(
+                    DomainEvent(
+                        domain="asset",
+                        event_type="discovery.completed",
+                        payload={"task_id": task_id, "discovered_count": discovered},
+                    )
+                )
+                logger.info(
+                    "Discovery scan completed: task=%s, found=%d", task_id, discovered
+                )
 
             except Exception as e:
                 logger.error("Discovery scan failed: task=%s, error=%s", task_id, e)
+                # 用独立 session 写错误状态；若该 session 也已损坏（如原异常是连接断开），
+                # 至少记录日志，避免任务静默卡在 running 状态。
                 try:
                     result = await session.execute(
                         select(DiscoveryTask).where(DiscoveryTask.id == task_id)
@@ -290,7 +320,9 @@ class DiscoveryService:
                         await session.flush()
                         await session.commit()
                 except Exception:
-                    pass
+                    logger.exception(
+                        "写入扫描失败状态时再次异常，任务 %s 可能卡在 running", task_id
+                    )
 
     async def list_tasks(self, page: int, page_size: int) -> tuple[list, int]:
         """列出发现任务."""
@@ -299,8 +331,10 @@ class DiscoveryService:
         )
         total = total_result.scalar() or 0
         result = await self.db.execute(
-            select(DiscoveryTask).order_by(DiscoveryTask.created_at.desc())
-            .offset((page - 1) * page_size).limit(page_size)
+            select(DiscoveryTask)
+            .order_by(DiscoveryTask.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
         )
         items = [model_to_dict(t) for t in result.scalars().all()]
         return items, total
@@ -313,8 +347,9 @@ class DiscoveryService:
         task = result.scalar_one_or_none()
         return model_to_dict(task) if task else None
 
-    async def get_results(self, task_id: str | None = None, page: int = 1,
-                          page_size: int = 20) -> tuple[list[dict], int]:
+    async def get_results(
+        self, task_id: str | None = None, page: int = 1, page_size: int = 20
+    ) -> tuple[list[dict], int]:
         """获取发现结果."""
         stmt = select(DiscoveryResult)
         count_stmt = select(func.count()).select_from(DiscoveryResult)
@@ -325,26 +360,35 @@ class DiscoveryService:
         total = (await self.db.execute(count_stmt)).scalar() or 0
         result = await self.db.execute(
             stmt.order_by(DiscoveryResult.discovered_at.desc())
-            .offset((page - 1) * page_size).limit(page_size)
+            .offset((page - 1) * page_size)
+            .limit(page_size)
         )
         items = []
         for r in result.scalars().all():
-            items.append({
-                "id": r.id,
-                "task_id": r.task_id,
-                "ip": r.ip,
-                "hostname": r.hostname,
-                "asset_type": r.asset_type,
-                "open_ports": r.open_ports,
-                "status": r.status,
-                "metadata": r.metadata_,
-                "discovered_at": r.discovered_at.isoformat() if r.discovered_at else None,
-                "onboarded_at": r.onboarded_at.isoformat() if r.onboarded_at else None,
-                "asset_id": r.asset_id,
-            })
+            items.append(
+                {
+                    "id": r.id,
+                    "task_id": r.task_id,
+                    "ip": r.ip,
+                    "hostname": r.hostname,
+                    "asset_type": r.asset_type,
+                    "open_ports": r.open_ports,
+                    "status": r.status,
+                    "metadata": r.metadata_,
+                    "discovered_at": r.discovered_at.isoformat()
+                    if r.discovered_at
+                    else None,
+                    "onboarded_at": r.onboarded_at.isoformat()
+                    if r.onboarded_at
+                    else None,
+                    "asset_id": r.asset_id,
+                }
+            )
         return items, total
 
-    async def onboard_results(self, result_ids: list[str], asset_type: str = "auto") -> dict:
+    async def onboard_results(
+        self, result_ids: list[str], asset_type: str = "auto"
+    ) -> dict:
         """纳管发现的资产."""
         onboarded = 0
         errors = 0
@@ -385,16 +429,18 @@ class DiscoveryService:
 
             # 发资产创建事件 → 触发采集
             bus = get_event_bus()
-            await bus.publish(DomainEvent(
-                domain="asset",
-                event_type=AssetEvents.ASSET_CREATED,
-                payload={
-                    "asset_id": str(asset.id),
-                    "asset_name": asset.hostname,
-                    "asset_type": asset.asset_type,
-                    "ip": asset.ip,
-                },
-            ))
+            await bus.publish(
+                DomainEvent(
+                    domain="asset",
+                    event_type=AssetEvents.ASSET_CREATED,
+                    payload={
+                        "asset_id": str(asset.id),
+                        "asset_name": asset.hostname,
+                        "asset_type": asset.asset_type,
+                        "ip": asset.ip,
+                    },
+                )
+            )
 
         # 更新task的onboarded_count
         if result_ids:
@@ -415,7 +461,9 @@ class DiscoveryService:
     async def import_asset(self, data: dict) -> Asset:
         """导入单个资产."""
         existing = await self.db.execute(
-            select(Asset).where(Asset.ip == data.get("ip", ""), Asset.is_deleted == False)
+            select(Asset).where(
+                Asset.ip == data.get("ip", ""), Asset.is_deleted == False
+            )
         )
         if existing.scalar_one_or_none():
             raise ValueError(f"IP {data.get('ip')} 已存在资产")
@@ -431,14 +479,16 @@ class DiscoveryService:
         await self.db.refresh(asset)
 
         bus = get_event_bus()
-        await bus.publish(DomainEvent(
-            domain="asset",
-            event_type=AssetEvents.ASSET_CREATED,
-            payload={
-                "asset_id": str(asset.id),
-                "asset_name": asset.hostname,
-                "asset_type": asset.asset_type,
-                "ip": asset.ip,
-            },
-        ))
+        await bus.publish(
+            DomainEvent(
+                domain="asset",
+                event_type=AssetEvents.ASSET_CREATED,
+                payload={
+                    "asset_id": str(asset.id),
+                    "asset_name": asset.hostname,
+                    "asset_type": asset.asset_type,
+                    "ip": asset.ip,
+                },
+            )
+        )
         return asset
