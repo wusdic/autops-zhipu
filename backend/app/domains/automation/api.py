@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common.auth_dependency import require_admin
 from app.common.crud_service import model_to_dict
-from app.common.exceptions import NotFoundError
 from app.common.response import paginate, success
 from app.domains.automation.schemas import (
     ExecutionCreate,
@@ -40,7 +38,7 @@ async def list_scripts(
     return paginate([model_to_dict(i) for i in items], total, page, page_size)
 
 
-@router.post("")
+@router.post("", dependencies=[Depends(require_admin)])
 async def create_script(data: ScriptCreate, svc: AutomationService = Depends(_get_svc)):
     s = await svc.create_script(**data.model_dump())
     return success(model_to_dict(s))
@@ -54,7 +52,7 @@ async def update_script(
     return success(model_to_dict(s))
 
 
-@router.delete("/{script_id}")
+@router.delete("/{script_id}", dependencies=[Depends(require_admin)])
 async def delete_script(script_id: str, svc: AutomationService = Depends(_get_svc)):
     await svc.delete_script(script_id)
     return success(message="脚本已删除")
@@ -70,7 +68,7 @@ async def list_playbooks(
     return paginate([model_to_dict(i) for i in items], total, page, page_size)
 
 
-@playbook_router.post("")
+@playbook_router.post("", dependencies=[Depends(require_admin)])
 async def create_playbook(
     data: PlaybookCreate, svc: AutomationService = Depends(_get_svc)
 ):
@@ -92,7 +90,7 @@ async def update_playbook(
     return success(model_to_dict(pb))
 
 
-@playbook_router.delete("/{playbook_id}")
+@playbook_router.delete("/{playbook_id}", dependencies=[Depends(require_admin)])
 async def delete_playbook(playbook_id: str, svc: AutomationService = Depends(_get_svc)):
     await svc.delete_playbook(playbook_id)
     return success(message="Playbook 已删除")
@@ -123,32 +121,36 @@ async def get_execution(exec_id: str, svc: AutomationService = Depends(_get_svc)
     return success(model_to_dict(exe))
 
 
-@exec_router.post("/{exec_id}/approve")
+@exec_router.post("/{exec_id}/approve", dependencies=[Depends(require_admin)])
 async def approve_execution(exec_id: str, svc: AutomationService = Depends(_get_svc)):
     exe = await svc.approve_execution(exec_id)
     return success(model_to_dict(exe))
 
 
-@exec_router.post("/{exec_id}/cancel")
+@exec_router.post("/{exec_id}/cancel", dependencies=[Depends(require_admin)])
 async def cancel_execution(exec_id: str, svc: AutomationService = Depends(_get_svc)):
     exe = await svc.cancel_execution(exec_id)
     return success(model_to_dict(exe))
 
 
-@exec_router.post("/{exec_id}/rollback")
+@exec_router.post("/{exec_id}/rollback", dependencies=[Depends(require_admin)])
 async def rollback_execution(exec_id: str, svc: AutomationService = Depends(_get_svc)):
     exe = await svc.rollback_execution(exec_id)
     return success(model_to_dict(exe))
 
 
 @exec_router.get("/{exec_id}/verification")
-async def get_execution_verification(exec_id: str, svc: AutomationService = Depends(_get_svc)):
+async def get_execution_verification(
+    exec_id: str, svc: AutomationService = Depends(_get_svc)
+):
     """获取执行任务验证信息."""
     exe = await svc.get_execution(exec_id)
-    return success({
-        "execution_id": exe.id,
-        "status": exe.status,
-        "risk_level": exe.risk_level,
-        "is_dry_run": exe.is_dry_run,
-        "verified": exe.status in ("approved", "completed", "running"),
-    })
+    return success(
+        {
+            "execution_id": exe.id,
+            "status": exe.status,
+            "risk_level": exe.risk_level,
+            "is_dry_run": exe.is_dry_run,
+            "verified": exe.status in ("approved", "completed", "running"),
+        }
+    )

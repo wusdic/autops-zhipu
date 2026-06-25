@@ -15,9 +15,10 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-logger = logging.getLogger(__name__)
-
+from app.common.auth_dependency import require_admin
 from app.common.response import paginate, success
+
+logger = logging.getLogger(__name__)
 from app.infra.database import get_db
 
 # ======================================================================
@@ -361,7 +362,12 @@ async def platform_self_check(db: AsyncSession = Depends(get_db)):
 # ======================================================================
 # Tenants — 租户管理
 # ======================================================================
-tenant_router = APIRouter(prefix="/tenants", tags=["租户管理"])
+# 租户增删改属高危操作，仅管理员可用（list 也限定管理员，避免租户信息泄漏）
+tenant_router = APIRouter(
+    prefix="/tenants",
+    tags=["租户管理"],
+    dependencies=[Depends(require_admin)],
+)
 
 
 class TenantCreate(BaseModel):

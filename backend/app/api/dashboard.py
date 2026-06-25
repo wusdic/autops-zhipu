@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -402,13 +402,28 @@ async def platform_health_summary(db: AsyncSession = Depends(get_db)):
 # ======================================================================
 @router.get("/my-pending")
 async def my_pending_items(
-    user_id: str = Query(..., description="当前用户ID"),
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    """聚合当前用户的待办事项."""
+    """聚合当前用户的待办事项.
+
+    user_id 从认证上下文 request.state.user_id 获取（由 AuthMiddleware 注入），
+    不再接受客户端传入的 user_id 查询参数，避免越权查看他人待办（IDOR）。
+    """
     from app.domains.anomaly.models import Anomaly
     from app.domains.automation.models import Execution
     from app.domains.ticket.models import Ticket
+
+    user_id = getattr(request.state, "user_id", "")
+    if not user_id:
+        return success(
+            {
+                "pending_approvals": 0,
+                "pending_anomalies": 0,
+                "pending_tickets": 0,
+                "total": 0,
+            }
+        )
 
     # 待审批执行
     pending_approvals = (

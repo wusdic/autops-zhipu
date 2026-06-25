@@ -1,4 +1,4 @@
-"""全局认证依赖.
+"""全局认证与授权依赖.
 
 提供 FastAPI 依赖函数 ``require_auth``，在请求进入业务路由前
 校验 JWT Token 并将当前用户注入 ``request.state.current_user``。
@@ -14,20 +14,34 @@
     @router.get("/users", dependencies=[Depends(require_auth)])
     async def list_users(...): ...
 """
+
 from __future__ import annotations
 
 from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.common.auth import decode_token
-from app.common.exceptions import UnauthorizedError
+from app.common.exceptions import PermissionDeniedError, UnauthorizedError
 from app.domains.governance.models import User
 from app.infra.database import get_db
-from sqlalchemy.ext.asyncio import AsyncSession
 
 # Bearer token 提取器 — 自动从 Authorization header 读取
 # auto=False 使得未提供 token 时不自动返回 403，而是交由 require_auth 处理
 _bearer_scheme = HTTPBearer(auto=False)
+
+# 拥有这些角色之一的用户视为管理员，require_admin 会放行
+_ADMIN_ROLES = {"super_admin", "admin"}
+
+
+async def _load_user(db: AsyncSession, user_id: str) -> User | None:
+    """加载用户并预加载 roles 关系（避免 async 上下文 lazy-load 报错）."""
+    result = await db.execute(
+        select(User).options(selectinload(User.roles)).where(User.id == user_id)
+    )
+    return result.scalar_one_or_none()
 
 
 async def require_auth(
@@ -51,7 +65,7 @@ async def require_auth(
     if not user_id:
         raise UnauthorizedError("Token 中缺少用户标识")
 
-    user = await db.get(User, user_id)
+    user = await _load_user(db, user_id)
     if user is None or user.is_deleted or user.status != "active":
         raise UnauthorizedError("用户不存在或已禁用")
 
@@ -72,4 +86,43 @@ async def get_current_user(request: Request) -> User:
     user = getattr(request.state, "current_user", None)
     if user is None:
         raise UnauthorizedError("未认证")
+    return user
+
+
+async def require_admin(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    """授权依赖：仅允许管理员（super_admin / admin 角色）访问.
+
+    自包含：会从 Authorization header 解析 token、加载用户与 roles、
+    校验管理员角色，并把 current_user 注入 request.state。
+
+    用法::
+
+        @router.post("/users", dependencies=[Depends(require_admin)])
+        async def create_user(...): ...
+
+    Raises:
+        UnauthorizedError: 缺少/无效 token 或用户不可用。
+        PermissionDeniedError: 当前用户不具备管理员角色。
+    """
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise UnauthorizedError("缺少认证 Token")
+    token = auth_header[7:]
+    payload = decode_token(token)
+    user_id = payload.get("sub")
+    if not user_id:
+        raise UnauthorizedError("Token 中缺少用户标识")
+
+    user = await _load_user(db, user_id)
+    if user is None or user.is_deleted or user.status != "active":
+        raise UnauthorizedError("用户不存在或已禁用")
+
+    request.state.current_user = user
+
+    role_names = {r.name for r in user.roles}
+    if not (role_names & _ADMIN_ROLES):
+        raise PermissionDeniedError("需要管理员权限")
     return user

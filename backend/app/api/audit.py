@@ -1,15 +1,20 @@
 """审计日志API."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select, func, desc
+from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.infra.database import get_db
 from app.common.audit import AuditLog
-from app.common.response import paginate, success
+from app.common.auth_dependency import require_admin
+from app.common.response import paginate
+from app.infra.database import get_db
 
-router = APIRouter(prefix="/audit-logs", tags=["audit"])
+# 审计日志含全平台操作明细，仅管理员可读
+router = APIRouter(
+    prefix="/audit-logs", tags=["audit"], dependencies=[Depends(require_admin)]
+)
 
 
 @router.get("")
@@ -38,9 +43,7 @@ async def list_audit_logs(
     total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
 
-    result = await db.execute(
-        query.offset((page - 1) * page_size).limit(page_size)
-    )
+    result = await db.execute(query.offset((page - 1) * page_size).limit(page_size))
     items = result.scalars().all()
 
     return paginate(

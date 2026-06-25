@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common.auth_dependency import require_admin
 from app.common.crud_service import model_to_dict
-from app.common.response import Response, paginate, success
+from app.common.response import paginate, success
 from app.domains.asset.schemas import (
-    AssetCreate, AssetGroupCreate, AssetGroupResponse, AssetImportItem,
-    AssetRelationCreate, AssetRelationResponse, AssetResponse,
-    AssetTimelineResponse, AssetUpdate,
+    AssetCreate,
+    AssetGroupCreate,
+    AssetImportItem,
+    AssetRelationCreate,
+    AssetUpdate,
 )
 from app.domains.asset.service import AssetService
 from app.infra.database import get_db
@@ -50,8 +51,10 @@ def _to_dict(asset) -> dict:
 
 def _rel_to_dict(r) -> dict:
     return {
-        "id": r.id, "source_asset_id": r.source_asset_id,
-        "target_asset_id": r.target_asset_id, "relation_type": r.relation_type,
+        "id": r.id,
+        "source_asset_id": r.source_asset_id,
+        "target_asset_id": r.target_asset_id,
+        "relation_type": r.relation_type,
         "description": r.description,
         "created_at": r.created_at.isoformat() if r.created_at else None,
     }
@@ -59,8 +62,12 @@ def _rel_to_dict(r) -> dict:
 
 def _timeline_to_dict(t) -> dict:
     return {
-        "id": t.id, "asset_id": t.asset_id, "event_type": t.event_type,
-        "title": t.title, "detail": t.detail, "source": t.source,
+        "id": t.id,
+        "asset_id": t.asset_id,
+        "event_type": t.event_type,
+        "title": t.title,
+        "detail": t.detail,
+        "source": t.source,
         "source_id": t.source_id,
         "created_at": t.created_at.isoformat() if t.created_at else None,
     }
@@ -80,15 +87,19 @@ async def list_assets(
     svc: AssetService = Depends(_get_service),
 ):
     items, total = await svc.list_assets(
-        page=page, page_size=page_size, asset_type=asset_type,
-        status=status, health_status=health_status,
-        business_system=business_system, environment=environment,
+        page=page,
+        page_size=page_size,
+        asset_type=asset_type,
+        status=status,
+        health_status=health_status,
+        business_system=business_system,
+        environment=environment,
         search=search,
     )
     return paginate([_to_dict(a) for a in items], total, page, page_size)
 
 
-@router.post("")
+@router.post("", dependencies=[Depends(require_admin)])
 async def create_asset(data: AssetCreate, svc: AssetService = Depends(_get_service)):
     asset = await svc.create_asset(data)
     return success(_to_dict(asset))
@@ -102,13 +113,20 @@ async def list_import_tasks(
     db: AsyncSession = Depends(get_db),
 ):
     """查询资产导入任务列表."""
-    from sqlalchemy import select, func, text
+    from sqlalchemy import text
+
     try:
-        cnt = (await db.execute(text("SELECT COUNT(*) FROM asset_import_tasks"))).scalar() or 0
-        rows = (await db.execute(
-            text("SELECT * FROM asset_import_tasks ORDER BY created_at DESC LIMIT :l OFFSET :o"),
-            {"l": page_size, "o": (page - 1) * page_size}
-        )).fetchall()
+        cnt = (
+            await db.execute(text("SELECT COUNT(*) FROM asset_import_tasks"))
+        ).scalar() or 0
+        rows = (
+            await db.execute(
+                text(
+                    "SELECT * FROM asset_import_tasks ORDER BY created_at DESC LIMIT :l OFFSET :o"
+                ),
+                {"l": page_size, "o": (page - 1) * page_size},
+            )
+        ).fetchall()
         items = [dict(r._mapping) for r in rows]
     except Exception:
         items = []
@@ -120,16 +138,23 @@ async def list_import_tasks(
 async def get_import_report(task_id: str, db: AsyncSession = Depends(get_db)):
     """获取导入任务报告."""
     from sqlalchemy import text
+
     try:
-        row = (await db.execute(text("SELECT * FROM asset_import_tasks WHERE id = :id"), {"id": task_id})).fetchone()
+        row = (
+            await db.execute(
+                text("SELECT * FROM asset_import_tasks WHERE id = :id"), {"id": task_id}
+            )
+        ).fetchone()
         if row:
             return success(dict(row._mapping))
     except Exception:
         pass
-    return success({"id": task_id, "status": "unknown", "total": 0, "succeeded": 0, "failed": 0})
+    return success(
+        {"id": task_id, "status": "unknown", "total": 0, "succeeded": 0, "failed": 0}
+    )
 
 
-@router.post("/import")
+@router.post("/import", dependencies=[Depends(require_admin)])
 async def import_assets(
     items: list[AssetImportItem], svc: AssetService = Depends(_get_service)
 ):
@@ -151,7 +176,7 @@ async def update_asset(
     return success(_to_dict(asset))
 
 
-@router.delete("/{asset_id}")
+@router.delete("/{asset_id}", dependencies=[Depends(require_admin)])
 async def delete_asset(asset_id: str, svc: AssetService = Depends(_get_service)):
     await svc.delete_asset(asset_id)
     return success(message="删除成功")
@@ -177,7 +202,8 @@ async def get_asset_topology(
 
 @router.post("/{asset_id}/relations")
 async def add_relation(
-    asset_id: str, data: AssetRelationCreate,
+    asset_id: str,
+    data: AssetRelationCreate,
     svc: AssetService = Depends(_get_service),
 ):
     rel = await svc.add_relation(asset_id, data)
@@ -185,7 +211,9 @@ async def add_relation(
 
 
 @router.delete("/{asset_id}/relations/{relation_id}")
-async def delete_relation(asset_id: str, relation_id: str, svc: AssetService = Depends(_get_service)):
+async def delete_relation(
+    asset_id: str, relation_id: str, svc: AssetService = Depends(_get_service)
+):
     await svc.delete_relation(asset_id, relation_id)
     return success(message="关系已删除")
 
@@ -199,7 +227,9 @@ async def get_timeline(asset_id: str, svc: AssetService = Depends(_get_service))
 
 # --- 资产凭证 ---
 @router.get("/{asset_id}/credentials")
-async def get_asset_credentials(asset_id: str, svc: AssetService = Depends(_get_service)):
+async def get_asset_credentials(
+    asset_id: str, svc: AssetService = Depends(_get_service)
+):
     creds = await svc.get_asset_credentials(asset_id)
     return success([model_to_dict(c) for c in creds])
 
@@ -212,14 +242,20 @@ async def get_asset_policies(asset_id: str, svc: AssetService = Depends(_get_ser
 
 
 # --- 资产凭证删除 ---
-@router.delete("/{asset_id}/credentials/{cred_id}")
+@router.delete(
+    "/{asset_id}/credentials/{cred_id}", dependencies=[Depends(require_admin)]
+)
 async def delete_asset_credential(
-    asset_id: str, cred_id: str, svc: AssetService = Depends(_get_service),
+    asset_id: str,
+    cred_id: str,
+    svc: AssetService = Depends(_get_service),
 ):
     """解除资产与凭证的绑定."""
+    from sqlalchemy import delete as sa_delete
+
     from app.common.exceptions import NotFoundError
     from app.domains.config.models import CredentialBinding
-    from sqlalchemy import select, delete as sa_delete
+
     stmt = sa_delete(CredentialBinding).where(
         CredentialBinding.id == cred_id,
         CredentialBinding.target_id == asset_id,
@@ -234,7 +270,9 @@ async def delete_asset_credential(
 # --- 资产策略删除 ---
 @router.delete("/{asset_id}/policies/{policy_id}")
 async def delete_asset_policy(
-    asset_id: str, policy_id: str, svc: AssetService = Depends(_get_service),
+    asset_id: str,
+    policy_id: str,
+    svc: AssetService = Depends(_get_service),
 ):
     """解除资产与策略的关联（stub）."""
     return success(message="策略关联已解除")
@@ -242,7 +280,9 @@ async def delete_asset_policy(
 
 # --- 资产采集配置 ---
 @router.get("/{asset_id}/collection-configs")
-async def get_collection_configs(asset_id: str, svc: AssetService = Depends(_get_service)):
+async def get_collection_configs(
+    asset_id: str, svc: AssetService = Depends(_get_service)
+):
     configs = await svc.get_collection_configs(asset_id)
     return success([model_to_dict(c) for c in configs])
 
@@ -266,36 +306,55 @@ async def list_groups(
 ):
     items, total = await svc.list_groups(page=page, page_size=page_size)
     return paginate(
-        [{"id": g.id, "name": g.name, "description": g.description,
-          "parent_id": g.parent_id} for g in items],
-        total, page, page_size,
+        [
+            {
+                "id": g.id,
+                "name": g.name,
+                "description": g.description,
+                "parent_id": g.parent_id,
+            }
+            for g in items
+        ],
+        total,
+        page,
+        page_size,
     )
 
 
 @group_router.post("")
-async def create_group(data: AssetGroupCreate, svc: AssetService = Depends(_get_service)):
+async def create_group(
+    data: AssetGroupCreate, svc: AssetService = Depends(_get_service)
+):
     group = await svc.create_group(data)
-    return success({"id": group.id, "name": group.name, "description": group.description})
+    return success(
+        {"id": group.id, "name": group.name, "description": group.description}
+    )
 
 
 @group_router.get("/{group_id}")
 async def get_group(group_id: str, svc: AssetService = Depends(_get_service)):
     group = await svc.get_group(group_id)
-    return success({
-        "id": group.id,
-        "name": group.name,
-        "description": group.description,
-        "parent_id": group.parent_id,
-    })
+    return success(
+        {
+            "id": group.id,
+            "name": group.name,
+            "description": group.description,
+            "parent_id": group.parent_id,
+        }
+    )
 
 
 @group_router.post("/{group_id}/members")
-async def add_member(group_id: str, asset_id: str, svc: AssetService = Depends(_get_service)):
+async def add_member(
+    group_id: str, asset_id: str, svc: AssetService = Depends(_get_service)
+):
     await svc.add_group_member(group_id, asset_id)
     return success(message="添加成功")
 
 
 @group_router.delete("/{group_id}/members/{asset_id}")
-async def remove_member(group_id: str, asset_id: str, svc: AssetService = Depends(_get_service)):
+async def remove_member(
+    group_id: str, asset_id: str, svc: AssetService = Depends(_get_service)
+):
     await svc.remove_group_member(group_id, asset_id)
     return success(message="移除成功")

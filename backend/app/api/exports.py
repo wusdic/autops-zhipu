@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-import uuid
 import json
+import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Query, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common.auth_dependency import require_admin
 from app.common.response import paginate, success
 from app.infra.database import get_db
 
@@ -36,7 +37,11 @@ async def list_exports(
 
     where = " AND ".join(conditions)
     count_sql = "SELECT COUNT(*) as cnt FROM exports WHERE " + where
-    data_sql = "SELECT * FROM exports WHERE " + where + " ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+    data_sql = (
+        "SELECT * FROM exports WHERE "
+        + where
+        + " ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+    )
 
     try:
         cnt_result = await db.execute(text(count_sql), params)
@@ -65,17 +70,20 @@ async def create_export(
         VALUES (:id, :name, :export_type, :format, :status, :filters, :created_by, :created_at, :updated_at)
     """)
     try:
-        await db.execute(sql, {
-            "id": item_id,
-            "name": body.get("name", "导出任务"),
-            "export_type": body.get("export_type", "report"),
-            "format": body.get("format", "xlsx"),
-            "status": "pending",
-            "filters": json.dumps(body.get("filters", {}), ensure_ascii=False),
-            "created_by": body.get("created_by", ""),
-            "created_at": now,
-            "updated_at": now,
-        })
+        await db.execute(
+            sql,
+            {
+                "id": item_id,
+                "name": body.get("name", "导出任务"),
+                "export_type": body.get("export_type", "report"),
+                "format": body.get("format", "xlsx"),
+                "status": "pending",
+                "filters": json.dumps(body.get("filters", {}), ensure_ascii=False),
+                "created_by": body.get("created_by", ""),
+                "created_at": now,
+                "updated_at": now,
+            },
+        )
         await db.commit()
     except Exception:
         await db.rollback()
@@ -84,7 +92,7 @@ async def create_export(
     return success({"id": item_id, "status": "pending"})
 
 
-@router.post("/{export_id}/cancel")
+@router.post("/{export_id}/cancel", dependencies=[Depends(require_admin)])
 async def cancel_export(
     export_id: str,
     db: AsyncSession = Depends(get_db),
@@ -92,8 +100,10 @@ async def cancel_export(
     """取消导出任务."""
     try:
         await db.execute(
-            text("UPDATE exports SET status = :status, updated_at = :updated_at WHERE id = :id"),
-            {"status": "cancelled", "updated_at": datetime.utcnow(), "id": export_id}
+            text(
+                "UPDATE exports SET status = :status, updated_at = :updated_at WHERE id = :id"
+            ),
+            {"status": "cancelled", "updated_at": datetime.utcnow(), "id": export_id},
         )
         await db.commit()
     except Exception:
@@ -103,7 +113,7 @@ async def cancel_export(
     return success({"id": export_id, "status": "cancelled"})
 
 
-@router.delete("/{export_id}")
+@router.delete("/{export_id}", dependencies=[Depends(require_admin)])
 async def delete_export(
     export_id: str,
     db: AsyncSession = Depends(get_db),

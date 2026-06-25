@@ -6,6 +6,7 @@
 相比 FastAPI ``dependencies=[Depends(require_auth)]`` 的方案，
 中间件不需要修改 210 个路由文件，且可以细粒度按路径白名单控制。
 """
+
 from __future__ import annotations
 
 import logging
@@ -15,16 +16,19 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from app.common.auth import decode_token
+from app.common.exceptions import UnauthorizedError
 from app.common.response import error
 
 logger = logging.getLogger(__name__)
 
 # ── 不需要认证的路径前缀（精确匹配或前缀匹配）──
-PUBLIC_PATHS: frozenset[str] = frozenset({
-    "/api/v1/auth/login",
-    "/api/v1/auth/refresh",
-    "/api/v1/auth/logout",
-})
+PUBLIC_PATHS: frozenset[str] = frozenset(
+    {
+        "/api/v1/auth/login",
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/logout",
+    }
+)
 
 PUBLIC_PREFIXES: tuple[str, ...] = (
     "/health",
@@ -34,7 +38,7 @@ PUBLIC_PREFIXES: tuple[str, ...] = (
     "/openapi.json",
 )
 
-# WebSocket 升级请求由 WebSocket 路由内部处理 token，不走 HTTP 中间件
+# WebSocket 请求由 WS 路由内部处理 token 鉴权，HTTP 中间件只负责 /api/* 的 JWT 校验
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -56,8 +60,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if not path.startswith("/api"):
             return await call_next(request)
 
-        # WebSocket 升级请求 — 由 ws 路由内部鉴权，中间件放行
-        if request.headers.get("upgrade", "").lower() == "websocket":
+        # 真正的 WebSocket 请求走 ASGI 层，不经过本 HTTP 中间件；
+        # 这里不依据客户端可控的 upgrade header 放行，避免被伪造绕过认证。
+        if request.scope.get("type") == "websocket":
             return await call_next(request)
 
         # 提取 Bearer token
@@ -69,8 +74,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         try:
             payload = decode_token(token)
-        except Exception:
+        except UnauthorizedError:
             return _unauthorized("Token 无效或已过期")
+        # 其它异常（如配置错误）不应被静默当作 401，上抛由通用处理器兜底
 
         user_id = payload.get("sub")
         if not user_id:

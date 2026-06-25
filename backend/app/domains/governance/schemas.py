@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-
 import json
+from datetime import datetime
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -46,6 +45,7 @@ class UserResponse(BaseModel):
     display_name: str
     email: str | None
     status: str
+    roles: list[RoleResponse] = Field(default_factory=list)
     last_login_at: datetime | None
     created_at: datetime
 
@@ -132,3 +132,7 @@ class ApiKeyResponse(BaseModel):
 
 class ApiKeyCreateResponse(ApiKeyResponse):
     key: str  # 只在创建时返回一次
+
+
+# 确保前向引用（UserResponse -> RoleResponse）正确解析
+UserResponse.model_rebuild()

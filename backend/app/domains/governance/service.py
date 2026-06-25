@@ -9,17 +9,27 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.common.auth import (
-    create_access_token, create_refresh_token, decode_token,
-    hash_password, verify_password,
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+    hash_password,
+    verify_password,
 )
 from app.common.exceptions import (
-    DuplicateError, NotFoundError, PermissionDeniedError, UnauthorizedError,
+    DuplicateError,
+    NotFoundError,
+    PermissionDeniedError,
+    UnauthorizedError,
 )
-from app.domains.governance.models import ApiKey, Role, User, UserRole
+from app.domains.governance.models import ApiKey, User, UserRole
 from app.domains.governance.schemas import (
-    ApiKeyCreate, LoginRequest, RoleCreate, UserCreate, UserUpdate,
+    ApiKeyCreate,
+    LoginRequest,
+    UserCreate,
+    UserUpdate,
 )
 
 
@@ -30,7 +40,11 @@ class AuthService:
         self.session = session
 
     async def login(self, data: LoginRequest, ip: str | None = None) -> dict:
-        q = select(User).where(User.username == data.username, User.is_deleted == False)  # noqa
+        q = (
+            select(User)
+            .options(selectinload(User.roles))
+            .where(User.username == data.username, User.is_deleted == False)  # noqa
+        )
         result = await self.session.execute(q)
         user = result.scalar_one_or_none()
 
@@ -44,14 +58,22 @@ class AuthService:
 
         access = create_access_token({"sub": user.id, "username": user.username})
         refresh = create_refresh_token({"sub": user.id})
-        return {"access_token": access, "refresh_token": refresh, "token_type": "bearer"}
+        return {
+            "access_token": access,
+            "refresh_token": refresh,
+            "token_type": "bearer",
+        }
 
     async def get_current_user(self, token: str) -> User:
         payload = decode_token(token)
         user_id = payload.get("sub")
         if not user_id:
             raise UnauthorizedError()
-        user = await self.session.get(User, user_id)
+        # 预加载 roles 关系，避免 async 上下文 lazy-load 报错
+        result = await self.session.execute(
+            select(User).options(selectinload(User.roles)).where(User.id == user_id)
+        )
+        user = result.scalar_one_or_none()
         if user is None or user.is_deleted or user.status != "active":
             raise UnauthorizedError()
         return user
@@ -97,9 +119,11 @@ class UserService:
 
     async def list_users(self, page: int = 1, page_size: int = 20):
         from app.common.repository import BaseRepository
+
         repo = BaseRepository(User, self.session)
         return await repo.get_multi(
-            page=page, page_size=page_size,
+            page=page,
+            page_size=page_size,
             filters=[User.is_deleted == False],  # noqa
             order_by=User.created_at.desc(),
         )
