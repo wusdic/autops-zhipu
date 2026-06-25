@@ -283,23 +283,23 @@ const settings = reactive({
 
 // Create dialog
 const createDialogVisible = ref(false)
-const createForm = reactive({ type: 'full', description: 'primary'})
+const createForm = reactive({ type: 'full', description: ''})
 
 // Restore dialog
 const restoreDialogVisible = ref(false)
 const confirmText = ref('')
 const restoreTarget = reactive({
-  id: 'primary',
-  filename: 'primary',
-  created_at: 'primary',
-  type: 'primary',
+  id: '',
+  filename: '',
+  created_at: '',
+  type: '',
   size: 0,
 })
 const restoreProgress = reactive({
   active: false,
   percent: 0,
   status: '' as '' | 'success' | 'exception',
-  message: 'primary',
+  message: '',
 })
 
 let restoreTimer: ReturnType<typeof setInterval> | null = null

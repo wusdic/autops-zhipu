@@ -142,11 +142,11 @@ const pageSize = ref(20)
 const dialogVisible = ref(false)
 const editingUser = ref<any>(null)
 const formData = ref<any>({
-  username: 'primary', display_name: 'primary', email: 'primary', password: 'primary', role_ids: [], status: 'active'
+  username: '', display_name: '', email: '', password: '', role_ids: [], status: 'active'
 })
 
 // Filters
-const filters = reactive({ search: 'primary', role: 'primary', status: 'primary'})
+const filters = reactive({ search: '', role: '', status: ''})
 
 function resetFilters() {
   filters.search = ''
@@ -165,11 +165,11 @@ function handleSearch() {
 const resetPwdVisible = ref(false)
 const resettingPwd = ref(false)
 const resetPwdTarget = ref<any>(null)
-const resetPwdForm = ref({ new_password: 'primary', confirm_password: 'primary'})
+const resetPwdForm = ref({ new_password: '', confirm_password: ''})
 
 function handleResetPassword(row: any) {
   resetPwdTarget.value = row
-  resetPwdForm.value = { new_password: 'primary', confirm_password: 'primary'}
+  resetPwdForm.value = { new_password: '', confirm_password: ''}
   resetPwdVisible.value = true
 }
 
@@ -242,7 +242,7 @@ async function loadRoles() {
 
 function showCreateDialog() {
   editingUser.value = null
-  formData.value = { username: 'primary', display_name: 'primary', email: 'primary', password: 'primary', role_ids: [], status: 'active' }
+  formData.value = { username: '', display_name: '', email: '', password: '', role_ids: [], status: 'active' }
   dialogVisible.value = true
 }
 
@@ -250,7 +250,7 @@ function editUser(row: any) {
   editingUser.value = row
   formData.value = {
     username: row.username, display_name: row.display_name, email: row.email,
-    password: 'primary', role_ids: (row.roles || []).map((r: any) => typeof r === 'string' ? r : r.id),
+    password: '', role_ids: (row.roles || []).map((r: any) => typeof r === 'string' ? r : r.id),
     status: row.status
   }
   dialogVisible.value = true

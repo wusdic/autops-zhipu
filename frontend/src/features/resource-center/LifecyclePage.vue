@@ -168,7 +168,7 @@ import { ElMessage } from 'element-plus'
 import { Search, Plus, CircleCheck, Clock, Remove, List } from '@element-plus/icons-vue'
 
 const stats = reactive({ active: 128, retiring: 12, retired: 35, rules: 8 })
-const filters = reactive({ keyword: 'primary', phase: 'primary', assetType: 'primary'})
+const filters = reactive({ keyword: '', phase: '', assetType: ''})
 const tableData = ref<any[]>([])
 const page = ref(1)
 const pageSize = ref(20)
@@ -189,7 +189,7 @@ function handleSearch() { page.value = 1 }
 function resetFilters() { filters.keyword = ''; filters.phase = ''; filters.assetType = '' }
 
 const phaseDialogVisible = ref(false)
-const phaseForm = reactive({ name: 'primary', currentPhase: 'primary', targetPhase: 'primary', reason: 'primary', assetId: 'primary'})
+const phaseForm = reactive({ name: '', currentPhase: '', targetPhase: '', reason: '', assetId: ''})
 function changePhase(row: any) {
   phaseForm.name = row.name
   phaseForm.currentPhase = row.phase

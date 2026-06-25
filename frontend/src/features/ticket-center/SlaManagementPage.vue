@@ -333,7 +333,7 @@ const ticketTypeLabelMap: Record<string, string> = {
 const ticketTypeTagMap: Record<string, TagType> = {
   incident: 'danger',
   problem: 'warning',
-  change: 'primary',
+  change: '',
   request: 'success',
   security: 'danger',
 }
@@ -357,9 +357,9 @@ const loading = ref(false)
 const tableData = ref<SlaPolicy[]>([])
 
 const filterForm = reactive({
-  keyword: 'primary',
-  ticket_type: 'primary',
-  status: 'primary',
+  keyword: '',
+  ticket_type: '',
+  status: '',
 })
 
 const pagination = reactive({
@@ -375,13 +375,13 @@ const isEditing = ref(false)
 const dialogFormRef = ref<FormInstance>()
 
 const defaultDialogForm = (): DialogFormData => ({
-  name: 'primary',
-  ticket_type: 'primary',
+  name: '',
+  ticket_type: '',
   response_hours: 4,
   resolve_hours: 24,
   priority_scope: ['critical', 'high', 'medium', 'low'],
   status: 'enabled',
-  description: 'primary',
+  description: '',
   work_hours_only: false,
   notify_on: ['approaching', 'breached'],
   escalate_to: 'supervisor',
@@ -552,7 +552,7 @@ async function handleDelete(row: any) {
     ElMessage.success('策略已删除')
     fetchData()
   } catch (err: unknown) {
-    if (err !== 'cancel') {
+    if (err !== 'cancel' && err?.action !== 'cancel' && err?.message !== 'cancel') {
       const msg = err instanceof Error ? err.message : '删除失败'
       ElMessage.error(msg)
     }

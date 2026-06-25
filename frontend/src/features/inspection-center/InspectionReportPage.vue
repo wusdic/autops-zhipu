@@ -162,7 +162,7 @@ const detailData = ref<any>(null)
 const { navToReportFromInspection } = useWorkflowNav()
 
 const filters = reactive({
-  keyword: 'primary',
+  keyword: '',
 })
 
 const pagination = reactive({

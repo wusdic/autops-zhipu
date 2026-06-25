@@ -158,10 +158,10 @@ const pagination = reactive({
 })
 
 const form = reactive({
-  name: 'primary',
-  check_type: 'primary',
-  asset_type: 'primary',
-  description: 'primary',
+  name: '',
+  check_type: '',
+  asset_type: '',
+  description: '',
 })
 
 const formRules: FormRules = {
@@ -295,7 +295,7 @@ async function handleDelete(row: any) {
     ElMessage.success('模板已删除')
     fetchList()
   } catch (err: any) {
-    if (err !== 'cancel') {
+    if (err !== 'cancel' && err?.action !== 'cancel' && err?.message !== 'cancel') {
       ElMessage.error(err.message || '删除失败')
     }
   }

@@ -574,10 +574,10 @@ const deleting = ref(false)
 const scripts = ref<Script[]>([])
 
 const filters = reactive({
-  search: 'primary',
-  script_type: 'primary',
-  risk_level: 'primary',
-  tag: 'primary',
+  search: '',
+  script_type: '',
+  risk_level: '',
+  tag: '',
 })
 const pagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
@@ -601,10 +601,10 @@ const tagInputRef = ref<InstanceType<typeof import('element-plus')['ElInput']>>(
 const lineNumbersRef = ref<HTMLElement>()
 
 const defaultFormData = () => ({
-  name: 'primary',
+  name: '',
   script_type: 'shell',
-  description: 'primary',
-  content: 'primary',
+  description: '',
+  content: '',
   risk_level: 'low',
   version: 1,
   tags: [] as string[],
@@ -819,11 +819,11 @@ function removeTag(tag: string) {
 // ---------- Parameters ----------
 function addParam() {
   formData.parameters.push({
-    name: 'primary',
+    name: '',
     type: 'string',
-    default_value: 'primary',
+    default_value: '',
     required: false,
-    description: 'primary',
+    description: '',
   })
 }
 

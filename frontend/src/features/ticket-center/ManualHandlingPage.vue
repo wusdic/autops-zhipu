@@ -160,7 +160,7 @@ const items = ref<any[]>([])
 const detailData = ref<any>({})
 
 const stats = reactive({ pending: 0, in_progress: 0, completed_today: 0, avg_duration: 0 })
-const filters = reactive({ status: 'primary', priority: 'primary', handler: 'primary'})
+const filters = reactive({ status: '', priority: '', handler: ''})
 const pagination = reactive({ page: 1, size: 20, total: 0 })
 
 function priorityType(p: string): TagType { return ({ urgent: 'danger', high: 'warning', medium: 'primary', low: 'info' }[p] || 'info') as TagType }

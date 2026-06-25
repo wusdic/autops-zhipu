@@ -196,14 +196,14 @@ const activeTab = ref('structured')
 const editorRef = ref<HTMLElement>()
 
 const form = reactive({
-  title: 'primary', category: 'incident_response', tags: [] as string[],
+  title: '', category: 'incident_response', tags: [] as string[],
   applicable_asset_types: [] as string[], risk_level: 'low', auto_executable: false,
   trigger_events: [] as { event: string; condition: string }[],
   diagnosis_steps: [] as { name: string; command: string; description: string }[],
   action_steps: [] as { name: string; type: string; target: string; description: string }[],
   verification_steps: [] as { name: string; expected: string }[],
-  related_policy_id: 'primary', related_playbook_id: 'primary', related_script_id: 'primary',
-  content: 'primary',
+  related_policy_id: '', related_playbook_id: '', related_script_id: '',
+  content: '',
 })
 
 function goBack() { router.push('/knowledge') }
@@ -255,7 +255,17 @@ async function saveAndPublish() {
   finally { saving.value = false }
 }
 
-onMounted(() => { const id = route.params.id as string; if (id) loadKnowledge(id) })
+onMounted(() => {
+  const id = route.params.id as string
+  // id 为 'new' 或不存在时是新建态，不加载已有文章
+  if (id && id !== 'new') {
+    loadKnowledge(id)
+  } else if (route.query.from === 'ticket') {
+    // 从工单转知识：预填标题，提示来源
+    form.title = '[工单] 处置经验'
+    form.category = 'incident_response'
+  }
+})
 </script>
 
 <style scoped>

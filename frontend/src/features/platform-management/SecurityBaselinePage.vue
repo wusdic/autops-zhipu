@@ -144,9 +144,9 @@ const drawerVisible = ref(false)
 const currentRow = ref<BaselineRecord | null>(null)
 
 const queryForm = reactive({
-  asset_name: 'primary',
-  baseline_name: 'primary',
-  status: 'primary',
+  asset_name: '',
+  baseline_name: '',
+  status: '',
 })
 
 const pagination = reactive({

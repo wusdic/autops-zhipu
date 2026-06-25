@@ -224,8 +224,8 @@ const pagination = reactive({
 })
 
 const triggerForm = reactive({
-  name: 'primary',
-  plan_id: 'primary',
+  name: '',
+  plan_id: '',
 })
 
 const triggerFormRules: FormRules = {
@@ -376,7 +376,7 @@ async function handleCancel(row: any) {
     ElMessage.success('任务已取消')
     fetchTasks()
   } catch (err: any) {
-    if (err !== 'cancel') {
+    if (err !== 'cancel' && err?.action !== 'cancel' && err?.message !== 'cancel') {
       ElMessage.error(err.message || '取消任务失败')
     }
   }

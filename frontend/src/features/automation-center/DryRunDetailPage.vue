@@ -408,7 +408,7 @@ async function handleDelete(row: any) {
     }
     fetchDryRuns()
   } catch (e: any) {
-    if (e !== 'cancel') {
+    if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') {
       ElMessage.error(e.message || '删除失败')
     }
   }

@@ -235,8 +235,8 @@ const pagination = reactive({
 const formRef = ref<FormInstance>()
 
 const form = reactive({
-  tool_name: 'primary',
-  description: 'primary',
+  tool_name: '',
+  description: '',
   allowed_scope: [] as string[],
   risk_level: 'medium',
   requires_approval: false,
@@ -326,8 +326,8 @@ function openCreate() {
   isEditing.value = false
   editingId.value = ''
   Object.assign(form, {
-    tool_name: 'primary',
-    description: 'primary',
+    tool_name: '',
+    description: '',
     allowed_scope: [],
     risk_level: 'medium',
     requires_approval: false,

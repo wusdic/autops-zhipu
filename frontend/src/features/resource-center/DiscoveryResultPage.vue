@@ -225,9 +225,9 @@ const currentRow = ref<DiscoveryResult | null>(null)
 const { navToAssetFromDiscovery } = useWorkflowNav()
 
 const filterForm = reactive({
-  keyword: 'primary',
-  status: 'primary',
-  asset_type: 'primary',
+  keyword: '',
+  status: '',
+  asset_type: '',
 })
 
 const pagination = reactive({
@@ -237,13 +237,13 @@ const pagination = reactive({
 })
 
 const sortInfo = reactive({
-  sort_by: 'primary',
-  sort_order: 'primary',
+  sort_by: '',
+  sort_order: '',
 })
 
 const importForm = reactive({
   group_id: undefined as number | undefined,
-  remark: 'primary',
+  remark: '',
 })
 
 // ─── 映射表 ──────────────────────────────────────────
@@ -260,7 +260,7 @@ const statusLabelMap: Record<string, string> = {
 }
 
 const assetTypeTagMap: Record<string, TagType> = {
-  server: 'primary',
+  server: '',
   network: 'success',
   security: 'danger',
   database: 'warning',
@@ -400,7 +400,7 @@ async function handleBatchImport() {
     ElMessage.success('成功导入 ' + importable.length + ' 条记录')
     fetchData()
   } catch (err: unknown) {
-    if (err !== 'cancel') {
+    if (err !== 'cancel' && err?.action !== 'cancel' && err?.message !== 'cancel') {
       const msg = err instanceof Error ? err.message : '批量导入失败'
       ElMessage.error(msg)
     }
@@ -421,7 +421,7 @@ async function handleIgnore(row: any) {
     ElMessage.success('已忽略')
     fetchData()
   } catch (err: unknown) {
-    if (err !== 'cancel') {
+    if (err !== 'cancel' && err?.action !== 'cancel' && err?.message !== 'cancel') {
       const msg = err instanceof Error ? err.message : '操作失败'
       ElMessage.error(msg)
     }

@@ -140,12 +140,12 @@ const policyId = computed(() => (route.query.id as string) || '')
 const isEdit = computed(() => !!policyId.value)
 
 const formData = reactive<PolicyForm>({
-  name: 'primary',
-  description: 'primary',
-  trigger_type: 'primary',
-  conditions: 'primary',
-  actions: 'primary',
-  risk_level: 'primary',
+  name: '',
+  description: '',
+  trigger_type: '',
+  conditions: '',
+  actions: '',
+  risk_level: '',
   enabled: true,
 })
 

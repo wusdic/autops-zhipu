@@ -186,8 +186,8 @@ import { Plus, Search, Delete } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
-const stats = reactive({ total: 0, active: 0, triggeredToday: 0, mostTriggered: 'primary'})
-const filters = reactive({ keyword: 'primary', severity: 'primary', status: 'primary', metric: 'primary'})
+const stats = reactive({ total: 0, active: 0, triggeredToday: 0, mostTriggered: ''})
+const filters = reactive({ keyword: '', severity: '', status: '', metric: ''})
 const items = ref<any[]>([])
 const loading = ref(false)
 const page = ref(1)
@@ -198,8 +198,8 @@ const showDialog = ref(false)
 const editing = ref(false)
 const editId = ref('')
 const form = reactive({
-  name: 'primary', description: 'primary', severity: 'warning', condition_logic: 'AND',
-  conditions: [] as any[], notify_type: 'internal', repeat_interval: 'primary', active: true,
+  name: '', description: '', severity: 'warning', condition_logic: 'AND',
+  conditions: [] as any[], notify_type: 'internal', repeat_interval: '', active: true,
 })
 
 const showDetail = ref(false)
@@ -234,7 +234,7 @@ function computeStats() {
   stats.mostTriggered = sorted[0]?.name || ''
 }
 
-function addCondition() { form.conditions.push({ metric: 'cpu_usage', operator: '>', value: 90, unit: '%', duration: 'primary'}) }
+function addCondition() { form.conditions.push({ metric: 'cpu_usage', operator: '>', value: 90, unit: '%', duration: ''}) }
 
 function openCreate() {
   editing.value = false; editId.value = ''

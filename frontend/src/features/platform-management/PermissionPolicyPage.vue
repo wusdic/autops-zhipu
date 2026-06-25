@@ -382,21 +382,21 @@ const total = ref(0)
 const formRef = ref<FormInstance>()
 
 const queryParams = reactive<QueryParams>({
-  name: 'primary',
-  resource_type: 'primary',
-  enabled: 'primary',
-  role_id: 'primary',
+  name: '',
+  resource_type: '',
+  enabled: '',
+  role_id: '',
   page: 1,
   pageSize: 20,
 })
 
 const policyForm = reactive<PolicyForm>({
-  name: 'primary',
-  description: 'primary',
-  resource_type: 'primary',
+  name: '',
+  description: '',
+  resource_type: '',
   actions: [],
   role_ids: [],
-  condition: 'primary',
+  condition: '',
   enabled: true,
 })
 
@@ -442,7 +442,7 @@ const actionLabel = (action: string): string => {
 const actionTagType = (action: string): TagType => {
   const map: Record<string, TagType> = {
     create: 'success',
-    read: 'primary',
+    read: '',
     update: 'warning',
     delete: 'danger',
   }

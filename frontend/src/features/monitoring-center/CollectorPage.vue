@@ -531,16 +531,16 @@ const jobTypeMap: Record<string, string> = {
 const collectorLoading = ref(false)
 const collectors = ref<Collector[]>([])
 const collectorFilters = reactive({
-  search: 'primary',
-  collector_type: 'primary',
-  status: 'primary',
+  search: '',
+  collector_type: '',
+  status: '',
 })
 const collectorPagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
 // ---------- Job State ----------
 const jobLoading = ref(false)
 const jobs = ref<CollectionJob[]>([])
-const jobFilters = reactive({ status: 'primary'})
+const jobFilters = reactive({ status: ''})
 const jobPagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
 // ---------- Dialog State ----------
@@ -558,10 +558,10 @@ const jobLogs = ref<string>('')
 const showTriggerDialog = ref(false)
 const triggering = ref(false)
 const triggerForm = reactive({
-  collector_id: 'primary',
-  asset_id: 'primary',
+  collector_id: '',
+  asset_id: '',
   job_type: 'full_collect',
-  params: 'primary',
+  params: '',
 })
 
 // ---------- Tab State ----------
@@ -785,7 +785,7 @@ async function retryJob(job: any) {
       ElMessage.error(data.message || '重试失败')
     }
   } catch (e: any) {
-    if (e !== 'cancel') {
+    if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') {
       ElMessage.error('重试失败: ' + (e.message || e))
     }
   }

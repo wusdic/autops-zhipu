@@ -165,18 +165,18 @@ const activeTab = ref('pending_review')
 const pendingCount = ref(0)
 
 const currentItem = reactive<any>({
-  id: 'primary',
-  title: 'primary',
-  content: 'primary',
-  category: 'primary',
-  status: 'primary',
-  submitted_by: 'primary',
-  submitted_at: 'primary',
+  id: '',
+  title: '',
+  content: '',
+  category: '',
+  status: '',
+  submitted_by: '',
+  submitted_at: '',
 })
 
 const filters = reactive({
-  keyword: 'primary',
-  category: 'primary',
+  keyword: '',
+  category: '',
 })
 
 const pagination = reactive({
@@ -226,11 +226,11 @@ function categoryTagType(cat: string): TagType {
   const map: Record<string, string> = {
     incident_summary: 'warning',
     runbook: 'success',
-    standard_solution: 'primary',
+    standard_solution: '',
     faq: 'info',
-    best_practice: 'primary',
+    best_practice: '',
     postmortem: 'danger',
-    response_plan: 'primary',
+    response_plan: '',
   }
   return (map[cat] ?? undefined) as TagType
 }

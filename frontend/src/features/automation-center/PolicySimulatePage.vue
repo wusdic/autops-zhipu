@@ -339,10 +339,10 @@ const assetOptions = ref<any[]>([])
 const selectedAsset = ref<any>(null)
 
 const simParams = reactive({
-  asset_id: 'primary',
-  alert_type: 'primary',
-  severity: 'primary',
-  extra_json: 'primary',
+  asset_id: '',
+  alert_type: '',
+  severity: '',
+  extra_json: '',
 })
 
 const simMetrics = reactive<{ key: string; value: number; unit: string }[]>([

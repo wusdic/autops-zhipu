@@ -197,7 +197,7 @@ import { API as R } from '@/shared/api/routes'
 // 列表
 const loading = ref(false)
 const credentials = ref<any[]>([])
-const filters = reactive({ credential_type: 'primary', search: 'primary'})
+const filters = reactive({ credential_type: '', search: ''})
 const pagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
 // 表单
@@ -208,14 +208,14 @@ const saving = ref(false)
 const formRef = ref<FormInstance>()
 
 const defaultForm = {
-  name: 'primary',
+  name: '',
   credential_type: 'ssh_password',
-  username: 'primary',
-  password: 'primary',
-  secret: 'primary',
-  token: 'primary',
+  username: '',
+  password: '',
+  secret: '',
+  token: '',
   port: 22 as number | undefined,
-  description: 'primary',
+  description: '',
 }
 const formData = reactive({ ...defaultForm })
 
@@ -303,9 +303,9 @@ function openEditDialog(row: any) {
     name: row.name,
     credential_type: row.credential_type,
     username: row.username || '',
-    password: 'primary', // 编辑时不回填密码
-    secret: 'primary',
-    token: 'primary',
+    password: '', // 编辑时不回填密码
+    secret: '',
+    token: '',
     port: row.port,
     description: row.description || '',
   })

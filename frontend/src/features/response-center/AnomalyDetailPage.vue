@@ -291,10 +291,10 @@ async function fetchRelatedAlerts(detail: Record<string, any>) {
 // Build timeline from anomaly data
 function buildTimeline(data: Record<string, any>) {
   const items: any[] = []
-  if (data.created_at) items.push({ time: data.created_at, action: '异常创建', type: 'created', detail: data.source ? '来源: ' + data.source : 'primary'})
+  if (data.created_at) items.push({ time: data.created_at, action: '异常创建', type: 'created', detail: data.source ? '来源: ' + data.source : ''})
   if (data.acknowledged_at) items.push({ time: data.acknowledged_at, action: '已确认', type: 'acknowledged', detail: data.acknowledged_by ? '操作人: ' + data.acknowledged_by : 'primary'})
   if (data.assigned_at) items.push({ time: data.assigned_at, action: '已分配', type: 'assigned', detail: data.assignee_name ? '处理人: ' + data.assignee_name : 'primary'})
-  if (data.escalated_at) items.push({ time: data.escalated_at, action: '已升级', type: 'escalated', detail: 'primary'})
+  if (data.escalated_at) items.push({ time: data.escalated_at, action: '已升级', type: 'escalated', detail: ''})
   if (data.closed_at) items.push({ time: data.closed_at, action: '已关闭', type: 'closed', detail: data.close_reason || '' })
   // Sort by time desc
   items.sort((a, b) => (b.time || '').localeCompare(a.time || ''))
@@ -310,7 +310,7 @@ async function handleAcknowledge() {
     ElMessage.success('已确认')
     await fetchAnomaly()
   } catch (e: any) {
-    if (e !== 'cancel') ElMessage.error(e.message || '操作失败')
+    if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') ElMessage.error(e.message || '操作失败')
   } finally {
     actionLoading.value = ''
   }
@@ -343,7 +343,7 @@ async function handleEscalate() {
     ElMessage.success('已升级')
     await fetchAnomaly()
   } catch (e: any) {
-    if (e !== 'cancel') ElMessage.error(e.message || '操作失败')
+    if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') ElMessage.error(e.message || '操作失败')
   } finally {
     actionLoading.value = ''
   }
@@ -357,7 +357,7 @@ async function handleClose() {
     ElMessage.success('已关闭')
     await fetchAnomaly()
   } catch (e: any) {
-    if (e !== 'cancel') ElMessage.error(e.message || '操作失败')
+    if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') ElMessage.error(e.message || '操作失败')
   } finally {
     actionLoading.value = ''
   }
@@ -371,7 +371,7 @@ async function handleConvertTicket() {
     ElMessage.success('已转工单')
     await fetchAnomaly()
   } catch (e: any) {
-    if (e !== 'cancel') ElMessage.error(e.message || '操作失败')
+    if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') ElMessage.error(e.message || '操作失败')
   } finally {
     actionLoading.value = ''
   }

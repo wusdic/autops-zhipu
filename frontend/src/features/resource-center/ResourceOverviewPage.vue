@@ -278,15 +278,15 @@ function getAssetTypeLabel(type: string): string {
 
 function getAssetTypeTagType(type: string): TagType {
   const map: Record<string, TagType> = {
-    server: 'primary',
-    linux_server: 'primary',
-    windows_server: 'primary',
+    server: '',
+    linux_server: '',
+    windows_server: '',
     web_server: 'success',
     network: 'success',
     storage: 'warning',
     database: 'danger',
     middleware: 'info',
-    vm: 'primary',
+    vm: '',
     container: 'success',
     cloud: 'warning',
   }

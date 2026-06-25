@@ -99,10 +99,10 @@ export function useWorkflowNav() {
     })
   }
 
-  /** 从工单详情转知识 */
+  /** 从工单详情转知识（新建知识草稿，带工单信息预填） */
   const navToKnowledgeFromTicket = (ticketId: string) => {
     router.push({
-      path: '/knowledge/edit',
+      path: '/knowledge/new/edit',
       query: { from: 'ticket', ticket_id: ticketId },
     })
   }

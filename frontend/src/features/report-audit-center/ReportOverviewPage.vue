@@ -223,13 +223,13 @@ const quickLinks = [
 
 // ── 类型映射 ──
 const typeMap: Record<string, { type: TagType; label: string }> = {
-  inspection: { type: 'primary', label: '巡检报告' },
+  inspection: { type: '', label: '巡检报告' },
   asset: { type: 'success', label: '资产台账' },
   sla: { type: 'warning', label: 'SLA报告' },
   audit: { type: 'danger', label: '审计报告' },
   operation: { type: 'info', label: '运维报告' },
   custom: { type: 'info', label: '自定义报告' },
-  daily: { type: 'primary', label: '日报' },
+  daily: { type: '', label: '日报' },
   weekly: { type: 'warning', label: '周报' },
   monthly: { type: 'success', label: '月报' },
 }
@@ -333,7 +333,7 @@ async function handleRetry(row: any) {
     fetchRecentTasks()
     fetchStats()
   } catch (err: any) {
-    if (err !== 'cancel') {
+    if (err !== 'cancel' && err?.action !== 'cancel' && err?.message !== 'cancel') {
       console.error('重新生成失败:', err)
       ElMessage.error('重新生成失败')
     }

@@ -360,9 +360,9 @@ const viewMode = ref<'table' | 'group'>('table')
 const { navToAnomalyFromInspection, navToReportFromInspection } = useWorkflowNav()
 
 const queryParams = reactive<QueryParams>({
-  keyword: 'primary',
-  status: 'primary',
-  check_type: 'primary',
+  keyword: '',
+  status: '',
+  check_type: '',
   dateRange: null,
   page: 1,
   pageSize: 20,

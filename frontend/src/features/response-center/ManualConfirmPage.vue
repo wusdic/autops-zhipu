@@ -128,7 +128,7 @@ const detailVisible = ref(false)
 const items = ref<any[]>([])
 const detailData = ref<any>({})
 
-const filters = reactive({ status: 'pending', source: 'primary', risk: 'primary'})
+const filters = reactive({ status: 'pending', source: '', risk: ''})
 const pagination = reactive({ page: 1, size: 20, total: 0 })
 
 const pendingCount = computed(() => items.value.filter(i => i.status === 'pending').length)

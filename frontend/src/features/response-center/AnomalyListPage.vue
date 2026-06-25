@@ -190,7 +190,7 @@ async function handleAcknowledge(row: any) {
     ElMessage.success('已确认')
     await fetchList()
   } catch (e: any) {
-    if (e !== 'cancel') ElMessage.error(e.message || '操作失败')
+    if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') ElMessage.error(e.message || '操作失败')
   } finally {
     actionMap[row.id] = ''
   }
@@ -207,7 +207,7 @@ async function handleClose(row: any) {
     ElMessage.success('已关闭')
     await fetchList()
   } catch (e: any) {
-    if (e !== 'cancel') ElMessage.error(e.message || '操作失败')
+    if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') ElMessage.error(e.message || '操作失败')
   } finally {
     actionMap[row.id] = ''
   }

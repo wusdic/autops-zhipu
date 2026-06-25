@@ -277,7 +277,7 @@ async function handleAcknowledge(row: any) {
     fetchRecentAnomalies()
     fetchStats()
   } catch (err: any) {
-    if (err !== 'cancel') {
+    if (err !== 'cancel' && err?.action !== 'cancel' && err?.message !== 'cancel') {
       console.error('确认异常失败:', err)
       ElMessage.error('确认异常失败')
     }

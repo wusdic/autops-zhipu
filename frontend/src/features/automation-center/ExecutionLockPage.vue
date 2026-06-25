@@ -269,9 +269,9 @@ const currentLock = ref<LockEntry | null>(null)
 let refreshTimer: ReturnType<typeof setInterval> | null = null
 
 const queryParams = reactive<QueryParams>({
-  execution_id: 'primary',
-  target_id: 'primary',
-  status: 'primary',
+  execution_id: '',
+  target_id: '',
+  status: '',
   page: 1,
   pageSize: 20,
 })

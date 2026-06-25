@@ -162,7 +162,7 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = 20
 
-const filters = reactive({ metric_name: 'primary', severity: 'primary', asset_type: 'primary', enabled: null as boolean | null })
+const filters = reactive({ metric_name: '', severity: '', asset_type: '', enabled: null as boolean | null })
 
 const metricOptions = ['cpu_usage', 'memory_usage', 'disk_usage', 'disk_io', 'network_in', 'network_out', 'response_time', 'connection_count', 'process_count', 'load_avg']
 
@@ -191,13 +191,13 @@ const dialogVisible = ref(false)
 const editingRule = ref<any>(null)
 const submitting = ref(false)
 const formData = reactive({
-  name: 'primary', metric_name: 'primary', asset_type: 'primary', condition: 'gt',
-  threshold_value: 90, duration_seconds: 0, severity: 'warning', description: 'primary',
+  name: '', metric_name: '', asset_type: '', condition: 'gt',
+  threshold_value: 90, duration_seconds: 0, severity: 'warning', description: '',
 })
 
 function openCreateDialog() {
   editingRule.value = null
-  Object.assign(formData, { name: 'primary', metric_name: 'primary', asset_type: 'primary', condition: 'gt', threshold_value: 90, duration_seconds: 0, severity: 'warning', description: 'primary'})
+  Object.assign(formData, { name: '', metric_name: '', asset_type: '', condition: 'gt', threshold_value: 90, duration_seconds: 0, severity: 'warning', description: ''})
   dialogVisible.value = true
 }
 

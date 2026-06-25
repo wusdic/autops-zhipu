@@ -264,11 +264,11 @@ const stats = reactive({
 })
 
 const filters = reactive({
-  severity: 'primary',
-  status: 'primary',
+  severity: '',
+  status: '',
   dateRange: null as [string, string] | null,
-  asset: 'primary',
-  keyword: 'primary',
+  asset: '',
+  keyword: '',
 })
 
 const pagination = reactive({

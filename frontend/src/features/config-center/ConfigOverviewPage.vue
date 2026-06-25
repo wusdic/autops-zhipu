@@ -191,7 +191,7 @@ const thresholdRules = ref<any[]>([])
 const notificationRules = ref<any[]>([])
 const configVersions = ref<any[]>([])
 
-const createForm = reactive({ type: 'primary', name: 'primary', description: 'primary'})
+const createForm = reactive({ type: '', name: '', description: ''})
 
 const categoryMap: Record<string, string> = {
   page_check: '页面检查', config_check: '配置检查',

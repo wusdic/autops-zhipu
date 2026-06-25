@@ -140,10 +140,10 @@ const pageSize = ref(20)
 const total = ref(0)
 
 const filter = reactive({
-  user: 'primary',
-  action: 'primary',
-  resource: 'primary',
-  result: 'primary',
+  user: '',
+  action: '',
+  resource: '',
+  result: '',
   dateRange: [] as string[],
 })
 

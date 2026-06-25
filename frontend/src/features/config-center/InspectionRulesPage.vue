@@ -178,13 +178,13 @@ const activeCategory = ref('all')
 const rules = ref<any[]>([])
 const formRef = ref()
 
-const filters = reactive({ keyword: 'primary', severity: 'primary'})
+const filters = reactive({ keyword: '', severity: ''})
 const pagination = reactive({ page: 1, size: 20, total: 0 })
 const simResult = ref<any>({})
 
 const form = reactive({
-  name: 'primary', category: 'primary', check_target: 'primary', condition: 'primary',
-  severity: 'medium', asset_types: [] as string[], remediation: 'primary', description: 'primary',
+  name: '', category: '', check_target: '', condition: '',
+  severity: 'medium', asset_types: [] as string[], remediation: '', description: '',
 })
 const formRules = {
   name: [{ required: true, message: '请输入规则名称', trigger: 'blur' }],
@@ -222,7 +222,7 @@ async function loadData() {
 function openDialog(row?: any) {
   editing.value = row || null
   if (row) Object.assign(form, row)
-  else Object.assign(form, { name: 'primary', category: 'primary', check_target: 'primary', condition: 'primary', severity: 'medium', asset_types: [], remediation: 'primary', description: 'primary'})
+  else Object.assign(form, { name: '', category: '', check_target: '', condition: '', severity: 'medium', asset_types: [], remediation: '', description: ''})
   dialogVisible.value = true
 }
 

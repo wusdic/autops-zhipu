@@ -125,7 +125,7 @@ const editingId = ref<string | null>(null)
 const currentItem = ref<any>(null)
 const formRef = ref<FormInstance>()
 
-const form = ref({ title: 'primary', alert_ids: 'primary', content: 'primary', status: 'draft' })
+const form = ref({ title: '', alert_ids: '', content: '', status: 'draft' })
 const rules: FormRules = { title: [{ required: true, message: '请输入标题', trigger: 'blur' }] }
 
 function statusType(s: string): TagType {
@@ -155,7 +155,7 @@ async function fetchList() {
 
 function handleCreate() {
   editingId.value = null
-  form.value = { title: 'primary', alert_ids: 'primary', content: 'primary', status: 'draft' }
+  form.value = { title: '', alert_ids: '', content: '', status: 'draft' }
   dialogVisible.value = true
 }
 
@@ -195,7 +195,7 @@ async function handleDelete(row: any) {
     await knowledgeService.delete(row.id)
     ElMessage.success('删除成功')
     fetchList()
-  } catch (e: any) { if (e !== 'cancel') ElMessage.error('删除失败') }
+  } catch (e: any) { if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') ElMessage.error('删除失败') }
 }
 
 function viewDetail(row: any) {

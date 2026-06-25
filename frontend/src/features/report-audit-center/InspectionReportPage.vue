@@ -156,7 +156,7 @@ const detailVisible = ref(false)
 const detailData = ref<any>(null)
 
 const filters = reactive({
-  keyword: 'primary',
+  keyword: '',
 })
 
 const pagination = reactive({

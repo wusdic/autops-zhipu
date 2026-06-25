@@ -211,10 +211,10 @@ const pagination = reactive({
 })
 
 const formData = reactive({
-  name: 'primary',
-  owner: 'primary',
-  contact: 'primary',
-  description: 'primary',
+  name: '',
+  owner: '',
+  contact: '',
+  description: '',
 })
 
 const formRules: FormRules = {
@@ -309,7 +309,7 @@ function openEditDialog(row: any) {
 }
 
 function resetForm() {
-  Object.assign(formData, { name: 'primary', owner: 'primary', contact: 'primary', description: 'primary'})
+  Object.assign(formData, { name: '', owner: '', contact: '', description: ''})
   formRef.value?.resetFields()
 }
 
@@ -353,7 +353,7 @@ async function handleDelete(row: any) {
     ElMessage.success('删除成功')
     fetchSystems()
   } catch (e: any) {
-    if (e !== 'cancel') {
+    if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') {
       ElMessage.error(e.message || '删除失败')
     }
   }

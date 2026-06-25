@@ -142,8 +142,8 @@ const detailVisible = ref(false)
 const currentRow = ref<any>(null)
 
 const filters = reactive({
-  keyword: 'primary',
-  status: 'primary',
+  keyword: '',
+  status: '',
 })
 
 const pagination = reactive({

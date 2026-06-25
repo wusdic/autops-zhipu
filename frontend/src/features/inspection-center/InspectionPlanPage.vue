@@ -178,11 +178,11 @@ const pagination = reactive({
 })
 
 const form = reactive({
-  name: 'primary',
-  template_id: 'primary',
+  name: '',
+  template_id: '',
   cron: '0 8 * * *',
   enabled: true,
-  description: 'primary',
+  description: '',
 })
 
 const formRules: FormRules = {
@@ -338,7 +338,7 @@ async function handleDelete(row: any) {
     ElMessage.success('计划已删除')
     fetchPlans()
   } catch (err: any) {
-    if (err !== 'cancel') {
+    if (err !== 'cancel' && err?.action !== 'cancel' && err?.message !== 'cancel') {
       ElMessage.error(err.message || '删除失败')
     }
   }

@@ -115,7 +115,7 @@ const dialogVisible = ref(false)
 const exports = ref<any[]>([])
 
 const pagination = reactive({ page: 1, size: 20, total: 0 })
-const form = reactive({ name: 'primary', type: 'assets', format: 'xlsx', dateRange: null as any })
+const form = reactive({ name: '', type: 'assets', format: 'xlsx', dateRange: null as any })
 
 const typeLabels: Record<string, string> = {
   assets: '资产列表', alerts: '告警记录', inspections: '巡检结果',
@@ -146,7 +146,7 @@ async function loadExports() {
 }
 
 function createExport() {
-  Object.assign(form, { name: 'primary', type: 'assets', format: 'xlsx', dateRange: null })
+  Object.assign(form, { name: '', type: 'assets', format: 'xlsx', dateRange: null })
   dialogVisible.value = true
 }
 

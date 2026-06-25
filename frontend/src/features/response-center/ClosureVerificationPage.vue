@@ -167,7 +167,7 @@ const activeTab = ref('pending')
 const verifyRemark = ref('')
 
 const queryForm = reactive({
-  title: 'primary',
+  title: '',
 })
 
 const pagination = reactive({

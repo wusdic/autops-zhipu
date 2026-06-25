@@ -145,7 +145,7 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = 20
 
-const filters = reactive({ protocol: 'primary', enabled: null as boolean | null })
+const filters = reactive({ protocol: '', enabled: null as boolean | null })
 
 async function fetchData() {
   loading.value = true
@@ -170,13 +170,13 @@ const dialogVisible = ref(false)
 const editingItem = ref<any>(null)
 const submitting = ref(false)
 const formData = reactive({
-  name: 'primary', protocol: 'ssh', target_scope: '{"ip_ranges":[],"asset_groups":[],"exclude":[]}',
-  port_range: 'primary', scan_interval: 3600, timeout: 300, asset_type_mapping: 'primary', description: 'primary',
+  name: '', protocol: 'ssh', target_scope: '{"ip_ranges":[],"asset_groups":[],"exclude":[]}',
+  port_range: '', scan_interval: 3600, timeout: 300, asset_type_mapping: '', description: '',
 })
 
 function openCreateDialog() {
   editingItem.value = null
-  Object.assign(formData, { name: 'primary', protocol: 'ssh', target_scope: '{"ip_ranges":[],"asset_groups":[],"exclude":[]}', port_range: 'primary', scan_interval: 3600, timeout: 300, asset_type_mapping: 'primary', description: 'primary'})
+  Object.assign(formData, { name: '', protocol: 'ssh', target_scope: '{"ip_ranges":[],"asset_groups":[],"exclude":[]}', port_range: '', scan_interval: 3600, timeout: 300, asset_type_mapping: '', description: ''})
   dialogVisible.value = true
 }
 

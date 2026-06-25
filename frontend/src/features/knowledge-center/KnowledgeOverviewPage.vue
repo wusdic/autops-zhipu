@@ -202,7 +202,7 @@ function getStatusTagType(status: string): TagType {
   const map: Record<string, TagType> = {
     published: 'success',
     draft: 'warning',
-    review: 'primary',
+    review: '',
     rejected: 'danger',
     archived: 'info',
   }
@@ -225,7 +225,7 @@ function getCategoryTagType(category: string): TagType {
     故障处理: 'danger',
     标准方案: 'success',
     经验沉淀: 'warning',
-    操作指南: 'primary',
+    操作指南: '',
     FAQ: 'info',
   }
   return (map[category] || 'info') as TagType

@@ -191,12 +191,12 @@ var rollbackDialogVisible = ref(false)
 var rollbackTargetId = ref('')
 var rollbackLoading = ref(false)
 
-var newVersion = reactive({ content: 'primary'})
+var newVersion = reactive({ content: ''})
 
 var currentDefName = computed(function() {
   if (!selectedDefId.value) return ''
   var found = definitions.value.find(function(d) { return d.id === selectedDefId.value })
-  return found ? found.name : 'primary'})
+  return found ? found.name : ''})
 
 var filteredVersions = computed(function() {
   var data = versions.value

@@ -149,7 +149,7 @@ const total = ref(0)
 const dateRange = ref<any>(null)
 const viewMode = ref<'table' | 'timeline'>('table')
 
-const filters = reactive({ user: 'primary', action: 'primary', resource_type: 'primary'})
+const filters = reactive({ user: '', action: '', resource_type: ''})
 
 // Filter options
 const actionTypes = ['create', 'update', 'delete', 'login', 'logout', 'execute', 'import', 'export', 'config_change']

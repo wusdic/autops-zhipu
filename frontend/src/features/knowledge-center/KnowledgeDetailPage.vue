@@ -229,9 +229,9 @@ function typeTagColor(t: string) {
   const m: Record<string, string> = {
     incident_summary: 'warning',
     runbook: 'success',
-    standard_solution: 'primary',
+    standard_solution: '',
     faq: 'info',
-    best_practice: 'primary',
+    best_practice: '',
   }
   return m[t] || ''
 }

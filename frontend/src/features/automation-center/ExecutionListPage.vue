@@ -344,11 +344,11 @@ const stats = reactive({
 const trendSeries = ref<Array<{ name: string; data: Array<{ time: string; value: number }>; color: string }>>([])
 
 const filters = reactive({
-  status: 'primary',
-  triggerSource: 'primary',
-  riskLevel: 'primary',
+  status: '',
+  triggerSource: '',
+  riskLevel: '',
   dateRange: null as [string, string] | null,
-  keyword: 'primary',
+  keyword: '',
 })
 
 const pagination = reactive({

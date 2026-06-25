@@ -624,6 +624,9 @@ async function loadAlerts() {
     if (data.code === 0) {
       activeAlerts.value = (data.data.items || []).filter((a: any) => a.status !== 'resolved')
     }
+  } catch (e: any) {
+    ElMessage.error('加载告警列表失败')
+    activeAlerts.value = []
   } finally {
     alertLoading.value = false
   }
@@ -1030,7 +1033,7 @@ async function toggleChannel(name: string, enabled: boolean) {
       enabled,
     })
     if (data.code === 0) {
-      ElMessage.success(name + ' 渠道已' + enabled ? '启用' : '禁用')
+      ElMessage.success(name + ' 渠道已' + (enabled ? '启用' : '禁用'))
       loadChannels()
     }
   } catch {

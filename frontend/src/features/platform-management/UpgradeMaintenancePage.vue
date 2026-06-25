@@ -187,7 +187,7 @@ var systemInfo = reactive({
 
 var platformComponents = ref<Record<string, any>>({})
 
-var upgradeForm = reactive({ description: 'primary'})
+var upgradeForm = reactive({ description: ''})
 var upgradeHistory = ref<any[]>([])
 
 function componentStatus(name: string): string {

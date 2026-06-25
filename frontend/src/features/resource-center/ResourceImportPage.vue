@@ -285,13 +285,13 @@ const historyData = ref<ImportHistory[]>([])
 const detailDialogVisible = ref(false)
 const detailData = ref<ImportHistory | null>(null)
 
-const historyFilter = reactive({ keyword: 'primary'})
+const historyFilter = reactive({ keyword: ''})
 const historyPagination = reactive({ page: 1, page_size: 10, total: 0 })
 
 // ─── 映射表 ──────────────────────────────────────────
 const historyStatusMap: Record<string, TagType> = {
   pending: 'warning',
-  processing: 'primary',
+  processing: '',
   completed: 'success',
   partial: 'warning',
   failed: 'danger',

@@ -182,7 +182,7 @@ async function startDiagnosis() {
       evidence_chain: [
         { source: '告警', type: 'error', time: anomaly?.created_at || new Date().toISOString(), content: anomaly?.alert_name || '检测到异常告警' },
         { source: '采集', type: 'warning', time: new Date().toISOString(), content: '最近采集数据显示指标偏离基线' },
-        { source: '知识库', type: 'primary', time: new Date().toISOString(), content: '匹配到 3 条相似案例' },
+        { source: '知识库', type: '', time: new Date().toISOString(), content: '匹配到 3 条相似案例' },
       ],
     }
   } catch (e) {

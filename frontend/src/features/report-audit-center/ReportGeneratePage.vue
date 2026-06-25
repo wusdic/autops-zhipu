@@ -168,12 +168,12 @@ const recentTasks = ref<any[]>([])
 const formRef = ref<FormInstance>()
 
 const form = reactive({
-  template_id: 'primary',
-  title: 'primary',
+  template_id: '',
+  title: '',
   date_range: null as [string, string] | null,
   asset_scope: 'all',
-  asset_group: 'primary',
-  asset_ids: 'primary',
+  asset_group: '',
+  asset_ids: '',
   format: 'pdf',
 })
 

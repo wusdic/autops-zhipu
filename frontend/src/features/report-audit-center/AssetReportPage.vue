@@ -238,9 +238,9 @@ const summaryStats = reactive({
 })
 
 const filters = reactive({
-  type: 'primary',
-  status: 'primary',
-  keyword: 'primary',
+  type: '',
+  status: '',
+  keyword: '',
 })
 
 const pagination = reactive({

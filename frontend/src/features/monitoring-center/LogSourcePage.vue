@@ -124,9 +124,9 @@ const loading = ref(false)
 const tableData = ref<any[]>([])
 
 const filters = reactive({
-  keyword: 'primary',
-  type: 'primary',
-  status: 'primary',
+  keyword: '',
+  type: '',
+  status: '',
 })
 
 const pagination = reactive({
@@ -154,7 +154,7 @@ function typeTagType(type: string): TagType {
   const map: Record<string, TagType> = {
     syslog: 'success',
     file: 'warning',
-    api: 'primary',
+    api: '',
   }
   return (map[type] || 'info') as TagType
 }

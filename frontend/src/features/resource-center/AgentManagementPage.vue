@@ -337,7 +337,7 @@ async function restartAgent(row: any) {
     ElMessage.success('已发送重启指令')
     setTimeout(() => fetchAgents(), 2000)
   } catch (e: any) {
-    if (e !== 'cancel') {
+    if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') {
       ElMessage.error(e.message || '重启失败')
     }
   } finally {

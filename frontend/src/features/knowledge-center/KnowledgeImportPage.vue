@@ -351,10 +351,10 @@ const progressStatus = computed(() => {
 
 // ─── Paste form ──────────────────────────────────────────────────────
 const pasteForm = reactive({
-  title: 'primary',
+  title: '',
   article_type: 'standard_solution',
   category: 'troubleshooting',
-  content: 'primary',
+  content: '',
   tags: [] as string[],
   risk_level: 'medium',
 })

@@ -164,9 +164,9 @@ const drawerVisible = ref(false)
 const currentRow = ref<TimelineEntry | null>(null)
 
 const queryForm = reactive({
-  alert_id: 'primary',
-  evidence_type: 'primary',
-  keyword: 'primary',
+  alert_id: '',
+  evidence_type: '',
+  keyword: '',
 })
 
 const pagination = reactive({
@@ -193,7 +193,7 @@ function eventTypeTagType(t: string): TagType {
   var map: Record<string, string> = {
     alert_created: 'danger',
     status_change: 'warning',
-    action: 'primary',
+    action: '',
     event: 'info',
   }
   return (map[t] || 'info') as TagType

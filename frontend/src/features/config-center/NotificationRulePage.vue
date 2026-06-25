@@ -156,7 +156,7 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = 20
 
-const filters = reactive({ event_type: 'primary', target_type: 'primary', enabled: null as boolean | null })
+const filters = reactive({ event_type: '', target_type: '', enabled: null as boolean | null })
 
 const eventTypes = [
   'alert.created', 'alert.escalated', 'alert.resolved',
@@ -191,13 +191,13 @@ const editingRule = ref<any>(null)
 const submitting = ref(false)
 const selectedChannels = ref<string[]>(['in_app'])
 const formData = reactive({
-  name: 'primary', event_type: 'primary', target_type: 'user', target_ids: '[]',
-  channels: '["in_app"]', severity_filter: 'primary', quiet_hours_start: 'primary', quiet_hours_end: 'primary', description: 'primary',
+  name: '', event_type: '', target_type: 'user', target_ids: '[]',
+  channels: '["in_app"]', severity_filter: '', quiet_hours_start: '', quiet_hours_end: '', description: '',
 })
 
 function openCreateDialog() {
   editingRule.value = null
-  Object.assign(formData, { name: 'primary', event_type: 'primary', target_type: 'user', target_ids: '[]', channels: '["in_app"]', severity_filter: 'primary', quiet_hours_start: 'primary', quiet_hours_end: 'primary', description: 'primary'})
+  Object.assign(formData, { name: '', event_type: '', target_type: 'user', target_ids: '[]', channels: '["in_app"]', severity_filter: '', quiet_hours_start: '', quiet_hours_end: '', description: ''})
   selectedChannels.value = ['in_app']
   dialogVisible.value = true
 }

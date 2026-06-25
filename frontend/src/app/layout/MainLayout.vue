@@ -538,7 +538,7 @@ const breadcrumbs = computed(() => {
   if (!title) title = (route.meta?.title as string) || (route.name as string) || path
 
   const crumbs: { path: string; title: string }[] = []
-  if (group) crumbs.push({ path: 'primary', title: group })
+  if (group) crumbs.push({ path: '', title: group })
   crumbs.push({ path, title })
   return crumbs
 })

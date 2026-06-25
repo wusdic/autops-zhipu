@@ -379,8 +379,8 @@ const platformHealthLoading = ref(false)
 async function fetchPlatformHealth() {
   platformHealthLoading.value = true
   try {
-    const res = await api.get('/api/v1/dashboard/platform-health')
-    const d = res.data?.data ?? res.data
+    const res = await api.get(API.DASHBOARD.PLATFORM_HEALTH)
+    const d = res.data?.data
     if (d?.components) {
       const nameMap: Record<string, string> = {
         database: 'DB', redis: 'Redis', api_server: 'API',
@@ -662,7 +662,7 @@ function pendingTypeTag(type: string): TagType {
     '执行审批': 'warning',
     '待确认资产': 'info',
     '待处理异常': 'danger',
-    '待审核报告': 'primary',
+    '待审核报告': '',
   }
   return (map[type] || 'info') as TagType
 }

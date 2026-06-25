@@ -364,8 +364,8 @@ const knowledgeConverting = ref(false)
 const knowledgeDialogVisible = ref(false)
 const knowledgeSubmitting = ref(false)
 const knowledgeForm = ref({
-  title: 'primary',
-  content: 'primary',
+  title: '',
+  content: '',
   type: 'incident' as string,
   tags: [] as string[],
 })
@@ -401,7 +401,7 @@ function openKnowledgeDialog() {
   const t = ticket.value
   if (!t) return
   knowledgeForm.value = {
-    title: '[工单] ' + t.title || '' + ' 处置经验',
+    title: '[工单] ' + (t.title || '') + ' 处置经验',
     content: buildKnowledgeContent(t),
     type: 'incident',
     tags: [t.ticket_type || 'incident'],
@@ -410,8 +410,8 @@ function openKnowledgeDialog() {
 }
 
 function buildKnowledgeContent(t: any): string {
-  let content = '## 问题描述\n' + t.description || '（无描述）' + '\n\n'
-  content += '## 工单信息\n- 工单ID: ' + t.id + '\n- 类型: ' + t.ticket_type || '-' + '\n- 优先级: ' + t.priority || '-' + '\n'
+  let content = `## 问题描述\n${t.description || '（无描述）'}\n\n`
+  content += `## 工单信息\n- 工单ID: ${t.id}\n- 类型: ${t.ticket_type || '-'}\n- 优先级: ${t.priority || '-'}\n`
   if (t.context) {
     content += '\n## 上下文信息\n```\n' + formatJson(t.context) + '\n```\n'
   }

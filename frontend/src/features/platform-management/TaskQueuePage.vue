@@ -224,11 +224,11 @@ const typeLabelMap: Record<string, string> = {
   system: '系统任务',
 }
 const typeTagMap: Record<string, TagType> = {
-  collection: 'primary',
+  collection: '',
   import: 'success',
   export: 'warning',
-  backup: 'primary',
-  report: 'primary',
+  backup: '',
+  report: '',
   system: 'info',
 }
 const statusLabelMap: Record<string, string> = {

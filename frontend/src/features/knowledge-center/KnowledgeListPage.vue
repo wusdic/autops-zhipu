@@ -192,10 +192,10 @@ const exporting = ref(false)
 const knowledgeList = ref<any[]>([])
 
 const filters = reactive({
-  keyword: 'primary',
-  article_type: 'primary',
-  risk_level: 'primary',
-  status: 'primary',
+  keyword: '',
+  article_type: '',
+  risk_level: '',
+  status: '',
 })
 
 const sortBy = ref('updated_at')
@@ -234,9 +234,9 @@ function typeTagColor(t: string) {
   const m: Record<string, string> = {
     incident_summary: 'warning',
     runbook: 'success',
-    standard_solution: 'primary',
+    standard_solution: '',
     faq: 'info',
-    best_practice: 'primary',
+    best_practice: '',
   }
   return m[t] || ''
 }

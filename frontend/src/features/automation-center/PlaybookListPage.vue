@@ -297,7 +297,7 @@ async function remove(row: any) {
     await ElMessageBox.confirm('确定删除此 Playbook？关联策略将失效。', '确认删除', { type: 'warning' })
     await api.delete(API.PLAYBOOKS + '/' + row.id)
     ElMessage.success('已删除'); load()
-  } catch (e: any) { if (e !== 'cancel') ElMessage.error('删除失败') }
+  } catch (e: any) { if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') ElMessage.error('删除失败') }
 }
 
 function getScriptName(id: string) { return scripts.value.find(s => s.id === id)?.name || id || '-' }

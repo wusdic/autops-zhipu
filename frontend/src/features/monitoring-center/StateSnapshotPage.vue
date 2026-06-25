@@ -150,7 +150,7 @@ const loadFailed = ref(false)
 const tableData = ref<any[]>([])
 
 const filters = reactive({
-  keyword: 'primary',
+  keyword: '',
 })
 
 const pagination = reactive({

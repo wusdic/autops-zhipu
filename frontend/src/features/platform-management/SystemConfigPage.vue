@@ -249,7 +249,7 @@ function groupLabel(g: string) {
 }
 
 const groupTagTypes: Record<string, TagType> = {
-  general: 'primary',
+  general: '',
   security: 'danger',
   llm: 'warning',
   collector: 'success',
@@ -278,10 +278,10 @@ const isEditing = ref(false)
 const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const formData = reactive({
-  id: 'primary',
-  key: 'primary',
-  value: 'primary',
-  description: 'primary',
+  id: '',
+  key: '',
+  value: '',
+  description: '',
   group: 'general',
   is_secret: false,
 })

@@ -179,7 +179,7 @@ const editingId = ref('')
 const saving = ref(false)
 const groupFormRef = ref<FormInstance>()
 
-const groupForm = reactive({ name: 'primary', description: 'primary'})
+const groupForm = reactive({ name: '', description: ''})
 const groupRules: FormRules = {
   name: [{ required: true, message: '请输入分组名称', trigger: 'blur' }],
 }
@@ -250,7 +250,7 @@ async function loadMembers(groupId: string) {
 function openCreateDialog() {
   isEditing.value = false
   editingId.value = ''
-  Object.assign(groupForm, { name: 'primary', description: 'primary'})
+  Object.assign(groupForm, { name: '', description: ''})
   showFormDialog.value = true
 }
 

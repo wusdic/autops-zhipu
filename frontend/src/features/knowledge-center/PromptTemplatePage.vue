@@ -208,8 +208,8 @@ const testResult = ref('')
 const testTemplateData = reactive<any>({})
 
 const filters = reactive({
-  keyword: 'primary',
-  usage: 'primary',
+  keyword: '',
+  usage: '',
 })
 
 const pagination = reactive({
@@ -221,13 +221,13 @@ const pagination = reactive({
 const formRef = ref<FormInstance>()
 
 const form = reactive({
-  name: 'primary',
-  usage: 'primary',
-  model: 'primary',
+  name: '',
+  usage: '',
+  model: '',
   temperature: 70,
-  system_prompt: 'primary',
-  user_prompt: 'primary',
-  description: 'primary',
+  system_prompt: '',
+  user_prompt: '',
+  description: '',
 })
 
 const formRules: FormRules = {
@@ -253,7 +253,7 @@ function usageTagType(usage: string): TagType {
     diagnosis: 'danger',
     remediation: 'warning',
     summary: 'success',
-    log_analysis: 'primary',
+    log_analysis: '',
   }
   return (map[usage] ?? undefined) as TagType
 }
@@ -298,13 +298,13 @@ function openCreate() {
   isEditing.value = false
   editingId.value = ''
   Object.assign(form, {
-    name: 'primary',
-    usage: 'primary',
-    model: 'primary',
+    name: '',
+    usage: '',
+    model: '',
     temperature: 70,
-    system_prompt: 'primary',
-    user_prompt: 'primary',
-    description: 'primary',
+    system_prompt: '',
+    user_prompt: '',
+    description: '',
   })
   dialogVisible.value = true
 }

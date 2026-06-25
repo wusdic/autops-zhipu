@@ -106,6 +106,7 @@ import { ref, nextTick, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, ChatLineSquare, Promotion } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 import { sanitizeHtml } from '@/shared/utils/sanitize'
 
 interface MessageAction {
@@ -179,7 +180,7 @@ async function sendMessage() {
   scrollToBottom()
 
   try {
-    const resp = await api.post('/api/v1/ai/chat', {
+    const resp = await api.post(API.AI.CHAT, {
       message: text,
       conversation_id: currentConvId.value,
     })
@@ -203,10 +204,11 @@ async function sendMessage() {
       })
     }
   } catch (err: any) {
-    // Fallback: local intelligent response
+    // AI 服务不可用时明确告知用户，而非静默用本地兜底文案伪装正常回复
     messages.value.push({
       role: 'assistant',
-      content: generateLocalResponse(text),
+      content: '⚠️ AI 服务暂时不可用：' + (err?.message || '连接失败') +
+        '。\n\n本地参考回复：\n' + generateLocalResponse(text),
     })
   } finally {
     loading.value = false
@@ -245,7 +247,7 @@ async function executeAction(action: MessageAction) {
   }
 
   try {
-    const resp = await api.post('/api/v1/ai/execute', {
+    const resp = await api.post(API.AI.EXECUTE, {
       action_type: action.type,
       params: action.params,
     })
@@ -258,8 +260,11 @@ async function executeAction(action: MessageAction) {
     } else {
       ElMessage.error(resp.data?.message || '操作执行失败')
     }
-  } catch {
-    ElMessage.error('操作执行失败，请稍后重试')
+  } catch (e: any) {
+    const msg = e?.message || '操作执行失败，请稍后重试'
+    ElMessage.error(msg)
+    // 失败也 push 到对话流，让用户在历史中能看到操作失败
+    messages.value.push({ role: 'assistant', content: '⚠️ 操作执行失败：' + msg })
   }
   scrollToBottom()
 }

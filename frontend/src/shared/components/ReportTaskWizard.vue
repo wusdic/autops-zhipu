@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from "vue"
+import { ref, reactive, computed, watch } from "vue"
 import { ElMessage } from "element-plus"
 
 const props = defineProps<{ modelValue: boolean }>()
@@ -58,6 +58,14 @@ const visible = computed({ get: () => props.modelValue, set: v => emit("update:m
 
 const step = ref(0)
 const form = reactive({ report_type: "daily", dateRange: [] as any[], modules: ["asset", "alert", "execution"], format: "pdf" })
+
+// 对话框每次打开时重置表单与步骤，避免残留上次数据
+watch(visible, (v) => {
+  if (v) {
+    step.value = 0
+    Object.assign(form, { report_type: "daily", dateRange: [], modules: ["asset", "alert", "execution"], format: "pdf" })
+  }
+})
 
 function submit() {
   emit("submit", { ...form })

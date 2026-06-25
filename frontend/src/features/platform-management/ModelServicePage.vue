@@ -189,7 +189,7 @@ const testResultVisible = ref(false)
 const editing = ref<any>(null)
 const models = ref<any[]>([])
 const metricsData = ref<any>({})
-const testResultData = ref<any>({ success: false, name: 'primary', latency: 0, response: 'primary', error: 'primary'})
+const testResultData = ref<any>({ success: false, name: '', latency: 0, response: '', error: ''})
 const formRef = ref()
 
 const overviewStats = computed(() => [
@@ -199,11 +199,11 @@ const overviewStats = computed(() => [
   { label: '今日调用', value: 0, color: '#ff7d00' },
 ])
 
-const globalConfig = reactive({ default_model: 'primary', timeout: 60, max_tokens: 4096, temperature: 70 })
+const globalConfig = reactive({ default_model: '', timeout: 60, max_tokens: 4096, temperature: 70 })
 
 const form = reactive({
-  name: 'primary', provider: 'zhipu', model_id: 'primary', endpoint: 'primary',
-  api_key: 'primary', max_tokens: 4096, description: 'primary',
+  name: '', provider: 'zhipu', model_id: '', endpoint: '',
+  api_key: '', max_tokens: 4096, description: '',
 })
 const formRules = {
   name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
@@ -226,7 +226,7 @@ async function loadData() {
 function openDialog(row?: any) {
   editing.value = row || null
   if (row) Object.assign(form, row)
-  else Object.assign(form, { name: 'primary', provider: 'zhipu', model_id: 'primary', endpoint: 'primary', api_key: 'primary', max_tokens: 4096, description: 'primary'})
+  else Object.assign(form, { name: '', provider: 'zhipu', model_id: '', endpoint: '', api_key: '', max_tokens: 4096, description: ''})
   dialogVisible.value = true
 }
 
@@ -246,7 +246,7 @@ async function handleSubmit() {
 }
 
 async function testModel(row: any) {
-  testResultData.value = { success: false, name: row.name, latency: 0, response: 'primary', error: 'primary'}
+  testResultData.value = { success: false, name: row.name, latency: 0, response: '', error: ''}
   testResultVisible.value = true
   try {
     const startTime = Date.now()
@@ -258,7 +258,7 @@ async function testModel(row: any) {
       name: row.name,
       latency: elapsed,
       response: result?.response || result?.content || '测试连接成功',
-      error: 'primary',
+      error: '',
     }
     ElMessage.success('测试完成')
   } catch (e: any) {
@@ -266,7 +266,7 @@ async function testModel(row: any) {
       success: false,
       name: row.name,
       latency: 0,
-      response: 'primary',
+      response: '',
       error: e.response?.data?.message || e.message || '连接失败',
     }
   }

@@ -150,6 +150,12 @@ export const API = {
     PROMPT_TEMPLATE_TEST: (id: string) => '/api/v1/aiops/prompt-templates/' + id + '/test',
   },
 
+  // AI 助手对话
+  AI: {
+    CHAT: '/api/v1/ai/chat',
+    EXECUTE: '/api/v1/ai/execute',
+  },
+
   // 证据链
   ALERT_EVIDENCE_CHAIN: (id: string) => '/api/v1/alerts/' + id + '/evidence-chain',
 

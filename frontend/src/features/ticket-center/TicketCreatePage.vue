@@ -328,7 +328,7 @@ const ticketTypes = [
 const priorityLevels = [
   { value: 'critical', label: '紧急', tagType: 'danger', desc: '系统不可用或核心业务中断' },
   { value: 'high', label: '高', tagType: 'warning', desc: '功能严重受损，影响较大' },
-  { value: 'medium', label: '中', tagType: 'primary', desc: '功能部分受影响' },
+  { value: 'medium', label: '中', tagType: '', desc: '功能部分受影响' },
   { value: 'low', label: '低', tagType: 'info', desc: '轻微问题或建议' },
 ]
 
@@ -345,14 +345,14 @@ const formRef = ref<FormInstance>()
 const submitting = ref(false)
 
 const formData = reactive<TicketFormData>({
-  title: 'primary',
-  description: 'primary',
-  type: 'primary',
-  priority: 'primary',
+  title: '',
+  description: '',
+  type: '',
+  priority: '',
   assignee_id: undefined,
   related_alert_id: undefined,
   related_asset_id: undefined,
-  expected_resolve_at: 'primary',
+  expected_resolve_at: '',
   notify_channels: ['email'],
   attachments: [],
 })
@@ -382,10 +382,12 @@ const assetOptions = ref<AssetItem[]>([])
 
 // ─── 搜索方法 ────────────────────────────────────────
 async function searchAssignees(query: string) {
-  if (!query) return
+  // 允许空查询：首次聚焦下拉框时加载默认负责人列表（onMounted 也会调用）
   assigneeLoading.value = true
   try {
-    const res = await client.get(API.GOVERNANCE.USERS ?? '/api/users', { params: { keyword: query, page_size: 20 } })
+    const params: any = { page_size: 20 }
+    if (query) params.keyword = query
+    const res = await client.get(API.GOVERNANCE.USERS ?? '/api/users', { params })
     const data = res.data?.data ?? res.data
     assigneeOptions.value = Array.isArray(data) ? data : data?.items ?? []
   } catch {
@@ -450,9 +452,9 @@ async function handleSubmit() {
 
     ElMessage.success('工单创建成功')
     if (ticketId) {
-      router.push('/ticket-center/tickets/' + ticketId)
+      router.push('/tickets/' + ticketId)
     } else {
-      router.push('/ticket-center/tickets')
+      router.push('/tickets')
     }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : '创建工单失败'
@@ -491,7 +493,7 @@ async function handleReset() {
 
 // ─── 返回 ────────────────────────────────────────────
 function handleBack() {
-  router.push('/ticket-center/tickets')
+  router.push('/tickets')
 }
 
 // ─── 初始化 ──────────────────────────────────────────

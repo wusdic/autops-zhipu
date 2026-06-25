@@ -472,12 +472,12 @@ const stats = reactive({
 })
 
 const filters = reactive({
-  status: 'primary',
-  priority: 'primary',
-  source: 'primary',
-  assignee: 'primary',
+  status: '',
+  priority: '',
+  source: '',
+  assignee: '',
   dateRange: null as [string, string] | null,
-  keyword: 'primary',
+  keyword: '',
 })
 
 const pagination = reactive({
@@ -699,12 +699,12 @@ const createDialogVisible = ref(false)
 const createSubmitting = ref(false)
 const createFormRef = ref<FormInstance>()
 const createForm = reactive({
-  title: 'primary',
-  description: 'primary',
+  title: '',
+  description: '',
   priority: 'medium',
-  assigned_to: 'primary',
-  related_alert_id: 'primary',
-  related_asset_id: 'primary',
+  assigned_to: '',
+  related_alert_id: '',
+  related_asset_id: '',
 })
 
 const createRules: FormRules = {

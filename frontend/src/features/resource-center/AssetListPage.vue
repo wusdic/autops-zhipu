@@ -390,11 +390,11 @@ const tableRef = ref()
 
 // Filters
 const filters = reactive({
-  search: 'primary',
-  asset_type: 'primary',
-  status: 'primary',
-  environment: 'primary',
-  health_status: 'primary',
+  search: '',
+  asset_type: '',
+  status: '',
+  environment: '',
+  health_status: '',
   tags: [] as string[],
 })
 const availableTags = ref<string[]>([])
@@ -429,8 +429,8 @@ const quickBindCredId = ref('')
 
 // ---------- Form ----------
 const defaultForm = {
-  name: 'primary', asset_type: 'linux_server', ip: 'primary', port: undefined as number | undefined,
-  os_type: 'linux', description: 'primary', environment: 'production', status: 'active',
+  name: '', asset_type: 'linux_server', ip: '', port: undefined as number | undefined,
+  os_type: 'linux', description: '', environment: 'production', status: 'active',
 }
 const formData = reactive({ ...defaultForm })
 
@@ -748,7 +748,8 @@ async function executeImport() {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     if (data.code === 0) {
-      ElMessage.success('成功导入 ' + data.data?.created || 0 + ' 项资产')
+      const imported = data.data?.imported ?? data.data?.created?.length ?? 0
+      ElMessage.success('成功导入 ' + imported + ' 项资产')
       closeImportDialog()
       loadAssets()
     } else {
@@ -800,7 +801,7 @@ async function quickStatusCheck(row: any) {
   try {
     const { data } = await api.get(R.STATES.LATEST(row.id))
     if (data.code === 0) {
-      ElMessage.success('[' + row.name + '] 状态: ' + data.data?.health_status || '正常')
+      ElMessage.success('[' + row.name + '] 状态: ' + (data.data?.health_status || '正常'))
     } else {
       ElMessage.warning(data.message || '无法获取状态')
     }

@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps<{ modelValue: boolean; title?: string }>()
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])
@@ -30,6 +30,14 @@ const visible = computed({
 })
 const decision = ref('')
 const comment = ref('')
+
+// 每次打开时清空上次的决定与意见，避免残留
+watch(visible, (v) => {
+  if (v) {
+    decision.value = ''
+    comment.value = ''
+  }
+})
 
 function submit() {
   emit('confirm', { decision: decision.value, comment: comment.value })

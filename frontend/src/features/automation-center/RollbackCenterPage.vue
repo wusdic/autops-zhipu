@@ -331,14 +331,14 @@ const rollbackLoading = ref(false)
 const rollbackTarget = ref<ExecutionEntry | null>(null)
 
 const rollbackForm = reactive({
-  reason: 'primary',
+  reason: '',
   force: false,
 })
 
 const queryParams = reactive<QueryParams>({
-  name: 'primary',
-  original_status: 'primary',
-  rollback_available: 'primary',
+  name: '',
+  original_status: '',
+  rollback_available: '',
   dateRange: null,
   page: 1,
   pageSize: 20,

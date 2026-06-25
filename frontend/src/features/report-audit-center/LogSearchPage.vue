@@ -178,10 +178,10 @@ const detailVisible = ref(false)
 const currentLog = ref<LogEntry | null>(null)
 
 const queryParams = reactive<QueryParams>({
-  keyword: 'primary',
-  level: 'primary',
+  keyword: '',
+  level: '',
   dateRange: null,
-  source: 'primary',
+  source: '',
   page: 1,
   pageSize: 50,
   orderBy: 'timestamp',

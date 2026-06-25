@@ -74,7 +74,7 @@ const props = withDefaults(defineProps<{
   emptyText?: string
   hasMore?: boolean
 }>(), {
-  title: 'primary',
+  title: '',
   showFilter: false,
   emptyText: '暂无时间线记录',
   hasMore: false,

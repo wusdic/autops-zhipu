@@ -224,7 +224,7 @@ function updateGroupState(group: any) {
 }
 
 const stats = reactive({ total: 0, active: 0, expired: 0, expiringSoon: 0 })
-const filters = reactive({ keyword: 'primary', status: 'primary', scope: 'primary'})
+const filters = reactive({ keyword: '', status: '', scope: ''})
 const loading = ref(false)
 const apiKeys = ref<any[]>([])
 const page = ref(1)
@@ -234,8 +234,8 @@ const total = ref(0)
 const dialogVisible = ref(false)
 const secretDialogVisible = ref(false)
 const saving = ref(false)
-const formData = reactive({ name: 'primary', scopes: [] as string[], expires_at: 'primary'})
-const createdKey = reactive({ name: 'primary', key_id: 'primary', secret: 'primary'})
+const formData = reactive({ name: '', scopes: [] as string[], expires_at: ''})
+const createdKey = reactive({ name: '', key_id: '', secret: ''})
 
 const showDetail = ref(false)
 const detailData = ref<any>(null)

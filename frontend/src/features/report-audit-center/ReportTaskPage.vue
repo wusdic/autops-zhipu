@@ -164,8 +164,8 @@ const detailVisible = ref(false)
 const taskDetail = ref<any>(null)
 
 const filters = reactive({
-  status: 'primary',
-  keyword: 'primary',
+  status: '',
+  keyword: '',
 })
 
 const pagination = reactive({

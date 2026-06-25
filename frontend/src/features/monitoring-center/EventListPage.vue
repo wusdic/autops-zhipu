@@ -442,12 +442,12 @@ const stats = reactive({
 })
 
 const filters = reactive({
-  source: 'primary',
-  severity: 'primary',
+  source: '',
+  severity: '',
   timePreset: '' as string,
   dateRange: null as [string, string] | null,
-  asset: 'primary',
-  keyword: 'primary',
+  asset: '',
+  keyword: '',
 })
 
 const pagination = reactive({
@@ -517,7 +517,7 @@ const eventTimeline = computed(() => {
       time: currentEvent.value.updated_at,
       title: '最后更新',
       description: '事件信息已更新',
-      type: 'primary',
+      type: '',
     })
   }
 
@@ -553,11 +553,11 @@ function sourceLabel(source: string): string {
 
 function sourceTagType(source: string): TagType {
   const map: Record<string, string> = {
-    collector: 'primary',
+    collector: '',
     state_change: 'warning',
     log: 'info',
     config_change: 'success',
-    execution: 'primary',
+    execution: '',
   }
   return (map[source] || 'info') as TagType
 }
@@ -589,11 +589,11 @@ function eventTypeTagType(type: string): TagType {
     alert_resolved: 'success',
     alert_suppressed: 'info',
     state_changed: 'warning',
-    config_changed: 'primary',
+    config_changed: '',
     asset_discovered: 'success',
     asset_offline: 'danger',
     asset_online: 'success',
-    execution_started: 'primary',
+    execution_started: '',
     execution_completed: 'success',
     execution_failed: 'danger',
     threshold_exceeded: 'danger',
@@ -611,7 +611,7 @@ function logLevelType(level: string): TagType {
     warn: 'warning',
     WARNING: 'warning',
     info: 'info',
-    INFO: 'primary',
+    INFO: '',
     debug: 'info',
     DEBUG: 'info',
   }

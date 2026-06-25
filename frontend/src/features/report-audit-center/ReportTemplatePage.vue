@@ -241,8 +241,8 @@ const previewVisible = ref(false)
 const previewData = ref<any>(null)
 
 const filters = reactive({
-  keyword: 'primary',
-  type: 'primary',
+  keyword: '',
+  type: '',
 })
 
 const pagination = reactive({
@@ -252,15 +252,15 @@ const pagination = reactive({
 })
 
 const form = reactive({
-  name: 'primary',
-  type: 'primary',
-  description: 'primary',
+  name: '',
+  type: '',
+  description: '',
   sections: [] as string[],
   params: {
     timeRange: '7d',
     outputFormat: 'pdf',
     autoSend: false,
-    receivers: 'primary',
+    receivers: '',
   } as Record<string, any>,
 })
 
@@ -291,7 +291,7 @@ function typeLabel(t: string): string {
 
 function typeTagType(t: string): TagType {
   const map: Record<string, string> = {
-    inspection: 'primary',
+    inspection: '',
     anomaly: 'danger',
     automation: 'warning',
     asset: 'success',
@@ -353,7 +353,7 @@ function resetForm() {
   form.type = ''
   form.description = ''
   form.sections = []
-  form.params = { timeRange: '7d', outputFormat: 'pdf', autoSend: false, receivers: 'primary'}
+  form.params = { timeRange: '7d', outputFormat: 'pdf', autoSend: false, receivers: ''}
   formRef.value?.resetFields()
 }
 
@@ -371,7 +371,7 @@ function openEditDialog(row: any) {
   form.type = row.type || ''
   form.description = row.description || ''
   form.sections = row.sections || []
-  form.params = row.params || { timeRange: '7d', outputFormat: 'pdf', autoSend: false, receivers: 'primary'}
+  form.params = row.params || { timeRange: '7d', outputFormat: 'pdf', autoSend: false, receivers: ''}
   dialogVisible.value = true
 }
 

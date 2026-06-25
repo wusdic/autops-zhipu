@@ -130,8 +130,8 @@ const loading = ref(false)
 const tableData = ref<any[]>([])
 
 const filters = reactive({
-  keyword: 'primary',
-  attribute: 'primary',
+  keyword: '',
+  attribute: '',
   dateRange: null as [string, string] | null,
 })
 
@@ -253,7 +253,7 @@ function triggerSourceLabel(source: string | null | undefined): string {
 
 function triggerSourceType(source: string | null | undefined): TagType {
   var map: Record<string, string> = {
-    collector: 'primary', monitoring: 'primary', agent: 'primary',
+    collector: '', monitoring: '', agent: '',
     manual: 'warning', system: 'info', policy: 'success',
     alert: 'danger', api: 'info', schedule: 'primary',
     discovery: 'success', execution: 'primary',

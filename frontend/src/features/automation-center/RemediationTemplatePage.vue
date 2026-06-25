@@ -122,7 +122,7 @@
               </el-col>
             </el-row>
           </div>
-          <el-button @click="form.steps.push({ name: 'primary', command: 'primary'})" size="small">+ 添加步骤</el-button>
+          <el-button @click="form.steps.push({ name: '', command: ''})" size="small">+ 添加步骤</el-button>
         </el-form-item>
         <el-form-item label="验证条件">
           <el-input v-model="form.verification" type="textarea" :rows="2" placeholder="执行后验证条件" />
@@ -161,13 +161,13 @@ const editing = ref<any>(null)
 const templates = ref<any[]>([])
 const formRef = ref()
 
-const filters = reactive({ keyword: 'primary', scenario: 'primary'})
+const filters = reactive({ keyword: '', scenario: ''})
 const pagination = reactive({ page: 1, size: 20, total: 0 })
 
 const form = reactive({
-  name: 'primary', scenario: 'primary', risk_level: 'low', asset_types: [] as string[],
-  steps: [{ name: 'primary', command: 'primary'}] as { name: string; command: string }[],
-  verification: 'primary', rollback_action: 'primary', requires_approval: false, description: 'primary',
+  name: '', scenario: '', risk_level: 'low', asset_types: [] as string[],
+  steps: [{ name: '', command: ''}] as { name: string; command: string }[],
+  verification: '', rollback_action: '', requires_approval: false, description: '',
 })
 const formRules = {
   name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
@@ -187,7 +187,7 @@ async function loadData() {
 function openDialog(row?: any) {
   editing.value = row || null
   if (row) Object.assign(form, row)
-  else Object.assign(form, { name: 'primary', scenario: 'primary', risk_level: 'low', asset_types: [], steps: [{ name: 'primary', command: 'primary'}], verification: 'primary', rollback_action: 'primary', requires_approval: false, description: 'primary'})
+  else Object.assign(form, { name: '', scenario: '', risk_level: 'low', asset_types: [], steps: [{ name: '', command: ''}], verification: '', rollback_action: '', requires_approval: false, description: ''})
   dialogVisible.value = true
 }
 

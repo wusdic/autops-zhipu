@@ -304,10 +304,10 @@ const taskPagination = reactive({ page: 1, pageSize: 20 })
 const showCreateDialog = ref(false)
 const taskFormRef = ref()
 const newTask = reactive({
-  name: 'primary', ipMode: 'range' as 'range' | 'cidr',
-  ip_start: 'primary', ip_end: 'primary', cidr: 'primary',
-  protocols: ['ICMP'] as string[], ports: 'primary',
-  credential_id: 'primary', timeout: 30,
+  name: '', ipMode: 'range' as 'range' | 'cidr',
+  ip_start: '', ip_end: '', cidr: '',
+  protocols: ['ICMP'] as string[], ports: '',
+  credential_id: '', timeout: 30,
 })
 const taskRules = { name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }] }
 
@@ -315,7 +315,7 @@ const taskRules = { name: [{ required: true, message: '请输入任务名称', t
 const results = ref<any[]>([])
 const resultLoading = ref(false)
 const selectedResults = ref<any[]>([])
-const resultFilter = reactive({ status: 'primary', asset_type: 'primary', keyword: 'primary'})
+const resultFilter = reactive({ status: '', asset_type: '', keyword: ''})
 
 // === 纳管向导 ===
 const wizardActive = ref(false)
@@ -335,18 +335,14 @@ const showNewCredDialog = ref(false)
 
 // === 加载函数 ===
 async function loadStats() {
-  try {
-    const res = await api.get(API.DISCOVERY_TASKS, { params: { page_size: 100 } })
-    if (res.data?.code === 0) {
-      const all = res.data.data?.items || res.data.data || []
-      stats.total_discovered = all.length
-      stats.pending_review = all.filter((t: any) => t.status === 'completed').length
-    }
-  } catch {}
+  // 已发现资产总数、已纳管、待审核、今日发现 均来自发现结果（discovery results），
+  // 而非发现任务（tasks）。任务数 ≠ 资产数。
   try {
     const res = await api.get(API.DISCOVERY_RESULTS, { params: { page_size: 100 } })
     if (res.data?.code === 0) {
       const all = res.data.data?.items || res.data.data || []
+      const total = res.data.data?.total ?? all.length
+      stats.total_discovered = total
       stats.onboarded = all.filter((r: any) => r.status === 'managed').length
       stats.pending_review = all.filter((r: any) => r.status === 'new').length
       stats.today = all.filter((r: any) => {
@@ -354,7 +350,9 @@ async function loadStats() {
         return new Date(r.discovered_at).toDateString() === new Date().toDateString()
       }).length
     }
-  } catch {}
+  } catch (e) {
+    console.warn('loadStats 加载失败', e)
+  }
 }
 
 async function loadTasks() {
@@ -434,7 +432,7 @@ async function deleteTask(task: any) {
     await api.delete(API.DISCOVERY_TASKS + '/' + task.id)
     ElMessage.success('已删除')
     loadTasks()
-  } catch (e: any) { if (e !== 'cancel') ElMessage.error('删除失败') }
+  } catch (e: any) { if (e !== 'cancel' && e?.action !== 'cancel' && e?.message !== 'cancel') ElMessage.error('删除失败') }
 }
 
 function viewResults(task: any) {

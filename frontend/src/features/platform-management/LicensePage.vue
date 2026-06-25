@@ -215,18 +215,18 @@ const licenseKey = ref('')
 const fileList = ref<any[]>([])
 
 const license = reactive({
-  type: 'primary',
-  holder: 'primary',
-  expires_at: 'primary',
+  type: '',
+  holder: '',
+  expires_at: '',
   expired: false,
-  serial: 'primary',
+  serial: '',
   max_assets: 0,
   current_assets: 0,
   max_nodes: 0,
   current_nodes: 0,
   max_users: 0,
   modules: '' as string | string[],
-  issued_at: 'primary',
+  issued_at: '',
 })
 
 // ── Computed ─────────────────────────────────────────────

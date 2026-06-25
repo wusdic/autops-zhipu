@@ -231,8 +231,8 @@ const stats = reactive({
 })
 
 const execFilters = reactive({
-  status: 'primary',
-  keyword: 'primary',
+  status: '',
+  keyword: '',
 })
 
 const execPagination = reactive({

@@ -190,11 +190,11 @@ const typeLabelMap: Record<string, string> = {
   data: '数据',
 }
 const typeTagMap: Record<string, TagType> = {
-  auth: 'primary',
+  auth: '',
   notification: 'success',
   monitoring: 'warning',
   event: 'danger',
-  data: 'primary',
+  data: '',
 }
 const statusLabelMap: Record<string, string> = {
   connected: '已连接',
@@ -236,10 +236,10 @@ const configuringName = ref('')
 const savingConfig = ref(false)
 const configFormRef = ref<FormInstance>()
 const configForm = reactive({
-  endpoint: 'primary',
-  username: 'primary',
-  password: 'primary',
-  extra: 'primary',
+  endpoint: '',
+  username: '',
+  password: '',
+  extra: '',
 })
 
 // ── Data Loading ─────────────────────────────────────────

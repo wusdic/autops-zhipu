@@ -412,7 +412,7 @@ const conditionTypeLabelMap: Record<string, string> = {
 }
 
 const conditionTypeTagMap: Record<string, TagType> = {
-  asset_type: 'primary',
+  asset_type: '',
   priority: 'danger',
   keyword: 'warning',
   ticket_type: 'success',
@@ -424,9 +424,9 @@ const loading = ref(false)
 const tableData = ref<AssignmentRule[]>([])
 
 const filterForm = reactive({
-  keyword: 'primary',
-  condition_type: 'primary',
-  status: 'primary',
+  keyword: '',
+  condition_type: '',
+  status: '',
 })
 
 const pagination = reactive({
@@ -449,13 +449,13 @@ const reorderLoading = ref(false)
 const reorderList = ref<AssignmentRule[]>([])
 
 const defaultDialogForm = (): DialogFormData => ({
-  name: 'primary',
-  conditions: [{ type: 'primary', value: 'primary'}],
-  assign_to: 'primary',
+  name: '',
+  conditions: [{ type: '', value: ''}],
+  assign_to: '',
   assign_to_type: 'role',
   priority: 10,
   status: 'enabled',
-  description: 'primary',
+  description: '',
 })
 
 const dialogForm = reactive<DialogFormData>(defaultDialogForm())
@@ -530,13 +530,13 @@ function handlePageChange(page: number) {
 
 // ─── 条件编辑器 ──────────────────────────────────────
 function addCondition() {
-  dialogForm.conditions.push({ type: 'primary', value: 'primary'})
+  dialogForm.conditions.push({ type: '', value: ''})
 }
 
 function removeCondition(index: number) {
   dialogForm.conditions.splice(index, 1)
   if (!dialogForm.conditions.length) {
-    dialogForm.conditions.push({ type: 'primary', value: 'primary'})
+    dialogForm.conditions.push({ type: '', value: ''})
   }
 }
 
@@ -567,7 +567,7 @@ function handleEdit(row: any) {
   Object.assign(dialogForm, {
     id: row.id,
     name: row.name,
-    conditions: row.conditions?.length ? row.conditions.map((c: any) => ({ ...c })) : [{ type: 'primary', value: 'primary'}],
+    conditions: row.conditions?.length ? row.conditions.map((c: any) => ({ ...c })) : [{ type: '', value: ''}],
     assign_to: row.assign_to,
     assign_to_type: row.assign_to_type,
     priority: row.priority,
@@ -658,7 +658,7 @@ async function handleDelete(row: any) {
     ElMessage.success('规则已删除')
     fetchData()
   } catch (err: unknown) {
-    if (err !== 'cancel') {
+    if (err !== 'cancel' && err?.action !== 'cancel' && err?.message !== 'cancel') {
       const msg = err instanceof Error ? err.message : '删除失败'
       ElMessage.error(msg)
     }

@@ -3,7 +3,7 @@ import { APP_CONFIG } from '@/shared/config'
 import router from '@/app/router'
 
 const apiClient = axios.create({
-  baseURL: '',
+  baseURL: APP_CONFIG.API_BASE_URL,
   timeout: APP_CONFIG.API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
@@ -24,17 +24,23 @@ apiClient.interceptors.response.use(
   (response) => {
     const data = response.data
     if (data.code !== undefined && data.code !== 0) {
-      return Promise.reject(new Error(data.message || '请求失败'))
+      // 业务错误：保留原始响应结构，让调用方能取到 response.data（含 code/message）
+      const bizError: any = new Error(data.message || '请求失败')
+      bizError.response = response
+      bizError.code = data.code
+      return Promise.reject(bizError)
     }
     return response
   },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem(APP_CONFIG.TOKEN_KEY)
-      router.push({ name: 'login' })
+      router.push({ name: 'login' }).catch(() => {})
     }
+    // 保留原始 axios error（含 response/status），调用方可访问 error.response?.data?.message
     const message = error.response?.data?.message || error.message || '网络错误'
-    return Promise.reject(new Error(message))
+    error.message = message
+    return Promise.reject(error)
   }
 )
 

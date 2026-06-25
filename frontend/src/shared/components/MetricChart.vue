@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   height: 240,
   color: '#165dff',
-  unit: 'primary',
+  unit: '',
 })
 
 const chartRef = ref<HTMLElement | null>(null)

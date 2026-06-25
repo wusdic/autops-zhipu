@@ -321,7 +321,7 @@ const configTypes = [
 ]
 
 const typeTagMap: Record<string, TagType> = {
-  collection_template: 'primary',
+  collection_template: '',
   policy_config: 'warning',
   notification: 'success',
   system: 'info',
@@ -330,7 +330,7 @@ const typeTagMap: Record<string, TagType> = {
 // ──────────────── List State ────────────────
 const loading = ref(false)
 const configs = ref<ConfigItem[]>([])
-const filters = reactive({ config_type: 'primary', search: 'primary'})
+const filters = reactive({ config_type: '', search: ''})
 const pagination = reactive({ page: 1, pageSize: 20, total: 0 })
 
 // ──────────────── Form State ────────────────
@@ -340,11 +340,11 @@ const editingId = ref('')
 const saving = ref(false)
 
 const defaultForm = {
-  name: 'primary',
-  schema_def: 'primary',
+  name: '',
+  schema_def: '',
   config_type: 'system',
-  description: 'primary',
-  version_note: 'primary',
+  description: '',
+  version_note: '',
 }
 const formData = reactive({ ...defaultForm })
 
@@ -442,7 +442,7 @@ function openEditDialog(row: any) {
     schema_def: row.schema_def,
     config_type: row.config_type,
     description: row.description || '',
-    version_note: 'primary',
+    version_note: '',
   })
   showFormDialog.value = true
 }

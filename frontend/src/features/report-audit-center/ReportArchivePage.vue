@@ -133,8 +133,8 @@ const detailVisible = ref(false)
 const archiveDetail = ref<any>(null)
 
 const filters = reactive({
-  keyword: 'primary',
-  type: 'primary',
+  keyword: '',
+  type: '',
 })
 
 const pagination = reactive({

@@ -244,17 +244,17 @@ const editingId = ref('')
 const formRef = ref<FormInstance>()
 
 const form = reactive({
-  name: 'primary',
-  code: 'primary',
-  admin: 'primary',
-  contact: 'primary',
-  phone: 'primary',
+  name: '',
+  code: '',
+  admin: '',
+  contact: '',
+  phone: '',
   max_users: 100,
   max_assets: 1000,
   max_policies: 100,
   max_playbooks: 50,
-  expire_at: 'primary',
-  remark: 'primary',
+  expire_at: '',
+  remark: '',
 })
 
 const formRules: FormRules = {
