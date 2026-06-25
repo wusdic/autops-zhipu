@@ -29,11 +29,21 @@ logger = logging.getLogger(__name__)
 # 后台任务句柄，防止被 GC
 _running_tasks: set[asyncio.Task] = set()
 
-# 默认巡检项（模板未定义 check_items 时使用）
+# 默认巡检项（模板未定义 check_items 时使用），按 check_type 分类。
+# 可用 metric 见 device_inspect 归一化输出；op 支持 > >= < <= == != is_true is_false。
 _DEFAULT_CHECK_ITEMS: list[dict[str, Any]] = [
-    {"key": "reachable", "name": "可达性", "metric": "reachable", "op": "is_false", "severity": "fail"},
-    {"key": "disk", "name": "磁盘使用率", "metric": "disk_used_percent_max", "op": ">", "threshold": 90, "warn": 80, "severity": "fail"},
-    {"key": "memory", "name": "内存使用率", "metric": "mem_used_percent", "op": ">", "threshold": 90, "warn": 80, "severity": "warning"},
+    # 基线
+    {"key": "reachable", "name": "可达性", "metric": "reachable", "op": "is_false", "severity": "fail", "check_type": "baseline"},
+    # 资源
+    {"key": "cpu_load", "name": "CPU单核负载", "metric": "load_per_core", "op": ">", "threshold": 4, "warn": 2, "severity": "fail", "check_type": "resource"},
+    {"key": "memory", "name": "内存使用率", "metric": "mem_used_percent", "op": ">", "threshold": 90, "warn": 80, "severity": "warning", "check_type": "resource"},
+    {"key": "swap", "name": "Swap使用率", "metric": "swap_used_percent", "op": ">", "threshold": 80, "warn": 50, "severity": "warning", "check_type": "resource"},
+    {"key": "disk", "name": "磁盘使用率", "metric": "disk_used_percent_max", "op": ">", "threshold": 90, "warn": 80, "severity": "fail", "check_type": "resource"},
+    {"key": "inode", "name": "inode使用率", "metric": "inode_used_percent_max", "op": ">", "threshold": 90, "warn": 80, "severity": "fail", "check_type": "resource"},
+    {"key": "zombie", "name": "僵尸进程数", "metric": "zombie_count", "op": ">", "threshold": 10, "warn": 3, "severity": "warning", "check_type": "resource"},
+    # 安全基线
+    {"key": "ntp", "name": "时间同步(NTP)", "metric": "ntp_synchronized", "op": "is_false", "severity": "warning", "check_type": "security"},
+    {"key": "ssh_root", "name": "SSH允许root登录", "metric": "ssh_permit_root", "op": "is_true", "severity": "warning", "check_type": "security"},
 ]
 
 
@@ -61,24 +71,33 @@ def evaluate_check_item(item: dict[str, Any], info: dict[str, Any]) -> tuple[str
     metric = item.get("metric", "")
     severity = item.get("severity", "warning")
     name = item.get("name", item.get("key", metric))
-    detail: dict[str, Any] = {"name": name, "metric": metric}
+    op = item.get("op", ">")
+    value = info.get(metric)
+    detail: dict[str, Any] = {"name": name, "metric": metric, "value": value}
 
-    # 特殊项：可达性
-    if metric == "reachable" or item.get("op") == "is_false":
-        reachable = bool(info.get("reachable"))
-        detail["value"] = reachable
-        if not reachable:
+    # 布尔类巡检项（is_true / is_false）
+    if op in ("is_true", "is_false"):
+        # 未采集到（None）且非可达性项 → 视为不适用，不计失败，避免噪声
+        if value is None and metric != "reachable":
+            detail["message"] = "指标未采集（方式不支持）"
+            return "pass", detail
+        bval = bool(value)
+        breach = bval if op == "is_true" else (not bval)
+        if metric == "reachable" and not bval:
             detail["message"] = info.get("error") or "设备不可达/采集失败"
+        if breach:
+            detail.setdefault("message", f"{name} 命中条件({op})")
             return severity, detail
         return "pass", detail
 
-    value = info.get(metric)
-    detail["value"] = value
+    # 数值类
+    if not info.get("reachable") and metric != "reachable":
+        detail["message"] = "设备不可达，未采集"
+        return "warning", detail
     if value is None:
         detail["message"] = "指标不可用（采集失败或方式不支持）"
         return "warning", detail
 
-    op = item.get("op", ">")
     threshold = item.get("threshold")
     warn = item.get("warn")
     try:
@@ -173,16 +192,20 @@ async def run_inspection_task(task_id: str) -> None:
                 for item in check_items:
                     status, detail = evaluate_check_item(item, info)
                     counts[status] = counts.get(status, 0) + 1
+                    check_type = item.get("check_type", "baseline")
                     session.add(
                         InspectionResult(
                             task_id=task_id,
                             asset_id=asset_id,
                             check_item=item.get("name", item.get("key", "check")),
+                            check_type=check_type,
                             status=status,
                             detail=detail,
                         )
                     )
-                    asset_summary["items"].append({"status": status, **detail})
+                    asset_summary["items"].append(
+                        {"status": status, "check_type": check_type, **detail}
+                    )
 
                 per_asset.append(asset_summary)
 

@@ -39,11 +39,24 @@ def _empty_info(method: str, error: str) -> dict[str, Any]:
         "hostname": None,
         "cpu_count": None,
         "load_1m": None,
+        "load_5m": None,
+        "load_15m": None,
+        "load_per_core": None,
         "mem_total_mb": None,
         "mem_used_mb": None,
         "mem_used_percent": None,
+        "swap_total_mb": None,
+        "swap_used_percent": None,
         "disk_used_percent_max": None,
         "disks": [],
+        "inode_used_percent_max": None,
+        "process_count": None,
+        "zombie_count": None,
+        "logged_in_users": None,
+        "listening_ports_count": None,
+        "ntp_synchronized": None,
+        "selinux": None,
+        "ssh_permit_root": None,
         "uptime_seconds": None,
         "raw": {},
     }
@@ -60,7 +73,14 @@ _SSH_COMMANDS = {
     "loadavg": "cat /proc/loadavg",
     "free": "free -m",
     "df": "df -P -x tmpfs -x devtmpfs",
+    "df_inode": "df -P -i -x tmpfs -x devtmpfs",
     "uptime": "cat /proc/uptime",
+    "ps_stat": "ps -e -o stat=",
+    "who": "who",
+    "listen": "ss -H -ltn",
+    "timedatectl": "timedatectl 2>/dev/null",
+    "sshd": "grep -iE '^[[:space:]]*PermitRootLogin' /etc/ssh/sshd_config 2>/dev/null",
+    "selinux": "getenforce 2>/dev/null",
 }
 
 
@@ -77,40 +97,101 @@ def _parse_ssh(outputs: dict[str, str]) -> dict[str, Any]:
         pass
 
     loadavg = (outputs.get("loadavg") or "").split()
-    if loadavg:
+    if len(loadavg) >= 3:
         try:
             info["load_1m"] = float(loadavg[0])
-        except ValueError:
+            info["load_5m"] = float(loadavg[1])
+            info["load_15m"] = float(loadavg[2])
+            if info.get("cpu_count"):
+                info["load_per_core"] = round(info["load_1m"] / info["cpu_count"], 2)
+        except (ValueError, ZeroDivisionError):
             pass
 
-    # free -m: 第二行 Mem: total used free ...
+    # free -m: Mem 与 Swap 两行
     for line in (outputs.get("free") or "").splitlines():
         parts = line.split()
-        if parts and parts[0].lower().startswith("mem"):
+        if not parts:
+            continue
+        head = parts[0].lower()
+        if head.startswith("mem"):
             try:
-                total = int(parts[1])
-                used = int(parts[2])
+                total, used = int(parts[1]), int(parts[2])
                 info["mem_total_mb"] = total
                 info["mem_used_mb"] = used
                 if total > 0:
                     info["mem_used_percent"] = round(used / total * 100, 1)
             except (ValueError, IndexError):
                 pass
-            break
+        elif head.startswith("swap"):
+            try:
+                total, used = int(parts[1]), int(parts[2])
+                info["swap_total_mb"] = total
+                if total > 0:
+                    info["swap_used_percent"] = round(used / total * 100, 1)
+                else:
+                    info["swap_used_percent"] = 0.0
+            except (ValueError, IndexError):
+                pass
 
-    # df -P: 跳过表头，列 = Filesystem Size Used Avail Use% Mounted
+    # df -P: 列 = Filesystem Size Used Avail Use% Mounted
     disks = []
     for line in (outputs.get("df") or "").splitlines()[1:]:
         parts = line.split()
         if len(parts) >= 6 and parts[4].endswith("%"):
             try:
-                used_pct = float(parts[4].rstrip("%"))
-                disks.append({"mount": parts[5], "used_percent": used_pct})
+                disks.append({"mount": parts[5], "used_percent": float(parts[4].rstrip("%"))})
             except ValueError:
                 pass
     info["disks"] = disks
     if disks:
         info["disk_used_percent_max"] = max(d["used_percent"] for d in disks)
+
+    # df -i: inode 使用率（IUse% 在第 5 列）
+    inode_pcts = []
+    for line in (outputs.get("df_inode") or "").splitlines()[1:]:
+        parts = line.split()
+        if len(parts) >= 6 and parts[4].endswith("%"):
+            try:
+                inode_pcts.append(float(parts[4].rstrip("%")))
+            except ValueError:
+                pass
+    if inode_pcts:
+        info["inode_used_percent_max"] = max(inode_pcts)
+
+    # 进程数 / 僵尸进程数
+    ps_lines = [s.strip() for s in (outputs.get("ps_stat") or "").splitlines() if s.strip()]
+    if ps_lines:
+        info["process_count"] = len(ps_lines)
+        info["zombie_count"] = sum(1 for s in ps_lines if s.startswith("Z"))
+
+    # 登录用户数
+    who_lines = [s for s in (outputs.get("who") or "").splitlines() if s.strip()]
+    info["logged_in_users"] = len(who_lines)
+
+    # 监听端口数
+    listen_lines = [s for s in (outputs.get("listen") or "").splitlines() if s.strip()]
+    info["listening_ports_count"] = len(listen_lines)
+
+    # 时间同步（NTP）
+    td = outputs.get("timedatectl") or ""
+    for line in td.splitlines():
+        low = line.lower()
+        if "ntp synchronized" in low or "system clock synchronized" in low:
+            info["ntp_synchronized"] = "yes" in low
+            break
+
+    # SSH 是否允许 root 登录（安全基线）
+    sshd = (outputs.get("sshd") or "").lower()
+    if sshd:
+        if "permitrootlogin yes" in sshd:
+            info["ssh_permit_root"] = True
+        elif "permitrootlogin" in sshd:  # no / prohibit-password / without-password
+            info["ssh_permit_root"] = False
+
+    # SELinux 状态
+    selinux = (outputs.get("selinux") or "").strip()
+    if selinux:
+        info["selinux"] = selinux
 
     uptime = (outputs.get("uptime") or "").split()
     if uptime:

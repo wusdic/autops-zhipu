@@ -63,6 +63,7 @@ def _result_to_dict(r) -> dict:
         "task_id": r.task_id,
         "asset_id": r.asset_id,
         "check_item": r.check_item,
+        "check_type": getattr(r, "check_type", "baseline"),
         "status": r.status,
         "detail": r.detail,
         "created_at": r.created_at.isoformat() if r.created_at else None,

@@ -94,6 +94,10 @@ class InspectionResult(Base):
     )
     asset_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
     check_item: Mapped[str] = mapped_column(String(256), nullable=False)
+    # 巡检分类：baseline / resource / service / config / security / log / page
+    check_type: Mapped[str] = mapped_column(
+        String(32), default="baseline", nullable=False, index=True,
+    )
     status: Mapped[str] = mapped_column(
         String(16), default="pass", nullable=False, index=True,
     )  # pass, fail, warning

@@ -33,7 +33,14 @@
    ```json
    {"key":"disk","name":"磁盘使用率","metric":"disk_used_percent_max","op":">","threshold":90,"warn":80,"severity":"fail"}
    ```
-   可用 `metric`：`reachable/cpu_count/load_1m/mem_used_percent/disk_used_percent_max/uptime_seconds`。
+   可用 `metric`（SSH 采集，Windows/SNMP 为子集）：
+   - 资源类：`load_1m/load_5m/load_15m/load_per_core`、`mem_used_percent`、`swap_used_percent`、
+     `disk_used_percent_max`、`inode_used_percent_max`、`process_count`、`zombie_count`、`cpu_count`、`uptime_seconds`
+   - 服务/会话：`listening_ports_count`、`logged_in_users`
+   - 安全基线（布尔，配合 `op: is_true/is_false`）：`reachable`、`ntp_synchronized`、`ssh_permit_root`、`selinux`
+   - 每个 check item 可带 `check_type`（baseline/resource/service/config/security/log/page），
+     落库到 `inspection_results.check_type`，对应 `/inspection/baseline-checks`、`/config-checks`、`/log-checks`、`/page-checks` 子类型查询。
+   - 内置默认巡检项覆盖：可达性 + CPU单核负载 + 内存 + Swap + 磁盘 + inode + 僵尸进程 + NTP同步 + SSH root 登录。
 4. **定时巡检**：给 `InspectionPlan` 设标准 5 字段 cron（如 `0 2 * * *` 每日 02:00），`enabled=true`，由 worker 触发。
 5. **报告目录**：`AUTOPS_REPORTS_DIR`（默认 `<cwd>/data/reports`）。生成后可经 `GET /report/tasks/{id}/download` 下载。
 
