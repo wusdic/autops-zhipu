@@ -16,7 +16,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.exceptions import DuplicateError, NotFoundError
 from app.common.repository import BaseRepository
-from app.domains.automation.models import Execution, ExecutionStep, Playbook, Script, ExecutionStatus
+from app.domains.automation.models import (
+    Execution,
+    ExecutionStep,
+    Playbook,
+    Script,
+    ExecutionStatus,
+)
 from app.domains.automation.schemas import ExecutionCreate
 from app.domains.automation.command_policy import CommandPolicy
 from app.domains.automation.executor.local_dev import LocalDevExecutor
@@ -53,14 +59,20 @@ class AutomationService:
         await self.session.refresh(script)
         return script
 
-    async def list_scripts(self, script_type: str | None = None, page: int = 1, page_size: int = 20):
+    async def list_scripts(
+        self, script_type: str | None = None, page: int = 1, page_size: int = 20
+    ):
         stmt = select(Script)
         if script_type:
             stmt = stmt.where(Script.script_type == script_type)
-        total_result = await self.session.execute(select(func.count()).select_from(Script))
+        # count 必须复用相同的 where 条件，否则总数与分页结果不一致
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_result = await self.session.execute(count_stmt)
         total = total_result.scalar() or 0
         result = await self.session.execute(
-            stmt.order_by(Script.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+            stmt.order_by(Script.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
         )
         return list(result.scalars().all()), total
 
@@ -91,7 +103,9 @@ class AutomationService:
 
     async def create_playbook(self, **kwargs) -> Playbook:
         name = kwargs.get("name")
-        existing = await self.session.execute(select(Playbook).where(Playbook.name == name))
+        existing = await self.session.execute(
+            select(Playbook).where(Playbook.name == name)
+        )
         if existing.scalar():
             raise DuplicateError(f"Playbook '{name}' 已存在")
         pb = await self.playbook_repo.create(**kwargs)
@@ -100,10 +114,15 @@ class AutomationService:
         return pb
 
     async def list_playbooks(self, page: int = 1, page_size: int = 20):
-        total_result = await self.session.execute(select(func.count()).select_from(Playbook))
+        total_result = await self.session.execute(
+            select(func.count()).select_from(Playbook)
+        )
         total = total_result.scalar() or 0
         result = await self.session.execute(
-            select(Playbook).order_by(Playbook.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+            select(Playbook)
+            .order_by(Playbook.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
         )
         return list(result.scalars().all()), total
 
@@ -133,7 +152,9 @@ class AutomationService:
 
     # ============= 执行管理 =============
 
-    async def create_execution(self, data: ExecutionCreate, user_id: str | None = None) -> Execution:
+    async def create_execution(
+        self, data: ExecutionCreate, user_id: str | None = None
+    ) -> Execution:
         risk = "low"
         if data.execution_type == "script":
             script = await self.script_repo.get_by_id(data.target_id)
@@ -169,7 +190,9 @@ class AutomationService:
         await self.session.refresh(exec_obj)
         return exec_obj
 
-    async def approve_execution(self, exec_id: str, user_id: str | None = None) -> Execution:
+    async def approve_execution(
+        self, exec_id: str, user_id: str | None = None
+    ) -> Execution:
         exe = await self.exec_repo.get_by_id(exec_id)
         if not exe:
             raise NotFoundError(f"执行任务 {exec_id} 不存在")
@@ -182,14 +205,20 @@ class AutomationService:
         await self.session.refresh(exe)
         return exe
 
-    async def list_executions(self, status: str | None = None, page: int = 1, page_size: int = 20):
+    async def list_executions(
+        self, status: str | None = None, page: int = 1, page_size: int = 20
+    ):
         stmt = select(Execution)
         if status:
             stmt = stmt.where(Execution.status == status)
-        total_result = await self.session.execute(select(func.count()).select_from(Execution))
+        # count 必须复用相同的 where 条件
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_result = await self.session.execute(count_stmt)
         total = total_result.scalar() or 0
         result = await self.session.execute(
-            stmt.order_by(Execution.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+            stmt.order_by(Execution.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
         )
         return list(result.scalars().all()), total
 
@@ -203,7 +232,12 @@ class AutomationService:
         exe = await self.exec_repo.get_by_id(exec_id)
         if not exe:
             raise NotFoundError(f"执行任务 {exec_id} 不存在")
-        if exe.status not in (ExecutionStatus.PENDING, ExecutionStatus.AWAITING_APPROVAL, ExecutionStatus.APPROVED, ExecutionStatus.RUNNING):
+        if exe.status not in (
+            ExecutionStatus.PENDING,
+            ExecutionStatus.AWAITING_APPROVAL,
+            ExecutionStatus.APPROVED,
+            ExecutionStatus.RUNNING,
+        ):
             raise ValueError("当前状态不允许取消")
         exe.status = ExecutionStatus.CANCELLED
         exe.completed_at = datetime.now(timezone.utc)
@@ -217,7 +251,12 @@ class AutomationService:
         状态流: rolling_back → 执行回滚步骤 → rolled_back / rollback_failed
         """
         execution = await self.get_execution(exec_id)
-        if execution.status not in (ExecutionStatus.COMPLETED, ExecutionStatus.FAILED, ExecutionStatus.DRY_RUN_COMPLETED, ExecutionStatus.DRY_RUN_FAILED):
+        if execution.status not in (
+            ExecutionStatus.COMPLETED,
+            ExecutionStatus.FAILED,
+            ExecutionStatus.DRY_RUN_COMPLETED,
+            ExecutionStatus.DRY_RUN_FAILED,
+        ):
             raise ValueError("只能回滚已完成或失败的执行")
 
         # 收集回滚步骤
@@ -228,7 +267,9 @@ class AutomationService:
             if pb:
                 # playbook.steps 是 JSON 字符串, 解析后查找 rollback_steps 或 steps 中含 rollback 的
                 try:
-                    steps_data = json.loads(pb.steps) if isinstance(pb.steps, str) else pb.steps
+                    steps_data = (
+                        json.loads(pb.steps) if isinstance(pb.steps, str) else pb.steps
+                    )
                 except (json.JSONDecodeError, TypeError):
                     steps_data = []
 
@@ -267,7 +308,11 @@ class AutomationService:
 
             try:
                 result = await _executor.execute(plan)
-                step_status = ExecutionStatus.COMPLETED if result.success else ExecutionStatus.FAILED
+                step_status = (
+                    ExecutionStatus.COMPLETED
+                    if result.success
+                    else ExecutionStatus.FAILED
+                )
                 if not result.success:
                     all_success = False
 
@@ -292,7 +337,11 @@ class AutomationService:
                     },
                 )
 
-        execution.status = ExecutionStatus.ROLLED_BACK if all_success else ExecutionStatus.ROLLBACK_FAILED
+        execution.status = (
+            ExecutionStatus.ROLLED_BACK
+            if all_success
+            else ExecutionStatus.ROLLBACK_FAILED
+        )
         execution.completed_at = datetime.now(timezone.utc)
         await self.session.flush()
         await self.session.refresh(execution)
@@ -303,9 +352,9 @@ class AutomationService:
         if not exe:
             return
         result = await self.session.execute(
-            select(func.count()).select_from(ExecutionStep).where(
-                ExecutionStep.execution_id == execution_id
-            )
+            select(func.count())
+            .select_from(ExecutionStep)
+            .where(ExecutionStep.execution_id == execution_id)
         )
         step_num = (result.scalar() or 0) + 1
         step = ExecutionStep(
@@ -356,6 +405,7 @@ class AutomationService:
 
         # 通过 Executor 执行
         from app.domains.automation.executor.base import ExecutionPlan
+
         plan = ExecutionPlan(
             execution_id=str(exe.id),
             command=content if isinstance(content, str) else str(content),
@@ -377,9 +427,15 @@ class AutomationService:
                 # policy 阻断也归为 failed（blocked 不在合法状态枚举中）
                 exe.status = ExecutionStatus.FAILED
                 if "blocked" in (result.stderr or "").lower():
-                    exe.error_message = f"Command blocked by policy: {result.stderr[:4000]}"
+                    exe.error_message = (
+                        f"Command blocked by policy: {result.stderr[:4000]}"
+                    )
         else:
-            exe.status = ExecutionStatus.DRY_RUN_COMPLETED if is_dry else ExecutionStatus.COMPLETED
+            exe.status = (
+                ExecutionStatus.DRY_RUN_COMPLETED
+                if is_dry
+                else ExecutionStatus.COMPLETED
+            )
 
         exe.completed_at = datetime.now(timezone.utc)
         await self.session.flush()

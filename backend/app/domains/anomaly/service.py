@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from typing import Any
 
@@ -10,6 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.exceptions import NotFoundError, ValidationError
 from app.common.repository import BaseRepository
+
+logger = logging.getLogger(__name__)
 from app.domains.anomaly.models import Anomaly
 
 _SEVERITY_LEVELS = ["low", "medium", "high", "critical"]
@@ -60,11 +63,7 @@ class AnomalyService:
 
         total = (await self.session.execute(count_stmt)).scalar() or 0
         offset = (page - 1) * page_size
-        stmt = (
-            stmt.order_by(Anomaly.detected_at.desc())
-            .offset(offset)
-            .limit(page_size)
-        )
+        stmt = stmt.order_by(Anomaly.detected_at.desc()).offset(offset).limit(page_size)
         result = await self.session.execute(stmt)
         items = list(result.scalars().all())
         return items, total
@@ -147,12 +146,20 @@ class AnomalyService:
                 raise ValidationError(f"无效的严重级别: {target_severity}")
             anomaly.severity = target_severity
         else:
-            # auto-escalate to next level
+            # auto-escalate to next level；已在最高级则跳过（避免无意义 append）
             next_idx = min(current_idx + 1, len(_SEVERITY_LEVELS) - 1)
+            if next_idx == current_idx:
+                # 已是最高级，记录日志后直接返回，不再 append escalation 记录
+                logger.debug(
+                    "异常 %s 已在最高级 %s，跳过升级", anomaly_id, anomaly.severity
+                )
+                return anomaly
             anomaly.severity = _SEVERITY_LEVELS[next_idx]
 
         # Track escalation reason in metadata
-        meta = dict(anomaly.meta or {})
+        # meta 可能是非 dict 类型（历史数据），需类型校验避免 dict(str) 抛错
+        raw_meta = anomaly.meta
+        meta = dict(raw_meta) if isinstance(raw_meta, dict) else {}
         escalations = meta.get("escalations", [])
         escalations.append(
             {
@@ -186,10 +193,20 @@ class AnomalyService:
             "asset_id": anomaly.asset_id,
             "assigned_to": anomaly.assigned_to,
         }
-        # Attempt to call ticket service if available; otherwise return payload
+        # Attempt to call ticket service if available; otherwise return payload.
+        # 注意：ImportError 表示工单服务未启用（正常降级），其它异常（DB 错误、
+        # 字段非法等）是真实故障，必须区分处理，否则会静默吞掉问题。
         try:
             from app.domains.ticket.service import TicketService
+        except ImportError:
+            return {
+                "anomaly_id": str(anomaly.id),
+                "ticket_payload": ticket_payload,
+                "created": False,
+                "message": "Ticket service unavailable; payload returned for manual creation.",
+            }
 
+        try:
             ticket_svc = TicketService(self.session)
             create_fn = getattr(ticket_svc, "create_ticket", None)
             if create_fn is not None:
@@ -205,7 +222,9 @@ class AnomalyService:
                     "created": True,
                 }
         except Exception:
-            pass
+            # 工单服务存在但创建失败属真实故障，记录日志并抛出让调用方感知
+            logger.exception("创建工单失败，异常 %s 转工单中断", anomaly.id)
+            raise
 
         return {
             "anomaly_id": str(anomaly.id),

@@ -158,8 +158,15 @@ async def get_import_report(task_id: str, db: AsyncSession = Depends(get_db)):
 async def import_assets(
     items: list[AssetImportItem], svc: AssetService = Depends(_get_service)
 ):
-    created = await svc.import_assets(items)
-    return success({"imported": len(created)})
+    result = await svc.import_assets(items)
+    return success(
+        {
+            "imported": len(result["created"]),
+            "skipped": len(result["skipped"]),
+            "errors": result["errors"],
+            "skipped_items": result["skipped"],
+        }
+    )
 
 
 @router.get("/{asset_id}")

@@ -8,14 +8,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.exceptions import DuplicateError, NotFoundError
 from app.domains.asset.models import (
-    Asset, AssetGroup, AssetGroupMember, AssetRelation, AssetTimeline,
+    Asset,
+    AssetGroup,
+    AssetGroupMember,
+    AssetRelation,
+    AssetTimeline,
 )
 from app.domains.asset.repository import (
-    AssetGroupRepository, AssetRelationRepository, AssetRepository,
+    AssetGroupRepository,
+    AssetRelationRepository,
+    AssetRepository,
     AssetTimelineRepository,
 )
 from app.domains.asset.schemas import (
-    AssetCreate, AssetGroupCreate, AssetImportItem, AssetRelationCreate, AssetUpdate,
+    AssetCreate,
+    AssetGroupCreate,
+    AssetImportItem,
+    AssetRelationCreate,
+    AssetUpdate,
 )
 from app.domains.collector.query_service import (
     get_collection_jobs_by_asset,
@@ -90,8 +100,10 @@ class AssetService:
         await self.session.refresh(asset)
 
         await self.timeline_repo.create(
-            asset_id=asset_id, event_type="updated",
-            title="资产更新", detail=f"更新了 {', '.join(updates.keys())}",
+            asset_id=asset_id,
+            event_type="updated",
+            title="资产更新",
+            detail=f"更新了 {', '.join(updates.keys())}",
             source="manual",
         )
         return asset
@@ -99,18 +111,34 @@ class AssetService:
     async def delete_asset(self, asset_id: str) -> None:
         await self.repo.soft_delete(asset_id)
 
-    async def import_assets(self, items: list[AssetImportItem]) -> list[Asset]:
-        """批量导入资产."""
-        created = []
-        for item in items:
+    async def import_assets(self, items: list[AssetImportItem]) -> dict:
+        """批量导入资产.
+
+        返回 {created, skipped, errors} 明细，而非仅成功的数量，
+        让调用方能区分重复跳过与真实失败。
+        """
+        created: list[Asset] = []
+        skipped: list[str] = []
+        errors: list[dict] = []
+        for idx, item in enumerate(items):
             try:
                 asset = await self.create_asset(AssetCreate(**item.model_dump()))
                 created.append(asset)
             except DuplicateError:
-                continue
-        return created
+                skipped.append(item.name or item.ip_address or f"#{idx}")
+            except Exception as e:
+                errors.append(
+                    {
+                        "index": idx,
+                        "name": item.name or item.ip_address or f"#{idx}",
+                        "error": str(e)[:200],
+                    }
+                )
+        return {"created": created, "skipped": skipped, "errors": errors}
 
-    async def add_relation(self, asset_id: str, data: AssetRelationCreate) -> AssetRelation:
+    async def add_relation(
+        self, asset_id: str, data: AssetRelationCreate
+    ) -> AssetRelation:
         await self.get_asset(asset_id)
         await self.get_asset(data.target_asset_id)
         return await self.relation_repo.create(
@@ -142,10 +170,9 @@ class AssetService:
         await self.session.flush()
 
     async def remove_group_member(self, group_id: str, asset_id: str) -> None:
-        q = (
-            "DELETE FROM asset_group_members WHERE group_id = :gid AND asset_id = :aid"
-        )
+        q = "DELETE FROM asset_group_members WHERE group_id = :gid AND asset_id = :aid"
         from sqlalchemy import text
+
         await self.session.execute(text(q), {"gid": group_id, "aid": asset_id})
         await self.session.flush()
 
@@ -192,6 +219,7 @@ class AssetService:
     async def get_topology(self, asset_id: str, depth: int = 2) -> dict:
         """获取资产拓扑关系图（递归查询关联资产）."""
         from sqlalchemy import select
+
         nodes = {}
         edges = []
         visited = set()
@@ -217,17 +245,24 @@ class AssetService:
             # 获取关联关系
             result = await self.session.execute(
                 select(AssetRelation).where(
-                    (AssetRelation.source_asset_id == aid) | (AssetRelation.target_asset_id == aid)
+                    (AssetRelation.source_asset_id == aid)
+                    | (AssetRelation.target_asset_id == aid)
                 )
             )
             relations = result.scalars().all()
             for rel in relations:
-                target_id = str(rel.target_asset_id if str(rel.source_asset_id) == aid else rel.source_asset_id)
-                edges.append({
-                    "source": str(rel.source_asset_id),
-                    "target": str(rel.target_asset_id),
-                    "type": rel.relation_type,
-                })
+                target_id = str(
+                    rel.target_asset_id
+                    if str(rel.source_asset_id) == aid
+                    else rel.source_asset_id
+                )
+                edges.append(
+                    {
+                        "source": str(rel.source_asset_id),
+                        "target": str(rel.target_asset_id),
+                        "type": rel.relation_type,
+                    }
+                )
                 await _traverse(target_id, current_depth + 1)
 
         await _traverse(asset_id, 0)

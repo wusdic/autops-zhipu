@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import select, func
@@ -27,44 +27,61 @@ async def automation_stats(db: AsyncSession = Depends(get_db)):
     """自动化执行统计."""
     from app.domains.automation.models import Execution
 
-    total = (await db.execute(
-        select(func.count()).select_from(Execution)
-    )).scalar() or 0
+    total = (
+        await db.execute(select(func.count()).select_from(Execution))
+    ).scalar() or 0
 
-    completed = (await db.execute(
-        select(func.count()).select_from(Execution)
-        .where(Execution.status == "completed")
-    )).scalar() or 0
+    completed = (
+        await db.execute(
+            select(func.count())
+            .select_from(Execution)
+            .where(Execution.status == "completed")
+        )
+    ).scalar() or 0
 
-    failed = (await db.execute(
-        select(func.count()).select_from(Execution)
-        .where(Execution.status == "failed")
-    )).scalar() or 0
+    failed = (
+        await db.execute(
+            select(func.count())
+            .select_from(Execution)
+            .where(Execution.status == "failed")
+        )
+    ).scalar() or 0
 
-    pending = (await db.execute(
-        select(func.count()).select_from(Execution)
-        .where(Execution.status == "pending_approval")
-    )).scalar() or 0
+    pending = (
+        await db.execute(
+            select(func.count())
+            .select_from(Execution)
+            .where(Execution.status == "pending_approval")
+        )
+    ).scalar() or 0
 
-    running = (await db.execute(
-        select(func.count()).select_from(Execution)
-        .where(Execution.status == "running")
-    )).scalar() or 0
+    running = (
+        await db.execute(
+            select(func.count())
+            .select_from(Execution)
+            .where(Execution.status == "running")
+        )
+    ).scalar() or 0
 
-    rolling_back = (await db.execute(
-        select(func.count()).select_from(Execution)
-        .where(Execution.status == "rolling_back")
-    )).scalar() or 0
+    rolling_back = (
+        await db.execute(
+            select(func.count())
+            .select_from(Execution)
+            .where(Execution.status == "rolling_back")
+        )
+    ).scalar() or 0
 
-    return success({
-        "total": total,
-        "completed": completed,
-        "failed": failed,
-        "pending_approval": pending,
-        "running": running,
-        "rolling_back": rolling_back,
-        "success_rate": round(completed / max(total, 1) * 100, 1),
-    })
+    return success(
+        {
+            "total": total,
+            "completed": completed,
+            "failed": failed,
+            "pending_approval": pending,
+            "running": running,
+            "rolling_back": rolling_back,
+            "success_rate": round(completed / max(total, 1) * 100, 1),
+        }
+    )
 
 
 # ======================================================================
@@ -80,22 +97,31 @@ async def list_approvals(
     page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
 ):
-    """审批列表(查询 pending_approval 状态的 executions)."""
+    """审批列表(查询 executions).
+
+    默认查询 pending_approval 状态；传入 status 时按 status 过滤
+    （原实现叠加 `pending_approval AND status` 导致恒空，已修正）。
+    """
     from app.domains.automation.models import Execution
 
-    base = select(Execution).where(Execution.status == "pending_approval")
-    if status:
-        base = base.where(Execution.status == status)
+    effective_status = status or "pending_approval"
+    base = select(Execution).where(Execution.status == effective_status)
 
-    total = (await db.execute(
-        select(func.count()).select_from(base.subquery())
-    )).scalar() or 0
+    total = (
+        await db.execute(select(func.count()).select_from(base.subquery()))
+    ).scalar() or 0
 
-    rows = (await db.execute(
-        base.order_by(Execution.created_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )).scalars().all()
+    rows = (
+        (
+            await db.execute(
+                base.order_by(Execution.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+            )
+        )
+        .scalars()
+        .all()
+    )
 
     items = [model_to_dict(r) for r in rows]
     return paginate(items, total, page, page_size)
@@ -111,17 +137,20 @@ async def approve_execution(
     body: ApprovalBody,
     db: AsyncSession = Depends(get_db),
 ):
-    """审批通过."""
+    """审批通过（仅 pending_approval 状态可审批）."""
+    from app.common.exceptions import ValidationError
     from app.domains.automation.models import Execution
 
-    row = (await db.execute(
-        select(Execution).where(Execution.id == approval_id)
-    )).scalar_one_or_none()
+    row = (
+        await db.execute(select(Execution).where(Execution.id == approval_id))
+    ).scalar_one_or_none()
     if not row:
         return success(None, message="审批记录不存在")
+    if row.status != "pending_approval":
+        raise ValidationError(f"当前状态为 {row.status}，不可审批")
 
     row.status = "approved"
-    row.updated_at = datetime.utcnow()
+    row.updated_at = datetime.now(timezone.utc)
     await db.flush()
     await db.refresh(row)
     return success(model_to_dict(row))
@@ -133,17 +162,20 @@ async def reject_execution(
     body: ApprovalBody,
     db: AsyncSession = Depends(get_db),
 ):
-    """审批拒绝."""
+    """审批拒绝（仅 pending_approval 状态可拒绝）."""
+    from app.common.exceptions import ValidationError
     from app.domains.automation.models import Execution
 
-    row = (await db.execute(
-        select(Execution).where(Execution.id == approval_id)
-    )).scalar_one_or_none()
+    row = (
+        await db.execute(select(Execution).where(Execution.id == approval_id))
+    ).scalar_one_or_none()
     if not row:
         return success(None, message="审批记录不存在")
+    if row.status != "pending_approval":
+        raise ValidationError(f"当前状态为 {row.status}，不可拒绝")
 
     row.status = "rejected"
-    row.updated_at = datetime.utcnow()
+    row.updated_at = datetime.now(timezone.utc)
     await db.flush()
     await db.refresh(row)
     return success(model_to_dict(row))
@@ -170,20 +202,26 @@ async def list_dry_runs(
 
     base = select(Execution)
     # Check for dry_run mode if column exists
-    if hasattr(Execution, 'mode'):
+    if hasattr(Execution, "mode"):
         base = base.where(Execution.mode == "dry_run")
     else:
         base = base.where(Execution.status == "dry_running")
 
-    total = (await db.execute(
-        select(func.count()).select_from(base.subquery())
-    )).scalar() or 0
+    total = (
+        await db.execute(select(func.count()).select_from(base.subquery()))
+    ).scalar() or 0
 
-    rows = (await db.execute(
-        base.order_by(Execution.created_at.desc())
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-    )).scalars().all()
+    rows = (
+        (
+            await db.execute(
+                base.order_by(Execution.created_at.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+            )
+        )
+        .scalars()
+        .all()
+    )
 
     items = [model_to_dict(r) for r in rows]
     return paginate(items, total, page, page_size)
@@ -197,14 +235,14 @@ async def create_dry_run(
     """发起 Dry-run(将 execution 标记为 dry_running)."""
     from app.domains.automation.models import Execution
 
-    row = (await db.execute(
-        select(Execution).where(Execution.id == data.execution_id)
-    )).scalar_one_or_none()
+    row = (
+        await db.execute(select(Execution).where(Execution.id == data.execution_id))
+    ).scalar_one_or_none()
     if not row:
         return success(None, message="执行记录不存在")
 
     row.status = "dry_running"
-    if hasattr(row, 'mode'):
+    if hasattr(row, "mode"):
         row.mode = "dry_run"
     row.updated_at = datetime.utcnow()
     await db.flush()
@@ -220,9 +258,9 @@ async def get_dry_run(
     """Dry-run 详情."""
     from app.domains.automation.models import Execution
 
-    row = (await db.execute(
-        select(Execution).where(Execution.id == dryrun_id)
-    )).scalar_one_or_none()
+    row = (
+        await db.execute(select(Execution).where(Execution.id == dryrun_id))
+    ).scalar_one_or_none()
     if not row:
         return success(None, message="Dry-run记录不存在")
     return success(model_to_dict(row))
