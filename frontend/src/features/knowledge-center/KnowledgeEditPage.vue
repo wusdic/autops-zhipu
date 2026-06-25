@@ -137,7 +137,7 @@
             <el-button size="small" @click="insertCodeBlock">代码块</el-button>
           </el-button-group>
         </div>
-        <div ref="editorRef" class="richtext-editor" contenteditable="true" @input="onEditorInput" v-html="form.content" />
+        <div ref="editorRef" class="richtext-editor" contenteditable="true" @input="onEditorInput" v-html="sanitizeHtml(form.content)" />
       </el-tab-pane>
 
       <!-- 预览 -->
@@ -173,7 +173,7 @@
             <ul><li v-for="(s,i) in form.verification_steps" :key="i">{{ s.name }} → 期望: {{ s.expected }}</li></ul>
           </template>
 
-          <div v-if="form.content" v-html="form.content" style="margin-top:16px" />
+          <div v-if="form.content" v-html="sanitizeHtml(form.content)" style="margin-top:16px" />
         </div>
       </el-tab-pane>
     </el-tabs>
@@ -187,6 +187,7 @@ import { ElMessage } from 'element-plus'
 import { ArrowLeft, Check, Delete } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
+import { sanitizeHtml } from '@/shared/utils/sanitize'
 
 const router = useRouter()
 const route = useRoute()

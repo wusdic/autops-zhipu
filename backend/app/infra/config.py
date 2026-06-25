@@ -105,12 +105,19 @@ class SecurityConfig(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 1440
     refresh_token_expire_days: int = 7
+    # 凭证加密主密钥（独立于 JWT 密钥）。优先读 CREDENTIAL_ENCRYPT_KEY，
+    # 回退到 SECURITY_CREDENTIAL_ENCRYPT_KEY，再回退到 jwt_secret（兼容旧配置）。
+    credential_encrypt_key: str = ""
 
     def __init__(self, **kwargs):
         # Support JWT_SECRET env var in addition to SECURITY_JWT_SECRET
         jwt_env = os.getenv("JWT_SECRET")
         if jwt_env and "jwt_secret" not in kwargs:
             kwargs["jwt_secret"] = jwt_env
+        # 凭证加密密钥独立注入：CREDENTIAL_ENCRYPT_KEY 优先
+        cred_env = os.getenv("CREDENTIAL_ENCRYPT_KEY")
+        if cred_env and "credential_encrypt_key" not in kwargs:
+            kwargs["credential_encrypt_key"] = cred_env
         super().__init__(**kwargs)
 
     @field_validator("jwt_secret")
@@ -120,13 +127,9 @@ class SecurityConfig(BaseSettings):
         if env == "prod" and not v:
             raise ValueError("JWT_SECRET must be set in production")
         if v in cls.INSECURE_SECRETS and env == "prod":
-            raise ValueError(
-                f"insecure JWT_SECRET in production: '{v}' is not allowed"
-            )
+            raise ValueError(f"insecure JWT_SECRET in production: '{v}' is not allowed")
         if env == "prod" and len(v) < 32:
-            raise ValueError(
-                "JWT_SECRET must be at least 32 characters in production"
-            )
+            raise ValueError("JWT_SECRET must be at least 32 characters in production")
         return v
 
     class Config:
@@ -202,9 +205,13 @@ class AppConfig(BaseSettings):
             # 只对 API 进程检查：不允许注册业务 handler 和 scheduler
             if self.process_role == "api":
                 if self.allow_inprocess_events:
-                    raise ValueError("allow_inprocess_events is not allowed in API process (production)")
+                    raise ValueError(
+                        "allow_inprocess_events is not allowed in API process (production)"
+                    )
                 if self.enable_scheduler:
-                    raise ValueError("enable_scheduler is not allowed in API process (production); use worker")
+                    raise ValueError(
+                        "enable_scheduler is not allowed in API process (production); use worker"
+                    )
 
     class Config:
         env_prefix = "AUTOPS_"

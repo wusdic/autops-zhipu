@@ -121,11 +121,19 @@ function handleSearch() {
   activeIndex.value = 0
 }
 
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c] as string))
+}
+
 function highlightKeyword(text: string) {
-  if (!keyword.value) return text
+  // 先转义 HTML 特殊字符，防止 title 中含恶意标签导致 XSS
+  const safe = escapeHtml(text)
+  if (!keyword.value) return safe
   const escaped = keyword.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = new RegExp('(' + escaped + ')', 'gi')
-  return text.replace(regex, '<mark>$1</mark>')
+  return safe.replace(regex, '<mark>$1</mark>')
 }
 
 function navigateTo(item: any) {
