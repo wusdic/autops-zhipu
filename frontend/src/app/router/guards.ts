@@ -5,7 +5,8 @@ const TOKEN_KEY = APP_CONFIG.TOKEN_KEY
 const LOGIN_PATH = '/login'
 
 // Routes that don't require authentication
-const publicRoutes = ['/login']
+// 含 session-expired / forbidden，否则 401 跳转后会被本守卫再次弹回 /login
+const publicRoutes = ['/login', '/session-expired', '/forbidden']
 
 export function setupAuthGuard(router: Router) {
   router.beforeEach((to, _from, next) => {
