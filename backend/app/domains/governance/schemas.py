@@ -70,6 +70,16 @@ class RoleResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+    @staticmethod
+    def _coerce_permissions(raw: str) -> list:
+        # 容错：'["*:*"]'(JSON 数组) 或 '*:*'(裸字符串) 都接受，
+        # 否则 json.loads('*:*') 抛 JSONDecodeError 会导致 /auth/me 等 500。
+        try:
+            parsed = json.loads(raw)
+            return parsed if isinstance(parsed, list) else [str(parsed)]
+        except (json.JSONDecodeError, ValueError):
+            return [raw]
+
     @model_validator(mode="before")
     @classmethod
     def parse_permissions(cls, data):
@@ -77,11 +87,11 @@ class RoleResponse(BaseModel):
             # SQLAlchemy model instance
             raw = data.permissions
             if isinstance(raw, str):
-                object.__setattr__(data, "permissions", json.loads(raw))
+                object.__setattr__(data, "permissions", cls._coerce_permissions(raw))
         elif isinstance(data, dict):
             raw = data.get("permissions")
             if isinstance(raw, str):
-                data["permissions"] = json.loads(raw)
+                data["permissions"] = cls._coerce_permissions(raw)
         return data
 
 

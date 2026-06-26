@@ -29,8 +29,8 @@ from app.domains.governance.models import User
 from app.infra.database import get_db
 
 # Bearer token 提取器 — 自动从 Authorization header 读取
-# auto=False 使得未提供 token 时不自动返回 403，而是交由 require_auth 处理
-_bearer_scheme = HTTPBearer(auto=False)
+# auto_error=False 使得未提供 token 时不自动返回 403，而是交由 require_auth 处理
+_bearer_scheme = HTTPBearer(auto_error=False)
 
 # 拥有这些角色之一的用户视为管理员，require_admin 会放行
 _ADMIN_ROLES = {"super_admin", "admin"}
