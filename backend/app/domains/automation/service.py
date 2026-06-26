@@ -473,6 +473,22 @@ class AutomationService:
 
         exe.completed_at = datetime.now(timezone.utc)
         await self.session.flush()
+
+        # 记录处置模板(Playbook)触发历史
+        if not is_dry and exe.execution_type == "playbook" and exe.target_id:
+            from app.common.trigger_history import record_trigger
+
+            pb = await self.playbook_repo.get_by_id(exe.target_id)
+            await record_trigger(
+                self.session,
+                ref_type="playbook",
+                ref_id=str(exe.target_id),
+                ref_name=getattr(pb, "name", None) if pb else None,
+                action="executed",
+                status="success" if exe.status == ExecutionStatus.COMPLETED else "fail",
+                detail={"execution_id": str(exe.id)},
+            )
+
         await self.session.refresh(exe)
         return exe
 

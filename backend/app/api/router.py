@@ -58,6 +58,7 @@ from app.api.platform_extra import (
 from app.api.aiops_extra import router as aiops_extra_router
 from app.api.exports import router as exports_router
 from app.api.search import router as search_router
+from app.api.trigger_history import router as trigger_history_router
 from app.api.ai_assistant import router as ai_router
 from app.api.model_service import (
     agents_router as model_agents_router,
@@ -197,3 +198,6 @@ api_router.include_router(discovery_template_router)
 
 # Exports
 api_router.include_router(exports_router)
+
+# Trigger history（巡检规则/处置模板触发历史）
+api_router.include_router(trigger_history_router)

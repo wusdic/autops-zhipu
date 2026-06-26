@@ -157,6 +157,24 @@
         <el-table-column prop="detail" label="详情" />
       </el-table>
     </el-dialog>
+
+    <el-dialog v-model="historyVisible" title="规则触发历史" width="640px">
+      <el-table stripe :data="historyData" v-loading="historyLoading" max-height="360">
+        <el-table-column prop="created_at" label="时间" width="180" />
+        <el-table-column prop="action" label="动作" width="100" />
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 'fail' ? 'danger' : row.status === 'warning' ? 'warning' : 'success'" size="small">{{ row.status }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="详情">
+          <template #default="{ row }">
+            <span>通过 {{ row.detail?.pass ?? 0 }} / 预警 {{ row.detail?.warning ?? 0 }} / 失败 {{ row.detail?.fail ?? 0 }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-empty v-if="!historyLoading && !historyData.length" description="暂无触发历史" />
+    </el-dialog>
   </div>
 </template>
 
@@ -173,6 +191,9 @@ const loading = ref(false)
 const submitting = ref(false)
 const dialogVisible = ref(false)
 const simVisible = ref(false)
+const historyVisible = ref(false)
+const historyLoading = ref(false)
+const historyData = ref<any[]>([])
 const editing = ref<any>(null)
 const activeCategory = ref('all')
 const rules = ref<any[]>([])
@@ -258,7 +279,22 @@ async function simulateRule(row: any) {
   ] }
 }
 
-async function viewHistory(row: any) { ElMessage.info('历史记录功能开发中') }
+async function viewHistory(row: any) {
+  historyVisible.value = true
+  historyLoading.value = true
+  historyData.value = []
+  try {
+    const res = await client.get('/api/v1/trigger-history', {
+      params: { ref_type: 'inspection_rule', ref_id: row.id, page_size: 50 },
+    })
+    const data = res.data?.data ?? res.data
+    historyData.value = data?.items || []
+  } catch {
+    historyData.value = []
+  } finally {
+    historyLoading.value = false
+  }
+}
 
 async function toggleRule(row: any) {
   try {

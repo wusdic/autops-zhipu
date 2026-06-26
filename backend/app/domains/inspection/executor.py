@@ -208,6 +208,8 @@ async def run_inspection_task(task_id: str) -> None:
 
             counts = {"pass": 0, "warning": 0, "fail": 0}
             per_asset: list[dict[str, Any]] = []
+            # 规则命中累计：rule_id -> {name, pass, warning, fail}
+            rule_hits: dict[str, dict] = {}
 
             for asset_id in target_ids:
                 asset = await session.get(Asset, asset_id)
@@ -254,6 +256,14 @@ async def run_inspection_task(task_id: str) -> None:
                     status, detail = evaluate_check_item(item, info)
                     counts[status] = counts.get(status, 0) + 1
                     check_type = item.get("check_type", "baseline")
+                    # 规则项命中累计（key 形如 rule:<id>）
+                    key = item.get("key", "")
+                    if isinstance(key, str) and key.startswith("rule:"):
+                        rid = key.split(":", 1)[1]
+                        h = rule_hits.setdefault(
+                            rid, {"name": item.get("name", ""), "pass": 0, "warning": 0, "fail": 0}
+                        )
+                        h[status] = h.get(status, 0) + 1
                     session.add(
                         InspectionResult(
                             task_id=task_id,
@@ -286,6 +296,26 @@ async def run_inspection_task(task_id: str) -> None:
                     report_data={"summary": summary, "assets": per_asset},
                 )
             )
+
+            # 记录规则触发历史 + 更新 last_triggered_at
+            if rule_hits:
+                from app.common.trigger_history import record_trigger
+
+                now = datetime.now(timezone.utc)
+                for rid, h in rule_hits.items():
+                    rule = await session.get(InspectionRule, rid)
+                    if rule:
+                        rule.last_triggered_at = now
+                    await record_trigger(
+                        session,
+                        ref_type="inspection_rule",
+                        ref_id=rid,
+                        ref_name=h.get("name"),
+                        action="triggered",
+                        status="fail" if h.get("fail") else ("warning" if h.get("warning") else "success"),
+                        detail={"task_id": task_id, **{k: h[k] for k in ("pass", "warning", "fail") if k in h}},
+                    )
+
             await session.commit()
             logger.info("巡检任务 %s 完成：%s", task_id, counts)
         except Exception as exc:  # noqa: BLE001

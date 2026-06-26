@@ -319,6 +319,9 @@ export const API = {
   // G0 全局搜索
   GLOBAL_SEARCH: '/api/v1/search',
 
+  // 触发历史（巡检规则/处置模板）
+  TRIGGER_HISTORY: '/api/v1/trigger-history',
+
   // 阈值规则
   THRESHOLD_RULES: '/api/v1/threshold-rules',
   THRESHOLD_RULE_DETAIL: (id: string) => '/api/v1/threshold-rules/' + id,

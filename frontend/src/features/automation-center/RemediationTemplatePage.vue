@@ -143,6 +143,22 @@
         <el-button type="primary" @click="handleSubmit" :loading="submitting">保存</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="historyVisible" title="处置模板执行历史" width="640px">
+      <el-table stripe :data="historyData" v-loading="historyLoading" max-height="360">
+        <el-table-column prop="created_at" label="时间" width="180" />
+        <el-table-column prop="action" label="动作" width="100" />
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 'fail' ? 'danger' : 'success'" size="small">{{ row.status }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="执行ID">
+          <template #default="{ row }"><span>{{ row.detail?.execution_id || '-' }}</span></template>
+        </el-table-column>
+      </el-table>
+      <el-empty v-if="!historyLoading && !historyData.length" description="暂无执行历史" />
+    </el-dialog>
   </div>
 </template>
 
@@ -166,6 +182,9 @@ function parseSteps(s: any): any[] {
 const loading = ref(false)
 const submitting = ref(false)
 const dialogVisible = ref(false)
+const historyVisible = ref(false)
+const historyLoading = ref(false)
+const historyData = ref<any[]>([])
 const editing = ref<any>(null)
 const templates = ref<any[]>([])
 const formRef = ref()
@@ -272,7 +291,22 @@ async function dryRun(row: any) {
   } catch { /* cancelled */ }
 }
 
-function viewHistory(row: any) { ElMessage.info('历史记录功能开发中') }
+async function viewHistory(row: any) {
+  historyVisible.value = true
+  historyLoading.value = true
+  historyData.value = []
+  try {
+    const res = await client.get('/api/v1/trigger-history', {
+      params: { ref_type: 'playbook', ref_id: row.id, page_size: 50 },
+    })
+    const data = res.data?.data ?? res.data
+    historyData.value = data?.items || []
+  } catch {
+    historyData.value = []
+  } finally {
+    historyLoading.value = false
+  }
+}
 
 async function handleDelete(row: any) {
   try {
