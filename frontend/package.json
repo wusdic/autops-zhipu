@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint src/ --ext .ts,.vue --fix",
     "typecheck": "vue-tsc --noEmit",
-    "test:e2e": "echo \"E2E tests not yet configured\""
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",

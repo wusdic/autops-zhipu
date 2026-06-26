@@ -1,0 +1,72 @@
+name: E2E (smoke)
+
+# 手动触发，避免未经验证的全栈 E2E 阻塞常规 PR CI。
+# 首次运行后按实际环境微调（seed 路径 / 启动等待 / 账号口令）。
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root_pw
+          MYSQL_DATABASE: autops
+          MYSQL_USER: autops
+          MYSQL_PASSWORD: autops_pw
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -proot_pw"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      AUTOPS_ENV: dev
+      DB_HOST: 127.0.0.1
+      DB_PORT: "3306"
+      DB_USER: autops
+      DB_PASS: autops_pw
+      DB_DATABASE: autops
+      JWT_SECRET: e2e-ci-secret-key-at-least-32-characters-long
+      ADMIN_INITIAL_PASSWORD: admin123456
+      E2E_BASE_URL: http://127.0.0.1:5174
+      E2E_USERNAME: admin
+      E2E_PASSWORD: admin123456
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: cd backend && pip install -e ".[dev]"
+
+      - name: DB migrate
+        run: cd backend && alembic upgrade head
+
+      - name: Seed admin + base data
+        run: cd backend && PYTHONPATH=. python ../scripts/data_seed/comprehensive_seed.py || true
+
+      - name: Start backend
+        run: |
+          cd backend && nohup uvicorn app.main:app --host 0.0.0.0 --port 8001 > /tmp/backend.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8001/health && break || sleep 2; done
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Frontend deps + dev server
+        run: |
+          cd frontend && npm ci
+          # @playwright/test 不入 package.json，避免影响主 CI 的 npm ci 锁文件校验
+          npm i -D --no-save @playwright/test@^1.48.0
+          npx playwright install --with-deps chromium
+          nohup npm run dev > /tmp/frontend.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:5174/ && break || sleep 2; done
+
+      - name: Run Playwright smoke
+        run: cd frontend && npm run test:e2e
+
+      - name: Dump logs on failure
+        if: failure()
+        run: tail -n 100 /tmp/backend.log /tmp/frontend.log || true

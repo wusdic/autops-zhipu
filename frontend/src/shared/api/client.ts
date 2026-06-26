@@ -34,8 +34,15 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
+      const hadToken = !!localStorage.getItem(APP_CONFIG.TOKEN_KEY)
       localStorage.removeItem(APP_CONFIG.TOKEN_KEY)
-      router.push({ name: 'login' }).catch(() => {})
+      // 会话中途失效（曾持有 token）→ 引导到会话过期页，体验优于直接弹回登录；
+      // 本就未登录 → 去登录页。已在公开页则不重复跳转，避免循环。
+      const current = router.currentRoute.value
+      const publicNames = ['login', 'session-expired', 'forbidden']
+      if (!publicNames.includes(current.name as string)) {
+        router.push({ name: hadToken ? 'session-expired' : 'login' }).catch(() => {})
+      }
     }
     // 保留原始 axios error（含 response/status），调用方可访问 error.response?.data?.message
     const message = error.response?.data?.message || error.message || '网络错误'
