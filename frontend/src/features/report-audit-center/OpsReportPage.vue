@@ -174,8 +174,19 @@ function viewReport(row: any) {
   router.push({ path: '/report-audit/preview', query: { id: row.id } })
 }
 
-function downloadReport(row: any) {
-  ElMessage.info('下载功能开发中')
+async function downloadReport(row: any) {
+  try {
+    const res = await api.get(API.REPORT.DOWNLOAD(row.id))
+    const data = res.data?.data ?? res.data
+    // 后端：已生成返回文件，未生成返回占位信息
+    if (data?.status === 'unavailable' || data?.download_url === null) {
+      ElMessage.warning('报告尚未生成完成，请稍后再下载')
+      return
+    }
+    window.open(API.REPORT.DOWNLOAD(row.id), '_blank')
+  } catch (e: any) {
+    ElMessage.error(e.message || '下载失败')
+  }
 }
 
 function typeLabel(t: string) {

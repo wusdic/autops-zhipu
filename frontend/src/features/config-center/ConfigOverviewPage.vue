@@ -265,12 +265,14 @@ function simulateRule(row: any) {
   ElMessage.info('规则模拟功能开发中')
 }
 
-function toggleRule(row: any) {
-  ElMessage.success('规则已' + row.enabled ? '启用' : '禁用')
+function toggleRule(_row: any) {
+  // 概览页只做导航；真实启停在专管页（阈值/通知规则）完成
+  router.push('/config/threshold-rules')
 }
 
-function viewVersionDiff(row: any) {
-  ElMessage.info('版本差异对比功能开发中')
+function viewVersionDiff(_row: any) {
+  // 版本差异/回滚在配置版本专管页完成
+  router.push('/config/versions')
 }
 
 async function rollbackVersion(row: any) {
