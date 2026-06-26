@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 
 # ---- Report Template ----
@@ -37,9 +37,15 @@ class ReportTemplateResponse(BaseModel):
 # ---- Report Task ----
 
 class ReportGenerateRequest(BaseModel):
-    template_id: str
+    # template_id 可选：未提供时按 report_type 自动查找/创建模板
+    template_id: str | None = None
+    report_type: str | None = Field(
+        default=None, validation_alias=AliasChoices("report_type", "type")
+    )
     params: dict[str, Any] | None = None
     triggered_by: str | None = None
+
+    model_config = {"populate_by_name": True}
 
 
 class ReportTaskResponse(BaseModel):

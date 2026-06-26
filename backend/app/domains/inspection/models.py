@@ -107,6 +107,35 @@ class InspectionResult(Base):
     )
 
 
+class InspectionRule(Base):
+    """巡检规则（页面/配置/日志/基线/API 检查规则）.
+
+    可单独管理，并可被巡检执行器按 asset_type + 可解析的条件转化为检查项。
+    """
+
+    __tablename__ = "inspection_rules"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    name: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
+    category: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    check_target: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    condition: Mapped[str | None] = mapped_column(Text, nullable=True)
+    severity: Mapped[str] = mapped_column(String(16), default="medium", nullable=False)
+    asset_types: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    remediation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    last_triggered_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
 class InspectionReport(Base):
     """巡检报告."""
 

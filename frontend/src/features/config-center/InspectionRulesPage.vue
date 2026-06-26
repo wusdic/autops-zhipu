@@ -211,8 +211,11 @@ async function loadData() {
       router.push('/config/threshold-rules')
       return
     }
-    const endpoint = activeCategory.value !== 'all' ? activeCategory.value + 's' : 'page-checks'
-    const res = await client.get('/api/v1/inspection/' + endpoint, { params: { page: pagination.page, page_size: pagination.size } })
+    const params: Record<string, any> = { page: pagination.page, page_size: pagination.size }
+    if (activeCategory.value !== 'all') params.category = activeCategory.value
+    if (filters.keyword) params.keyword = filters.keyword
+    if (filters.severity) params.severity = filters.severity
+    const res = await client.get('/api/v1/inspection/rules', { params })
     const data = res.data?.data ?? res.data
     rules.value = data?.items || []
     pagination.total = data?.total || 0
@@ -230,10 +233,21 @@ async function handleSubmit() {
   await formRef.value?.validate()
   submitting.value = true
   try {
+    const payload = {
+      name: form.name, category: form.category, check_target: form.check_target,
+      condition: form.condition, severity: form.severity,
+      asset_types: form.asset_types, remediation: form.remediation,
+      description: form.description,
+    }
+    if (editing.value?.id) {
+      await client.put('/api/v1/inspection/rules/' + editing.value.id, payload)
+    } else {
+      await client.post('/api/v1/inspection/rules', payload)
+    }
     ElMessage.success(editing.value ? '规则更新成功' : '规则创建成功')
     dialogVisible.value = false
     loadData()
-  } catch (e: any) { ElMessage.error(e.message) } finally { submitting.value = false }
+  } catch (e: any) { ElMessage.error(e.message || '保存失败') } finally { submitting.value = false }
 }
 
 async function simulateRule(row: any) {
@@ -247,12 +261,19 @@ async function simulateRule(row: any) {
 async function viewHistory(row: any) { ElMessage.info('历史记录功能开发中') }
 
 async function toggleRule(row: any) {
-  ElMessage.success('规则已' + row.enabled ? '启用' : '禁用')
+  try {
+    await client.post('/api/v1/inspection/rules/' + row.id + '/toggle')
+    ElMessage.success('规则已' + (row.enabled ? '启用' : '禁用'))
+  } catch (e: any) {
+    row.enabled = !row.enabled  // 回滚开关
+    ElMessage.error(e.message || '操作失败')
+  }
 }
 
 async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm('确认删除规则「' + row.name + '」？', '删除确认', { type: 'warning' })
+    await client.delete('/api/v1/inspection/rules/' + row.id)
     ElMessage.success('已删除')
     loadData()
   } catch { /* cancelled */ }

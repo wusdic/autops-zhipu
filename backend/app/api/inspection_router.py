@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.response import paginate, success
@@ -242,6 +243,95 @@ async def list_reports(
 async def get_report(report_id: str, svc: InspectionService = Depends(_get_service)):
     report = await svc.get_report(report_id)
     return success(_report_to_dict(report))
+
+
+# --- 巡检规则 ---
+def _rule_to_dict(r) -> dict:
+    return {
+        "id": r.id,
+        "name": r.name,
+        "category": r.category,
+        "check_target": r.check_target,
+        "condition": r.condition,
+        "severity": r.severity,
+        "asset_types": r.asset_types or [],
+        "asset_count": len(r.asset_types or []),
+        "remediation": r.remediation,
+        "description": r.description,
+        "enabled": r.enabled,
+        "last_triggered": r.last_triggered_at.isoformat() if r.last_triggered_at else None,
+        "created_at": r.created_at.isoformat() if r.created_at else None,
+    }
+
+
+class InspectionRuleCreate(BaseModel):
+    name: str
+    category: str
+    check_target: str | None = None
+    condition: str | None = None
+    severity: str = "medium"
+    asset_types: list[str] | None = None
+    remediation: str | None = None
+    description: str | None = None
+    enabled: bool = True
+
+
+class InspectionRuleUpdate(BaseModel):
+    name: str | None = None
+    category: str | None = None
+    check_target: str | None = None
+    condition: str | None = None
+    severity: str | None = None
+    asset_types: list[str] | None = None
+    remediation: str | None = None
+    description: str | None = None
+    enabled: bool | None = None
+
+
+@router.get("/rules")
+async def list_rules(
+    category: str | None = None,
+    keyword: str | None = None,
+    severity: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    svc: InspectionService = Depends(_get_service),
+):
+    items, total = await svc.list_rules(
+        category=category, keyword=keyword, severity=severity,
+        page=page, page_size=page_size,
+    )
+    return paginate([_rule_to_dict(r) for r in items], total, page, page_size)
+
+
+@router.post("/rules")
+async def create_rule(data: InspectionRuleCreate, svc: InspectionService = Depends(_get_service)):
+    rule = await svc.create_rule(data.model_dump(exclude_none=True))
+    return success(_rule_to_dict(rule))
+
+
+@router.get("/rules/{rule_id}")
+async def get_rule(rule_id: str, svc: InspectionService = Depends(_get_service)):
+    rule = await svc.get_rule(rule_id)
+    return success(_rule_to_dict(rule))
+
+
+@router.put("/rules/{rule_id}")
+async def update_rule(rule_id: str, data: InspectionRuleUpdate, svc: InspectionService = Depends(_get_service)):
+    rule = await svc.update_rule(rule_id, data.model_dump(exclude_unset=True))
+    return success(_rule_to_dict(rule))
+
+
+@router.delete("/rules/{rule_id}")
+async def delete_rule(rule_id: str, svc: InspectionService = Depends(_get_service)):
+    await svc.delete_rule(rule_id)
+    return success(message="巡检规则已删除")
+
+
+@router.post("/rules/{rule_id}/toggle")
+async def toggle_rule(rule_id: str, svc: InspectionService = Depends(_get_service)):
+    rule = await svc.toggle_rule(rule_id)
+    return success(_rule_to_dict(rule))
 
 
 # --- Stats ---

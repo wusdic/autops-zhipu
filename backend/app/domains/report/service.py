@@ -106,12 +106,35 @@ class ReportService:
             raise NotFoundError(f"报告任务 {task_id} 不存在")
         return t
 
+    async def _resolve_template_id(self, req: ReportGenerateRequest) -> str:
+        """确定模板：显式 template_id 优先；否则按 report_type 查找/自动创建。"""
+        if req.template_id:
+            await self.get_template(req.template_id)
+            return req.template_id
+        rtype = (req.report_type or "custom").strip() or "custom"
+        existing = (
+            await self.session.execute(
+                select(ReportTemplate).where(ReportTemplate.type == rtype).limit(1)
+            )
+        ).scalar_one_or_none()
+        if existing:
+            return str(existing.id)
+        name_map = {
+            "compliance": "合规报告", "daily": "日报", "weekly": "周报",
+            "monthly": "月报", "custom": "自定义报告",
+        }
+        tpl = await self.template_repo.create(
+            name=name_map.get(rtype, f"{rtype} 报告"), type=rtype,
+            description="系统自动创建的报告模板",
+        )
+        await self.session.flush()
+        return str(tpl.id)
+
     async def generate_report(self, req: ReportGenerateRequest) -> ReportTask:
-        """创建报告生成任务（stub：仅创建任务记录，后台实际生成待接入）."""
-        # 校验模板存在
-        await self.get_template(req.template_id)
+        """创建报告生成任务（后台实际渲染由 generator 接管）."""
+        template_id = await self._resolve_template_id(req)
         task = await self.task_repo.create(
-            template_id=req.template_id,
+            template_id=template_id,
             status="pending",
             triggered_by=req.triggered_by or "system",
         )

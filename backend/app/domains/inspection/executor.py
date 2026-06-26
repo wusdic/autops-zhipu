@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -20,11 +21,49 @@ from app.domains.inspection.models import (
     InspectionPlan,
     InspectionReport,
     InspectionResult,
+    InspectionRule,
     InspectionTask,
     InspectionTemplate,
 )
 
 logger = logging.getLogger(__name__)
+
+# device_inspect 归一化输出中可用于阈值比较的数值/布尔指标
+_KNOWN_METRICS = {
+    "reachable", "cpu_count", "load_1m", "load_5m", "load_15m", "load_per_core",
+    "mem_used_percent", "swap_used_percent", "disk_used_percent_max",
+    "inode_used_percent_max", "process_count", "zombie_count",
+    "logged_in_users", "listening_ports_count", "ntp_synchronized",
+    "ssh_permit_root", "uptime_seconds",
+}
+_OP_RE = re.compile(r"(>=|<=|==|!=|>|<)\s*(-?\d+(?:\.\d+)?)")
+# 规则严重度 → 巡检结果状态
+_SEVERITY_TO_STATUS = {"critical": "fail", "high": "fail", "medium": "warning", "low": "warning"}
+
+
+def rule_to_check_item(rule: InspectionRule) -> dict[str, Any] | None:
+    """把可解析的巡检规则转换为检查项；无法映射到指标时返回 None（仅管理不评估）."""
+    metric = (rule.check_target or "").strip()
+    if metric not in _KNOWN_METRICS:
+        return None
+    cond = rule.condition or ""
+    check_type = rule.category.replace("_check", "") if rule.category else "baseline"
+    status_sev = _SEVERITY_TO_STATUS.get(rule.severity, "warning")
+    m = _OP_RE.search(cond)
+    if m:
+        return {
+            "key": f"rule:{rule.id}", "name": rule.name, "metric": metric,
+            "op": m.group(1), "threshold": float(m.group(2)),
+            "severity": status_sev, "check_type": check_type,
+        }
+    # 布尔指标 + 无数值条件：按 is_true/is_false 处理（condition 含 false/否 → is_false）
+    if metric in ("reachable", "ntp_synchronized", "ssh_permit_root"):
+        op = "is_false" if any(k in cond.lower() for k in ("false", "否", "未", "no")) else "is_true"
+        return {
+            "key": f"rule:{rule.id}", "name": rule.name, "metric": metric,
+            "op": op, "severity": status_sev, "check_type": check_type,
+        }
+    return None
 
 # 后台任务句柄，防止被 GC
 _running_tasks: set[asyncio.Task] = set()
@@ -150,10 +189,22 @@ async def run_inspection_task(task_id: str) -> None:
             await session.flush()
 
             template = await session.get(InspectionTemplate, task.template_id)
-            check_items = (template.check_items if template else None) or _DEFAULT_CHECK_ITEMS
+            base_items = (template.check_items if template else None) or _DEFAULT_CHECK_ITEMS
+
+            # 加载启用的巡检规则（可解析者转为附加检查项，按资产类型生效）
+            enabled_rules = list(
+                (
+                    await session.execute(
+                        select(InspectionRule).where(InspectionRule.enabled == True)  # noqa: E712
+                    )
+                ).scalars().all()
+            )
 
             target_ids = await _resolve_targets(session, task)
-            logger.info("巡检任务 %s 开始：%d 个目标资产", task_id, len(target_ids))
+            logger.info(
+                "巡检任务 %s 开始：%d 个目标资产，%d 条启用规则",
+                task_id, len(target_ids), len(enabled_rules),
+            )
 
             counts = {"pass": 0, "warning": 0, "fail": 0}
             per_asset: list[dict[str, Any]] = []
@@ -188,6 +239,16 @@ async def run_inspection_task(task_id: str) -> None:
                     },
                     "items": [],
                 }
+
+                # 基础检查项 + 适用于该资产类型的规则检查项
+                check_items = list(base_items)
+                for rule in enabled_rules:
+                    types = rule.asset_types or []
+                    if types and asset.asset_type not in types:
+                        continue
+                    ci = rule_to_check_item(rule)
+                    if ci:
+                        check_items.append(ci)
 
                 for item in check_items:
                     status, detail = evaluate_check_item(item, info)

@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.exceptions import NotFoundError
 from app.domains.inspection.models import (
-    InspectionPlan, InspectionReport, InspectionResult, InspectionTask,
-    InspectionTemplate,
+    InspectionPlan, InspectionReport, InspectionResult, InspectionRule,
+    InspectionTask, InspectionTemplate,
 )
 from app.domains.inspection.repository import (
     InspectionPlanRepository, InspectionReportRepository,
@@ -176,6 +175,66 @@ class InspectionService:
         if not report:
             raise NotFoundError(f"巡检报告 {report_id} 不存在")
         return report
+
+    # --- 巡检规则 ---
+    async def list_rules(
+        self, *, category: str | None = None, keyword: str | None = None,
+        severity: str | None = None, page: int = 1, page_size: int = 20,
+    ) -> tuple[list[InspectionRule], int]:
+        stmt = select(InspectionRule)
+        count_stmt = select(func.count()).select_from(InspectionRule)
+        conds = []
+        if category and category not in ("all",):
+            conds.append(InspectionRule.category == category)
+        if keyword:
+            conds.append(InspectionRule.name.ilike(f"%{keyword}%"))
+        if severity:
+            conds.append(InspectionRule.severity == severity)
+        for c in conds:
+            stmt = stmt.where(c)
+            count_stmt = count_stmt.where(c)
+        total = (await self.session.execute(count_stmt)).scalar() or 0
+        rows = (
+            await self.session.execute(
+                stmt.order_by(InspectionRule.created_at.desc())
+                .offset((page - 1) * page_size).limit(page_size)
+            )
+        ).scalars().all()
+        return list(rows), total
+
+    async def get_rule(self, rule_id: str) -> InspectionRule:
+        rule = await self.session.get(InspectionRule, rule_id)
+        if not rule:
+            raise NotFoundError(f"巡检规则 {rule_id} 不存在")
+        return rule
+
+    async def create_rule(self, data: dict) -> InspectionRule:
+        rule = InspectionRule(**data)
+        self.session.add(rule)
+        await self.session.flush()
+        await self.session.refresh(rule)
+        return rule
+
+    async def update_rule(self, rule_id: str, data: dict) -> InspectionRule:
+        rule = await self.get_rule(rule_id)
+        for k, v in data.items():
+            if hasattr(rule, k):
+                setattr(rule, k, v)
+        await self.session.flush()
+        await self.session.refresh(rule)
+        return rule
+
+    async def delete_rule(self, rule_id: str) -> None:
+        rule = await self.get_rule(rule_id)
+        await self.session.delete(rule)
+        await self.session.flush()
+
+    async def toggle_rule(self, rule_id: str) -> InspectionRule:
+        rule = await self.get_rule(rule_id)
+        rule.enabled = not rule.enabled
+        await self.session.flush()
+        await self.session.refresh(rule)
+        return rule
 
     # --- 统计 ---
     async def get_stats(self) -> dict:

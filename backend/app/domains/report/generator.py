@@ -100,12 +100,33 @@ async def _gather_data(session) -> dict[str, Any]:
     return data
 
 
-def _render_html(template_name: str, data: dict[str, Any]) -> str:
+def _compliance_block(data: dict[str, Any]) -> str:
+    """合规报告专属区块：用最近巡检的通过/失败折算合规得分."""
+    insp = data.get("last_inspection") or {}
+    results = insp.get("results", {})
+    passed = int(results.get("pass", 0))
+    warning = int(results.get("warning", 0))
+    failed = int(results.get("fail", 0))
+    total = passed + warning + failed
+    score = round(passed / total * 100) if total else 0
+    return (
+        "<h2>合规概览</h2>"
+        f"<p>合规得分：<b>{score}</b>/100</p>"
+        f"<table><tr><th>检查项</th><th>数量</th></tr>"
+        f"<tr><td>通过</td><td>{passed}</td></tr>"
+        f"<tr><td>预警</td><td>{warning}</td></tr>"
+        f"<tr><td>不合规</td><td>{failed}</td></tr>"
+        f"<tr><td>合计</td><td>{total}</td></tr></table>"
+    )
+
+
+def _render_html(template_name: str, data: dict[str, Any], report_type: str = "custom") -> str:
     """渲染自包含 HTML 报告（不引入模板引擎依赖）."""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     a = data.get("assets", {})
     al = data.get("alerts", {})
     insp = data.get("last_inspection")
+    extra_block = _compliance_block(data) if report_type == "compliance" else ""
 
     def _rows(d: dict) -> str:
         return "".join(
@@ -143,6 +164,7 @@ td,th{{border:1px solid #e5e6eb;padding:6px 12px;font-size:14px}}
 <table><tr><th>严重度</th><th>数量</th></tr>{_rows(al.get('by_severity', {}))}</table>
 <h2>最近巡检</h2>
 {insp_html}
+{extra_block}
 </body></html>
 """
 
@@ -163,9 +185,10 @@ async def build_report(task_id: str) -> None:
 
             template = await session.get(ReportTemplate, task.template_id)
             template_name = template.name if template else "运维报告"
+            report_type = template.type if template else "custom"
 
             data = await _gather_data(session)
-            html_content = _render_html(template_name, data)
+            html_content = _render_html(template_name, data, report_type)
 
             filename = f"report_{task_id}.html"
             path = _reports_dir() / filename
