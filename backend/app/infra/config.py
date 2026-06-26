@@ -176,6 +176,8 @@ class AppConfig(BaseSettings):
     enable_scheduler: bool = False
     # 进程角色: api / worker（用于决定上述开关的合法性）
     process_role: Literal["api", "worker"] = "api"
+    # 自动化执行器: auto(生产→ssh, 其余→local_dev) / local_dev / ssh
+    executor: Literal["auto", "local_dev", "ssh"] = "auto"
 
     # 子配置
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)

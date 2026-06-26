@@ -152,8 +152,17 @@ import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
 const router = useRouter()
+
+// 处置模板以「剧本(Playbook)」为后端载体（多步执行模板）
+function parseSteps(s: any): any[] {
+  if (Array.isArray(s)) return s
+  if (typeof s === 'string') { try { const v = JSON.parse(s); return Array.isArray(v) ? v : [] } catch { return [] } }
+  return []
+}
 const loading = ref(false)
 const submitting = ref(false)
 const dialogVisible = ref(false)
@@ -181,13 +190,50 @@ function riskLabel(r: string) { return { low: '低', medium: '中', high: '高',
 
 async function loadData() {
   loading.value = true
-  try { templates.value = []; pagination.total = 0 } finally { loading.value = false }
+  try {
+    const params: any = { page: pagination.page, page_size: pagination.size }
+    if (filters.keyword) params.keyword = filters.keyword
+    const res = await client.get(API.PLAYBOOKS, { params })
+    const data = res.data?.data ?? res.data
+    const items = data?.items || []
+    templates.value = items
+      .map((p: any) => {
+        const steps = parseSteps(p.steps)
+        return {
+          id: p.id,
+          name: p.name,
+          scenario: p.scenario || p.category || '',
+          risk_level: p.risk_level || 'low',
+          steps_count: steps.length,
+          requires_approval: !!p.requires_approval,
+          usage_count: p.usage_count ?? '-',
+          success_rate: p.success_rate ?? null,
+          _raw: p,
+        }
+      })
+      .filter((r: any) => !filters.scenario || r.scenario === filters.scenario)
+    pagination.total = data?.total || templates.value.length
+  } catch {
+    templates.value = []
+    pagination.total = 0
+  } finally {
+    loading.value = false
+  }
 }
 
 function openDialog(row?: any) {
   editing.value = row || null
-  if (row) Object.assign(form, row)
-  else Object.assign(form, { name: '', scenario: '', risk_level: 'low', asset_types: [], steps: [{ name: '', command: ''}], verification: '', rollback_action: '', requires_approval: false, description: ''})
+  if (row) {
+    const p = row._raw || row
+    Object.assign(form, {
+      name: p.name || '', scenario: p.scenario || '', risk_level: p.risk_level || 'low',
+      asset_types: p.asset_types || [], steps: parseSteps(p.steps).length ? parseSteps(p.steps) : [{ name: '', command: '' }],
+      verification: p.verification || '', rollback_action: p.rollback_action || '',
+      requires_approval: !!p.requires_approval, description: p.description || '',
+    })
+  } else {
+    Object.assign(form, { name: '', scenario: '', risk_level: 'low', asset_types: [], steps: [{ name: '', command: ''}], verification: '', rollback_action: '', requires_approval: false, description: ''})
+  }
   dialogVisible.value = true
 }
 
@@ -195,9 +241,27 @@ async function handleSubmit() {
   await formRef.value?.validate()
   submitting.value = true
   try {
+    const payload: any = {
+      name: form.name,
+      description: form.description,
+      steps: JSON.stringify(form.steps),
+      risk_level: form.risk_level,
+      requires_approval: form.requires_approval,
+      scenario: form.scenario,
+      asset_types: form.asset_types,
+      verification: form.verification,
+      rollback_action: form.rollback_action,
+    }
+    if (editing.value?.id) {
+      await client.put(API.PLAYBOOKS + '/' + editing.value.id, payload)
+    } else {
+      await client.post(API.PLAYBOOKS, payload)
+    }
     ElMessage.success(editing.value ? '更新成功' : '创建成功')
     dialogVisible.value = false
     loadData()
+  } catch (e: any) {
+    ElMessage.error(e.message || '保存失败')
   } finally { submitting.value = false }
 }
 
@@ -213,8 +277,11 @@ function viewHistory(row: any) { ElMessage.info('历史记录功能开发中') }
 async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm('确认删除「' + row.name + '」？', '删除确认', { type: 'warning' })
+    await client.delete(API.PLAYBOOKS + '/' + row.id)
     ElMessage.success('已删除'); loadData()
-  } catch { /* cancelled */ }
+  } catch (e: any) {
+    if (e !== 'cancel' && e?.message) ElMessage.error(e.message)
+  }
 }
 
 onMounted(loadData)

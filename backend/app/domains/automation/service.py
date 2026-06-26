@@ -25,10 +25,30 @@ from app.domains.automation.models import (
 )
 from app.domains.automation.schemas import ExecutionCreate
 from app.domains.automation.command_policy import CommandPolicy
-from app.domains.automation.executor.local_dev import LocalDevExecutor
 
 _policy = CommandPolicy()
-_executor = LocalDevExecutor()
+
+
+def _get_executor():
+    """按配置选择执行器.
+
+    - executor=ssh        → SSHExecutor（生产推荐）
+    - executor=local_dev  → LocalDevExecutor（仅非生产）
+    - executor=auto(默认) → 生产用 SSH，其余用 local_dev
+    """
+    from app.infra.config import get_config
+
+    cfg = get_config()
+    choice = getattr(cfg, "executor", "auto")
+    if choice == "auto":
+        choice = "ssh" if cfg.env == "prod" else "local_dev"
+    if choice == "ssh":
+        from app.domains.automation.executor.ssh import SSHExecutor
+
+        return SSHExecutor()
+    from app.domains.automation.executor.local_dev import LocalDevExecutor
+
+    return LocalDevExecutor()
 
 
 class AutomationService:
@@ -307,7 +327,7 @@ class AutomationService:
             )
 
             try:
-                result = await _executor.execute(plan)
+                result = await _get_executor().execute(plan)
                 step_status = (
                     ExecutionStatus.COMPLETED
                     if result.success
@@ -403,19 +423,33 @@ class AutomationService:
             await self.session.flush()
             return exe
 
-        # 通过 Executor 执行
+        # 通过 Executor 执行（目标资产取 asset_ids 首个，供 SSH 执行器解析凭据登录）
         from app.domains.automation.executor.base import ExecutionPlan
+
+        target_asset = ""
+        raw_assets = exe.asset_ids
+        if isinstance(raw_assets, list) and raw_assets:
+            target_asset = str(raw_assets[0])
+        elif isinstance(raw_assets, str) and raw_assets:
+            try:
+                parsed = json.loads(raw_assets)
+                if isinstance(parsed, list) and parsed:
+                    target_asset = str(parsed[0])
+            except (json.JSONDecodeError, ValueError):
+                target_asset = ""
 
         plan = ExecutionPlan(
             execution_id=str(exe.id),
+            asset_id=target_asset,
             command=content if isinstance(content, str) else str(content),
             timeout_seconds=300,
         )
 
+        executor = _get_executor()
         if is_dry:
-            result = await _executor.dry_run(plan)
+            result = await executor.dry_run(plan)
         else:
-            result = await _executor.execute(plan)
+            result = await executor.execute(plan)
 
         exe.result = result.stdout[:10000] if result.stdout else None
         exe.error_message = result.stderr[:5000] if result.stderr else None

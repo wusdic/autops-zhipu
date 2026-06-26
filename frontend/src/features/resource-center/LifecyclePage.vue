@@ -163,16 +163,62 @@
 
 <script setup lang="ts">
 import type { TagType } from '@/shared/types'
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Plus, CircleCheck, Clock, Remove, List } from '@element-plus/icons-vue'
+import client from '@/shared/api/client'
+import { API } from '@/shared/api/routes'
 
-const stats = reactive({ active: 128, retiring: 12, retired: 35, rules: 8 })
+const stats = reactive({ active: 0, retiring: 0, retired: 0, rules: 0 })
 const filters = reactive({ keyword: '', phase: '', assetType: ''})
 const tableData = ref<any[]>([])
+const loading = ref(false)
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
+
+// 资产状态 → 生命周期阶段（资产模型暂无独立 lifecycle 字段，按状态映射）
+function statusToPhase(a: any): string {
+  if (a.is_deleted) return 'retired'
+  if (a.status === 'online') return 'running'
+  if (a.status === 'offline') return 'maintenance'
+  return 'running'
+}
+
+async function loadData() {
+  loading.value = true
+  try {
+    const params: any = { page: page.value, page_size: pageSize.value }
+    if (filters.keyword) params.keyword = filters.keyword
+    if (filters.assetType) params.asset_type = filters.assetType
+    const res = await client.get(API.ASSETS, { params })
+    const data = res.data?.data ?? res.data
+    const items = data?.items || []
+    tableData.value = items
+      .map((a: any) => ({
+        id: a.id,
+        name: a.name || a.hostname || a.ip,
+        assetType: a.asset_type,
+        phase: statusToPhase(a),
+        enterPhaseTime: a.created_at || '-',
+        nextPhaseTime: '-',
+        daysInPhase: a.updated_at
+          ? Math.max(0, Math.floor((Date.now() - new Date(a.updated_at).getTime()) / 86400000))
+          : '-',
+        warranty: '-',
+      }))
+      .filter((r: any) => !filters.phase || r.phase === filters.phase)
+    total.value = data?.total || tableData.value.length
+    stats.active = tableData.value.filter((r: any) => r.phase === 'running').length
+    stats.retiring = tableData.value.filter((r: any) => r.phase === 'retiring').length
+    stats.retired = tableData.value.filter((r: any) => r.phase === 'retired').length
+    stats.rules = total.value
+  } catch {
+    tableData.value = []
+  } finally {
+    loading.value = false
+  }
+}
 
 const phaseLabelMap: Record<string, string> = {
   planning: '规划中', procurement: '采购中', deployment: '部署中',
@@ -185,8 +231,8 @@ const phaseTagTypeMap: Record<string, TagType> = {
 const phaseLabel = (p: string) => phaseLabelMap[p] || p
 const phaseTagType = (p: string) => phaseTagTypeMap[p] || 'info'
 
-function handleSearch() { page.value = 1 }
-function resetFilters() { filters.keyword = ''; filters.phase = ''; filters.assetType = '' }
+function handleSearch() { page.value = 1; loadData() }
+function resetFilters() { filters.keyword = ''; filters.phase = ''; filters.assetType = ''; loadData() }
 
 const phaseDialogVisible = ref(false)
 const phaseForm = reactive({ name: '', currentPhase: '', targetPhase: '', reason: '', assetId: ''})
@@ -209,16 +255,29 @@ function submitPhaseChange() {
 
 const timelineVisible = ref(false)
 const timelineData = ref<any[]>([])
-function viewTimeline(row: any) {
-  timelineData.value = [
-    { id: 1, phase: '运行中', timestamp: '2025-08-15 10:30', operator: 'admin', reason: '部署完成，投入生产', active: true },
-    { id: 2, phase: '部署中', timestamp: '2025-08-10 14:00', operator: 'ops', reason: '开始部署', active: false },
-    { id: 3, phase: '采购中', timestamp: '2025-07-20 09:00', operator: 'admin', reason: '采购审批通过', active: false },
-  ]
+async function viewTimeline(row: any) {
   timelineVisible.value = true
+  timelineData.value = []
+  try {
+    const res = await client.get(API.ASSET_TIMELINE(row.id))
+    const data = res.data?.data ?? res.data
+    const items = Array.isArray(data) ? data : data?.items || []
+    timelineData.value = items.map((e: any, i: number) => ({
+      id: e.id || i,
+      phase: e.event_type || e.title || e.action || '事件',
+      timestamp: e.created_at || e.timestamp || '',
+      operator: e.operator || e.created_by || 'system',
+      reason: e.description || e.detail || '',
+      active: i === 0,
+    }))
+  } catch {
+    timelineData.value = []
+  }
 }
 
 const showCreateDialog = ref(false)
+
+onMounted(loadData)
 </script>
 
 <style scoped>

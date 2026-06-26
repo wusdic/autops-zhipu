@@ -140,7 +140,8 @@ const router = createRouter({
     { path: '/report/:id/preview', name: 'report-preview', component: () => import('@/features/report-audit-center/ReportPreviewPage.vue'), meta: { module: 'M9', title: '报告预览' } },
     { path: '/ops-report', name: 'ops-report', component: () => import('@/features/report-audit-center/OpsReportPage.vue'), meta: { module: 'M9', title: '运维报告' } },
     { path: '/asset-report', name: 'asset-report', component: () => import('@/features/report-audit-center/AssetReportPage.vue'), meta: { module: 'M9', title: '资产报告' } },
-    { path: '/inspection-report', name: 'inspection-report-center', component: () => import('@/features/report-audit-center/InspectionReportPage.vue'), meta: { module: 'M9', title: '巡检报告' } },
+    // 与 /inspection/reports 重复，统一重定向到巡检中心巡检报告页（去重）
+    { path: '/inspection-report', redirect: '/inspection/reports' },
     { path: '/automation-report', name: 'automation-report', component: () => import('@/features/report-audit-center/AutomationReportPage.vue'), meta: { module: 'M9', title: '自动化报告' } },
     { path: '/compliance-report', name: 'compliance-report', component: () => import('@/features/report-audit-center/ComplianceReportPage.vue'), meta: { module: 'M9', title: '合规报告' } },
     { path: '/audit', name: 'audit', component: () => import('@/features/platform-management/AuditLogPage.vue'), meta: { module: 'M9', title: '审计查询' } },

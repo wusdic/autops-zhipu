@@ -161,7 +161,6 @@
             <el-menu-item index="/report/templates">报告模板</el-menu-item>
             <el-menu-item index="/ops-report">运维报告</el-menu-item>
             <el-menu-item index="/asset-report">资产报告</el-menu-item>
-            <el-menu-item index="/inspection-report">巡检报告</el-menu-item>
             <el-menu-item index="/automation-report">自动化报告</el-menu-item>
             <el-menu-item index="/compliance-report">合规报告</el-menu-item>
             <el-menu-item index="/audit">审计查询</el-menu-item>
