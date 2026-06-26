@@ -216,8 +216,13 @@ async function generateReport() {
   }
 }
 
-function exportData() {
-  ElMessage.info('导出功能开发中')
+async function exportData() {
+  try {
+    await api.post(API.EXPORTS, { name: '工单报表', export_type: 'ticket_report', format: 'csv' })
+    ElMessage.success('导出任务已提交，请到「导出中心」下载')
+  } catch (e: any) {
+    ElMessage.error(e.message || '导出失败')
+  }
 }
 
 onMounted(() => { fetchData(); fetchTrend() })

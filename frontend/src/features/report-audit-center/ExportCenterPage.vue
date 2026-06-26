@@ -163,8 +163,8 @@ async function handleSubmit() {
 }
 
 function downloadExport(row: any) {
-  if (row.download_url) window.open(row.download_url, '_blank')
-  else ElMessage.info('下载链接生成中')
+  if (row.status === 'completed') window.open(API.EXPORT_DOWNLOAD(row.id), '_blank')
+  else ElMessage.info('导出未完成，请稍后再下载')
 }
 
 async function cancelExport(row: any) {

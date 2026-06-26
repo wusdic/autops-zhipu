@@ -1,6 +1,7 @@
 """工单中心 API."""
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, Query, Request, UploadFile
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.crud_service import model_to_dict
@@ -75,47 +76,123 @@ async def get_comments(ticket_id: str, svc: TicketService = Depends(_get_svc)):
     return success([model_to_dict(c) for c in comments])
 
 
+def _attachment_dir():
+    import os
+    import tempfile
+    from pathlib import Path
+
+    candidate = os.getenv("AUTOPS_UPLOAD_DIR") or str(Path.cwd() / "data" / "uploads" / "tickets")
+    try:
+        Path(candidate).mkdir(parents=True, exist_ok=True)
+        return Path(candidate)
+    except Exception:  # noqa: BLE001
+        fb = Path(tempfile.gettempdir()) / "autops_uploads"
+        fb.mkdir(parents=True, exist_ok=True)
+        return fb
+
+
 @router.get("/{ticket_id}/attachments")
-async def get_attachments(ticket_id: str, svc: TicketService = Depends(_get_svc)):
+async def get_attachments(ticket_id: str, db: AsyncSession = Depends(get_db)):
     """获取工单附件列表."""
-    await svc.get_ticket(ticket_id)
-    # Stub: return empty list until attachment model is implemented
-    return success([])
+    from sqlalchemy import text
 
-
-from pydantic import BaseModel as _BaseModel
-
-
-class AttachmentUpload(_BaseModel):
-    filename: str
-    content_type: str | None = None
-    size: int | None = None
+    rows = (await db.execute(
+        text(
+            "SELECT id, ticket_id, filename, content_type, size, uploaded_by, created_at "
+            "FROM ticket_attachments WHERE ticket_id=:tid ORDER BY created_at DESC"
+        ),
+        {"tid": ticket_id},
+    )).mappings().all()
+    items = [dict(r) for r in rows]
+    for it in items:
+        it["download_url"] = f"/api/v1/tickets/{ticket_id}/attachments/{it['id']}/download"
+    return success(items)
 
 
 @router.post("/{ticket_id}/attachments")
 async def upload_attachment(
-    ticket_id: str, body: AttachmentUpload, svc: TicketService = Depends(_get_svc),
+    ticket_id: str,
+    request: Request,
+    file: UploadFile = File(...),
+    svc: TicketService = Depends(_get_svc),
+    db: AsyncSession = Depends(get_db),
 ):
-    """上传工单附件（stub）."""
-    await svc.get_ticket(ticket_id)
+    """上传工单附件（multipart，真实落盘）."""
     import uuid as _uuid
     from datetime import datetime as _dt, timezone
+    from pathlib import Path
+
+    from sqlalchemy import text
+
+    await svc.get_ticket(ticket_id)
+    aid = str(_uuid.uuid4())
+    safe_name = Path(file.filename or "file").name
+    dest = _attachment_dir() / f"{aid}_{safe_name}"
+    content = await file.read()
+    dest.write_bytes(content)
+    uploaded_by = getattr(request.state, "username", "") or getattr(request.state, "user_id", "")
+    await db.execute(
+        text(
+            "INSERT INTO ticket_attachments (id, ticket_id, filename, content_type, size, "
+            "storage_path, uploaded_by, created_at) VALUES (:id, :tid, :fn, :ct, :sz, :sp, :by, :ts)"
+        ),
+        {
+            "id": aid, "tid": ticket_id, "fn": safe_name,
+            "ct": file.content_type, "sz": len(content), "sp": str(dest),
+            "by": uploaded_by, "ts": _dt.now(timezone.utc),
+        },
+    )
+    await db.commit()
     return success({
-        "id": str(_uuid.uuid4()),
-        "ticket_id": ticket_id,
-        "filename": body.filename,
-        "content_type": body.content_type,
-        "size": body.size,
-        "uploaded_at": _dt.now(timezone.utc).isoformat(),
+        "id": aid, "ticket_id": ticket_id, "filename": safe_name,
+        "content_type": file.content_type, "size": len(content),
+        "download_url": f"/api/v1/tickets/{ticket_id}/attachments/{aid}/download",
     })
 
 
+@router.get("/{ticket_id}/attachments/{attachment_id}/download")
+async def download_attachment(ticket_id: str, attachment_id: str, db: AsyncSession = Depends(get_db)):
+    """下载工单附件."""
+    from pathlib import Path
+
+    from sqlalchemy import text
+
+    from app.common.exceptions import NotFoundError
+
+    row = (await db.execute(
+        text("SELECT * FROM ticket_attachments WHERE id=:id AND ticket_id=:tid"),
+        {"id": attachment_id, "tid": ticket_id},
+    )).mappings().first()
+    if not row or not Path(row["storage_path"]).exists():
+        raise NotFoundError("附件不存在")
+    return FileResponse(
+        row["storage_path"], filename=row["filename"],
+        media_type=row.get("content_type") or "application/octet-stream",
+    )
+
+
 @router.delete("/{ticket_id}/attachments/{attachment_id}")
-async def delete_attachment(
-    ticket_id: str, attachment_id: str, svc: TicketService = Depends(_get_svc),
-):
-    """删除工单附件（stub：附件模型落地前返回成功）."""
-    await svc.get_ticket(ticket_id)
+async def delete_attachment(ticket_id: str, attachment_id: str, db: AsyncSession = Depends(get_db)):
+    """删除工单附件（含磁盘文件）."""
+    from pathlib import Path
+
+    from sqlalchemy import text
+
+    row = (await db.execute(
+        text("SELECT storage_path FROM ticket_attachments WHERE id=:id AND ticket_id=:tid"),
+        {"id": attachment_id, "tid": ticket_id},
+    )).mappings().first()
+    if row:
+        try:
+            p = Path(row["storage_path"])
+            if p.exists():
+                p.unlink()
+        except Exception:  # noqa: BLE001
+            pass
+        await db.execute(
+            text("DELETE FROM ticket_attachments WHERE id=:id"), {"id": attachment_id}
+        )
+        await db.commit()
     return success(message="附件已删除")
 
 

@@ -314,6 +314,7 @@ export const API = {
   EXPORTS: '/api/v1/exports',
   EXPORT_DETAIL: (id: string) => '/api/v1/exports/' + id,
   EXPORT_CANCEL: (id: string) => '/api/v1/exports/' + id + '/cancel',
+  EXPORT_DOWNLOAD: (id: string) => '/api/v1/exports/' + id + '/download',
 
   // G0 全局搜索
   GLOBAL_SEARCH: '/api/v1/search',

@@ -221,8 +221,13 @@ async function runAssessment() {
   }
 }
 
-function exportReport() {
-  ElMessage.info('报告导出功能开发中')
+async function exportReport() {
+  try {
+    await api.post(API.EXPORTS, { name: '风险分级报告', export_type: 'risk_grading', format: 'csv' })
+    ElMessage.success('导出任务已提交，请到「导出中心」下载')
+  } catch (e: any) {
+    ElMessage.error(e.message || '导出失败')
+  }
 }
 
 function showDetail(item: any) {
