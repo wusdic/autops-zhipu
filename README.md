@@ -50,7 +50,9 @@ Ping采集 → 状态变更(offline→online) → STATE_CHANGED事件
 - **数据库：** MySQL/MariaDB（兼容 PostgreSQL / openGauss / 达梦 / 人大金仓）
 - **缓存/队列：** Redis
 - **异步：** asyncio + async/await 全异步架构
-- **数据库迁移：** Alembic
+- **数据库迁移：** Alembic（升级数据库结构须执行 `alembic upgrade head`）
+- **设备采集/执行：** asyncssh(SSH) / pysnmp(SNMP) / pywinrm(WinRM)（均懒加载，缺失自动降级）
+- **自动化执行器：** `AUTOPS_EXECUTOR=auto|local_dev|ssh`（auto：生产→SSH 远程执行，开发→本地）
 
 ### 前端
 
@@ -157,11 +159,11 @@ npm run dev
 
 ## 项目统计
 
-- **后端 API 端点：** 145+
-- **数据库表：** 36
+- **后端 API 端点：** 300+
+- **数据库表：** 47
 - **领域模块：** 13
-- **前端页面：** 36+
-- **前端路由：** 38
+- **前端页面：** 124
+- **前端路由：** 127
 
 ## 许可证
 

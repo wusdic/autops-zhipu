@@ -25,5 +25,5 @@ accepted
 ## 后续动作
 - [x] CommandPolicy 实现
 - [x] LocalDevExecutor 实现
-- [ ] SSHExecutor 实现
+- [x] SSHExecutor 实现（0.7.0，`executor/ssh.py`；由 `AUTOPS_EXECUTOR=auto|local_dev|ssh` 选择，生产默认 ssh）
 - [ ] 单元测试覆盖

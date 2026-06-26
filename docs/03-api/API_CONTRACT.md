@@ -356,4 +356,51 @@
 | 通知 (notifications) | 3 |
 | 平台治理 (users/roles/keys/audit/backups/platform) | 19 |
 | WebSocket | 1 |
-| **合计** | **145** (含 /docs /openapi.json /redoc = 4 系统端点) |
+| **合计（截至 2026-05-31 快照）** | **145** (含 /docs /openapi.json /redoc = 4 系统端点) |
+
+---
+
+## 附录 A. 0.7.0 新增端点（2026-06-26）
+
+> 实际后端路由装饰器已达 **300+**。下表为本版本相对 0.6.0 的增量，权威以 `router.py` 为准。
+
+### AI 助手 / 模型服务
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/ai/chat` | 与大模型对话（运行时模型配置，缺模型降级提示） |
+| POST | `/ai/execute` | 由助手触发脚本执行（创建执行记录） |
+| GET/POST | `/aiops/agents` | 模型注册列表/新增 |
+| PUT/DELETE | `/aiops/agents/{id}` | 模型更新/删除 |
+| POST | `/aiops/agents/{id}/test` | 模型连通性测试 |
+| GET/POST | `/aiops/model-config` | 全局模型配置（默认模型/超时/max_tokens/温度） |
+
+### 巡检规则 / 触发历史
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET/POST | `/inspection/rules` | 巡检规则列表/新增 |
+| GET/PUT/DELETE | `/inspection/rules/{id}` | 规则详情/更新/删除 |
+| POST | `/inspection/rules/{id}/toggle` | 启停规则 |
+| GET | `/trigger-history` | 规则/处置模板触发历史（`ref_type`/`ref_id` 过滤） |
+
+### 平台管理
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST/PUT/DELETE | `/dictionaries`、`/dictionaries/{id}` | 字典增改删（原仅 GET） |
+| GET/POST | `/platform/license` | 许可证查看/激活 |
+| GET | `/platform/upgrade-history` | 升级历史 |
+
+### 导出 / 工单附件 / 备份
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/exports/{id}/download` | 下载导出 CSV |
+| POST(multipart)/GET/DELETE | `/tickets/{id}/attachments`、`.../{aid}/download` | 工单附件真实上传/下载/删除 |
+| PUT | `/backups/settings` | 备份设置保存 |
+
+### 补齐的资源端点
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| PUT/DELETE | `/credentials/{id}` | 凭证更新/删除 |
+| POST | `/assets/{id}/credentials` | 资产绑定凭证 |
+| DELETE | `/knowledge/{id}` | 删除知识 |
+| DELETE | `/alert-rules/{id}` | 删除告警规则 |
+| GET/DELETE | `/collectors/edge`、`/collectors/edge/{id}` | Edge 采集器列表/详情/删除 |

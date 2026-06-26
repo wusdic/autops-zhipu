@@ -4,6 +4,52 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.7.0] - 2026-06-26
+
+### 深度采集/巡检/报告闭环、生产执行器、平台功能补齐、前后端契约对齐
+
+> 本版本新增 5 个数据库迁移（0005–0009），部署需执行 `alembic upgrade head`。
+
+#### Added — 设备深度采集 · 巡检执行 · 自动报告
+- **深度采集器**（`app/workers/device_inspect.py`）：SSH(Linux)/WinRM(Windows)/SNMP(网络设备) 采集 OS/CPU/内存/磁盘/负载/inode/进程/监听端口/NTP/SSH-root/SELinux 等真实指标；依赖懒加载，缺失优雅降级
+- **凭据解析**（`app/common/credentials.py`）：按资产绑定凭据解密并归一化（用户名/密码/私钥/community）
+- **巡检执行引擎**（`app/domains/inspection/executor.py`）：按模板 `check_items` + 启用的巡检规则评估阈值，写 `InspectionResult`/`InspectionReport`
+- **定时巡检**（`app/workers/inspection_scheduler.py`）：worker 内置 cron 触发巡检计划
+- **报告生成器**（`app/domains/report/generator.py`）：汇总资产/告警/巡检渲染 HTML 报告并归档
+- 新增依赖：`asyncssh`、`pysnmp`、`pywinrm`
+
+#### Added — 生产自动化执行器
+- 新增 `SSHExecutor`（`executor/ssh.py`），凭据中心解析登录，支持多行脚本，拦截高危/fork 炸弹
+- 执行器可配置选择 `AUTOPS_EXECUTOR=auto|local_dev|ssh`（auto：生产→ssh）
+
+#### Added — 平台与 AI 功能补齐（此前前端有页面、后端缺失/造假）
+- AI 助手：`/ai/chat`、`/ai/execute`
+- 模型服务：`/aiops/agents` CRUD + `/aiops/agents/{id}/test` + `/aiops/model-config`（api_key 加密；LLMClient 运行时读取，回退 env/yaml）
+- 平台：字典 CRUD、`/platform/license`、`/platform/upgrade-history`；任务队列修正（`event_outbox.status`）
+- 备份：由内存 mock 改为 `backups` 表持久化 + mysqldump 真实产物 + 下载
+- 导出中心：`/exports` 真实生成 CSV（白名单表）+ `/exports/{id}/download`
+- 工单附件：真实上传(multipart)/列表/下载/删除（`ticket_attachments` 表落盘）
+- 巡检规则：`/inspection/rules` CRUD + toggle，执行器据此评估
+- 触发历史：`/trigger-history`（巡检规则/处置模板触发记录）
+
+#### Added — 补齐前端在用但后端缺失的端点
+- 凭证 PUT/DELETE、资产绑定凭证 POST、知识 DELETE、告警规则 DELETE、Edge 采集器 GET 列表/详情/DELETE、工单附件 DELETE
+
+#### Fixed — 阻断级与前后端契约
+- `success()` 恢复 `message` 参数（修复全仓 44 处删除/登出类端点 500）
+- `EventService.create_event` 发布 `event.created`/`event.deduplicated`，打通 event→alert→policy→automation
+- `RoleResponse.parse_permissions` 容错 `*:*` 裸字符串（修 `/auth/me` 500）
+- `HTTPBearer(auto=False)` → `auto_error=False`（修后端导入即报错）
+- alert/policy/automation handler 的 JSON 字段解析与方法签名修正
+- 前端：App.vue 未登录不渲染 MainLayout（消除 401 风暴）、侧边栏默认展开、401→session-expired、路由守卫放行公开页、ConfigOverview/OpsReport 假动作接真
+- 配置：`DB_PASS`/`REDIS_PASS`/`JWT_ALGORITHM` 增加 `AliasChoices`
+
+#### Added — 迁移
+- `0005_check_type`、`0006_platform_tables`、`0007_inspection_rules`、`0008_exports_attach`、`0009_trigger_history`
+
+#### Changed — 统计（详见 README）
+- 数据库表 36 → **47**；API 端点 145+ → **300+**
+
 ## [0.6.0] - 2026-06-25
 
 ### 全面安全加固、Bug 修复、自动纳管、文档同步

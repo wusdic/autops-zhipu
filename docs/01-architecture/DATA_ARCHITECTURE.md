@@ -762,3 +762,26 @@ audit_logs
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 ```
 
+---
+
+## 附录 A. 0.7.0 新增表（迁移 0005–0009，2026-06-26）
+
+> 部署须 `alembic upgrade head`。表总数 36 → **47**。
+
+| 迁移 | 表/列 | 用途 |
+|---|---|---|
+| 0005 | `inspection_results.check_type`（列） | 巡检结果分类：baseline/resource/service/config/security/log/page |
+| 0006 | `dictionaries` | 数据字典（type/code/label/value/sort_order/is_active） |
+| 0006 | `tenants` | 租户（name/code/admin_user_id/resource_quota/feature_scope/status） |
+| 0006 | `licenses` | 许可证（license_key/licensed_to/edition/max_assets/expires_at/status） |
+| 0006 | `upgrade_history` | 升级历史（version/from_version/status/notes/operated_by） |
+| 0006 | `model_agents` | 模型注册（name/provider/model_id/endpoint/api_key_enc/max_tokens/temperature/is_default/status） |
+| 0006 | `system_settings` | 键值配置（skey/svalue），存模型/备份等全局配置 |
+| 0006 | `backups` | 备份记录（name/backup_type/status/file_path/file_size/checksum/error） |
+| 0007 | `inspection_rules` | 巡检规则（name/category/check_target/condition/severity/asset_types/enabled/last_triggered_at） |
+| 0008 | `exports` | 导出任务（name/export_type/format/status/filters/file_path/file_size/row_count） |
+| 0008 | `ticket_attachments` | 工单附件（ticket_id/filename/content_type/size/storage_path/uploaded_by） |
+| 0009 | `trigger_history` | 触发历史（ref_type/ref_id/ref_name/action/status/detail） |
+
+> 说明：`api_key_enc` 用凭证加密（`app/common/crypto.py`）存储，不回显明文。
+
