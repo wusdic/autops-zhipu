@@ -13,7 +13,6 @@ from app.domains.aiops.agent.llm_client import LLMClient
 from app.domains.aiops.agent.react import ReActAgent
 from app.domains.aiops.agent.context import ContextBuilder
 from app.domains.aiops.models import AIAnalysis
-from app.domains.aiops.tools.guard import ToolGuard
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["AI Agent"])

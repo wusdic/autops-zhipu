@@ -7,7 +7,6 @@ from app.common.events import (
     DomainEvent,
     get_event_bus,
     AutomationEvents,
-    LogEvents,
 )
 
 logger = logging.getLogger(__name__)

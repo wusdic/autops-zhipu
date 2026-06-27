@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 import logging
-from datetime import datetime, timedelta, timezone
-from typing import Any
+from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select
 
 from app.domains.collector.edge.protocol import (
     HeartbeatPayload,
-    TaskPayload,
     ResultPayload,
     RegisterPayload,
 )

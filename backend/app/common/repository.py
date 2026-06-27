@@ -6,9 +6,7 @@ import uuid
 from typing import Any, Generic, Sequence, TypeVar
 
 from sqlalchemy import Select, func, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.common.mixins import UUIDPrimaryKey
 from app.infra.database import Base
 
 ModelType = TypeVar("ModelType", bound=Base)

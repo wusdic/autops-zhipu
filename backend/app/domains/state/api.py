@@ -33,7 +33,7 @@ async def list_snapshots(
     db: AsyncSession = Depends(get_db),
 ):
     """查询状态快照列表."""
-    from sqlalchemy import select, func, text
+    from sqlalchemy import select, func
     from app.domains.state.models import StateSnapshot
 
     q = select(StateSnapshot).order_by(StateSnapshot.created_at.desc())

@@ -5,8 +5,6 @@ from __future__ import annotations
 import uuid
 
 from starlette.types import ASGIApp, Receive, Scope, Send
-from starlette.requests import Request
-from starlette.responses import Response
 
 
 class TraceIdMiddleware:

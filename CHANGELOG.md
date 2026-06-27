@@ -4,6 +4,40 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.8.0] - 2026-06-27
+
+### 第四轮整改：执行队列化 + 闭环落库 + 契约对齐 + 安全加固
+
+> 实施记录见 `docs/REMEDIATION_P1_P4_2026-06-27.md`。新增迁移 0010，部署需 `alembic upgrade head`。
+
+#### Added — 执行队列化（P0-03/P1-03/P2-05）
+- `execution_queue` 表（迁移 0010）+ `execution_queue.py`（领取/续租/心跳/指数退避重试）
+- `ExecutionWorker`（并入 WorkerRunner）：持久化领取并运行，崩溃租约回收重投
+- `EventBus.dispatch_to_handlers` 聚合异常抛出 `EventDispatchError` → outbox 真正重试；幂等键成功后登记
+
+#### Changed — 核心闭环真实落库（P0-02/P1-02/P1-07）
+- 告警规则命中先落 `Alert`；策略匹配落 `PolicyExecution` 并串 `policy_execution_id` 全链
+- `on_execution_created_run` 同步创建+入队（不再 fire-and-forget）
+- 发现扫描移出 API 进程（发 `DISCOVERY_SCAN_REQUESTED` 由 Worker 执行）；ping 跨平台
+- `asset.create_asset` / `state.record_snapshot` 补发领域事件
+
+#### Fixed — API 契约（P1-08/P1-09/P1-12）
+- WebSocket：支持 unsubscribe + lifespan 停止桥接；前端统一 `/ws?token`+executions 频道
+- 执行日志统一写 `ExecutionLog`
+- `GET /executions` 支持筛选/stats/trend；新增 `POST /executions/{id}/retry`
+
+#### Security（P1-04/P2-04/P2-06/P2-07/P2-08）
+- 中间件校验用户禁用状态(30s 缓存) + 支持 `X-API-Key`(scope)
+- `CommandPolicy.evaluate_script()` 多行脚本逐行硬校验，SSH/local 共用
+- 前端 refresh token 单飞刷新；M12/审计路由体验级管理员拦截
+- install.sh 去硬编码弱口令、Redis requirepass
+
+#### Chore（P2-09）
+- 修复 `F821`（scheduler `CollectionJob` 前向引用）；清理 78 处未用导入
+
+#### 受理待办（高风险/大改，需可运行环境）
+- P1-11 Alembic baseline 显式 DDL；主机升级/回滚真实执行；多租户行级隔离；mypy strict 全量；前端拆包
+
 ## [0.7.1] - 2026-06-27
 
 ### 外部审查整改（第三轮）：闭环正确性 + 工程门禁 + 跨平台/契约修复

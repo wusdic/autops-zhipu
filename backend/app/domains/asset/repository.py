@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from sqlalchemy import Select, or_, select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.repository import BaseRepository
 from app.domains.asset.models import (
-    Asset, AssetGroup, AssetGroupMember, AssetIP, AssetRelation, AssetTimeline,
+    Asset, AssetGroup, AssetRelation, AssetTimeline,
 )
 
 

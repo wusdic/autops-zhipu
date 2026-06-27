@@ -6,7 +6,6 @@ Agent 即 Edge Collector，本文件复用 collector 域的模型提供管理视
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
@@ -10,7 +9,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.crud_service import model_to_dict
-from app.common.exceptions import NotFoundError
 from app.common.response import paginate, success
 from app.domains.alert.schemas import AlertRuleCreate, AlertCreateBody
 from app.domains.alert.service import AlertService

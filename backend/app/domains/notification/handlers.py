@@ -8,7 +8,6 @@ from app.common.events import (
     get_event_bus,
     AlertEvents,
     TicketEvents,
-    GovernanceEvents,
     AutomationEvents,
     NotificationEvents,
 )

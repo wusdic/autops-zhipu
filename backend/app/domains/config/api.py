@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.auth_dependency import require_admin
-from app.common.response import Response, paginate, success
+from app.common.response import paginate, success
 from app.common.crud_service import model_to_dict
 from app.infra.database import get_db
 from app.domains.config.service import ConfigService

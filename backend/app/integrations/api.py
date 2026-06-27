@@ -2,7 +2,6 @@
 from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Optional
 from app.integrations.registry import NotificationRegistry
 from app.integrations.base import NotificationPayload
 from app.common.response import success

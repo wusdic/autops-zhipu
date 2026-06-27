@@ -8,7 +8,6 @@ from app.common.events import (
     get_event_bus,
     StateEvents,
     AssetEvents,
-    EventEvents,
 )
 
 logger = logging.getLogger(__name__)
@@ -132,7 +131,6 @@ async def on_state_recovered_create_event(event: DomainEvent) -> None:
 
         from app.infra.database import async_session_factory
         from app.domains.event.service import EventService
-        import json
 
         async with async_session_factory() as session:
             svc = EventService(session)

@@ -12,7 +12,6 @@ from app.common.events import (
     get_event_bus,
     TicketEvents,
     AutomationEvents,
-    AnomalyEvents,
     ReportEvents,
     NotificationEvents,
 )

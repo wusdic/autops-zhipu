@@ -1,9 +1,8 @@
 """国产化数据库方言适配模拟测试."""
 from __future__ import annotations
 
-import pytest
 
-from app.infra.db_dialect import DialectAdapter, DialectConfig, SUPPORTED_DIALECTS
+from app.infra.db_dialect import DialectAdapter, SUPPORTED_DIALECTS
 
 
 # ---------------------------------------------------------------------------

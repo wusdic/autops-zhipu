@@ -1,5 +1,4 @@
 """EventBus 单元测试."""
-import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest

@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 # Ensure app is importable
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from app.infra.database import Base, get_db
+from app.infra.database import get_db
 from app.main import create_app
 
 # Use a test database (same server, different db for isolation)

@@ -6,7 +6,7 @@ import pytest
 
 from app.common.exceptions import DuplicateError, NotFoundError
 from app.domains.asset.models import (
-    Asset, AssetGroup, AssetGroupMember, AssetRelation, AssetTimeline,
+    Asset, AssetGroup, AssetRelation, AssetTimeline,
 )
 from app.domains.asset.schemas import (
     AssetCreate, AssetGroupCreate, AssetRelationCreate, AssetUpdate,

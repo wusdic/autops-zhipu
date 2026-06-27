@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.common.response import success, paginate
+from app.common.response import paginate
 from app.common.crud_service import model_to_dict
 from app.infra.database import get_db
 

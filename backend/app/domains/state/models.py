@@ -3,7 +3,7 @@
 from __future__ import annotations
 import uuid
 from datetime import datetime
-from sqlalchemy import DateTime, String, Text, Integer, Float, ForeignKey, func
+from sqlalchemy import DateTime, String, Text, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 from app.infra.database import Base
 

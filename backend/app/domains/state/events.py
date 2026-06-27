@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from app.common.events import (
     DomainEvent,
-    EventBus,
     get_event_bus,
     StateEvents,
 )

@@ -7,7 +7,7 @@ import json
 import logging
 import time
 from collections import OrderedDict
-from typing import Any, AsyncIterator
+from typing import AsyncIterator
 
 import httpx
 

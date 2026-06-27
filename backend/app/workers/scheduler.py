@@ -5,12 +5,15 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import uuid
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
 from sqlalchemy import select
 
 from app.workers.builtin_collectors import run_collection, COLLECTOR_REGISTRY
+
+if TYPE_CHECKING:
+    from app.domains.collector.models import CollectionJob
 
 logger = logging.getLogger(__name__)
 
@@ -303,7 +306,6 @@ class CollectionScheduler:
 
 async def on_asset_created_run_collection(event) -> None:
     """资产创建/纳管时立即执行采集 — 复用统一采集入口."""
-    from app.common.events import DomainEvent
     from app.infra.database import async_session_factory
     from app.domains.asset.models import Asset
 

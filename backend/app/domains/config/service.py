@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.exceptions import DuplicateError, NotFoundError
-from app.common.crypto import encrypt_credential, decrypt_credential
+from app.common.crypto import encrypt_credential
 from app.common.repository import BaseRepository
 from app.domains.config.models import (
     ConfigDefinition,

@@ -1,7 +1,6 @@
 """通知渠道注册中心."""
 from __future__ import annotations
 import logging
-from typing import Any
 from app.integrations.base import NotificationChannel, NotificationPayload
 
 logger = logging.getLogger(__name__)

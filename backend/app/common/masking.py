@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import re
-from typing import Any
 
 
 def mask_password(data: dict) -> dict:

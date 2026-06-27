@@ -1,6 +1,4 @@
 """配置中心 Service 单元测试."""
-import json
-from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
