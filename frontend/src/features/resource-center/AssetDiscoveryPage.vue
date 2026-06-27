@@ -489,16 +489,14 @@ async function executeOnboard() {
   onboarding.value = true
   try {
     for (const item of wizardSelected.value) {
+      // 字段须与后端 AssetCreate 对齐：ip（非 ip_address）、os_type（非 os_info），
+      // 否则纳管出的资产 IP/OS 为空，导致"资产已存在但部分页面不显示/无 IP"。
       await api.post(API.ASSETS, {
         name: item.hostname || item.ip,
         asset_type: item.asset_type || 'linux_server',
-        ip_address: item.ip,
+        ip: item.ip,
         hostname: item.hostname,
-        os_info: item.os_info,
-        credential_id: wizardCredential.value || undefined,
-        group_id: wizardGroup.value || undefined,
-        collection_template: wizardCollectionTemplate.value || undefined,
-        collection_interval: wizardInterval.value || undefined,
+        os_type: item.os_info || item.os_type,
       })
     }
     ElMessage.success('成功纳管 ' + wizardSelected.value.length + ' 个资产')

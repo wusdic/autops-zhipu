@@ -102,7 +102,7 @@
               <circle cx="-50" cy="-14" r="4" :fill="healthColor(node.health_status || node.status)" />
               <text x="0" y="-6" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">{{ truncate(node.name, 10) }}</text>
               <text x="0" y="10" text-anchor="middle" fill="rgba(255,255,255,0.75)" font-size="9">{{ typeLabel(node.asset_type) }}</text>
-              <text x="0" y="22" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">{{ node.ip_address || '' }}</text>
+              <text x="0" y="22" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">{{ node.ip || node.ip_address || '' }}</text>
             </g>
           </svg>
 
@@ -314,7 +314,7 @@ function onSearch() {
   if (!searchKeyword.value) { searchMatchNodes.value = new Set(); return }
   const kw = searchKeyword.value.toLowerCase()
   searchMatchNodes.value = new Set(
-    nodes.value.filter(n => n.name?.toLowerCase().includes(kw) || n.ip_address?.includes(kw)).map(n => n.id)
+    nodes.value.filter(n => n.name?.toLowerCase().includes(kw) || (n.ip || n.ip_address)?.includes(kw)).map(n => n.id)
   )
 }
 

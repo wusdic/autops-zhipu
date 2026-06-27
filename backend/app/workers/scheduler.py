@@ -183,10 +183,16 @@ async def run_collection_for_asset(
             # 不再 return，继续尝试其他采集器
             continue
 
-        # --- Ping 状态变更检测 → 发事件 ---
+        # --- Ping 在线性检测 → 更新 reachability 并发事件 ---
+        # 注意：在线/离线属"可达性"，写入 asset.reachability；asset.status 专表
+        # 生命周期(active/inactive/maintenance/decommissioned)，二者不再混用，
+        # 避免巡检把生命周期状态覆盖成 online/offline 导致各页面筛选/展示不一致。
         if ctype == "ping":
-            was_online = getattr(asset, "status", "") == "online"
+            was_online = getattr(asset, "reachability", "") == "reachable"
             is_alive = result_data.get("alive", False)
+            new_reach = "reachable" if is_alive else "unreachable"
+            # 事件载荷仍用 online/offline 语义，保持下游事件/告警链路不变
+            old_status = "online" if was_online else "offline"
             new_status = "online" if is_alive else "offline"
 
             logger.info(
@@ -197,8 +203,7 @@ async def run_collection_for_asset(
             )
 
             if was_online != is_alive:
-                old_status = asset.status
-                asset.status = new_status
+                asset.reachability = new_reach
                 await session.flush()
 
                 # 在同一事务中写 outbox（传入 session 复用业务事务，原子提交/回滚）

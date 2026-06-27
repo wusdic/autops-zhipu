@@ -460,12 +460,14 @@ class DiscoveryService:
                 continue
 
             at = asset_type if asset_type != "auto" else dr.asset_type
+            # status 专表生命周期(active)，在线性写 reachability（发现存活即 reachable）
             asset = Asset(
                 name=dr.hostname or dr.ip,
                 hostname=dr.hostname or dr.ip,
                 ip=dr.ip,
                 asset_type=at,
-                status="online",
+                status="active",
+                reachability="reachable",
             )
             self.db.add(asset)
             await self.db.flush()
@@ -540,7 +542,7 @@ class DiscoveryService:
             hostname=data.get("hostname", data.get("ip", "unknown")),
             ip=data.get("ip", "0.0.0.0"),
             asset_type=data.get("asset_type", "linux_server"),
-            status="offline",
+            status="active",
         )
         self.db.add(asset)
         await self.db.flush()

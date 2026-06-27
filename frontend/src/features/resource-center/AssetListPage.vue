@@ -97,8 +97,8 @@
         </el-table-column>
         <el-table-column prop="reachability" label="可达性" width="90">
           <template #default="{ row }">
-            <el-tag :type="row.reachability === 'reachable' ? 'success' : 'danger'" size="small">
-              {{ row.reachability === 'reachable' ? '可达' : (row.reachability || '-') }}
+            <el-tag :type="row.reachability === 'reachable' ? 'success' : row.reachability === 'unreachable' ? 'danger' : 'info'" size="small">
+              {{ ({ reachable: '可达', unreachable: '不可达', unknown: '未知' } as Record<string, string>)[row.reachability] || row.reachability || '-' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -446,10 +446,20 @@ function formatType(t: string): string {
 }
 
 function statusType(s: string): TagType {
-  return (s === 'active' ? 'success' : s === 'inactive' ? 'danger' : 'warning') as TagType
+  const map: Record<string, string> = {
+    active: 'success', online: 'success',
+    inactive: 'info', disabled: 'info',
+    maintenance: 'warning', provisioning: 'warning',
+    decommissioned: 'danger', offline: 'danger',
+  }
+  return (map[s] || 'warning') as TagType
 }
 function statusLabel(s: string) {
-  return ({ active: '活跃', inactive: '停用', maintenance: '维护', provisioning: '配置中' })[s] ?? s ?? '-'
+  // 兼容生命周期(active/...)与历史在线性(online/offline)取值，避免显示空白
+  return ({
+    active: '活跃', inactive: '停用', maintenance: '维护', provisioning: '配置中',
+    decommissioned: '已下线', online: '在线', offline: '离线',
+  })[s] ?? s ?? '-'
 }
 
 function healthType(h: string): TagType {
