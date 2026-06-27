@@ -44,7 +44,6 @@
             <el-menu-item index="/asset-groups">资源分组</el-menu-item>
             <el-menu-item index="/lifecycle">生命周期</el-menu-item>
             <el-menu-item index="/resources/discovery">资源发现</el-menu-item>
-            <el-menu-item index="/resources/discovery-results">发现结果</el-menu-item>
             <el-menu-item index="/resources/import">资源导入</el-menu-item>
           </el-sub-menu>
 
@@ -350,7 +349,6 @@ const menuMap: Record<string, string> = {
   '/asset-groups': '资源分组',
   '/lifecycle': '生命周期',
   '/resources/discovery': '资源发现',
-  '/resources/discovery-results': '发现结果',
   '/resources/import': '资源导入',
   // M3 巡检中心
   '/inspections': '巡检总览',
@@ -465,7 +463,7 @@ const menuMap: Record<string, string> = {
 const groupMap: Record<string, string> = {
   '/': '运维驾驶舱',
   '/business-health-map': '运维驾驶舱', '/daily-summary': '运维驾驶舱',
-  '/resources': '资源中心', '/resources/discovery': '资源中心', '/resources/discovery-results': '资源中心',
+  '/resources': '资源中心', '/resources/discovery': '资源中心',
   '/assets': '资源中心', '/business-systems': '资源中心', '/topology': '资源中心',
   '/resources/import': '资源中心', '/asset-groups': '资源中心', '/lifecycle': '资源中心',
   '/inspections': '巡检中心', '/inspection/plans': '巡检中心', '/inspection/tasks': '巡检中心',

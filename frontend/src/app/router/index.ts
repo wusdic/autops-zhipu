@@ -30,7 +30,8 @@ const router = createRouter({
     { path: '/asset-groups', name: 'asset-groups', component: () => import('@/features/resource-center/AssetGroupPage.vue'), meta: { module: 'M2', title: '资源分组' } },
     { path: '/lifecycle', name: 'lifecycle', component: () => import('@/features/resource-center/LifecyclePage.vue'), meta: { module: 'M2', title: '生命周期' } },
     { path: '/resources/discovery', name: 'discovery-tasks', component: () => import('@/features/resource-center/AssetDiscoveryPage.vue'), meta: { module: 'M2', title: '资源发现' } },
-    { path: '/resources/discovery-results', name: 'discovery-results', component: () => import('@/features/resource-center/DiscoveryResultPage.vue'), meta: { module: 'M2', title: '发现结果' } },
+    // 去重：发现结果已并入资源发现页"发现结果"tab，旧路径重定向保留外链/书签
+    { path: '/resources/discovery-results', redirect: '/resources/discovery?tab=results' },
     { path: '/resources/import', name: 'resource-import', component: () => import('@/features/resource-center/ResourceImportPage.vue'), meta: { module: 'M2', title: '资源导入' } },
 
     // ============================================================
