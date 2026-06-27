@@ -73,8 +73,7 @@
             <el-menu-item index="/monitoring/collection-results">采集结果</el-menu-item>
             <el-menu-item index="/monitoring/collector-health">采集器健康</el-menu-item>
             <el-menu-item index="/monitoring/metrics">指标趋势</el-menu-item>
-            <el-menu-item index="/monitoring/states">状态快照</el-menu-item>
-            <el-menu-item index="/monitoring/state-changes">状态变化</el-menu-item>
+            <el-menu-item index="/monitoring/states">状态监控</el-menu-item>
             <el-menu-item index="/events">事件流</el-menu-item>
             <el-menu-item index="/monitoring/log-sources">日志接入</el-menu-item>
             <el-menu-item index="/monitoring/config-facts">配置事实</el-menu-item>
@@ -367,8 +366,7 @@ const menuMap: Record<string, string> = {
   '/monitoring/collection-results': '采集结果',
   '/monitoring/collector-health': '采集器健康',
   '/monitoring/metrics': '指标趋势',
-  '/monitoring/states': '状态快照',
-  '/monitoring/state-changes': '状态变化',
+  '/monitoring/states': '状态监控',
   '/events': '事件流',
   '/monitoring/log-sources': '日志接入',
   '/monitoring/config-facts': '配置事实',
@@ -473,7 +471,7 @@ const groupMap: Record<string, string> = {
   '/monitoring': '监控告警', '/monitoring/collectors': '监控告警',
   '/monitoring/collection-results': '监控告警', '/monitoring/collector-health': '监控告警',
   '/monitoring/metrics': '监控告警', '/monitoring/states': '监控告警',
-  '/monitoring/state-changes': '监控告警', '/events': '监控告警',
+  '/events': '监控告警',
   '/monitoring/log-sources': '监控告警', '/monitoring/config-facts': '监控告警',
   '/alerts': '监控告警', '/alert-rules': '监控告警', '/alert-correlation': '监控告警',
   '/anomalies': '监控告警', '/anomaly/list': '监控告警',

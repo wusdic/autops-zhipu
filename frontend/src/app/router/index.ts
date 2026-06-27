@@ -58,8 +58,9 @@ const router = createRouter({
     { path: '/monitoring/collection-results', name: 'collection-results', component: () => import('@/features/monitoring-center/CollectionResultPage.vue'), meta: { module: 'M4', title: '采集结果' } },
     { path: '/monitoring/collector-health', name: 'collector-health', component: () => import('@/features/monitoring-center/CollectorHealthPage.vue'), meta: { module: 'M4', title: '采集器健康' } },
     { path: '/monitoring/metrics', name: 'metrics-trend', component: () => import('@/features/monitoring-center/MetricsTrendPage.vue'), meta: { module: 'M4', title: '指标趋势' } },
-    { path: '/monitoring/states', name: 'state-snapshot', component: () => import('@/features/monitoring-center/StateSnapshotPage.vue'), meta: { module: 'M4', title: '状态快照' } },
-    { path: '/monitoring/state-changes', name: 'state-changes', component: () => import('@/features/monitoring-center/StateChangePage.vue'), meta: { module: 'M4', title: '状态变化' } },
+    { path: '/monitoring/states', name: 'state-monitor', component: () => import('@/features/monitoring-center/StateMonitorPage.vue'), meta: { module: 'M4', title: '状态监控' } },
+    // 去重 B4：状态变化已并入状态监控页"变更历史"tab，旧路径重定向保留外链/书签
+    { path: '/monitoring/state-changes', redirect: '/monitoring/states?tab=changes' },
     { path: '/events', name: 'events', component: () => import('@/features/monitoring-center/EventListPage.vue'), meta: { module: 'M4', title: '事件流' } },
     { path: '/monitoring/log-sources', name: 'log-sources', component: () => import('@/features/monitoring-center/LogSourcePage.vue'), meta: { module: 'M4', title: '日志接入' } },
     { path: '/monitoring/config-facts', name: 'config-facts', component: () => import('@/features/monitoring-center/ConfigPage.vue'), meta: { module: 'M4', title: '配置事实' } },
