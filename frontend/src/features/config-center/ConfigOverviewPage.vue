@@ -170,6 +170,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, ArrowLeft, Monitor, Search, Warning, Bell } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import { severityTagType } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 
 const router = useRouter()
@@ -198,10 +199,7 @@ const categoryMap: Record<string, string> = {
   log_check: '日志检查', baseline_check: '基线检查',
 }
 
-function severityType(severity: string): TagType {
-  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }
-  return (map[severity] || 'info') as TagType
-}
+const severityType = (severity: string): TagType => severityTagType(severity) as TagType
 
 function unwrapItems(res: any): any[] {
   var raw = res?.data ?? {}

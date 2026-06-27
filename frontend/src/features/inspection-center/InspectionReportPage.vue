@@ -151,6 +151,7 @@ import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
 import { Document } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import { severityTagType } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
@@ -186,10 +187,7 @@ function rateColor(rate: number): string {
   return '#f53f3f'
 }
 
-function severityType(severity: string): TagType {
-  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }
-  return (map[severity] || 'info') as TagType
-}
+const severityType = (severity: string): TagType => severityTagType(severity) as TagType
 
 // ── Data Loading ───────────────────────────────────────────────────
 async function loadReports() {

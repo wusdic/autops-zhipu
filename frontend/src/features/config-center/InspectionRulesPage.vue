@@ -185,6 +185,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import { severityTagType, severityLabel as severityLabelFn } from '@/shared/utils/labels'
 
 const router = useRouter()
 const loading = ref(false)
@@ -217,12 +218,8 @@ const categoryMap: Record<string, string> = {
   page_check: '页面检查', config_check: '配置检查',
   log_check: '日志检查', baseline_check: '基线检查', api_check: 'API检查',
 }
-function severityType(s: string): TagType {
-  return ({ critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }[s] || 'info') as TagType
-}
-function severityLabel(s: string) {
-  return { critical: '紧急', high: '高危', medium: '中危', low: '低危' }[s] || s
-}
+const severityType = (s: string): TagType => severityTagType(s) as TagType
+const severityLabel = (s: string): string => severityLabelFn(s)
 
 async function loadData() {
   loading.value = true

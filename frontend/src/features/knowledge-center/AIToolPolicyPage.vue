@@ -211,6 +211,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { Plus, Search, SetUp, Monitor } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import client from '@/shared/api/client'
+import { riskLabel as riskLabelFn } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 
 // ─── State ───────────────────────────────────────────────────────────
@@ -250,10 +251,7 @@ const formRules: FormRules = {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────
-function riskLabel(level: string): string {
-  const map: Record<string, string> = { high: '高', medium: '中', low: '低' }
-  return map[level] || level || '-'
-}
+const riskLabel = (level: string): string => riskLabelFn(level)
 
 function riskTagType(level: string): TagType {
   const map: Record<string, string> = { high: 'danger', medium: 'warning', low: 'info' }

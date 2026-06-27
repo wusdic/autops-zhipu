@@ -604,6 +604,7 @@ import {
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
+import { riskLabel as riskLabelFn } from '@/shared/utils/labels'
 import { API as R } from '@/shared/api/routes'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import SeverityBadge from '@/shared/components/SeverityBadge.vue'
@@ -901,10 +902,7 @@ function riskTagType(level: string): TagType {
   return ('info') as TagType
 }
 
-function riskLabel(level: string): string {
-  const m: Record<string, string> = { high: '高', medium: '中', low: '低' }
-  return m[level] || level
-}
+const riskLabel = (level: string): string => riskLabelFn(level)
 
 // ─── Load Alerts ─────────────────────────────────────────────────────
 async function loadAlerts() {

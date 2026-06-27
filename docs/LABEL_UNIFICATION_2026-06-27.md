@@ -31,10 +31,25 @@
 - 工单 status：open / assigned / in_progress / pending_approval / resolved / closed / rejected
 - 执行 status：pending / dry_running / dry_run_completed / dry_run_failed / awaiting_approval / approved / running / verifying / completed / failed / cancelled / rolling_back / rolled_back / rollback_failed
 
-## 剩余（增量收敛，建议后续）
-其余页面仍有局部 label 函数。由于多数列表/详情已通过 StatusBadge/SeverityBadge 渲染
-而被统一，剩余局部函数可逐页改为引用 labels.ts。原则：**新增/修改页面一律用 labels.ts，
-不再写局部 map**。
+## 已逐页收敛（severity/risk/health/status 委托 labels.ts）
+- 工单：TicketList/TicketDetail/TicketOverview
+- 自动化：ExecutionList/ExecutionDetail/AutomationOverview/PolicyList/PlaybookList/PolicySimulate
+- 响应：IncidentResponse/ManualConfirm/AiDiagnosisPanel/ResponseSuggestion/RiskGrading
+- 监控：AlertList/AlertDetail/AlertRule/StateSnapshot
+- 资源：AssetList/AssetDetail/AssetGroup/BusinessSystem/AssetTopology
+- 巡检/配置/知识：InspectionReport(×2)/InspectionRules/ConfigOverview/AiDiagnosis/AIToolPolicy
+- 共享组件：StatusBadge / SeverityBadge
+
+## 刻意保留（领域特有子状态，非四大实体 canonical，强行套用会误标）
+- 工单子工作流：ManualHandling/Postmortem 的处置/复盘状态
+- 审批工作流：ApprovalCenter 的 pending/approved/rejected
+- 巡检结果 pass/fail、报表任务状态、模型服务/自检/采集器状态、
+  事件/异常(anomaly) 状态、Incident 的 major/minor 严重度
+> 这些属于各自领域的独立词表，应在 labels.ts 中**另设**对应映射后再收敛，
+> 不并入四大实体的 canonical 维度。
+
+## 原则
+**新增/修改页面一律用 labels.ts，不再写局部 map。**
 
 ## 验证
 前端本环境无 node_modules，未跑 vue-tsc/build；改动均为"局部 map→引用共享函数"的等价替换，
