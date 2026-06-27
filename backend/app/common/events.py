@@ -219,15 +219,19 @@ class EventBus:
         """
         from sqlalchemy import text
 
+        # event_outbox.id 是 varchar(36) 主键且无 server_default，必须显式传值，
+        # 否则 MySQL 严格模式报 (1364, "Field 'id' doesn't have a default value")，
+        # 导致所有事件发布失败、业务事务连带回滚（资产发现/告警/策略链路全断）。
         insert_sql = text("""
             INSERT INTO event_outbox
-                (event_id, event_type, domain, payload, priority, source,
+                (id, event_id, event_type, domain, payload, priority, source,
                  correlation_id, status, created_at)
             VALUES
-                (:eid, :etype, :domain, :payload, :priority, :source,
+                (:id, :eid, :etype, :domain, :payload, :priority, :source,
                  :corr_id, 'pending', NOW())
         """)
         params = {
+            "id": str(uuid.uuid4()),
             "eid": event.event_id,
             "etype": event.event_type,
             "domain": event.domain,

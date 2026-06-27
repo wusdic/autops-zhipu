@@ -242,9 +242,53 @@ class LLMClient:
             )
             if resp.status_code == 200:
                 data = resp.json()
-                return data["choices"][0]["message"]["content"]
+                content = (data["choices"][0]["message"].get("content") or "").strip()
+                if content:
+                    return content
+                # 某些模型/推理端（如 Qwen MTP + llama.cpp 内置 jinja 模板）chat 接口
+                # 返回空内容；降级到 /completions + 手工 ChatML 拼接。
+                logger.warning("LLM chat 返回空内容，降级到 /completions")
+                return await self._do_completions(messages, headers)
             logger.error("LLM error: %s %s", resp.status_code, resp.text[:200])
             raise AppError(ErrorCode.AI_UNAVAILABLE_ANALYSIS, f"LLM returned status {resp.status_code}", 502)
+
+    @staticmethod
+    def _messages_to_chatml(messages: list[dict[str, str]]) -> str:
+        """把 messages 拼成 ChatML prompt（用于 /completions 降级路径）."""
+        parts = []
+        for m in messages:
+            role = m.get("role", "user")
+            content = m.get("content", "")
+            parts.append(f"<|im_start|>{role}\n{content}<|im_end|>")
+        parts.append("<|im_start|>assistant\n")
+        return "\n".join(parts)
+
+    async def _do_completions(
+        self, messages: list[dict[str, str]], headers: dict[str, str]
+    ) -> str:
+        """降级路径：调用 /completions（文本补全）端点."""
+        base = self.base_url.rstrip("/")
+        url = f"{base}/completions" if base.endswith("/v1") else f"{base}/v1/completions"
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.post(
+                url,
+                json={
+                    "model": self.model,
+                    "prompt": self._messages_to_chatml(messages),
+                    "temperature": 0.3,
+                    "max_tokens": self.max_tokens,
+                    "stop": ["<|im_end|>"],
+                },
+                headers=headers,
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return (data["choices"][0].get("text") or "").strip()
+            logger.error("LLM completions error: %s %s", resp.status_code, resp.text[:200])
+            raise AppError(
+                ErrorCode.AI_UNAVAILABLE_ANALYSIS,
+                f"LLM completions returned status {resp.status_code}", 502,
+            )
 
     async def _get_cache(self, key: str) -> str | None:
         """优先 Redis → 降级 LRU."""

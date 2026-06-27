@@ -217,3 +217,52 @@ class ApiKeyService:
         await self.session.flush()
         await self.session.refresh(key)
         return key
+
+
+class GovernanceService:
+    """治理中心审计服务.
+
+    事件总线以 subscribe_all 把所有领域事件落审计日志（governance/handlers.py）。
+    此前缺少本类导致每个事件都 ImportError、审计完全失效。
+    """
+
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def create_audit_log(
+        self,
+        action: str,
+        domain: str = "",
+        source: str = "",
+        details: dict | None = None,
+        user_id: str | None = None,
+        username: str | None = None,
+        resource_id: str | None = None,
+        ip_address: str | None = None,
+    ) -> None:
+        """写一条审计日志（容错：表/字段异常不应影响主流程）."""
+        from app.common.audit import AuditLog
+
+        details = details or {}
+        trace_id = (
+            details.get("correlation_id")
+            or details.get("event_id")
+            or __import__("uuid").uuid4().hex
+        )
+        try:
+            self.session.add(
+                AuditLog(
+                    trace_id=str(trace_id),
+                    user_id=user_id or details.get("user_id"),
+                    username=username or details.get("username"),
+                    action=action or "event",
+                    resource_type=domain or "event",
+                    resource_id=resource_id or details.get("resource_id"),
+                    detail=json.dumps(details, ensure_ascii=False, default=str),
+                    ip_address=ip_address or details.get("ip_address"),
+                )
+            )
+            await self.session.flush()
+        except Exception:
+            # 审计为旁路能力，失败不阻断业务事件处理
+            await self.session.rollback()
