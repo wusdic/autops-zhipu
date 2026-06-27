@@ -96,7 +96,7 @@ class LocalDevExecutor:
                 success=proc.returncode == 0,
                 exit_code=proc.returncode,
                 stdout=(stdout or b"").decode("utf-8", errors="replace")[:10000],
-                stderr=(stderr or b"").decode("utf-8", errors="replace")[:5000] or None,
+                stderr=(stderr or b"").decode("utf-8", errors="replace")[:5000],
                 started_at=started.isoformat(),
                 completed_at=completed.isoformat(),
                 evidence={"return_code": proc.returncode},

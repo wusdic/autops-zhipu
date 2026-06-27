@@ -11,7 +11,6 @@ from app.common.events import (
     get_event_bus,
     AlertEvents,
     AIOpsEvents,
-    PolicyEvents,
     AutomationEvents,
 )
 
@@ -161,59 +160,11 @@ async def on_analysis_failed_log(event: DomainEvent) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 从 common/event_handlers.py 迁移的处理器
+# 执行运行器（唯一保留：EXECUTION_CREATED → 创建并运行执行记录）
 # ---------------------------------------------------------------------------
-
-
-@idempotent_handler
-async def on_alert_created_match_policies(event) -> None:
-    """告警创建 → 触发策略匹配."""
-    payload = event.payload
-    matched_policies = await _match_policies(payload)
-    bus = get_event_bus()
-    for policy_data in matched_policies:
-        await bus.publish(
-            DomainEvent(
-                event_type=PolicyEvents.POLICY_TRIGGERED,
-                domain="policy",
-                payload=policy_data,
-                source="policy_engine",
-                correlation_id=event.correlation_id or event.event_id,
-            )
-        )
-
-
-@idempotent_handler
-async def on_policy_approved_create_execution(event) -> None:
-    """策略审批通过 → 创建执行."""
-    payload = event.payload
-    bus = get_event_bus()
-    # 安全解析 action_chain
-    action_chain = payload.get("action_chain", [])
-    first_action = {}
-    if isinstance(action_chain, list) and len(action_chain) > 0:
-        first = action_chain[0]
-        if isinstance(first, list) and len(first) > 0:
-            first_action = first[0] if isinstance(first[0], dict) else {}
-        elif isinstance(first, dict):
-            first_action = first
-    await bus.publish(
-        DomainEvent(
-            event_type=AutomationEvents.EXECUTION_CREATED,
-            domain="automation",
-            payload={
-                "execution_type": first_action.get("type", "script"),
-                "target_id": first_action.get("target_id", ""),
-                "asset_ids": payload.get("matched_assets", []),
-                "trigger_source": "policy",
-                "policy_id": payload.get("policy_id"),
-                "alert_id": payload.get("alert_id"),
-                "is_dry_run": False,
-            },
-            source="handler",
-            correlation_id=event.event_id,
-        )
-    )
+# 注意：告警→策略匹配、策略审批→创建执行 两条链路统一由 policy 领域
+# (policy/handlers.py) 负责，本模块此前重复订阅 ALERT_CREATED / POLICY_APPROVED
+# 会导致同一告警双重匹配、同一审批双重创建执行。已移除重复 handler。
 
 
 @idempotent_handler
@@ -307,71 +258,6 @@ async def _run_execution_async(payload: dict, correlation_id: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 辅助函数
-# ---------------------------------------------------------------------------
-
-
-async def _match_policies(alert_payload: dict) -> list[dict]:
-    """匹配策略，返回匹配到的策略数据列表."""
-    import json as _json
-
-    try:
-        from app.infra.database import async_session_factory
-        from app.domains.policy.service import PolicyService
-
-        async with async_session_factory() as session:
-            svc = PolicyService(session)
-            policies, _ = await svc.list_policies(status="active")
-            results = []
-            severity = alert_payload.get("severity", "")
-            for policy in policies:
-                trigger_type = policy.trigger_type
-                matched = False
-                # 解析 trigger_condition (可能是 JSON string 或 dict)
-                tc = policy.trigger_condition or {}
-                if isinstance(tc, str):
-                    try:
-                        tc = _json.loads(tc)
-                    except Exception:
-                        tc = {}
-                # 解析 action_chain (可能是 JSON string 或 list)
-                ac = policy.action_chain or []
-                if isinstance(ac, str):
-                    try:
-                        ac = _json.loads(ac)
-                    except Exception:
-                        ac = []
-
-                if trigger_type == "alert_severity" and severity:
-                    target_sev = tc.get("severity", "")
-                    if target_sev and severity == target_sev:
-                        matched = True
-                elif trigger_type == "event_type":
-                    target_type = tc.get("event_type", "")
-                    if target_type and alert_payload.get("event_type") == target_type:
-                        matched = True
-                elif trigger_type == "any_alert":
-                    matched = True
-                if matched:
-                    results.append(
-                        {
-                            "policy_id": str(policy.id),
-                            "policy_name": policy.name,
-                            "action_chain": ac,
-                            "requires_approval": policy.requires_approval,
-                            "risk_level": policy.risk_level,
-                            "matched_assets": alert_payload.get("asset_ids", []),
-                            "alert_id": alert_payload.get("alert_id")
-                            or alert_payload.get("rule_id"),
-                        }
-                    )
-            return results
-    except Exception as e:
-        logger.error("匹配策略失败: %s", e)
-        return []
-
-
-# ---------------------------------------------------------------------------
 # 注册入口
 # ---------------------------------------------------------------------------
 
@@ -380,14 +266,12 @@ def register_handlers() -> None:
     """注册AIOps领域的事件处理器."""
     bus = get_event_bus()
 
-    # 原有handlers
+    # AI 分析链路
     bus.subscribe(AlertEvents.ALERT_CREATED, on_alert_created_trigger_analysis)
     bus.subscribe(AIOpsEvents.ANALYSIS_COMPLETED, on_analysis_completed_recommend)
     bus.subscribe(AIOpsEvents.ANALYSIS_FAILED, on_analysis_failed_log)
 
-    # 从 event_handlers 迁移
-    bus.subscribe(AlertEvents.ALERT_CREATED, on_alert_created_match_policies)
-    bus.subscribe(PolicyEvents.POLICY_APPROVED, on_policy_approved_create_execution)
+    # 执行运行器：策略链路最终产生 EXECUTION_CREATED 后由此创建并运行执行记录
     bus.subscribe(AutomationEvents.EXECUTION_CREATED, on_execution_created_run)
 
     logger.info("aiops领域事件处理器已注册 (含idempotency)")

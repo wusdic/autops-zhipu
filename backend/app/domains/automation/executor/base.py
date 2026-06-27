@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ExecutionPlan(BaseModel):
@@ -15,7 +15,7 @@ class ExecutionPlan(BaseModel):
     command: str
     working_dir: str | None = None
     timeout_seconds: int = 300
-    env_vars: dict[str, str] = {}
+    env_vars: dict[str, str] = Field(default_factory=dict)
 
 
 class ExecutionResult(BaseModel):
@@ -26,7 +26,7 @@ class ExecutionResult(BaseModel):
     stderr: str = ""
     started_at: str = ""
     completed_at: str = ""
-    evidence: dict = {}
+    evidence: dict = Field(default_factory=dict)
 
 
 class Executor(Protocol):

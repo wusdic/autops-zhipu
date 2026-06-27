@@ -8,7 +8,7 @@ import pytest
 from app.common.exceptions import NotFoundError
 from app.domains.automation.models import Execution, ExecutionStep, Playbook, Script
 from app.domains.automation.schemas import ExecutionCreate
-from app.domains.automation.service import AutomationService, BLOCKED_COMMANDS
+from app.domains.automation.service import AutomationService
 
 
 # ---------------------------------------------------------------------------

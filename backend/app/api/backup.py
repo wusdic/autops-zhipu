@@ -89,8 +89,10 @@ async def _run_backup(backup_id: str) -> None:
                     f"-- mysqldump 不可用或非 MySQL 方言({cfg.dialect})，未生成真实物理备份。\n",
                     encoding="utf-8",
                 )
-                size, status = out.stat().st_size, "completed"
-                err = "mysqldump 不可用，已生成占位文件（非真实备份）"
+                # 占位文件不是可恢复备份，必须标记 degraded（而非 completed），
+                # 否则用户会下载到不可恢复的"已完成备份"。
+                size, status = out.stat().st_size, "degraded"
+                err = "mysqldump 不可用，已生成占位文件（非真实备份，不可恢复）"
         except Exception as exc:  # noqa: BLE001
             logger.exception("备份执行失败 id=%s", backup_id)
             status, err = "failed", str(exc)[:500]

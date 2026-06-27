@@ -158,6 +158,11 @@ class EventBus:
                 logger.exception(
                     "EventBus: outbox persist failed for %s", event.event_type
                 )
+                # 复用业务事务（session 非空）时，持久化失败必须向上抛出，
+                # 让调用方回滚业务数据，避免"业务写成功但事件丢失"破坏一致性。
+                # 独立 session 模式下已自行提交，失败仅记录日志。
+                if session is not None:
+                    raise
         else:
             # 开发模式: 直接触发handler（无outbox持久化）
             await self.dispatch_to_handlers(event)

@@ -51,7 +51,7 @@ async def automation_stats(db: AsyncSession = Depends(get_db)):
         await db.execute(
             select(func.count())
             .select_from(Execution)
-            .where(Execution.status == "pending_approval")
+            .where(Execution.status == "awaiting_approval")
         )
     ).scalar() or 0
 
@@ -99,12 +99,12 @@ async def list_approvals(
 ):
     """审批列表(查询 executions).
 
-    默认查询 pending_approval 状态；传入 status 时按 status 过滤
-    （原实现叠加 `pending_approval AND status` 导致恒空，已修正）。
+    默认查询 awaiting_approval 状态（ExecutionStatus 的 canonical 值）；
+    传入 status 时按 status 过滤（原实现叠加 AND 导致恒空，已修正）。
     """
     from app.domains.automation.models import Execution
 
-    effective_status = status or "pending_approval"
+    effective_status = status or "awaiting_approval"
     base = select(Execution).where(Execution.status == effective_status)
 
     total = (
@@ -137,7 +137,7 @@ async def approve_execution(
     body: ApprovalBody,
     db: AsyncSession = Depends(get_db),
 ):
-    """审批通过（仅 pending_approval 状态可审批）."""
+    """审批通过（仅 awaiting_approval 状态可审批）."""
     from app.common.exceptions import ValidationError
     from app.domains.automation.models import Execution
 
@@ -146,7 +146,7 @@ async def approve_execution(
     ).scalar_one_or_none()
     if not row:
         return success(None, message="审批记录不存在")
-    if row.status != "pending_approval":
+    if row.status != "awaiting_approval":
         raise ValidationError(f"当前状态为 {row.status}，不可审批")
 
     row.status = "approved"
@@ -162,7 +162,7 @@ async def reject_execution(
     body: ApprovalBody,
     db: AsyncSession = Depends(get_db),
 ):
-    """审批拒绝（仅 pending_approval 状态可拒绝）."""
+    """审批拒绝（仅 awaiting_approval 状态可拒绝）."""
     from app.common.exceptions import ValidationError
     from app.domains.automation.models import Execution
 
@@ -171,7 +171,7 @@ async def reject_execution(
     ).scalar_one_or_none()
     if not row:
         return success(None, message="审批记录不存在")
-    if row.status != "pending_approval":
+    if row.status != "awaiting_approval":
         raise ValidationError(f"当前状态为 {row.status}，不可拒绝")
 
     row.status = "rejected"

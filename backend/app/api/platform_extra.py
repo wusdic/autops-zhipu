@@ -314,7 +314,7 @@ async def task_queue_status(db: AsyncSession = Depends(get_db)):
         count = (
             await db.execute(
                 text(
-                    "SELECT COUNT(*) FROM executions WHERE status IN ('pending', 'running', 'pending_approval')"
+                    "SELECT COUNT(*) FROM executions WHERE status IN ('pending', 'running', 'awaiting_approval')"
                 )
             )
         ).scalar() or 0

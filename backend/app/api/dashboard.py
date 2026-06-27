@@ -61,7 +61,7 @@ async def dashboard_stats(db: AsyncSession = Depends(get_db)):
         await db.execute(
             select(func.count())
             .select_from(Execution)
-            .where(Execution.status == "pending_approval")
+            .where(Execution.status == "awaiting_approval")
         )
     ).scalar() or 0
 
@@ -287,7 +287,7 @@ async def automation_summary(db: AsyncSession = Depends(get_db)):
         await db.execute(
             select(func.count())
             .select_from(Execution)
-            .where(Execution.status == "pending_approval")
+            .where(Execution.status == "awaiting_approval")
         )
     ).scalar() or 0
 
@@ -430,7 +430,7 @@ async def my_pending_items(
         await db.execute(
             select(func.count())
             .select_from(Execution)
-            .where(Execution.status == "pending_approval")
+            .where(Execution.status == "awaiting_approval")
         )
     ).scalar() or 0
 

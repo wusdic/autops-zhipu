@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common.auth_dependency import require_admin
 from app.common.response import Response, paginate, success
 from app.common.crud_service import model_to_dict
 from app.infra.database import get_db
@@ -16,7 +17,21 @@ from app.domains.config.schemas import (
 )
 
 router = APIRouter(prefix="/configs", tags=["配置中心"])
-cred_router = APIRouter(prefix="/credentials", tags=["凭证管理"])
+# 凭证管理属敏感操作：全量挂载 require_admin，且响应永不返回密文字段。
+cred_router = APIRouter(
+    prefix="/credentials", tags=["凭证管理"], dependencies=[Depends(require_admin)]
+)
+
+# 凭证响应中必须剔除的敏感字段（密文/原始密钥材料）。
+_CRED_SENSITIVE_FIELDS = ("encrypted_data", "data", "secret", "private_key", "password")
+
+
+def _cred_dict(cred) -> dict:
+    """凭证转 DTO：剔除密文/敏感字段，仅保留元数据."""
+    d = model_to_dict(cred)
+    for f in _CRED_SENSITIVE_FIELDS:
+        d.pop(f, None)
+    return d
 
 
 def _get_service(db: AsyncSession = Depends(get_db)) -> ConfigService:
@@ -104,7 +119,7 @@ async def list_credentials(
     svc: ConfigService = Depends(_get_service),
 ):
     items, total = await svc.list_credentials(cred_type, page, page_size)
-    return paginate([model_to_dict(i) for i in items], total, page, page_size)
+    return paginate([_cred_dict(i) for i in items], total, page, page_size)
 
 
 @cred_router.post("")
@@ -113,13 +128,13 @@ async def create_credential(data: CredentialCreate, svc: ConfigService = Depends
         name=data.name, cred_type=data.cred_type,
         data=data.data, description=data.description,
     )
-    return success(model_to_dict(cred))
+    return success(_cred_dict(cred))
 
 
 @cred_router.get("/{cred_id}")
 async def get_credential(cred_id: str, svc: ConfigService = Depends(_get_service)):
     cred = await svc.get_credential(cred_id)
-    return success(model_to_dict(cred))
+    return success(_cred_dict(cred))
 
 
 class CredentialUpdate(BaseModel):
@@ -133,7 +148,7 @@ async def update_credential(cred_id: str, body: CredentialUpdate, svc: ConfigSer
     cred = await svc.update_credential(
         cred_id, name=body.name, description=body.description, data=body.data
     )
-    return success(model_to_dict(cred))
+    return success(_cred_dict(cred))
 
 
 @cred_router.delete("/{cred_id}")

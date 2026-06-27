@@ -121,7 +121,7 @@ class SSHExecutor:
                 success=res.exit_status == 0,
                 exit_code=res.exit_status,
                 stdout=(res.stdout or "")[:10000],
-                stderr=((res.stderr or "")[:5000]) or None,
+                stderr=(res.stderr or "")[:5000],
                 started_at=started, completed_at=completed,
                 evidence={"host": asset.ip, "return_code": res.exit_status},
             )

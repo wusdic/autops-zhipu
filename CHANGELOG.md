@@ -4,6 +4,33 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.7.1] - 2026-06-27
+
+### 外部审查整改（第三轮）：闭环正确性 + 工程门禁 + 跨平台/契约修复
+
+> 逐条评估见 `docs/AUDIT_ADJUDICATION_2026-06-27.md`。本轮聚焦可独立验证、
+> 低风险的高确定性修复；执行队列化等架构级项已受理待办。
+
+#### Fixed — 阻断级
+- **P0-01 跨平台配置/迁移**：`config.py` YAML 读取显式 `encoding="utf-8"`；`alembic.ini` 注释改 ASCII（修 Windows/中文 locale 下 GBK 解码崩溃）
+- **P0-02 告警闭环**：告警规则命中先 `create_alert()` 落库再发布带真实 `alert_id` 的 `ALERT_CREATED`；删除 aiops 中重复的告警→策略、审批→执行 handler（消除双触发）
+- **P0-04 审批状态统一**：后端查询全部由 `pending_approval` 改为 canonical `awaiting_approval`（automation_extra/dashboard/platform_extra）
+- **P0-05 执行成功路径**：`stderr` 恒为字符串（去 `or None`，修 Pydantic 校验失败）
+- **P0-06 测试门禁**：`testpaths` 纳入 `app/domains`；修复领域测试对不存在的 `BLOCKED_COMMANDS` 的导入
+
+#### Fixed — 高危
+- **P1-01**：EventBus 复用业务事务时 outbox 持久化失败改为抛出（触发回滚），不再静默吞掉
+- **P1-05**：凭证接口挂 `require_admin`，响应剔除 `encrypted_data` 等密文字段
+- **P1-06**：备份占位文件标记为 `degraded`（不再冒充 completed）
+- **P1-10**：配置漂移检测改查全部版本绑定再比对最新发布版本；rollback 复用 publish 归档逻辑保证唯一 published
+- **P1-13**：旧 AIOps `_call_llm` 两处补 `Authorization: Bearer` 头
+
+#### Fixed — 中危
+- **P2-01**：加载 `app.yaml`（version/api_prefix/cors_origins/name）；version 统一为 `0.7.x`
+- **P2-02**：5 个 BaseSettings 由 `class Config` 迁移到 `SettingsConfigDict`
+- **P2-03**：分页 total 复用同一筛选条件（aiops/config/state 列表）
+- 可变默认 `{}` → `Field(default_factory=dict)`（ExecutionPlan/ExecutionResult）
+
 ## [0.7.0] - 2026-06-26
 
 ### 深度采集/巡检/报告闭环、生产执行器、平台功能补齐、前后端契约对齐

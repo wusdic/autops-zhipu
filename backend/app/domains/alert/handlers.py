@@ -62,16 +62,21 @@ async def on_event_created_match_rules(event: DomainEvent) -> None:
             logger.debug("alert: 事件创建缺少event_type/asset_id, 跳过规则匹配")
             return
 
+        import json as _json
+
         from app.infra.database import async_session_factory
         from app.domains.alert.service import AlertService
         from app.common.events import AlertEvents as _AE
 
         from app.common.jsonutil import parse_json_field
 
+        # 规则命中必须先落库 Alert，再发布带真实 alert_id 的 ALERT_CREATED 事件，
+        # 否则下游（策略/AI/通知）拿到的是空 alert_id 的"虚拟告警"，关联查询断裂、
+        # 告警列表也查不到这些规则触发的告警。
+        matched_alerts: list[dict] = []
         async with async_session_factory() as session:
             svc = AlertService(session)
             rules = await svc.list_rules(enabled=True)
-            matched_alerts = []
             for rule in rules:
                 # event_types / asset_ids 以 JSON 字符串存储，需解析后再匹配，
                 # 否则 isinstance(..., list) 恒为 False，导致规则过滤条件失效。
@@ -84,16 +89,27 @@ async def on_event_created_match_rules(event: DomainEvent) -> None:
                 type_match = event_type in rule_types or not rule_types
                 asset_match = asset_id in rule_assets if rule_assets else True
                 if type_match and asset_match:
+                    asset_list = [asset_id] if asset_id else []
+                    alert = await svc.create_alert(
+                        title=f"[规则触发] {rule.name}",
+                        severity=rule.severity,
+                        rule_id=str(rule.id),
+                        event_ids=_json.dumps([event.event_id]),
+                        asset_ids=_json.dumps(asset_list),
+                        context=_json.dumps(payload, ensure_ascii=False, default=str),
+                    )
                     matched_alerts.append(
                         {
-                            "title": f"[规则触发] {rule.name}",
-                            "severity": rule.severity,
+                            "alert_id": str(alert.id),
+                            "title": alert.title,
+                            "severity": alert.severity,
                             "rule_id": str(rule.id),
                             "event_ids": [event.event_id],
-                            "asset_ids": [asset_id] if asset_id else [],
+                            "asset_ids": asset_list,
                             "context": payload,
                         }
                     )
+            await session.commit()
 
         if matched_alerts:
             bus = get_event_bus()
@@ -107,7 +123,7 @@ async def on_event_created_match_rules(event: DomainEvent) -> None:
                         correlation_id=event.correlation_id or event.event_id,
                     )
                 )
-            logger.info("alert: 事件创建匹配到 %d 条告警规则", len(matched_alerts))
+            logger.info("alert: 事件创建匹配并落库 %d 条告警", len(matched_alerts))
         else:
             logger.debug("alert: 事件创建未匹配到告警规则 event_type=%s", event_type)
     except Exception as e:

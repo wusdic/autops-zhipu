@@ -15,7 +15,7 @@ from typing import ClassVar, Literal
 
 import yaml
 from pydantic import AliasChoices, Field, field_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 def _detect_config_dir() -> Path:
@@ -37,7 +37,9 @@ _CONFIG_DIR = _detect_config_dir()
 def _load_yaml(filename: str) -> dict:
     filepath = _CONFIG_DIR / filename
     if filepath.exists():
-        with open(filepath) as f:
+        # 显式 UTF-8：配置文件含中文注释，Windows/中文 locale 默认 GBK 会触发
+        # UnicodeDecodeError，导致配置/迁移命令在该环境下不可用。
+        with open(filepath, encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
     return {}
 
@@ -71,8 +73,7 @@ class DatabaseConfig(BaseSettings):
             return f"{base_url}?charset=utf8mb4"
         return base_url
 
-    class Config:
-        env_prefix = "DB_"
+    model_config = SettingsConfigDict(env_prefix="DB_")
 
 
 class RedisConfig(BaseSettings):
@@ -90,8 +91,7 @@ class RedisConfig(BaseSettings):
         auth = f":{self.redis_pass}@" if self.redis_pass else ""
         return f"redis://{auth}{self.host}:{self.port}/{self.db}"
 
-    class Config:
-        env_prefix = "REDIS_"
+    model_config = SettingsConfigDict(env_prefix="REDIS_")
 
 
 class SecurityConfig(BaseSettings):
@@ -145,8 +145,7 @@ class SecurityConfig(BaseSettings):
             raise ValueError("JWT_SECRET must be at least 32 characters in production")
         return v
 
-    class Config:
-        env_prefix = "SECURITY_"
+    model_config = SettingsConfigDict(env_prefix="SECURITY_")
 
 
 class LLMConfig(BaseSettings):
@@ -157,13 +156,12 @@ class LLMConfig(BaseSettings):
     max_tokens: int = 1024
     temperature: float = 0.2
 
-    class Config:
-        env_prefix = "LLM_"
+    model_config = SettingsConfigDict(env_prefix="LLM_")
 
 
 class AppConfig(BaseSettings):
     app_name: str = "AUTOPS"
-    version: str = "0.5.0"
+    version: str = "0.7.0"
     api_prefix: str = "/api/v1"
     cors_origins: list[str] = Field(default_factory=lambda: ["*"])
     config_dir: str = str(_CONFIG_DIR)
@@ -212,6 +210,24 @@ class AppConfig(BaseSettings):
                     continue
                 setattr(obj, k, v)
 
+        # --- app.yaml 顶层配置（version / api_prefix / cors_origins / name）---
+        # 此前未加载，导致 app.yaml 内容失效、version 永远是代码默认值。
+        app_yaml = _load_yaml("app.yaml").get("app", {})
+        if isinstance(app_yaml, dict):
+            _app_field_map = {
+                "name": "app_name",
+                "version": "version",
+                "api_prefix": "api_prefix",
+                "cors_origins": "cors_origins",
+            }
+            for yk, field in _app_field_map.items():
+                if yk not in app_yaml:
+                    continue
+                env_key = ("AUTOPS_" + field).upper()
+                if env_key in os.environ:
+                    continue
+                setattr(self, field, app_yaml[yk])
+
         # --- Production hardening (applied after all config sources) ---
         if self.env == "prod":
             if self.cors_origins == ["*"]:
@@ -228,8 +244,7 @@ class AppConfig(BaseSettings):
                         "enable_scheduler is not allowed in API process (production); use worker"
                     )
 
-    class Config:
-        env_prefix = "AUTOPS_"
+    model_config = SettingsConfigDict(env_prefix="AUTOPS_")
 
 
 @lru_cache

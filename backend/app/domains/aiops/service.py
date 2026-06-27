@@ -19,6 +19,17 @@ logger = logging.getLogger(__name__)
 from app.domains.aiops.schemas import AIAnalysisRequest, AIFeedback
 
 
+def _llm_headers(config) -> dict:
+    """构造 LLM 请求头：配置了 api_key 时附带 Bearer 鉴权.
+
+    智谱/兼容 OpenAI 的服务通常要求 Authorization；此前传统 AIOps 链路漏带导致 401。
+    """
+    api_key = getattr(getattr(config, "llm", None), "api_key", "") or ""
+    if api_key:
+        return {"Authorization": f"Bearer {api_key}"}
+    return {}
+
+
 class AIOpsService:
     """AIops 业务逻辑."""
 
@@ -106,6 +117,7 @@ class AIOpsService:
                         "temperature": 0.3,
                         "max_tokens": 1024,
                     },
+                    headers=_llm_headers(config),
                 )
                 if resp.status_code == 200:
                     content = resp.json()["choices"][0]["message"]["content"]
@@ -145,13 +157,14 @@ class AIOpsService:
         page_size: int = 20,
     ):
         stmt = select(AIAnalysis)
+        count_stmt = select(func.count()).select_from(AIAnalysis)
         if analysis_type:
             stmt = stmt.where(AIAnalysis.analysis_type == analysis_type)
+            count_stmt = count_stmt.where(AIAnalysis.analysis_type == analysis_type)
         if status:
             stmt = stmt.where(AIAnalysis.status == status)
-        total_result = await self.session.execute(
-            select(func.count()).select_from(AIAnalysis)
-        )
+            count_stmt = count_stmt.where(AIAnalysis.status == status)
+        total_result = await self.session.execute(count_stmt)
         total = total_result.scalar() or 0
         result = await self.session.execute(
             stmt.order_by(AIAnalysis.created_at.desc())
@@ -293,6 +306,7 @@ class AIOpsService:
                         "temperature": 0.3,
                         "max_tokens": 1024,
                     },
+                    headers=_llm_headers(config),
                 )
                 if resp.status_code == 200:
                     content = resp.json()["choices"][0]["message"]["content"]

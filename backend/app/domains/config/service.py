@@ -46,15 +46,19 @@ class ConfigService:
     async def list_definitions(
         self, config_type: str | None = None, page: int = 1, page_size: int = 20
     ):
+        from sqlalchemy import func
+
         stmt = select(ConfigDefinition).where(ConfigDefinition.is_deleted == False)
-        if config_type:
-            stmt = stmt.where(ConfigDefinition.config_type == config_type)
-        stmt = stmt.order_by(ConfigDefinition.created_at.desc())
-        total_result = await self.session.execute(
-            select(__import__("sqlalchemy").func.count())
+        count_stmt = (
+            select(func.count())
             .select_from(ConfigDefinition)
             .where(ConfigDefinition.is_deleted == False)
         )
+        if config_type:
+            stmt = stmt.where(ConfigDefinition.config_type == config_type)
+            count_stmt = count_stmt.where(ConfigDefinition.config_type == config_type)
+        stmt = stmt.order_by(ConfigDefinition.created_at.desc())
+        total_result = await self.session.execute(count_stmt)
         total = total_result.scalar() or 0
         result = await self.session.execute(
             stmt.offset((page - 1) * page_size).limit(page_size)
@@ -173,17 +177,19 @@ class ConfigService:
             )
         )
         max_ver = result.scalar() or 0
-        # 创建新版本（内容从目标版本复制）
+        # 创建新版本（内容从目标版本复制），先置 draft，再复用 publish_version 的
+        # 归档逻辑发布——保证同一 definition 只有一个 published 版本（修复回滚后
+        # 可能出现多个 published 的问题）。
         new_version = ConfigVersion(
             definition_id=definition_id,
             version=max_ver + 1,
             content=target.content,
-            status="published",
+            status="draft",
         )
         self.session.add(new_version)
         await self.session.flush()
         await self.session.refresh(new_version)
-        return new_version
+        return await self.publish_version(str(new_version.id), user_id)
 
     async def detect_drift(self, definition_id: str) -> dict:
         """检测配置漂移."""
@@ -204,11 +210,20 @@ class ConfigService:
                 "has_drift": False,
                 "message": "无已发布版本",
             }
-        # 获取所有绑定
-        result = await self.session.execute(
-            select(ConfigBinding).where(ConfigBinding.version_id == latest.id)
+        # 获取该 definition 下所有版本的绑定（而非只查已绑定到最新版本的绑定——
+        # 后者逻辑上永远查不出漂移）。再逐个与最新发布版本比较。
+        ver_ids_result = await self.session.execute(
+            select(ConfigVersion.id).where(
+                ConfigVersion.definition_id == definition_id
+            )
         )
-        bindings = result.scalars().all()
+        ver_ids = [str(v) for v in ver_ids_result.scalars().all()]
+        bindings = []
+        if ver_ids:
+            result = await self.session.execute(
+                select(ConfigBinding).where(ConfigBinding.version_id.in_(ver_ids))
+            )
+            bindings = result.scalars().all()
         # 检查是否有绑定指向非最新版本（即存在漂移）
         drifted = []
         for binding in bindings:
@@ -251,15 +266,19 @@ class ConfigService:
     async def list_credentials(
         self, cred_type: str | None = None, page: int = 1, page_size: int = 20
     ):
+        from sqlalchemy import func
+
         stmt = select(Credential).where(Credential.is_deleted == False)
-        if cred_type:
-            stmt = stmt.where(Credential.cred_type == cred_type)
-        stmt = stmt.order_by(Credential.created_at.desc())
-        total_result = await self.session.execute(
-            select(__import__("sqlalchemy").func.count())
+        count_stmt = (
+            select(func.count())
             .select_from(Credential)
             .where(Credential.is_deleted == False)
         )
+        if cred_type:
+            stmt = stmt.where(Credential.cred_type == cred_type)
+            count_stmt = count_stmt.where(Credential.cred_type == cred_type)
+        stmt = stmt.order_by(Credential.created_at.desc())
+        total_result = await self.session.execute(count_stmt)
         total = total_result.scalar() or 0
         result = await self.session.execute(
             stmt.offset((page - 1) * page_size).limit(page_size)

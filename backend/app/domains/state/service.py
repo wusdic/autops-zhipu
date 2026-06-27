@@ -59,11 +59,13 @@ class StateService:
 
     async def get_changes(self, asset_id: str, state_type: str | None = None, page: int = 1, page_size: int = 20):
         stmt = select(StateChange).where(StateChange.asset_id == asset_id)
+        count_stmt = select(func.count()).select_from(StateChange).where(
+            StateChange.asset_id == asset_id
+        )
         if state_type:
             stmt = stmt.where(StateChange.state_type == state_type)
-        total_result = await self.session.execute(
-            select(func.count()).select_from(StateChange).where(StateChange.asset_id == asset_id)
-        )
+            count_stmt = count_stmt.where(StateChange.state_type == state_type)
+        total_result = await self.session.execute(count_stmt)
         total = total_result.scalar() or 0
         result = await self.session.execute(stmt.order_by(StateChange.created_at.desc()).offset((page-1)*page_size).limit(page_size))
         return list(result.scalars().all()), total
