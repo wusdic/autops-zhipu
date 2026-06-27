@@ -81,8 +81,7 @@
             <el-menu-item index="/alerts">告警列表</el-menu-item>
             <el-menu-item index="/alert-rules">告警规则</el-menu-item>
             <el-menu-item index="/alert-correlation">告警收敛</el-menu-item>
-            <el-menu-item index="/anomalies">异常总览</el-menu-item>
-            <el-menu-item index="/anomaly/list">异常列表</el-menu-item>
+            <el-menu-item index="/anomalies">异常中心</el-menu-item>
           </el-sub-menu>
 
           <!-- M5 分析中心 -->
@@ -372,8 +371,7 @@ const menuMap: Record<string, string> = {
   '/alerts': '告警列表',
   '/alert-rules': '告警规则',
   '/alert-correlation': '告警收敛',
-  '/anomalies': '异常总览',
-  '/anomaly/list': '异常列表',
+  '/anomalies': '异常中心',
   // M5 分析中心
   '/incident': '故障工作台',
   '/ai-diagnosis': 'AI 诊断',
@@ -472,7 +470,7 @@ const groupMap: Record<string, string> = {
   '/events': '监控告警',
   '/monitoring/log-sources': '监控告警', '/monitoring/config-facts': '监控告警',
   '/alerts': '监控告警', '/alert-rules': '监控告警', '/alert-correlation': '监控告警',
-  '/anomalies': '监控告警', '/anomaly/list': '监控告警',
+  '/anomalies': '监控告警',
   '/incident': '分析中心', '/ai-diagnosis': '分析中心', '/impact-analysis': '分析中心',
   '/risk-grading': '分析中心', '/response-suggestion': '分析中心', '/closure-verification': '分析中心',
   '/automation': '自动化中心', '/policies': '自动化中心', '/remediation-templates': '自动化中心',

@@ -69,8 +69,9 @@ const router = createRouter({
     { path: '/alerts/:id', name: 'alert-detail', component: () => import('@/features/monitoring-center/AlertDetailPage.vue'), meta: { module: 'M4', title: '告警详情' } },
     { path: '/alert-rules', name: 'alert-rules', component: () => import('@/features/monitoring-center/AlertRulePage.vue'), meta: { module: 'M4', title: '告警规则' } },
     { path: '/alert-correlation', name: 'alert-correlation', component: () => import('@/features/response-center/AlertCorrelationPage.vue'), meta: { module: 'M4', title: '告警收敛' } },
-    { path: '/anomalies', name: 'anomaly-overview', component: () => import('@/features/response-center/AnomalyOverviewPage.vue'), meta: { module: 'M4', title: '异常总览' } },
-    { path: '/anomaly/list', name: 'anomaly-list', component: () => import('@/features/response-center/AnomalyListPage.vue'), meta: { module: 'M4', title: '异常列表' } },
+    { path: '/anomalies', name: 'anomaly-center', component: () => import('@/features/response-center/AnomalyCenterPage.vue'), meta: { module: 'M4', title: '异常中心' } },
+    // 去重 C：异常列表已并入异常中心页"列表"tab，旧路径重定向保留外链/书签
+    { path: '/anomaly/list', redirect: '/anomalies?tab=list' },
     { path: '/anomaly/:id', name: 'anomaly-detail', component: () => import('@/features/response-center/AnomalyDetailPage.vue'), meta: { module: 'M4', title: '异常详情' } },
 
     // ============================================================
