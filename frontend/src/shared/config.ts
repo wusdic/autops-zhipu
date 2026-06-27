@@ -8,8 +8,12 @@ const defaultWsUrl = wsProtocol + '//' + window.location.host + '/api/v1/ws'
 export const APP_CONFIG = {
   /** localStorage 中存储 auth token 的 key */
   TOKEN_KEY: 'autops_token',
+  /** localStorage 中存储 refresh token 的 key */
+  REFRESH_TOKEN_KEY: 'autops_refresh_token',
   /** localStorage 中存储用户名的 key */
   USERNAME_KEY: 'username',
+  /** localStorage 中存储用户角色名数组的 key（用于前端体验级路由拦截） */
+  ROLES_KEY: 'autops_roles',
   /** API 基础路径（空字符串表示同域，走 Nginx 反代） */
   API_BASE_URL: import.meta.env.VITE_API_BASE_URL || '',
   /** API 请求超时（毫秒） */

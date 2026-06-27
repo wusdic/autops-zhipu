@@ -155,13 +155,22 @@ setup_database() {
         MYSQL_CMD="mysql -u root"
     fi
 
+    # 不再使用硬编码弱口令：优先取环境变量 DB_PASS，否则随机生成并打印一次。
+    APP_DB_PASS="${DB_PASS:-}"
+    if [ -z "$APP_DB_PASS" ]; then
+        APP_DB_PASS="$(head -c 18 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 24)"
+        warn "未提供 DB_PASS，已随机生成 autops 数据库口令（请妥善保存，仅显示一次）："
+        echo "    DB_PASS=${APP_DB_PASS}"
+    fi
+
     $MYSQL_CMD <<EOF
 CREATE DATABASE IF NOT EXISTS autops CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER IF NOT EXISTS 'autops'@'127.0.0.1' IDENTIFIED BY 'autops_2026';
+CREATE USER IF NOT EXISTS 'autops'@'127.0.0.1' IDENTIFIED BY '${APP_DB_PASS}';
+ALTER USER 'autops'@'127.0.0.1' IDENTIFIED BY '${APP_DB_PASS}';
 GRANT ALL PRIVILEGES ON autops.* TO 'autops'@'127.0.0.1';
 FLUSH PRIVILEGES;
 EOF
-    log "数据库配置完成"
+    log "数据库配置完成（口令来自 DB_PASS 环境变量或随机生成）"
 }
 
 # ============================================================
@@ -171,6 +180,17 @@ setup_redis() {
     log "配置 Redis..."
     if ! systemctl is-active --quiet redis 2>/dev/null && ! systemctl is-active --quiet redis-server 2>/dev/null; then
         systemctl start redis 2>/dev/null || systemctl start redis-server 2>/dev/null || warn "Redis 启动失败"
+    fi
+    # 安全提示：生产环境 Redis 必须设置 requirepass 或内网隔离。
+    if [ -n "${REDIS_PASS:-}" ]; then
+        REDIS_CONF="$(redis-cli CONFIG GET dir >/dev/null 2>&1 && echo ok || echo '')"
+        if redis-cli CONFIG SET requirepass "${REDIS_PASS}" >/dev/null 2>&1; then
+            log "已为 Redis 设置 requirepass（来自 REDIS_PASS）"
+        else
+            warn "无法自动设置 Redis requirepass，请手动在 redis.conf 配置 requirepass=${REDIS_PASS}"
+        fi
+    else
+        warn "未设置 REDIS_PASS：生产环境务必为 Redis 配置 requirepass 或仅绑定 127.0.0.1/内网"
     fi
 }
 

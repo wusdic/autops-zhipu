@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shlex
 from dataclasses import dataclass
 
@@ -126,6 +127,51 @@ class CommandPolicy:
             "docker start",
         }
     )
+
+    def evaluate_script(
+        self, script: str, allowed_paths: set[str] | None = None
+    ) -> CommandPolicyResult:
+        """对多行脚本逐行做硬性安全校验（SSH/远程执行共用）.
+
+        单命令策略 evaluate() 会因脚本中的换行/管道等 shell 结构整体拒绝，不适用于
+        合法多行脚本。这里对每一行做与 evaluate() 一致的"硬拦截"：高危命令、fork 炸弹、
+        危险重定向、rm -rf 系统路径、forbidden 路径写入。返回首个命中的拒绝结果，
+        全部通过则 allowed=True。
+        """
+        if not script or not script.strip():
+            return CommandPolicyResult(False, "low", "空命令", False)
+
+        # fork 炸弹（整体匹配）
+        if ":(){:|:&}" in script or "fork bomb" in script.lower():
+            return CommandPolicyResult(False, "critical", "检测到fork炸弹模式", True)
+
+        for raw_line in script.splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+            # 拆出该行涉及的命令段（按 shell 连接符切分），逐段取首词判断高危
+            for seg in re.split(r"&&|\|\||\||;", line):
+                seg = seg.strip()
+                if not seg:
+                    continue
+                first = seg.split()[0].split("/")[-1] if seg.split() else ""
+                if first in self.DANGEROUS_COMMANDS:
+                    return CommandPolicyResult(
+                        False, "critical", f"禁止执行高危命令: {first}", True
+                    )
+            # 危险重定向到系统关键路径
+            if ">" in line and any(p in line for p in self.FORBIDDEN_PATHS):
+                return CommandPolicyResult(
+                    False, "critical", "禁止写入系统关键路径", True
+                )
+            # rm -rf 系统路径
+            if "rm" in line and "-rf" in line:
+                for p in self.FORBIDDEN_PATHS:
+                    if p in line.split():
+                        return CommandPolicyResult(
+                            False, "critical", f"禁止递归删除系统路径: {p}", True
+                        )
+        return CommandPolicyResult(True, "medium", "脚本硬性校验通过", False)
 
     def evaluate(
         self, command: str, allowed_paths: set[str] | None = None

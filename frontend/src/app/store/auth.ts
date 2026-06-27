@@ -28,8 +28,9 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     isAuthenticated.value = false
     localStorage.removeItem(APP_CONFIG.TOKEN_KEY)
-    // 同时清理 username 缓存
+    // 同时清理 username / roles 缓存
     localStorage.removeItem(APP_CONFIG.USERNAME_KEY)
+    localStorage.removeItem(APP_CONFIG.ROLES_KEY)
   }
 
   /** 从后端 /auth/me 拉取用户信息（页面刷新后恢复 user 状态） */
@@ -51,6 +52,8 @@ export const useAuthStore = defineStore('auth', () => {
             typeof r === 'string' ? r : r?.name
           ).filter(Boolean),
         }
+        // 持久化角色名供路由守卫做体验级拦截（后端仍为权威授权）
+        localStorage.setItem(APP_CONFIG.ROLES_KEY, JSON.stringify(user.value.roles))
         isAuthenticated.value = true
         return user.value
       }

@@ -19,6 +19,44 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
+// ── refresh token 单飞（并发刷新只发一次请求）──
+let _refreshing: Promise<string | null> | null = null
+
+async function _doRefresh(): Promise<string | null> {
+  const refreshToken = localStorage.getItem(APP_CONFIG.REFRESH_TOKEN_KEY)
+  if (!refreshToken) return null
+  try {
+    // 用裸 axios 避免触发本拦截器递归
+    const resp = await axios.post(
+      APP_CONFIG.API_BASE_URL + '/api/v1/auth/refresh',
+      { refresh_token: refreshToken },
+      { headers: { 'Content-Type': 'application/json' } },
+    )
+    const d = resp.data?.data || resp.data
+    const newAccess = d?.access_token
+    if (newAccess) {
+      localStorage.setItem(APP_CONFIG.TOKEN_KEY, newAccess)
+      if (d.refresh_token) {
+        localStorage.setItem(APP_CONFIG.REFRESH_TOKEN_KEY, d.refresh_token)
+      }
+      return newAccess
+    }
+  } catch {
+    // 刷新失败 → 走登出流程
+  }
+  return null
+}
+
+function _redirectUnauthenticated(hadToken: boolean) {
+  localStorage.removeItem(APP_CONFIG.TOKEN_KEY)
+  localStorage.removeItem(APP_CONFIG.REFRESH_TOKEN_KEY)
+  const current = router.currentRoute.value
+  const publicNames = ['login', 'session-expired', 'forbidden']
+  if (!publicNames.includes(current.name as string)) {
+    router.push({ name: hadToken ? 'session-expired' : 'login' }).catch(() => {})
+  }
+}
+
 // 响应拦截：统一错误处理
 apiClient.interceptors.response.use(
   (response) => {
@@ -32,17 +70,28 @@ apiClient.interceptors.response.use(
     }
     return response
   },
-  (error) => {
-    if (error.response?.status === 401) {
+  async (error) => {
+    const status = error.response?.status
+    const original = error.config || {}
+    const isRefreshCall = (original.url || '').includes('/auth/refresh')
+
+    if (status === 401 && !original._retry && !isRefreshCall) {
       const hadToken = !!localStorage.getItem(APP_CONFIG.TOKEN_KEY)
-      localStorage.removeItem(APP_CONFIG.TOKEN_KEY)
-      // 会话中途失效（曾持有 token）→ 引导到会话过期页，体验优于直接弹回登录；
-      // 本就未登录 → 去登录页。已在公开页则不重复跳转，避免循环。
-      const current = router.currentRoute.value
-      const publicNames = ['login', 'session-expired', 'forbidden']
-      if (!publicNames.includes(current.name as string)) {
-        router.push({ name: hadToken ? 'session-expired' : 'login' }).catch(() => {})
+      const hasRefresh = !!localStorage.getItem(APP_CONFIG.REFRESH_TOKEN_KEY)
+      if (hasRefresh) {
+        original._retry = true
+        // 单飞：并发 401 共用同一次刷新
+        _refreshing = _refreshing || _doRefresh()
+        const newToken = await _refreshing
+        _refreshing = null
+        if (newToken) {
+          original.headers = original.headers || {}
+          original.headers.Authorization = 'Bearer ' + newToken
+          return apiClient(original)
+        }
       }
+      // 无 refresh token 或刷新失败 → 跳转
+      _redirectUnauthenticated(hadToken)
     }
     // 保留原始 axios error（含 response/status），调用方可访问 error.response?.data?.message
     const message = error.response?.data?.message || error.message || '网络错误'

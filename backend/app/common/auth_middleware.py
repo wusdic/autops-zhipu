@@ -65,7 +65,22 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if request.scope.get("type") == "websocket":
             return await call_next(request)
 
-        # 提取 Bearer token
+        from app.common.auth_state import is_user_active, resolve_api_key
+
+        # ── API Key 认证（X-API-Key）──
+        api_key = request.headers.get("X-API-Key", "")
+        if api_key:
+            resolved = await resolve_api_key(api_key)
+            if not resolved:
+                return _unauthorized("API Key 无效或已过期")
+            user_id, scopes = resolved
+            if not await is_user_active(user_id):
+                return _unauthorized("用户已被禁用或删除")
+            request.state.user_id = user_id
+            request.state.api_key_scopes = scopes
+            return await call_next(request)
+
+        # ── JWT 认证（Authorization: Bearer）──
         auth_header = request.headers.get("Authorization", "")
         if not auth_header.startswith("Bearer "):
             return _unauthorized("缺少认证 Token")
@@ -85,6 +100,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
         user_id = payload.get("sub")
         if not user_id:
             return _unauthorized("Token 中缺少用户标识")
+
+        # 校验用户当前状态：禁用/删除后未过期 token 立即失效（带 30s 缓存）
+        if not await is_user_active(user_id):
+            return _unauthorized("用户已被禁用或删除")
 
         # 注入到 request.state 供后续 handler 使用
         request.state.user_id = user_id

@@ -30,16 +30,13 @@ def _fail(reason: str, started: str) -> ExecutionResult:
 
 
 def _hard_blocked(command: str) -> str | None:
-    """仅拦截绝对高危：DANGEROUS_COMMANDS 首词 / fork 炸弹。返回拦截原因或 None."""
-    if ":(){:|:&}" in command or "fork bomb" in command.lower():
-        return "检测到 fork 炸弹模式"
-    first_line = next((ln.strip() for ln in command.splitlines() if ln.strip()), "")
-    if not first_line:
-        return "空命令"
-    exe = first_line.split()[0].split("/")[-1]
-    if exe in CommandPolicy.DANGEROUS_COMMANDS:
-        return f"禁止执行高危命令: {exe}"
-    return None
+    """对多行脚本逐行做硬性安全校验（与 local 执行器共用 CommandPolicy）。
+
+    返回拦截原因或 None。覆盖：高危命令(逐行逐段)、fork 炸弹、危险重定向、
+    rm -rf 系统路径——比此前只查首行更严格。
+    """
+    result = _policy.evaluate_script(command)
+    return None if result.allowed else result.reason
 
 
 class SSHExecutor:

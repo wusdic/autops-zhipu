@@ -28,6 +28,7 @@ import { ElMessage } from 'element-plus'
 import { setToken } from '@/app/router/guards'
 import { useAuthStore } from '@/app/store/auth'
 import apiClient from '@/shared/api/client'
+import { APP_CONFIG } from '@/shared/config'
 
 const router = useRouter()
 const loading = ref(false)
@@ -52,6 +53,10 @@ async function handleLogin() {
     if (data.data?.access_token) {
       setToken(data.data.access_token)
       authStore.setToken(data.data.access_token)
+      // 保存 refresh token，供 401 时静默刷新
+      if (data.data.refresh_token) {
+        localStorage.setItem(APP_CONFIG.REFRESH_TOKEN_KEY, data.data.refresh_token)
+      }
       if (data.data.user) {
         authStore.user = data.data.user
       }
