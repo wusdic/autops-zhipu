@@ -15,8 +15,9 @@ export const useTicketStore = defineStore('ticket', () => {
     loading.value = true
     try {
       const res = await ticketService.list(params)
-      tickets.value = res.data?.items || []
-      total.value = res.data?.total || 0
+      const payload = res.data?.data || {}
+      tickets.value = payload.items || []
+      total.value = payload.total || 0
     } finally {
       loading.value = false
     }
@@ -24,14 +25,14 @@ export const useTicketStore = defineStore('ticket', () => {
 
   async function fetchDetail(id: string) {
     const res = await ticketService.get(id)
-    currentTicket.value = res.data
-    return res.data
+    currentTicket.value = res.data?.data ?? null
+    return currentTicket.value
   }
 
   async function create(data: Record<string, any>) {
     const res = await ticketService.create(data)
     await fetchList()
-    return res.data
+    return res.data?.data
   }
 
   async function changeStatus(id: string, status: string, comment?: string) {

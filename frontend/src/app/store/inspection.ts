@@ -14,7 +14,7 @@ export const useInspectionStore = defineStore('inspection', () => {
     loading.value = true
     try {
       const res = await inspectionService.listTemplates(params)
-      templates.value = res.data?.items || []
+      templates.value = res.data?.data?.items || []
     } finally {
       loading.value = false
     }
@@ -24,7 +24,7 @@ export const useInspectionStore = defineStore('inspection', () => {
     loading.value = true
     try {
       const res = await inspectionService.listPlans(params)
-      plans.value = res.data?.items || []
+      plans.value = res.data?.data?.items || []
     } finally {
       loading.value = false
     }
@@ -34,7 +34,7 @@ export const useInspectionStore = defineStore('inspection', () => {
     loading.value = true
     try {
       const res = await inspectionService.listTasks(params)
-      tasks.value = res.data?.items || []
+      tasks.value = res.data?.data?.items || []
     } finally {
       loading.value = false
     }
@@ -44,7 +44,7 @@ export const useInspectionStore = defineStore('inspection', () => {
     loading.value = true
     try {
       const res = await inspectionService.listResults(params)
-      results.value = res.data?.items || []
+      results.value = res.data?.data?.items || []
     } finally {
       loading.value = false
     }
@@ -52,7 +52,7 @@ export const useInspectionStore = defineStore('inspection', () => {
 
   async function fetchOverview() {
     const res = await inspectionService.overview()
-    overview.value = res.data || {}
+    overview.value = res.data?.data || {}
   }
 
   return { templates, plans, tasks, results, overview, loading, fetchTemplates, fetchPlans, fetchTasks, fetchResults, fetchOverview }

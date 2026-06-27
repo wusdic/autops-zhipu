@@ -85,8 +85,11 @@ async def list_assets(
     business_system: str | None = None,
     environment: str | None = None,
     search: str | None = None,
+    keyword: str | None = None,
     svc: AssetService = Depends(_get_service),
 ):
+    # 兼容前端两种搜索参数名：部分资产选择器/页面发送 keyword，统一回落到 search，
+    # 否则该参数被 FastAPI 丢弃导致搜索不生效（前后端契约漂移）。
     items, total = await svc.list_assets(
         page=page,
         page_size=page_size,
@@ -95,7 +98,7 @@ async def list_assets(
         health_status=health_status,
         business_system=business_system,
         environment=environment,
-        search=search,
+        search=search or keyword,
     )
     return paginate([_to_dict(a) for a in items], total, page, page_size)
 

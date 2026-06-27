@@ -16,8 +16,9 @@ export const useAlertStore = defineStore('alert', () => {
     loading.value = true
     try {
       const res = await alertService.list(params)
-      alerts.value = res.data?.items || []
-      total.value = res.data?.total || 0
+      const payload = res.data?.data || {}
+      alerts.value = payload.items || []
+      total.value = payload.total || 0
     } finally {
       loading.value = false
     }
@@ -25,7 +26,7 @@ export const useAlertStore = defineStore('alert', () => {
 
   async function fetchStats() {
     const res = await alertService.stats()
-    stats.value = res.data || {}
+    stats.value = res.data?.data || {}
   }
 
   async function acknowledge(id: string) {

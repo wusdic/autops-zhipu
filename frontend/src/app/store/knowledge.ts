@@ -12,8 +12,9 @@ export const useKnowledgeStore = defineStore('knowledge', () => {
     loading.value = true
     try {
       const res = await knowledgeService.list(params)
-      articles.value = res.data?.items || []
-      total.value = res.data?.total || 0
+      const payload = res.data?.data || {}
+      articles.value = payload.items || []
+      total.value = payload.total || 0
     } finally {
       loading.value = false
     }
@@ -21,20 +22,20 @@ export const useKnowledgeStore = defineStore('knowledge', () => {
 
   async function fetchDetail(id: string) {
     const res = await knowledgeService.get(id)
-    currentArticle.value = res.data
-    return res.data
+    currentArticle.value = res.data?.data ?? null
+    return currentArticle.value
   }
 
   async function create(data: Record<string, any>) {
     const res = await knowledgeService.create(data)
     await fetchList()
-    return res.data
+    return res.data?.data
   }
 
   async function update(id: string, data: Record<string, any>) {
     const res = await knowledgeService.update(id, data)
     await fetchList()
-    return res.data
+    return res.data?.data
   }
 
   async function remove(id: string) {

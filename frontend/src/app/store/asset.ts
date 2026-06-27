@@ -18,8 +18,10 @@ export const useAssetStore = defineStore('asset', () => {
     loading.value = true
     try {
       const res = await assetService.list(params)
-      assets.value = res.data?.items || []
-      total.value = res.data?.total || 0
+      // 响应包裹为 {code,message,data:{items,total}}，须取 res.data.data
+      const payload = res.data?.data || {}
+      assets.value = payload.items || []
+      total.value = payload.total || 0
     } finally {
       loading.value = false
     }
@@ -27,20 +29,20 @@ export const useAssetStore = defineStore('asset', () => {
 
   async function fetchDetail(id: string) {
     const res = await assetService.get(id)
-    currentAsset.value = res.data
-    return res.data
+    currentAsset.value = res.data?.data ?? null
+    return currentAsset.value
   }
 
   async function create(data: Record<string, any>) {
     const res = await assetService.create(data)
     await fetchList()
-    return res.data
+    return res.data?.data
   }
 
   async function update(id: string, data: Record<string, any>) {
     const res = await assetService.update(id, data)
     await fetchList()
-    return res.data
+    return res.data?.data
   }
 
   async function remove(id: string) {

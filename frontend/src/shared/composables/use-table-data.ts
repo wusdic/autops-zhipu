@@ -2,7 +2,7 @@ import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 
 export function useTableData<T = any>(
-  fetchFn: (params: Record<string, any>) => Promise<{ data: { items: T[]; total: number } }>,
+  fetchFn: (params: Record<string, any>) => Promise<{ data: { data?: { items?: T[]; total?: number } } }>,
   options?: { immediate?: boolean; pageSize?: number }
 ) {
   const data = ref<T[]>([]) as any
@@ -16,8 +16,10 @@ export function useTableData<T = any>(
     loading.value = true
     try {
       const res = await fetchFn({ page: page.value, page_size: pageSize.value, ...filters.value })
-      data.value = res.data?.items || []
-      total.value = res.data?.total || 0
+      // 响应包裹为 {code,message,data:{items,total}}，须取 res.data.data
+      const payload = (res.data as any)?.data || {}
+      data.value = payload.items || []
+      total.value = payload.total || 0
     } catch (e: any) {
       ElMessage.error(e?.response?.data?.detail || '加载失败')
     } finally {

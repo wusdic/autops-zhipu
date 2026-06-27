@@ -14,7 +14,7 @@ export const useExecutionStore = defineStore('execution', () => {
     loading.value = true
     try {
       const res = await automationService.listExecutions(params)
-      executions.value = res.data?.items || []
+      executions.value = res.data?.data?.items || []
     } finally {
       loading.value = false
     }
@@ -22,8 +22,8 @@ export const useExecutionStore = defineStore('execution', () => {
 
   async function fetchDetail(id: string) {
     const res = await automationService.getExecution(id)
-    currentExecution.value = res.data
-    return res.data
+    currentExecution.value = res.data?.data ?? null
+    return currentExecution.value
   }
 
   async function fetchLogs(id: string, params?: Record<string, any>) {
@@ -46,7 +46,7 @@ export const useExecutionStore = defineStore('execution', () => {
     automationService
       .getExecutionLogs(executionId, { page: 1, page_size: 200 })
       .then((res) => {
-        const items = res.data?.items || []
+        const items = res.data?.data?.items || []
         for (const it of items) realtimeLogs.value.push(_formatLog(it))
       })
       .catch(() => { /* 日志非关键，忽略 */ })
