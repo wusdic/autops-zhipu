@@ -77,13 +77,14 @@ const router = createRouter({
     // ============================================================
     // M5 分析中心
     // ============================================================
-    { path: '/incident', name: 'incident', component: () => import('@/features/response-center/IncidentResponsePage.vue'), meta: { module: 'M5', title: '故障工作台' } },
+    // 去重 B1/B2：分析中心 5 个单步页收敛为故障工作台内 tab，菜单只留一个入口
+    { path: '/incident', name: 'incident', component: () => import('@/features/response-center/IncidentWorkbenchPage.vue'), meta: { module: 'M5', title: '故障工作台' } },
     { path: '/incident/:alertId', name: 'incident-detail', component: () => import('@/features/response-center/IncidentResponsePage.vue'), meta: { module: 'M5', title: '故障处置详情' } },
-    { path: '/ai-diagnosis', name: 'ai-diagnosis-panel', component: () => import('@/features/response-center/AiDiagnosisPanelPage.vue'), meta: { module: 'M5', title: 'AI 诊断' } },
-    { path: '/impact-analysis', name: 'impact-analysis', component: () => import('@/features/response-center/ImpactAnalysisPage.vue'), meta: { module: 'M5', title: '影响分析' } },
-    { path: '/risk-grading', name: 'risk-grading', component: () => import('@/features/response-center/RiskGradingPage.vue'), meta: { module: 'M5', title: '风险分级' } },
-    { path: '/response-suggestion', name: 'response-suggestion', component: () => import('@/features/response-center/ResponseSuggestionPage.vue'), meta: { module: 'M5', title: '处置建议' } },
-    { path: '/closure-verification', name: 'closure-verification', component: () => import('@/features/response-center/ClosureVerificationPage.vue'), meta: { module: 'M5', title: '关闭验证' } },
+    { path: '/ai-diagnosis', redirect: '/incident?tab=ai' },
+    { path: '/impact-analysis', redirect: '/incident?tab=impact' },
+    { path: '/risk-grading', redirect: '/incident?tab=risk' },
+    { path: '/response-suggestion', redirect: '/incident?tab=suggestion' },
+    { path: '/closure-verification', redirect: '/incident?tab=closure' },
 
     // ============================================================
     // M6 自动化中心

@@ -88,5 +88,25 @@
 3. **B1/B2**（M5 分析中心 + AI 诊断）—— 入口最杂乱，收敛后主菜单显著变清爽。
 4. B3/B4 → C 异常总览/列表 → 其余总览精简。
 
-> 说明：本文件仅为排查与建议，未改动任何页面/路由。确认取舍方案后再实施（A1/A2 改动局限于
-> `router/index.ts` + `MainLayout.vue` + 少量页面，风险低；B1/B2 涉及交互重构，建议单独排期）。
+---
+
+## 实施进度（2026-06-27 更新）
+
+| 项 | 状态 | 实现 |
+|---|---|---|
+| A1 发现结果 | ✅ 已完成 | 删菜单项；`/resources/discovery-results` → redirect `?tab=results`；退役 DiscoveryResultPage |
+| A2 配置总览 | ✅ 已完成（方案①） | 总览瘦身为统计+入口卡片，5 个独立配置页为唯一实现 |
+| A3 巡检报告 | ✅ 历史已去重 | `/inspection-report` redirect |
+| B1 M5 分析中心 | ✅ 已完成 | 新增 IncidentWorkbenchPage，5 单步页收敛为 6 tab；菜单只留"故障工作台"；5 旧路径 redirect |
+| B2 AI 诊断入口 | ✅ 部分完成 | `/ai-diagnosis` 并入工作台（B1）；`/ai-assistant` 保留；`/aiops`（AI诊断记录）保留为知识库历史，未跨模块强并 |
+| B3 人工确认/处置台 | ✅ 已完成 | 新增 ManualWorkbenchPage（待确认/待处置 两 tab）；`/manual-confirm` redirect |
+| B4 状态快照/变化 | ✅ 已完成 | 新增 StateMonitorPage（当前快照/变更历史 两 tab）；`/monitoring/state-changes` redirect |
+| C 异常总览/列表 | ✅ 已完成 | 新增 AnomalyCenterPage（总览/列表 两 tab）；`/anomaly/list` redirect |
+| B5 日志三页 | — 不合并 | 职责不同，保留 |
+| B6 报告生成/导出中心 | ⏳ 待核对边界 | 未动 |
+| C 其余总览+列表 | ⏳ 可选 | 巡检/监控/工单/知识/报表/自动化/资源总览未动 |
+
+**统一实现模式**：被合并页加 `embedded` prop（嵌入时隐藏自身页头），宿主页用 `el-tabs`（`lazy`）承载；
+旧路径一律 `redirect` 到宿主 `?tab=xxx` 保留外链/书签。
+
+> 验证：本环境无 node_modules，未跑 vue-tsc/vite build，须 CI 复核。

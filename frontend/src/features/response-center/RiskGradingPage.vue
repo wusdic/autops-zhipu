@@ -1,7 +1,7 @@
 <template>
   <div class="autops-page-container">
     <div class="autops-page-header">
-      <div class="autops-page-title">风险分级</div>
+      <div class="autops-page-title" v-if="!embedded">风险分级</div>
       <div>
         <el-select v-model="riskFilter" placeholder="风险级别" style="width: 120px; margin-right: 8px" clearable @change="fetchData">
           <el-option label="高风险" value="high" />
@@ -140,6 +140,8 @@
 import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { Refresh, Download } from '@element-plus/icons-vue'
+
+defineProps<{ embedded?: boolean }>()
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 import { riskLabel as riskLabelFn, riskTag as riskTagFn } from '@/shared/utils/labels'

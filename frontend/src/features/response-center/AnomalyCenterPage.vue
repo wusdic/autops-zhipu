@@ -9,10 +9,10 @@
     </div>
 
     <el-tabs v-model="activeTab" class="anomaly-center-tabs">
-      <el-tab-pane label="总览" name="overview">
+      <el-tab-pane label="总览" name="overview" lazy>
         <AnomalyOverviewPage embedded />
       </el-tab-pane>
-      <el-tab-pane label="列表" name="list">
+      <el-tab-pane label="列表" name="list" lazy>
         <AnomalyListPage embedded />
       </el-tab-pane>
     </el-tabs>

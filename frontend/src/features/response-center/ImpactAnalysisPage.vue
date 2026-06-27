@@ -1,6 +1,6 @@
 <template>
   <div class="p-6">
-    <div class="autops-page-header">
+    <div class="autops-page-header" v-if="!embedded">
       <div class="autops-page-title">影响分析</div>
     </div>
 
@@ -193,6 +193,8 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { anomalyService } from '@/shared/api'
+
+defineProps<{ embedded?: boolean }>()
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

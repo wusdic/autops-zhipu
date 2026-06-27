@@ -9,10 +9,10 @@
     </div>
 
     <el-tabs v-model="activeTab" class="manual-workbench-tabs">
-      <el-tab-pane label="待确认" name="confirm">
+      <el-tab-pane label="待确认" name="confirm" lazy>
         <ManualConfirmPage embedded />
       </el-tab-pane>
-      <el-tab-pane label="待处置" name="handling">
+      <el-tab-pane label="待处置" name="handling" lazy>
         <ManualHandlingPage embedded />
       </el-tab-pane>
     </el-tabs>

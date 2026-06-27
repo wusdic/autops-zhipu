@@ -90,11 +90,6 @@
               <el-icon><Opportunity /></el-icon><span>分析中心</span>
             </template>
             <el-menu-item index="/incident">故障工作台</el-menu-item>
-            <el-menu-item index="/ai-diagnosis">AI 诊断</el-menu-item>
-            <el-menu-item index="/impact-analysis">影响分析</el-menu-item>
-            <el-menu-item index="/risk-grading">风险分级</el-menu-item>
-            <el-menu-item index="/response-suggestion">处置建议</el-menu-item>
-            <el-menu-item index="/closure-verification">关闭验证</el-menu-item>
           </el-sub-menu>
 
           <!-- M6 自动化中心 -->
@@ -374,11 +369,6 @@ const menuMap: Record<string, string> = {
   '/anomalies': '异常中心',
   // M5 分析中心
   '/incident': '故障工作台',
-  '/ai-diagnosis': 'AI 诊断',
-  '/impact-analysis': '影响分析',
-  '/risk-grading': '风险分级',
-  '/response-suggestion': '处置建议',
-  '/closure-verification': '关闭验证',
   // M6 自动化中心
   '/automation': '自动化总览',
   '/policies': '策略管理',
@@ -471,8 +461,7 @@ const groupMap: Record<string, string> = {
   '/monitoring/log-sources': '监控告警', '/monitoring/config-facts': '监控告警',
   '/alerts': '监控告警', '/alert-rules': '监控告警', '/alert-correlation': '监控告警',
   '/anomalies': '监控告警',
-  '/incident': '分析中心', '/ai-diagnosis': '分析中心', '/impact-analysis': '分析中心',
-  '/risk-grading': '分析中心', '/response-suggestion': '分析中心', '/closure-verification': '分析中心',
+  '/incident': '分析中心',
   '/automation': '自动化中心', '/policies': '自动化中心', '/remediation-templates': '自动化中心',
   '/scripts': '自动化中心', '/playbooks': '自动化中心', '/approvals': '自动化中心',
   '/executions': '自动化中心', '/rollback-center': '自动化中心', '/execution-locks': '自动化中心',

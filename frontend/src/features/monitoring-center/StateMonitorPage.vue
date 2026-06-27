@@ -9,10 +9,10 @@
     </div>
 
     <el-tabs v-model="activeTab" class="state-monitor-tabs">
-      <el-tab-pane label="当前快照" name="snapshot">
+      <el-tab-pane label="当前快照" name="snapshot" lazy>
         <StateSnapshotPage embedded />
       </el-tab-pane>
-      <el-tab-pane label="变更历史" name="changes">
+      <el-tab-pane label="变更历史" name="changes" lazy>
         <StateChangePage embedded />
       </el-tab-pane>
     </el-tabs>
