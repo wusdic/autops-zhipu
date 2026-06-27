@@ -154,6 +154,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
 import { reportService } from '@/shared/api'
+import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 
 const router = useRouter()
 
@@ -183,19 +184,8 @@ function formatTime(val: string | null | undefined): string {
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
-function statusType(s: string): TagType {
-  const map: Record<string, string> = {
-    pending: 'info', generating: 'warning', completed: 'success', failed: 'danger',
-  }
-  return (map[s] || 'info') as TagType
-}
-
-function statusLabel(s: string): string {
-  const map: Record<string, string> = {
-    pending: '等待中', generating: '生成中', completed: '已完成', failed: '失败',
-  }
-  return map[s] || s || '-'
-}
+const statusType = (s: string): TagType => taskStatusTag(s) as TagType
+const statusLabel = (s: string): string => taskStatusLabel(s)
 
 function progressStatus(status: string): '' | 'success' | 'exception' | undefined {
   if (status === 'completed') return 'success'

@@ -153,6 +153,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { Reading, Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { knowledgeService } from '@/shared/api'
+import { knowledgeStatusLabel, knowledgeStatusTag } from '@/shared/utils/labels'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
@@ -189,25 +190,8 @@ const sortBy = ref('submitted_at')
 const sortOrder = ref<string>('desc')
 
 // ─── Helpers ─────────────────────────────────────────────────────────
-function statusLabel(status: string): string {
-  const map: Record<string, string> = {
-    draft: '草稿',
-    pending_review: '待审核',
-    published: '已发布',
-    rejected: '已驳回',
-  }
-  return map[status] || status || '-'
-}
-
-function statusTagType(status: string): TagType {
-  const map: Record<string, string> = {
-    draft: 'info',
-    pending_review: 'warning',
-    published: 'success',
-    rejected: 'danger',
-  }
-  return (map[status] || 'info') as TagType
-}
+const statusLabel = (status: string): string => knowledgeStatusLabel(status)
+const statusTagType = (status: string): TagType => knowledgeStatusTag(status) as TagType
 
 function categoryLabel(cat: string): string {
   const map: Record<string, string> = {

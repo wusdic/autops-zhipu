@@ -145,6 +145,7 @@ import {
   Search,
 } from '@element-plus/icons-vue'
 import { reportService } from '@/shared/api'
+import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 
 const router = useRouter()
 
@@ -243,26 +244,10 @@ function typeLabel(t: string) {
 }
 
 // ── 状态映射 ──
-const statusMap: Record<string, { type: TagType; label: string }> = {
-  pending: { type: 'info', label: '待生成' },
-  queued: { type: 'info', label: '队列中' },
-  generating: { type: 'warning', label: '生成中' },
-  running: { type: 'warning', label: '生成中' },
-  in_progress: { type: 'warning', label: '生成中' },
-  completed: { type: 'success', label: '已完成' },
-  success: { type: 'success', label: '已完成' },
-  failed: { type: 'danger', label: '生成失败' },
-  error: { type: 'danger', label: '生成失败' },
-  archived: { type: 'success', label: '已归档' },
-  cancelled: { type: 'info', label: '已取消' },
-}
-
-function statusType(status: string): TagType {
-  return (statusMap[status]?.type ?? 'info') as TagType
-}
-
+// 报表任务状态统一取自 labels.ts
+const statusType = (status: string): TagType => taskStatusTag(status) as TagType
 function statusLabel(status: string) {
-  return statusMap[status]?.label ?? status ?? '-'
+  return taskStatusLabel(status) ?? status ?? '-'
 }
 
 // ── 格式化工具 ──

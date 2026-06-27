@@ -174,6 +174,7 @@ import {
   Connection,
 } from '@element-plus/icons-vue'
 import { platformService } from '@/shared/api'
+import { checkResultTag, checkResultLabel } from '@/shared/utils/labels'
 
 // ── Categories ───────────────────────────────────────────
 const categories = [
@@ -238,15 +239,8 @@ function statusIcon(s: string) {
   return map[s] ?? Clock
 }
 
-function statusTagType(s: string): TagType {
-  const map: Record<string, string> = { ok: 'success', error: 'danger', warning: 'warning', pending: 'info' }
-  return (map[s] ?? 'info') as TagType
-}
-
-function statusLabel(s: string): string {
-  const map: Record<string, string> = { ok: '正常', error: '异常', warning: '警告', pending: '待检' }
-  return map[s] ?? s
-}
+const statusTagType = (s: string): TagType => checkResultTag(s) as TagType
+const statusLabel = (s: string): string => checkResultLabel(s)
 
 function formatTime(val: string | undefined): string {
   if (!val) return '-'

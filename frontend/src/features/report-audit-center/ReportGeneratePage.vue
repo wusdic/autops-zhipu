@@ -156,6 +156,7 @@ import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Document } from '@element-plus/icons-vue'
 import { reportService } from '@/shared/api'
+import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 
 const route = useRoute()
 const router = useRouter()
@@ -198,19 +199,8 @@ function typeLabel(t: string): string {
   return map[t] || t || '-'
 }
 
-function statusType(s: string): TagType {
-  const map: Record<string, string> = {
-    pending: 'info', generating: 'warning', completed: 'success', failed: 'danger',
-  }
-  return (map[s] || 'info') as TagType
-}
-
-function statusLabel(s: string): string {
-  const map: Record<string, string> = {
-    pending: '等待中', generating: '生成中', completed: '已完成', failed: '失败',
-  }
-  return map[s] || s || '-'
-}
+const statusType = (s: string): TagType => taskStatusTag(s) as TagType
+const statusLabel = (s: string): string => taskStatusLabel(s)
 
 // ── Data Loading ───────────────────────────────────────────────────
 async function loadTemplates() {

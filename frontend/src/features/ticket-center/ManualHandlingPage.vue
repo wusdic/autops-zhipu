@@ -152,6 +152,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Plus, Refresh, ArrowLeft, Clock, Loading, CircleCheck, Timer } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import { priorityTag, priorityLabel as priorityLabelFn } from '@/shared/utils/labels'
 
 const router = useRouter()
 const loading = ref(false)
@@ -163,8 +164,8 @@ const stats = reactive({ pending: 0, in_progress: 0, completed_today: 0, avg_dur
 const filters = reactive({ status: '', priority: '', handler: ''})
 const pagination = reactive({ page: 1, size: 20, total: 0 })
 
-function priorityType(p: string): TagType { return ({ urgent: 'danger', high: 'warning', medium: 'primary', low: 'info' }[p] || 'info') as TagType }
-function priorityLabel(p: string) { return { urgent: '紧急', high: '高', medium: '中', low: '低' }[p] || p }
+const priorityType = (p: string): TagType => priorityTag(p) as TagType
+const priorityLabel = (p: string): string => priorityLabelFn(p)
 function statusType(s: string): TagType { return ({ pending: 'warning', in_progress: 'primary', completed: 'success', closed: 'info' }[s] || 'info') as TagType }
 function statusLabel(s: string) { return { pending: '待处置', in_progress: '进行中', completed: '已完成', closed: '已关闭' }[s] || s }
 

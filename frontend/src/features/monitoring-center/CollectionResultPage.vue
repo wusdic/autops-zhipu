@@ -134,6 +134,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
 import { monitoringService } from '@/shared/api'
+import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 
 // ── State ──────────────────────────────────────────────────────────
 const loading = ref(false)
@@ -171,23 +172,8 @@ function formatDuration(ms: number | null | undefined): string {
   return minutes + 'm' + remainSeconds + 's'
 }
 
-function statusTagType(status: string): TagType {
-  const map: Record<string, TagType> = {
-    success: 'success',
-    failed: 'danger',
-    timeout: 'warning',
-  }
-  return (map[status] || 'info') as TagType
-}
-
-function statusLabel(status: string): string {
-  const map: Record<string, string> = {
-    success: '成功',
-    failed: '失败',
-    timeout: '超时',
-  }
-  return map[status] || status
-}
+const statusTagType = (status: string): TagType => taskStatusTag(status) as TagType
+const statusLabel = (status: string): string => taskStatusLabel(status)
 
 function formatRawData(raw: any): string {
   if (!raw) return '-'

@@ -171,6 +171,7 @@ import {
   SuccessFilled,
 } from '@element-plus/icons-vue'
 import { monitoringService } from '@/shared/api'
+import { healthLabel as healthLabelFn } from '@/shared/utils/labels'
 
 // ── State ──────────────────────────────────────────────────────────
 const loading = ref(false)
@@ -208,14 +209,7 @@ function healthTagType(status: string): TagType {
   return (map[status] || 'info') as TagType
 }
 
-function healthLabel(status: string): string {
-  const map: Record<string, string> = {
-    healthy: '健康',
-    degraded: '降级',
-    down: '离线',
-  }
-  return map[status] || status
-}
+const healthLabel = (status: string): string => healthLabelFn(status)
 
 function rateClass(rate: number): string {
   if (rate >= 0.95) return 'rate-good'

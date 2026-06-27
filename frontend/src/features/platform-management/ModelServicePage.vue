@@ -177,6 +177,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import { serviceStatusLabel } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 
 const router = useRouter()
@@ -212,7 +213,7 @@ const formRules = {
   endpoint: [{ required: true, message: '请输入API地址', trigger: 'blur' }],
 }
 
-function statusLabel(s: string) { return { active: '正常', error: '异常', inactive: '未激活', testing: '测试中' }[s] || s }
+const statusLabel = (s: string): string => serviceStatusLabel(s)
 
 async function loadData() {
   loading.value = true

@@ -106,6 +106,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { taskStatusTag } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 
 const router = useRouter()
@@ -124,9 +125,7 @@ const typeLabels: Record<string, string> = {
 const statusLabels: Record<string, string> = {
   pending: '等待中', processing: '处理中', completed: '已完成', failed: '失败', cancelled: '已取消',
 }
-function statusType(s: string): TagType {
-  return ({ pending: 'warning', processing: 'primary', completed: 'success', failed: 'danger', cancelled: 'info' }[s] || 'info') as TagType
-}
+const statusType = (s: string): TagType => taskStatusTag(s) as TagType
 
 function formatSize(bytes: number) {
   if (bytes < 1024) return bytes + 'B'

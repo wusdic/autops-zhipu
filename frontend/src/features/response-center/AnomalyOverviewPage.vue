@@ -133,6 +133,9 @@ import {
   List,
 } from '@element-plus/icons-vue'
 import { anomalyService } from '@/shared/api'
+import {
+  severityTagType, severityLabel as severityLabelFn, anomalyStatusTag, anomalyStatusLabel,
+} from '@/shared/utils/labels'
 
 const router = useRouter()
 
@@ -209,47 +212,11 @@ const quickLinks = [
   },
 ]
 
-// ── 严重度映射 ──
-const severityMap: Record<string, { type: '' | 'success' | 'warning' | 'danger' | 'info'; label: string }> = {
-  critical: { type: 'danger', label: '严重' },
-  high: { type: 'danger', label: '高' },
-  major: { type: 'danger', label: '高' },
-  medium: { type: 'warning', label: '中' },
-  warning: { type: 'warning', label: '中' },
-  low: { type: 'info', label: '低' },
-  minor: { type: 'info', label: '低' },
-  info: { type: 'info', label: '信息' },
-}
-
-function severityType(severity: string): TagType {
-  return (severityMap[severity]?.type ?? 'info') as TagType
-}
-
-function severityLabel(severity: string) {
-  return severityMap[severity]?.label ?? severity ?? '-'
-}
-
-// ── 状态映射 ──
-const statusMap: Record<string, { type: '' | 'success' | 'warning' | 'danger' | 'info'; label: string }> = {
-  open: { type: 'danger', label: '待处理' },
-  pending: { type: 'danger', label: '待处理' },
-  new: { type: 'danger', label: '待处理' },
-  acknowledged: { type: 'warning', label: '已确认' },
-  processing: { type: 'warning', label: '处理中' },
-  in_progress: { type: 'warning', label: '处理中' },
-  resolved: { type: 'success', label: '已解决' },
-  closed: { type: 'success', label: '已关闭' },
-  escalated: { type: 'danger', label: '已升级' },
-  cancelled: { type: 'info', label: '已取消' },
-}
-
-function statusType(status: string): TagType {
-  return (statusMap[status]?.type ?? 'info') as TagType
-}
-
-function statusLabel(status: string) {
-  return statusMap[status]?.label ?? status ?? '-'
-}
+// 严重度/异常状态统一取自 labels.ts
+const severityType = (severity: string): TagType => severityTagType(severity) as TagType
+const severityLabel = (severity: string): string => severityLabelFn(severity)
+const statusType = (status: string): TagType => anomalyStatusTag(status) as TagType
+const statusLabel = (status: string): string => anomalyStatusLabel(status)
 
 // ── 格式化工具 ──
 function formatTime(val: string | null | undefined): string {

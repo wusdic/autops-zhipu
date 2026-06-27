@@ -246,6 +246,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
+import { taskStatusTag } from '@/shared/utils/labels'
 import { API as R } from '@/shared/api/routes'
 import { APP_CONFIG } from '@/shared/config'
 
@@ -328,15 +329,8 @@ const cronDescription = computed(() => {
 })
 
 // ── Helpers ────────────────────────────────────────────────
-function statusTagType(status: string): 'success' | 'warning' | 'danger' | 'info' {
-  switch (status) {
-    case 'completed': return 'success'
-    case 'creating':
-    case 'running': return 'warning'
-    case 'failed': return 'danger'
-    default: return 'info'
-  }
-}
+const statusTagType = (status: string): 'success' | 'warning' | 'danger' | 'info' =>
+  (taskStatusTag(status) || 'info') as 'success' | 'warning' | 'danger' | 'info'
 
 function formatSize(bytes: number | undefined): string {
   if (!bytes) return '—'

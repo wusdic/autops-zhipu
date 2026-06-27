@@ -150,14 +150,16 @@ export function knowledgeStatusTag(s: string): TagType { return pickTag(KNOWLEDG
 
 // ─── 通用任务/作业状态（报表/导出/巡检任务/采集结果等）───
 export const TASK_STATUS_MAP: Record<string, string> = {
-  pending: '待执行', queued: '排队中', generating: '生成中', running: '执行中',
-  processing: '处理中', in_progress: '处理中', completed: '已完成', success: '成功',
-  failed: '失败', error: '失败', cancelled: '已取消', timeout: '超时', archived: '已归档',
+  pending: '待执行', queued: '排队中', generating: '生成中', creating: '创建中',
+  running: '执行中', processing: '处理中', in_progress: '处理中', completed: '已完成',
+  success: '成功', failed: '失败', error: '失败', cancelled: '已取消',
+  timeout: '超时', archived: '已归档', degraded: '降级',
 }
 export const TASK_STATUS_TAG: Record<string, TagType> = {
-  pending: 'info', queued: 'info', generating: 'warning', running: 'warning',
-  processing: 'warning', in_progress: 'warning', completed: 'success', success: 'success',
-  failed: 'danger', error: 'danger', cancelled: 'info', timeout: 'danger', archived: 'success',
+  pending: 'info', queued: 'info', generating: 'warning', creating: 'warning',
+  running: 'warning', processing: 'warning', in_progress: 'warning', completed: 'success',
+  success: 'success', failed: 'danger', error: 'danger', cancelled: 'info',
+  timeout: 'danger', archived: 'success', degraded: 'warning',
 }
 export function taskStatusLabel(s: string): string { return pick(TASK_STATUS_MAP, s) }
 export function taskStatusTag(s: string): TagType { return pickTag(TASK_STATUS_TAG, s) }
