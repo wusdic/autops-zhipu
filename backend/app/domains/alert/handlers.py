@@ -35,11 +35,12 @@ def idempotent_handler(func):
         if key in _processed_events:
             logger.debug("alert: 跳过重复处理 key=%s", key)
             return
-        # LRU 淘汰：达上限时移除最旧的条目
+        # 先执行，成功后再登记幂等键：失败不登记，使 outbox 重试可重新执行。
+        result = await func(event)
         if len(_processed_events) >= _MAX_PROCESSED:
             _processed_events.popitem(last=False)
         _processed_events[key] = None
-        return await func(event)
+        return result
 
     wrapper.__name__ = func.__name__
     wrapper.__qualname__ = func.__qualname__

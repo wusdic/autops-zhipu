@@ -54,6 +54,7 @@ async def on_policy_triggered_create_execution(event: DomainEvent) -> None:
                 "asset_ids": asset_ids,
                 "trigger_source": "policy_triggered",
                 "policy_id": policy_id,
+                "policy_execution_id": payload.get("policy_execution_id"),
                 "alert_id": alert_id,
                 "is_dry_run": False,
                 "action_chain": action_chain,

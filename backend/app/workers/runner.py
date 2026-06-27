@@ -47,7 +47,13 @@ class WorkerRunner:
         from app.common.events import AssetEvents
         from app.workers.scheduler import on_asset_created_run_collection
         bus.subscribe(AssetEvents.ASSET_CREATED, on_asset_created_run_collection)
-        logger.info("WorkerRunner: outbox enabled, all handlers registered, asset_created→collection linked")
+
+        # 注册发现扫描请求 → 在 Worker 进程执行扫描（移出 API 进程，P1-07）
+        from app.domains.asset.discovery_service import on_discovery_scan_requested
+        bus.subscribe(
+            AssetEvents.DISCOVERY_SCAN_REQUESTED, on_discovery_scan_requested
+        )
+        logger.info("WorkerRunner: outbox enabled, handlers registered, asset_created→collection & discovery_scan→worker linked")
 
         # 2. 启动 OutboxConsumer
         from app.common.outbox import OutboxConsumer
@@ -78,6 +84,14 @@ class WorkerRunner:
             name="inspection-scheduler",
         ))
 
+        # 3.6 启动执行队列 Worker（领取 execution_queue 并真实执行）
+        from app.workers.execution_worker import ExecutionWorker
+        execution_worker = ExecutionWorker(lease_seconds=300, poll_interval=2.0)
+        self._tasks.append(asyncio.create_task(
+            execution_worker.run_forever(),
+            name="execution-worker",
+        ))
+
         # 4. 启动 heartbeat loop
         self._tasks.append(asyncio.create_task(
             self._heartbeat_loop(),
@@ -92,6 +106,7 @@ class WorkerRunner:
         outbox_consumer.stop()
         await scheduler.stop()
         await inspection_scheduler.stop()
+        execution_worker.stop()
         logger.info("WorkerRunner stopped")
 
     async def _heartbeat_loop(self) -> None:

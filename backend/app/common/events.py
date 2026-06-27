@@ -27,6 +27,18 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class EventDispatchError(Exception):
+    """一个或多个事件处理器执行失败 — 触发 outbox 重试."""
+
+    def __init__(self, event_type: str, errors: list[Exception]):
+        self.event_type = event_type
+        self.errors = errors
+        super().__init__(
+            f"{len(errors)} handler(s) failed for {event_type}: "
+            + "; ".join(str(e)[:200] for e in errors)
+        )
+
+
 class EventPriority(int, Enum):
     """事件优先级."""
 
@@ -168,21 +180,32 @@ class EventBus:
             await self.dispatch_to_handlers(event)
 
     async def dispatch_to_handlers(self, event: DomainEvent) -> None:
-        """仅触发已注册的处理器（由 OutboxConsumer 调用）."""
+        """仅触发已注册的处理器（由 OutboxConsumer 调用）.
+
+        任一 handler 抛异常时，记录后聚合抛出 EventDispatchError，使 OutboxConsumer
+        将该 outbox 事件按退避重试（已成功的 handler 由幂等保护在重试时跳过）。
+        注意：大多数领域 handler 内部自吞异常仅记日志（不会触发重试）；仅显式向上
+        抛出的关键 handler（如执行入队）才会驱动重试，从而避免静默丢任务。
+        """
         handlers = list(self._handlers.get(event.event_type, []))
         all_handlers = handlers + self._wildcard_handlers
 
+        errors: list[Exception] = []
         for handler in all_handlers:
             try:
                 result = handler(event)
                 if asyncio.iscoroutine(result):
                     await result
-            except Exception:
+            except Exception as exc:  # noqa: BLE001
                 logger.exception(
                     "EventBus handler %s failed for %s",
                     handler.__name__ if hasattr(handler, "__name__") else handler,
                     event.event_type,
                 )
+                errors.append(exc)
+
+        if errors:
+            raise EventDispatchError(event.event_type, errors)
 
     async def _persist_to_outbox(
         self, event: DomainEvent, session: AsyncSession | None = None
@@ -313,6 +336,8 @@ class AssetEvents:
     ASSET_DISCOVERED = "asset.discovered"
     ASSET_RELATION_ADDED = "asset.relation_added"
     ASSET_RELATION_REMOVED = "asset.relation_removed"
+    # 发现扫描请求 — 由 API 发出、Worker 进程执行（移出 API 进程）
+    DISCOVERY_SCAN_REQUESTED = "asset.discovery_scan_requested"
 
 
 class ConfigEvents:

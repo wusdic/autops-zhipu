@@ -17,8 +17,8 @@ from app.domains.asset.models import Asset
 
 logger = logging.getLogger(__name__)
 
-# 后台扫描任务句柄集合，防止未被强引用的 task 被 GC 回收（导致扫描无故消失）
-_background_scan_tasks: set[asyncio.Task] = set()
+# Worker 进程内运行的扫描任务句柄集合，防止 task 被 GC 回收
+_scan_tasks: set[asyncio.Task] = set()
 
 
 def _expand_ips(ip_range: str) -> list[str]:
@@ -56,16 +56,24 @@ def _expand_ips(ip_range: str) -> list[str]:
     return ips[:1024]  # 安全上限
 
 
+def _ping_args(ip: str, timeout: float) -> list[str]:
+    """按平台返回 ping 参数（Windows 与 *nix 不兼容）.
+
+    - Windows: ``ping -n 1 -w <ms> ip``（-w 单位毫秒）
+    - Linux/macOS: ``ping -c 1 -W <sec> ip``（-W 单位秒）
+    """
+    import platform
+
+    if platform.system().lower().startswith("win"):
+        return ["ping", "-n", "1", "-w", str(int(timeout * 1000)), ip]
+    return ["ping", "-c", "1", "-W", str(max(int(timeout), 1)), ip]
+
+
 async def _icmp_ping(ip: str, timeout: float = 2.0) -> bool:
-    """ICMP Ping检测."""
+    """ICMP Ping检测（跨平台参数）."""
     try:
         proc = await asyncio.create_subprocess_exec(
-            "ping",
-            "-c",
-            "1",
-            "-W",
-            str(int(timeout)),
-            ip,
+            *_ping_args(ip, timeout),
             stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.DEVNULL,
         )
@@ -146,7 +154,8 @@ def _guess_asset_type(open_ports: list[int]) -> str:
 
 
 class DiscoveryService:
-    def __init__(self, db: AsyncSession):
+    # _run_scan 内部自建 session，因此 Worker 侧可用 db=None 实例化
+    def __init__(self, db: AsyncSession | None = None):
         self.db = db
 
     async def create_task(self, data: dict) -> dict:
@@ -190,7 +199,7 @@ class DiscoveryService:
                 logger.exception("auto_onboard: 自动启动扫描失败 task=%s", task.id)
                 # 自启动失败不影响任务创建，用户仍可手动启动
 
-        # 重新查询以返回最新状态（start_task 已 commit 改为 running）
+        # 重新查询以返回最新状态（start_task 已将状态改为 running）
         await self.db.refresh(task)
         return model_to_dict(task)
 
@@ -209,13 +218,20 @@ class DiscoveryService:
         task.started_at = datetime.now(timezone.utc)
         task.error_message = None
         await self.db.flush()
-        # 显式 commit，确保 running 状态落库（_run_scan 用独立 session 查询）
-        await self.db.commit()
 
-        # 异步执行扫描，保存 task 句柄防 GC
-        scan_task = asyncio.create_task(self._run_scan(task_id))
-        _background_scan_tasks.add(scan_task)
-        scan_task.add_done_callback(_background_scan_tasks.discard)
+        # 不在 API 进程内跑扫描（多副本/重启会丢任务），改为发事件：
+        # status=running 与 scan_requested 事件复用同一事务原子落库，
+        # 由 Worker 进程的 on_discovery_scan_requested 领取执行（P1-07）。
+        bus = get_event_bus()
+        await bus.publish(
+            DomainEvent(
+                domain="asset",
+                event_type=AssetEvents.DISCOVERY_SCAN_REQUESTED,
+                payload={"task_id": task_id},
+                source="discovery_service",
+            ),
+            session=self.db,
+        )
         return {"task_id": task_id, "status": "running"}
 
     async def _run_scan(self, task_id: str) -> None:
@@ -544,3 +560,24 @@ class DiscoveryService:
             )
         )
         return asset
+
+
+# ---------------------------------------------------------------------------
+# Worker 进程事件处理器
+# ---------------------------------------------------------------------------
+
+
+async def on_discovery_scan_requested(event: DomainEvent) -> None:
+    """Worker：收到发现扫描请求 → 后台执行扫描（不阻塞 outbox 消费循环）。
+
+    扫描可能耗时较长，若在 OutboxConsumer 串行派发中同步执行会卡住事件消费，
+    因此在 Worker 进程内以 tracked task 运行；_run_scan 内部自建 session。
+    """
+    task_id = event.payload.get("task_id")
+    if not task_id:
+        return
+    svc = DiscoveryService()
+    t = asyncio.create_task(svc._run_scan(task_id))
+    _scan_tasks.add(t)
+    t.add_done_callback(_scan_tasks.discard)
+    logger.info("discovery: 已在 Worker 启动扫描 task=%s", task_id)

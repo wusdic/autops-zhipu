@@ -387,6 +387,22 @@ class AutomationService:
         self.session.add(step)
         await self.session.flush()
 
+    async def reset_for_retry(self, exec_id: str) -> None:
+        """把上一次崩溃残留的中间态执行重置为可重跑状态.
+
+        Worker 崩溃后租约过期会重投任务，但执行记录可能停在 running/dry_running，
+        run_execution 的状态守卫会拒绝。重投前把这些中间态回退到 pending/approved，
+        使重试可继续。
+        """
+        exe = await self.exec_repo.get_by_id(exec_id)
+        if not exe:
+            return
+        if exe.status in (ExecutionStatus.RUNNING, ExecutionStatus.DRY_RUNNING):
+            exe.status = (
+                ExecutionStatus.APPROVED if exe.approved_by else ExecutionStatus.PENDING
+            )
+            await self.session.flush()
+
     async def run_execution(self, exec_id: str) -> Execution:
         """执行脚本/命令 — 通过 Executor Adapter.
 

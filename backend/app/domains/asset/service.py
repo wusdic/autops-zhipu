@@ -79,6 +79,26 @@ class AssetService:
             detail=f"资产 {data.name} ({data.asset_type}) 已创建",
             source="manual",
         )
+        await self.session.flush()
+
+        # 发布 ASSET_CREATED（与业务数据同事务），驱动 worker 立即采集等下游链路。
+        from app.common.events import AssetEvents, DomainEvent, get_event_bus
+
+        await get_event_bus().publish(
+            DomainEvent(
+                domain="asset",
+                event_type=AssetEvents.ASSET_CREATED,
+                payload={
+                    "asset_id": str(asset.id),
+                    "asset_name": asset.hostname or asset.name,
+                    "asset_type": asset.asset_type,
+                    "ip": asset.ip,
+                },
+                source="asset_service",
+            ),
+            session=self.session,
+        )
+
         # Refresh to load server_default fields
         await self.session.refresh(asset)
         return asset

@@ -152,6 +152,10 @@ async def approve_execution(
     row.status = "approved"
     row.updated_at = datetime.now(timezone.utc)
     await db.flush()
+    # 审批通过后入队，由 ExecutionWorker 领取运行（P1-03）
+    from app.common.execution_queue import enqueue
+
+    await enqueue(db, str(row.id))
     await db.refresh(row)
     return success(model_to_dict(row))
 

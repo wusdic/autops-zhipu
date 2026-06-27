@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from collections import OrderedDict
 
@@ -28,9 +27,6 @@ AI_ANALYSIS_SEVERITY_THRESHOLD = {"critical", "high"}
 _processed_events: OrderedDict[str, None] = OrderedDict()
 _MAX_PROCESSED = 50_000
 
-# 后台执行的长任务句柄集合，防止 task 被 GC 回收
-_background_tasks: set[asyncio.Task] = set()
-
 
 def idempotent_handler(func):
     """装饰器: 防止同一事件被同一处理器重复处理."""
@@ -40,11 +36,12 @@ def idempotent_handler(func):
         if key in _processed_events:
             logger.debug("aiops: 跳过重复处理 key=%s", key)
             return
-        # LRU 淘汰：达上限时移除最旧的条目
+        # 先执行，成功后再登记幂等键：失败不登记，使 outbox 重试可重新执行。
+        result = await func(event)
         if len(_processed_events) >= _MAX_PROCESSED:
             _processed_events.popitem(last=False)
         _processed_events[key] = None
-        return await func(event)
+        return result
 
     wrapper.__name__ = func.__name__
     wrapper.__qualname__ = func.__qualname__
@@ -169,92 +166,56 @@ async def on_analysis_failed_log(event: DomainEvent) -> None:
 
 @idempotent_handler
 async def on_execution_created_run(event) -> None:
-    """EXECUTION_CREATED事件 → 后台创建执行记录并运行.
+    """EXECUTION_CREATED → 同步创建执行记录并入队（由 ExecutionWorker 真实运行）.
 
-    run_execution 可能起子进程并阻塞最长 300 秒，若在事件总线串行派发中
-    同步执行会卡死整个总线（含高优先级告警）。因此改为后台 task 执行，
-    handler 立即返回不阻塞总线。
+    关键修复（P0-03/P1-03）：不再用 `asyncio.create_task` 后台跑（进程退出即丢、
+    异常不重试）。改为在本 handler 内同步创建执行记录 + 写 execution_queue 并提交；
+    真正的长耗时执行交给 ExecutionWorker 领取运行（带租约/心跳/重试）。
+    本 handler 失败会抛出异常，触发 outbox 重试，杜绝静默丢任务。
     """
+    import json as _json
+
+    from app.infra.database import async_session_factory
+    from app.domains.automation.service import AutomationService
+    from app.domains.automation.schemas import ExecutionCreate
+    from app.domains.automation.models import ExecutionStatus
+    from app.common.execution_queue import enqueue
+
     payload = event.payload
-    task = asyncio.create_task(_run_execution_async(payload, event.event_id))
-    _background_tasks.add(task)
-    task.add_done_callback(_background_tasks.discard)
+    asset_ids = payload.get("asset_ids", [])
+    if isinstance(asset_ids, str):
+        asset_ids = _json.loads(asset_ids)
 
+    async with async_session_factory() as session:
+        svc = AutomationService(session)
+        exec_create = ExecutionCreate(
+            execution_type=payload.get("execution_type", "script"),
+            target_id=payload.get("target_id", ""),
+            asset_ids=asset_ids,
+            parameters=_json.dumps(payload.get("parameters", {})),
+            trigger_source=payload.get("trigger_source", "policy"),
+            trigger_source_id=payload.get("policy_id") or payload.get("alert_id"),
+            is_dry_run=payload.get("is_dry_run", False),
+        )
+        execution = await svc.create_execution(exec_create)
+        # 关联策略执行记录，打通 PolicyExecution↔Execution（审查 P0-02 全链）
+        policy_execution_id = payload.get("policy_execution_id")
+        if policy_execution_id:
+            execution.policy_execution_id = policy_execution_id
+            await session.flush()
+            from app.domains.policy.service import PolicyService
 
-async def _run_execution_async(payload: dict, correlation_id: str) -> None:
-    """后台执行：创建执行记录并运行，完成后发布完成/失败事件."""
-    try:
-        from app.infra.database import async_session_factory
-        from app.domains.automation.service import AutomationService
-        from app.domains.automation.schemas import ExecutionCreate
-
-        async with async_session_factory() as session:
-            svc = AutomationService(session)
-            import json as _json
-
-            asset_ids = payload.get("asset_ids", [])
-            if isinstance(asset_ids, str):
-                asset_ids = _json.loads(asset_ids)
-
-            exec_create = ExecutionCreate(
-                execution_type=payload.get("execution_type", "script"),
-                target_id=payload.get("target_id", ""),
-                asset_ids=asset_ids,
-                parameters=_json.dumps(payload.get("parameters", {})),
-                trigger_source=payload.get("trigger_source", "policy"),
-                trigger_source_id=payload.get("policy_id") or payload.get("alert_id"),
-                is_dry_run=payload.get("is_dry_run", False),
+            await PolicyService(session).mark_executing(
+                policy_execution_id, str(execution.id)
             )
-            execution = await svc.create_execution(exec_create)
-            await session.commit()
-
-            # 创建成功后立即运行
-            if execution.status in ("pending", "approved"):
-                execution = await svc.run_execution(str(execution.id))
-                await session.commit()
-
-            logger.info(
-                "Execution %s created and run: status=%s",
-                execution.id,
-                execution.status,
-            )
-
-            # 运行完成后发布完成/失败事件
-            bus = get_event_bus()
-            if execution.status == "completed":
-                await bus.publish(
-                    DomainEvent(
-                        event_type=AutomationEvents.EXECUTION_COMPLETED,
-                        domain="automation",
-                        payload={
-                            "execution_id": str(execution.id),
-                            "alert_id": payload.get("alert_id"),
-                            "policy_id": payload.get("policy_id"),
-                            "result": execution.result,
-                            "status": "completed",
-                        },
-                        source="automation",
-                        correlation_id=correlation_id,
-                    )
-                )
-            elif execution.status in ("failed", "blocked", "timeout"):
-                await bus.publish(
-                    DomainEvent(
-                        event_type=AutomationEvents.EXECUTION_FAILED,
-                        domain="automation",
-                        payload={
-                            "execution_id": str(execution.id),
-                            "alert_id": payload.get("alert_id"),
-                            "policy_id": payload.get("policy_id"),
-                            "error_message": execution.error_message,
-                            "status": execution.status,
-                        },
-                        source="automation",
-                        correlation_id=correlation_id,
-                    )
-                )
-    except Exception as e:
-        logger.error("创建/运行执行失败: %s", e, exc_info=True)
+        # 需审批的不入队，等审批通过后再入队（见 automation API approve）
+        if execution.status in (ExecutionStatus.PENDING, ExecutionStatus.APPROVED):
+            await enqueue(session, str(execution.id))
+        await session.commit()
+        logger.info(
+            "Execution %s created & enqueued (status=%s)",
+            execution.id, execution.status,
+        )
 
 
 # ---------------------------------------------------------------------------

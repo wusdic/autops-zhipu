@@ -111,7 +111,13 @@ async def list_executions(
 async def create_execution(
     data: ExecutionCreate, svc: AutomationService = Depends(_get_svc)
 ):
+    """创建执行任务并入队（非待审批者由 ExecutionWorker 领取运行）."""
+    from app.common.execution_queue import enqueue
+    from app.domains.automation.models import ExecutionStatus
+
     exe = await svc.create_execution(data)
+    if exe.status in (ExecutionStatus.PENDING, ExecutionStatus.APPROVED):
+        await enqueue(svc.session, str(exe.id))
     return success(model_to_dict(exe))
 
 
@@ -123,7 +129,11 @@ async def get_execution(exec_id: str, svc: AutomationService = Depends(_get_svc)
 
 @exec_router.post("/{exec_id}/approve", dependencies=[Depends(require_admin)])
 async def approve_execution(exec_id: str, svc: AutomationService = Depends(_get_svc)):
+    """审批通过并入队执行（P1-03：审批后必须续跑）."""
+    from app.common.execution_queue import enqueue
+
     exe = await svc.approve_execution(exec_id)
+    await enqueue(svc.session, str(exe.id))
     return success(model_to_dict(exe))
 
 
