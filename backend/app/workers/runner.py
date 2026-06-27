@@ -53,6 +53,11 @@ class WorkerRunner:
         bus.subscribe(
             AssetEvents.DISCOVERY_SCAN_REQUESTED, on_discovery_scan_requested
         )
+
+        # 注册手动全量采集请求 → Worker 进程执行（API 进程无 CAP_NET_RAW，R13）
+        from app.common.events import CollectorEvents
+        from app.workers.scheduler import on_full_scan_requested
+        bus.subscribe(CollectorEvents.FULL_SCAN_REQUESTED, on_full_scan_requested)
         logger.info("WorkerRunner: outbox enabled, handlers registered, asset_created→collection & discovery_scan→worker linked")
 
         # 2. 启动 OutboxConsumer

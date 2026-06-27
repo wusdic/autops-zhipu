@@ -53,17 +53,24 @@ async def create_job(data: CollectionJobCreate, svc: CollectorService = Depends(
 
 
 @job_router.post("/trigger")
-async def trigger_collection():
-    """手动触发一次全量采集周期（同步等待完成）."""
-    from app.workers.scheduler import get_scheduler
-    scheduler = get_scheduler()
-    try:
-        await scheduler._run_all_assets()
-        return success({"message": "Collection cycle completed"})
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return success({"message": f"Error: {e}"})
+async def trigger_collection(db: AsyncSession = Depends(get_db)):
+    """手动触发一次全量采集周期.
+
+    不在 API 进程内直接跑（API 进程无 CAP_NET_RAW、scheduler 未启动，ping 会全失败）。
+    改为发 FULL_SCAN_REQUESTED 事件，由 Worker 进程消费执行（与 P1-07 发现一致）。
+    """
+    from app.common.events import CollectorEvents, DomainEvent, get_event_bus
+
+    await get_event_bus().publish(
+        DomainEvent(
+            domain="collector",
+            event_type=CollectorEvents.FULL_SCAN_REQUESTED,
+            payload={},
+            source="collector_api",
+        ),
+        session=db,
+    )
+    return success({"message": "Collection cycle requested (via worker)"})
 
 
 @job_router.get("/{job_id}/results")

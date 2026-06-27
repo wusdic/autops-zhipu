@@ -136,7 +136,7 @@ async function loadTags() {
     const items = res.data?.data?.items || []
     const tagSet = new Set<string>()
     items.forEach((a: any) => {
-      if (a.tags) a.tags.forEach((t: string) => tagSet.add(t))
+      if (Array.isArray(a.tags)) a.tags.forEach((t: string) => tagSet.add(t))
     })
     availableTags.value = Array.from(tagSet)
   } catch { /* ignore */ }
