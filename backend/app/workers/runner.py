@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import signal
 import uuid
@@ -115,9 +116,11 @@ class WorkerRunner:
         logger.info("WorkerRunner stopped")
 
     async def _heartbeat_loop(self) -> None:
-        """每 60s 打印一次心跳日志."""
+        """每 60s 打印一次心跳日志，并写 Redis 存活信号（供 /platform/diagnostics 检测 worker 是否在跑）。"""
+        worker_id = f"runner-{uuid.uuid4().hex[:8]}"
         while not self.stop_event.is_set():
             logger.info("WorkerRunner heartbeat: %d tasks running", len(self._tasks))
+            await self._write_heartbeat(worker_id)
             try:
                 await asyncio.wait_for(
                     asyncio.create_task(self.stop_event.wait()),
@@ -125,6 +128,24 @@ class WorkerRunner:
                 )
             except asyncio.TimeoutError:
                 pass
+
+    async def _write_heartbeat(self, worker_id: str) -> None:
+        """写 Redis 存活信号（TTL 180s）；Redis 不可用时只记日志不影响运行。"""
+        from datetime import datetime, timezone
+
+        try:
+            from app.infra.redis_client import get_redis
+
+            redis = await get_redis()
+            if redis is not None:
+                payload = json.dumps({
+                    "worker_id": worker_id,
+                    "ts": datetime.now(timezone.utc).isoformat(),
+                    "tasks": len(self._tasks),
+                })
+                await redis.set(f"autops:worker:heartbeat:{worker_id}", payload, ex=180)
+        except Exception:
+            logger.debug("WorkerRunner: 写心跳到 Redis 失败（忽略）", exc_info=True)
 
     async def shutdown(self) -> None:
         logger.info("WorkerRunner shutting down...")

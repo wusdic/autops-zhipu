@@ -1,0 +1,14 @@
+# AUTOPS 日志轮转配置 —— 安装到 /etc/logrotate.d/autops
+# 覆盖安装日志与应用文件日志；systemd 服务日志由 journald 管理（见 journald.conf 配额）。
+/var/log/autops-install.log
+/var/log/autops/*.log {
+    daily
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    su root root
+    create 0640 root root
+}

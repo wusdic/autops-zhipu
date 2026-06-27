@@ -223,6 +223,12 @@ check "autops-backend 服务" "$([ "$SYSTEMD_ACTIVE" = "active" ] && echo pass |
 BACKEND_PID=$(pgrep -f "uvicorn app.main:app" 2>/dev/null || echo "")
 check "后端进程 (PID: ${BACKEND_PID:-无})" "$([ -n "$BACKEND_PID" ] && echo pass || echo warn)"
 
+# Worker 服务（事件驱动核心：outbox 消费 + 采集/巡检调度 + 执行队列）
+WORKER_ACTIVE=$(systemctl is-active autops-worker 2>/dev/null || echo "unknown")
+check "autops-worker 服务" "$([ "$WORKER_ACTIVE" = "active" ] && echo pass || echo fail)" "未运行则 outbox 不消费、采集/执行停滞"
+WORKER_PID=$(pgrep -f "app.workers.runner" 2>/dev/null || echo "")
+check "Worker 进程 (PID: ${WORKER_PID:-无})" "$([ -n "$WORKER_PID" ] && echo pass || echo warn)"
+
 # 检查端口监听
 PORT_CHECK=$(ss -tlnp 2>/dev/null | grep ':8001' || echo "")
 check "端口 8001 监听" "$([ -n "$PORT_CHECK" ] && echo pass || echo fail)"

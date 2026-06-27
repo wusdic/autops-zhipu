@@ -1,0 +1,27 @@
+[Unit]
+Description=AUTOPS Backend API (FastAPI/uvicorn)
+After=network.target mysql.service redis.service
+Wants=mysql.service redis.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/autops/backend
+Environment=DB_USER=autops
+Environment=DB_DATABASE=autops
+# DB_PASSWORD 等敏感配置请用 EnvironmentFile 注入，勿写明文：
+# EnvironmentFile=/etc/autops/backend.env
+ExecStart=/opt/autops/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8001
+
+# 故障自愈
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=autops-backend
+
+[Install]
+WantedBy=multi-user.target

@@ -334,19 +334,57 @@ Type=simple
 User=root
 WorkingDirectory=${PROJECT_DIR}/backend
 Environment=DB_USER=autops
-Environment=DB_PASSWORD=***
+Environment=DB_PASSWORD=${DB_PASSWORD:-autops}
 Environment=DB_DATABASE=autops
 ExecStart=${PROJECT_DIR}/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8001
 Restart=always
 RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
+    # Worker 进程：事件驱动核心（outbox 消费 + 采集/巡检调度 + 执行队列）。
+    # 必须随 backend 一起启用，否则 outbox 永不消费、采集/执行全部停滞。
+    cat > /etc/systemd/system/autops-worker.service <<EOF
+[Unit]
+Description=AUTOPS Worker (outbox consumer + scheduler + execution worker)
+After=network.target mysql.service redis.service autops-backend.service
+Wants=mysql.service redis.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=${PROJECT_DIR}/backend
+Environment=DB_USER=autops
+Environment=DB_PASSWORD=${DB_PASSWORD:-autops}
+Environment=DB_DATABASE=autops
+ExecStart=${PROJECT_DIR}/backend/.venv/bin/python -m app.workers.runner
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+# ping/SNMP 需要原始套接字与低端口能力
+AmbientCapabilities=CAP_NET_RAW CAP_NET_BIND_SERVICE
+NoNewPrivileges=false
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # logrotate：应用文件日志轮转（systemd 日志由 journald 管理）
+    mkdir -p /var/log/autops
+    if [ -f "${SCRIPT_DIR}/../systemd/autops.logrotate" ]; then
+        cp "${SCRIPT_DIR}/../systemd/autops.logrotate" /etc/logrotate.d/autops
+        log "logrotate 配置已安装到 /etc/logrotate.d/autops"
+    fi
+
     systemctl daemon-reload
     systemctl enable autops-backend
-    log "systemd 服务配置完成"
+    systemctl enable autops-worker
+    log "systemd 服务配置完成（backend + worker）"
 }
 
 # ============================================================
@@ -378,9 +416,10 @@ print_summary() {
     log "健康检查: http://localhost:8001/health"
     log "默认账户: admin / admin123"
     echo ""
-    log "启动服务: systemctl start autops-backend"
-    log "停止服务: systemctl stop autops-backend"
-    log "查看日志: journalctl -u autops-backend -f"
+    log "启动服务: systemctl start autops-backend autops-worker"
+    log "停止服务: systemctl stop autops-backend autops-worker"
+    log "查看日志: journalctl -u autops-backend -u autops-worker -f"
+    log "综合诊断: curl http://localhost:8001/api/v1/platform/diagnostics"
     log "运行自检: $SCRIPT_DIR/self_check.sh"
     echo ""
 }
@@ -414,8 +453,9 @@ main() {
     setup_seed_data
     setup_systemd
 
-    # 启动服务
-    systemctl start autops-backend || warn "服务启动失败，请手动检查"
+    # 启动服务（backend + worker 必须同时运行）
+    systemctl start autops-backend || warn "后端服务启动失败，请手动检查"
+    systemctl start autops-worker || warn "Worker 服务启动失败，请手动检查（outbox/采集/执行依赖它）"
 
     # 运行自检
     run_self_check
