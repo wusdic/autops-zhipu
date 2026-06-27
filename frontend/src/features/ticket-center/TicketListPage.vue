@@ -452,6 +452,10 @@ import {
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
+import {
+  ticketStatusLabel, ticketStatusTag,
+  priorityTag, priorityLabel as priorityLabelFn,
+} from '@/shared/utils/labels'
 
 const router = useRouter()
 
@@ -501,40 +505,11 @@ function formatTime(val: string | null | undefined): string {
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds())
 }
 
-function priorityType(p: string): TagType {
-  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: 'primary', low: 'info' }
-  return (map[p] || 'info') as TagType
-}
-
-function priorityLabel(p: string): string {
-  const map: Record<string, string> = { critical: '紧急', high: '高', medium: '中', low: '低' }
-  return map[p] || p || '-'
-}
-
-function statusType(s: string): TagType {
-  const map: Record<string, string> = {
-    open: 'warning',
-    in_progress: 'primary',
-    pending_approval: 'info',
-    resolved: 'success',
-    closed: 'info',
-    overdue: 'danger',
-  }
-  return (map[s] || 'info') as TagType
-}
-
-function statusLabel(s: string): string {
-  const map: Record<string, string> = {
-    open: '待处理',
-    in_progress: '处理中',
-    pending_approval: '待审批',
-    pending: '待处理',
-    resolved: '已解决',
-    closed: '已关闭',
-    overdue: '已超时',
-  }
-  return map[s] || s || '-'
-}
+// 状态/优先级统一取自 shared/utils/labels.ts（单一事实源）
+const priorityType = (p: string): TagType => priorityTag(p) as TagType
+const priorityLabel = (p: string): string => priorityLabelFn(p)
+const statusType = (s: string): TagType => ticketStatusTag(s) as TagType
+const statusLabel = (s: string): string => ticketStatusLabel(s)
 
 function sourceIcon(s: string) {
   const map: Record<string, string> = {

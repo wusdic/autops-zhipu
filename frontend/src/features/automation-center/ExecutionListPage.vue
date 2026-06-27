@@ -323,6 +323,7 @@ import { API as R } from '@/shared/api/routes'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import MetricChart from '@/shared/components/MetricChart.vue'
 import LogStream from '@/shared/components/LogStream.vue'
+import { riskTag, riskLabel } from '@/shared/utils/labels'
 
 const router = useRouter()
 
@@ -408,19 +409,9 @@ function triggerSourceLabel(source: string): string {
   return map[source] || source || '-'
 }
 
-function riskLevelType(level: string): TagType {
-  const map: Record<string, string> = {
-    low: 'info', medium: 'warning', high: 'danger', critical: 'danger',
-  }
-  return (map[level] || 'info') as TagType
-}
-
-function riskLevelLabel(level: string): string {
-  const map: Record<string, string> = {
-    low: '低', medium: '中', high: '高', critical: '严重',
-  }
-  return map[level] || level
-}
+// 风险等级统一取自 shared/utils/labels.ts
+const riskLevelType = (level: string): TagType => riskTag(level) as TagType
+const riskLevelLabel = (level: string): string => riskLabel(level)
 
 function canCancel(status: string): boolean {
   return ['pending', 'awaiting_approval', 'approved', 'running'].includes(status)

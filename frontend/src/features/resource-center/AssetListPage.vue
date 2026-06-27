@@ -376,6 +376,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { UploadFile } from 'element-plus'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
+import {
+  assetTypeLabel, assetStatusTag, assetStatusLabel,
+  healthTag, healthLabel as healthLabel0,
+} from '@/shared/utils/labels'
 
 // ---------- State ----------
 const loading = ref(false)
@@ -435,39 +439,12 @@ const defaultForm = {
 const formData = reactive({ ...defaultForm })
 
 // ---------- Helpers ----------
-function formatType(t: string): string {
-  const map: Record<string, string> = {
-    linux_server: 'Linux', windows_server: 'Windows', database: '数据库',
-    network_device: '网络', web_service: 'Web', server: '服务器',
-    container: '容器', virtual_machine: '虚拟机', storage: '存储',
-    Linux: 'Linux', Windows: 'Windows', Server: '服务器',
-  }
-  return map[t] || t
-}
-
-function statusType(s: string): TagType {
-  const map: Record<string, string> = {
-    active: 'success', online: 'success',
-    inactive: 'info', disabled: 'info',
-    maintenance: 'warning', provisioning: 'warning',
-    decommissioned: 'danger', offline: 'danger',
-  }
-  return (map[s] || 'warning') as TagType
-}
-function statusLabel(s: string) {
-  // 兼容生命周期(active/...)与历史在线性(online/offline)取值，避免显示空白
-  return ({
-    active: '活跃', inactive: '停用', maintenance: '维护', provisioning: '配置中',
-    decommissioned: '已下线', online: '在线', offline: '离线',
-  })[s] ?? s ?? '-'
-}
-
-function healthType(h: string): TagType {
-  return (h === 'healthy' ? 'success' : h === 'warning' ? 'warning' : h === 'critical' ? 'danger' : 'info') as TagType
-}
-function healthLabel(h: string) {
-  return ({ healthy: '健康', warning: '警告', critical: '严重', unknown: '未知' })[h] ?? h ?? '-'
-}
+// 类型/状态/健康统一取自 shared/utils/labels.ts（单一事实源）
+const formatType = (t: string): string => assetTypeLabel(t)
+const statusType = (s: string): TagType => assetStatusTag(s) as TagType
+const statusLabel = (s: string): string => assetStatusLabel(s)
+const healthType = (h: string): TagType => healthTag(h) as TagType
+const healthLabel = (h: string): string => healthLabel0(h)
 
 function lifecycleType(ls: string): TagType {
   const map: Record<string, string> = {

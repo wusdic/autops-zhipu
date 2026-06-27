@@ -8,6 +8,13 @@
 <script setup lang="ts">
 import type { TagType } from '@/shared/types'
 import { computed } from 'vue'
+import {
+  SEVERITY_MAP, SEVERITY_TAG, ASSET_STATUS_MAP, ASSET_STATUS_TAG,
+  REACHABILITY_MAP, REACHABILITY_TAG, HEALTH_MAP, HEALTH_TAG,
+  ALERT_STATUS_MAP, ALERT_STATUS_TAG, TICKET_STATUS_MAP, TICKET_STATUS_TAG,
+  PRIORITY_MAP, PRIORITY_TAG, EXEC_STATUS_MAP, EXEC_STATUS_TAG,
+  POLICY_STATUS_MAP, POLICY_STATUS_TAG, KNOWLEDGE_STATUS_MAP, RISK_MAP, RISK_TAG_TYPE,
+} from '@/shared/utils/labels'
 
 const props = defineProps<{
   status?: string
@@ -17,76 +24,20 @@ const props = defineProps<{
   dot?: boolean
 }>()
 
-const typeMap: Record<string, TagType> = {
-  // 通用状态
-  active: 'success',
-  inactive: 'info',
-  running: 'primary',
-  pending: 'warning',
-  completed: 'success',
-  failed: 'danger',
-  cancelled: 'info',
-  timeout: 'danger',
-  // 健康状态
-  healthy: 'success',
-  unhealthy: 'danger',
-  degraded: 'warning',
-  unknown: 'info',
-  // 告警状态
-  firing: 'danger',
-  resolved: 'success',
-  acknowledged: 'warning',
-  suppressed: 'info',
-  // 资产状态
-  online: 'success',
-  offline: 'danger',
-  error: 'danger',
-  warning: 'warning',
-  // 审批状态
-  approved: 'success',
-  rejected: 'danger',
-  // 知识状态
-  draft: 'info',
-  published: 'success',
-  archived: 'info',
-  // 工单状态
-  open: 'primary',
-  in_progress: 'primary',
-  closed: 'success',
-  reopened: 'warning',
-}
-
+// 全部取值映射统一来自 shared/utils/labels.ts（单一事实源），合并为通用徽标。
+// 合并顺序：通用/健康在前，具体业务状态在后覆盖，避免同义键冲突。
 const labelMap: Record<string, string> = {
-  active: '活跃',
-  inactive: '未激活',
-  running: '运行中',
-  pending: '待处理',
-  completed: '已完成',
-  failed: '失败',
-  cancelled: '已取消',
-  timeout: '超时',
-  healthy: '健康',
-  unhealthy: '不健康',
-  degraded: '降级',
-  unknown: '未知',
-  firing: '告警中',
-  resolved: '已恢复',
-  acknowledged: '已确认',
-  suppressed: '已抑制',
-  online: '在线',
-  offline: '离线',
-  error: '异常',
-  warning: '告警',
-  approved: '已通过',
-  rejected: '已拒绝',
-  draft: '草稿',
-  published: '已发布',
-  archived: '已归档',
-  open: '待处理',
-  in_progress: '处理中',
-  closed: '已关闭',
-  reopened: '已重开',
+  ...HEALTH_MAP, ...SEVERITY_MAP, ...REACHABILITY_MAP, ...POLICY_STATUS_MAP,
+  ...KNOWLEDGE_STATUS_MAP, ...RISK_MAP, ...ASSET_STATUS_MAP, ...EXEC_STATUS_MAP,
+  ...TICKET_STATUS_MAP, ...PRIORITY_MAP, ...ALERT_STATUS_MAP,
+  error: '异常', reopened: '已重开',
 }
+const typeMap: Record<string, TagType> = {
+  ...HEALTH_TAG, ...SEVERITY_TAG, ...REACHABILITY_TAG, ...POLICY_STATUS_TAG,
+  ...RISK_TAG_TYPE, ...ASSET_STATUS_TAG, ...EXEC_STATUS_TAG,
+  ...TICKET_STATUS_TAG, ...PRIORITY_TAG, ...ALERT_STATUS_TAG,
+  error: 'danger', reopened: 'warning',
+} as Record<string, TagType>
 
 const type = computed(() => {
   if (props.type) return props.type
