@@ -122,8 +122,7 @@
             <el-menu-item index="/ticket-overview">工单总览</el-menu-item>
             <el-menu-item index="/tickets">工单列表</el-menu-item>
             <el-menu-item index="/ticket-create">新建工单</el-menu-item>
-            <el-menu-item index="/manual-confirm">人工确认台</el-menu-item>
-            <el-menu-item index="/manual-handling">人工处置台</el-menu-item>
+            <el-menu-item index="/manual-handling">人工工作台</el-menu-item>
             <el-menu-item index="/assignment-rules">派单规则</el-menu-item>
             <el-menu-item index="/sla-management">SLA 管理</el-menu-item>
             <el-menu-item index="/postmortem">故障复盘</el-menu-item>
@@ -396,8 +395,7 @@ const menuMap: Record<string, string> = {
   '/ticket-overview': '工单总览',
   '/tickets': '工单列表',
   '/ticket-create': '新建工单',
-  '/manual-confirm': '人工确认台',
-  '/manual-handling': '人工处置台',
+  '/manual-handling': '人工工作台',
   '/assignment-rules': '派单规则',
   '/sla-management': 'SLA 管理',
   '/postmortem': '故障复盘',
@@ -481,7 +479,7 @@ const groupMap: Record<string, string> = {
   '/scripts': '自动化中心', '/playbooks': '自动化中心', '/approvals': '自动化中心',
   '/executions': '自动化中心', '/rollback-center': '自动化中心', '/execution-locks': '自动化中心',
   '/ticket-overview': '工单协同', '/tickets': '工单协同', '/ticket-create': '工单协同',
-  '/manual-confirm': '工单协同', '/manual-handling': '工单协同', '/assignment-rules': '工单协同',
+  '/manual-handling': '工单协同', '/assignment-rules': '工单协同',
   '/sla-management': '工单协同', '/postmortem': '工单协同', '/ticket-report': '工单协同',
   '/knowledge-overview': '智能知识库', '/aiops': '智能知识库', '/knowledge': '智能知识库',
   '/knowledge/import': '智能知识库', '/knowledge-review': '智能知识库', '/similar-cases': '智能知识库',

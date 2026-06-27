@@ -1,6 +1,6 @@
 <template>
   <div class="manual-confirm-page">
-    <div class="autops-page-header">
+    <div class="autops-page-header" v-if="!embedded">
       <div class="autops-page-title-row">
         <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
         <span class="autops-page-title">人工确认台</span>
@@ -118,6 +118,8 @@
 import { ref, computed, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
+
+defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'

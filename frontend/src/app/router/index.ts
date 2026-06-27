@@ -108,8 +108,9 @@ const router = createRouter({
     { path: '/tickets', name: 'tickets', component: () => import('@/features/ticket-center/TicketListPage.vue'), meta: { module: 'M7', title: '工单列表' } },
     { path: '/tickets/:id', name: 'ticket-detail', component: () => import('@/features/ticket-center/TicketDetailPage.vue'), meta: { module: 'M7', title: '工单详情' } },
     { path: '/ticket-create', name: 'ticket-create', component: () => import('@/features/ticket-center/TicketCreatePage.vue'), meta: { module: 'M7', title: '新建工单' } },
-    { path: '/manual-confirm', name: 'manual-confirm', component: () => import('@/features/response-center/ManualConfirmPage.vue'), meta: { module: 'M7', title: '人工确认台' } },
-    { path: '/manual-handling', name: 'manual-handling', component: () => import('@/features/ticket-center/ManualHandlingPage.vue'), meta: { module: 'M7', title: '人工处置台' } },
+    { path: '/manual-handling', name: 'manual-workbench', component: () => import('@/features/ticket-center/ManualWorkbenchPage.vue'), meta: { module: 'M7', title: '人工工作台' } },
+    // 去重 B3：人工确认台已并入人工工作台"待确认"tab，旧路径重定向保留外链/书签
+    { path: '/manual-confirm', redirect: '/manual-handling?tab=confirm' },
     { path: '/assignment-rules', name: 'assignment-rules', component: () => import('@/features/ticket-center/AssignmentRulePage.vue'), meta: { module: 'M7', title: '派单规则' } },
     { path: '/sla-management', name: 'sla-management', component: () => import('@/features/ticket-center/SlaManagementPage.vue'), meta: { module: 'M7', title: 'SLA 管理' } },
     { path: '/postmortem', name: 'postmortem', component: () => import('@/features/ticket-center/PostmortemPage.vue'), meta: { module: 'M7', title: '故障复盘' } },
