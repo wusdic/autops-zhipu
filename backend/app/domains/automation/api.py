@@ -99,11 +99,31 @@ async def delete_playbook(playbook_id: str, svc: AutomationService = Depends(_ge
 @exec_router.get("")
 async def list_executions(
     status: str | None = None,
+    trigger_source: str | None = None,
+    risk_level: str | None = None,
+    search: str | None = None,
+    start_time: str | None = None,
+    end_time: str | None = None,
+    stats: bool = False,
+    trend: str | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     svc: AutomationService = Depends(_get_svc),
 ):
-    items, total = await svc.list_executions(status, page, page_size)
+    """执行列表（支持筛选）+ 统计卡片(stats) + 趋势(trend=7d)。"""
+    if stats:
+        return success(await svc.execution_stats())
+    if trend:
+        days = 7
+        digits = "".join(ch for ch in trend if ch.isdigit())
+        if digits:
+            days = max(1, min(int(digits), 90))
+        return success({"trend": await svc.execution_trend(days)})
+    items, total = await svc.list_executions(
+        status=status, page=page, page_size=page_size,
+        trigger_source=trigger_source, risk_level=risk_level,
+        search=search, start_time=start_time, end_time=end_time,
+    )
     return paginate([model_to_dict(i) for i in items], total, page, page_size)
 
 
@@ -134,6 +154,18 @@ async def approve_execution(exec_id: str, svc: AutomationService = Depends(_get_
 
     exe = await svc.approve_execution(exec_id)
     await enqueue(svc.session, str(exe.id))
+    return success(model_to_dict(exe))
+
+
+@exec_router.post("/{exec_id}/retry")
+async def retry_execution(exec_id: str, svc: AutomationService = Depends(_get_svc)):
+    """以相同参数重新发起执行（克隆并入队）."""
+    from app.common.execution_queue import enqueue
+    from app.domains.automation.models import ExecutionStatus
+
+    exe = await svc.retry_execution(exec_id)
+    if exe.status in (ExecutionStatus.PENDING, ExecutionStatus.APPROVED):
+        await enqueue(svc.session, str(exe.id))
     return success(model_to_dict(exe))
 
 

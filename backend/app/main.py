@@ -56,6 +56,9 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
+    from app.api.websocket import stop_ws_event_bridges
+
+    await stop_ws_event_bridges()
     await close_db_engine()
     await close_redis()
     logger.info("AUTOPS API process stopped")

@@ -225,12 +225,54 @@ class AutomationService:
         await self.session.refresh(exe)
         return exe
 
+    @staticmethod
+    def _parse_dt(value):
+        """宽松解析时间字符串/日期为 datetime；失败返回 None."""
+        if not value:
+            return None
+        if isinstance(value, datetime):
+            return value
+        from datetime import datetime as _dt
+
+        for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+            try:
+                return _dt.strptime(str(value)[:19], fmt)
+            except ValueError:
+                continue
+        try:
+            return _dt.fromisoformat(str(value))
+        except ValueError:
+            return None
+
     async def list_executions(
-        self, status: str | None = None, page: int = 1, page_size: int = 20
+        self,
+        status: str | None = None,
+        page: int = 1,
+        page_size: int = 20,
+        trigger_source: str | None = None,
+        risk_level: str | None = None,
+        search: str | None = None,
+        start_time=None,
+        end_time=None,
     ):
         stmt = select(Execution)
         if status:
             stmt = stmt.where(Execution.status == status)
+        if trigger_source:
+            stmt = stmt.where(Execution.trigger_source == trigger_source)
+        if risk_level:
+            stmt = stmt.where(Execution.risk_level == risk_level)
+        if search:
+            like = f"%{search}%"
+            stmt = stmt.where(
+                (Execution.id.like(like)) | (Execution.target_id.like(like))
+            )
+        start_dt = self._parse_dt(start_time)
+        end_dt = self._parse_dt(end_time)
+        if start_dt:
+            stmt = stmt.where(Execution.created_at >= start_dt)
+        if end_dt:
+            stmt = stmt.where(Execution.created_at <= end_dt)
         # count 必须复用相同的 where 条件
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total_result = await self.session.execute(count_stmt)
@@ -241,6 +283,88 @@ class AutomationService:
             .limit(page_size)
         )
         return list(result.scalars().all()), total
+
+    async def execution_stats(self) -> dict:
+        """执行统计卡片：今日总数/运行中/成功率/失败数."""
+        today = datetime.now(timezone.utc).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+
+        async def _count(*conds) -> int:
+            stmt = select(func.count()).select_from(Execution)
+            for c in conds:
+                stmt = stmt.where(c)
+            return (await self.session.execute(stmt)).scalar() or 0
+
+        today_total = await _count(Execution.created_at >= today)
+        running_now = await _count(
+            Execution.status.in_(
+                [ExecutionStatus.RUNNING, ExecutionStatus.DRY_RUNNING]
+            )
+        )
+        completed = await _count(Execution.status == ExecutionStatus.COMPLETED)
+        failed = await _count(Execution.status == ExecutionStatus.FAILED)
+        total = await _count()
+        success_rate = round(completed / max(total, 1) * 100, 1)
+        return {
+            "today_total": today_total,
+            "running_now": running_now,
+            "success_rate": success_rate,
+            "failed_count": failed,
+            "total": total,
+            "completed": completed,
+        }
+
+    async def execution_trend(self, days: int = 7) -> list[dict]:
+        """近 N 天执行趋势（按天聚合 success/failed），Python 侧聚合避免方言差异."""
+        from datetime import timedelta
+
+        cutoff = (
+            datetime.now(timezone.utc) - timedelta(days=days - 1)
+        ).replace(hour=0, minute=0, second=0, microsecond=0)
+        result = await self.session.execute(
+            select(Execution.created_at, Execution.status).where(
+                Execution.created_at >= cutoff
+            )
+        )
+        buckets: dict[str, dict] = {}
+        for i in range(days):
+            d = (cutoff + timedelta(days=i))
+            key = d.strftime("%m-%d")
+            buckets[key] = {"date": key, "success": 0, "failed": 0}
+        for created_at, status in result.all():
+            if not created_at:
+                continue
+            key = created_at.strftime("%m-%d")
+            if key not in buckets:
+                continue
+            if status == ExecutionStatus.COMPLETED:
+                buckets[key]["success"] += 1
+            elif status in (ExecutionStatus.FAILED, ExecutionStatus.ROLLBACK_FAILED):
+                buckets[key]["failed"] += 1
+        return list(buckets.values())
+
+    async def retry_execution(self, source_id: str) -> Execution:
+        """以相同参数克隆一条新执行（重试）."""
+        src = await self.exec_repo.get_by_id(source_id)
+        if not src:
+            raise NotFoundError(f"执行任务 {source_id} 不存在")
+        asset_ids = src.asset_ids
+        if isinstance(asset_ids, str):
+            try:
+                asset_ids = json.loads(asset_ids)
+            except (json.JSONDecodeError, ValueError):
+                asset_ids = []
+        data = ExecutionCreate(
+            execution_type=src.execution_type,
+            target_id=src.target_id,
+            asset_ids=asset_ids if isinstance(asset_ids, list) else [],
+            parameters=src.parameters,
+            trigger_source="manual",
+            trigger_source_id=source_id,
+            is_dry_run=src.is_dry_run,
+        )
+        return await self.create_execution(data)
 
     async def get_execution(self, exec_id: str) -> Execution:
         exe = await self.exec_repo.get_by_id(exec_id)
@@ -367,6 +491,41 @@ class AutomationService:
         await self.session.refresh(execution)
         return execution
 
+    async def _write_execution_log(
+        self,
+        execution_id: str,
+        stream_type: str,
+        content: str,
+        step_id: str | None = None,
+    ) -> None:
+        """写入 ExecutionLog（日志中心/前端读取的 canonical 日志表）.
+
+        统一日志模型（P1-09）：此前执行输出只写 ExecutionStep，而 /logs/execution
+        API 读 ExecutionLog，导致前端查不到执行日志。现在执行输出与步骤日志都落
+        ExecutionLog。
+        """
+        if not content:
+            return
+        from app.domains.log.models import ExecutionLog
+
+        # offset = 该执行已有日志条数，便于前端增量拉取
+        existing = await self.session.execute(
+            select(func.count())
+            .select_from(ExecutionLog)
+            .where(ExecutionLog.execution_id == execution_id)
+        )
+        offset = existing.scalar() or 0
+        self.session.add(
+            ExecutionLog(
+                execution_id=execution_id,
+                step_id=step_id,
+                stream_type=stream_type if stream_type in ("stdout", "stderr") else "stdout",
+                content=content[:60000],
+                offset=offset,
+            )
+        )
+        await self.session.flush()
+
     async def append_execution_log(self, execution_id: str, log_entry: dict) -> None:
         exe = await self.exec_repo.get_by_id(execution_id)
         if not exe:
@@ -386,6 +545,17 @@ class AutomationService:
         )
         self.session.add(step)
         await self.session.flush()
+        # 同步写一份到 ExecutionLog，使日志中心 API 能查到（P1-09）
+        stderr_text = log_entry.get("stderr") or log_entry.get("error")
+        stdout_text = log_entry.get("stdout") or log_entry.get("output") or log_entry.get("message")
+        if stdout_text:
+            await self._write_execution_log(
+                execution_id, "stdout", str(stdout_text), log_entry.get("step_id")
+            )
+        if stderr_text:
+            await self._write_execution_log(
+                execution_id, "stderr", str(stderr_text), log_entry.get("step_id")
+            )
 
     async def reset_for_retry(self, exec_id: str) -> None:
         """把上一次崩溃残留的中间态执行重置为可重跑状态.
@@ -469,6 +639,12 @@ class AutomationService:
 
         exe.result = result.stdout[:10000] if result.stdout else None
         exe.error_message = result.stderr[:5000] if result.stderr else None
+
+        # 执行输出落 ExecutionLog，供日志中心/前端实时日志读取（P1-09）
+        if result.stdout:
+            await self._write_execution_log(str(exe.id), "stdout", result.stdout)
+        if result.stderr:
+            await self._write_execution_log(str(exe.id), "stderr", result.stderr)
 
         if not result.success:
             if is_dry:

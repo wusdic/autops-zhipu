@@ -8,6 +8,8 @@ export const automationService = {
   createPlaybook: (data: Record<string, any>) => client.post(API.PLAYBOOKS, data),
   listExecutions: (params?: Record<string, any>) => client.get(API.EXECUTIONS, { params }),
   getExecution: (id: string) => client.get(API.EXECUTION_DETAIL(id)),
+  getExecutionLogs: (id: string, params?: Record<string, any>) =>
+    client.get(API.LOGS.EXECUTION(id), { params }),
   triggerExecution: (data: Record<string, any>) => client.post(API.EXECUTIONS, data),
   cancelExecution: (id: string) => client.post(API.EXECUTION_CANCEL(id)),
   rollback: (id: string) => client.post(API.EXECUTION_ROLLBACK(id)),

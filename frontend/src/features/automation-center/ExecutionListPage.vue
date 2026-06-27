@@ -423,11 +423,11 @@ function riskLevelLabel(level: string): string {
 }
 
 function canCancel(status: string): boolean {
-  return ['created', 'validated', 'running'].includes(status)
+  return ['pending', 'awaiting_approval', 'approved', 'running'].includes(status)
 }
 
 function canRetry(status: string): boolean {
-  return ['failed', 'partial_success', 'rollback'].includes(status)
+  return ['failed', 'rollback_failed', 'dry_run_failed'].includes(status)
 }
 
 // ── Statistics ──────────────────────────────────────────────────────
@@ -613,11 +613,8 @@ async function retryExecution(row: any) {
       '重新执行',
       { confirmButtonText: '确认重试', cancelButtonText: '返回', type: 'info' },
     )
-    // Retry by re-creating the execution with same params
-    const { data } = await api.post(R.EXECUTIONS, {
-      source_execution_id: id,
-      trigger_source: 'manual',
-    })
+    // 调用专用 retry 端点克隆并入队（参数由后端从源执行复制）
+    const { data } = await api.post(R.EXECUTION_RETRY(id))
     if (data.code === 0) {
       ElMessage.success('已重新发起执行')
       loadExecutions()

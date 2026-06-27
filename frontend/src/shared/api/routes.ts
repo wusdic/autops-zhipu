@@ -87,6 +87,7 @@ export const API = {
   EXECUTION_DETAIL: (id: string) => '/api/v1/executions/' + id,
   EXECUTION_APPROVE: (id: string) => '/api/v1/executions/' + id + '/approve',
   EXECUTION_CANCEL: (id: string) => '/api/v1/executions/' + id + '/cancel',
+  EXECUTION_RETRY: (id: string) => '/api/v1/executions/' + id + '/retry',
   EXECUTION_ROLLBACK: (id: string) => '/api/v1/executions/' + id + '/rollback',
   EXECUTION_VERIFICATION: (id: string) => '/api/v1/executions/' + id + '/verification',
 

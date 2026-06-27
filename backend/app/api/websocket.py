@@ -74,6 +74,11 @@ class ConnectionManager:
             if client_id in self._subscriptions:
                 self._subscriptions[client_id].update(channels)
 
+    async def unsubscribe(self, client_id: str, channels: list[str]) -> None:
+        async with self._lock:
+            if client_id in self._subscriptions:
+                self._subscriptions[client_id].difference_update(channels)
+
     async def broadcast(self, channel: str, message: dict[str, Any]) -> None:
         """向订阅了指定频道的所有客户端广播消息.
 
@@ -120,6 +125,9 @@ class ConnectionManager:
 # 全局连接管理器
 manager = ConnectionManager()
 
+# realtime 桥接后台任务句柄（lifespan shutdown 时停止，避免悬挂/重复桥接）
+_realtime_task: asyncio.Task | None = None
+
 
 @router.websocket("/ws")
 async def websocket_endpoint(
@@ -162,6 +170,17 @@ async def websocket_endpoint(
                     await websocket.send_json(
                         {
                             "type": "subscribed",
+                            "payload": {"channels": channels},
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                        }
+                    )
+
+                elif msg_type == "unsubscribe":
+                    channels = payload.get("channels", [])
+                    await manager.unsubscribe(client_id, channels)
+                    await websocket.send_json(
+                        {
+                            "type": "unsubscribed",
                             "payload": {"channels": channels},
                             "timestamp": datetime.now(timezone.utc).isoformat(),
                         }
@@ -310,9 +329,10 @@ def register_ws_event_bridges() -> None:
                 # 未知事件类型仅记录日志，不广播（避免泄漏给无关客户端）
                 logger.debug("未识别的 realtime 事件类型，已忽略: %s", event_type)
 
-        # 需要在运行中的 event loop 内启动 subscriber
+        # 需要在运行中的 event loop 内启动 subscriber，并保存句柄供 shutdown 停止
+        global _realtime_task
         loop = asyncio.get_running_loop()
-        loop.create_task(
+        _realtime_task = loop.create_task(
             start_api_realtime_subscriber(_on_realtime_message),
             name="realtime-ws-bridge",
         )
@@ -332,3 +352,16 @@ def register_ws_event_bridges() -> None:
         bus.subscribe(TicketEvents.TICKET_CREATED, _on_ticket_event)
         bus.subscribe(TicketEvents.TICKET_UPDATED, _on_ticket_event)
         logger.info("WebSocket event bridges: in-process mode (dev only)")
+
+
+async def stop_ws_event_bridges() -> None:
+    """停止 realtime 桥接后台任务（lifespan shutdown 调用）."""
+    global _realtime_task
+    if _realtime_task is not None:
+        _realtime_task.cancel()
+        try:
+            await _realtime_task
+        except (asyncio.CancelledError, Exception):  # noqa: BLE001
+            pass
+        _realtime_task = None
+        logger.info("WebSocket realtime bridge stopped")
