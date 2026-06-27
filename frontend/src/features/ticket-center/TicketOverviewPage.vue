@@ -144,6 +144,7 @@ import { ElMessage } from 'element-plus'
 import { Warning, Document, Loading, CircleCheck, Plus } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
+import { priorityTag, ticketStatusTag, ticketStatusLabel } from '@/shared/utils/labels'
 
 const router = useRouter()
 const statsLoading = ref(false)
@@ -173,15 +174,10 @@ const slaWarnings = computed(() => {
   return myTickets.value.filter((t: any) => t.sla_remaining && t.status !== 'closed' && t.status !== 'resolved').slice(0, 5)
 })
 
-function priorityType(p: string): TagType {
-  return ({ critical: 'danger', high: 'danger', medium: 'warning', low: 'info' }[p] || 'info') as TagType
-}
-function statusType(s: string): TagType {
-  return ({ open: 'warning', in_progress: 'primary', pending: 'info', resolved: 'success', closed: 'success', cancelled: 'info' }[s] || 'info') as TagType
-}
-function statusLabel(s: string) {
-  return { open: '待处理', in_progress: '处理中', pending: '待分配', resolved: '已解决', closed: '已关闭', cancelled: '已取消' }[s] || s || '-'
-}
+// 工单状态/优先级统一取自 labels.ts
+const priorityType = (p: string): TagType => priorityTag(p) as TagType
+const statusType = (s: string): TagType => ticketStatusTag(s) as TagType
+const statusLabel = (s: string): string => ticketStatusLabel(s)
 function formatTime(t: string) {
   if (!t) return '-'
   return new Date(t).toLocaleString('zh-CN')

@@ -326,6 +326,7 @@ import {
   CircleCloseFilled, Timer, Warning
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { policyStatusLabel } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 
 const route = useRoute()
@@ -358,9 +359,7 @@ function triggerLabel(s: string) {
   return ({ event: '事件', alert: '告警', state_change: '状态变更', manual: '手动', schedule: '定时' })[s] || s
 }
 
-function statusLabel(s: string) {
-  return ({ draft: '草稿', active: '已激活', deprecated: '已废弃' })[s] || s
-}
+const statusLabel = (s: string): string => policyStatusLabel(s)
 
 function actionTypeLabel(t: string) {
   return ({ script: '执行脚本', playbook: '执行Playbook', notification: '发送通知', ticket: '创建工单', suppress: '抑制告警' })[t] || t

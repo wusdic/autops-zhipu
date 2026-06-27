@@ -313,6 +313,7 @@ import { APP_CONFIG } from '@/shared/config'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
+import { priorityTag } from '@/shared/utils/labels'
 import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
@@ -667,10 +668,8 @@ function formatJson(obj: any) {
   try { return JSON.stringify(obj, null, 2) } catch { return String(obj) }
 }
 
-function priorityType(p: string): TagType {
-  const map: Record<string, string> = { critical: 'danger', high: 'warning', medium: 'primary', low: 'success' }
-  return (map[p] ?? undefined) as TagType
-}
+// 优先级统一取自 labels.ts
+const priorityType = (p: string): TagType => priorityTag(p) as TagType
 
 function ticketTypeLabel(t: string) {
   const map: Record<string, string> = { incident: '事件', problem: '问题', change: '变更', task: '任务' }

@@ -213,6 +213,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Delete } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
+import { policyStatusLabel, riskTag } from '@/shared/utils/labels'
 
 const router = useRouter()
 const stats = reactive({ total: 0, active: 0, highRisk: 0, pendingApproval: 0 })
@@ -330,8 +331,8 @@ async function toggleStatus(row: any) {
 function getGroupName(id: string) { return groups.value.find(g => g.id === id)?.name || id }
 function triggerLabel(s: string) { return ({ event:'事件', alert:'告警', state_change:'状态变更', manual:'手动', schedule:'定时' })[s] || s }
 function actionTypeLabel(t: string) { return ({ script:'脚本', playbook:'Playbook', notification:'通知', ticket:'工单', suppress:'抑制' })[t] || t }
-function statusLabel(s: string) { return ({ draft:'草稿', active:'已激活', deprecated:'已废弃' })[s] || s }
-function riskType(r: string): TagType { return (({ low:'info', medium:'warning', high:'danger', critical:'danger' })[r] ?? 'info') as TagType }
+const statusLabel = (s: string): string => policyStatusLabel(s)
+const riskType = (r: string): TagType => riskTag(r) as TagType
 function fmt(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '-' }
 
 onMounted(() => { load(); loadGroups() })

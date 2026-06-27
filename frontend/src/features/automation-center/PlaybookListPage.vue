@@ -171,6 +171,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Delete } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
+import { policyStatusLabel, riskTag } from '@/shared/utils/labels'
 
 const router = useRouter()
 
@@ -301,8 +302,8 @@ async function remove(row: any) {
 }
 
 function getScriptName(id: string) { return scripts.value.find(s => s.id === id)?.name || id || '-' }
-function statusLabel(s: string) { return ({ draft:'草稿', active:'已激活', deprecated:'已废弃' })[s] || s }
-function riskType(r: string): TagType { return (({ low:'info', medium:'warning', high:'danger', critical:'danger' })[r] ?? 'info') as TagType }
+const statusLabel = (s: string): string => policyStatusLabel(s)
+const riskType = (r: string): TagType => riskTag(r) as TagType
 function fmt(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '-' }
 
 onMounted(() => { load(); loadScripts() })

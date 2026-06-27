@@ -245,6 +245,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
+import { execStatusTag, execStatusLabel } from '@/shared/utils/labels'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 const route = useRoute()
@@ -281,19 +282,9 @@ const steps = computed(() => execution.value?.steps || [])
 
 let logTimer: ReturnType<typeof setInterval> | null = null
 
-function statusType(s: string): TagType {
-  const map: Record<string, string> = {
-    pending: 'warning', running: 'primary', completed: 'success', failed: 'danger', cancelled: 'info',
-  }
-  return (map[s] || 'info') as TagType
-}
-
-function statusLabel(s: string) {
-  const map: Record<string, string> = {
-    pending: '待审批', running: '执行中', completed: '已完成', failed: '失败', cancelled: '已取消',
-  }
-  return map[s] || s
-}
+// 执行状态统一取自 labels.ts（覆盖全部 canonical 状态）
+const statusType = (s: string): TagType => execStatusTag(s) as TagType
+const statusLabel = (s: string): string => execStatusLabel(s)
 
 async function loadExecution() {
   loading.value = true
