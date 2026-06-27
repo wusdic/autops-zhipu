@@ -25,6 +25,8 @@ class DiscoveryTask(Base):
     protocols: Mapped[str | None] = mapped_column(JSON, nullable=True)
     ports: Mapped[str | None] = mapped_column(String(200), nullable=True)
     credential_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # 引用发现模板：创建任务时从模板继承 protocols/ports/凭据/超时
+    template_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     timeout: Mapped[int] = mapped_column(Integer, default=30)
     # 是否自动纳管：开启后建任务即自动启动扫描，扫描完成自动纳管全部存活IP
     auto_onboard: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

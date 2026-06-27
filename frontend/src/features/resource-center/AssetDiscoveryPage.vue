@@ -250,11 +250,35 @@
           </div>
           <el-input v-if="newTask.ipMode === 'cidr'" v-model="newTask.cidr" placeholder="192.168.1.0/24" style="margin-top:8px" />
         </el-form-item>
+        <el-form-item label="发现模板">
+          <el-select
+            v-model="newTask.template_id"
+            placeholder="可选：选择模板自动套用协议/端口/凭据"
+            clearable
+            style="width:100%"
+            @change="onTemplatePick"
+          >
+            <el-option v-for="t in templates" :key="t.id" :label="t.name" :value="t.id" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="协议">
           <el-checkbox-group v-model="newTask.protocols">
-            <el-checkbox value="ICMP" /><el-checkbox value="TCP" />
-            <el-checkbox value="SNMP" /><el-checkbox value="SSH" />
+            <el-tooltip content="ICMP Ping：探测主机可达性（在线/离线）" placement="top">
+              <el-checkbox value="icmp" label="ICMP" />
+            </el-tooltip>
+            <el-tooltip content="TCP 端口扫描：探测开放端口、推断资产类型" placement="top">
+              <el-checkbox value="tcp" label="TCP" />
+            </el-tooltip>
+            <el-tooltip content="SNMP：采集网络设备指纹（需 community/凭证）" placement="top">
+              <el-checkbox value="snmp" label="SNMP" />
+            </el-tooltip>
+            <el-tooltip content="SSH：探测可登录性（需 SSH 凭证）" placement="top">
+              <el-checkbox value="ssh" label="SSH" />
+            </el-tooltip>
           </el-checkbox-group>
+          <div style="font-size:12px;color:var(--autops-info);margin-top:4px">
+            勾选探测协议；ICMP 判在线性，TCP 扫端口推断类型。
+          </div>
         </el-form-item>
         <el-form-item label="端口范围">
           <el-input v-model="newTask.ports" placeholder="22,80,443,3389 或留空" />
@@ -310,8 +334,8 @@ const taskFormRef = ref()
 const newTask = reactive({
   name: '', ipMode: 'range' as 'range' | 'cidr',
   ip_start: '', ip_end: '', cidr: '',
-  protocols: ['ICMP'] as string[], ports: '',
-  credential_id: '', timeout: 30,
+  protocols: ['icmp', 'tcp'] as string[], ports: '',
+  template_id: '', credential_id: '', timeout: 30,
   auto_onboard: true,
 })
 const taskRules = { name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }] }
@@ -332,6 +356,7 @@ const wizardCollectionTemplate = ref('default_linux')
 const wizardInterval = ref('900')
 const wizardGroup = ref('')
 const credentials = ref<any[]>([])
+const templates = ref<any[]>([])
 const assetGroups = ref<any[]>([])
 const testing = ref(false)
 const testResult = ref('')
@@ -392,6 +417,18 @@ async function loadCredentials() {
   } catch {}
 }
 
+async function loadTemplates() {
+  try {
+    const res = await api.get(API.DISCOVERY_TEMPLATES)
+    if (res.data?.code === 0) templates.value = res.data.data?.items || res.data.data || []
+  } catch {}
+}
+
+// 选模板后清空协议勾选，交由后端从模板继承（再勾选则视为覆盖）
+function onTemplatePick(id: string) {
+  if (id) newTask.protocols = []
+}
+
 async function loadAssetGroups() {
   try {
     const res = await api.get(API.ASSET_GROUPS)
@@ -404,8 +441,13 @@ async function createTask() {
   try {
     await taskFormRef.value?.validate()
     const payload: any = {
-      name: newTask.name, protocols: newTask.protocols,
+      name: newTask.name,
       timeout: newTask.timeout, auto_onboard: newTask.auto_onboard,
+    }
+    // 选了模板就让协议留空（由后端从模板继承）；否则用所选协议
+    if (newTask.template_id) payload.template_id = newTask.template_id
+    if (!newTask.template_id || (newTask.protocols && newTask.protocols.length)) {
+      payload.protocols = newTask.protocols
     }
     if (newTask.ipMode === 'range') { payload.ip_start = newTask.ip_start; payload.ip_end = newTask.ip_end }
     else { payload.cidr = newTask.cidr }
@@ -529,7 +571,7 @@ function getCredentialName(id: string) { return credentials.value.find(c => c.id
 function getGroupName(id: string) { return assetGroups.value.find(g => g.id === id)?.name || '-' }
 
 // === 生命周期 ===
-onMounted(() => { loadTasks(); loadResults(); loadStats(); loadCredentials(); loadAssetGroups() })
+onMounted(() => { loadTasks(); loadResults(); loadStats(); loadCredentials(); loadAssetGroups(); loadTemplates() })
 </script>
 
 <style scoped>

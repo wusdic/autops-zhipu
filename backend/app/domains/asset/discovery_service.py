@@ -158,24 +158,51 @@ class DiscoveryService:
     def __init__(self, db: AsyncSession | None = None):
         self.db = db
 
+    async def _load_template(self, template_id: str):
+        """加载发现模板（用于任务继承），不存在返回 None."""
+        from app.domains.asset.discovery_template_models import DiscoveryTemplate
+
+        return (
+            await self.db.execute(
+                select(DiscoveryTemplate).where(DiscoveryTemplate.id == template_id)
+            )
+        ).scalar_one_or_none()
+
     async def create_task(self, data: dict) -> dict:
         """创建发现任务（DB持久化）.
 
         当 auto_onboard=True（默认）时，创建后自动启动扫描。
+        支持 template_id：未显式提供的字段从发现模板继承。
         """
         ip_range = data.get("ip_range") or data.get("cidr") or ""
         if not ip_range:
             ip_range = "127.0.0.1"
+
+        # 引用发现模板时，未显式提供的字段从模板继承（B.1：模板应用到任务）
+        template_id = data.get("template_id")
+        tpl_protocols = tpl_ports = tpl_cred = tpl_timeout = None
+        if template_id:
+            tpl = await self._load_template(template_id)
+            if tpl:
+                # template.protocol 为 "ssh,snmp" 形式，拆成小写列表
+                tpl_protocols = [
+                    p.strip().lower() for p in (tpl.protocol or "").split(",") if p.strip()
+                ] or None
+                tpl_ports = tpl.port_range
+                tpl_cred = tpl.credential_id
+                tpl_timeout = tpl.timeout
+
         task = DiscoveryTask(
             name=data.get(
                 "name", "discovery-" + datetime.now().strftime("%Y%m%d%H%M%S")
             ),
             ip_range=ip_range,
             ip_mode=data.get("ip_mode", "cidr"),
-            protocols=data.get("protocols", ["icmp"]),
-            ports=data.get("ports"),
-            credential_id=data.get("credential_id"),
-            timeout=data.get("timeout", 30),
+            protocols=data.get("protocols") or tpl_protocols or ["icmp"],
+            ports=data.get("ports") or tpl_ports,
+            credential_id=data.get("credential_id") or tpl_cred,
+            template_id=template_id,
+            timeout=data.get("timeout") or tpl_timeout or 30,
             auto_onboard=data.get("auto_onboard", True),
             status="pending",
             discovered_count=0,

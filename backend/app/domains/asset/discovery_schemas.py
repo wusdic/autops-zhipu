@@ -13,9 +13,10 @@ class DiscoveryTaskCreate(BaseModel):
     cidr: str | None = Field(default=None, description="CIDR格式: 10.168.1.0/24")
     ip_start: str | None = Field(default=None, description="起始IP (range模式)")
     ip_end: str | None = Field(default=None, description="结束IP (range模式)")
-    protocols: list[str] = Field(default=["icmp"], description="探测协议")
+    protocols: list[str] | None = Field(default=None, description="探测协议（留空且选模板则继承模板）")
     ports: str | None = Field(default=None, description="端口范围: 22,80,443")
     credential_id: str | None = Field(default=None, description="绑定凭证ID")
+    template_id: str | None = Field(default=None, description="发现模板ID（继承协议/端口/凭据/超时）")
     timeout: int = Field(default=30, description="超时秒数")
     # 自动纳管：开启后建任务即自动启动扫描，扫描完成自动纳管全部存活IP
     auto_onboard: bool = Field(default=True, description="自动发现并纳管存活IP")
