@@ -462,6 +462,7 @@ import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { MagicStick, Loading, Bell } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { severityTagType } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 import TimelineView from '@/shared/components/TimelineView.vue'
 import LogStream from '@/shared/components/LogStream.vue'
@@ -583,10 +584,7 @@ function parseActionChain(s: string) {
   }
 }
 
-function severityType(severity: string): TagType {
-  const map: Record<string, string> = { critical: 'danger', high: 'danger', warning: 'warning', info: 'info' }
-  return (map[severity] || 'info') as TagType
-}
+const severityType = (severity: string): TagType => severityTagType(severity) as TagType
 
 function logLevelType(level: string): TagType {
   const map: Record<string, TagType> = { error: 'danger', warning: 'warning', warn: 'warning', info: 'info', debug: 'info' }

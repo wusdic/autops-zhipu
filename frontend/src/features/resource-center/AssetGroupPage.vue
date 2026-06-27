@@ -166,6 +166,7 @@ import { Plus, Search, Folder } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import api from '@/shared/api/client'
+import { assetStatusTag } from '@/shared/utils/labels'
 import { API as R } from '@/shared/api/routes'
 
 // 分组列表
@@ -210,9 +211,7 @@ function formatType(t: string): string {
   return map[t] || t || '-'
 }
 
-function statusType(s: string): TagType {
-  return (s === 'active' ? 'success' : s === 'inactive' ? 'danger' : 'warning') as TagType
-}
+const statusType = (s: string): TagType => assetStatusTag(s) as TagType
 
 async function loadGroups() {
   groupLoading.value = true

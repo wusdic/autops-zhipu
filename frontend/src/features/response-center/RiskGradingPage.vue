@@ -142,6 +142,7 @@ import { ref, computed, onMounted } from 'vue'
 import { Refresh, Download } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
+import { riskLabel as riskLabelFn, riskTag as riskTagFn } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 
 const loading = ref(false)
@@ -239,14 +240,9 @@ function filterByCell(cell: any) {
   riskFilter.value = cell.level
 }
 
-function riskLabel(l: string) {
-  const map: Record<string, string> = { high: '高', medium: '中', low: '低', unknown: '未知' }
-  return map[l] || l || '-'
-}
-function riskTag(l: string): TagType {
-  const map: Record<string, TagType> = { high: 'danger', medium: 'warning', low: 'success', unknown: 'info' }
-  return (map[l] || 'info') as TagType
-}
+// 风险等级统一取自 labels.ts
+const riskLabel = (l: string): string => riskLabelFn(l)
+const riskTag = (l: string): TagType => riskTagFn(l) as TagType
 function assetTypeLabel(t: string) {
   const map: Record<string, string> = { linux: 'Linux', windows: 'Windows', database: '数据库', web: 'Web服务' }
   return map[t] || t || '-'

@@ -165,6 +165,7 @@ import { ref, computed, onMounted } from 'vue'
 import { MagicStick, CircleCheckFilled } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { knowledgeService } from '@/shared/api'
+import { riskLabel as riskLabelFn } from '@/shared/utils/labels'
 
 // ─── State ───────────────────────────────────────────────────────────
 const loading = ref(false)
@@ -181,14 +182,7 @@ const mediumRiskCount = computed(() => suggestions.value.filter(s => s.risk_leve
 const appliedCount = computed(() => suggestions.value.filter(s => s.applied).length)
 
 // ─── Helpers ─────────────────────────────────────────────────────────
-function riskLabel(level: string): string {
-  const map: Record<string, string> = {
-    high: '高风险',
-    medium: '中风险',
-    low: '低风险',
-  }
-  return map[level] || level || '-'
-}
+const riskLabel = (level: string): string => riskLabelFn(level)
 
 function riskTagType(level: string): TagType {
   const map: Record<string, string> = {

@@ -184,6 +184,7 @@ import type { TagType } from '@/shared/types'
 import { ElMessage } from 'element-plus'
 import { Plus, Search, Delete } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { severityTagType } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 
 const stats = reactive({ total: 0, active: 0, triggeredToday: 0, mostTriggered: ''})
@@ -298,7 +299,7 @@ async function duplicateRule(row: any) {
 function metricLabel(m: string) {
   return ({ cpu_usage:'CPU使用率', memory_usage:'内存使用率', disk_usage:'磁盘使用率', network_in:'网络入', network_out:'网络出', response_time:'响应时间', status_check:'状态检查', status_code:'状态码', connection_count:'连接数', process_count:'进程数', custom:'自定义' })[m] || m
 }
-function severityType(s: string): TagType { return (({ critical:'danger', warning:'warning', info:'info' })[s] ?? 'info') as TagType }
+const severityType = (s: string): TagType => severityTagType(s) as TagType
 function fmt(t: string) { return t ? new Date(t).toLocaleString('zh-CN') : '-' }
 
 onMounted(() => { load() })

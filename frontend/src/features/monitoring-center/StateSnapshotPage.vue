@@ -143,6 +143,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
 import { monitoringService } from '@/shared/api'
+import { healthLabel as healthLabelFn } from '@/shared/utils/labels'
 
 // ── State ──────────────────────────────────────────────────────────
 const loading = ref(false)
@@ -201,14 +202,7 @@ function healthTagType(health: string): TagType {
   return (map[health] || 'info') as TagType
 }
 
-function healthLabel(health: string): string {
-  const map: Record<string, string> = {
-    healthy: '健康',
-    degraded: '降级',
-    unhealthy: '异常',
-  }
-  return map[health] || health
-}
+const healthLabel = (health: string): string => healthLabelFn(health)
 
 // ── Data Loading ────────────────────────────────────────────────────
 async function loadData() {

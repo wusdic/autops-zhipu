@@ -378,6 +378,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Plus, Connection, Setting } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
+import { assetStatusTag, healthTag } from '@/shared/utils/labels'
 import { API as R } from '@/shared/api/routes'
 import TimelineView from '@/shared/components/TimelineView.vue'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
@@ -439,13 +440,8 @@ function formatRelationType(t: string): string {
   return map[t] || t
 }
 
-function statusType(s: string): TagType {
-  return (s === 'active' ? 'success' : s === 'inactive' ? 'danger' : 'warning') as TagType
-}
-
-function healthType(h: string): TagType {
-  return (h === 'healthy' ? 'success' : h === 'warning' ? 'warning' : h === 'critical' ? 'danger' : 'info') as TagType
-}
+const statusType = (s: string): TagType => assetStatusTag(s) as TagType
+const healthType = (h: string): TagType => healthTag(h) as TagType
 
 function riskLevelType(level: string): TagType {
   const map: Record<string, string> = {

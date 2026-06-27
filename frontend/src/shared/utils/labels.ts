@@ -55,9 +55,11 @@ export function reachabilityTag(s: string): TagType { return pickTag(REACHABILIT
 // ─── 健康度 health_status：healthy/warning/critical/unknown ───
 export const HEALTH_MAP: Record<string, string> = {
   healthy: '健康', warning: '警告', critical: '严重', unknown: '未知', degraded: '降级',
+  unhealthy: '异常', error: '异常',
 }
 export const HEALTH_TAG: Record<string, TagType> = {
   healthy: 'success', warning: 'warning', critical: 'danger', degraded: 'warning', unknown: 'info',
+  unhealthy: 'danger', error: 'danger',
 }
 export function healthLabel(s: string): string { return pick(HEALTH_MAP, s) }
 export function healthTag(s: string): TagType { return pickTag(HEALTH_TAG, s) }

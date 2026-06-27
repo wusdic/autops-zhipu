@@ -173,6 +173,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import { healthLabel as healthLabelFn } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 
 // ---------- Types ----------
@@ -228,10 +229,7 @@ function healthTagType(status: string): TagType {
   return (map[status] || 'info') as TagType
 }
 
-function healthLabel(status: string) {
-  const map: Record<string, string> = { healthy: '健康', warning: '告警', error: '异常', unknown: '未知' }
-  return map[status] || '未知'
-}
+const healthLabel = (status: string): string => healthLabelFn(status)
 
 function formatTime(val?: string) {
   if (!val) return '-'

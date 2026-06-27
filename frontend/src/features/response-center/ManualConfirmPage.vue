@@ -121,6 +121,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import { riskTag } from '@/shared/utils/labels'
 
 const router = useRouter()
 const loading = ref(false)
@@ -136,7 +137,7 @@ const pendingCount = computed(() => items.value.filter(i => i.status === 'pendin
 const sourceMap: Record<string, string> = { automation: '自动处置', ai: 'AI建议', policy: '策略触发' }
 function sourceName(s: string) { return sourceMap[s] || s }
 function sourceType(s: string): TagType { return ({ automation: 'warning', ai: 'success', policy: 'primary' }[s] || 'info') as TagType }
-function riskType(r: string): TagType { return ({ high: 'danger', medium: 'warning', low: 'info' }[r] || 'info') as TagType }
+const riskType = (r: string): TagType => riskTag(r) as TagType
 
 async function loadData() {
   loading.value = true

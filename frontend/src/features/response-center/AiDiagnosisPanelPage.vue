@@ -130,6 +130,7 @@ import { useRoute } from 'vue-router'
 import { MagicStick, Warning, VideoPlay, Link, Setting, Tickets, Connection, Loading, Select, SemiSelect, CloseBold } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
+import { riskLabel as riskLabelFn } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
@@ -204,10 +205,7 @@ function riskTag(r: string): TagType {
   const map: Record<string, TagType> = { high: 'danger', medium: 'warning', low: 'success' }
   return (map[r] || 'info') as TagType
 }
-function riskLabel(r: string) {
-  const map: Record<string, string> = { high: '高', medium: '中', low: '低' }
-  return map[r] || r || '-'
-}
+const riskLabel = (r: string): string => riskLabelFn(r)
 
 function delay(ms: number) { return new Promise(r => setTimeout(r, ms)) }
 </script>

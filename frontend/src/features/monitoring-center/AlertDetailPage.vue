@@ -429,6 +429,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Warning } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import { severityTagType } from '@/shared/utils/labels'
 import { API as R } from '@/shared/api/routes'
 import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
@@ -546,10 +547,7 @@ function formatJson(obj: any) {
   try { return JSON.stringify(obj, null, 2) } catch { return String(obj) }
 }
 
-function severityType(severity: string): TagType {
-  const map: Record<string, string> = { critical: 'danger', high: 'danger', warning: 'warning', info: 'info' }
-  return (map[severity] || 'info') as TagType
-}
+const severityType = (severity: string): TagType => severityTagType(severity) as TagType
 
 function logLevelType(level: string): TagType {
   const map: Record<string, TagType> = { error: 'danger', warning: 'warning', warn: 'warning', info: 'info', debug: 'info' }
