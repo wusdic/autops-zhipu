@@ -84,6 +84,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import { checkResultTag, checkResultLabel } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 
 // ---------- 状态 ----------
@@ -98,20 +99,9 @@ const pagination = reactive({
   total: 0,
 })
 
-// ---------- 工具函数 ----------
-const statusMap: Record<string, { label: string; type: string }> = {
-  pass: { label: '通过', type: 'success' },
-  fail: { label: '失败', type: 'danger' },
-  warn: { label: '警告', type: 'warning' },
-}
-
-function statusTagType(status: string): TagType {
-  return (statusMap[status]?.type ?? 'info') as TagType
-}
-
-function statusLabel(status: string): string {
-  return statusMap[status]?.label ?? status ?? '-'
-}
+// ---------- 工具函数（结果取值统一来自 labels.ts）----------
+const statusTagType = (status: string): TagType => checkResultTag(status) as TagType
+const statusLabel = (status: string): string => checkResultLabel(status)
 
 function statusCodeClass(code: number | undefined): string {
   if (!code) return ''

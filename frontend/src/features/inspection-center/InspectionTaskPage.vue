@@ -201,6 +201,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Search, Refresh, VideoPlay, Loading } from '@element-plus/icons-vue'
 import { inspectionService } from '@/shared/api'
+import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
 // ---------- 状态 ----------
@@ -233,22 +234,9 @@ const triggerFormRules: FormRules = {
   plan_id: [{ required: true, message: '请选择巡检计划', trigger: 'change' }],
 }
 
-// ---------- 工具函数 ----------
-const statusMap: Record<string, { label: string; type: string }> = {
-  pending: { label: '待执行', type: 'info' },
-  running: { label: '执行中', type: 'warning' },
-  completed: { label: '已完成', type: 'success' },
-  failed: { label: '失败', type: 'danger' },
-  cancelled: { label: '已取消', type: 'info' },
-}
-
-function statusTagType(status: string): TagType {
-  return (statusMap[status]?.type ?? 'info') as TagType
-}
-
-function statusLabel(status: string): string {
-  return statusMap[status]?.label ?? status ?? '-'
-}
+// ---------- 工具函数（任务状态统一来自 labels.ts）----------
+const statusTagType = (status: string): TagType => taskStatusTag(status) as TagType
+const statusLabel = (status: string): string => taskStatusLabel(status)
 
 function progressStatus(row: any): '' | 'success' | 'warning' | 'exception' | undefined {
   if (row.status === 'failed') return 'exception'

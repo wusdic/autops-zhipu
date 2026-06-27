@@ -120,6 +120,7 @@ import {
   Tickets,
 } from '@element-plus/icons-vue'
 import { inspectionService } from '@/shared/api'
+import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 
 const router = useRouter()
 
@@ -197,24 +198,9 @@ const quickLinks = [
   },
 ]
 
-// ── 状态映射 ──
-const statusMap: Record<string, { type: '' | 'success' | 'warning' | 'danger' | 'info'; label: string }> = {
-  completed: { type: 'success', label: '已完成' },
-  success: { type: 'success', label: '已完成' },
-  failed: { type: 'danger', label: '失败' },
-  running: { type: 'warning', label: '执行中' },
-  pending: { type: 'info', label: '待执行' },
-  cancelled: { type: 'info', label: '已取消' },
-  timeout: { type: 'danger', label: '超时' },
-}
-
-function statusType(status: string): TagType {
-  return (statusMap[status]?.type ?? 'info') as TagType
-}
-
-function statusLabel(status: string) {
-  return statusMap[status]?.label ?? status
-}
+// 任务状态统一取自 labels.ts
+const statusType = (status: string): TagType => taskStatusTag(status) as TagType
+const statusLabel = (status: string): string => taskStatusLabel(status)
 
 // ── 格式化工具 ──
 function formatTime(val: string | null | undefined): string {

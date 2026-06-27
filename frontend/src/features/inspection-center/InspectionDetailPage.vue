@@ -121,6 +121,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Refresh, Warning, Document, DataAnalysis, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
+import {
+  taskStatusTag, taskStatusLabel, checkResultTag, checkResultLabel, severityTagType,
+} from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 
@@ -193,26 +196,11 @@ function handleExpand(row: any) { /* expanded */ }
 
 function goBack() { router.back() }
 
-function statusTag(s: string): TagType {
-  const map: Record<string, TagType> = { running: 'warning', completed: 'success', failed: 'danger', pending: 'info' }
-  return (map[s] || 'info') as TagType
-}
-function statusLabel(s: string) {
-  const map: Record<string, string> = { running: '执行中', completed: '已完成', failed: '失败', pending: '待执行' }
-  return map[s] || s || '-'
-}
-function resultTag(r: string): TagType {
-  const map: Record<string, TagType> = { pass: 'success', fail: 'danger', warning: 'warning', skip: 'info' }
-  return (map[r] || 'info') as TagType
-}
-function resultLabel(r: string) {
-  const map: Record<string, string> = { pass: '通过', fail: '失败', warning: '警告', skip: '跳过' }
-  return map[r] || r || '-'
-}
-function severityTag(s: string): TagType {
-  const map: Record<string, TagType> = { critical: 'danger', high: 'danger', medium: 'warning', low: 'info' }
-  return (map[s] || 'info') as TagType
-}
+const statusTag = (s: string): TagType => taskStatusTag(s) as TagType
+const statusLabel = (s: string): string => taskStatusLabel(s)
+const resultTag = (r: string): TagType => checkResultTag(r) as TagType
+const resultLabel = (r: string): string => checkResultLabel(r)
+const severityTag = (s: string): TagType => severityTagType(s) as TagType
 function typeLabel(t: string) {
   const map: Record<string, string> = { page: '页面巡检', log: '日志巡检', config: '配置巡检', performance: '性能巡检', security: '安全巡检', baseline: '基线巡检' }
   return map[t] || t || '-'

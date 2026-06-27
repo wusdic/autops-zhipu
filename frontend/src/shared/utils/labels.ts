@@ -20,11 +20,12 @@ function pickTag(map: Record<string, TagType>, key: string | null | undefined, f
 
 // ─── 严重度（告警/异常）info/warning/critical，容错 high/medium/low ───
 export const SEVERITY_MAP: Record<string, string> = {
-  critical: '严重', high: '高危', warning: '警告', medium: '中', info: '提示', low: '低', normal: '正常',
+  critical: '严重', high: '高危', major: '高', warning: '警告', medium: '中',
+  info: '提示', low: '低', minor: '低', normal: '正常',
 }
 export const SEVERITY_TAG: Record<string, TagType> = {
-  critical: 'danger', high: 'danger', warning: 'warning', medium: 'warning',
-  info: 'info', low: 'info', normal: 'success',
+  critical: 'danger', high: 'danger', major: 'danger', warning: 'warning', medium: 'warning',
+  info: 'info', low: 'info', minor: 'info', normal: 'success',
 }
 export function severityLabel(s: string): string { return pick(SEVERITY_MAP, s) }
 export function severityTagType(s: string): TagType { return pickTag(SEVERITY_TAG, s) }
@@ -55,11 +56,11 @@ export function reachabilityTag(s: string): TagType { return pickTag(REACHABILIT
 // ─── 健康度 health_status：healthy/warning/critical/unknown ───
 export const HEALTH_MAP: Record<string, string> = {
   healthy: '健康', warning: '警告', critical: '严重', unknown: '未知', degraded: '降级',
-  unhealthy: '异常', error: '异常',
+  unhealthy: '异常', error: '异常', down: '离线',
 }
 export const HEALTH_TAG: Record<string, TagType> = {
   healthy: 'success', warning: 'warning', critical: 'danger', degraded: 'warning', unknown: 'info',
-  unhealthy: 'danger', error: 'danger',
+  unhealthy: 'danger', error: 'danger', down: 'danger',
 }
 export function healthLabel(s: string): string { return pick(HEALTH_MAP, s) }
 export function healthTag(s: string): TagType { return pickTag(HEALTH_TAG, s) }
@@ -138,8 +139,78 @@ export function riskTag(s: string): TagType { return pickTag(RISK_TAG_TYPE, s) }
 // ─── 知识库状态 ───
 export const KNOWLEDGE_STATUS_MAP: Record<string, string> = {
   draft: '草稿', published: '已发布', archived: '已归档', review: '待审核',
+  pending_review: '待审核', rejected: '已驳回',
+}
+export const KNOWLEDGE_STATUS_TAG: Record<string, TagType> = {
+  draft: 'info', published: 'success', archived: 'info', review: 'warning',
+  pending_review: 'warning', rejected: 'danger',
 }
 export function knowledgeStatusLabel(s: string): string { return pick(KNOWLEDGE_STATUS_MAP, s) }
+export function knowledgeStatusTag(s: string): TagType { return pickTag(KNOWLEDGE_STATUS_TAG, s) }
+
+// ─── 通用任务/作业状态（报表/导出/巡检任务/采集结果等）───
+export const TASK_STATUS_MAP: Record<string, string> = {
+  pending: '待执行', queued: '排队中', generating: '生成中', running: '执行中',
+  processing: '处理中', in_progress: '处理中', completed: '已完成', success: '成功',
+  failed: '失败', error: '失败', cancelled: '已取消', timeout: '超时', archived: '已归档',
+}
+export const TASK_STATUS_TAG: Record<string, TagType> = {
+  pending: 'info', queued: 'info', generating: 'warning', running: 'warning',
+  processing: 'warning', in_progress: 'warning', completed: 'success', success: 'success',
+  failed: 'danger', error: 'danger', cancelled: 'info', timeout: 'danger', archived: 'success',
+}
+export function taskStatusLabel(s: string): string { return pick(TASK_STATUS_MAP, s) }
+export function taskStatusTag(s: string): TagType { return pickTag(TASK_STATUS_TAG, s) }
+
+// ─── 检查/巡检结果（巡检/配置巡检/自检）───
+export const CHECK_RESULT_MAP: Record<string, string> = {
+  normal: '正常', ok: '正常', pass: '通过', passed: '通过',
+  abnormal: '异常', fail: '未通过', failed: '失败', error: '异常',
+  warning: '警告', warn: '警告', pending: '未执行', skipped: '跳过', skip: '跳过',
+}
+export const CHECK_RESULT_TAG: Record<string, TagType> = {
+  normal: 'success', ok: 'success', pass: 'success', passed: 'success',
+  abnormal: 'danger', fail: 'danger', failed: 'danger', error: 'danger',
+  warning: 'warning', warn: 'warning', pending: 'info', skipped: 'info', skip: 'info',
+}
+export function checkResultLabel(s: string): string { return pick(CHECK_RESULT_MAP, s) }
+export function checkResultTag(s: string): TagType { return pickTag(CHECK_RESULT_TAG, s) }
+
+// ─── 审批状态（执行审批/Agent 审批）───
+export const APPROVAL_STATUS_MAP: Record<string, string> = {
+  pending: '待审批', approved: '已批准', rejected: '已拒绝',
+}
+export const APPROVAL_STATUS_TAG: Record<string, TagType> = {
+  pending: 'warning', approved: 'success', rejected: 'danger',
+}
+export function approvalStatusLabel(s: string): string { return pick(APPROVAL_STATUS_MAP, s) }
+export function approvalStatusTag(s: string): TagType { return pickTag(APPROVAL_STATUS_TAG, s) }
+
+// ─── 服务状态（模型服务/集成）───
+export const SERVICE_STATUS_MAP: Record<string, string> = {
+  active: '正常', inactive: '未激活', error: '异常', testing: '测试中',
+  online: '在线', offline: '离线',
+}
+export const SERVICE_STATUS_TAG: Record<string, TagType> = {
+  active: 'success', inactive: 'info', error: 'danger', testing: 'warning',
+  online: 'success', offline: 'danger',
+}
+export function serviceStatusLabel(s: string): string { return pick(SERVICE_STATUS_MAP, s) }
+export function serviceStatusTag(s: string): TagType { return pickTag(SERVICE_STATUS_TAG, s) }
+
+// ─── 异常(anomaly)状态 ───
+export const ANOMALY_STATUS_MAP: Record<string, string> = {
+  open: '待处理', new: '待处理', pending: '待处理', acknowledged: '已确认',
+  processing: '处理中', in_progress: '处理中', resolved: '已解决', closed: '已关闭',
+  escalated: '已升级', cancelled: '已取消',
+}
+export const ANOMALY_STATUS_TAG: Record<string, TagType> = {
+  open: 'danger', new: 'danger', pending: 'warning', acknowledged: 'warning',
+  processing: 'warning', in_progress: 'warning', resolved: 'success', closed: 'info',
+  escalated: 'danger', cancelled: 'info',
+}
+export function anomalyStatusLabel(s: string): string { return pick(ANOMALY_STATUS_MAP, s) }
+export function anomalyStatusTag(s: string): TagType { return pickTag(ANOMALY_STATUS_TAG, s) }
 
 // ─── 资产类型 ───
 export const ASSET_TYPE_MAP: Record<string, string> = {

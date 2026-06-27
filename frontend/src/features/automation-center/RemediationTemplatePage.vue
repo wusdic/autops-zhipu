@@ -169,6 +169,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import { riskTag, riskLabel as riskLabelFn } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 
 const router = useRouter()
@@ -204,8 +205,8 @@ const formRules = {
 
 const scenarioMap: Record<string, string> = { disk_full: '磁盘空间', service_down: '服务异常', port_unreachable: '端口不可达', connection_high: '连接数过高', cert_expiry: '证书过期' }
 function scenarioName(s: string) { return scenarioMap[s] || s }
-function riskType(r: string): TagType { return ({ low: 'info', medium: 'primary', high: 'warning', critical: 'danger' }[r] || 'info') as TagType }
-function riskLabel(r: string) { return { low: '低', medium: '中', high: '高', critical: '极高' }[r] || r }
+const riskType = (r: string): TagType => riskTag(r) as TagType
+const riskLabel = (r: string): string => riskLabelFn(r)
 
 async function loadData() {
   loading.value = true

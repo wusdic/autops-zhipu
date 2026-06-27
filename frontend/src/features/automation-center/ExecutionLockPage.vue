@@ -224,6 +224,7 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Search, Refresh, Unlock, Lock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { API } from '@/shared/api/routes'
+import { taskStatusLabel, taskStatusTag, riskLabel as riskLabelFn } from '@/shared/utils/labels'
 import client from '@/shared/api/client'
 import type { AxiosResponse } from 'axios'
 
@@ -310,20 +311,9 @@ function triggerLabel(t: string | undefined): string {
   return map[t || ''] || t || '-'
 }
 
-function statusLabel(s: string | undefined): string {
-  var map: Record<string, string> = { pending: '待执行', running: '运行中', completed: '已完成', failed: '失败', cancelled: '已取消' }
-  return map[s || ''] || s || '-'
-}
-
-function statusTagType(s: string | undefined): TagType {
-  var map: Record<string, string> = { pending: 'info', running: 'warning', completed: 'success', failed: 'danger', cancelled: 'info' }
-  return (map[s || ''] || 'info') as TagType
-}
-
-function riskLabel(r: string | undefined): string {
-  var map: Record<string, string> = { high: '高', medium: '中', low: '低' }
-  return map[r || ''] || r || '-'
-}
+const statusLabel = (s: string | undefined): string => taskStatusLabel(s || '')
+const statusTagType = (s: string | undefined): TagType => taskStatusTag(s || '') as TagType
+const riskLabel = (r: string | undefined): string => riskLabelFn(r || '')
 
 // ---------- 数据请求 ----------
 var buildParams = (): Record<string, unknown> => {

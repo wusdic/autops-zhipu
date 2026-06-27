@@ -236,6 +236,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Refresh, Search, Close } from '@element-plus/icons-vue'
 import { automationService } from '@/shared/api'
+import { riskLabel as riskLabelFn } from '@/shared/utils/labels'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
@@ -321,10 +322,7 @@ function riskTagType(level: string): TagType {
   return (map[level || ''] || 'info') as TagType
 }
 
-function riskLabel(level?: string) {
-  const map: Record<string, string> = { high: '高风险', medium: '中风险', low: '低风险' }
-  return map[level || ''] || '未知'
-}
+const riskLabel = (level?: string): string => riskLabelFn(level || '')
 
 function formatTime(val?: string) {
   if (!val) return '-'

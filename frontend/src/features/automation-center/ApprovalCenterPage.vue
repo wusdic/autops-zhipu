@@ -233,6 +233,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import { automationService } from '@/shared/api'
+import { riskLabel as riskLabelFn, approvalStatusTag, approvalStatusLabel } from '@/shared/utils/labels'
 
 // ---------- Types ----------
 interface Approval {
@@ -300,20 +301,9 @@ function riskTagType(level: string): TagType {
   return (map[level || ''] || 'info') as TagType
 }
 
-function riskLabel(level?: string) {
-  const map: Record<string, string> = { high: '高风险', medium: '中风险', low: '低风险' }
-  return map[level || ''] || '未知'
-}
-
-function statusTagType(status: string): TagType {
-  const map: Record<string, string> = { pending: 'warning', approved: 'success', rejected: 'danger' }
-  return (map[status || ''] || 'info') as TagType
-}
-
-function statusLabel(status?: string) {
-  const map: Record<string, string> = { pending: '待审批', approved: '已批准', rejected: '已拒绝' }
-  return map[status || ''] || '未知'
-}
+const riskLabel = (level?: string): string => riskLabelFn(level || '')
+const statusTagType = (status?: string): TagType => approvalStatusTag(status || '') as TagType
+const statusLabel = (status?: string): string => approvalStatusLabel(status || '')
 
 function formatTime(val?: string) {
   if (!val) return '-'

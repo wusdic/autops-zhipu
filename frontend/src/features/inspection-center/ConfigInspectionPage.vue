@@ -126,6 +126,7 @@ import { ref, computed, onMounted } from 'vue'
 import { Search, VideoPlay } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
+import { checkResultLabel, checkResultTag } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 import { useRouter } from 'vue-router'
 
@@ -237,14 +238,8 @@ function checkTypeTag(t: string): TagType {
   const map: Record<string, TagType> = { drift: 'warning', compliance: 'primary', baseline: 'info' }
   return (map[t] || 'info') as TagType
 }
-function statusLabel(s: string) {
-  const map: Record<string, string> = { normal: '正常', abnormal: '异常', pending: '未执行' }
-  return map[s] || s || '-'
-}
-function statusTag(s: string): TagType {
-  const map: Record<string, TagType> = { normal: 'success', abnormal: 'danger', pending: 'info' }
-  return (map[s] || 'info') as TagType
-}
+const statusLabel = (s: string): string => checkResultLabel(s)
+const statusTag = (s: string): TagType => checkResultTag(s) as TagType
 function formatTime(t: string) {
   return t ? new Date(t).toLocaleString('zh-CN') : '-'
 }
