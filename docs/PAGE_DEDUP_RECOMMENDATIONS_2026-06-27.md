@@ -102,9 +102,14 @@
 | B3 人工确认/处置台 | ✅ 已完成 | 新增 ManualWorkbenchPage（待确认/待处置 两 tab）；`/manual-confirm` redirect |
 | B4 状态快照/变化 | ✅ 已完成 | 新增 StateMonitorPage（当前快照/变更历史 两 tab）；`/monitoring/state-changes` redirect |
 | C 异常总览/列表 | ✅ 已完成 | 新增 AnomalyCenterPage（总览/列表 两 tab）；`/anomaly/list` redirect |
-| B5 日志三页 | — 不合并 | 职责不同，保留 |
-| B6 报告生成/导出中心 | ⏳ 待核对边界 | 未动 |
-| C 其余总览+列表 | ⏳ 可选 | 巡检/监控/工单/知识/报表/自动化/资源总览未动 |
+| B5 日志三页 | ✅ 核对：不合并 | 巡检/接入/检索职责不同，保留 |
+| B6 报告生成/导出中心 | ✅ 核对：不合并 | ReportGenerate 用 reportService.generate（报表生成表单+最近任务）；ExportCenter 用 API.EXPORTS（通用导出任务管理+下载/取消）。功能不同，非重复 |
+| C 其余总览+列表 | ✅ 核对：保留 | 工单/知识/巡检/监控/报表/自动化/资源「总览」均为真实仪表盘（统计卡片+近期动态+「查看全部→列表」入口），未复制完整列表（筛选/分页/CRUD）。符合"总览只做统计+入口+动态"原则，合并将损坏仪表盘——故保留。唯一的列表型重复（异常）已在 C 合并。 |
+
+### 核对结论
+去重工作至此收敛完成：**确定重复（A1/A2/A3）与高度相近（B1/B2/B3/B4 + C 异常）已全部合并**；
+其余经逐一核对为**职责不同或合规仪表盘**，强行合并会造成功能回退，故保留。
+后续如新增页面，沿用本文「embedded prop + el-tabs(lazy) + 旧路径 redirect」模式即可。
 
 **统一实现模式**：被合并页加 `embedded` prop（嵌入时隐藏自身页头），宿主页用 `el-tabs`（`lazy`）承载；
 旧路径一律 `redirect` 到宿主 `?tab=xxx` 保留外链/书签。
