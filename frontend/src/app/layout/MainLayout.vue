@@ -99,6 +99,7 @@
             </template>
             <el-menu-item index="/automation">自动化总览</el-menu-item>
             <el-menu-item index="/policies">策略管理</el-menu-item>
+            <el-menu-item index="/rule-gap">规则覆盖度</el-menu-item>
             <el-menu-item index="/scripts">脚本库</el-menu-item>
             <el-menu-item index="/playbooks">剧本库</el-menu-item>
             <el-menu-item index="/approvals">审批中心</el-menu-item>
@@ -132,9 +133,6 @@
             <el-menu-item index="/knowledge/import">知识导入</el-menu-item>
             <el-menu-item index="/knowledge-review">知识审核</el-menu-item>
             <el-menu-item index="/similar-cases">相似案例</el-menu-item>
-            <el-menu-item index="/rule-gap">规则缺口</el-menu-item>
-            <el-menu-item index="/prompt-templates">Prompt 模板</el-menu-item>
-            <el-menu-item index="/ai-tool-policy">AI 工具策略</el-menu-item>
           </el-sub-menu>
 
           <!-- M9 报表审计中心 -->
@@ -175,6 +173,10 @@
             <el-menu-item index="/config/inspection-rules">巡检规则</el-menu-item>
             <el-menu-item index="/config/threshold-rules">阈值规则</el-menu-item>
             <el-menu-item index="/config/notification-rules">通知规则</el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">AI 设置</el-menu-item>
+            <el-menu-item index="/model-service">模型服务</el-menu-item>
+            <el-menu-item index="/ai-tool-policy">AI 工具策略</el-menu-item>
+            <el-menu-item index="/prompt-templates">Prompt 模板</el-menu-item>
           </el-sub-menu>
 
           <!-- M12 平台管理 -->
@@ -190,7 +192,6 @@
             <el-menu-item index="/system-config">系统配置</el-menu-item>
             <el-menu-item index="/dictionaries">字典管理</el-menu-item>
             <el-menu-item index="/integrations">集成管理</el-menu-item>
-            <el-menu-item index="/model-service">模型服务</el-menu-item>
             <el-menu-item index="/agents">Agent 管理</el-menu-item>
             <el-menu-item index="/platform-status">平台健康</el-menu-item>
             <el-menu-item index="/task-queue">任务队列</el-menu-item>
@@ -464,7 +465,7 @@ const groupMap: Record<string, string> = {
   '/sla-management': '工单协同', '/postmortem': '工单协同', '/ticket-report': '工单协同',
   '/knowledge-overview': '智能知识库', '/knowledge': '智能知识库',
   '/knowledge/import': '智能知识库', '/knowledge-review': '智能知识库', '/similar-cases': '智能知识库',
-  '/rule-gap': '智能知识库', '/prompt-templates': '智能知识库', '/ai-tool-policy': '智能知识库',
+  '/rule-gap': '自动化中心', '/prompt-templates': '配置中心', '/ai-tool-policy': '配置中心',
   '/reports': '报表审计', '/report/generate': '报表审计', '/report/tasks': '报表审计',
   '/report/archive': '报表审计', '/export-center': '报表审计', '/report/templates': '报表审计',
   '/ops-report': '报表审计', '/automation-report': '报表审计',
@@ -477,7 +478,7 @@ const groupMap: Record<string, string> = {
   '/users': '平台管理', '/roles': '平台管理', '/tenants': '平台管理', '/api-keys': '平台管理',
   '/permission-policy': '平台管理', '/system-config': '平台管理', '/dictionaries': '平台管理',
   '/integrations': '平台管理', '/platform-status': '平台管理', '/task-queue': '平台管理',
-  '/model-service': '平台管理', '/agents': '平台管理',
+  '/model-service': '配置中心', '/agents': '平台管理',
   '/backup': '平台管理', '/upgrade-maintenance': '平台管理', '/license': '平台管理',
   '/system-check': '平台管理', '/profile': '个人中心',
 }

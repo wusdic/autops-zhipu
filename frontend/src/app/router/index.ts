@@ -131,9 +131,9 @@ const router = createRouter({
     // 归位：AI 诊断工具已并入故障工作台(M5) AI诊断 tab，旧入口重定向
     { path: '/aiops', redirect: '/incident?tab=ai' },
     { path: '/similar-cases', name: 'similar-cases', component: () => import('@/features/knowledge-center/SimilarCasePage.vue'), meta: { module: 'M8', title: '相似案例' } },
-    { path: '/rule-gap', name: 'rule-gap', component: () => import('@/features/knowledge-center/RuleGapPage.vue'), meta: { module: 'M8', title: '规则缺口' } },
-    { path: '/prompt-templates', name: 'prompt-templates', component: () => import('@/features/knowledge-center/PromptTemplatePage.vue'), meta: { module: 'M8', title: 'Prompt 模板' } },
-    { path: '/ai-tool-policy', name: 'ai-tool-policy', component: () => import('@/features/knowledge-center/AIToolPolicyPage.vue'), meta: { module: 'M8', title: 'AI 工具策略' } },
+    { path: '/rule-gap', name: 'rule-gap', component: () => import('@/features/knowledge-center/RuleGapPage.vue'), meta: { module: 'M6', title: '规则覆盖度' } },
+    { path: '/prompt-templates', name: 'prompt-templates', component: () => import('@/features/knowledge-center/PromptTemplatePage.vue'), meta: { module: 'M11', title: 'Prompt 模板' } },
+    { path: '/ai-tool-policy', name: 'ai-tool-policy', component: () => import('@/features/knowledge-center/AIToolPolicyPage.vue'), meta: { module: 'M11', title: 'AI 工具策略' } },
 
     // ============================================================
     // M9 报表审计中心
@@ -182,7 +182,7 @@ const router = createRouter({
     { path: '/system-config', name: 'admin-config', component: () => import('@/features/platform-management/SystemConfigPage.vue'), meta: { module: 'M12', title: '系统配置' } },
     { path: '/dictionaries', name: 'admin-dictionaries', component: () => import('@/features/platform-management/DictionaryPage.vue'), meta: { module: 'M12', title: '字典管理' } },
     { path: '/integrations', name: 'admin-integrations', component: () => import('@/features/platform-management/IntegrationPage.vue'), meta: { module: 'M12', title: '集成管理' } },
-    { path: '/model-service', name: 'model-service', component: () => import('@/features/platform-management/ModelServicePage.vue'), meta: { module: 'M12', title: '模型服务' } },
+    { path: '/model-service', name: 'model-service', component: () => import('@/features/platform-management/ModelServicePage.vue'), meta: { module: 'M11', title: '模型服务' } },
     { path: '/agents', name: 'agents', component: () => import('@/features/resource-center/AgentManagementPage.vue'), meta: { module: 'M12', title: 'Agent 管理' } },
     // 去重：安全基线与基线巡检同源（同读 INSPECTION），重定向到基线巡检
     { path: '/security-baseline', redirect: '/inspection/baseline-check' },
