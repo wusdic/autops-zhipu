@@ -68,16 +68,17 @@
             <template #title>
               <el-icon><TrendCharts /></el-icon><span>监控告警</span>
             </template>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">监控采集</el-menu-item>
             <el-menu-item index="/monitoring">监控总览</el-menu-item>
             <el-menu-item index="/monitoring/collectors">采集任务</el-menu-item>
             <el-menu-item index="/monitoring/collection-results">采集结果</el-menu-item>
             <el-menu-item index="/monitoring/collector-health">采集器健康</el-menu-item>
             <el-menu-item index="/monitoring/metrics">指标趋势</el-menu-item>
             <el-menu-item index="/monitoring/states">状态监控</el-menu-item>
-            <el-menu-item index="/events">事件流</el-menu-item>
             <el-menu-item index="/monitoring/log-sources">日志接入</el-menu-item>
             <el-menu-item index="/monitoring/config-facts">配置快照</el-menu-item>
-            <el-menu-item index="" disabled style="height:1px;padding:0;overflow:hidden;background:#3a414d;margin:4px 16px"></el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">信号 · 事件→告警→异常</el-menu-item>
+            <el-menu-item index="/events">事件流</el-menu-item>
             <el-menu-item index="/alerts">告警列表</el-menu-item>
             <el-menu-item index="/alert-rules">告警规则</el-menu-item>
             <el-menu-item index="/alert-correlation">告警收敛</el-menu-item>

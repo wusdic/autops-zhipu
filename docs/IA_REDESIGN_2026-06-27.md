@@ -123,4 +123,24 @@ M12 平台管理：权限治理 · 系统运维 · 扩展与集成
 
 每步独立提交、可回滚；步骤 1–6 可连续做，步骤 7 单独排期并做事件链回归。
 
+---
+
+## 八、实施状态（2026-06-27 全部完成）
+
+| 步骤 | 状态 | commit 说明 |
+|---|---|---|
+| 1 重复合并 | ✅ | 处置模板→剧本库、安全基线→基线巡检（redirect + 退役页） |
+| 2 AI诊断归位 | ✅ | 真 AiDiagnosisPage 入 M5 工作台、退役薄面板、/aiops redirect |
+| 3 M8净化+AI设置组 | ✅ | 模型服务/AI工具策略/Prompt模板入 M11「AI 设置」；规则缺口→M6「规则覆盖度」 |
+| 4 命名消歧 | ✅ | Agent管理→采集节点、配置事实→配置快照 |
+| 5 M9收敛 | ✅ | 业务报告(运维/资产/自动化/合规) 4 合 1 tab；M9 三子区 |
+| 6 M12分组 | ✅ | 权限治理/系统运维/扩展与集成 三组分隔 |
+| 7 告警/异常单向化 | ✅ | 删 Anomaly→Alert 反向通知；新增 ALERT_CREATED→收敛 Anomaly；ANOMALY_DETECTED→落库；M4 三段分组 |
+
+**#5 落地结论**：采用「分层 + 严格单向」。`anomaly/handlers.py` 重构为
+`检测源(StateCritical/巡检) + 收敛源(高/严重 Alert) → ANOMALY_DETECTED → 落库 Anomaly`，
+移除旧的 `on_anomaly_detected→ALERT_CREATED` 反向链路。告警引擎 (`Event→规则→Alert`) 不变。
+
+> 后端事件链改动须在可运行环境做回归（本环境仅 py_compile + ruff 通过）。
+
 > 验证：本环境无 node_modules，未跑 vue-tsc/build；后端改动仅 py_compile/ruff，事件链需运行态回归。
