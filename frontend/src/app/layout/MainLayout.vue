@@ -184,21 +184,24 @@
             <template #title>
               <el-icon><Tools /></el-icon><span>平台管理</span>
             </template>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">权限治理</el-menu-item>
             <el-menu-item index="/users">用户管理</el-menu-item>
             <el-menu-item index="/roles">角色管理</el-menu-item>
             <el-menu-item index="/tenants">租户管理</el-menu-item>
             <el-menu-item index="/permission-policy">权限策略</el-menu-item>
             <el-menu-item index="/api-keys">API Key</el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">系统运维</el-menu-item>
             <el-menu-item index="/system-config">系统配置</el-menu-item>
             <el-menu-item index="/dictionaries">字典管理</el-menu-item>
-            <el-menu-item index="/integrations">集成管理</el-menu-item>
-            <el-menu-item index="/agents">采集节点</el-menu-item>
             <el-menu-item index="/platform-status">平台健康</el-menu-item>
             <el-menu-item index="/task-queue">任务队列</el-menu-item>
             <el-menu-item index="/system-check">系统自检</el-menu-item>
             <el-menu-item index="/backup">备份恢复</el-menu-item>
             <el-menu-item index="/upgrade-maintenance">升级维护</el-menu-item>
             <el-menu-item index="/license">授权许可</el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">扩展与集成</el-menu-item>
+            <el-menu-item index="/integrations">集成管理</el-menu-item>
+            <el-menu-item index="/agents">采集节点</el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-scrollbar>
