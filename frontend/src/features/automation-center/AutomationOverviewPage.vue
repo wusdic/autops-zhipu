@@ -42,7 +42,7 @@
       <el-table stripe
  :data="recentExecutions"
  v-loading="executionsLoading"
-52| empty-text="暂无执行记录"
+ empty-text="暂无执行记录"
  style="width: 100%"
  >
         <el-table-column prop="name" label="执行名称" min-width="180" show-overflow-tooltip>

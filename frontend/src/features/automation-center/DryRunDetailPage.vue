@@ -62,7 +62,7 @@
           <!-- Table -->
           <el-table stripe
  :data="dryRuns"
-66| v-loading="loading"
+v-loading="loading"
  empty-text="暂无预演记录"
  highlight-current-row
  @current-change="handleRowSelect"

@@ -313,9 +313,19 @@ const route = useRoute()
 
 // ─── Sidebar ───
 const isCollapsed = ref(false)
+// 手动切换后在本次会话内尊重用户选择，不再被窗口缩放自动覆盖
+const manualCollapse = ref(false)
+const AUTO_COLLAPSE_WIDTH = 1024
 
 function toggleCollapse() {
   isCollapsed.value = !isCollapsed.value
+  manualCollapse.value = true
+}
+
+// 窗口变窄时自动收起侧边栏（未手动干预时）
+function applyResponsiveCollapse() {
+  if (manualCollapse.value) return
+  isCollapsed.value = window.innerWidth < AUTO_COLLAPSE_WIDTH
 }
 
 // ─── Active Menu ───
@@ -648,10 +658,13 @@ onMounted(() => {
   authStore.fetchUser().catch(() => {})
   fetchUnread()
   document.addEventListener('keydown', handleKeydown)
+  applyResponsiveCollapse()
+  window.addEventListener('resize', applyResponsiveCollapse)
 })
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('resize', applyResponsiveCollapse)
 })
 </script>
 
