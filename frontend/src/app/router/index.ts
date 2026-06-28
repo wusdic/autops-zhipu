@@ -93,7 +93,8 @@ const router = createRouter({
     { path: '/policies', name: 'policies', component: () => import('@/features/automation-center/PolicyListPage.vue'), meta: { module: 'M6', title: '策略管理' } },
     { path: '/policies/:id/edit', name: 'policy-edit', component: () => import('@/features/automation-center/PolicyEditPage.vue'), meta: { module: 'M6', title: '策略编辑' } },
     { path: '/policies/:id/simulate', name: 'policy-simulate', component: () => import('@/features/automation-center/PolicySimulatePage.vue'), meta: { module: 'M6', title: '策略模拟' } },
-    { path: '/remediation-templates', name: 'remediation-templates', component: () => import('@/features/automation-center/RemediationTemplatePage.vue'), meta: { module: 'M6', title: '处置模板' } },
+    // 去重：处置模板与剧本库同源（同读 PLAYBOODS），重定向到剧本库
+    { path: '/remediation-templates', redirect: '/playbooks' },
     { path: '/scripts', name: 'scripts', component: () => import('@/features/automation-center/ScriptListPage.vue'), meta: { module: 'M6', title: '脚本库' } },
     { path: '/playbooks', name: 'playbooks', component: () => import('@/features/automation-center/PlaybookListPage.vue'), meta: { module: 'M6', title: '剧本库' } },
     { path: '/approvals', name: 'approvals', component: () => import('@/features/automation-center/ApprovalCenterPage.vue'), meta: { module: 'M6', title: '审批中心' } },
@@ -182,7 +183,8 @@ const router = createRouter({
     { path: '/integrations', name: 'admin-integrations', component: () => import('@/features/platform-management/IntegrationPage.vue'), meta: { module: 'M12', title: '集成管理' } },
     { path: '/model-service', name: 'model-service', component: () => import('@/features/platform-management/ModelServicePage.vue'), meta: { module: 'M12', title: '模型服务' } },
     { path: '/agents', name: 'agents', component: () => import('@/features/resource-center/AgentManagementPage.vue'), meta: { module: 'M12', title: 'Agent 管理' } },
-    { path: '/security-baseline', name: 'security-baseline', component: () => import('@/features/platform-management/SecurityBaselinePage.vue'), meta: { module: 'M12', title: '安全基线' } },
+    // 去重：安全基线与基线巡检同源（同读 INSPECTION），重定向到基线巡检
+    { path: '/security-baseline', redirect: '/inspection/baseline-check' },
     { path: '/platform-status', name: 'admin-status', component: () => import('@/features/platform-management/PlatformHealthPage.vue'), meta: { module: 'M12', title: '平台健康' } },
     { path: '/task-queue', name: 'admin-tasks', component: () => import('@/features/platform-management/TaskQueuePage.vue'), meta: { module: 'M12', title: '任务队列' } },
     { path: '/system-check', name: 'admin-self-check', component: () => import('@/features/platform-management/SelfCheckPage.vue'), meta: { module: 'M12', title: '系统自检' } },

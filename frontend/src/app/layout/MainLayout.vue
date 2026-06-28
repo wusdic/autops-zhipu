@@ -99,7 +99,6 @@
             </template>
             <el-menu-item index="/automation">自动化总览</el-menu-item>
             <el-menu-item index="/policies">策略管理</el-menu-item>
-            <el-menu-item index="/remediation-templates">处置模板</el-menu-item>
             <el-menu-item index="/scripts">脚本库</el-menu-item>
             <el-menu-item index="/playbooks">剧本库</el-menu-item>
             <el-menu-item index="/approvals">审批中心</el-menu-item>
@@ -194,7 +193,6 @@
             <el-menu-item index="/integrations">集成管理</el-menu-item>
             <el-menu-item index="/model-service">模型服务</el-menu-item>
             <el-menu-item index="/agents">Agent 管理</el-menu-item>
-            <el-menu-item index="/security-baseline">安全基线</el-menu-item>
             <el-menu-item index="/platform-status">平台健康</el-menu-item>
             <el-menu-item index="/task-queue">任务队列</el-menu-item>
             <el-menu-item index="/system-check">系统自检</el-menu-item>
@@ -372,7 +370,6 @@ const menuMap: Record<string, string> = {
   // M6 自动化中心
   '/automation': '自动化总览',
   '/policies': '策略管理',
-  '/remediation-templates': '处置模板',
   '/scripts': '脚本库',
   '/playbooks': '剧本库',
   '/approvals': '审批中心',
@@ -434,7 +431,6 @@ const menuMap: Record<string, string> = {
   '/integrations': '集成管理',
   '/model-service': '模型服务',
   '/agents': 'Agent 管理',
-  '/security-baseline': '安全基线',
   '/platform-status': '平台健康',
   '/task-queue': '任务队列',
   '/system-check': '系统自检',
@@ -462,7 +458,7 @@ const groupMap: Record<string, string> = {
   '/alerts': '监控告警', '/alert-rules': '监控告警', '/alert-correlation': '监控告警',
   '/anomalies': '监控告警',
   '/incident': '分析中心',
-  '/automation': '自动化中心', '/policies': '自动化中心', '/remediation-templates': '自动化中心',
+  '/automation': '自动化中心', '/policies': '自动化中心',
   '/scripts': '自动化中心', '/playbooks': '自动化中心', '/approvals': '自动化中心',
   '/executions': '自动化中心', '/rollback-center': '自动化中心', '/execution-locks': '自动化中心',
   '/ticket-overview': '工单协同', '/tickets': '工单协同', '/ticket-create': '工单协同',
@@ -483,7 +479,7 @@ const groupMap: Record<string, string> = {
   '/users': '平台管理', '/roles': '平台管理', '/tenants': '平台管理', '/api-keys': '平台管理',
   '/permission-policy': '平台管理', '/system-config': '平台管理', '/dictionaries': '平台管理',
   '/integrations': '平台管理', '/platform-status': '平台管理', '/task-queue': '平台管理',
-  '/model-service': '平台管理', '/agents': '平台管理', '/security-baseline': '平台管理',
+  '/model-service': '平台管理', '/agents': '平台管理',
   '/backup': '平台管理', '/upgrade-maintenance': '平台管理', '/license': '平台管理',
   '/system-check': '平台管理', '/profile': '个人中心',
 }
