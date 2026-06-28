@@ -1,7 +1,7 @@
 <template>
   <div class="autops-page-container">
     <div class="autops-page-header autops-page-header--between">
-      <div>
+      <div v-if="!embedded">
         <div class="autops-page-title">运维报告</div>
         <div class="autops-page-desc">生成和查看运维报告</div>
       </div>
@@ -105,6 +105,8 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from 'vue'
 import { Document, DataAnalysis, CircleCheck, Warning, Clock } from '@element-plus/icons-vue'
+
+defineProps<{ embedded?: boolean }>()
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import api from '@/shared/api/client'

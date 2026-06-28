@@ -145,12 +145,14 @@ const router = createRouter({
     { path: '/export-center', name: 'export-center', component: () => import('@/features/report-audit-center/ExportCenterPage.vue'), meta: { module: 'M9', title: '导出中心' } },
     { path: '/report/templates', name: 'report-templates', component: () => import('@/features/report-audit-center/ReportTemplatePage.vue'), meta: { module: 'M9', title: '报告模板' } },
     { path: '/report/:id/preview', name: 'report-preview', component: () => import('@/features/report-audit-center/ReportPreviewPage.vue'), meta: { module: 'M9', title: '报告预览' } },
-    { path: '/ops-report', name: 'ops-report', component: () => import('@/features/report-audit-center/OpsReportPage.vue'), meta: { module: 'M9', title: '运维报告' } },
-    { path: '/asset-report', name: 'asset-report', component: () => import('@/features/report-audit-center/AssetReportPage.vue'), meta: { module: 'M9', title: '资产报告' } },
+    // 步骤5：成品报告按类型收敛为业务报告宿主，旧路径重定向
+    { path: '/business-report', name: 'business-report', component: () => import('@/features/report-audit-center/BusinessReportPage.vue'), meta: { module: 'M9', title: '业务报告' } },
+    { path: '/ops-report', redirect: '/business-report?tab=ops' },
+    { path: '/asset-report', redirect: '/business-report?tab=asset' },
+    { path: '/automation-report', redirect: '/business-report?tab=automation' },
+    { path: '/compliance-report', redirect: '/business-report?tab=compliance' },
     // 与 /inspection/reports 重复，统一重定向到巡检中心巡检报告页（去重）
     { path: '/inspection-report', redirect: '/inspection/reports' },
-    { path: '/automation-report', name: 'automation-report', component: () => import('@/features/report-audit-center/AutomationReportPage.vue'), meta: { module: 'M9', title: '自动化报告' } },
-    { path: '/compliance-report', name: 'compliance-report', component: () => import('@/features/report-audit-center/ComplianceReportPage.vue'), meta: { module: 'M9', title: '合规报告' } },
     { path: '/audit', name: 'audit', component: () => import('@/features/platform-management/AuditLogPage.vue'), meta: { module: 'M9', title: '审计查询' } },
     { path: '/logs/search', name: 'log-search', component: () => import('@/features/report-audit-center/LogSearchPage.vue'), meta: { module: 'M9', title: '日志检索' } },
     { path: '/evidence', name: 'evidence-archive', component: () => import('@/features/report-audit-center/EvidenceArchivePage.vue'), meta: { module: 'M9', title: '证据归档' } },

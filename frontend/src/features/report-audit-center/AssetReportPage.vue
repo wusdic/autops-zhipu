@@ -2,7 +2,7 @@
   <div class="asset-report-page">
     <!-- Page Header -->
     <div class="autops-page-header">
-      <div>
+      <div v-if="!embedded">
         <div class="autops-page-title">资产报告</div>
         <div class="autops-page-desc">资产清单统计与状态分析报告</div>
       </div>
@@ -217,6 +217,8 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+
+defineProps<{ embedded?: boolean }>()
 import { Search, Refresh, RefreshLeft, Download } from '@element-plus/icons-vue'
 import { Monitor, CircleCheckFilled, SwitchButton, WarningFilled } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'

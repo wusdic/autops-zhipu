@@ -140,16 +140,16 @@
             <template #title>
               <el-icon><Document /></el-icon><span>报表审计</span>
             </template>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">报表生产</el-menu-item>
             <el-menu-item index="/reports">报表总览</el-menu-item>
             <el-menu-item index="/report/generate">报告生成</el-menu-item>
             <el-menu-item index="/report/tasks">报告任务</el-menu-item>
             <el-menu-item index="/report/archive">报告归档</el-menu-item>
             <el-menu-item index="/export-center">导出中心</el-menu-item>
             <el-menu-item index="/report/templates">报告模板</el-menu-item>
-            <el-menu-item index="/ops-report">运维报告</el-menu-item>
-            <el-menu-item index="/asset-report">资产报告</el-menu-item>
-            <el-menu-item index="/automation-report">自动化报告</el-menu-item>
-            <el-menu-item index="/compliance-report">合规报告</el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">业务报告</el-menu-item>
+            <el-menu-item index="/business-report">业务报告</el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">审计取证</el-menu-item>
             <el-menu-item index="/audit">审计查询</el-menu-item>
             <el-menu-item index="/logs/search">日志检索</el-menu-item>
             <el-menu-item index="/evidence">证据归档</el-menu-item>
@@ -401,6 +401,7 @@ const menuMap: Record<string, string> = {
   '/report/archive': '报告归档',
   '/export-center': '导出中心',
   '/report/templates': '报告模板',
+  '/business-report': '业务报告',
   '/ops-report': '运维报告',
   '/asset-report': '资产报告',
   '/inspection-report': '巡检报告',
@@ -468,8 +469,7 @@ const groupMap: Record<string, string> = {
   '/rule-gap': '自动化中心', '/prompt-templates': '配置中心', '/ai-tool-policy': '配置中心',
   '/reports': '报表审计', '/report/generate': '报表审计', '/report/tasks': '报表审计',
   '/report/archive': '报表审计', '/export-center': '报表审计', '/report/templates': '报表审计',
-  '/ops-report': '报表审计', '/automation-report': '报表审计',
-  '/asset-report': '报表审计', '/inspection-report': '报表审计', '/compliance-report': '报表审计',
+  '/business-report': '报表审计',
   '/audit': '报表审计', '/logs/search': '报表审计', '/evidence': '报表审计',
   '/ai-assistant': 'AI 助手',
   '/credentials': '配置中心', '/config/versions': '配置中心',

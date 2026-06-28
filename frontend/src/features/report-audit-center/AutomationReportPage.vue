@@ -2,7 +2,7 @@
   <div class="automation-report-page">
     <!-- Page Header -->
     <div class="autops-page-header">
-      <div>
+      <div v-if="!embedded">
         <div class="autops-page-title">自动化报告</div>
         <div class="autops-page-desc">自动化执行统计与详细分析</div>
       </div>
@@ -211,6 +211,8 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+
+defineProps<{ embedded?: boolean }>()
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
 import { Operation, CircleCheckFilled, CircleCloseFilled, Timer } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
