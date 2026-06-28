@@ -13,7 +13,7 @@
         <IncidentResponsePage embedded />
       </el-tab-pane>
       <el-tab-pane label="AI 诊断" name="ai" lazy>
-        <AiDiagnosisPanelPage embedded />
+        <AiDiagnosisPage embedded />
       </el-tab-pane>
       <el-tab-pane label="影响分析" name="impact" lazy>
         <ImpactAnalysisPage embedded />
@@ -35,7 +35,7 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import IncidentResponsePage from './IncidentResponsePage.vue'
-import AiDiagnosisPanelPage from './AiDiagnosisPanelPage.vue'
+import AiDiagnosisPage from '@/features/knowledge-center/AiDiagnosisPage.vue'
 import ImpactAnalysisPage from './ImpactAnalysisPage.vue'
 import RiskGradingPage from './RiskGradingPage.vue'
 import ResponseSuggestionPage from './ResponseSuggestionPage.vue'

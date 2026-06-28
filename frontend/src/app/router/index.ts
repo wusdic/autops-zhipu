@@ -128,7 +128,8 @@ const router = createRouter({
     { path: '/knowledge-review', name: 'knowledge-review', component: () => import('@/features/knowledge-center/KnowledgeReviewPage.vue'), meta: { module: 'M8', title: '知识审核' } },
     { path: '/knowledge/:id', name: 'knowledge-detail', component: () => import('@/features/knowledge-center/KnowledgeDetailPage.vue'), meta: { module: 'M8', title: '知识详情' } },
     { path: '/knowledge/:id/edit', name: 'knowledge-edit', component: () => import('@/features/knowledge-center/KnowledgeEditPage.vue'), meta: { module: 'M8', title: '知识编辑' } },
-    { path: '/aiops', name: 'aiops', component: () => import('@/features/knowledge-center/AiDiagnosisPage.vue'), meta: { module: 'M8', title: 'AI 诊断记录' } },
+    // 归位：AI 诊断工具已并入故障工作台(M5) AI诊断 tab，旧入口重定向
+    { path: '/aiops', redirect: '/incident?tab=ai' },
     { path: '/similar-cases', name: 'similar-cases', component: () => import('@/features/knowledge-center/SimilarCasePage.vue'), meta: { module: 'M8', title: '相似案例' } },
     { path: '/rule-gap', name: 'rule-gap', component: () => import('@/features/knowledge-center/RuleGapPage.vue'), meta: { module: 'M8', title: '规则缺口' } },
     { path: '/prompt-templates', name: 'prompt-templates', component: () => import('@/features/knowledge-center/PromptTemplatePage.vue'), meta: { module: 'M8', title: 'Prompt 模板' } },

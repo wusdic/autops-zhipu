@@ -1,6 +1,6 @@
 <template>
   <div class="aiops-page">
-    <div class="autops-page-header">
+    <div class="autops-page-header" v-if="!embedded">
       <div>
         <div class="autops-page-title">
           <el-icon style="margin-right: 6px"><MagicStick /></el-icon>
@@ -596,6 +596,8 @@
 <script setup lang="ts">
 import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+
+defineProps<{ embedded?: boolean }>()
 import {
   MagicStick, Bell, Refresh, Cpu, FolderOpened, Warning, Monitor,
   Timer, Document, Reading, Tickets, SetUp, VideoPlay, Position,

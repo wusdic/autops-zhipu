@@ -131,7 +131,6 @@
             <el-menu-item index="/knowledge">知识列表</el-menu-item>
             <el-menu-item index="/knowledge/import">知识导入</el-menu-item>
             <el-menu-item index="/knowledge-review">知识审核</el-menu-item>
-            <el-menu-item index="/aiops">AI 诊断记录</el-menu-item>
             <el-menu-item index="/similar-cases">相似案例</el-menu-item>
             <el-menu-item index="/rule-gap">规则缺口</el-menu-item>
             <el-menu-item index="/prompt-templates">Prompt 模板</el-menu-item>
@@ -390,7 +389,6 @@ const menuMap: Record<string, string> = {
   '/knowledge': '知识列表',
   '/knowledge/import': '知识导入',
   '/knowledge-review': '知识审核',
-  '/aiops': 'AI 诊断记录',
   '/similar-cases': '相似案例',
   '/rule-gap': '规则缺口',
   '/prompt-templates': 'Prompt 模板',
@@ -464,7 +462,7 @@ const groupMap: Record<string, string> = {
   '/ticket-overview': '工单协同', '/tickets': '工单协同', '/ticket-create': '工单协同',
   '/manual-handling': '工单协同', '/assignment-rules': '工单协同',
   '/sla-management': '工单协同', '/postmortem': '工单协同', '/ticket-report': '工单协同',
-  '/knowledge-overview': '智能知识库', '/aiops': '智能知识库', '/knowledge': '智能知识库',
+  '/knowledge-overview': '智能知识库', '/knowledge': '智能知识库',
   '/knowledge/import': '智能知识库', '/knowledge-review': '智能知识库', '/similar-cases': '智能知识库',
   '/rule-gap': '智能知识库', '/prompt-templates': '智能知识库', '/ai-tool-policy': '智能知识库',
   '/reports': '报表审计', '/report/generate': '报表审计', '/report/tasks': '报表审计',
