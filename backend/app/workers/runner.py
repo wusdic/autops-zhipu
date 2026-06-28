@@ -61,6 +61,19 @@ class WorkerRunner:
         bus.subscribe(CollectorEvents.FULL_SCAN_REQUESTED, on_full_scan_requested)
         logger.info("WorkerRunner: outbox enabled, handlers registered, asset_created→collection & discovery_scan→worker linked")
 
+        # 启动恢复：重新派发 Worker 离线期间卡住的发现任务（pending/running）
+        try:
+            from app.infra.database import async_session_factory
+            from app.domains.asset.discovery_service import DiscoveryService
+
+            async with async_session_factory() as _s:
+                n = await DiscoveryService(_s).requeue_stuck_tasks()
+                await _s.commit()
+            if n:
+                logger.info("WorkerRunner: 已恢复 %d 个未完成发现任务", n)
+        except Exception:
+            logger.exception("WorkerRunner: 发现任务启动恢复失败（忽略，不阻塞启动）")
+
         # 2. 启动 OutboxConsumer
         from app.common.outbox import OutboxConsumer
         worker_id = f"worker-{uuid.uuid4().hex[:8]}"

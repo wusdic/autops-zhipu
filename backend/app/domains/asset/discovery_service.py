@@ -261,6 +261,42 @@ class DiscoveryService:
         )
         return {"task_id": task_id, "status": "running"}
 
+    async def requeue_stuck_tasks(self) -> int:
+        """Worker 启动时恢复孤儿任务：重新派发 pending/running 状态的发现任务。
+
+        场景：任务创建时 Worker 未运行、或 Worker 在扫描中途崩溃，任务会卡在
+        pending/running。Worker 启动后调用本方法，重发 DISCOVERY_SCAN_REQUESTED，
+        由 outbox→handler 重新执行（_run_scan 会先清空旧结果，幂等安全）。
+        """
+        rows = (
+            (
+                await self.db.execute(
+                    select(DiscoveryTask).where(
+                        DiscoveryTask.status.in_(["pending", "running"])
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        if not rows:
+            return 0
+        bus = get_event_bus()
+        for task in rows:
+            task.status = "running"
+            await bus.publish(
+                DomainEvent(
+                    domain="asset",
+                    event_type=AssetEvents.DISCOVERY_SCAN_REQUESTED,
+                    payload={"task_id": str(task.id)},
+                    source="discovery_recovery",
+                ),
+                session=self.db,
+            )
+        await self.db.flush()
+        logger.info("discovery: 启动恢复，重新派发 %d 个未完成任务", len(rows))
+        return len(rows)
+
     async def _run_scan(self, task_id: str) -> None:
         """执行实际扫描（后台任务）."""
         from app.infra.database import async_session_factory
@@ -273,6 +309,13 @@ class DiscoveryService:
                 task = result.scalar_one_or_none()
                 if not task:
                     return
+
+                # 幂等：清除本任务历史发现结果，避免重跑（孤儿恢复/手动重启）产生重复行
+                from sqlalchemy import delete as _delete
+
+                await session.execute(
+                    _delete(DiscoveryResult).where(DiscoveryResult.task_id == task_id)
+                )
 
                 ips = _expand_ips(task.ip_range)
                 if not ips:
