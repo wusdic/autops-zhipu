@@ -63,7 +63,7 @@ const router = createRouter({
     { path: '/monitoring/state-changes', redirect: '/monitoring/states?tab=changes' },
     { path: '/events', name: 'events', component: () => import('@/features/monitoring-center/EventListPage.vue'), meta: { module: 'M4', title: '事件流' } },
     { path: '/monitoring/log-sources', name: 'log-sources', component: () => import('@/features/monitoring-center/LogSourcePage.vue'), meta: { module: 'M4', title: '日志接入' } },
-    { path: '/monitoring/config-facts', name: 'config-facts', component: () => import('@/features/monitoring-center/ConfigPage.vue'), meta: { module: 'M4', title: '配置事实' } },
+    { path: '/monitoring/config-facts', name: 'config-facts', component: () => import('@/features/monitoring-center/ConfigPage.vue'), meta: { module: 'M4', title: '配置快照' } },
     // 告警管理
     { path: '/alerts', name: 'alerts', component: () => import('@/features/monitoring-center/AlertListPage.vue'), meta: { module: 'M4', title: '告警列表' } },
     { path: '/alerts/:id', name: 'alert-detail', component: () => import('@/features/monitoring-center/AlertDetailPage.vue'), meta: { module: 'M4', title: '告警详情' } },
@@ -183,7 +183,7 @@ const router = createRouter({
     { path: '/dictionaries', name: 'admin-dictionaries', component: () => import('@/features/platform-management/DictionaryPage.vue'), meta: { module: 'M12', title: '字典管理' } },
     { path: '/integrations', name: 'admin-integrations', component: () => import('@/features/platform-management/IntegrationPage.vue'), meta: { module: 'M12', title: '集成管理' } },
     { path: '/model-service', name: 'model-service', component: () => import('@/features/platform-management/ModelServicePage.vue'), meta: { module: 'M11', title: '模型服务' } },
-    { path: '/agents', name: 'agents', component: () => import('@/features/resource-center/AgentManagementPage.vue'), meta: { module: 'M12', title: 'Agent 管理' } },
+    { path: '/agents', name: 'agents', component: () => import('@/features/resource-center/AgentManagementPage.vue'), meta: { module: 'M12', title: '采集节点' } },
     // 去重：安全基线与基线巡检同源（同读 INSPECTION），重定向到基线巡检
     { path: '/security-baseline', redirect: '/inspection/baseline-check' },
     { path: '/platform-status', name: 'admin-status', component: () => import('@/features/platform-management/PlatformHealthPage.vue'), meta: { module: 'M12', title: '平台健康' } },

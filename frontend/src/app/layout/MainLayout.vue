@@ -76,7 +76,7 @@
             <el-menu-item index="/monitoring/states">状态监控</el-menu-item>
             <el-menu-item index="/events">事件流</el-menu-item>
             <el-menu-item index="/monitoring/log-sources">日志接入</el-menu-item>
-            <el-menu-item index="/monitoring/config-facts">配置事实</el-menu-item>
+            <el-menu-item index="/monitoring/config-facts">配置快照</el-menu-item>
             <el-menu-item index="" disabled style="height:1px;padding:0;overflow:hidden;background:#3a414d;margin:4px 16px"></el-menu-item>
             <el-menu-item index="/alerts">告警列表</el-menu-item>
             <el-menu-item index="/alert-rules">告警规则</el-menu-item>
@@ -192,7 +192,7 @@
             <el-menu-item index="/system-config">系统配置</el-menu-item>
             <el-menu-item index="/dictionaries">字典管理</el-menu-item>
             <el-menu-item index="/integrations">集成管理</el-menu-item>
-            <el-menu-item index="/agents">Agent 管理</el-menu-item>
+            <el-menu-item index="/agents">采集节点</el-menu-item>
             <el-menu-item index="/platform-status">平台健康</el-menu-item>
             <el-menu-item index="/task-queue">任务队列</el-menu-item>
             <el-menu-item index="/system-check">系统自检</el-menu-item>
@@ -360,7 +360,7 @@ const menuMap: Record<string, string> = {
   '/monitoring/states': '状态监控',
   '/events': '事件流',
   '/monitoring/log-sources': '日志接入',
-  '/monitoring/config-facts': '配置事实',
+  '/monitoring/config-facts': '配置快照',
   '/alerts': '告警列表',
   '/alert-rules': '告警规则',
   '/alert-correlation': '告警收敛',
@@ -429,7 +429,7 @@ const menuMap: Record<string, string> = {
   '/dictionaries': '字典管理',
   '/integrations': '集成管理',
   '/model-service': '模型服务',
-  '/agents': 'Agent 管理',
+  '/agents': '采集节点',
   '/platform-status': '平台健康',
   '/task-queue': '任务队列',
   '/system-check': '系统自检',
