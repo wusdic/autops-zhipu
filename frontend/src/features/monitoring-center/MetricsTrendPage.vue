@@ -75,7 +75,7 @@
           <p class="chart-empty-text">图表将在此显示</p>
         </div>
         <div v-else class="chart-area">
-          <div class="chart-placeholder-text">图表将在此显示</div>
+          <MetricChart :multiple="chartSeries" :height="320" />
         </div>
       </div>
     </div>
@@ -129,15 +129,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft, DataAnalysis } from '@element-plus/icons-vue'
 import { monitoringService, assetService } from '@/shared/api'
+import MetricChart from '@/shared/components/MetricChart.vue'
 
 // ── State ──────────────────────────────────────────────────────────
 const loading = ref(false)
 const tableData = ref<any[]>([])
 const assetOptions = ref<{ id: string; name: string }[]>([])
+
+// 按指标名分组成多系列趋势（时间升序），喂给 MetricChart
+const chartSeries = computed(() => {
+  const groups: Record<string, { time: string; value: number }[]> = {}
+  for (const row of tableData.value) {
+    const name = row.metric_name || '指标'
+    ;(groups[name] ||= []).push({ time: formatTime(row.timestamp), value: Number(row.value) || 0 })
+  }
+  return Object.entries(groups).map(([name, data]) => ({
+    name,
+    data: data.slice().reverse(), // 表格通常按时间倒序，趋势图需升序
+  }))
+})
 
 const filters = reactive({
   assetId: '',

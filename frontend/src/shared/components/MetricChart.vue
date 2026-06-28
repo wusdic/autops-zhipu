@@ -4,146 +4,113 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import * as echarts from 'echarts'
+
+type Point = { time: string; value: number }
+type Series = { name: string; data: Point[]; color?: string }
 
 const props = withDefaults(defineProps<{
-  data?: Array<{ time: string; value: number }>
+  data?: Point[]
+  multiple?: Series[]
+  chartType?: 'line' | 'bar' | 'pie'
   title?: string
   height?: number
   color?: string
   unit?: string
 }>(), {
+  data: () => [],
+  multiple: () => [],
+  chartType: 'line',
   height: 240,
   color: '#165dff',
   unit: '',
 })
 
 const chartRef = ref<HTMLElement | null>(null)
-let chartInstance: any = null
+let chart: echarts.ECharts | null = null
 
-// Simple canvas-based chart (no echarts dependency)
-function renderChart() {
-  const el = chartRef.value
-  if (!el || !props.data || props.data.length === 0) {
-    // Draw empty state
-    if (el) {
-      const canvas = document.createElement('canvas')
-      canvas.width = el.clientWidth * 2
-      canvas.height = el.clientHeight * 2
-      canvas.style.width = '100%'
-      canvas.style.height = '100%'
-      el.innerHTML = ''
-      el.appendChild(canvas)
-      const ctx = canvas.getContext('2d')
-      if (ctx) {
-        ctx.scale(2, 2)
-        const w = el.clientWidth
-        const h = el.clientHeight
-        ctx.fillStyle = '#f2f3f5'
-        ctx.fillRect(0, 0, w, h)
-        ctx.fillStyle = '#c9cdd4'
-        ctx.font = '13px sans-serif'
-        ctx.textAlign = 'center'
-        ctx.fillText('暂无数据', w / 2, h / 2)
-      }
-    }
-    return
-  }
+const PALETTE = ['#165dff', '#00b42a', '#ff7d00', '#f53f3f', '#722ed1', '#14c9c9', '#eb0aa4', '#7bc616']
 
-  const canvas = document.createElement('canvas')
-  canvas.width = el.clientWidth * 2
-  canvas.height = el.clientHeight * 2
-  canvas.style.width = '100%'
-  canvas.style.height = '100%'
-  el.innerHTML = ''
-  el.appendChild(canvas)
-
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return
-
-  ctx.scale(2, 2)
-  const w = el.clientWidth
-  const h = el.clientHeight
-  const pad = { top: 20, right: 20, bottom: 30, left: 50 }
-  const cw = w - pad.left - pad.right
-  const ch = h - pad.top - pad.bottom
-
-  // Background
-  ctx.fillStyle = '#fff'
-  ctx.fillRect(0, 0, w, h)
-
-  // Grid
-  ctx.strokeStyle = '#e5e6eb'
-  ctx.lineWidth = 0.5
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.top + (ch / 4) * i
-    ctx.beginPath()
-    ctx.moveTo(pad.left, y)
-    ctx.lineTo(w - pad.right, y)
-    ctx.stroke()
-  }
-
-  // Data
-  const values = props.data.map(d => d.value)
-  const minVal = Math.min(...values)
-  const maxVal = Math.max(...values)
-  const range = maxVal - minVal || 1
-
-  // Line
-  ctx.strokeStyle = props.color
-  ctx.lineWidth = 2
-  ctx.beginPath()
-  props.data.forEach((d, i) => {
-    const x = pad.left + (cw / (props.data!.length - 1 || 1)) * i
-    const y = pad.top + ch - ((d.value - minVal) / range) * ch
-    if (i === 0) ctx.moveTo(x, y)
-    else ctx.lineTo(x, y)
-  })
-  ctx.stroke()
-
-  // Fill area
-  ctx.lineTo(pad.left + cw, pad.top + ch)
-  ctx.lineTo(pad.left, pad.top + ch)
-  ctx.closePath()
-  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + ch)
-  grad.addColorStop(0, props.color + '30')
-  grad.addColorStop(1, props.color + '05')
-  ctx.fillStyle = grad
-  ctx.fill()
-
-  // Y axis labels
-  ctx.fillStyle = '#86909c'
-  ctx.font = '11px sans-serif'
-  ctx.textAlign = 'right'
-  for (let i = 0; i <= 4; i++) {
-    const val = maxVal - (range / 4) * i
-    const y = pad.top + (ch / 4) * i + 4
-    ctx.fillText(val.toFixed(0) + props.unit, pad.left - 6, y)
-  }
-
-  // X axis labels (first, middle, last)
-  ctx.textAlign = 'center'
-  const showLabels = props.data.filter((_, i) => {
-    const step = Math.max(1, Math.floor(props.data!.length / 5))
-    return i % step === 0 || i === props.data!.length - 1
-  })
-  showLabels.forEach(d => {
-    const idx = props.data!.indexOf(d)
-    const x = pad.left + (cw / (props.data!.length - 1 || 1)) * idx
-    ctx.fillText(d.time.slice(-5), x, h - 6)
-  })
+function hasData(): boolean {
+  if (props.chartType === 'pie') return (props.data?.length ?? 0) > 0
+  if (props.multiple && props.multiple.length) return props.multiple.some(s => s.data && s.data.length)
+  return (props.data?.length ?? 0) > 0
 }
 
-onMounted(() => {
-  nextTick(renderChart)
-})
+function buildOption(): echarts.EChartsOption {
+  const title = props.title
+    ? { text: props.title, left: 'center', textStyle: { fontSize: 13, color: '#4e5969', fontWeight: 600 as const } }
+    : undefined
 
-onBeforeUnmount(() => {
-  chartInstance = null
-})
+  // 空态
+  if (!hasData()) {
+    return {
+      title: { text: '暂无数据', left: 'center', top: 'middle', textStyle: { color: '#c9cdd4', fontSize: 13, fontWeight: 'normal' as const } },
+    }
+  }
 
-watch(() => props.data, () => {
-  nextTick(renderChart)
-}, { deep: true })
+  // 饼图（data[].time 作为名称，data[].value 作为数值）
+  if (props.chartType === 'pie') {
+    return {
+      title,
+      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+      legend: { bottom: 0, type: 'scroll' },
+      series: [{
+        type: 'pie',
+        radius: ['40%', '68%'],
+        center: ['50%', title ? '48%' : '45%'],
+        avoidLabelOverlap: true,
+        itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 },
+        label: { formatter: '{b}\n{c}' },
+        data: (props.data || []).map(d => ({ name: d.time, value: d.value })),
+      }],
+    }
+  }
+
+  // 折线/柱状（单或多系列）
+  const seriesList: Series[] = (props.multiple && props.multiple.length)
+    ? props.multiple
+    : [{ name: props.title || '数值', data: props.data || [], color: props.color }]
+  const xData = (seriesList[0]?.data || []).map(p => p.time)
+  const multi = seriesList.length > 1
+
+  return {
+    title,
+    tooltip: { trigger: 'axis', valueFormatter: (v) => `${v}${props.unit}` },
+    legend: multi ? { bottom: 0, type: 'scroll' } : undefined,
+    grid: { left: 48, right: 16, top: title ? 36 : 16, bottom: multi ? 36 : 28 },
+    xAxis: { type: 'category', boundaryGap: props.chartType === 'bar', data: xData, axisLabel: { color: '#86909c', fontSize: 11 } },
+    yAxis: { type: 'value', axisLabel: { color: '#86909c', fontSize: 11, formatter: (v: number) => `${v}${props.unit}` }, splitLine: { lineStyle: { color: '#e5e6eb' } } },
+    series: seriesList.map((s, i) => ({
+      name: s.name,
+      type: props.chartType === 'bar' ? 'bar' : 'line',
+      smooth: props.chartType !== 'bar',
+      showSymbol: false,
+      data: (s.data || []).map(p => p.value),
+      itemStyle: { color: s.color || PALETTE[i % PALETTE.length] },
+      areaStyle: (!multi && props.chartType === 'line')
+        ? { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: (s.color || props.color) + '40' },
+            { offset: 1, color: (s.color || props.color) + '05' },
+          ]) }
+        : undefined,
+    })),
+  }
+}
+
+function render() {
+  const el = chartRef.value
+  if (!el) return
+  if (!chart) chart = echarts.init(el)
+  chart.setOption(buildOption(), true)
+}
+
+function onResize() { chart?.resize() }
+
+onMounted(() => { nextTick(render); window.addEventListener('resize', onResize) })
+onBeforeUnmount(() => { window.removeEventListener('resize', onResize); chart?.dispose(); chart = null })
+
+watch(() => [props.data, props.multiple, props.chartType], () => nextTick(render), { deep: true })
 </script>
 
 <style scoped>

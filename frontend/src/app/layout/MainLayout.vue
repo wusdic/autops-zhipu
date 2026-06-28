@@ -14,8 +14,8 @@
           :default-active="activeMenu"
           :collapse="isCollapsed"
           :collapse-transition="false"
-          :unique-opened="false"
-          :default-openeds="['m1','m2','m3','m4','m5','m6','m7','m8','m9','m10','m11','m12']"
+          :unique-opened="true"
+          :default-openeds="defaultOpeneds"
           background-color="transparent"
           text-color="#c9cdd4"
           active-text-color="#ffffff"
@@ -338,6 +338,12 @@ const activeMenu = computed(() => {
   const seg = path.split('/').filter(Boolean)
   if (seg.length > 0) return '/' + seg[0]
   return path
+})
+
+// ─── 手风琴：仅默认展开当前路由所属大模块（submenu index 形如 m1..m12） ───
+const defaultOpeneds = computed(() => {
+  const mod = String(route.meta?.module || '').toLowerCase()
+  return /^m\d+$/.test(mod) ? [mod] : []
 })
 
 // ─── V3 菜单映射（12模块） ───
