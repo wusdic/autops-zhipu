@@ -74,13 +74,17 @@ async def _redis_set(key: str, value: str, ttl: int = 300) -> None:
 # LLM 配置加载辅助
 # ---------------------------------------------------------------------------
 def _load_llm_timeout() -> int:
-    """从 configs/llm.yaml 读取 timeout, 默认 30s."""
+    """从 configs/llm.yaml 读取 timeout, 默认 180s.
+
+    带"思考块"的本地大模型单次推理可达数百秒，30s 默认会把正常推理误判为超时失败，
+    故默认抬高到 180s（仍可在 llm.yaml 覆盖）。
+    """
     try:
         from app.infra.config import _load_yaml
         cfg = _load_yaml("llm.yaml")
-        return int(cfg.get("llm", {}).get("timeout", 30))
+        return int(cfg.get("llm", {}).get("timeout", 180))
     except Exception:
-        return 30
+        return 180
 
 
 def _load_llm_max_tokens() -> int:
