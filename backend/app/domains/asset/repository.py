@@ -21,6 +21,7 @@ class AssetRepository(BaseRepository[Asset]):
         self, *, page: int = 1, page_size: int = 20,
         asset_type: str | None = None, status: str | None = None,
         health_status: str | None = None, business_system: str | None = None,
+        business_system_id: str | None = None,
         environment: str | None = None, search: str | None = None,
     ) -> tuple[list[Asset], int]:
         filters = [Asset.is_deleted == False]  # noqa: E712
@@ -32,6 +33,8 @@ class AssetRepository(BaseRepository[Asset]):
             filters.append(Asset.health_status == health_status)
         if business_system:
             filters.append(Asset.business_system == business_system)
+        if business_system_id:
+            filters.append(Asset.business_system_id == business_system_id)
         if environment:
             filters.append(Asset.environment == environment)
         if search:

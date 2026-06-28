@@ -31,7 +31,9 @@ class Asset(Base):
     os_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
     os_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    business_system: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    business_system: Mapped[str | None] = mapped_column(String(64), nullable=True)  # 反范式名缓存（展示用）
+    # 业务系统归属的事实源：自引用指向 asset_type='business_system' 的资产行（改名安全）
+    business_system_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     environment: Mapped[str | None] = mapped_column(String(32), nullable=True)
     location: Mapped[str | None] = mapped_column(String(128), nullable=True)
     status: Mapped[str] = mapped_column(

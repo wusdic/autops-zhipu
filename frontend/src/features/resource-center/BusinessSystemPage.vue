@@ -162,8 +162,38 @@
           <el-descriptions-item label="创建时间">{{ formatTime(currentSystem.created_at) }}</el-descriptions-item>
           <el-descriptions-item label="更新时间">{{ formatTime(currentSystem.updated_at) }}</el-descriptions-item>
         </el-descriptions>
+
+        <!-- 成员资产管理 -->
+        <div style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between">
+          <span style="font-weight: 600">成员资产（{{ members.length }}）</span>
+          <el-button type="primary" size="small" @click="openAddMembers"><el-icon><Plus /></el-icon> 添加资产</el-button>
+        </div>
+        <el-table :data="members" v-loading="membersLoading" size="small" style="margin-top: 8px" empty-text="暂无成员资产">
+          <el-table-column prop="name" label="名称" min-width="120" show-overflow-tooltip />
+          <el-table-column prop="ip" label="IP" width="120" />
+          <el-table-column label="操作" width="70" align="center">
+            <template #default="{ row }">
+              <el-button link type="danger" size="small" @click="removeMember(row)">移除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </template>
     </el-drawer>
+
+    <!-- 添加成员资产对话框 -->
+    <el-dialog v-model="addMembersVisible" title="添加成员资产" width="520px">
+      <el-select
+        v-model="selectedAssetIds"
+        multiple filterable remote :remote-method="searchAssets" :loading="assetSearchLoading"
+        placeholder="搜索并选择资产（仅未归属或属于本业务的资产）" style="width: 100%"
+      >
+        <el-option v-for="a in assetCandidates" :key="a.id" :label="a.name + (a.ip ? ' (' + a.ip + ')' : '')" :value="a.id" />
+      </el-select>
+      <template #footer>
+        <el-button @click="addMembersVisible = false">取消</el-button>
+        <el-button type="primary" :loading="addingMembers" @click="confirmAddMembers">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -338,6 +368,73 @@ async function handleSubmit() {
 function viewSystem(row: any) {
   currentSystem.value = row
   drawerVisible.value = true
+  loadMembers()
+}
+
+// ---------- 成员资产管理 ----------
+const members = ref<any[]>([])
+const membersLoading = ref(false)
+const addMembersVisible = ref(false)
+const selectedAssetIds = ref<string[]>([])
+const assetCandidates = ref<any[]>([])
+const assetSearchLoading = ref(false)
+const addingMembers = ref(false)
+
+async function loadMembers() {
+  if (!currentSystem.value) return
+  membersLoading.value = true
+  try {
+    const { data } = await client.get(`${API.BUSINESS_SYSTEM_DETAIL(currentSystem.value.id)}/members`, { params: { page: 1, page_size: 500 } })
+    members.value = data?.data?.items || data?.data || []
+  } catch { members.value = [] }
+  finally { membersLoading.value = false }
+}
+
+function openAddMembers() {
+  selectedAssetIds.value = []
+  assetCandidates.value = []
+  addMembersVisible.value = true
+  searchAssets('')
+}
+
+async function searchAssets(query: string) {
+  assetSearchLoading.value = true
+  try {
+    const params: any = { page: 1, page_size: 50, asset_type: '' }
+    if (query) params.keyword = query
+    const { data } = await client.get(API.ASSETS, { params })
+    const items = data?.data?.items || data?.data || []
+    // 排除业务系统本身；仅展示未归属或已属于本业务的资产
+    assetCandidates.value = items.filter((a: any) =>
+      a.asset_type !== 'business_system' &&
+      (!a.business_system_id || a.business_system_id === currentSystem.value?.id))
+  } catch { assetCandidates.value = [] }
+  finally { assetSearchLoading.value = false }
+}
+
+async function confirmAddMembers() {
+  if (!currentSystem.value || selectedAssetIds.value.length === 0) { addMembersVisible.value = false; return }
+  addingMembers.value = true
+  try {
+    await client.post(`${API.BUSINESS_SYSTEM_DETAIL(currentSystem.value.id)}/members`, { asset_ids: selectedAssetIds.value })
+    ElMessage.success('已添加成员资产')
+    addMembersVisible.value = false
+    await loadMembers()
+    fetchSystems()
+  } catch (e: any) {
+    ElMessage.error('添加失败: ' + (e.message || e))
+  } finally { addingMembers.value = false }
+}
+
+async function removeMember(row: any) {
+  if (!currentSystem.value) return
+  try {
+    await ElMessageBox.confirm(`确认将「${row.name}」移出该业务系统？`, '移除确认', { type: 'warning' })
+    await client.delete(`${API.BUSINESS_SYSTEM_DETAIL(currentSystem.value.id)}/members/${row.id}`)
+    ElMessage.success('已移除')
+    await loadMembers()
+    fetchSystems()
+  } catch { /* cancelled */ }
 }
 
 async function handleDelete(row: any) {

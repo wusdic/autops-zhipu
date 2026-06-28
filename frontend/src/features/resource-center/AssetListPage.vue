@@ -52,6 +52,11 @@
             <el-option label="未知" value="unknown" />
           </el-select>
         </el-form-item>
+        <el-form-item label="业务">
+          <el-select v-model="filters.business_system_id" placeholder="全部业务" clearable filterable @change="loadAssets" style="width: 180px">
+            <el-option v-for="bs in businessSystemOptions" :key="bs.id" :label="bs.name" :value="bs.id" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="标签">
           <el-select
             v-model="filters.tags"
@@ -100,6 +105,11 @@
             <el-tag :type="row.reachability === 'reachable' ? 'success' : row.reachability === 'unreachable' ? 'danger' : 'info'" size="small">
               {{ ({ reachable: '可达', unreachable: '不可达', unknown: '未知' } as Record<string, string>)[row.reachability] || row.reachability || '-' }}
             </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="business_system" label="所属业务" width="120" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span>{{ row.business_system || '-' }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="os_type" label="系统" width="90">
@@ -210,6 +220,11 @@
             <el-option label="生产" value="production" />
             <el-option label="预发布" value="staging" />
             <el-option label="开发" value="development" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="所属业务">
+          <el-select v-model="formData.business_system_id" clearable filterable placeholder="选择业务系统（可不选）" style="width: 100%">
+            <el-option v-for="bs in businessSystemOptions" :key="bs.id" :label="bs.name" :value="bs.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="描述">
@@ -399,6 +414,7 @@ const filters = reactive({
   status: '',
   environment: '',
   health_status: '',
+  business_system_id: '',
   tags: [] as string[],
 })
 const availableTags = ref<string[]>([])
@@ -435,8 +451,17 @@ const quickBindCredId = ref('')
 const defaultForm = {
   name: '', asset_type: 'linux_server', ip: '', port: undefined as number | undefined,
   os_type: 'linux', description: '', environment: 'production', status: 'active',
+  business_system_id: '' as string,
 }
 const formData = reactive({ ...defaultForm })
+// 业务系统下拉选项（供"所属业务"选择 + 列表过滤）
+const businessSystemOptions = ref<{ id: string; name: string }[]>([])
+async function loadBusinessSystems() {
+  try {
+    const { data } = await api.get(R.BUSINESS_SYSTEMS, { params: { page: 1, page_size: 500 } })
+    businessSystemOptions.value = (data?.data?.items || data?.data || []).map((b: any) => ({ id: b.id, name: b.name }))
+  } catch { businessSystemOptions.value = [] }
+}
 
 // ---------- Helpers ----------
 // 类型/状态/健康统一取自 shared/utils/labels.ts（单一事实源）
@@ -488,6 +513,7 @@ async function loadAssets() {
     if (filters.status) params.status = filters.status
     if (filters.environment) params.environment = filters.environment
     if (filters.health_status) params.health_status = filters.health_status
+    if (filters.business_system_id) params.business_system_id = filters.business_system_id
     if (filters.tags.length > 0) params.tags = filters.tags.join(',')
     const { data } = await api.get(R.ASSETS, { params })
     if (data.code === 0) {
@@ -548,6 +574,7 @@ function openEditDialog(row: any) {
     description: row.description || '',
     environment: row.environment || 'production',
     status: row.status || 'active',
+    business_system_id: row.business_system_id || '',
   })
   showFormDialog.value = true
 }
@@ -819,7 +846,7 @@ async function executeQuickBind() {
 }
 
 // ---------- Init ----------
-onMounted(() => loadAssets())
+onMounted(() => { loadAssets(); loadBusinessSystems() })
 </script>
 
 <style scoped>

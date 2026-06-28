@@ -18,6 +18,7 @@ class AssetCreate(BaseModel):
     os_version: str | None = None
     description: str | None = None
     business_system: str | None = None
+    business_system_id: str | None = None
     environment: str | None = None
     location: str | None = None
     tags: list[str] | None = None
@@ -32,6 +33,7 @@ class AssetUpdate(BaseModel):
     os_version: str | None = None
     description: str | None = None
     business_system: str | None = None
+    business_system_id: str | None = None
     environment: str | None = None
     location: str | None = None
     status: str | None = None
@@ -49,6 +51,7 @@ class AssetResponse(BaseModel):
     os_version: str | None
     description: str | None
     business_system: str | None
+    business_system_id: str | None
     environment: str | None
     location: str | None
     status: str

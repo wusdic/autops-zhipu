@@ -56,6 +56,7 @@ def _to_dict(asset) -> dict:
         "os_version": asset.os_version,
         "description": asset.description,
         "business_system": asset.business_system,
+        "business_system_id": asset.business_system_id,
         "environment": asset.environment,
         "location": asset.location,
         "status": asset.status,
@@ -100,6 +101,7 @@ async def list_assets(
     status: str | None = None,
     health_status: str | None = None,
     business_system: str | None = None,
+    business_system_id: str | None = None,
     environment: str | None = None,
     search: str | None = None,
     keyword: str | None = None,
@@ -114,6 +116,7 @@ async def list_assets(
         status=status,
         health_status=health_status,
         business_system=business_system,
+        business_system_id=business_system_id,
         environment=environment,
         search=search or keyword,
     )

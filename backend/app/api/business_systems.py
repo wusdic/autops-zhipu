@@ -67,6 +67,7 @@ async def list_business_systems(
     )
 
     # 关联资产数 + 健康度聚合（业务系统不应有静态健康度；按成员资产实时聚合）
+    # 成员事实源为 business_system_id；兼容尚未回填 id 的历史数据（按名匹配）。
     items = []
     for r in rows:
         d = model_to_dict(r)
@@ -74,7 +75,8 @@ async def list_business_systems(
             (
                 await db.execute(
                     select(Asset.health_status).where(
-                        Asset.business_system == r.name,
+                        ((Asset.business_system_id == r.id)
+                         | (Asset.business_system == r.name)),
                         Asset.asset_type != "business_system",
                         Asset.is_deleted == False,
                     )
@@ -174,10 +176,21 @@ async def update_business_system(
 
         updates["tags"] = json.dumps(updates["tags"])
 
+    old_name = row.name
     for k, v in updates.items():
         if hasattr(row, k):
             setattr(row, k, v)
     await db.flush()
+    # 改名 → 同步成员资产的名缓存（事实源是 business_system_id，仅同步展示名）
+    if "name" in updates and updates["name"] != old_name:
+        from sqlalchemy import update as _update
+
+        await db.execute(
+            _update(Asset)
+            .where(Asset.business_system_id == row.id)
+            .values(business_system=row.name)
+        )
+        await db.flush()
     await db.refresh(row)
     return success(model_to_dict(row))
 
@@ -205,5 +218,67 @@ async def delete_business_system(
 
     row.is_deleted = True
     row.deleted_at = datetime.now(timezone.utc)
+    # 解除成员归属，避免悬挂引用
+    from sqlalchemy import update as _update
+
+    await db.execute(
+        _update(Asset)
+        .where(Asset.business_system_id == system_id)
+        .values(business_system_id=None, business_system=None)
+    )
     await db.flush()
     return success({"id": system_id, "deleted": True})
+
+
+# ======================================================================
+# 成员资产管理：列表 / 添加 / 移除（事实源 = assets.business_system_id）
+# ======================================================================
+class MemberAssignBody(BaseModel):
+    asset_ids: list[str] = Field(default_factory=list)
+
+
+@router.get("/{system_id}/members")
+async def list_members(
+    system_id: str,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=500),
+    db: AsyncSession = Depends(get_db),
+):
+    """列出业务系统下的成员资产."""
+    from app.domains.asset.service import AssetService
+
+    rows, total = await AssetService(db).list_business_members(system_id, page, page_size)
+    return paginate([model_to_dict(a) for a in rows], total, page, page_size)
+
+
+@router.post("/{system_id}/members")
+async def add_members(
+    system_id: str,
+    body: MemberAssignBody,
+    db: AsyncSession = Depends(get_db),
+):
+    """把若干资产归属到该业务系统."""
+    from app.domains.asset.service import AssetService
+
+    svc = AssetService(db)
+    n = 0
+    for aid in body.asset_ids:
+        try:
+            await svc.assign_business_system(aid, system_id)
+            n += 1
+        except Exception:  # noqa: BLE001 单个失败不影响整体
+            continue
+    return success({"assigned": n})
+
+
+@router.delete("/{system_id}/members/{asset_id}")
+async def remove_member(
+    system_id: str,
+    asset_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """从业务系统移除某成员资产（解除归属）."""
+    from app.domains.asset.service import AssetService
+
+    await AssetService(db).assign_business_system(asset_id, None)
+    return success({"asset_id": asset_id, "removed": True})

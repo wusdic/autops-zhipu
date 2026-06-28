@@ -121,6 +121,87 @@ class AssetService:
             await self.refresh_status_from_snapshots(str(aid))
         return len(ids)
 
+    async def _resolve_business_system(
+        self, bs_id: str | None, bs_name: str | None
+    ) -> tuple[str | None, str | None]:
+        """解析业务系统归属，返回 (business_system_id, business_system 名缓存)。
+
+        - 优先用 id：校验其为有效业务系统资产，返回 (id, name)；无效则清空 (None, None)。
+        - 否则用名：能匹配到业务系统资产则返回 (id, name)，匹配不到则保留名、id 空（兼容自由文本）。
+        """
+        from sqlalchemy import select as _select
+
+        if bs_id:
+            row = (
+                await self.session.execute(
+                    _select(Asset.id, Asset.name).where(
+                        Asset.id == bs_id,
+                        Asset.asset_type == "business_system",
+                        Asset.is_deleted == False,  # noqa: E712
+                    )
+                )
+            ).first()
+            return (row[0], row[1]) if row else (None, None)
+        if bs_name:
+            row = (
+                await self.session.execute(
+                    _select(Asset.id, Asset.name).where(
+                        Asset.name == bs_name,
+                        Asset.asset_type == "business_system",
+                        Asset.is_deleted == False,  # noqa: E712
+                    )
+                )
+            ).first()
+            return (row[0], row[1]) if row else (None, bs_name)
+        return None, None
+
+    async def assign_business_system(
+        self, asset_id: str, business_system_id: str | None
+    ) -> Asset:
+        """把资产归属到某业务系统（或传 None 解除归属），同步写 id + 名缓存。"""
+        asset = await self.get_asset(asset_id)
+        bs_id, bs_name = await self._resolve_business_system(business_system_id, None)
+        asset.business_system_id = bs_id
+        asset.business_system = bs_name
+        await self.session.flush()
+        await self.timeline_repo.create(
+            asset_id=asset_id,
+            event_type="updated",
+            title="业务系统归属变更",
+            detail=f"归属业务系统: {bs_name or '（已解除）'}",
+            source="manual",
+        )
+        return asset
+
+    async def list_business_members(
+        self, business_system_id: str, page: int = 1, page_size: int = 20
+    ):
+        """列出某业务系统下的成员资产（按 business_system_id 事实源）。"""
+        from sqlalchemy import select as _select, func as _func
+
+        base = _select(Asset).where(
+            Asset.business_system_id == business_system_id,
+            Asset.asset_type != "business_system",
+            Asset.is_deleted == False,  # noqa: E712
+        )
+        total = (
+            await self.session.execute(
+                _select(_func.count()).select_from(base.subquery())
+            )
+        ).scalar() or 0
+        rows = (
+            (
+                await self.session.execute(
+                    base.order_by(Asset.created_at.desc())
+                    .offset((page - 1) * page_size)
+                    .limit(page_size)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        return rows, total
+
     async def create_asset(self, data: AssetCreate) -> Asset:
         """创建资产."""
         existing = await self.repo.get_by_name(data.name)
@@ -132,6 +213,10 @@ class AssetService:
                 raise DuplicateError(f"IP '{data.ip}' 已被占用")
 
         tags_json = json.dumps(data.tags) if data.tags else None
+        # 解析业务系统归属（id 优先，回退按名），同步写 id + 名缓存
+        bs_id, bs_name = await self._resolve_business_system(
+            data.business_system_id, data.business_system
+        )
         asset = await self.repo.create(
             name=data.name,
             asset_type=data.asset_type,
@@ -141,7 +226,8 @@ class AssetService:
             os_type=data.os_type,
             os_version=data.os_version,
             description=data.description,
-            business_system=data.business_system,
+            business_system=bs_name,
+            business_system_id=bs_id,
             environment=data.environment,
             location=data.location,
             tags=tags_json,
@@ -190,9 +276,31 @@ class AssetService:
         updates = data.model_dump(exclude_unset=True, exclude_none=True)
         if "tags" in updates and isinstance(updates["tags"], list):
             updates["tags"] = json.dumps(updates["tags"])
+
+        # 业务系统归属：从 setattr 流程里摘出，统一经解析写 id + 名缓存
+        if "business_system_id" in updates or "business_system" in updates:
+            bs_id, bs_name = await self._resolve_business_system(
+                updates.pop("business_system_id", None),
+                updates.pop("business_system", None),
+            )
+            asset.business_system_id = bs_id
+            asset.business_system = bs_name
+
         for key, value in updates.items():
             setattr(asset, key, value)
         await self.session.flush()
+
+        # 业务系统自身改名 → 传播到成员资产的名缓存（事实源是 id，不受影响，仅同步展示）
+        if asset.asset_type == "business_system" and "name" in updates:
+            from sqlalchemy import update as _update
+
+            await self.session.execute(
+                _update(Asset)
+                .where(Asset.business_system_id == asset.id)
+                .values(business_system=asset.name)
+            )
+            await self.session.flush()
+
         await self.session.refresh(asset)
 
         await self.timeline_repo.create(
