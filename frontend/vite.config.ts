@@ -24,6 +24,8 @@ export default defineConfig({
     },
   },
   server: {
+    // 绑定 0.0.0.0，局域网内其它机器可通过 http://<本机IP>:5174 访问
+    host: '0.0.0.0',
     port: 5174,
     proxy: {
       '/api/': {
@@ -32,5 +34,9 @@ export default defineConfig({
         ws: true,
       },
     },
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 4173,
   },
 })

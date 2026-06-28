@@ -27,16 +27,28 @@ docker compose logs -f autops-migrate
 docker compose exec autops-backend python scripts/data_seed/init_data.py
 #    若未设 ADMIN_INITIAL_PASSWORD，初始口令会打印在上方输出，仅显示一次
 
-# 6. 访问
-# 前端:       http://localhost
-# 后端 API:   仅绑定 127.0.0.1:8001，由前端 nginx 反代 /api/ 对外
-# OpenAPI:    开发环境 http://localhost:8001/docs（生产关闭）
+# 6. 访问（局域网）
+# 前端:       http://<服务器IP>        （nginx :80 绑定 0.0.0.0，同网段可访问）
+# 后端 API:   http://<服务器IP>:8001   （uvicorn 绑定 0.0.0.0；对外建议仍走 nginx /api/ 反代）
+# OpenAPI:    开发环境 http://<服务器IP>:8001/docs（生产关闭）
 ```
+
+### 局域网访问与防火墙
+- 服务**绑定 `0.0.0.0`**（不是 `127.0.0.1`），因此局域网内其它机器用 `http://<服务器IP>` 即可访问。
+- 查看本机 IP：`hostname -I`。
+- 放通防火墙（二选一）：
+  ```bash
+  # 简便（内网/实验环境，按部署需求）：直接关闭
+  sudo ufw disable
+  # 或 生产推荐：只放通必要端口
+  sudo ufw allow 80,443/tcp && sudo ufw allow 8001/tcp
+  ```
+  `install.sh` 已内置该步骤（默认 `ufw disable`，可用 `FIREWALL_DISABLE=false` 改为只放通端口）。
 
 > ⚠️ **生产注意事项**
 > - `JWT_SECRET` 必须 ≥32 字符且不能是占位值，否则启动报错
 > - `configs/app.yaml` 的 `cors_origins` 不能为 `["*"]`（生产校验会拒绝），需改为具体域名
-> - MySQL/Redis 端口仅绑定 `127.0.0.1`，不对外暴露
+> - 应用（nginx/后端）绑定 `0.0.0.0` 供局域网访问；**MySQL/Redis 仍建议仅绑定 `127.0.0.1`/内网**，不要对公网暴露
 > - 后端 `/docs`、`/redoc` 在生产环境（`AUTOPS_ENV=prod`）自动关闭
 
 ## 2. 物理机部署
@@ -88,10 +100,10 @@ npm run dev
 
 | 服务 | 默认端口 | 可配置 | 暴露范围 |
 |---|---|---|---|
-| 前端 (Nginx) | 80 | `.env FRONTEND_PORT` | 对外 |
-| 后端 API | 8001 | `.env BACKEND_PORT` | 仅 `127.0.0.1`（由 nginx 反代） |
-| MySQL | 3306 | `.env DB_PORT` | 仅 `127.0.0.1` |
-| Redis | 6379 | `.env REDIS_PORT` | 仅 `127.0.0.1` |
+| 前端 (Nginx) | 80 | `.env FRONTEND_PORT` | `0.0.0.0` 对外/局域网 |
+| 后端 API | 8001 | `.env BACKEND_PORT` | `0.0.0.0`（局域网可直连；对外建议走 nginx /api/ 反代） |
+| MySQL | 3306 | `.env DB_PORT` | 仅 `127.0.0.1`/内网（勿对公网） |
+| Redis | 6379 | `.env REDIS_PORT` | 仅 `127.0.0.1`/内网（勿对公网） |
 
 > 健康检查：`GET /health` 返回 `{"status":"alive"}`；`GET /ready` 返回 DB+Redis 检查结果。
 > 注意 docker-compose 中 backend 容器的 healthcheck 依赖 `curl`，若镜像未安装需改用 python urllib 或在 Dockerfile 安装 curl。

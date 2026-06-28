@@ -51,5 +51,7 @@ tar xzf autops-offline-*.tar.gz
 - 配置文件中的密码必须修改默认值（`MYSQL_ROOT_PASSWORD`、`DB_PASS`、`JWT_SECRET`、`CREDENTIAL_ENCRYPT_KEY`）
 - `JWT_SECRET` 生产环境必须 ≥32 字符，否则启动报错
 - 初始 admin 口令从安装日志获取后请立即登录修改；如需指定可在安装前设置 `ADMIN_INITIAL_PASSWORD`
-- MySQL/Redis/后端端口仅绑定 `127.0.0.1`，对外由前端 nginx 反代 `/api/` 到后端
+- 应用（nginx :80 / 后端 :8001）绑定 `0.0.0.0`，局域网内用 `http://<服务器IP>` 即可访问；
+  MySQL/Redis 仍仅绑定 `127.0.0.1`/内网，勿对公网暴露
+- 局域网访问不通时放通防火墙：`sudo ufw disable`（内网/实验环境）或 `sudo ufw allow 80,443,8001/tcp`（生产推荐）
 

@@ -388,6 +388,26 @@ EOF
 }
 
 # ============================================================
+# 防火墙：确保局域网可访问
+# ============================================================
+setup_firewall() {
+    # 服务已绑定 0.0.0.0（nginx :80 / 后端 :8001），需放通防火墙局域网才能访问。
+    if command -v ufw >/dev/null 2>&1; then
+        if [ "${FIREWALL_DISABLE:-true}" = "true" ]; then
+            # 按部署需求关闭 ufw（内网/实验环境）。生产环境建议改为只放通端口（见下）。
+            ufw disable 2>/dev/null && log "已关闭 ufw 防火墙（局域网可访问）" || warn "关闭 ufw 失败，请手动 sudo ufw disable"
+        else
+            ufw allow 80/tcp 2>/dev/null || true
+            ufw allow 443/tcp 2>/dev/null || true
+            ufw allow 8001/tcp 2>/dev/null || true
+            log "已放通 ufw 端口 80/443/8001（生产推荐做法，未整体关闭防火墙）"
+        fi
+    else
+        log "未检测到 ufw，跳过防火墙配置（如有其它防火墙请放通 80/443/8001 或对内网开放）"
+    fi
+}
+
+# ============================================================
 # 安装后自检
 # ============================================================
 run_self_check() {
@@ -411,10 +431,13 @@ print_summary() {
     log "AUTOPS 安装完成！(${mode}模式)"
     echo "============================================"
     echo ""
-    log "后端地址: http://$(hostname -I 2>/dev/null | awk '{print $1}' || echo 'localhost'):8001"
-    log "前端地址: http://$(hostname -I 2>/dev/null | awk '{print $1}' || echo 'localhost')"
-    log "健康检查: http://localhost:8001/health"
+    local lan_ip
+    lan_ip="$(hostname -I 2>/dev/null | awk '{print $1}' || echo 'localhost')"
+    log "局域网访问(前端): http://${lan_ip}        （服务已绑定 0.0.0.0，同网段可访问）"
+    log "局域网访问(后端): http://${lan_ip}:8001"
+    log "健康检查: http://${lan_ip}:8001/health"
     log "默认账户: admin / admin123"
+    log "提示: 若局域网仍无法访问，确认防火墙已放通（脚本默认 ufw disable；或 sudo ufw allow 80,443,8001）"
     echo ""
     log "启动服务: systemctl start autops-backend autops-worker"
     log "停止服务: systemctl stop autops-backend autops-worker"
@@ -452,6 +475,7 @@ main() {
     setup_frontend
     setup_seed_data
     setup_systemd
+    setup_firewall
 
     # 启动服务（backend + worker 必须同时运行）
     systemctl start autops-backend || warn "后端服务启动失败，请手动检查"
