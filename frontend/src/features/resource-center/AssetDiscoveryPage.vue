@@ -33,7 +33,16 @@
             <el-icon><Plus /></el-icon> 新建发现任务
           </el-button>
           <el-button @click="loadTasks"><el-icon><Refresh /></el-icon> 刷新</el-button>
+          <span v-if="hasRunningTasks" class="polling-hint">
+            <el-icon class="is-loading"><Refresh /></el-icon> 任务执行中，自动刷新…
+          </span>
         </div>
+
+        <el-alert
+          v-if="hasRunningTasks"
+          type="info" :closable="false" show-icon class="mb-2"
+          title="有任务正在执行（每 5 秒自动刷新）。若长时间停留在「运行中」不完成，请确认采集 Worker(autops-worker) 是否在运行。"
+        />
 
         <el-table stripe :data="tasks" v-loading="loading">
           <el-table-column type="index" label="序号" width="60" />
@@ -305,7 +314,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import type { TagType } from '@/shared/types'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -387,16 +396,31 @@ async function loadStats() {
   }
 }
 
-async function loadTasks() {
-  loading.value = true
+async function loadTasks(silent = false) {
+  if (!silent) loading.value = true
   try {
     const res = await api.get(API.DISCOVERY_TASKS, { params: { page: taskPagination.page, page_size: taskPagination.pageSize } })
     if (res.data?.code === 0) {
       tasks.value = res.data.data?.items || res.data.data || []
       taskTotal.value = res.data.data?.total || tasks.value.length
     }
-  } catch { ElMessage.error('加载任务失败') }
-  finally { loading.value = false }
+  } catch { if (!silent) ElMessage.error('加载任务失败') }
+  finally { if (!silent) loading.value = false }
+}
+
+// 有 pending/running 任务时静默轮询，完成后自动停止（无需手动刷新）
+const hasRunningTasks = computed(() => tasks.value.some((t: any) => t.status === 'pending' || t.status === 'running'))
+let pollTimer: ReturnType<typeof setInterval> | null = null
+function startPolling() {
+  if (pollTimer) return
+  pollTimer = setInterval(() => {
+    if (hasRunningTasks.value) {
+      loadTasks(true); loadResults(); loadStats()
+    }
+  }, 5000)
+}
+function stopPolling() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null }
 }
 
 async function loadResults() {
@@ -573,7 +597,8 @@ function getCredentialName(id: string) { return credentials.value.find(c => c.id
 function getGroupName(id: string) { return assetGroups.value.find(g => g.id === id)?.name || '-' }
 
 // === 生命周期 ===
-onMounted(() => { loadTasks(); loadResults(); loadStats(); loadCredentials(); loadAssetGroups(); loadTemplates() })
+onMounted(() => { loadTasks(); loadResults(); loadStats(); loadCredentials(); loadAssetGroups(); loadTemplates(); startPolling() })
+onBeforeUnmount(() => stopPolling())
 </script>
 
 <style scoped>
@@ -591,4 +616,6 @@ onMounted(() => { loadTasks(); loadResults(); loadStats(); loadCredentials(); lo
 .wizard-assets-preview { margin-top: var(--autops-space-xl); }
 .wizard-assets-preview h4 { margin-bottom: 10px; color: var(--autops-text-2); }
 .main-tabs { margin-top: var(--autops-space-lg); }
+.polling-hint { margin-left: 12px; color: var(--autops-text-secondary, #909399); font-size: 13px; display: inline-flex; align-items: center; gap: 4px; }
+.mb-2 { margin-bottom: 12px; }
 </style>
