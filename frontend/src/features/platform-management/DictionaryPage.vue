@@ -59,7 +59,7 @@
         <el-table stripe
  :data="items"
  v-loading="loading"
-63| border
+border
  row-key="id"
  empty-text="暂无字典项"
  style="width: 100%"

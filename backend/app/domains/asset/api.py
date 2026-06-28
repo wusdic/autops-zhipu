@@ -22,6 +22,23 @@ from app.infra.database import get_db
 router = APIRouter(prefix="/assets", tags=["资产"])
 
 
+def _parse_tags(raw) -> list:
+    """tags 在库里是 JSON 字符串，统一解析为 list 返回，避免前端对字符串调用 forEach."""
+    if not raw:
+        return []
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, str):
+        import json as _json
+
+        try:
+            v = _json.loads(raw)
+            return v if isinstance(v, list) else [raw]
+        except (ValueError, TypeError):
+            return [raw]
+    return []
+
+
 def _get_service(db: AsyncSession = Depends(get_db)) -> AssetService:
     return AssetService(db)
 
@@ -44,7 +61,7 @@ def _to_dict(asset) -> dict:
         "status": asset.status,
         "health_status": asset.health_status,
         "reachability": asset.reachability,
-        "tags": asset.tags,
+        "tags": _parse_tags(asset.tags),
         "created_at": asset.created_at.isoformat() if asset.created_at else None,
         "updated_at": asset.updated_at.isoformat() if asset.updated_at else None,
     }
@@ -78,7 +95,7 @@ def _timeline_to_dict(t) -> dict:
 @router.get("")
 async def list_assets(
     page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    page_size: int = Query(20, ge=1, le=500),
     asset_type: str | None = None,
     status: str | None = None,
     health_status: str | None = None,
@@ -109,11 +126,29 @@ async def create_asset(data: AssetCreate, svc: AssetService = Depends(_get_servi
     return success(_to_dict(asset))
 
 
+@router.post("/refresh-all-statuses", dependencies=[Depends(require_admin)])
+async def refresh_all_statuses(svc: AssetService = Depends(_get_service)):
+    """根据最新 state_snapshots 批量刷新资产健康/可达/生命周期状态（R7）."""
+    count = await svc.refresh_all_statuses()
+    return success({"refreshed": count})
+
+
+@router.post("/{asset_id}/refresh-status")
+async def refresh_asset_status(asset_id: str, svc: AssetService = Depends(_get_service)):
+    """根据最新 state_snapshots 刷新单个资产状态."""
+    asset = await svc.refresh_status_from_snapshots(asset_id)
+    if not asset:
+        from app.common.exceptions import NotFoundError
+
+        raise NotFoundError(f"资产 {asset_id} 不存在")
+    return success(_to_dict(asset))
+
+
 # --- 资产导入（必须在 /{asset_id} 之前注册，否则 "import" 会被当作 asset_id） ---
 @router.get("/import")
 async def list_import_tasks(
     page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    page_size: int = Query(20, ge=1, le=500),
     db: AsyncSession = Depends(get_db),
 ):
     """查询资产导入任务列表."""
@@ -327,7 +362,7 @@ group_router = APIRouter(prefix="/asset-groups", tags=["资产分组"])
 @group_router.get("")
 async def list_groups(
     page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    page_size: int = Query(20, ge=1, le=500),
     svc: AssetService = Depends(_get_service),
 ):
     items, total = await svc.list_groups(page=page, page_size=page_size)

@@ -45,6 +45,82 @@ class AssetService:
         self.relation_repo = AssetRelationRepository(session)
         self.timeline_repo = AssetTimelineRepository(session)
 
+    async def refresh_status_from_snapshots(self, asset_id: str) -> Asset | None:
+        """根据最新 state_snapshots 推算资产 health_status/reachability/status（R7）.
+
+        - ping 快照 normal→reachable / critical→unreachable
+        - 健康度：任一 critical→critical；全 normal→healthy；无快照→unknown；其余 warning
+        - status（生命周期）：业务系统保持 active；普通资产 reachable→active / 不可达→maintenance
+        """
+        from sqlalchemy import select as _select
+
+        from app.domains.state.models import StateSnapshot
+
+        asset = await self.repo.get_by_id(asset_id)
+        if not asset:
+            return None
+
+        rows = (
+            (
+                await self.session.execute(
+                    _select(StateSnapshot)
+                    .where(StateSnapshot.asset_id == asset_id)
+                    .order_by(StateSnapshot.collected_at.desc())
+                    .limit(50)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        # 取每个 state_type 的最新一条
+        latest: dict[str, str] = {}
+        for s in rows:
+            latest.setdefault(s.state_type, s.status)
+        if not latest:
+            return asset  # 无快照，不动
+
+        statuses = list(latest.values())
+        if any(v == "critical" for v in statuses):
+            health = "critical"
+        elif all(v == "normal" for v in statuses):
+            health = "healthy"
+        elif any(v in ("warning", "degraded") for v in statuses):
+            health = "warning"
+        else:
+            health = "unknown"
+
+        ping = latest.get("ping")
+        if ping == "normal":
+            reachability = "reachable"
+        elif ping == "critical":
+            reachability = "unreachable"
+        else:
+            reachability = asset.reachability or "unknown"
+
+        asset.health_status = health
+        asset.reachability = reachability
+        if asset.asset_type != "business_system":
+            asset.status = "active" if reachability == "reachable" else "maintenance"
+        await self.session.flush()
+        return asset
+
+    async def refresh_all_statuses(self) -> int:
+        """批量从快照刷新所有未删除资产状态，返回处理数量."""
+        from sqlalchemy import select as _select
+
+        ids = (
+            (
+                await self.session.execute(
+                    _select(Asset.id).where(Asset.is_deleted == False)  # noqa: E712
+                )
+            )
+            .scalars()
+            .all()
+        )
+        for aid in ids:
+            await self.refresh_status_from_snapshots(str(aid))
+        return len(ids)
+
     async def create_asset(self, data: AssetCreate) -> Asset:
         """创建资产."""
         existing = await self.repo.get_by_name(data.name)

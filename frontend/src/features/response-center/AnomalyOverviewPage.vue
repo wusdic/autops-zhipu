@@ -1,13 +1,13 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header autops-page-header--between">
+    <!-- 页面头部（嵌入到异常中心页时由宿主统一展示，隐藏自身） -->
+    <div class="autops-page-header autops-page-header--between" v-if="!embedded">
       <div>
         <div class="autops-page-title">异常总览</div>
         <div class="autops-page-desc">监控和处理系统异常事件</div>
       </div>
       <div class="autops-header-actions">
-        <el-button type="primary" @click="router.push('/response/anomaly-list')"><el-icon><Plus /></el-icon>异常列表</el-button>
+        <el-button type="primary" @click="router.push('/anomaly/list')"><el-icon><Plus /></el-icon>异常列表</el-button>
       </div>
     </div>
 
@@ -120,6 +120,8 @@ import { ref, reactive, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+
+defineProps<{ embedded?: boolean }>()
 import {
   Plus,
   ArrowRight,

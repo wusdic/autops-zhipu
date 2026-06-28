@@ -1,7 +1,7 @@
 <template>
   <div class="compliance-report-page">
     <div class="autops-page-header autops-page-header--between">
-      <div>
+      <div v-if="!embedded">
         <div class="autops-page-title">合规报告</div>
         <div class="autops-page-desc">生成和查看合规检查报告，评估系统合规状态</div>
       </div>
@@ -108,6 +108,8 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+
+defineProps<{ embedded?: boolean }>()
 import { Document, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 

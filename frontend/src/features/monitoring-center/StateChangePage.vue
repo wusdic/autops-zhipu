@@ -1,7 +1,7 @@
 <template>
   <div class="state-change-page">
-    <!-- ========== Page Header ========== -->
-    <div class="autops-page-header">
+    <!-- ========== Page Header（嵌入到状态监控页时由宿主统一展示，隐藏自身） ========== -->
+    <div class="autops-page-header" v-if="!embedded">
       <div>
         <div class="autops-page-title">状态变化</div>
         <div class="autops-page-desc">状态变更历史、触发来源、证据</div>
@@ -122,6 +122,8 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft, Right } from '@element-plus/icons-vue'
+
+defineProps<{ embedded?: boolean }>()
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

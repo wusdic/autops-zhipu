@@ -1,7 +1,7 @@
 <template>
   <div class="autops-page-container">
     <!-- 页面头部 -->
-    <div class="autops-page-header">
+    <div class="autops-page-header" v-if="!embedded">
       <div class="autops-page-title">关闭验证</div>
       <div class="autops-page-desc">验证异常处理结果的关闭状态</div>
     </div>
@@ -141,6 +141,8 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
+
+defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

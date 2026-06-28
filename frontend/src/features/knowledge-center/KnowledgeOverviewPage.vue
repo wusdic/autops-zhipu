@@ -31,7 +31,7 @@
       </template>
       <el-table stripe
  :data="recentItems"
-40| v-loading="tableLoading"
+v-loading="tableLoading"
  empty-text="暂无知识"
  style="width: 100%"
  >

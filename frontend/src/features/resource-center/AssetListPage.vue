@@ -495,7 +495,7 @@ async function loadAssets() {
       pagination.total = data.data.total || 0
       // Collect tags from items for filter suggestions
       const tagSet = new Set<string>()
-      assets.value.forEach((a: any) => (a.tags || []).forEach((t: string) => tagSet.add(t)))
+      assets.value.forEach((a: any) => (Array.isArray(a.tags) ? a.tags : []).forEach((t: string) => tagSet.add(t)))
       tagSet.forEach(t => { if (!availableTags.value.includes(t)) availableTags.value.push(t) })
     }
   } catch (e: any) {

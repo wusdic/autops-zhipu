@@ -41,7 +41,7 @@
     <el-table stripe
  :data="integrations"
  v-loading="loading"
-45| border
+border
  row-key="name"
  empty-text="暂无集成配置"
  style="width: 100%"

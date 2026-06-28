@@ -307,7 +307,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import type { TagType } from '@/shared/types'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, Search } from '@element-plus/icons-vue'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
@@ -315,6 +315,7 @@ import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
 const router = useRouter()
+const route = useRoute()
 
 const { navToDiscovery } = useWorkflowNav()
 
@@ -322,7 +323,8 @@ const { navToDiscovery } = useWorkflowNav()
 const stats = reactive({ total_discovered: 0, onboarded: 0, pending_review: 0, today: 0 })
 
 // === Tab ===
-const activeTab = ref('tasks')
+// 支持 ?tab=results 深链（去重后 /resources/discovery-results 重定向至此）
+const activeTab = ref(route.query.tab === 'results' ? 'results' : 'tasks')
 
 // === 发现任务 ===
 const tasks = ref<any[]>([])

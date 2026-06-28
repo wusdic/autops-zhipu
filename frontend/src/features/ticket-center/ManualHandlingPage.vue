@@ -1,7 +1,7 @@
 <template>
   <div class="autops-page-container">
     <div class="autops-page-header autops-page-header--between">
-      <div>
+      <div v-if="!embedded">
         <div class="autops-page-title-row">
           <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
           <span class="autops-page-title">人工处置台</span>
@@ -149,6 +149,8 @@
 import { ref, reactive, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
+
+defineProps<{ embedded?: boolean }>()
 import { ElMessage } from 'element-plus'
 import { Plus, Refresh, ArrowLeft, Clock, Loading, CircleCheck, Timer } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'

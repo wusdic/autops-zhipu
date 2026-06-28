@@ -30,6 +30,79 @@ def _llm_headers(config) -> dict:
     return {}
 
 
+def _llm_timeout(config) -> float:
+    """LLM 请求超时（秒）。
+
+    带"思考块"的本地大模型单次推理可达数百秒，30s 硬超时会把正常推理判成失败。
+    从 config.llm.timeout 读取，默认 300s。
+    """
+    t = getattr(getattr(config, "llm", None), "timeout", None)
+    try:
+        return float(t) if t else 300.0
+    except (TypeError, ValueError):
+        return 300.0
+
+
+def _llm_endpoints(config, prompt_len: int) -> list[tuple[str, str]]:
+    """大小模型智能路由：返回按优先级排序的 (base_url, model) 列表。
+
+    短 prompt（< 阈值）优先走小模型（快、可高并发），失败回退大模型；
+    长 prompt 直接走大模型。小模型端点由环境变量配置，未配置则只用大模型。
+        SMALL_LLM_URL / SMALL_LLM_MODEL / SMALL_LLM_PROMPT_THRESHOLD(默认300)
+    """
+    import os
+
+    large = (config.llm.base_url, config.llm.model_name)
+    small_url = os.getenv("SMALL_LLM_URL", "").strip()
+    small_model = os.getenv("SMALL_LLM_MODEL", "").strip()
+    try:
+        threshold = int(os.getenv("SMALL_LLM_PROMPT_THRESHOLD", "300") or 300)
+    except ValueError:
+        threshold = 300
+    if small_url and small_model and prompt_len < threshold:
+        return [(small_url, small_model), large]  # 小模型优先，回退大模型
+    return [large]
+
+
+async def _chat_completion(
+    config, messages: list[dict], max_tokens: int = 512, prompt_len: int = 0
+) -> str | None:
+    """按智能路由顺序依次尝试各 LLM 端点，返回首个成功的文本内容。
+
+    - 端点连接失败（ConnectError）→ 回退下一个端点；
+    - 全部端点不可达 → 返回 None（由调用方做优雅降级）；
+    - 端点可达但返回非 200 → 抛 AppError。
+    """
+    timeout = _llm_timeout(config)
+    endpoints = _llm_endpoints(config, prompt_len)
+    last_http_error: AppError | None = None
+    for base_url, model in endpoints:
+        try:
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                resp = await client.post(
+                    f"{base_url}/chat/completions",
+                    json={
+                        "model": model,
+                        "messages": messages,
+                        "temperature": 0.3,
+                        "max_tokens": max_tokens,
+                    },
+                    headers=_llm_headers(config),
+                )
+            if resp.status_code == 200:
+                return resp.json()["choices"][0]["message"]["content"]
+            last_http_error = AppError(
+                ErrorCode.AI_UNAVAILABLE_ANALYSIS,
+                f"LLM 返回状态码 {resp.status_code}",
+                502,
+            )
+        except httpx.ConnectError:
+            continue  # 该端点不可达，尝试下一个（fallback）
+    if last_http_error is not None:
+        raise last_http_error
+    return None  # 所有端点都连不上 → 降级
+
+
 class AIOpsService:
     """AIops 业务逻辑."""
 
@@ -93,8 +166,6 @@ class AIOpsService:
 
     async def _call_llm(self, analysis: AIAnalysis) -> dict:
         config = self.llm_config
-        base_url = config.llm.base_url
-        model = config.llm.model_name
 
         prompt = f"""你是运维分析专家。请分析以下问题并给出结构化的JSON响应。
 分析类型: {analysis.analysis_type}
@@ -107,47 +178,33 @@ class AIOpsService:
   "recommended_actions": [{{"action": "动作描述", "risk_level": "low"}}]
 }}"""
 
-        try:
-            async with httpx.AsyncClient(timeout=30) as client:
-                resp = await client.post(
-                    f"{base_url}/chat/completions",
-                    json={
-                        "model": model,
-                        "messages": [{"role": "user", "content": prompt}],
-                        "temperature": 0.3,
-                        "max_tokens": 1024,
-                    },
-                    headers=_llm_headers(config),
-                )
-                if resp.status_code == 200:
-                    content = resp.json()["choices"][0]["message"]["content"]
-                    # Try to parse JSON from response
-                    try:
-                        # Find JSON block in response
-                        start = content.find("{")
-                        end = content.rfind("}") + 1
-                        if start >= 0 and end > start:
-                            return json.loads(content[start:end])
-                    except json.JSONDecodeError:
-                        pass
-                    return {
-                        "summary": content,
-                        "root_causes": [],
-                        "recommended_actions": [],
-                    }
-                else:
-                    raise AppError(
-                        ErrorCode.AI_UNAVAILABLE_ANALYSIS,
-                        f"LLM 返回状态码 {resp.status_code}",
-                        502,
-                    )
-        except httpx.ConnectError:
-            # Model unavailable - graceful degradation
+        # 智能路由 + 可配置超时 + fallback（见 _chat_completion）
+        content = await _chat_completion(
+            config,
+            [{"role": "user", "content": prompt}],
+            max_tokens=512,
+            prompt_len=len(prompt),
+        )
+        if content is None:
+            # 所有端点不可达 — 优雅降级
             return {
                 "summary": "模型服务不可用，已降级处理",
                 "root_causes": [],
                 "recommended_actions": [],
             }
+        # 尝试从响应中解析 JSON 块
+        try:
+            start = content.find("{")
+            end = content.rfind("}") + 1
+            if start >= 0 and end > start:
+                return json.loads(content[start:end])
+        except json.JSONDecodeError:
+            pass
+        return {
+            "summary": content,
+            "root_causes": [],
+            "recommended_actions": [],
+        }
 
     async def list_analyses(
         self,
@@ -276,8 +333,6 @@ class AIOpsService:
 
         # 自由问答模式
         config = self.llm_config
-        base_url = config.llm.base_url
-        model = config.llm.model_name
 
         system_prompt = """你是 AUTOPS 自治运维系统的 AI 运维分析专家。你的职责是：
 1. 分析运维问题的根因
@@ -293,42 +348,31 @@ class AIOpsService:
         if asset_type:
             user_prompt += f"\n资产类型: {asset_type}"
 
+        # 智能路由：短问答优先小模型，复杂/长上下文走大模型，失败回退
+        prompt_len = len(question or "") + len(context or "") + len(asset_type or "")
         try:
-            async with httpx.AsyncClient(timeout=30) as client:
-                resp = await client.post(
-                    f"{base_url}/chat/completions",
-                    json={
-                        "model": model,
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": user_prompt},
-                        ],
-                        "temperature": 0.3,
-                        "max_tokens": 1024,
-                    },
-                    headers=_llm_headers(config),
-                )
-                if resp.status_code == 200:
-                    content = resp.json()["choices"][0]["message"]["content"]
-                    result = {"raw_response": content}
-                    try:
-                        start = content.find("{")
-                        end = content.rfind("}") + 1
-                        if start >= 0 and end > start:
-                            parsed = json.loads(content[start:end])
-                            result.update(parsed)
-                    except json.JSONDecodeError:
-                        result["root_cause"] = content
-                        result["confidence"] = 50
-                        result["recommendations"] = []
-                    return result
-                return {
-                    "error": f"LLM 返回 {resp.status_code}",
-                    "root_cause": "模型服务暂时不可用",
-                    "confidence": 0,
-                    "recommendations": [],
-                }
-        except httpx.ConnectError:
+            content = await _chat_completion(
+                config,
+                [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                max_tokens=512,
+                prompt_len=prompt_len,
+            )
+            if content is not None:
+                result = {"raw_response": content}
+                try:
+                    start = content.find("{")
+                    end = content.rfind("}") + 1
+                    if start >= 0 and end > start:
+                        parsed = json.loads(content[start:end])
+                        result.update(parsed)
+                except json.JSONDecodeError:
+                    result["root_cause"] = content
+                    result["confidence"] = 50
+                    result["recommendations"] = []
+                return result
             return {
                 "error": "模型服务不可用",
                 "root_cause": "vLLM 服务未启动",

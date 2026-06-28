@@ -178,6 +178,21 @@ async def run_collection_for_asset(
             job_obj.last_run_at = datetime.now(timezone.utc)
             last_job = job_obj
 
+            # 同步写一条 state_snapshot（R4：此前 state_snapshots 始终为空，
+            # 导致资产健康度无法从快照推算）。状态归一：success→normal，否则 critical。
+            from app.domains.state.models import StateSnapshot
+
+            session.add(
+                StateSnapshot(
+                    asset_id=str(asset.id),
+                    state_type=ctype,
+                    status="normal" if status == "success" else "critical",
+                    value=json.dumps(result_data, ensure_ascii=False, default=str)[:4000],
+                    collected_at=datetime.now(timezone.utc),
+                )
+            )
+            await session.flush()
+
         except Exception as db_err:
             logger.warning("DB write error for %s/%s: %s", ip, ctype, db_err)
             # 不再 return，继续尝试其他采集器
@@ -238,6 +253,16 @@ async def run_collection_for_asset(
                 )
 
     await session.flush()
+
+    # 采集完成后从最新快照刷新资产 health/reachability/status（R7），
+    # 使页面显示与真实采集结果一致（不再是写死的 unknown）。
+    try:
+        from app.domains.asset.service import AssetService
+
+        await AssetService(session).refresh_status_from_snapshots(str(asset.id))
+    except Exception:  # noqa: BLE001
+        logger.debug("refresh_status_from_snapshots 失败 asset=%s", asset.id, exc_info=True)
+
     return last_job
 
 
@@ -291,8 +316,8 @@ class CollectionScheduler:
             logger.info("CollectionScheduler: scanning %d assets", len(assets))
 
             for asset in assets:
-                if not self._running:
-                    break
+                # 注意：不要在此 break on not self._running——否则"一次性手动触发"
+                # （未 start 调度循环）只会跑第一个资产就停。停止由外层循环控制。
                 try:
                     await run_collection_for_asset(asset, session, trigger="schedule")
                 except Exception as e:
@@ -341,3 +366,19 @@ def get_scheduler() -> CollectionScheduler:
     if _scheduler_instance is None:
         _scheduler_instance = CollectionScheduler()
     return _scheduler_instance
+
+
+# Worker 进程内运行的全量采集任务句柄，防止 GC
+_full_scan_tasks: set[asyncio.Task] = set()
+
+
+async def on_full_scan_requested(event) -> None:
+    """Worker：收到手动全量采集请求 → 后台执行（不阻塞 outbox 消费循环）.
+
+    采集在 Worker 进程跑（具备 CAP_NET_RAW，ping 才能成功；API 进程不行）。
+    """
+    logger.info("收到手动全量采集请求，调度中")
+    scheduler = get_scheduler()
+    t = asyncio.create_task(scheduler._run_all_assets())
+    _full_scan_tasks.add(t)
+    t.add_done_callback(_full_scan_tasks.discard)

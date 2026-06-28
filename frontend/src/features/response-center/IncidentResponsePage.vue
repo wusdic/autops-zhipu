@@ -4,7 +4,7 @@
     <el-card class="autops-page-header" shadow="never">
       <div class="header-bar">
         <div class="header-left">
-          <div class="autops-page-title">故障工作台</div>
+          <div class="autops-page-title" v-if="!embedded">故障工作台</div>
           <span v-if="selectedAlert" class="header-alert-tag">
             <el-tag :type="(severityType(selectedAlert.severity)) as TagType" effect="dark" size="small">
               {{ selectedAlert.severity }}
@@ -469,6 +469,8 @@ import LogStream from '@/shared/components/LogStream.vue'
 import AiAnalysisCard from '@/shared/components/AiAnalysisCard.vue'
 import ApprovalDialog from '@/shared/components/ApprovalDialog.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
+
+defineProps<{ embedded?: boolean }>()
 
 // ─── Router ───
 const route = useRoute()

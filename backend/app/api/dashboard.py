@@ -74,6 +74,30 @@ async def dashboard_stats(db: AsyncSession = Depends(get_db)):
         )
     ).scalar() or 0
 
+    # 资产明细统计（资产报告页/概览卡片用；按 reachability/health 实时聚合）
+    _real = (Asset.is_deleted == False, Asset.asset_type != "business_system")
+
+    async def _ac(*conds):
+        stmt = select(func.count()).select_from(Asset)
+        for c in (*_real, *conds):
+            stmt = stmt.where(c)
+        return (await db.execute(stmt)).scalar() or 0
+
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    asset_real_total = await _ac()
+    online_count = await _ac(Asset.reachability == "reachable")
+    offline_count = await _ac(Asset.reachability == "unreachable")
+    abnormal_count = await _ac(Asset.health_status.in_(["critical", "warning"]))
+    today_new = await _ac(Asset.created_at >= today_start)
+    type_rows = (
+        await db.execute(
+            select(Asset.asset_type, func.count().label("c"))
+            .where(*_real)
+            .group_by(Asset.asset_type)
+        )
+    ).all()
+    type_distribution = [{"type": r[0], "count": r[1]} for r in type_rows]
+
     return success(
         {
             "asset_total": asset_total,
@@ -81,6 +105,16 @@ async def dashboard_stats(db: AsyncSession = Depends(get_db)):
             "anomaly_open": anomaly_open,
             "execution_pending_approval": exec_pending,
             "ticket_open": ticket_open,
+            # 资产报告/概览卡片读取的明细
+            "asset_stats": {
+                "total": asset_real_total,
+                "online_count": online_count,
+                "offline_count": offline_count,
+                "abnormal_count": abnormal_count,
+                "today_new": today_new,
+                "today_changed": 0,
+                "type_distribution": type_distribution,
+            },
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     )

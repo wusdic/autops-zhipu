@@ -2,7 +2,7 @@
   <div class="config-page">
     <!-- 页面头部 -->
     <div class="autops-page-header">
-<div class="autops-page-title">配置事实</div>
+<div class="autops-page-title">配置快照</div>
     </div>
 
     <!-- ========== 配置列表 ========== -->

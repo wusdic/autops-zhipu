@@ -3,305 +3,92 @@
     <div class="autops-page-header autops-page-header--between">
       <div>
         <div class="autops-page-title">配置总览</div>
-        <div class="autops-page-desc">统一管理发现模板、巡检规则、阈值规则、通知规则和配置版本</div>
+        <div class="autops-page-desc">配置中心入口：发现模板、巡检规则、阈值规则、通知规则、配置版本统一入口</div>
       </div>
       <div class="autops-header-actions">
-        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <el-button type="primary" @click="showQuickCreate = true">
-          <el-icon><Plus /></el-icon> 快速创建
-        </el-button>
+        <el-button plain @click="loadCounts" :loading="loading"><el-icon><Refresh /></el-icon> 刷新</el-button>
       </div>
     </div>
 
-    <!-- 统计卡片 -->
+    <!-- 入口卡片：点击进入对应专管页（不再在总览页内重复整张表格，避免双份实现） -->
     <el-row :gutter="16" class="mt-lg">
-      <el-col :span="6" v-for="stat in stats" :key="stat.label">
-        <div class="autops-metric-card" style="cursor: pointer" @click="stat.click">
-          <div class="metric-icon" :class="stat.bgClass">
-            <el-icon size="20"><component :is="stat.icon" /></el-icon>
+      <el-col :span="8" v-for="entry in entries" :key="entry.path" class="mb-lg">
+        <div class="autops-metric-card config-entry" @click="router.push(entry.path)">
+          <div class="config-entry-head">
+            <div class="metric-icon" :class="entry.bgClass">
+              <el-icon size="20"><component :is="entry.icon" /></el-icon>
+            </div>
+            <div class="config-entry-count" :class="entry.textClass">{{ entry.count }}</div>
           </div>
-          <div class="metric-label">{{ stat.label }}</div>
-          <div class="metric-value" :class="stat.textClass">{{ stat.value }}</div>
+          <div class="config-entry-label">{{ entry.label }}</div>
+          <div class="config-entry-desc">{{ entry.desc }}</div>
+          <div class="config-entry-action">
+            进入管理 <el-icon><ArrowRight /></el-icon>
+          </div>
         </div>
       </el-col>
     </el-row>
-
-    <!-- 配置分类 Tab -->
-    <el-tabs v-model="activeTab" class="mt-lg">
-      <el-tab-pane label="发现模板" name="discovery">
-        <el-table stripe :data="discoveryTemplates" v-loading="loading">
-          <el-table-column prop="name" label="模板名称" min-width="180" />
-          <el-table-column prop="type" label="发现类型" width="120">
-            <template #default="{ row }">
-              <el-tag :type="row.type === 'ssh' ? 'primary' : row.type === 'snmp' ? 'success' : 'warning'" size="small">
-                {{ row.type?.toUpperCase() }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="asset_count" label="关联资产" width="100" />
-          <el-table-column prop="last_run" label="最近执行" width="180" />
-          <el-table-column prop="status" label="状态" width="80">
-            <template #default="{ row }">
-              <el-tag :type="row.status === 'active' ? 'success' : 'info'" size="small">
-                {{ row.status === 'active' ? '启用' : '禁用' }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="180" fixed="right">
-            <template #default="{ row }">
-              <el-button plain type="primary" @click="runDiscovery(row)">执行</el-button>
-              <el-button plain type="primary" @click="editTemplate('discovery', row)">编辑</el-button>
-              <el-button plain type="danger" @click="deleteTemplate('discovery', row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-tab-pane>
-
-      <el-tab-pane label="巡检规则" name="inspection">
-        <el-table stripe :data="inspectionRules" v-loading="loading">
-          <el-table-column prop="name" label="规则名称" min-width="180" />
-          <el-table-column prop="category" label="规则类型" width="120">
-            <template #default="{ row }">
-              <el-tag size="small">{{ categoryMap[row.category] || row.category }}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="severity" label="严重度" width="100">
-            <template #default="{ row }">
-              <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="asset_count" label="适用资产" width="100" />
-          <el-table-column prop="enabled" label="状态" width="80">
-            <template #default="{ row }">
-              <el-switch v-model="row.enabled" size="small" @change="toggleRule(row)" />
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="180" fixed="right">
-            <template #default="{ row }">
-              <el-button plain type="primary" @click="editTemplate('inspection-rule', row)">编辑</el-button>
-              <el-button plain type="primary" @click="simulateRule(row)">模拟</el-button>
-              <el-button plain type="danger" @click="deleteTemplate('inspection-rule', row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-tab-pane>
-
-      <el-tab-pane label="阈值规则" name="threshold">
-        <el-empty description="阈值规则已迁移至独立页面" :image-size="80">
-          <el-button type="primary" @click="$router.push('/config/threshold-rules')">前往阈值规则管理</el-button>
-        </el-empty>
-      </el-tab-pane>
-
-      <el-tab-pane label="通知规则" name="notification">
-        <el-table stripe :data="notificationRules" v-loading="loading">
-          <el-table-column prop="name" label="规则名称" min-width="180" />
-          <el-table-column prop="trigger" label="触发条件" width="150" />
-          <el-table-column prop="channel" label="通知渠道" width="120">
-            <template #default="{ row }">
-              <el-tag size="small">{{ row.channel }}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="recipients" label="接收人" min-width="150">
-            <template #default="{ row }">
-              {{ (row.recipients || []).join(', ') || '-' }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="enabled" label="状态" width="80">
-            <template #default="{ row }">
-              <el-switch v-model="row.enabled" size="small" @change="toggleRule(row)" />
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="180" fixed="right">
-            <template #default="{ row }">
-              <el-button plain type="primary" @click="editTemplate('notification', row)">编辑</el-button>
-              <el-button plain type="danger" @click="deleteTemplate('notification', row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-tab-pane>
-
-      <el-tab-pane label="配置版本" name="version">
-        <el-table stripe :data="configVersions" v-loading="loading">
-          <el-table-column prop="config_name" label="配置名称" min-width="180" />
-          <el-table-column prop="version" label="版本号" width="100" />
-          <el-table-column prop="updated_by" label="修改人" width="120" />
-          <el-table-column prop="updated_at" label="修改时间" width="180" />
-          <el-table-column prop="change_summary" label="变更摘要" min-width="200" />
-          <el-table-column label="操作" width="180" fixed="right">
-            <template #default="{ row }">
-              <el-button plain type="primary" @click="viewVersionDiff(row)">查看差异</el-button>
-              <el-button plain type="warning" @click="rollbackVersion(row)">回滚</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-tab-pane>
-    </el-tabs>
-
-    <!-- 快速创建对话框 -->
-    <el-dialog v-model="showQuickCreate" title="快速创建配置" width="600px">
-      <el-form :model="createForm" label-width="100px">
-        <el-form-item label="配置类型">
-          <el-select v-model="createForm.type" placeholder="选择类型">
-            <el-option label="发现模板" value="discovery" />
-            <el-option label="巡检规则" value="inspection-rule" />
-            <el-option label="阈值规则" value="threshold" />
-            <el-option label="通知规则" value="notification" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="名称">
-          <el-input v-model="createForm.name" placeholder="请输入配置名称" />
-        </el-form-item>
-        <el-form-item label="描述">
-          <el-input v-model="createForm.description" type="textarea" :rows="3" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="showQuickCreate = false">取消</el-button>
-        <el-button type="primary" @click="handleCreate" :loading="creating">创建</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
-import type { TagType } from '@/shared/types'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, ArrowLeft, Monitor, Search, Warning, Bell } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { Refresh, ArrowRight, Monitor, Search, Warning, Bell, Document } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
-import { severityTagType } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 
 const router = useRouter()
 const loading = ref(false)
-const activeTab = ref('discovery')
-const showQuickCreate = ref(false)
-const creating = ref(false)
 
-const stats = ref([
-  { label: '发现模板', value: 0, icon: Monitor, bgClass: 'bg-brand', textClass: 'text-brand', click: () => { activeTab.value = 'discovery' } },
-  { label: '巡检规则', value: 0, icon: Search, bgClass: 'bg-success', textClass: 'text-success', click: () => { activeTab.value = 'inspection' } },
-  { label: '阈值规则', value: 0, icon: Warning, bgClass: 'bg-warning', textClass: 'text-warning', click: () => { activeTab.value = 'threshold' } },
-  { label: '通知规则', value: 0, icon: Bell, bgClass: 'bg-danger', textClass: 'text-danger', click: () => { activeTab.value = 'notification' } },
+const entries = ref([
+  { key: 'discovery', label: '发现模板', desc: '资产发现的扫描协议与参数模板', path: '/config/discovery-templates', icon: Monitor, bgClass: 'bg-brand', textClass: 'text-brand', count: 0 },
+  { key: 'inspection', label: '巡检规则', desc: '页面/配置/日志/基线等巡检检查项', path: '/config/inspection-rules', icon: Search, bgClass: 'bg-success', textClass: 'text-success', count: 0 },
+  { key: 'threshold', label: '阈值规则', desc: '指标告警阈值与触发条件', path: '/config/threshold-rules', icon: Warning, bgClass: 'bg-warning', textClass: 'text-warning', count: 0 },
+  { key: 'notification', label: '通知规则', desc: '告警/事件的通知渠道与接收人', path: '/config/notification-rules', icon: Bell, bgClass: 'bg-danger', textClass: 'text-danger', count: 0 },
+  { key: 'version', label: '配置版本', desc: '配置变更历史与版本回滚', path: '/config/versions', icon: Document, bgClass: 'bg-info', textClass: 'text-info', count: 0 },
 ])
 
-const discoveryTemplates = ref<any[]>([])
-const inspectionRules = ref<any[]>([])
-const thresholdRules = ref<any[]>([])
-const notificationRules = ref<any[]>([])
-const configVersions = ref<any[]>([])
-
-const createForm = reactive({ type: '', name: '', description: ''})
-
-const categoryMap: Record<string, string> = {
-  page_check: '页面检查', config_check: '配置检查',
-  log_check: '日志检查', baseline_check: '基线检查',
+function unwrapTotal(res: any): number {
+  const raw = res?.data ?? {}
+  const payload = raw.data ?? raw
+  if (typeof payload?.total === 'number') return payload.total
+  const items = payload?.items ?? payload?.results ?? (Array.isArray(payload) ? payload : [])
+  return Array.isArray(items) ? items.length : 0
 }
 
-const severityType = (severity: string): TagType => severityTagType(severity) as TagType
-
-function unwrapItems(res: any): any[] {
-  var raw = res?.data ?? {}
-  var payload = raw.data ?? raw
-  return payload?.items ?? payload?.results ?? (Array.isArray(payload) ? payload : [])
-}
-
-async function loadData() {
+async function loadCounts() {
   loading.value = true
   try {
-    var settled = await Promise.allSettled([
-      client.get(API.DISCOVERY_TEMPLATES, { params: { page_size: 100 } }),
-      client.get(API.CONFIGS, { params: { page_size: 100, type: 'inspection_rule' } }),
-      client.get(API.CONFIGS, { params: { page_size: 100, type: 'threshold_rule' } }),
-      client.get(API.NOTIFICATION_RULES, { params: { page_size: 100 } }),
-      client.get(API.CONFIGS, { params: { page_size: 100, type: 'version' } }),
+    const settled = await Promise.allSettled([
+      client.get(API.DISCOVERY_TEMPLATES, { params: { page_size: 1 } }),
+      client.get(API.CONFIGS, { params: { page_size: 1, type: 'inspection_rule' } }),
+      client.get(API.CONFIGS, { params: { page_size: 1, type: 'threshold_rule' } }),
+      client.get(API.NOTIFICATION_RULES, { params: { page_size: 1 } }),
+      client.get(API.CONFIGS, { params: { page_size: 1, type: 'version' } }),
     ])
-    discoveryTemplates.value = settled[0].status === 'fulfilled' ? unwrapItems(settled[0].value) : []
-    inspectionRules.value = settled[1].status === 'fulfilled' ? unwrapItems(settled[1].value) : []
-    thresholdRules.value = settled[2].status === 'fulfilled' ? unwrapItems(settled[2].value) : []
-    notificationRules.value = settled[3].status === 'fulfilled' ? unwrapItems(settled[3].value) : []
-    configVersions.value = settled[4].status === 'fulfilled' ? unwrapItems(settled[4].value) : []
-
-    stats.value[0].value = discoveryTemplates.value.length
-    stats.value[1].value = inspectionRules.value.length
-    stats.value[2].value = thresholdRules.value.length
-    stats.value[3].value = notificationRules.value.length
+    entries.value.forEach((e, i) => {
+      e.count = settled[i].status === 'fulfilled' ? unwrapTotal((settled[i] as PromiseFulfilledResult<any>).value) : 0
+    })
   } catch (e: any) {
-    ElMessage.warning('部分数据加载失败: ' + (e.message ?? '未知错误'))
+    ElMessage.warning('部分统计加载失败: ' + (e?.message ?? '未知错误'))
   } finally {
     loading.value = false
   }
 }
 
-async function runDiscovery(row: any) {
-  try {
-    await ElMessageBox.confirm('确认执行发现模板「' + row.name + '」？', '执行确认', { type: 'info' })
-    ElMessage.success('发现任务已提交')
-  } catch { /* cancelled */ }
-}
-
-function editTemplate(type: string, row: any) {
-  const routeMap: Record<string, string> = {
-    discovery: '/config/discovery-templates',
-    'inspection-rule': '/config/inspection-rules',
-    threshold: '/config/threshold-rules',
-    notification: '/config/notification-rules',
-  }
-  router.push(routeMap[type] || '/config/overview')
-}
-
-async function deleteTemplate(type: string, row: any) {
-  try {
-    await ElMessageBox.confirm('确认删除「' + row.name + '」？此操作不可恢复。', '删除确认', { type: 'warning' })
-    ElMessage.success('已删除')
-    loadData()
-  } catch { /* cancelled */ }
-}
-
-function simulateRule(row: any) {
-  ElMessage.info('规则模拟功能开发中')
-}
-
-function toggleRule(_row: any) {
-  // 概览页只做导航；真实启停在专管页（阈值/通知规则）完成
-  router.push('/config/threshold-rules')
-}
-
-function viewVersionDiff(_row: any) {
-  // 版本差异/回滚在配置版本专管页完成
-  router.push('/config/versions')
-}
-
-async function rollbackVersion(row: any) {
-  try {
-    await ElMessageBox.confirm('确认回滚到版本 ' + row.version + '？', '回滚确认', { type: 'warning' })
-    ElMessage.success('配置已回滚')
-    loadData()
-  } catch { /* cancelled */ }
-}
-
-async function handleCreate() {
-  if (!createForm.type || !createForm.name) {
-    ElMessage.warning('请填写必要信息')
-    return
-  }
-  creating.value = true
-  try {
-    ElMessage.success('配置创建成功')
-    showQuickCreate.value = false
-    createForm.type = ''
-    createForm.name = ''
-    createForm.description = ''
-    loadData()
-  } finally {
-    creating.value = false
-  }
-}
-
-onMounted(loadData)
+onMounted(loadCounts)
 </script>
 
 <style scoped>
 .mt-lg { margin-top: var(--autops-space-lg); }
+.mb-lg { margin-bottom: var(--autops-space-lg); }
+.config-entry { cursor: pointer; transition: box-shadow .2s, transform .2s; }
+.config-entry:hover { box-shadow: var(--autops-shadow-md, 0 4px 12px rgba(0,0,0,.1)); transform: translateY(-2px); }
+.config-entry-head { display: flex; align-items: center; justify-content: space-between; }
+.config-entry-count { font-size: 28px; font-weight: 600; }
+.config-entry-label { margin-top: 8px; font-size: 15px; font-weight: 600; }
+.config-entry-desc { margin-top: 4px; font-size: 12px; color: var(--autops-text-secondary, #909399); min-height: 32px; }
+.config-entry-action { margin-top: 8px; font-size: 12px; color: var(--autops-color-primary, #409eff); display: flex; align-items: center; gap: 2px; }
 </style>

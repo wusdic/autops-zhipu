@@ -44,7 +44,6 @@
             <el-menu-item index="/asset-groups">资源分组</el-menu-item>
             <el-menu-item index="/lifecycle">生命周期</el-menu-item>
             <el-menu-item index="/resources/discovery">资源发现</el-menu-item>
-            <el-menu-item index="/resources/discovery-results">发现结果</el-menu-item>
             <el-menu-item index="/resources/import">资源导入</el-menu-item>
           </el-sub-menu>
 
@@ -69,22 +68,21 @@
             <template #title>
               <el-icon><TrendCharts /></el-icon><span>监控告警</span>
             </template>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">监控采集</el-menu-item>
             <el-menu-item index="/monitoring">监控总览</el-menu-item>
             <el-menu-item index="/monitoring/collectors">采集任务</el-menu-item>
             <el-menu-item index="/monitoring/collection-results">采集结果</el-menu-item>
             <el-menu-item index="/monitoring/collector-health">采集器健康</el-menu-item>
             <el-menu-item index="/monitoring/metrics">指标趋势</el-menu-item>
-            <el-menu-item index="/monitoring/states">状态快照</el-menu-item>
-            <el-menu-item index="/monitoring/state-changes">状态变化</el-menu-item>
-            <el-menu-item index="/events">事件流</el-menu-item>
+            <el-menu-item index="/monitoring/states">状态监控</el-menu-item>
             <el-menu-item index="/monitoring/log-sources">日志接入</el-menu-item>
-            <el-menu-item index="/monitoring/config-facts">配置事实</el-menu-item>
-            <el-menu-item index="" disabled style="height:1px;padding:0;overflow:hidden;background:#3a414d;margin:4px 16px"></el-menu-item>
+            <el-menu-item index="/monitoring/config-facts">配置快照</el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">信号 · 事件→告警→异常</el-menu-item>
+            <el-menu-item index="/events">事件流</el-menu-item>
             <el-menu-item index="/alerts">告警列表</el-menu-item>
             <el-menu-item index="/alert-rules">告警规则</el-menu-item>
             <el-menu-item index="/alert-correlation">告警收敛</el-menu-item>
-            <el-menu-item index="/anomalies">异常总览</el-menu-item>
-            <el-menu-item index="/anomaly/list">异常列表</el-menu-item>
+            <el-menu-item index="/anomalies">异常中心</el-menu-item>
           </el-sub-menu>
 
           <!-- M5 分析中心 -->
@@ -93,11 +91,6 @@
               <el-icon><Opportunity /></el-icon><span>分析中心</span>
             </template>
             <el-menu-item index="/incident">故障工作台</el-menu-item>
-            <el-menu-item index="/ai-diagnosis">AI 诊断</el-menu-item>
-            <el-menu-item index="/impact-analysis">影响分析</el-menu-item>
-            <el-menu-item index="/risk-grading">风险分级</el-menu-item>
-            <el-menu-item index="/response-suggestion">处置建议</el-menu-item>
-            <el-menu-item index="/closure-verification">关闭验证</el-menu-item>
           </el-sub-menu>
 
           <!-- M6 自动化中心 -->
@@ -107,7 +100,7 @@
             </template>
             <el-menu-item index="/automation">自动化总览</el-menu-item>
             <el-menu-item index="/policies">策略管理</el-menu-item>
-            <el-menu-item index="/remediation-templates">处置模板</el-menu-item>
+            <el-menu-item index="/rule-gap">规则覆盖度</el-menu-item>
             <el-menu-item index="/scripts">脚本库</el-menu-item>
             <el-menu-item index="/playbooks">剧本库</el-menu-item>
             <el-menu-item index="/approvals">审批中心</el-menu-item>
@@ -124,8 +117,7 @@
             <el-menu-item index="/ticket-overview">工单总览</el-menu-item>
             <el-menu-item index="/tickets">工单列表</el-menu-item>
             <el-menu-item index="/ticket-create">新建工单</el-menu-item>
-            <el-menu-item index="/manual-confirm">人工确认台</el-menu-item>
-            <el-menu-item index="/manual-handling">人工处置台</el-menu-item>
+            <el-menu-item index="/manual-handling">人工工作台</el-menu-item>
             <el-menu-item index="/assignment-rules">派单规则</el-menu-item>
             <el-menu-item index="/sla-management">SLA 管理</el-menu-item>
             <el-menu-item index="/postmortem">故障复盘</el-menu-item>
@@ -141,11 +133,7 @@
             <el-menu-item index="/knowledge">知识列表</el-menu-item>
             <el-menu-item index="/knowledge/import">知识导入</el-menu-item>
             <el-menu-item index="/knowledge-review">知识审核</el-menu-item>
-            <el-menu-item index="/aiops">AI 诊断记录</el-menu-item>
             <el-menu-item index="/similar-cases">相似案例</el-menu-item>
-            <el-menu-item index="/rule-gap">规则缺口</el-menu-item>
-            <el-menu-item index="/prompt-templates">Prompt 模板</el-menu-item>
-            <el-menu-item index="/ai-tool-policy">AI 工具策略</el-menu-item>
           </el-sub-menu>
 
           <!-- M9 报表审计中心 -->
@@ -153,16 +141,16 @@
             <template #title>
               <el-icon><Document /></el-icon><span>报表审计</span>
             </template>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">报表生产</el-menu-item>
             <el-menu-item index="/reports">报表总览</el-menu-item>
             <el-menu-item index="/report/generate">报告生成</el-menu-item>
             <el-menu-item index="/report/tasks">报告任务</el-menu-item>
             <el-menu-item index="/report/archive">报告归档</el-menu-item>
             <el-menu-item index="/export-center">导出中心</el-menu-item>
             <el-menu-item index="/report/templates">报告模板</el-menu-item>
-            <el-menu-item index="/ops-report">运维报告</el-menu-item>
-            <el-menu-item index="/asset-report">资产报告</el-menu-item>
-            <el-menu-item index="/automation-report">自动化报告</el-menu-item>
-            <el-menu-item index="/compliance-report">合规报告</el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">业务报告</el-menu-item>
+            <el-menu-item index="/business-report">业务报告</el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">审计取证</el-menu-item>
             <el-menu-item index="/audit">审计查询</el-menu-item>
             <el-menu-item index="/logs/search">日志检索</el-menu-item>
             <el-menu-item index="/evidence">证据归档</el-menu-item>
@@ -186,6 +174,10 @@
             <el-menu-item index="/config/inspection-rules">巡检规则</el-menu-item>
             <el-menu-item index="/config/threshold-rules">阈值规则</el-menu-item>
             <el-menu-item index="/config/notification-rules">通知规则</el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">AI 设置</el-menu-item>
+            <el-menu-item index="/model-service">模型服务</el-menu-item>
+            <el-menu-item index="/ai-tool-policy">AI 工具策略</el-menu-item>
+            <el-menu-item index="/prompt-templates">Prompt 模板</el-menu-item>
           </el-sub-menu>
 
           <!-- M12 平台管理 -->
@@ -193,23 +185,24 @@
             <template #title>
               <el-icon><Tools /></el-icon><span>平台管理</span>
             </template>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">权限治理</el-menu-item>
             <el-menu-item index="/users">用户管理</el-menu-item>
             <el-menu-item index="/roles">角色管理</el-menu-item>
             <el-menu-item index="/tenants">租户管理</el-menu-item>
             <el-menu-item index="/permission-policy">权限策略</el-menu-item>
             <el-menu-item index="/api-keys">API Key</el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">系统运维</el-menu-item>
             <el-menu-item index="/system-config">系统配置</el-menu-item>
             <el-menu-item index="/dictionaries">字典管理</el-menu-item>
-            <el-menu-item index="/integrations">集成管理</el-menu-item>
-            <el-menu-item index="/model-service">模型服务</el-menu-item>
-            <el-menu-item index="/agents">Agent 管理</el-menu-item>
-            <el-menu-item index="/security-baseline">安全基线</el-menu-item>
             <el-menu-item index="/platform-status">平台健康</el-menu-item>
             <el-menu-item index="/task-queue">任务队列</el-menu-item>
             <el-menu-item index="/system-check">系统自检</el-menu-item>
             <el-menu-item index="/backup">备份恢复</el-menu-item>
             <el-menu-item index="/upgrade-maintenance">升级维护</el-menu-item>
             <el-menu-item index="/license">授权许可</el-menu-item>
+            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">扩展与集成</el-menu-item>
+            <el-menu-item index="/integrations">集成管理</el-menu-item>
+            <el-menu-item index="/agents">采集节点</el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-scrollbar>
@@ -320,9 +313,19 @@ const route = useRoute()
 
 // ─── Sidebar ───
 const isCollapsed = ref(false)
+// 手动切换后在本次会话内尊重用户选择，不再被窗口缩放自动覆盖
+const manualCollapse = ref(false)
+const AUTO_COLLAPSE_WIDTH = 1024
 
 function toggleCollapse() {
   isCollapsed.value = !isCollapsed.value
+  manualCollapse.value = true
+}
+
+// 窗口变窄时自动收起侧边栏（未手动干预时）
+function applyResponsiveCollapse() {
+  if (manualCollapse.value) return
+  isCollapsed.value = window.innerWidth < AUTO_COLLAPSE_WIDTH
 }
 
 // ─── Active Menu ───
@@ -350,7 +353,6 @@ const menuMap: Record<string, string> = {
   '/asset-groups': '资源分组',
   '/lifecycle': '生命周期',
   '/resources/discovery': '资源发现',
-  '/resources/discovery-results': '发现结果',
   '/resources/import': '资源导入',
   // M3 巡检中心
   '/inspections': '巡检总览',
@@ -369,27 +371,19 @@ const menuMap: Record<string, string> = {
   '/monitoring/collection-results': '采集结果',
   '/monitoring/collector-health': '采集器健康',
   '/monitoring/metrics': '指标趋势',
-  '/monitoring/states': '状态快照',
-  '/monitoring/state-changes': '状态变化',
+  '/monitoring/states': '状态监控',
   '/events': '事件流',
   '/monitoring/log-sources': '日志接入',
-  '/monitoring/config-facts': '配置事实',
+  '/monitoring/config-facts': '配置快照',
   '/alerts': '告警列表',
   '/alert-rules': '告警规则',
   '/alert-correlation': '告警收敛',
-  '/anomalies': '异常总览',
-  '/anomaly/list': '异常列表',
+  '/anomalies': '异常中心',
   // M5 分析中心
   '/incident': '故障工作台',
-  '/ai-diagnosis': 'AI 诊断',
-  '/impact-analysis': '影响分析',
-  '/risk-grading': '风险分级',
-  '/response-suggestion': '处置建议',
-  '/closure-verification': '关闭验证',
   // M6 自动化中心
   '/automation': '自动化总览',
   '/policies': '策略管理',
-  '/remediation-templates': '处置模板',
   '/scripts': '脚本库',
   '/playbooks': '剧本库',
   '/approvals': '审批中心',
@@ -400,8 +394,7 @@ const menuMap: Record<string, string> = {
   '/ticket-overview': '工单总览',
   '/tickets': '工单列表',
   '/ticket-create': '新建工单',
-  '/manual-confirm': '人工确认台',
-  '/manual-handling': '人工处置台',
+  '/manual-handling': '人工工作台',
   '/assignment-rules': '派单规则',
   '/sla-management': 'SLA 管理',
   '/postmortem': '故障复盘',
@@ -411,7 +404,6 @@ const menuMap: Record<string, string> = {
   '/knowledge': '知识列表',
   '/knowledge/import': '知识导入',
   '/knowledge-review': '知识审核',
-  '/aiops': 'AI 诊断记录',
   '/similar-cases': '相似案例',
   '/rule-gap': '规则缺口',
   '/prompt-templates': 'Prompt 模板',
@@ -423,6 +415,7 @@ const menuMap: Record<string, string> = {
   '/report/archive': '报告归档',
   '/export-center': '导出中心',
   '/report/templates': '报告模板',
+  '/business-report': '业务报告',
   '/ops-report': '运维报告',
   '/asset-report': '资产报告',
   '/inspection-report': '巡检报告',
@@ -451,8 +444,7 @@ const menuMap: Record<string, string> = {
   '/dictionaries': '字典管理',
   '/integrations': '集成管理',
   '/model-service': '模型服务',
-  '/agents': 'Agent 管理',
-  '/security-baseline': '安全基线',
+  '/agents': '采集节点',
   '/platform-status': '平台健康',
   '/task-queue': '任务队列',
   '/system-check': '系统自检',
@@ -465,7 +457,7 @@ const menuMap: Record<string, string> = {
 const groupMap: Record<string, string> = {
   '/': '运维驾驶舱',
   '/business-health-map': '运维驾驶舱', '/daily-summary': '运维驾驶舱',
-  '/resources': '资源中心', '/resources/discovery': '资源中心', '/resources/discovery-results': '资源中心',
+  '/resources': '资源中心', '/resources/discovery': '资源中心',
   '/assets': '资源中心', '/business-systems': '资源中心', '/topology': '资源中心',
   '/resources/import': '资源中心', '/asset-groups': '资源中心', '/lifecycle': '资源中心',
   '/inspections': '巡检中心', '/inspection/plans': '巡检中心', '/inspection/tasks': '巡检中心',
@@ -475,25 +467,23 @@ const groupMap: Record<string, string> = {
   '/monitoring': '监控告警', '/monitoring/collectors': '监控告警',
   '/monitoring/collection-results': '监控告警', '/monitoring/collector-health': '监控告警',
   '/monitoring/metrics': '监控告警', '/monitoring/states': '监控告警',
-  '/monitoring/state-changes': '监控告警', '/events': '监控告警',
+  '/events': '监控告警',
   '/monitoring/log-sources': '监控告警', '/monitoring/config-facts': '监控告警',
   '/alerts': '监控告警', '/alert-rules': '监控告警', '/alert-correlation': '监控告警',
-  '/anomalies': '监控告警', '/anomaly/list': '监控告警',
-  '/incident': '分析中心', '/ai-diagnosis': '分析中心', '/impact-analysis': '分析中心',
-  '/risk-grading': '分析中心', '/response-suggestion': '分析中心', '/closure-verification': '分析中心',
-  '/automation': '自动化中心', '/policies': '自动化中心', '/remediation-templates': '自动化中心',
+  '/anomalies': '监控告警',
+  '/incident': '分析中心',
+  '/automation': '自动化中心', '/policies': '自动化中心',
   '/scripts': '自动化中心', '/playbooks': '自动化中心', '/approvals': '自动化中心',
   '/executions': '自动化中心', '/rollback-center': '自动化中心', '/execution-locks': '自动化中心',
   '/ticket-overview': '工单协同', '/tickets': '工单协同', '/ticket-create': '工单协同',
-  '/manual-confirm': '工单协同', '/manual-handling': '工单协同', '/assignment-rules': '工单协同',
+  '/manual-handling': '工单协同', '/assignment-rules': '工单协同',
   '/sla-management': '工单协同', '/postmortem': '工单协同', '/ticket-report': '工单协同',
-  '/knowledge-overview': '智能知识库', '/aiops': '智能知识库', '/knowledge': '智能知识库',
+  '/knowledge-overview': '智能知识库', '/knowledge': '智能知识库',
   '/knowledge/import': '智能知识库', '/knowledge-review': '智能知识库', '/similar-cases': '智能知识库',
-  '/rule-gap': '智能知识库', '/prompt-templates': '智能知识库', '/ai-tool-policy': '智能知识库',
+  '/rule-gap': '自动化中心', '/prompt-templates': '配置中心', '/ai-tool-policy': '配置中心',
   '/reports': '报表审计', '/report/generate': '报表审计', '/report/tasks': '报表审计',
   '/report/archive': '报表审计', '/export-center': '报表审计', '/report/templates': '报表审计',
-  '/ops-report': '报表审计', '/automation-report': '报表审计',
-  '/asset-report': '报表审计', '/inspection-report': '报表审计', '/compliance-report': '报表审计',
+  '/business-report': '报表审计',
   '/audit': '报表审计', '/logs/search': '报表审计', '/evidence': '报表审计',
   '/ai-assistant': 'AI 助手',
   '/credentials': '配置中心', '/config/versions': '配置中心',
@@ -502,7 +492,7 @@ const groupMap: Record<string, string> = {
   '/users': '平台管理', '/roles': '平台管理', '/tenants': '平台管理', '/api-keys': '平台管理',
   '/permission-policy': '平台管理', '/system-config': '平台管理', '/dictionaries': '平台管理',
   '/integrations': '平台管理', '/platform-status': '平台管理', '/task-queue': '平台管理',
-  '/model-service': '平台管理', '/agents': '平台管理', '/security-baseline': '平台管理',
+  '/model-service': '配置中心', '/agents': '平台管理',
   '/backup': '平台管理', '/upgrade-maintenance': '平台管理', '/license': '平台管理',
   '/system-check': '平台管理', '/profile': '个人中心',
 }
@@ -668,10 +658,13 @@ onMounted(() => {
   authStore.fetchUser().catch(() => {})
   fetchUnread()
   document.addEventListener('keydown', handleKeydown)
+  applyResponsiveCollapse()
+  window.addEventListener('resize', applyResponsiveCollapse)
 })
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('resize', applyResponsiveCollapse)
 })
 </script>
 

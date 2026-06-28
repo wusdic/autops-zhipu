@@ -1,6 +1,6 @@
 <template>
   <div class="p-6">
-    <div class="autops-page-header">
+    <div class="autops-page-header" v-if="!embedded">
       <div class="autops-page-title">异常列表</div>
       <el-button type="primary" @click="router.push('/response/anomalies/create')">新建异常</el-button>
     </div>
@@ -125,6 +125,8 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { anomalyService } from '@/shared/api'
 

@@ -42,7 +42,7 @@
       <el-table stripe
  :data="recentTasks"
  v-loading="tasksLoading"
-52| empty-text="暂无巡检任务"
+empty-text="暂无巡检任务"
  style="width: 100%"
  >
         <el-table-column prop="name" label="任务名称" min-width="180" show-overflow-tooltip>

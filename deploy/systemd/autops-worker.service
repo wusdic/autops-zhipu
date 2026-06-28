@@ -1,0 +1,35 @@
+[Unit]
+Description=AUTOPS Worker (outbox consumer + scheduler + execution worker)
+# Worker 进程承载事件驱动核心：消费 event_outbox、采集调度、巡检调度、执行队列。
+# 没有它则 outbox 永不消费、采集/执行全部停滞——生产环境必须随 backend 一起启用。
+After=network.target mysql.service redis.service autops-backend.service
+Wants=mysql.service redis.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/autops/backend
+Environment=DB_USER=autops
+Environment=DB_DATABASE=autops
+# DB_PASSWORD 等敏感配置请用 EnvironmentFile 注入，勿写明文：
+# EnvironmentFile=/etc/autops/worker.env
+ExecStart=/opt/autops/backend/.venv/bin/python -m app.workers.runner
+
+# 故障自愈：进程退出（崩溃/被杀）总是重启
+Restart=always
+RestartSec=5
+# 指数退避的近似：60s 窗口内最多重启 5 次，超过则停服等待人工（避免无意义狂重启）
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# ping/SNMP 等需要原始套接字与低端口能力（R12）
+AmbientCapabilities=CAP_NET_RAW CAP_NET_BIND_SERVICE
+NoNewPrivileges=false
+
+# 日志归口到 journald（再由 logrotate 之外的 journald 配额管理）
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=autops-worker
+
+[Install]
+WantedBy=multi-user.target

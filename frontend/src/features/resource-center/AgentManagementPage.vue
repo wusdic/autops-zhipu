@@ -3,7 +3,7 @@
     <!-- Page Header -->
     <div class="autops-page-header">
       <div>
-        <div class="autops-page-title">Agent 管理</div>
+        <div class="autops-page-title">采集节点</div>
         <div class="autops-page-desc">管理采集 Agent 节点，监控运行状态</div>
       </div>
       <div class="header-actions">

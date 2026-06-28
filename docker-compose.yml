@@ -116,6 +116,9 @@ services:
       dockerfile: Dockerfile
     container_name: autops-worker
     restart: always
+    # ping/SNMP 探活需要原始套接字能力
+    cap_add:
+      - NET_RAW
     env_file:
       - .env
     entrypoint: ["python", "-m", "app.workers.runner"]

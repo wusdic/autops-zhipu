@@ -66,7 +66,35 @@ async def list_business_systems(
         .all()
     )
 
-    items = [model_to_dict(r) for r in rows]
+    # 关联资产数 + 健康度聚合（业务系统不应有静态健康度；按成员资产实时聚合）
+    items = []
+    for r in rows:
+        d = model_to_dict(r)
+        members = (
+            (
+                await db.execute(
+                    select(Asset.health_status).where(
+                        Asset.business_system == r.name,
+                        Asset.asset_type != "business_system",
+                        Asset.is_deleted == False,
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        d["asset_count"] = len(members)
+        if not members:
+            d["health_status"] = "unknown"
+        elif any(h == "critical" for h in members):
+            d["health_status"] = "critical"
+        elif any(h == "warning" for h in members):
+            d["health_status"] = "warning"
+        elif all(h == "healthy" for h in members):
+            d["health_status"] = "healthy"
+        else:
+            d["health_status"] = "unknown"
+        items.append(d)
     return paginate(items, total, page, page_size)
 
 
@@ -79,14 +107,16 @@ async def create_business_system(
     import json
     from app.domains.asset.models import Asset
 
+    # 新建业务系统默认健康度 unknown：0 关联资产不应显示“健康”（误导）；
+    # 健康度应由关联资产聚合得出（见 health 聚合）。
     asset = Asset(
         name=data.name,
         asset_type="business_system",
         hostname=data.code,
         description=data.description,
         status="active",
-        health_status="healthy",
-        reachability="reachable",
+        health_status="unknown",
+        reachability="unknown",
         tags=json.dumps(data.tags or []),
     )
     db.add(asset)

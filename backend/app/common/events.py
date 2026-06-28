@@ -361,6 +361,7 @@ class CollectorEvents:
 
     COLLECTOR_REGISTERED = "collector.registered"
     COLLECTOR_HEALTH_CHANGED = "collector.health_changed"
+    FULL_SCAN_REQUESTED = "collector.full_scan_requested"
     JOB_CREATED = "collector.job_created"
     JOB_COMPLETED = "collector.job_completed"
     JOB_FAILED = "collector.job_failed"

@@ -1,7 +1,7 @@
 <template>
   <div class="response-suggestion-page">
     <!-- Page Header -->
-    <div class="autops-page-header">
+    <div class="autops-page-header" v-if="!embedded">
       <div>
         <div class="autops-page-title">
           <el-icon style="margin-right: 6px"><MagicStick /></el-icon>
@@ -163,6 +163,8 @@
 import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { MagicStick, CircleCheckFilled } from '@element-plus/icons-vue'
+
+defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { knowledgeService } from '@/shared/api'
 import { riskLabel as riskLabelFn } from '@/shared/utils/labels'

@@ -58,7 +58,7 @@
       <!-- Data Table -->
       <el-table stripe
  :data="approvals"
-62| v-loading="loading"
+v-loading="loading"
  empty-text="暂无审批记录"
  @sort-change="handleSortChange"
  >
