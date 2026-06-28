@@ -68,19 +68,29 @@ async def on_alert_created_trigger_analysis(event: DomainEvent) -> None:
 
         from app.infra.database import async_session_factory
         from app.domains.aiops.service import AIOpsService
+        from app.domains.aiops.schemas import AIAnalysisRequest
+
+        # asset_ids 可能是 JSON 字符串或 list，统一规整为 list[str]
+        if isinstance(asset_ids, str):
+            import json as _json
+            try:
+                asset_ids = _json.loads(asset_ids)
+            except (ValueError, TypeError):
+                asset_ids = [asset_ids] if asset_ids else []
+        if not isinstance(asset_ids, list):
+            asset_ids = []
 
         analysis_id = None
         async with async_session_factory() as session:
             svc = AIOpsService(session)
+            # 修复：request_analysis 接收单个 AIAnalysisRequest，而非 analysis_type/context 关键字。
+            # 旧调用签名不匹配会 TypeError 并被下方 except 吞掉，导致高危告警自动分析链路一直静默失败。
             analysis = await svc.request_analysis(
-                analysis_type="alert_correlation",
-                context={
-                    "alert_id": alert_id,
-                    "severity": severity,
-                    "asset_ids": asset_ids,
-                    "context": payload.get("context", {}),
-                    "source_event_id": event.event_id,
-                },
+                AIAnalysisRequest(
+                    analysis_type="alert_correlation",
+                    alert_id=alert_id or None,
+                    asset_ids=asset_ids or None,
+                )
             )
             analysis_id = str(getattr(analysis, "id", ""))
             await session.commit()
