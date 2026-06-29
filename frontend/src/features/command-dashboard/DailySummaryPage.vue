@@ -1,11 +1,7 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header autops-page-header--between">
-      <div>
-        <div class="autops-page-title">今日摘要</div>
-        <div class="autops-page-desc">查看当日告警、异常与自动化执行摘要</div>
-      </div>
-      <div class="autops-header-actions">
+    <PageHeader title="今日摘要" desc="查看当日告警、异常与自动化执行摘要">
+      <template #actions>
         <el-date-picker
           v-model="selectedDate"
           type="date"
@@ -14,8 +10,8 @@
           style="width: 180px"
           @change="fetchSummary"
         />
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 摘要卡片 -->
     <el-row :gutter="16" class="mb-lg">
@@ -146,6 +142,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Warning, CircleCheck, VideoPlay, Document } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { dashboardService, alertService, anomalyService } from '@/shared/api'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

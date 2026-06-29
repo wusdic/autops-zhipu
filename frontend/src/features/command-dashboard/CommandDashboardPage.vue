@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">指挥中心</div>
-      <div class="autops-page-desc">全局态势感知与运维指挥总览</div>
-    </div>
+    <PageHeader title="指挥中心" desc="全局态势感知与运维指挥总览" />
 
     <!-- ─── 第一行：核心态势指标（V3 M1-RQ-001） ─── -->
     <el-row :gutter="16" class="metric-row">
@@ -348,6 +344,7 @@ import { ref, reactive, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API } from '@/shared/api/routes'
 
 const router = useRouter()

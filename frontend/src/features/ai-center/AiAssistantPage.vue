@@ -1,9 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">AI 助手</div>
-      <div class="autops-page-desc">通过自然语言对话查询平台信息、分析问题、调度功能执行操作</div>
-    </div>
+    <PageHeader title="AI 助手" desc="通过自然语言对话查询平台信息、分析问题、调度功能执行操作" />
 
     <div class="chat-container">
       <!-- 左侧：对话历史 -->
@@ -105,6 +102,7 @@
 import { ref, nextTick, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, ChatLineSquare, Promotion } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 import { sanitizeHtml } from '@/shared/utils/sanitize'

@@ -1,14 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header autops-page-header--between">
-      <div>
-        <div class="autops-page-title">业务健康地图</div>
-        <div class="autops-page-desc">监控各业务系统的健康状态和告警情况</div>
-      </div>
-      <div class="autops-header-actions">
+    <PageHeader title="业务健康地图" desc="监控各业务系统的健康状态和告警情况">
+      <template #actions>
         <el-button @click="fetchSystems" :loading="loading" type="primary" plain size="small">刷新</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 总体健康评分 -->
     <el-row :gutter="16" class="mb-lg">
@@ -158,6 +154,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { CircleCheck, Warning, CircleClose, QuestionFilled } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { dashboardService, alertService } from '@/shared/api'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
