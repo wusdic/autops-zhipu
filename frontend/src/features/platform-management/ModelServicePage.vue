@@ -49,12 +49,9 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="latency" label="平均延迟" width="100" />
-        <el-table-column prop="call_count" label="近7天调用" width="120" />
-        <el-table-column label="操作" width="240" fixed="right">
+        <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button plain type="primary" @click="testModel(row)">测试</el-button>
-            <el-button plain type="primary" @click="viewMetrics(row)">指标</el-button>
             <el-button plain type="primary" @click="openDialog(row)">编辑</el-button>
             <el-button plain type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
@@ -120,6 +117,14 @@
         <el-form-item label="最大Token">
           <el-input-number v-model="form.max_tokens" :min="100" :max="128000" style="width: 100%" />
         </el-form-item>
+        <el-form-item label="思考模式">
+          <el-select v-model="form.enable_thinking" style="width: 100%">
+            <el-option label="默认（不干预，云端模型推荐）" :value="null" />
+            <el-option label="开启（GPU 部署 / 追求推理质量）" :value="1" />
+            <el-option label="关闭（CPU 部署 / 追求低延迟）" :value="0" />
+          </el-select>
+          <div class="form-tip">仅对支持思考模式的推理模型（如 Qwen3）生效。CPU 部署建议「关闭」，否则模型会先消耗大量 token 进行"思考"，导致回答缓慢甚至超时无回复（AI 助手出现"默认回答"）。云端 API 选「默认」。</div>
+        </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" :rows="2" />
         </el-form-item>
@@ -128,19 +133,6 @@
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleSubmit" :loading="submitting">保存</el-button>
       </template>
-    </el-dialog>
-
-    <!-- 指标对话框 -->
-    <el-dialog v-model="metricsVisible" title="模型调用指标" width="600px">
-      <el-descriptions :column="2" border>
-        <el-descriptions-item label="模型">{{ metricsData.name }}</el-descriptions-item>
-        <el-descriptions-item label="状态">{{ statusLabel(metricsData.status) }}</el-descriptions-item>
-        <el-descriptions-item label="总调用">{{ metricsData.call_count }}</el-descriptions-item>
-        <el-descriptions-item label="成功率">{{ metricsData.success_rate }}%</el-descriptions-item>
-        <el-descriptions-item label="平均延迟">{{ metricsData.avg_latency }}ms</el-descriptions-item>
-        <el-descriptions-item label="P99延迟">{{ metricsData.p99_latency }}ms</el-descriptions-item>
-        <el-descriptions-item label="Token消耗">{{ metricsData.token_usage }}</el-descriptions-item>
-      </el-descriptions>
     </el-dialog>
 
     <!-- 连接测试结果对话框 -->
@@ -191,12 +183,10 @@ const loading = ref(false)
 const submitting = ref(false)
 const saving = ref(false)
 const dialogVisible = ref(false)
-const metricsVisible = ref(false)
 const testResultVisible = ref(false)
 const testing = ref(false)
 const editing = ref<any>(null)
 const models = ref<any[]>([])
-const metricsData = ref<any>({})
 const testResultData = ref<any>({ success: false, name: '', latency: 0, response: '', error: ''})
 const formRef = ref()
 
@@ -209,9 +199,9 @@ const overviewStats = computed(() => [
 
 const globalConfig = reactive({ default_model: '', timeout: 60, max_tokens: 4096, temperature: 70 })
 
-const form = reactive({
+const form = reactive<Record<string, any>>({
   name: '', provider: 'zhipu', model_id: '', endpoint: '',
-  api_key: '', max_tokens: 4096, description: '',
+  api_key: '', max_tokens: 4096, description: '', enable_thinking: null,
 })
 const formRules = {
   name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
@@ -247,8 +237,8 @@ async function loadConfig() {
 
 function openDialog(row?: any) {
   editing.value = row || null
-  if (row) Object.assign(form, row)
-  else Object.assign(form, { name: '', provider: 'zhipu', model_id: '', endpoint: '', api_key: '', max_tokens: 4096, description: ''})
+  if (row) Object.assign(form, { enable_thinking: null, ...row })
+  else Object.assign(form, { name: '', provider: 'zhipu', model_id: '', endpoint: '', api_key: '', max_tokens: 4096, description: '', enable_thinking: null })
   dialogVisible.value = true
 }
 
@@ -300,12 +290,6 @@ async function testModel(row: any) {
   } finally {
     testing.value = false
   }
-}
-
-function viewMetrics(row: any) {
-  // 后端暂无 metrics 端点，展示模型基础信息
-  metricsData.value = { ...row, call_count: row.call_count ?? '-', success_rate: row.success_rate ?? '-', avg_latency: row.avg_latency ?? '-', p99_latency: row.p99_latency ?? '-', token_usage: row.token_usage ?? '-' }
-  metricsVisible.value = true
 }
 
 async function handleDelete(row: any) {

@@ -193,10 +193,12 @@ async function sendMessage() {
       .slice(-10)
       .map((m) => ({ role: m.role, content: m.content }))
 
+    // 本地/推理模型单次回答可达上百秒，全局 30s 超时会让前端提前中断并误显示兜底文案；
+    // 此处放宽到 200s（略大于后端 LLM 180s 超时）。
     const resp = await api.post(API.AI.CHAT, {
       message: text,
       history,
-    })
+    }, { timeout: 200000 })
 
     if (resp.data?.code === 0 && resp.data?.data) {
       const data = resp.data.data
@@ -218,31 +220,20 @@ async function sendMessage() {
       })
     }
   } catch (err: any) {
-    // AI 服务不可用时明确告知用户，而非静默用本地兜底文案伪装正常回复
+    // AI 服务不可用/超时时如实告知，不再用本地硬编码文案伪装成模型回复
+    const isTimeout = err?.code === 'ECONNABORTED' || /timeout/i.test(err?.message || '')
     messages.value.push({
       role: 'assistant',
-      content: '⚠️ AI 服务暂时不可用：' + (err?.message || '连接失败') +
-        '。\n\n本地参考回复：\n' + generateLocalResponse(text),
+      content: isTimeout
+        ? '⚠️ 模型响应超时。本地/推理模型首次或复杂问题可能较慢；若为 Qwen3 等带"思考"的模型且部署在 CPU 上，建议在「平台管理-模型服务」将该模型的「思考模式」设为关闭后重试。'
+        : '⚠️ AI 服务暂时不可用：' + (err?.message || '连接失败') +
+          '。请检查「平台管理-模型服务」配置或本地模型是否已启动。',
     })
   } finally {
     loading.value = false
     persist()
     scrollToBottom()
   }
-}
-
-function generateLocalResponse(text: string): string {
-  const lower = text.toLowerCase()
-  if (lower.includes('告警') || lower.includes('alert')) {
-    return '正在为您查询告警信息。您可以前往 **监控告警** 模块查看实时告警列表，或告诉我具体的告警ID进行详细分析。\n\n快捷操作：点击上方 **告警列表** 查看所有活跃告警。'
-  }
-  if (lower.includes('资源') || lower.includes('asset')) {
-    return '正在为您查询资源状态。您可以前往 **资源中心** 查看所有资源的实时状态。\n\n我也可以帮您：\n- 查询特定资源的详细信息\n- 查看资源拓扑关系\n- 检查资源健康状态'
-  }
-  if (lower.includes('巡检') || lower.includes('inspection')) {
-    return '正在为您查询巡检情况。您可以前往 **巡检中心** 查看巡检计划执行状态和结果。\n\n需要我帮您：\n- 查看最近的巡检结果\n- 创建新的巡检任务\n- 查看巡检报告'
-  }
-  return '收到您的请求。我正在持续学习中，目前可以帮您：\n\n1. **查询信息**：告警、资源、巡检、执行状态\n2. **分析问题**：根因分析、影响范围评估\n3. **调度操作**：执行策略、创建工单\n\n请告诉我您需要什么帮助？'
 }
 
 function sendQuickQuestion(q: string) {

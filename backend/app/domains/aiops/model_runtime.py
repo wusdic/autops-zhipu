@@ -55,6 +55,8 @@ async def load_active_model(session: AsyncSession) -> dict | None:
         "api_key": api_key,
         "max_tokens": row.get("max_tokens") or 4096,
         "temperature": row.get("temperature"),
+        # NULL=自动(不发送)，1=开启，0=关闭；列可能在旧库不存在，用 get 容错
+        "enable_thinking": row.get("enable_thinking"),
     }
 
 
@@ -85,6 +87,10 @@ async def build_llm_client(session: AsyncSession) -> LLMClient:
             client.api_key = active["api_key"] or "EMPTY"
             if active["max_tokens"]:
                 client.max_tokens = int(active["max_tokens"])
+            # 仅当显式配置(非 NULL)时才透传 enable_thinking；否则保持不发送（云端安全）
+            et = active.get("enable_thinking")
+            if et is not None:
+                client.chat_template_kwargs = {"enable_thinking": bool(et)}
         cfg = await _load_global_config(session)
         if cfg.get("timeout"):
             client.timeout = int(cfg["timeout"])

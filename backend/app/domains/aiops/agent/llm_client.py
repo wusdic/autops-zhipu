@@ -131,6 +131,10 @@ class LLMClient:
         self.timeout = _load_llm_timeout()
         self.max_tokens = _load_llm_max_tokens()
 
+        # 透传给推理后端的 chat 模板参数（如 Qwen3 的 enable_thinking）。
+        # None = 不发送（对云端/非 Qwen 最安全）；由 model_runtime 按模型配置注入。
+        self.chat_template_kwargs: dict | None = None
+
     # ------------------------------------------------------------------
     # 公共 API
     # ------------------------------------------------------------------
@@ -181,6 +185,8 @@ class LLMClient:
             "max_tokens": self.max_tokens,
             "stream": True,
         }
+        if self.chat_template_kwargs is not None:
+            payload["chat_template_kwargs"] = self.chat_template_kwargs
 
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             async with client.stream(
@@ -233,15 +239,19 @@ class LLMClient:
         if self.api_key and self.api_key != "EMPTY":
             headers["Authorization"] = f"Bearer {self.api_key}"
 
+        chat_payload: dict = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": 0.3,
+            "max_tokens": self.max_tokens,
+        }
+        if self.chat_template_kwargs is not None:
+            chat_payload["chat_template_kwargs"] = self.chat_template_kwargs
+
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             resp = await client.post(
                 f"{self.base_url}/chat/completions",
-                json={
-                    "model": self.model,
-                    "messages": messages,
-                    "temperature": 0.3,
-                    "max_tokens": self.max_tokens,
-                },
+                json=chat_payload,
                 headers=headers,
             )
             if resp.status_code == 200:

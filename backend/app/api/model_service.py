@@ -42,6 +42,8 @@ class ModelAgentCreate(BaseModel):
     temperature: float = 0.3
     description: str | None = None
     is_default: bool = False
+    # 思考模式：None=自动(不发送)，1=开启，0=关闭（Qwen3 等推理模型，CPU 部署建议关闭）
+    enable_thinking: int | None = None
 
 
 class ModelAgentUpdate(BaseModel):
@@ -55,6 +57,7 @@ class ModelAgentUpdate(BaseModel):
     description: str | None = None
     is_default: bool | None = None
     status: str | None = None
+    enable_thinking: int | None = None
 
 
 def _public(row: dict) -> dict:
@@ -84,14 +87,14 @@ async def create_model_agent(data: ModelAgentCreate, db: AsyncSession = Depends(
     await db.execute(
         text(
             "INSERT INTO model_agents (id, name, provider, model_id, endpoint, api_key_enc, "
-            "max_tokens, temperature, description, is_default, status) VALUES "
-            "(:id, :name, :provider, :model_id, :endpoint, :enc, :mt, :temp, :desc, :def, 'active')"
+            "max_tokens, temperature, description, is_default, enable_thinking, status) VALUES "
+            "(:id, :name, :provider, :model_id, :endpoint, :enc, :mt, :temp, :desc, :def, :et, 'active')"
         ),
         {
             "id": mid, "name": data.name, "provider": data.provider,
             "model_id": data.model_id, "endpoint": data.endpoint, "enc": enc,
             "mt": data.max_tokens, "temp": data.temperature, "desc": data.description,
-            "def": data.is_default,
+            "def": data.is_default, "et": data.enable_thinking,
         },
     )
     await db.commit()
@@ -158,6 +161,10 @@ async def test_model_agent(agent_id: str, db: AsyncSession = Depends(get_db)):
     # 并把 ping 的 max_tokens 压到极小，让其尽快返回。
     client.timeout = 60
     client.max_tokens = 16
+    # 测试时也应用该模型的思考模式设置，使测试结果与实际调用一致
+    et = row.get("enable_thinking")
+    if et is not None:
+        client.chat_template_kwargs = {"enable_thinking": bool(et)}
 
     start = time.monotonic()
     try:
