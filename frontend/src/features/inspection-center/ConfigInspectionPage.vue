@@ -1,9 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">配置巡检</div>
-      <div class="autops-page-desc">配置漂移、合规检查与基线对比</div>
-    </div>
+    <PageHeader title="配置巡检" desc="配置漂移、合规检查与基线对比" />
     <div class="autops-toolbar">
       <div class="autops-toolbar-left">
         <el-input v-model="searchQuery" placeholder="搜索名称/资产" style="width: 200px" clearable @clear="fetchItems" @keyup.enter="fetchItems">
@@ -124,6 +121,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { Search, VideoPlay } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 import { checkResultLabel, checkResultTag } from '@/shared/utils/labels'

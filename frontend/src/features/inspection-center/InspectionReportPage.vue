@@ -1,12 +1,6 @@
 <template>
-  <div class="inspection-report-page">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">巡检报告</div>
-        <div class="autops-page-desc">巡检结果汇总报告、下载和归档</div>
-      </div>
-    </div>
+  <div class="inspection-report-page autops-page-container">
+    <PageHeader title="巡检报告" desc="巡检结果汇总报告、下载和归档" />
 
     <!-- Main Card -->
     <div class="autops-card main-card">
@@ -149,6 +143,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { Document } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { severityTagType } from '@/shared/utils/labels'

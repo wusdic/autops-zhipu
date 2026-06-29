@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">日志巡检</div>
-      <div class="autops-page-desc">日志源、匹配规则、命中数量、样例日志</div>
-    </div>
+    <PageHeader title="日志巡检" desc="日志源、匹配规则、命中数量、样例日志" />
 
     <!-- 搜索栏 -->
     <div class="page-toolbar">
@@ -109,6 +105,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

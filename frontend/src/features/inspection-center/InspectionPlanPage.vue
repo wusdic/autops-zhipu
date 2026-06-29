@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">巡检计划</div>
-      <div class="autops-page-desc">创建和管理巡检计划，设置调度周期</div>
-    </div>
+    <PageHeader title="巡检计划" desc="创建和管理巡检计划，设置调度周期" />
     <!-- 搜索栏 -->
     <div class="autops-toolbar">
       <el-input
@@ -162,6 +158,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Plus, Search, Refresh, QuestionFilled, Setting } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { useRouter } from 'vue-router'
 import { inspectionService } from '@/shared/api'
 

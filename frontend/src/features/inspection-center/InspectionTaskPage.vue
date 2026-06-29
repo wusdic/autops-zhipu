@@ -1,15 +1,12 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">巡检任务</div>
-      <div class="autops-page-desc">查看和管理巡检任务执行状态</div>
-    </div>
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px">
-      <el-button type="primary" @click="handleTriggerTask">
-        <el-icon><VideoPlay /></el-icon> 手动触发
-      </el-button>
-    </div>
+    <PageHeader title="巡检任务" desc="查看和管理巡检任务执行状态">
+      <template #actions>
+        <el-button type="primary" @click="handleTriggerTask">
+          <el-icon><VideoPlay /></el-icon> 手动触发
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- 搜索栏 -->
     <div class="page-toolbar">
@@ -200,6 +197,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Search, Refresh, VideoPlay, Loading } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { inspectionService } from '@/shared/api'
 import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'

@@ -1,15 +1,12 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">巡检模板</div>
-      <div class="autops-page-desc">管理巡检模板，定义检查项和规则</div>
-    </div>
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px">
-      <el-button type="primary" @click="handleCreate">
-        <el-icon><Plus /></el-icon> 新建模板
-      </el-button>
-    </div>
+    <PageHeader title="巡检模板" desc="管理巡检模板，定义检查项和规则">
+      <template #actions>
+        <el-button type="primary" @click="handleCreate">
+          <el-icon><Plus /></el-icon> 新建模板
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- 搜索栏 -->
     <div class="page-toolbar">
@@ -139,6 +136,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Plus, Search, Refresh } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { inspectionService } from '@/shared/api'
 
 // ---------- 状态 ----------

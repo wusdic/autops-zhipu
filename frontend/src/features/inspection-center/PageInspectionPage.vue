@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">页面巡检</div>
-      <div class="autops-page-desc">URL可用性、状态码、响应时间、页面关键字检测</div>
-    </div>
+    <PageHeader title="页面巡检" desc="URL可用性、状态码、响应时间、页面关键字检测" />
 
     <!-- 搜索栏 -->
     <div class="page-toolbar">
@@ -83,6 +79,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { checkResultTag, checkResultLabel } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'

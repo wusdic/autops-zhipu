@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">巡检结果</div>
-      <div class="autops-page-desc">查看详细的巡检检测项结果</div>
-    </div>
+    <PageHeader title="巡检结果" desc="查看详细的巡检检测项结果" />
 
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">
@@ -292,6 +288,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Search, Refresh, Download, Monitor } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { Warning, Document } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { API } from '@/shared/api/routes'

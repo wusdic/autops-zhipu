@@ -1,15 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header autops-page-header--between">
-      <div>
-        <div class="autops-page-title">巡检总览</div>
-        <div class="autops-page-desc">管理和配置巡检模板、计划与任务</div>
-      </div>
-      <div class="autops-header-actions">
+    <PageHeader title="巡检总览" desc="管理和配置巡检模板、计划与任务">
+      <template #actions>
         <el-button type="primary" @click="router.push('/inspection/plans')"><el-icon><Plus /></el-icon>创建计划</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="metric-row">
@@ -120,6 +115,7 @@ import {
   Tickets,
 } from '@element-plus/icons-vue'
 import { inspectionService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 
 const router = useRouter()

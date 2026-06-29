@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">基线巡检</div>
-      <div class="autops-page-desc">安全和运维基线检查、合规状态、整改建议</div>
-    </div>
+    <PageHeader title="基线巡检" desc="安全和运维基线检查、合规状态、整改建议" />
 
     <!-- 搜索栏 -->
     <div class="autops-toolbar">
@@ -104,6 +100,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
