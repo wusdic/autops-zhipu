@@ -1,15 +1,14 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">工单报告</div>
-      <div>
-        <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" style="margin-right: 8px" @change="fetchData" />
+    <PageHeader title="工单报告">
+      <template #actions>
+        <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" @change="fetchData" />
         <el-button type="primary" @click="generateReport" :loading="generating">
           <el-icon><Document /></el-icon> 生成报表
         </el-button>
         <el-button @click="exportData"><el-icon><Download /></el-icon> 导出</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 概要统计 -->
     <el-row :gutter="16" class="mb-lg">
@@ -102,6 +101,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Document, Download } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

@@ -1,14 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header autops-page-header--between">
-      <div>
-        <div class="autops-page-title">工单总览</div>
-        <div class="autops-page-desc">查看工单整体状态与处理进度</div>
-      </div>
-      <div class="autops-header-actions">
+    <PageHeader title="工单总览" desc="查看工单整体状态与处理进度">
+      <template #actions>
         <el-button type="primary" @click="router.push('/tickets/create')"><el-icon><Plus /></el-icon>新建工单</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="metric-row">
@@ -142,6 +138,7 @@ import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Warning, Document, Loading, CircleCheck, Plus } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 import { priorityTag, ticketStatusTag, ticketStatusLabel } from '@/shared/utils/labels'

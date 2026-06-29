@@ -1,12 +1,6 @@
 <template>
-  <div class="ticket-list-page">
-    <!-- ========== Page Header ========== -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">工单列表</div>
-        <div class="autops-page-desc">统一管理事件工单，支持指派、升级、关闭与 SLA 跟踪</div>
-      </div>
-    </div>
+  <div class="ticket-list-page autops-page-container">
+    <PageHeader title="工单列表" desc="统一管理事件工单，支持指派、升级、关闭与 SLA 跟踪" />
 
     <!-- ========== Statistics Row ========== -->
     <el-row :gutter="16" class="stats-row mb-lg">
@@ -451,6 +445,7 @@ import {
   Operation,
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API as R } from '@/shared/api/routes'
 import {
   ticketStatusLabel, ticketStatusTag,

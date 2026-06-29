@@ -1,12 +1,7 @@
 <template>
   <div class="manual-workbench-page autops-page-container">
-    <!-- 统一页头：人工确认台 + 人工处置台合并为「人工工作台」两 tab（去重 B3） -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">人工工作台</div>
-        <div class="autops-page-desc">人工确认自动/AI/策略操作，并处置需人工干预的工单</div>
-      </div>
-    </div>
+    <!-- 人工确认台 + 人工处置台合并为「人工工作台」两 tab（去重 B3） -->
+    <PageHeader title="人工工作台" desc="人工确认自动/AI/策略操作，并处置需人工干预的工单" />
 
     <el-tabs v-model="activeTab" class="manual-workbench-tabs">
       <el-tab-pane label="待确认" name="confirm" lazy>
@@ -24,6 +19,7 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import ManualConfirmPage from '@/features/response-center/ManualConfirmPage.vue'
 import ManualHandlingPage from './ManualHandlingPage.vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
 const route = useRoute()
 // 支持 ?tab=confirm 深链（去重后 /manual-confirm 重定向至此）

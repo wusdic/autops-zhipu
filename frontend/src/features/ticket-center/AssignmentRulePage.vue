@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">分配规则</div>
-      <div class="autops-page-desc">管理工单自动分配规则</div>
-    </div>
+    <PageHeader title="分配规则" desc="管理工单自动分配规则" />
 
     <!-- 搜索与筛选栏 -->
     <el-card shadow="never" class="filter-card">
@@ -368,6 +364,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Search, Refresh, Plus, Delete, Sort, User, Avatar, Rank } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

@@ -1,9 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">故障复盘</div>
-      <el-button type="primary" @click="handleCreate" :icon="Plus">新建复盘</el-button>
-    </div>
+    <PageHeader title="故障复盘">
+      <template #actions>
+        <el-button type="primary" @click="handleCreate" :icon="Plus">新建复盘</el-button>
+      </template>
+    </PageHeader>
     <div class="page-toolbar" style="display:flex;gap:12px;margin-bottom:16px">
       <el-input v-model="query" placeholder="搜索复盘报告..." clearable style="width:300px" @clear="fetchList" @keyup.enter="fetchList">
         <template #prefix><el-icon><Search /></el-icon></template>
@@ -107,6 +108,7 @@ import { ref, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Refresh } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { knowledgeService } from '@/shared/api'
 

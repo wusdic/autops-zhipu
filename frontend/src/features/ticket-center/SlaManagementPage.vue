@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">SLA 管理</div>
-      <div class="autops-page-desc">配置工单服务级别协议</div>
-    </div>
+    <PageHeader title="SLA 管理" desc="配置工单服务级别协议" />
 
     <!-- 搜索与操作栏 -->
     <el-card shadow="never" class="filter-card">
@@ -284,6 +280,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 
