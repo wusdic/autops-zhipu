@@ -24,6 +24,12 @@
       <el-button type="default" @click="fetchPlans">
         <el-icon><Refresh /></el-icon> 刷新
       </el-button>
+      <el-button text type="primary" @click="goConfig('/config/inspection-rules')">
+        <el-icon><Setting /></el-icon> 配置巡检规则
+      </el-button>
+      <el-button text type="primary" @click="goConfig('/inspection/templates')">
+        <el-icon><Setting /></el-icon> 巡检模板
+      </el-button>
     </div>
 
     <!-- 数据表格 -->
@@ -155,8 +161,12 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { Plus, Search, Refresh, QuestionFilled } from '@element-plus/icons-vue'
+import { Plus, Search, Refresh, QuestionFilled, Setting } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
 import { inspectionService } from '@/shared/api'
+
+const router = useRouter()
+function goConfig(path: string) { router.push(path) }
 
 // ---------- 状态 ----------
 const loading = ref(false)

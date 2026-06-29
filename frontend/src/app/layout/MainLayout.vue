@@ -68,7 +68,6 @@
             <template #title>
               <el-icon><TrendCharts /></el-icon><span>监控告警</span>
             </template>
-            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">监控采集</el-menu-item>
             <el-menu-item index="/monitoring">监控总览</el-menu-item>
             <el-menu-item index="/monitoring/collectors">采集任务</el-menu-item>
             <el-menu-item index="/monitoring/collection-results">采集结果</el-menu-item>
@@ -77,7 +76,6 @@
             <el-menu-item index="/monitoring/states">状态监控</el-menu-item>
             <el-menu-item index="/monitoring/log-sources">日志接入</el-menu-item>
             <el-menu-item index="/monitoring/config-facts">配置快照</el-menu-item>
-            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">信号 · 事件→告警→异常</el-menu-item>
             <el-menu-item index="/events">事件流</el-menu-item>
             <el-menu-item index="/alerts">告警列表</el-menu-item>
             <el-menu-item index="/alert-rules">告警规则</el-menu-item>
@@ -148,7 +146,6 @@
             <el-menu-item index="/report/archive">报告归档</el-menu-item>
             <el-menu-item index="/export-center">导出中心</el-menu-item>
             <el-menu-item index="/report/templates">报告模板</el-menu-item>
-            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">业务报告</el-menu-item>
             <el-menu-item index="/business-report">业务报告</el-menu-item>
             <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">审计取证</el-menu-item>
             <el-menu-item index="/audit">审计查询</el-menu-item>
@@ -185,13 +182,11 @@
             <template #title>
               <el-icon><Tools /></el-icon><span>平台管理</span>
             </template>
-            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">权限治理</el-menu-item>
             <el-menu-item index="/users">用户管理</el-menu-item>
             <el-menu-item index="/roles">角色管理</el-menu-item>
             <el-menu-item index="/tenants">租户管理</el-menu-item>
             <el-menu-item index="/permission-policy">权限策略</el-menu-item>
             <el-menu-item index="/api-keys">API Key</el-menu-item>
-            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">系统运维</el-menu-item>
             <el-menu-item index="/system-config">系统配置</el-menu-item>
             <el-menu-item index="/dictionaries">字典管理</el-menu-item>
             <el-menu-item index="/platform-status">平台健康</el-menu-item>
@@ -200,7 +195,6 @@
             <el-menu-item index="/backup">备份恢复</el-menu-item>
             <el-menu-item index="/upgrade-maintenance">升级维护</el-menu-item>
             <el-menu-item index="/license">授权许可</el-menu-item>
-            <el-menu-item index="" disabled style="opacity:.5;font-size:12px;height:28px;line-height:28px">扩展与集成</el-menu-item>
             <el-menu-item index="/integrations">集成管理</el-menu-item>
             <el-menu-item index="/agents">采集节点</el-menu-item>
           </el-sub-menu>
@@ -422,11 +416,6 @@ const menuMap: Record<string, string> = {
   '/export-center': '导出中心',
   '/report/templates': '报告模板',
   '/business-report': '业务报告',
-  '/ops-report': '运维报告',
-  '/asset-report': '资产报告',
-  '/inspection-report': '巡检报告',
-  '/automation-report': '自动化报告',
-  '/compliance-report': '合规报告',
   '/audit': '审计查询',
   '/logs/search': '日志检索',
   '/evidence': '证据归档',
