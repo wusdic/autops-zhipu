@@ -1,11 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">策略管理</div>
-        <div class="autops-page-desc">配置自动化触发策略</div>
-      </div>
-    </div>
+    <PageHeader title="策略管理" desc="配置自动化触发策略" />
 
     <el-row :gutter="16" class="stat-row">
       <el-col :span="6"><div class="autops-card stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">策略总数</div></div></el-col>
@@ -211,6 +206,7 @@ import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Delete } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 import { policyStatusLabel, riskTag } from '@/shared/utils/labels'

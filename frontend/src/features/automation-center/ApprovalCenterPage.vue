@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">审批中心</div>
-      <div class="autops-page-desc">审批自动化执行请求，管控操作风险</div>
-    </div>
+    <PageHeader title="审批中心" desc="审批自动化执行请求，管控操作风险" />
 
     <!-- Status Tabs -->
     <el-card shadow="never" class="tabs-card">
@@ -232,6 +228,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { automationService } from '@/shared/api'
 import { riskLabel as riskLabelFn, approvalStatusTag, approvalStatusLabel } from '@/shared/utils/labels'
 

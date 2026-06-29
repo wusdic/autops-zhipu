@@ -1,9 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">执行历史</div>
-      <div class="autops-page-desc">查看所有自动化执行记录与状态</div>
-    </div>
+    <PageHeader title="执行历史" desc="查看所有自动化执行记录与状态" />
 
     <!-- ========== Statistics Row ========== -->
     <el-row :gutter="16" class="stats-row">
@@ -319,6 +316,7 @@ import {
   CircleCloseFilled,
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API as R } from '@/shared/api/routes'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import MetricChart from '@/shared/components/MetricChart.vue'

@@ -1,11 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">脚本库</div>
-        <div class="autops-page-desc">管理可复用的自动化脚本</div>
-      </div>
-    </div>
+    <PageHeader title="脚本库" desc="管理可复用的自动化脚本" />
 
     <!-- ========== 统计卡片 ========== -->
     <el-row :gutter="16" class="stat-row">
@@ -519,6 +514,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { Plus, Refresh, Delete } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import api from '@/shared/api/client'

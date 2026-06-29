@@ -1,15 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header autops-page-header--between">
-      <div>
-        <div class="autops-page-title">自动化总览</div>
-        <div class="autops-page-desc">管理自动化脚本、Playbook 与执行记录</div>
-      </div>
-      <div class="autops-header-actions">
+    <PageHeader title="自动化总览" desc="管理自动化脚本、Playbook 与执行记录">
+      <template #actions>
         <el-button type="primary" @click="router.push('/scripts')"><el-icon><Plus /></el-icon>创建脚本</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="metric-row">
@@ -121,6 +116,7 @@ import {
   Stamp,
 } from '@element-plus/icons-vue'
 import { automationService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { execStatusTag, execStatusLabel } from '@/shared/utils/labels'
 
 const router = useRouter()

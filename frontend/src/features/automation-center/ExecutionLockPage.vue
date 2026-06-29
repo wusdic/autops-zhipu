@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">执行锁管理</div>
-      <div class="autops-page-desc">查看和管理自动化执行锁定记录</div>
-    </div>
+    <PageHeader title="执行锁管理" desc="查看和管理自动化执行锁定记录" />
 
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">
@@ -222,6 +218,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Search, Refresh, Unlock, Lock } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import { API } from '@/shared/api/routes'
 import { taskStatusLabel, taskStatusTag, riskLabel as riskLabelFn } from '@/shared/utils/labels'

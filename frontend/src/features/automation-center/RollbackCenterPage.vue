@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">回滚中心</div>
-      <div class="autops-page-desc">管理自动化回滚操作</div>
-    </div>
+    <PageHeader title="回滚中心" desc="管理自动化回滚操作" />
 
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">
@@ -288,6 +284,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { API } from '@/shared/api/routes'
 import client from '@/shared/api/client'
