@@ -129,9 +129,7 @@
         <el-descriptions-item label="采集器名称">{{ currentRow.collector_name }}</el-descriptions-item>
         <el-descriptions-item label="类型">{{ currentRow.collector_type }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="(healthTagType(currentRow.status)) as TagType" size="small">
-            {{ healthLabel(currentRow.status) }}
-          </el-tag>
+          <StatusBadge :status="currentRow.status" />
         </el-descriptions-item>
         <el-descriptions-item label="版本">{{ currentRow.version || '-' }}</el-descriptions-item>
         <el-descriptions-item label="最后心跳">{{ formatTime(currentRow.last_heartbeat) }}</el-descriptions-item>
@@ -166,6 +164,7 @@ import {
 } from '@element-plus/icons-vue'
 import { monitoringService } from '@/shared/api'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { healthLabel as healthLabelFn } from '@/shared/utils/labels'
 
 // ── State ──────────────────────────────────────────────────────────

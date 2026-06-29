@@ -99,9 +99,7 @@
         <el-descriptions-item label="资产名">{{ currentRow.asset_name }}</el-descriptions-item>
         <el-descriptions-item label="采集器类型">{{ currentRow.collector_type }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="(statusTagType(currentRow.status)) as TagType" size="small">
-            {{ statusLabel(currentRow.status) }}
-          </el-tag>
+          <StatusBadge :status="currentRow.status" />
         </el-descriptions-item>
         <el-descriptions-item label="耗时">
           {{ currentRow.duration != null ? formatDuration(currentRow.duration) : '-' }}
@@ -128,6 +126,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { monitoringService } from '@/shared/api'
 import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 

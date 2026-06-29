@@ -48,7 +48,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="severity" label="严重度" width="90">
-        <template #default="{ row }"><el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag></template>
+        <template #default="{ row }"><SeverityBadge :severity="row.severity" size="small" /></template>
       </el-table-column>
       <el-table-column label="状态" width="80">
         <template #default="{ row }">
@@ -142,7 +142,7 @@
       <template v-if="detail">
         <el-descriptions :column="2" border>
           <el-descriptions-item label="名称">{{ detail.name }}</el-descriptions-item>
-          <el-descriptions-item label="严重度"><el-tag :type="(severityType(detail.severity)) as TagType" size="small">{{ detail.severity }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="严重度"><SeverityBadge :severity="detail.severity" size="small" /></el-descriptions-item>
           <el-descriptions-item label="状态">{{ detail.active !== false ? '启用' : '停用' }}</el-descriptions-item>
           <el-descriptions-item label="触发次数">{{ detail.trigger_count || 0 }}</el-descriptions-item>
           <el-descriptions-item label="描述" :span="2">{{ detail.description || '-' }}</el-descriptions-item>
@@ -178,6 +178,7 @@ import type { TagType } from '@/shared/types'
 import { ElMessage } from 'element-plus'
 import { Plus, Search, Delete } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import api from '@/shared/api/client'
 import { severityTagType } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
