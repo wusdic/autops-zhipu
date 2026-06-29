@@ -144,13 +144,22 @@
 
     <!-- 连接测试结果对话框 -->
     <el-dialog v-model="testResultVisible" title="连接测试结果" width="500px">
-      <el-result v-if="testResultData.success" icon="success" title="连接成功">
+      <el-result v-if="testing" icon="info" title="正在测试连接…">
+        <template #sub-title>
+          <span>正向「{{ testResultData.name }}」发送一次探测请求，本地模型首次加载可能较慢，请稍候。</span>
+        </template>
+        <template #extra>
+          <el-icon class="is-loading" :size="22"><Loading /></el-icon>
+        </template>
+      </el-result>
+      <el-result v-else-if="testResultData.success" icon="success" title="连接成功">
         <template #extra>
           <el-descriptions :column="1" border size="small">
             <el-descriptions-item label="模型">{{ testResultData.name }}</el-descriptions-item>
             <el-descriptions-item label="响应时间">{{ testResultData.latency }}ms</el-descriptions-item>
-            <el-descriptions-item label="返回内容">{{ testResultData.response || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="模型回复">{{ testResultData.response || '-' }}</el-descriptions-item>
           </el-descriptions>
+          <div class="form-tip" style="margin-top: 8px">「模型回复」为该模型对探测语句的真实生成结果，内容每次不同属正常现象，仅用于验证模型可正常应答。</div>
         </template>
       </el-result>
       <el-result v-else icon="error" :title="'连接失败: ' + (testResultData.error || '未知错误')">
@@ -162,7 +171,7 @@
         </template>
       </el-result>
       <template #footer>
-        <el-button type="primary" @click="testResultVisible = false">确定</el-button>
+        <el-button type="primary" :disabled="testing" @click="testResultVisible = false">确定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -171,7 +180,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh } from '@element-plus/icons-vue'
+import { Plus, Refresh, Loading } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { serviceStatusLabel } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
@@ -183,6 +192,7 @@ const saving = ref(false)
 const dialogVisible = ref(false)
 const metricsVisible = ref(false)
 const testResultVisible = ref(false)
+const testing = ref(false)
 const editing = ref<any>(null)
 const models = ref<any[]>([])
 const metricsData = ref<any>({})
@@ -257,7 +267,9 @@ async function handleSubmit() {
 }
 
 async function testModel(row: any) {
-  testResultData.value = { success: false, name: row.name, latency: 0, response: '', error: ''}
+  // 先进入「测试中」态，避免在请求返回前闪现失败结果界面
+  testResultData.value = { success: false, name: row.name, latency: 0, response: '', error: '' }
+  testing.value = true
   testResultVisible.value = true
   try {
     const startTime = Date.now()
@@ -270,11 +282,11 @@ async function testModel(row: any) {
       success: ok,
       name: row.name,
       latency: result?.latency ?? elapsed,
-      response: ok ? (result?.response || result?.content || '测试连接成功') : '',
+      response: ok ? (result?.response || result?.content || '（无内容）') : '',
       error: ok ? '' : (result?.error || '连接失败'),
     }
-    if (ok) ElMessage.success('测试完成')
-    else ElMessage.error('测试失败')
+    if (ok) ElMessage.success('连接成功')
+    else ElMessage.error('连接失败')
   } catch (e: any) {
     testResultData.value = {
       success: false,
@@ -283,6 +295,9 @@ async function testModel(row: any) {
       response: '',
       error: e.response?.data?.message || e.message || '连接失败',
     }
+    ElMessage.error('连接失败')
+  } finally {
+    testing.value = false
   }
 }
 
