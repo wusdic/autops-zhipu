@@ -1,12 +1,6 @@
 <template>
-  <div class="report-archive-page">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">报表归档</div>
-        <div class="autops-page-desc">历史报表存储、下载与管理</div>
-      </div>
-    </div>
+  <div class="report-archive-page autops-page-container">
+    <PageHeader title="报表归档" desc="历史报表存储、下载与管理" />
 
     <!-- Main Card -->
     <div class="autops-card main-card">
@@ -124,6 +118,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { reportService } from '@/shared/api'
 
 // ── State ──────────────────────────────────────────────────────────

@@ -1,12 +1,6 @@
 <template>
-  <div class="report-template-page">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">报表模板</div>
-        <div class="autops-page-desc">管理报表模板，支持创建、编辑和生成报表</div>
-      </div>
-    </div>
+  <div class="report-template-page autops-page-container">
+    <PageHeader title="报表模板" desc="管理报表模板，支持创建、编辑和生成报表" />
 
     <!-- Main Card -->
     <div class="autops-card main-card">
@@ -225,6 +219,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Search, Refresh, RefreshLeft, Plus } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { reportService } from '@/shared/api'
 
 const router = useRouter()

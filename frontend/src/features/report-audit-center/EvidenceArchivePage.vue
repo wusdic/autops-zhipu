@@ -1,9 +1,6 @@
 <template>
-  <div class="evidence-archive-page">
-    <div class="autops-page-header">
-      <div class="autops-page-title">证据归档</div>
-      <div class="autops-page-desc">查看告警证据链与处置操作时间线</div>
-    </div>
+  <div class="evidence-archive-page autops-page-container">
+    <PageHeader title="证据归档" desc="查看告警证据链与处置操作时间线" />
     <!-- Search -->
     <el-card shadow="never" class="filter-card">
       <el-form :inline="true" :model="queryForm" @submit.prevent="handleSearch">
@@ -138,6 +135,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

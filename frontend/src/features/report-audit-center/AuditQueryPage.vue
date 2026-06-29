@@ -1,9 +1,6 @@
 <template>
-  <div class="p-6">
-    <div class="autops-page-header">
-      <div class="autops-page-title">审计查询</div>
-      <div class="autops-page-desc">查询系统操作审计日志</div>
-    </div>
+  <div class="autops-page-container">
+    <PageHeader title="审计查询" desc="查询系统操作审计日志" />
 
     <!-- 查询条件 -->
     <div class="autops-card mb-lg">
@@ -130,6 +127,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Download } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { auditService } from '@/shared/api'
 
 const loading = ref(false)

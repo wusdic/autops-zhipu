@@ -1,12 +1,6 @@
 <template>
-  <div class="report-task-page">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">报表任务</div>
-        <div class="autops-page-desc">报表生成任务队列、进度跟踪与日志</div>
-      </div>
-    </div>
+  <div class="report-task-page autops-page-container">
+    <PageHeader title="报表任务" desc="报表生成任务队列、进度跟踪与日志" />
 
     <!-- Main Card -->
     <div class="autops-card main-card">
@@ -153,6 +147,7 @@ import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { reportService } from '@/shared/api'
 import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 

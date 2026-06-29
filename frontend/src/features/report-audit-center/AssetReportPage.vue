@@ -1,12 +1,8 @@
 <template>
-  <div class="asset-report-page">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div v-if="!embedded">
-        <div class="autops-page-title">资产报告</div>
-        <div class="autops-page-desc">资产清单统计与状态分析报告</div>
-      </div>
-      <div class="header-actions">
+  <div class="asset-report-page autops-page-container">
+    <PageHeader v-if="!embedded" title="资产报告" desc="资产清单统计与状态分析报告" />
+    <div class="autops-toolbar">
+      <div class="autops-toolbar-right" style="margin-left:auto">
         <el-button :icon="Refresh" circle size="small" @click="loadAll" />
         <el-button type="primary" @click="exportReport">
           <el-icon style="margin-right: 4px"><Download /></el-icon>
@@ -220,6 +216,7 @@ import { ElMessage } from 'element-plus'
 
 defineProps<{ embedded?: boolean }>()
 import { Search, Refresh, RefreshLeft, Download } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { Monitor, CircleCheckFilled, SwitchButton, WarningFilled } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

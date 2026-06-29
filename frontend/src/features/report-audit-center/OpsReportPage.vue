@@ -1,13 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header autops-page-header--between">
-      <div v-if="!embedded">
-        <div class="autops-page-title">运维报告</div>
-        <div class="autops-page-desc">生成和查看运维报告</div>
-      </div>
-      <div class="autops-header-actions">
-        <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" style="margin-right: 8px" @change="fetchData" />
-        <el-select v-model="moduleFilter" placeholder="报告类型" style="width: 140px; margin-right: 8px" clearable @change="fetchData">
+    <PageHeader v-if="!embedded" title="运维报告" desc="生成和查看运维报告" />
+    <div class="autops-toolbar">
+      <div class="autops-toolbar-right" style="margin-left:auto">
+        <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" @change="fetchData" />
+        <el-select v-model="moduleFilter" placeholder="报告类型" style="width: 140px" clearable @change="fetchData">
           <el-option label="日报" value="daily" />
           <el-option label="周报" value="weekly" />
           <el-option label="月报" value="monthly" />
@@ -105,6 +102,7 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from 'vue'
 import { Document, DataAnalysis, CircleCheck, Warning, Clock } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
 defineProps<{ embedded?: boolean }>()
 import { ElMessage } from 'element-plus'

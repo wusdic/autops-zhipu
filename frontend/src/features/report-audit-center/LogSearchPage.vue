@@ -1,9 +1,6 @@
 <template>
-  <div class="log-search-page">
-    <div class="autops-page-header">
-      <div class="autops-page-title">日志搜索</div>
-      <div class="autops-page-desc">搜索和查询系统操作日志</div>
-    </div>
+  <div class="log-search-page autops-page-container">
+    <PageHeader title="日志搜索" desc="搜索和查询系统操作日志" />
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">
       <el-form :model="queryParams" inline @submit.prevent="handleSearch">
@@ -143,6 +140,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Search, Refresh, Download } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { API } from '@/shared/api/routes'
 import client from '@/shared/api/client'

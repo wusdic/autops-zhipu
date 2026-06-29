@@ -1,12 +1,8 @@
 <template>
-  <div class="automation-report-page">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div v-if="!embedded">
-        <div class="autops-page-title">自动化报告</div>
-        <div class="autops-page-desc">自动化执行统计与详细分析</div>
-      </div>
-      <div class="header-actions">
+  <div class="automation-report-page autops-page-container">
+    <PageHeader v-if="!embedded" title="自动化报告" desc="自动化执行统计与详细分析" />
+    <div class="autops-toolbar">
+      <div class="autops-toolbar-right" style="margin-left:auto">
         <el-date-picker
           v-model="dateRange"
           type="daterange"
@@ -214,6 +210,7 @@ import { ElMessage } from 'element-plus'
 
 defineProps<{ embedded?: boolean }>()
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { Operation, CircleCheckFilled, CircleCloseFilled, Timer } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

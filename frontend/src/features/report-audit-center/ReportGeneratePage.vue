@@ -1,12 +1,6 @@
 <template>
-  <div class="report-generate-page">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">生成报表</div>
-        <div class="autops-page-desc">选择模板与参数，快速生成运维报表</div>
-      </div>
-    </div>
+  <div class="report-generate-page autops-page-container">
+    <PageHeader title="生成报表" desc="选择模板与参数，快速生成运维报表" />
 
     <!-- Generate Form Card -->
     <div class="autops-card mb-lg">
@@ -155,6 +149,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Document } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { reportService } from '@/shared/api'
 import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 

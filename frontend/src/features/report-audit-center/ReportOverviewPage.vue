@@ -1,16 +1,13 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header autops-page-header--between">
-      <div>
-        <div class="autops-page-title">报表总览</div>
-        <div class="autops-page-desc">查看各类报表的生成状态和统计数据</div>
-      </div>
-      <el-button type="primary" @click="router.push('/report-audit/generate')">
-        <el-icon><Plus /></el-icon>
-        生成报告
-      </el-button>
-    </div>
+    <PageHeader title="报表总览" desc="查看各类报表的生成状态和统计数据">
+      <template #actions>
+        <el-button type="primary" @click="router.push('/report-audit/generate')">
+          <el-icon><Plus /></el-icon>
+          生成报告
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="metric-row">
@@ -145,6 +142,7 @@ import {
   Search,
 } from '@element-plus/icons-vue'
 import { reportService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 
 const router = useRouter()

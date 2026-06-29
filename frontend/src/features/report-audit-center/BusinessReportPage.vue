@@ -1,12 +1,7 @@
 <template>
   <div class="business-report-page autops-page-container">
     <!-- 成品报告按类型收敛为「业务报告」一个入口（去重 步骤5） -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">业务报告</div>
-        <div class="autops-page-desc">运维 / 资产 / 自动化 / 合规 各类成品报告</div>
-      </div>
-    </div>
+    <PageHeader title="业务报告" desc="运维 / 资产 / 自动化 / 合规 各类成品报告" />
 
     <el-tabs v-model="activeTab" class="business-report-tabs">
       <el-tab-pane label="运维报告" name="ops" lazy>
@@ -28,6 +23,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import OpsReportPage from './OpsReportPage.vue'
 import AssetReportPage from './AssetReportPage.vue'
 import AutomationReportPage from './AutomationReportPage.vue'
