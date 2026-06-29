@@ -116,7 +116,7 @@
         </el-table-column>
         <el-table-column label="风险等级" width="100">
           <template #default="{ row }">
-            <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small">{{ row.risk_level || '-' }}</el-tag>
+            <StatusBadge :status="row.risk_level" />
           </template>
         </el-table-column>
         <el-table-column label="状态" width="90">
@@ -176,6 +176,7 @@ import {
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { API } from '@/shared/api/routes'
 
 const router = useRouter()

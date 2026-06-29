@@ -77,9 +77,7 @@
         </el-table-column>
         <el-table-column label="风险等级" width="110">
           <template #default="{ row }">
-            <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small" effect="dark">
-              {{ riskLabel(row.risk_level) }}
-            </el-tag>
+            <StatusBadge :status="row.risk_level" />
           </template>
         </el-table-column>
         <el-table-column label="需要审批" width="100" align="center">
@@ -202,6 +200,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Plus, Search, SetUp, Monitor } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import client from '@/shared/api/client'
 import { riskLabel as riskLabelFn } from '@/shared/utils/labels'

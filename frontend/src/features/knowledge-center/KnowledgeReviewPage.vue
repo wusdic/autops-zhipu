@@ -68,9 +68,7 @@
         </el-table-column>
         <el-table-column label="状态" width="110">
           <template #default="{ row }">
-            <el-tag :type="(statusTagType(row.status)) as TagType" size="small">
-              {{ statusLabel(row.status) }}
-            </el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column label="操作" width="240" fixed="right">
@@ -111,7 +109,7 @@
         <el-descriptions-item label="标题" :span="2">{{ currentItem.title }}</el-descriptions-item>
         <el-descriptions-item label="分类">{{ categoryLabel(currentItem.category) }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="(statusTagType(currentItem.status)) as TagType" size="small">{{ statusLabel(currentItem.status) }}</el-tag>
+          <StatusBadge :status="currentItem.status" />
         </el-descriptions-item>
         <el-descriptions-item label="提交者">{{ currentItem.submitted_by }}</el-descriptions-item>
         <el-descriptions-item label="提交时间">{{ formatTime(currentItem.submitted_at || currentItem.created_at) }}</el-descriptions-item>
@@ -143,6 +141,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Reading, Search } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { knowledgeService } from '@/shared/api'
 import { knowledgeStatusLabel, knowledgeStatusTag } from '@/shared/utils/labels'

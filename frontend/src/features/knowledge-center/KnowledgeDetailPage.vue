@@ -48,7 +48,7 @@
               <el-tag size="small">{{ typeLabel(article.article_type) }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="风险等级">
-              <el-tag :type="(riskTagType(article.risk_level)) as TagType" size="small">{{ article.risk_level }}</el-tag>
+              <StatusBadge :status="article.risk_level" />
             </el-descriptions-item>
             <el-descriptions-item label="状态">
               <el-tag :type="article.status === 'published' ? 'success' : 'info'" size="small">
@@ -141,7 +141,7 @@
             </el-table-column>
             <el-table-column label="风险" width="80">
               <template #default="{ row }">
-                <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small">{{ row.risk_level }}</el-tag>
+                <StatusBadge :status="row.risk_level" />
               </template>
             </el-table-column>
             <el-table-column label="浏览" width="80" align="center">
@@ -186,6 +186,7 @@ import {
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { API } from '@/shared/api/routes'
 import { sanitizeHtml } from '@/shared/utils/sanitize'
 

@@ -47,9 +47,7 @@ v-loading="tableLoading"
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="(getStatusTagType(row.status)) as TagType">
-              {{ getStatusLabel(row.status) }}
-            </el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="created_by" label="创建者" width="120">
@@ -129,6 +127,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Document, CircleCheck, Edit, Star, ArrowRight, Upload, List, View as Review, Notebook } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { knowledgeService } from '@/shared/api'
 
 const router = useRouter()

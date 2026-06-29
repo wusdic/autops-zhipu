@@ -198,7 +198,7 @@
                 <el-table-column prop="article_type" label="类型" width="120" />
                 <el-table-column prop="risk_level" label="风险" width="80">
                   <template #default="{ row }">
-                    <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small">{{ row.risk_level }}</el-tag>
+                    <StatusBadge :status="row.risk_level" />
                   </template>
                 </el-table-column>
               </el-table>
@@ -259,7 +259,7 @@
                   <div class="action-header">
                     <span class="action-index">#{{ idx + 1 }}</span>
                     <span class="action-title">{{ action.title || action.name }}</span>
-                    <el-tag :type="(riskTagType(action.risk_level)) as TagType" size="small">{{ riskLabel(action.risk_level) }}风险</el-tag>
+                    <StatusBadge :status="action.risk_level" :label="riskLabel(action.risk_level) + '风险'" />
                     <el-tag v-if="action.approval_required" type="warning" size="small" effect="dark">需要审批</el-tag>
                     <el-tag v-else type="success" size="small">自动执行</el-tag>
                   </div>
