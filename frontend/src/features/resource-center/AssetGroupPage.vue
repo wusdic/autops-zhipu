@@ -82,7 +82,7 @@
               </el-table-column>
               <el-table-column prop="status" label="状态" width="90">
                 <template #default="{ row }">
-                  <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ row.status }}</el-tag>
+                  <StatusBadge :status="row.status" />
                 </template>
               </el-table-column>
               <el-table-column prop="os_type" label="系统" width="80" />
@@ -161,6 +161,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { Plus, Search, Folder } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import api from '@/shared/api/client'

@@ -142,7 +142,7 @@
         <div v-if="selectedNode" class="autops-card" style="margin-top:12px">
           <div class="autops-card-header">
             <span class="autops-card-title">{{ selectedNode.name }}</span>
-            <el-tag :type="(healthTagType(selectedNode.health_status || selectedNode.status)) as TagType" size="small">{{ selectedNode.health_status || selectedNode.status || 'unknown' }}</el-tag>
+            <StatusBadge :status="selectedNode.health_status || selectedNode.status || 'unknown'" />
           </div>
           <div class="autops-card-body">
           <el-descriptions :column="1" size="small" border>
@@ -208,6 +208,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, Warning, ZoomIn, ZoomOut, FullScreen, Grid } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

@@ -59,9 +59,7 @@
         </el-table-column>
         <el-table-column prop="health_status" label="健康状态" width="110" align="center">
           <template #default="{ row }">
-            <el-tag :type="(healthTagType(row.health_status)) as TagType" size="small" effect="light">
-              {{ healthLabel(row.health_status) }}
-            </el-tag>
+            <StatusBadge :status="row.health_status" />
           </template>
         </el-table-column>
         <el-table-column prop="contact" label="联系方式" width="140" show-overflow-tooltip>
@@ -150,9 +148,7 @@
             <el-tag size="small">{{ currentSystem.asset_count ?? 0 }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="健康状态">
-            <el-tag :type="(healthTagType(currentSystem.health_status)) as TagType" size="small">
-              {{ healthLabel(currentSystem.health_status) }}
-            </el-tag>
+            <StatusBadge :status="currentSystem.health_status" />
           </el-descriptions-item>
           <el-descriptions-item label="描述">{{ currentSystem.description || '-' }}</el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ formatTime(currentSystem.created_at) }}</el-descriptions-item>
@@ -199,6 +195,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import client from '@/shared/api/client'
 import { healthLabel as healthLabelFn } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'

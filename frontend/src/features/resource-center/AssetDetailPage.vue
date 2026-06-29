@@ -3,8 +3,8 @@
     <!-- 页面头部 -->
     <PageHeader v-if="asset" :title="asset.name" back>
       <template #title-extra>
-        <el-tag :type="(statusType(asset.status)) as TagType" size="small">{{ asset.status }}</el-tag>
-        <el-tag :type="(healthType(asset.health_status)) as TagType" size="small">{{ asset.health_status }}</el-tag>
+        <StatusBadge :status="asset.status" />
+        <StatusBadge :status="asset.health_status" />
       </template>
       <template #actions>
         <el-button type="primary" plain @click="$router.push('/assets/' + asset.id + '/topology')">
@@ -74,10 +74,10 @@
                 <el-descriptions-item label="IP">{{ asset.ip }}</el-descriptions-item>
                 <el-descriptions-item label="端口">{{ asset.port || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="状态">
-                  <el-tag :type="(statusType(asset.status)) as TagType" size="small">{{ asset.status }}</el-tag>
+                  <StatusBadge :status="asset.status" />
                 </el-descriptions-item>
                 <el-descriptions-item label="健康状态">
-                  <el-tag :type="(healthType(asset.health_status)) as TagType" size="small">{{ asset.health_status }}</el-tag>
+                  <StatusBadge :status="asset.health_status" />
                 </el-descriptions-item>
                 <el-descriptions-item label="操作系统">{{ asset.os_type || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="环境">{{ asset.environment || '-' }}</el-descriptions-item>
@@ -311,7 +311,7 @@
                   <el-table-column prop="trigger_condition" label="触发条件" min-width="160" show-overflow-tooltip />
                   <el-table-column prop="risk_level" label="风险等级" width="100">
                     <template #default="{ row }">
-                      <el-tag :type="(riskLevelType(row.risk_level)) as TagType" size="small">{{ row.risk_level || '-' }}</el-tag>
+                      <StatusBadge :status="row.risk_level" />
                     </template>
                   </el-table-column>
                   <el-table-column prop="enabled" label="启用状态" width="100">

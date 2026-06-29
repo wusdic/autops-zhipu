@@ -109,9 +109,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="(getStatusTagType(row.status || row.reachability)) as TagType">
-              {{ getStatusLabel(row.status || row.reachability) }}
-            </el-tag>
+            <StatusBadge :status="row.status || row.reachability" />
           </template>
         </el-table-column>
         <el-table-column prop="updated_at" label="更新时间" width="180">
@@ -171,6 +169,7 @@ import {
 } from '@element-plus/icons-vue'
 import { assetService, dashboardService } from '@/shared/api'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

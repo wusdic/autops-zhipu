@@ -91,19 +91,17 @@
         <el-table-column prop="ip" label="IP" width="140" />
         <el-table-column prop="status" label="状态" width="90">
           <template #default="{ row }">
-            <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="health_status" label="健康" width="90">
           <template #default="{ row }">
-            <el-tag :type="(healthType(row.health_status)) as TagType" size="small">{{ healthLabel(row.health_status) }}</el-tag>
+            <StatusBadge :status="row.health_status" />
           </template>
         </el-table-column>
         <el-table-column prop="reachability" label="可达性" width="90">
           <template #default="{ row }">
-            <el-tag :type="row.reachability === 'reachable' ? 'success' : row.reachability === 'unreachable' ? 'danger' : 'info'" size="small">
-              {{ ({ reachable: '可达', unreachable: '不可达', unknown: '未知' } as Record<string, string>)[row.reachability] || row.reachability || '-' }}
-            </el-tag>
+            <StatusBadge :status="row.reachability" />
           </template>
         </el-table-column>
         <el-table-column prop="business_system" label="所属业务" width="120" show-overflow-tooltip>
@@ -246,15 +244,13 @@
           <el-descriptions-item label="IP">{{ currentAsset.ip }}</el-descriptions-item>
           <el-descriptions-item label="端口">{{ currentAsset.port || '-' }}</el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="(statusType(currentAsset.status)) as TagType">{{ currentAsset.status }}</el-tag>
+            <StatusBadge :status="currentAsset.status" />
           </el-descriptions-item>
           <el-descriptions-item label="健康状态">
-            <el-tag :type="(healthType(currentAsset.health_status)) as TagType">{{ currentAsset.health_status }}</el-tag>
+            <StatusBadge :status="currentAsset.health_status" />
           </el-descriptions-item>
           <el-descriptions-item label="可达性">
-            <el-tag :type="currentAsset.reachability === 'reachable' ? 'success' : 'danger'">
-              {{ currentAsset.reachability || '-' }}
-            </el-tag>
+            <StatusBadge :status="currentAsset.reachability" />
           </el-descriptions-item>
           <el-descriptions-item label="操作系统">{{ currentAsset.os_type || '-' }}</el-descriptions-item>
           <el-descriptions-item label="环境">{{ currentAsset.environment || '-' }}</el-descriptions-item>
@@ -390,6 +386,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { UploadFile } from 'element-plus'
 import api from '@/shared/api/client'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { API as R } from '@/shared/api/routes'
 import {
   assetTypeLabel, assetStatusTag, assetStatusLabel,
