@@ -4,43 +4,25 @@
 
     <!-- ========== Statistics Row ========== -->
     <el-row :gutter="16" class="stats-row mb-lg">
-      <el-col :span="8">
-        <div class="autops-card stat-card stat-card--healthy">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="32"><CircleCheckFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.healthy }}</div>
-              <div class="stat-card__label">健康</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="8">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">健康</div>
+          <div class="metric-value">{{ stats.healthy }}</div>
         </div>
       </el-col>
-      <el-col :span="8">
-        <div class="autops-card stat-card stat-card--degraded">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="32"><WarningFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.degraded }}</div>
-              <div class="stat-card__label">降级</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="8">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><WarningFilled /></el-icon></div>
+          <div class="metric-label">降级</div>
+          <div class="metric-value">{{ stats.degraded }}</div>
         </div>
       </el-col>
-      <el-col :span="8">
-        <div class="autops-card stat-card stat-card--down">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="32"><CircleCloseFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.down }}</div>
-              <div class="stat-card__label">离线</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="8">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><CircleCloseFilled /></el-icon></div>
+          <div class="metric-label">离线</div>
+          <div class="metric-value">{{ stats.down }}</div>
         </div>
       </el-col>
     </el-row>
@@ -252,62 +234,6 @@ onMounted(() => {
 /* ── Statistics Cards ── */
 .stats-row {
   margin-bottom: var(--autops-space-lg);
-}
-.stat-card__body {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-card__icon {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--autops-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-card__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-card__value {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.stat-card__label {
-  font-size: var(--autops-font-13);
-  color: var(--autops-info);
-  margin-top: 4px;
-}
-
-.autops-metric-card--healthy .stat-card__icon {
-  background: rgba(103, 194, 58, 0.12);
-  color: var(--autops-success);
-}
-.autops-metric-card--healthy .stat-card__value {
-  color: var(--autops-success);
-}
-
-.autops-metric-card--degraded .stat-card__icon {
-  background: rgba(230, 162, 60, 0.12);
-  color: var(--autops-warning);
-}
-.autops-metric-card--degraded .stat-card__value {
-  color: var(--autops-warning);
-}
-
-.autops-metric-card--down .stat-card__icon {
-  background: rgba(245, 108, 108, 0.12);
-  color: var(--autops-danger);
-}
-.autops-metric-card--down .stat-card__value {
-  color: var(--autops-danger);
 }
 
 /* ── Main Card ── */

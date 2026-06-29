@@ -14,55 +14,31 @@
     <!-- Summary Statistics -->
     <el-row :gutter="16" class="stats-row mb-lg">
       <el-col :xs="12" :sm="6">
-        <div class="autops-card stat-card stat-card--total">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><Monitor /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ summaryStats.total }}</div>
-              <div class="stat-card__label">资产总数</div>
-            </div>
-          </div>
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Monitor /></el-icon></div>
+          <div class="metric-label">资产总数</div>
+          <div class="metric-value">{{ summaryStats.total }}</div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="autops-card stat-card stat-card--online">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><CircleCheckFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ summaryStats.online }}</div>
-              <div class="stat-card__label">在线</div>
-            </div>
-          </div>
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">在线</div>
+          <div class="metric-value">{{ summaryStats.online }}</div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="autops-card stat-card stat-card--offline">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><SwitchButton /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ summaryStats.offline }}</div>
-              <div class="stat-card__label">离线</div>
-            </div>
-          </div>
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><SwitchButton /></el-icon></div>
+          <div class="metric-label">离线</div>
+          <div class="metric-value">{{ summaryStats.offline }}</div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="autops-card stat-card stat-card--abnormal">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><WarningFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ summaryStats.abnormal }}</div>
-              <div class="stat-card__label">异常</div>
-            </div>
-          </div>
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><WarningFilled /></el-icon></div>
+          <div class="metric-label">异常</div>
+          <div class="metric-value">{{ summaryStats.abnormal }}</div>
         </div>
       </el-col>
     </el-row>
@@ -398,48 +374,6 @@ onMounted(() => {
 .stats-row {
   margin-bottom: var(--autops-space-lg);
 }
-.stat-card__body {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: var(--autops-space-xs) 0;
-}
-
-.stat-card__icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-card__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-card__value {
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.stat-card__label {
-  font-size: var(--autops-font-12);
-  color: var(--autops-info);
-  margin-top: 2px;
-}
-
-.autops-metric-card--total .stat-card__icon { background: rgba(64, 158, 255, 0.12); color: var(--autops-primary); }
-.autops-metric-card--total .stat-card__value { color: var(--autops-primary); }
-.autops-metric-card--online .stat-card__icon { background: rgba(103, 194, 58, 0.12); color: var(--autops-success); }
-.autops-metric-card--online .stat-card__value { color: var(--autops-success); }
-.autops-metric-card--offline .stat-card__icon { background: rgba(144, 147, 153, 0.12); color: var(--autops-info); }
-.autops-metric-card--offline .stat-card__value { color: var(--autops-info); }
-.autops-metric-card--abnormal .stat-card__icon { background: rgba(245, 108, 108, 0.12); color: var(--autops-danger); }
-.autops-metric-card--abnormal .stat-card__value { color: var(--autops-danger); }
 
 .filter-form {
   margin-bottom: var(--autops-space-lg);

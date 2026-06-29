@@ -4,56 +4,32 @@
 
     <!-- ========== Statistics Row ========== -->
     <el-row :gutter="16" class="stats-row mb-lg">
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-card--total">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="32"><Document /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.total }}</div>
-              <div class="stat-card__label">事件总数</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Document /></el-icon></div>
+          <div class="metric-label">事件总数</div>
+          <div class="metric-value">{{ stats.total }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-card--today">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="32"><Clock /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.today }}</div>
-              <div class="stat-card__label">今日事件</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><Clock /></el-icon></div>
+          <div class="metric-label">今日事件</div>
+          <div class="metric-value">{{ stats.today }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-card--pending">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="32"><Warning /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.pending }}</div>
-              <div class="stat-card__label">待处理</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Warning /></el-icon></div>
+          <div class="metric-label">待处理</div>
+          <div class="metric-value">{{ stats.pending }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-card--critical">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="32"><WarningFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.critical }}</div>
-              <div class="stat-card__label">严重事件</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><WarningFilled /></el-icon></div>
+          <div class="metric-label">严重事件</div>
+          <div class="metric-value">{{ stats.critical }}</div>
         </div>
       </el-col>
     </el-row>
@@ -877,70 +853,6 @@ onBeforeUnmount(() => {
 /* ── Statistics Cards ── */
 .stats-row {
   margin-bottom: var(--autops-space-lg);
-}
-.stat-card__body {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-card__icon {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--autops-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-card__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-card__value {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.stat-card__label {
-  font-size: var(--autops-font-13);
-  color: var(--autops-info);
-  margin-top: 4px;
-}
-
-.autops-metric-card--total .stat-card__icon {
-  background: rgba(64, 158, 255, 0.12);
-  color: var(--autops-primary);
-}
-.autops-metric-card--total .stat-card__value {
-  color: var(--autops-primary);
-}
-
-.autops-metric-card--today .stat-card__icon {
-  background: rgba(103, 194, 58, 0.12);
-  color: var(--autops-success);
-}
-.autops-metric-card--today .stat-card__value {
-  color: var(--autops-success);
-}
-
-.autops-metric-card--pending .stat-card__icon {
-  background: rgba(230, 162, 60, 0.12);
-  color: var(--autops-warning);
-}
-.autops-metric-card--pending .stat-card__value {
-  color: var(--autops-warning);
-}
-
-.autops-metric-card--critical .stat-card__icon {
-  background: rgba(245, 108, 108, 0.12);
-  color: var(--autops-danger);
-}
-.autops-metric-card--critical .stat-card__value {
-  color: var(--autops-danger);
 }
 
 /* ── Main Card ── */

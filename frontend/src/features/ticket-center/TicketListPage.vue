@@ -4,82 +4,46 @@
 
     <!-- ========== Statistics Row ========== -->
     <el-row :gutter="16" class="stats-row mb-lg">
-      <el-col :span="4">
-        <div class="autops-card stat-card stat-card--total">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><Tickets /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.total }}</div>
-              <div class="stat-card__label">全部工单</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Tickets /></el-icon></div>
+          <div class="metric-label">全部工单</div>
+          <div class="metric-value">{{ stats.total }}</div>
         </div>
       </el-col>
-      <el-col :span="4">
-        <div class="autops-card stat-card stat-card--open">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><Bell /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.open }}</div>
-              <div class="stat-card__label">待处理</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Bell /></el-icon></div>
+          <div class="metric-label">待处理</div>
+          <div class="metric-value">{{ stats.open }}</div>
         </div>
       </el-col>
-      <el-col :span="4">
-        <div class="autops-card stat-card stat-card--progress">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><Loading /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.inProgress }}</div>
-              <div class="stat-card__label">处理中</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><Loading /></el-icon></div>
+          <div class="metric-label">处理中</div>
+          <div class="metric-value">{{ stats.inProgress }}</div>
         </div>
       </el-col>
-      <el-col :span="4">
-        <div class="autops-card stat-card stat-card--closed">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><CircleCheckFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.closed }}</div>
-              <div class="stat-card__label">已关闭</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">已关闭</div>
+          <div class="metric-value">{{ stats.closed }}</div>
         </div>
       </el-col>
-      <el-col :span="4">
-        <div class="autops-card stat-card stat-card--overdue">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><WarningFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.overdue }}</div>
-              <div class="stat-card__label">SLA超时</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><WarningFilled /></el-icon></div>
+          <div class="metric-label">SLA超时</div>
+          <div class="metric-value">{{ stats.overdue }}</div>
         </div>
       </el-col>
-      <el-col :span="4">
-        <div class="autops-card stat-card stat-card--sla">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><Timer /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ slaPercent }}%</div>
-              <div class="stat-card__label">SLA达标率</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-cyan"><el-icon size="20"><Timer /></el-icon></div>
+          <div class="metric-label">SLA达标率</div>
+          <div class="metric-value">{{ slaPercent }}%</div>
         </div>
       </el-col>
     </el-row>
@@ -980,86 +944,6 @@ onBeforeUnmount(() => {
 /* ── Statistics Cards ── */
 .stats-row {
   margin-bottom: var(--autops-space-lg);
-}
-.stat-card__body {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.stat-card__icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-card__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-card__value {
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.stat-card__label {
-  font-size: var(--autops-font-12);
-  color: var(--autops-info);
-  margin-top: 2px;
-}
-
-.autops-metric-card--total .stat-card__icon {
-  background: rgba(144, 147, 153, 0.12);
-  color: var(--autops-info);
-}
-.autops-metric-card--total .stat-card__value {
-  color: var(--autops-text-2);
-}
-
-.autops-metric-card--open .stat-card__icon {
-  background: rgba(230, 162, 60, 0.12);
-  color: var(--autops-warning);
-}
-.autops-metric-card--open .stat-card__value {
-  color: var(--autops-warning);
-}
-
-.autops-metric-card--progress .stat-card__icon {
-  background: rgba(64, 158, 255, 0.12);
-  color: var(--autops-primary);
-}
-.autops-metric-card--progress .stat-card__value {
-  color: var(--autops-primary);
-}
-
-.autops-metric-card--closed .stat-card__icon {
-  background: rgba(103, 194, 58, 0.12);
-  color: var(--autops-success);
-}
-.autops-metric-card--closed .stat-card__value {
-  color: var(--autops-success);
-}
-
-.autops-metric-card--overdue .stat-card__icon {
-  background: rgba(245, 108, 108, 0.12);
-  color: var(--autops-danger);
-}
-.autops-metric-card--overdue .stat-card__value {
-  color: var(--autops-danger);
-}
-
-.autops-metric-card--sla .stat-card__icon {
-  background: rgba(103, 194, 58, 0.12);
-  color: var(--autops-success);
-}
-.autops-metric-card--sla .stat-card__value {
-  color: var(--autops-success);
 }
 
 /* ── SLA Summary Bar ── */

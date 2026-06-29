@@ -21,55 +21,31 @@
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row mb-lg">
       <el-col :xs="12" :sm="6">
-        <div class="autops-card stat-card stat-card--total">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><Operation /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.total }}</div>
-              <div class="stat-card__label">执行总数</div>
-            </div>
-          </div>
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Operation /></el-icon></div>
+          <div class="metric-label">执行总数</div>
+          <div class="metric-value">{{ stats.total }}</div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="autops-card stat-card stat-card--success">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><CircleCheckFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.successRate }}%</div>
-              <div class="stat-card__label">成功率</div>
-            </div>
-          </div>
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">成功率</div>
+          <div class="metric-value">{{ stats.successRate }}%</div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="autops-card stat-card stat-card--failed">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><CircleCloseFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.failedCount }}</div>
-              <div class="stat-card__label">失败数</div>
-            </div>
-          </div>
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><CircleCloseFilled /></el-icon></div>
+          <div class="metric-label">失败数</div>
+          <div class="metric-value">{{ stats.failedCount }}</div>
         </div>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="autops-card stat-card stat-card--duration">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="28"><Timer /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.avgDuration }}</div>
-              <div class="stat-card__label">平均耗时</div>
-            </div>
-          </div>
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-cyan"><el-icon size="20"><Timer /></el-icon></div>
+          <div class="metric-label">平均耗时</div>
+          <div class="metric-value">{{ stats.avgDuration }}</div>
         </div>
       </el-col>
     </el-row>
@@ -381,48 +357,6 @@ onMounted(() => {
 .stats-row {
   margin-bottom: var(--autops-space-lg);
 }
-.stat-card__body {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: var(--autops-space-xs) 0;
-}
-
-.stat-card__icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-card__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-card__value {
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.stat-card__label {
-  font-size: var(--autops-font-12);
-  color: var(--autops-info);
-  margin-top: 2px;
-}
-
-.autops-metric-card--total .stat-card__icon { background: rgba(64, 158, 255, 0.12); color: var(--autops-primary); }
-.autops-metric-card--total .stat-card__value { color: var(--autops-primary); }
-.autops-metric-card--success .stat-card__icon { background: rgba(103, 194, 58, 0.12); color: var(--autops-success); }
-.autops-metric-card--success .stat-card__value { color: var(--autops-success); }
-.autops-metric-card--failed .stat-card__icon { background: rgba(245, 108, 108, 0.12); color: var(--autops-danger); }
-.autops-metric-card--failed .stat-card__value { color: var(--autops-danger); }
-.autops-metric-card--duration .stat-card__icon { background: rgba(144, 147, 153, 0.12); color: var(--autops-info); }
-.autops-metric-card--duration .stat-card__value { color: var(--autops-text-2); }
 .filter-form {
   margin-bottom: var(--autops-space-lg);
   padding-bottom: 16px;

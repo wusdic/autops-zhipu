@@ -4,56 +4,32 @@
 
     <!-- ========== Statistics Row ========== -->
     <el-row :gutter="16" class="stats-row">
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-card--today">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="32"><Document /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.todayTotal }}</div>
-              <div class="stat-card__label">今日执行</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Document /></el-icon></div>
+          <div class="metric-label">今日执行</div>
+          <div class="metric-value">{{ stats.todayTotal }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-card--running">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="32"><Loading /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.runningNow }}</div>
-              <div class="stat-card__label">执行中</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><Loading /></el-icon></div>
+          <div class="metric-label">执行中</div>
+          <div class="metric-value">{{ stats.runningNow }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-card--success">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="32"><CircleCheckFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.successRate }}%</div>
-              <div class="stat-card__label">成功率</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">成功率</div>
+          <div class="metric-value">{{ stats.successRate }}%</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-card--failed">
-          <div class="stat-card__body">
-            <div class="stat-card__icon">
-              <el-icon :size="32"><CircleCloseFilled /></el-icon>
-            </div>
-            <div class="stat-card__info">
-              <div class="stat-card__value">{{ stats.failedCount }}</div>
-              <div class="stat-card__label">失败数</div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><CircleCloseFilled /></el-icon></div>
+          <div class="metric-label">失败数</div>
+          <div class="metric-value">{{ stats.failedCount }}</div>
         </div>
       </el-col>
     </el-row>
@@ -722,70 +698,6 @@ onBeforeUnmount(() => {
 /* ── Statistics Cards ── */
 .stats-row {
   margin-bottom: var(--autops-space-lg);
-}
-.stat-card__body {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-card__icon {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--autops-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-card__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-card__value {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.stat-card__label {
-  font-size: var(--autops-font-13);
-  color: var(--autops-info);
-  margin-top: 4px;
-}
-
-.autops-metric-card--today .stat-card__icon {
-  background: rgba(64, 158, 255, 0.12);
-  color: var(--autops-primary);
-}
-.autops-metric-card--today .stat-card__value {
-  color: var(--autops-primary);
-}
-
-.autops-metric-card--running .stat-card__icon {
-  background: rgba(230, 162, 60, 0.12);
-  color: var(--autops-warning);
-}
-.autops-metric-card--running .stat-card__value {
-  color: var(--autops-warning);
-}
-
-.autops-metric-card--success .stat-card__icon {
-  background: rgba(103, 194, 58, 0.12);
-  color: var(--autops-success);
-}
-.autops-metric-card--success .stat-card__value {
-  color: var(--autops-success);
-}
-
-.autops-metric-card--failed .stat-card__icon {
-  background: rgba(245, 108, 108, 0.12);
-  color: var(--autops-danger);
-}
-.autops-metric-card--failed .stat-card__value {
-  color: var(--autops-danger);
 }
 
 /* ── Trend Card ── */
