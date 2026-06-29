@@ -15,6 +15,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 
+import httpx
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy import text
@@ -152,7 +153,11 @@ async def test_model_agent(agent_id: str, db: AsyncSession = Depends(get_db)):
     client.base_url = _base_url_from_endpoint(row.get("endpoint", "")) or client.base_url
     client.model = row.get("model_id") or client.model
     client.api_key = api_key or "EMPTY"
-    client.timeout = 10
+    # 本地大模型（尤其带"思考"的推理模型 / 普通硬件）连一句 ping 也可能数十秒，
+    # 10s 会把正常推理误判为超时失败（云端 API 毫秒级则通过）。放宽到 60s，
+    # 并把 ping 的 max_tokens 压到极小，让其尽快返回。
+    client.timeout = 60
+    client.max_tokens = 16
 
     start = time.monotonic()
     try:
@@ -162,11 +167,18 @@ async def test_model_agent(agent_id: str, db: AsyncSession = Depends(get_db)):
             "success": True, "name": row.get("name"), "latency": latency,
             "response": (reply or "")[:200],
         })
+    except httpx.TimeoutException:
+        latency = int((time.monotonic() - start) * 1000)
+        return success({
+            "success": False, "name": row.get("name"), "latency": latency,
+            "error": "连接超时（60s）：本地模型可能正在加载或推理过慢，请确认服务已就绪后重试；"
+                     "或确认端点为 OpenAI 兼容地址（.../v1）。",
+        })
     except Exception as exc:  # noqa: BLE001
         latency = int((time.monotonic() - start) * 1000)
         return success({
             "success": False, "name": row.get("name"), "latency": latency,
-            "error": str(exc)[:300],
+            "error": str(exc)[:300] or "连接失败：请检查端点、端口与网络可达性。",
         })
 
 

@@ -104,12 +104,14 @@
             <el-option label="Anthropic" value="anthropic" />
             <el-option label="本地部署" value="local" />
           </el-select>
+          <div class="form-tip">仅用于标识来源，不影响调用方式；所有模型均按 OpenAI 兼容协议调用。</div>
         </el-form-item>
         <el-form-item label="模型ID" prop="model_id">
           <el-input v-model="form.model_id" placeholder="如：glm-4-plus" />
         </el-form-item>
         <el-form-item label="API地址" prop="endpoint">
           <el-input v-model="form.endpoint" placeholder="https://api.example.com/v1/chat/completions" />
+          <div class="form-tip">须为 OpenAI 兼容地址（通常以 /v1 结尾，如 http://localhost:11434/v1）。本地模型首次测试加载较慢，超时阈值为 60 秒。</div>
         </el-form-item>
         <el-form-item label="API Key">
           <el-input v-model="form.api_key" type="password" show-password placeholder="sk-xxx" />
@@ -262,14 +264,17 @@ async function testModel(row: any) {
     const res = await client.post(API.AIOPS.MODEL_AGENT_TEST(row.id))
     const elapsed = Date.now() - startTime
     const result = res.data?.data || res.data
+    // 后端测试失败时以 HTTP 200 返回 { success:false, error }，需按内层标志判定
+    const ok = result?.success !== false
     testResultData.value = {
-      success: true,
+      success: ok,
       name: row.name,
-      latency: elapsed,
-      response: result?.response || result?.content || '测试连接成功',
-      error: '',
+      latency: result?.latency ?? elapsed,
+      response: ok ? (result?.response || result?.content || '测试连接成功') : '',
+      error: ok ? '' : (result?.error || '连接失败'),
     }
-    ElMessage.success('测试完成')
+    if (ok) ElMessage.success('测试完成')
+    else ElMessage.error('测试失败')
   } catch (e: any) {
     testResultData.value = {
       success: false,
@@ -317,4 +322,5 @@ onMounted(() => { loadData(); loadConfig() })
 .model-service-page { padding: var(--autops-space-xl); }
 .mt-4 { margin-top: var(--autops-space-lg); }
 .text-xs { font-size: var(--autops-font-12); }
+.form-tip { margin-top: 4px; font-size: var(--autops-font-12); color: var(--autops-text-tertiary); line-height: 1.5; }
 </style>
