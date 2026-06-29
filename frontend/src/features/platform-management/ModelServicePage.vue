@@ -1,20 +1,15 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title-row">
-        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <span class="autops-page-title">模型服务</span>
-      </div>
-      <div class="autops-page-desc">注册和管理 AI 模型服务，配置全局模型参数</div>
-    </div>
-    <div style="display: flex; gap: 8px; margin-bottom: 16px">
-      <el-button type="primary" @click="openDialog()">
-        <el-icon><Plus /></el-icon> 注册模型
-      </el-button>
-      <el-button @click="loadData" :loading="loading">
-        <el-icon><Refresh /></el-icon> 刷新
-      </el-button>
-    </div>
+    <PageHeader title="模型服务" desc="注册和管理 AI 模型服务，配置全局模型参数">
+      <template #actions>
+        <el-button type="primary" @click="openDialog()">
+          <el-icon><Plus /></el-icon> 注册模型
+        </el-button>
+        <el-button @click="loadData" :loading="loading">
+          <el-icon><Refresh /></el-icon> 刷新
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- 模型总览 -->
     <el-row :gutter="16" class="mt-lg">
@@ -173,14 +168,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh, ArrowLeft } from '@element-plus/icons-vue'
+import { Plus, Refresh } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { serviceStatusLabel } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
-const router = useRouter()
 const loading = ref(false)
 const submitting = ref(false)
 const saving = ref(false)

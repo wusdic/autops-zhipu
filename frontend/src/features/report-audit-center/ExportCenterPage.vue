@@ -1,12 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title-row">
-        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <span class="autops-page-title">导出中心</span>
-      </div>
-      <div class="autops-page-desc">管理数据导出任务，支持多种格式和类型导出</div>
-    </div>
+    <PageHeader title="导出中心" desc="管理数据导出任务，支持多种格式和类型导出" />
 
     <!-- 导出任务列表 -->
     <el-card class="mt-lg" shadow="never">
@@ -102,14 +96,12 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
-import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { taskStatusTag } from '@/shared/utils/labels'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API } from '@/shared/api/routes'
 
-const router = useRouter()
 const loading = ref(false)
 const submitting = ref(false)
 const dialogVisible = ref(false)

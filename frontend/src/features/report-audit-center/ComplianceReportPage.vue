@@ -6,7 +6,6 @@
         <div class="autops-page-desc">生成和查看合规检查报告，评估系统合规状态</div>
       </div>
       <div class="autops-header-actions">
-        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
         <el-button type="primary" @click="generateReport">
           <el-icon><Document /></el-icon> 生成报告
         </el-button>
@@ -110,7 +109,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 defineProps<{ embedded?: boolean }>()
-import { Document, Refresh, ArrowLeft } from '@element-plus/icons-vue'
+import { Document, Refresh } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 
 const router = useRouter()

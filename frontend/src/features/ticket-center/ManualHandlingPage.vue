@@ -2,10 +2,7 @@
   <div class="autops-page-container">
     <div class="autops-page-header autops-page-header--between">
       <div v-if="!embedded">
-        <div class="autops-page-title-row">
-          <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-          <span class="autops-page-title">人工处置台</span>
-        </div>
+        <div class="autops-page-title">人工处置台</div>
         <div class="autops-page-desc">处理人工干预的工单，跟踪处置进度和 SLA</div>
       </div>
       <div class="autops-header-actions">
@@ -152,7 +149,7 @@ import { useRouter } from 'vue-router'
 
 defineProps<{ embedded?: boolean }>()
 import { ElMessage } from 'element-plus'
-import { Plus, Refresh, ArrowLeft, Clock, Loading, CircleCheck, Timer } from '@element-plus/icons-vue'
+import { Plus, Refresh, Clock, Loading, CircleCheck, Timer } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { priorityTag, priorityLabel as priorityLabelFn } from '@/shared/utils/labels'
 
