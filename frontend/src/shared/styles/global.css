@@ -333,6 +333,21 @@ body {
   border: 1px solid var(--autops-bg-4);
 }
 
+/* ─── 7c. 过滤区统一为扁平风格 ───
+ * 历史上过滤条件区两套并存：有的用扁平 .autops-toolbar，有的用带边框的
+ * .filter-card（el-card 包 inline 表单）。这里把 filter-card 扁平化，与
+ * autops-toolbar 视觉一致（无边框/无底色/无卡片内边距），消除页面间差异。 */
+.filter-card.el-card {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  margin-bottom: var(--autops-space-lg);
+}
+
+.filter-card.el-card > .el-card__body {
+  padding: 0;
+}
+
 /* ─── 8. 工具栏（搜索/过滤/操作按钮区） ─── */
 /*
  * 布局原则：toolbar-right（操作按钮）永远不换行
