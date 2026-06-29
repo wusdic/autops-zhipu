@@ -1,9 +1,6 @@
 <template>
-  <div class="collector-page">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-<div class="autops-page-title">采集任务</div>
-    </div>
+  <div class="collector-page autops-page-container">
+    <PageHeader title="采集任务" />
 
     <!-- ========== Tab 切换：本地采集器 / Edge采集器 ========== -->
     <el-tabs v-model="activeTab" @tab-change="handleTabChange">
@@ -446,6 +443,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Refresh, VideoPlay } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'

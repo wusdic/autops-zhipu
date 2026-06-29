@@ -1,12 +1,6 @@
 <template>
-  <div class="metrics-trend-page">
-    <!-- ========== Page Header ========== -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">指标趋势</div>
-        <div class="autops-page-desc">CPU、内存、磁盘、网络、数据库、页面响应时间</div>
-      </div>
-    </div>
+  <div class="metrics-trend-page autops-page-container">
+    <PageHeader title="指标趋势" desc="CPU、内存、磁盘、网络、数据库、页面响应时间" />
 
     <!-- ========== Filters Card ========== -->
     <div class="autops-card filter-card">
@@ -132,6 +126,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft, DataAnalysis } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { monitoringService, assetService } from '@/shared/api'
 import MetricChart from '@/shared/components/MetricChart.vue'
 

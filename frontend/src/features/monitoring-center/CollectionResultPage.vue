@@ -1,12 +1,6 @@
 <template>
-  <div class="collection-result-page">
-    <!-- ========== Page Header ========== -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">采集结果</div>
-        <div class="autops-page-desc">原始输出、标准化指标、解析结果、错误详情</div>
-      </div>
-    </div>
+  <div class="collection-result-page autops-page-container">
+    <PageHeader title="采集结果" desc="原始输出、标准化指标、解析结果、错误详情" />
 
     <!-- ========== Main Card ========== -->
     <div class="autops-card main-card">
@@ -133,6 +127,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { monitoringService } from '@/shared/api'
 import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 

@@ -1,9 +1,6 @@
 <template>
-  <div class="config-page">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-<div class="autops-page-title">配置快照</div>
-    </div>
+  <div class="config-page autops-page-container">
+    <PageHeader title="配置快照" />
 
     <!-- ========== 配置列表 ========== -->
     <div class="autops-card">
@@ -283,6 +280,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API as R } from '@/shared/api/routes'
 import ConfigDiffView from '@/shared/components/ConfigDiffView.vue'
 import JsonViewer from '@/shared/components/JsonViewer.vue'

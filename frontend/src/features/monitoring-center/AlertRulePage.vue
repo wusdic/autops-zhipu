@@ -1,12 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- ========== Page Header ========== -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">告警规则</div>
-        <div class="autops-page-desc">配置指标阈值与触发条件，实现自动化告警</div>
-      </div>
-    </div>
+    <PageHeader title="告警规则" desc="配置指标阈值与触发条件，实现自动化告警" />
 
     <el-row :gutter="16" class="stat-row mb-lg">
       <el-col :span="6"><div class="autops-card stat-card"><div class="autops-card-body"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">规则总数</div></div></div></el-col>
@@ -183,6 +177,7 @@ import { ref, reactive, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { ElMessage } from 'element-plus'
 import { Plus, Search, Delete } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { severityTagType } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'

@@ -1,12 +1,6 @@
 <template>
-  <div class="log-source-page">
-    <!-- ========== Page Header ========== -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">日志接入</div>
-        <div class="autops-page-desc">日志源、解析规则、接入状态</div>
-      </div>
-    </div>
+  <div class="log-source-page autops-page-container">
+    <PageHeader title="日志接入" desc="日志源、解析规则、接入状态" />
 
     <!-- ========== Main Card ========== -->
     <div class="autops-card main-card">
@@ -117,6 +111,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { monitoringService } from '@/shared/api'
 
 // ── State ──────────────────────────────────────────────────────────

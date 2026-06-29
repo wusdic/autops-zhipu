@@ -1,12 +1,7 @@
 <template>
   <div class="state-snapshot-page">
-    <!-- ========== Page Header（嵌入到状态监控页时由宿主统一展示，隐藏自身） ========== -->
-    <div class="autops-page-header" v-if="!embedded">
-      <div>
-        <div class="autops-page-title">状态快照</div>
-        <div class="autops-page-desc">资源当前可达性、健康状态、最新指标</div>
-      </div>
-    </div>
+    <!-- 嵌入到状态监控页时由宿主统一展示，隐藏自身 -->
+    <PageHeader v-if="!embedded" title="状态快照" desc="资源当前可达性、健康状态、最新指标" />
 
     <!-- ========== Main Card ========== -->
     <div class="autops-card main-card">
@@ -144,6 +139,7 @@ import { ref, reactive, onMounted } from 'vue'
 defineProps<{ embedded?: boolean }>()
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { monitoringService } from '@/shared/api'
 import { healthLabel as healthLabelFn } from '@/shared/utils/labels'
 

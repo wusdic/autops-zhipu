@@ -1,12 +1,6 @@
 <template>
-  <div class="event-list-page">
-    <!-- ========== Page Header ========== -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">事件流</div>
-        <div class="autops-page-desc">统一查看与关联分析所有监控事件</div>
-      </div>
-    </div>
+  <div class="event-list-page autops-page-container">
+    <PageHeader title="事件流" desc="统一查看与关联分析所有监控事件" />
 
     <!-- ========== Statistics Row ========== -->
     <el-row :gutter="16" class="stats-row mb-lg">
@@ -423,6 +417,7 @@ import {
   WarningFilled,
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API as R } from '@/shared/api/routes'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import SeverityBadge from '@/shared/components/SeverityBadge.vue'

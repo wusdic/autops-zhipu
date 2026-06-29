@@ -1,12 +1,6 @@
 <template>
-  <div class="collector-health-page">
-    <!-- ========== Page Header ========== -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">采集器健康</div>
-        <div class="autops-page-desc">在线状态、心跳、成功率、平均延迟</div>
-      </div>
-    </div>
+  <div class="collector-health-page autops-page-container">
+    <PageHeader title="采集器健康" desc="在线状态、心跳、成功率、平均延迟" />
 
     <!-- ========== Statistics Row ========== -->
     <el-row :gutter="16" class="stats-row mb-lg">
@@ -171,6 +165,7 @@ import {
   SuccessFilled,
 } from '@element-plus/icons-vue'
 import { monitoringService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { healthLabel as healthLabelFn } from '@/shared/utils/labels'
 
 // ── State ──────────────────────────────────────────────────────────

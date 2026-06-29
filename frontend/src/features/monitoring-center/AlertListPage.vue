@@ -1,12 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- ========== Page Header ========== -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">告警列表</div>
-        <div class="autops-page-desc">实时监控告警事件，支持确认、恢复、转工单等操作</div>
-      </div>
-    </div>
+    <PageHeader title="告警列表" desc="实时监控告警事件，支持确认、恢复、转工单等操作" />
 
     <!-- ========== Statistics Row ========== -->
     <el-row :gutter="16" class="stats-row mb-lg">
@@ -243,6 +237,7 @@ import {
   CircleCheckFilled,
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API as R } from '@/shared/api/routes'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import SeverityBadge from '@/shared/components/SeverityBadge.vue'

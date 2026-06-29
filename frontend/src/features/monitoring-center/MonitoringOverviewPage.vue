@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container monitoring-overview">
-    <!-- ========== Page Header ========== -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">监控总览</div>
-      <div class="autops-page-desc">实时监控概览，包括事件趋势、告警分布与状态变更</div>
-    </div>
+    <PageHeader title="监控总览" desc="实时监控概览，包括事件趋势、告警分布与状态变更" />
 
     <!-- ===== 顶部统计卡片 ===== -->
     <el-row :gutter="16" class="stat-cards mb-lg">
@@ -205,6 +201,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Bell, WarningFilled, Monitor, CircleCheckFilled } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import MetricChart from '@/shared/components/MetricChart.vue'
