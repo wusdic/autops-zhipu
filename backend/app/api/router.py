@@ -124,7 +124,7 @@ api_router.include_router(aiops_extra_router, prefix="/aiops")
 api_router.include_router(model_agents_router, prefix="/aiops")
 api_router.include_router(model_config_router, prefix="/aiops")
 
-# AI 助手对话：/ai/chat、/ai/execute
+# AI 助手对话：/ai/chat
 api_router.include_router(ai_router)
 
 # Anomalies

@@ -1,21 +1,20 @@
 """AI 助手对话 API.
 
 为前端 AiAssistantPage 提供真实后端：
-- POST /ai/chat    : 与大模型对话（运行时模型配置 + 降级提示）
-- POST /ai/execute : 由对话触发自动化执行（创建执行记录，复用执行链路）
+- POST /ai/chat : 与大模型对话（运行时模型配置 + 降级提示）
+
+说明：历史上还有 POST /ai/execute（对话触发自动化执行），但前端从不产出可执行
+actions、该端点与前端字段也不一致，属未完成的死路径，已移除。后续若要做
+「对话触发执行」，应由 chat/agent 产出结构化方案，统一走自动化中心的
+执行/审批链路（PolicyExecution/Execution），而非此处的临时 INSERT。
 """
 
 from __future__ import annotations
 
-import json
 import logging
-import re
-from datetime import datetime, timezone
-from uuid import uuid4
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.response import success
@@ -34,16 +33,6 @@ _SYSTEM_PROMPT = (
 class ChatRequest(BaseModel):
     message: str
     history: list[dict] | None = None  # [{role, content}]
-
-
-class ExecuteRequest(BaseModel):
-    script_id: str
-    asset_id: str
-    dry_run: bool = True
-
-
-def _valid_id(v: str) -> bool:
-    return bool(v) and bool(re.fullmatch(r"[A-Za-z0-9_-]+", v))
 
 
 @router.post("/chat")
@@ -77,37 +66,3 @@ async def ai_chat(req: ChatRequest, db: AsyncSession = Depends(get_db)):
                 "degraded": True,
             }
         )
-
-
-@router.post("/execute")
-async def ai_execute(req: ExecuteRequest, db: AsyncSession = Depends(get_db)):
-    """由 AI 助手触发脚本执行：创建一条执行记录（默认 dry-run），交由执行链路处理。"""
-    if not _valid_id(req.script_id) or not _valid_id(req.asset_id):
-        from app.common.exceptions import ValidationError
-
-        raise ValidationError("script_id / asset_id 非法")
-
-    exec_id = str(uuid4())
-    await db.execute(
-        text(
-            "INSERT INTO executions (id, execution_type, target_id, asset_ids, status, "
-            "is_dry_run, created_at) VALUES (:id, 'script', :target, :assets, 'pending', "
-            ":dry, :ts)"
-        ),
-        {
-            "id": exec_id,
-            "target": req.script_id,
-            "assets": json.dumps([req.asset_id]),
-            "dry": req.dry_run,
-            "ts": datetime.now(timezone.utc),
-        },
-    )
-    await db.commit()
-    return success(
-        {
-            "execution_id": exec_id,
-            "status": "pending",
-            "is_dry_run": req.dry_run,
-            "message": "执行已创建，请在自动化中心查看进度",
-        }
-    )

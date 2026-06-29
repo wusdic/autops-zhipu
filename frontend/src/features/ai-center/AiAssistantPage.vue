@@ -51,15 +51,6 @@
             </div>
             <div class="message-body">
               <div class="message-content" v-html="renderMarkdown(msg.content)"></div>
-              <div v-if="msg.actions && msg.actions.length" class="message-actions">
-                <el-button
-                  v-for="act in msg.actions"
-                  :key="act.label"
-                  :type="act.danger ? 'danger' : 'primary'"
-                  size="small"
-                  @click="executeAction(act)"
-                >{{ act.label }}</el-button>
-              </div>
             </div>
           </div>
           <div v-if="loading" class="message-item assistant">
@@ -100,24 +91,15 @@
 
 <script setup lang="ts">
 import { ref, nextTick, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, ChatLineSquare, Promotion } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 import { sanitizeHtml } from '@/shared/utils/sanitize'
 
-interface MessageAction {
-  label: string
-  type: string
-  params: Record<string, any>
-  danger?: boolean
-}
-
 interface Message {
   role: 'user' | 'assistant'
   content: string
-  actions?: MessageAction[]
 }
 
 interface Conversation {
@@ -223,7 +205,6 @@ async function sendMessage() {
       messages.value.push({
         role: 'assistant',
         content: reply,
-        actions: data.actions || [],
       })
       // Update conversation title from first exchange
       if (messages.value.length === 2) {
@@ -267,41 +248,6 @@ function generateLocalResponse(text: string): string {
 function sendQuickQuestion(q: string) {
   inputText.value = q
   sendMessage()
-}
-
-async function executeAction(action: MessageAction) {
-  if (action.danger) {
-    try {
-      await ElMessageBox.confirm(
-        '此操作可能影响系统运行，确认执行？',
-        '操作确认',
-        { confirmButtonText: '确认执行', cancelButtonText: '取消', type: 'warning' }
-      )
-    } catch { return }
-  }
-
-  try {
-    const resp = await api.post(API.AI.EXECUTE, {
-      action_type: action.type,
-      params: action.params,
-    })
-    if (resp.data?.code === 0) {
-      ElMessage.success('操作执行成功')
-      messages.value.push({
-        role: 'assistant',
-        content: '操作已成功执行：' + (resp.data.data?.message || '完成'),
-      })
-    } else {
-      ElMessage.error(resp.data?.message || '操作执行失败')
-    }
-  } catch (e: any) {
-    const msg = e?.message || '操作执行失败，请稍后重试'
-    ElMessage.error(msg)
-    // 失败也 push 到对话流，让用户在历史中能看到操作失败
-    messages.value.push({ role: 'assistant', content: '⚠️ 操作执行失败：' + msg })
-  }
-  persist()
-  scrollToBottom()
 }
 
 function renderMarkdown(text: string): string {
@@ -474,13 +420,6 @@ function scrollToBottom() {
 
 .message-content :deep(strong) {
   font-weight: 600;
-}
-
-.message-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  flex-wrap: wrap;
 }
 
 .typing-indicator {

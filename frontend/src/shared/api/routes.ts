@@ -155,7 +155,6 @@ export const API = {
   // AI 助手对话
   AI: {
     CHAT: '/api/v1/ai/chat',
-    EXECUTE: '/api/v1/ai/execute',
   },
 
   // 证据链
