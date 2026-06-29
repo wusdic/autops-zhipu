@@ -1,14 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">用户管理</div>
-        <div class="autops-page-desc">管理系统用户账号</div>
-      </div>
-      <div class="top-actions">
+    <PageHeader title="用户管理" desc="管理系统用户账号">
+      <template #actions>
         <el-button type="primary" @click="showCreateDialog">新建用户</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filters -->
     <div class="autops-toolbar">
@@ -129,6 +125,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API as R } from '@/shared/api/routes'
 
 const statusMap: Record<string, string> = { active: '启用', disabled: '禁用', locked: '锁定' }

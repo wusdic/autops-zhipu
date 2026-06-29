@@ -1,11 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">字典管理</div>
-        <div class="autops-page-desc">管理系统字典分类与字典项</div>
-      </div>
-    </div>
+    <PageHeader title="字典管理" desc="管理系统字典分类与字典项" />
 
     <div class="dict-layout">
       <!-- ── Left Panel: Dictionary Groups ────────────────── -->
@@ -160,6 +155,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Plus, Folder } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { platformService } from '@/shared/api'
 
 // ── State ────────────────────────────────────────────────

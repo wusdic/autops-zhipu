@@ -1,11 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">系统配置</div>
-        <div class="autops-page-desc">管理平台全局配置参数</div>
-      </div>
-    </div>
+    <PageHeader title="系统配置" desc="管理平台全局配置参数" />
 
     <!-- ── System Info Panel ─────────────────────────────── -->
     <div class="system-info-panel" v-loading="infoLoading">
@@ -220,6 +215,7 @@ import {
   Setting, Lock as Shield, MagicStick, DataLine, Bell,
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API as R } from '@/shared/api/routes'
 
 // ── Types ──────────────────────────────────────────────

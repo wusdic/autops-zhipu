@@ -1,11 +1,7 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">升级维护</div>
-        <div class="autops-page-desc">系统版本信息、自检与维护操作</div>
-      </div>
-      <div>
+    <PageHeader title="升级维护" desc="系统版本信息、自检与维护操作">
+      <template #actions>
         <el-button type="primary" @click="showUpgradeDialog"><el-icon><Upload /></el-icon> 系统升级</el-button>
         <el-button @click="showRollbackDialog" :disabled="!canRollback"><el-icon><RefreshLeft /></el-icon> 回滚</el-button>
         <el-button @click="runSelfCheck" :loading="checking"><el-icon><Monitor /></el-icon> 自检</el-button>
@@ -13,8 +9,8 @@
           <el-icon><Setting /></el-icon>
           {{ maintenanceMode ? '退出维护模式' : '维护模式' }}
         </el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 当前版本信息 -->
     <div class="autops-card mb-lg">
@@ -159,6 +155,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { Upload, RefreshLeft, Monitor, Setting, Refresh } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

@@ -1,11 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">API 密钥</div>
-        <div class="autops-page-desc">管理系统 API 密钥</div>
-      </div>
-    </div>
+    <PageHeader title="API 密钥" desc="管理系统 API 密钥" />
 
     <el-row :gutter="16" class="stat-row">
       <el-col :span="6"><div class="autops-card stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">API Key 总数</div></div></el-col>
@@ -184,6 +179,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

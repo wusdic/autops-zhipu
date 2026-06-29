@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">权限策略</div>
-      <div class="autops-page-desc">管理系统访问权限策略</div>
-    </div>
+    <PageHeader title="权限策略" desc="管理系统访问权限策略" />
 
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">
@@ -299,6 +295,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { API } from '@/shared/api/routes'

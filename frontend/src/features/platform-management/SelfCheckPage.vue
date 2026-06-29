@@ -17,18 +17,14 @@
 
     <!-- ── Normal Content (API available) ────────────────── -->
     <template v-else>
-      <div class="autops-page-header">
-        <div>
-          <div class="autops-page-title">系统自检</div>
-          <div class="autops-page-desc">检查平台各组件的运行状态与健康情况</div>
-        </div>
-        <div class="header-actions">
+      <PageHeader title="系统自检" desc="检查平台各组件的运行状态与健康情况">
+        <template #actions>
           <el-button @click="loadHistory" :loading="historyLoading">刷新记录</el-button>
           <el-button type="primary" @click="runCheck" :loading="checking">
             <el-icon><CircleCheck /></el-icon> 开始自检
           </el-button>
-        </div>
-      </div>
+        </template>
+      </PageHeader>
 
       <!-- ── Category Filter ───────────────────────────────── -->
       <div class="category-bar">
@@ -174,6 +170,7 @@ import {
   Connection,
 } from '@element-plus/icons-vue'
 import { platformService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { checkResultTag, checkResultLabel } from '@/shared/utils/labels'
 
 // ── Categories ───────────────────────────────────────────

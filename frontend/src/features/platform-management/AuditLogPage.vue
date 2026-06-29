@@ -1,11 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">审计日志</div>
-        <div class="autops-page-desc">查看系统操作审计日志</div>
-      </div>
-    </div>
+    <PageHeader title="审计日志" desc="查看系统操作审计日志" />
 
     <div class="autops-card">
       
@@ -137,6 +132,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Download } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 

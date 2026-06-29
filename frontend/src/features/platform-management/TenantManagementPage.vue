@@ -1,19 +1,15 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">租户管理</div>
-        <div class="autops-page-desc">多租户资源与配额管理</div>
-      </div>
-      <div class="header-actions">
+    <PageHeader title="租户管理" desc="多租户资源与配额管理">
+      <template #actions>
         <el-button @click="loadTenants" :loading="loading">
           <el-icon><Refresh /></el-icon> 刷新
         </el-button>
         <el-button type="primary" @click="openCreateDialog">
           <el-icon><Plus /></el-icon> 新建租户
         </el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- ── Filters ──────────────────────────────────────── -->
     <div class="filter-bar">
@@ -213,6 +209,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Refresh, Plus } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { platformService } from '@/shared/api'
 
 // ── Maps ─────────────────────────────────────────────────

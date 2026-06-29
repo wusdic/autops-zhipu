@@ -17,15 +17,13 @@
 
     <!-- 正常页面内容 -->
     <div v-if="!backendUnavailable">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">授权许可</div>
-        <div class="autops-page-desc">查看与管理平台授权信息</div>
-      </div>
-      <el-button @click="loadLicense" :loading="loading">
-        <el-icon><Refresh /></el-icon> 刷新
-      </el-button>
-    </div>
+    <PageHeader title="授权许可" desc="查看与管理平台授权信息">
+      <template #actions>
+        <el-button @click="loadLicense" :loading="loading">
+          <el-icon><Refresh /></el-icon> 刷新
+        </el-button>
+      </template>
+    </PageHeader>
 
     <el-row :gutter="16">
       <!-- ── License Info Card ────────────────────────────── -->
@@ -204,6 +202,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh, CircleCheck } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

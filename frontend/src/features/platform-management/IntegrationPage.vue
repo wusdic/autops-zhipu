@@ -1,16 +1,12 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">集成管理</div>
-        <div class="autops-page-desc">管理平台与外部系统的集成连接</div>
-      </div>
-      <div class="header-actions">
+    <PageHeader title="集成管理" desc="管理平台与外部系统的集成连接">
+      <template #actions>
         <el-button @click="loadIntegrations" :loading="loading">
           <el-icon><Refresh /></el-icon> 刷新
         </el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- ── Filters ──────────────────────────────────────── -->
     <div class="filter-bar">
@@ -179,6 +175,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { Refresh, Connection } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { platformService } from '@/shared/api'
 
 // ── Maps ─────────────────────────────────────────────────

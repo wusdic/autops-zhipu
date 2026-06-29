@@ -1,14 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">角色管理</div>
-        <div class="autops-page-desc">管理角色与权限</div>
-      </div>
-      <div class="top-actions">
+    <PageHeader title="角色管理" desc="管理角色与权限">
+      <template #actions>
         <el-button type="primary" @click="showCreateDialog">新建角色</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <el-table stripe :data="roles" v-loading="loading"border style="width: 100%">
       <el-table-column prop="name" label="角色名称" width="160">
@@ -111,6 +107,7 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { ElTree } from 'element-plus'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API as R } from '@/shared/api/routes'
 
 // Hierarchical permission tree

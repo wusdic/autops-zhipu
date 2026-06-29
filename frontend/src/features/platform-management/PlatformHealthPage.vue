@@ -1,11 +1,7 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">平台健康</div>
-        <div class="autops-page-desc">查看平台运行指标与健康度</div>
-      </div>
-      <div class="top-actions" style="display:flex;align-items:center;gap:12px">
+    <PageHeader title="平台健康" desc="查看平台运行指标与健康度">
+      <template #actions>
         <div class="auto-refresh-control">
           <el-switch v-model="autoRefresh" active-text="自动刷新" @change="toggleAutoRefresh" />
           <span v-if="autoRefresh" class="refresh-countdown">{{ countdown }}s</span>
@@ -18,8 +14,8 @@
           <el-icon><Refresh /></el-icon>
           刷新
         </el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Overall Health Summary -->
     <el-alert
@@ -115,6 +111,7 @@ import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh, CircleCheck } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 

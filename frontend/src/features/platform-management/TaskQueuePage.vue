@@ -1,16 +1,12 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">任务队列</div>
-        <div class="autops-page-desc">管理后台异步任务的执行状态</div>
-      </div>
-      <div class="header-actions">
+    <PageHeader title="任务队列" desc="管理后台异步任务的执行状态">
+      <template #actions>
         <el-button @click="loadTasks" :loading="loading">
           <el-icon><Refresh /></el-icon> 刷新
         </el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- ── Filters ──────────────────────────────────────── -->
     <div class="filter-bar">
@@ -212,6 +208,7 @@ import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, Loading } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { platformService } from '@/shared/api'
 
 // ── Maps ─────────────────────────────────────────────────
