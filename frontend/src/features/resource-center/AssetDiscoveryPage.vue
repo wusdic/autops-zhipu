@@ -298,8 +298,25 @@
             勾选探测协议；ICMP 判在线性，TCP 扫端口推断类型。
           </div>
         </el-form-item>
-        <el-form-item label="端口范围">
-          <el-input v-model="newTask.ports" placeholder="22,80,443,3389 或留空" />
+        <el-form-item label="TCP 端口" v-if="newTask.protocols.includes('tcp')">
+          <el-radio-group v-model="newTask.portMode">
+            <el-radio-button value="common">常用端口</el-radio-button>
+            <el-radio-button value="service">常见服务(1-1024)</el-radio-button>
+            <el-radio-button value="full">全量(1-65535)</el-radio-button>
+            <el-radio-button value="custom">自定义</el-radio-button>
+          </el-radio-group>
+          <el-input
+            v-if="newTask.portMode === 'custom'"
+            v-model="newTask.ports"
+            placeholder="多个端口/区间，如 22,80,443,8000-8100"
+            style="margin-top:8px"
+          />
+          <div style="font-size:12px;color:var(--autops-info);margin-top:4px">
+            <template v-if="newTask.portMode === 'common'">默认常用端口：22,80,443,3389,3306,5432,6379,8080,8443,9200</template>
+            <template v-else-if="newTask.portMode === 'service'">扫描 1-1024 常见服务端口</template>
+            <template v-else-if="newTask.portMode === 'full'">⚠️ 全量 65535 端口，耗时很长，仅建议对单台或极小网段使用</template>
+            <template v-else>支持逗号分隔与区间，如 22,80,443 或 8000-8100</template>
+          </div>
         </el-form-item>
         <el-form-item label="凭证">
           <el-select v-model="newTask.credential_id" placeholder="选择凭证(可选)" clearable style="width:100%">
@@ -355,10 +372,17 @@ const taskFormRef = ref()
 const newTask = reactive({
   name: '', ipMode: 'range' as 'range' | 'cidr',
   ip_start: '', ip_end: '', cidr: '',
-  protocols: ['icmp', 'tcp'] as string[], ports: '',
+  protocols: ['icmp', 'tcp'] as string[],
+  portMode: 'common' as 'common' | 'service' | 'full' | 'custom',
+  ports: '',
   template_id: '', credential_id: '', timeout: 30,
   auto_onboard: true,
 })
+// 端口模式 → 实际端口串（common=后端常用默认；service=1-1024；full=全量；custom=自定义）
+const PORT_MODE_MAP: Record<string, string> = { common: '', service: '1-1024', full: '1-65535' }
+function resolvedPorts(): string {
+  return newTask.portMode === 'custom' ? newTask.ports.trim() : PORT_MODE_MAP[newTask.portMode]
+}
 const taskRules = { name: [{ required: true, message: '请输入任务名称', trigger: 'blur' }] }
 
 // === 发现结果 ===
@@ -487,7 +511,8 @@ async function createTask() {
     }
     if (newTask.ipMode === 'range') { payload.ip_start = newTask.ip_start; payload.ip_end = newTask.ip_end }
     else { payload.cidr = newTask.cidr }
-    if (newTask.ports) payload.ports = newTask.ports
+    const ports = resolvedPorts()
+    if (ports) payload.ports = ports
     if (newTask.credential_id) payload.credential_id = newTask.credential_id
     await api.post(API.DISCOVERY_TASKS, payload)
     ElMessage.success(newTask.auto_onboard ? '任务已创建并自动启动扫描' : '任务创建成功')

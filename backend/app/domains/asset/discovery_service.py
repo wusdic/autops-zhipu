@@ -497,9 +497,10 @@ class DiscoveryService:
 
                         # TCP端口扫描
                         if "tcp" in protocols or ports:
-                            tcp_ports = await _tcp_scan(
-                                ip, ports, timeout=timeout / max(len(ports), 1)
-                            )
+                            # 端口并发探测，单端口超时取固定区间（0.5~3s），不能按端口数均摊，
+                            # 否则全量(65535)端口时每端口超时趋近于0、全部误判为关闭。
+                            port_timeout = max(0.5, min(3.0, (timeout or 30) / 20))
+                            tcp_ports = await _tcp_scan(ip, ports, timeout=port_timeout)
                             if tcp_ports:
                                 alive = True
                                 open_ports_list = tcp_ports
