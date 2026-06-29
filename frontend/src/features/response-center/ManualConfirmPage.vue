@@ -1,9 +1,6 @@
 <template>
   <div class="manual-confirm-page">
-    <div class="autops-page-header" v-if="!embedded">
-      <div class="autops-page-title">人工确认台</div>
-      <div class="autops-page-desc">审核和确认自动处置、AI建议和策略触发的操作</div>
-    </div>
+    <PageHeader v-if="!embedded" title="人工确认台" desc="审核和确认自动处置、AI建议和策略触发的操作" />
     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px">
       <el-badge :value="pendingCount" :max="99">
         <el-tag type="danger">待确认</el-tag>
@@ -118,6 +115,7 @@ import type { TagType } from '@/shared/types'
 defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { riskTag } from '@/shared/utils/labels'
 

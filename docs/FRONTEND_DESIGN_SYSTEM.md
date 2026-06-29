@@ -74,10 +74,16 @@
 - **分页**：右对齐（全局已统一）。
 - **空状态**：`.autops-empty` 或 `el-empty`。
 
-## 6. 迁移进度
+## 6. 迁移进度（已完成）
 
 - [x] PageHeader 组件 + 本规范
-- [ ] 批1：13 个详情页头迁移（带返回）
-- [ ] 批2：6 个菜单/内嵌页删除多余返回
-- [ ] 批3：列表/总览页头统一
-- [ ] 批4：根容器统一 autops-page-container
+- [x] 批1：13 个详情页头迁移（带返回）
+- [x] 批2：6 个菜单/内嵌页删除多余返回
+- [x] 批3：全部模块（M1~M12）列表/总览/内嵌页头统一迁移 PageHeader
+- [x] 批4：根容器统一 autops-page-container（含去掉 padding:0 贴边页）
+
+**例外（保留手写头，原因如下，不纳入 PageHeader）：**
+- `knowledge-center/AiDiagnosisPage.vue`：全屏聊天式布局 + 动态描述（按模式切换），非标准页头。
+- `response-center/IncidentResponsePage.vue`：卡片式头部内嵌实时告警标签，为专用应急工作台头部。
+
+> 全站约 120 个页面已统一到 PageHeader；新增页面必须遵循第 2/3 节骨架，禁止再手写 `autops-page-header` 内部结构。

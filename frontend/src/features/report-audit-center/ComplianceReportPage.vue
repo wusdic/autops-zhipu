@@ -1,11 +1,8 @@
 <template>
   <div class="compliance-report-page">
-    <div class="autops-page-header autops-page-header--between">
-      <div v-if="!embedded">
-        <div class="autops-page-title">合规报告</div>
-        <div class="autops-page-desc">生成和查看合规检查报告，评估系统合规状态</div>
-      </div>
-      <div class="autops-header-actions">
+    <PageHeader v-if="!embedded" title="合规报告" desc="生成和查看合规检查报告，评估系统合规状态" />
+    <div class="autops-toolbar">
+      <div class="autops-toolbar-right" style="margin-left:auto">
         <el-button type="primary" @click="generateReport">
           <el-icon><Document /></el-icon> 生成报告
         </el-button>
@@ -110,6 +107,7 @@ import { ElMessage } from 'element-plus'
 
 defineProps<{ embedded?: boolean }>()
 import { Document, Refresh } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 
 const router = useRouter()
