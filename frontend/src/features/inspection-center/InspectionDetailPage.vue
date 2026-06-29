@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="巡检详情" back>
+    <PageHeader title="巡检详情" desc="查看巡检任务的检查项与结果" back>
       <template #actions>
         <el-button type="primary" @click="rerunInspection" :loading="rerunning"><el-icon><Refresh /></el-icon> 重新巡检</el-button>
       </template>

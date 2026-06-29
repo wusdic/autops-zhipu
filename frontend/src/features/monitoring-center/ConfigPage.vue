@@ -1,6 +1,6 @@
 <template>
   <div class="config-page autops-page-container">
-    <PageHeader title="配置快照" />
+    <PageHeader title="配置快照" desc="采集并留存资源配置快照，支持版本比对" />
 
     <!-- ========== 配置列表 ========== -->
     <div class="autops-card">

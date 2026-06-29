@@ -1,6 +1,6 @@
 <template>
   <div class="asset-list autops-page-container">
-    <PageHeader title="资源列表">
+    <PageHeader title="资源列表" desc="集中管理所有纳管资源，支持检索、导入与业务归属">
       <template #actions>
         <el-button type="success" @click="showImportDialog = true">
           <el-icon><Upload /></el-icon> 批量导入

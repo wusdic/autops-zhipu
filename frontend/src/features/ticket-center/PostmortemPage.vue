@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="故障复盘">
+    <PageHeader title="故障复盘" desc="沉淀故障复盘报告与改进项">
       <template #actions>
         <el-button type="primary" @click="handleCreate" :icon="Plus">新建复盘</el-button>
       </template>

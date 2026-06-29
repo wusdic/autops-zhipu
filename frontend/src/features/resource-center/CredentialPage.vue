@@ -1,6 +1,6 @@
 <template>
   <div class="credential-page autops-page-container">
-    <PageHeader title="凭证库">
+    <PageHeader title="凭证库" desc="集中托管登录凭证，加密存储与引用">
       <template #actions>
         <el-button type="primary" @click="openCreateDialog" :icon="Plus">新建凭证</el-button>
       </template>

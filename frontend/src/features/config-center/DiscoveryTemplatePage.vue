@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="发现模板">
+    <PageHeader title="发现模板" desc="预置资产发现的扫描参数模板">
       <template #actions>
         <el-button type="primary" @click="openCreateDialog">
           <el-icon><Plus /></el-icon> 新建模板

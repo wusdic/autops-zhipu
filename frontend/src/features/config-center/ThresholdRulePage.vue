@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="阈值规则">
+    <PageHeader title="阈值规则" desc="配置指标阈值与触发条件">
       <template #actions>
         <el-button type="primary" @click="openCreateDialog">
           <el-icon><Plus /></el-icon> 新建规则

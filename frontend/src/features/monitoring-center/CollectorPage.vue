@@ -1,6 +1,6 @@
 <template>
   <div class="collector-page autops-page-container">
-    <PageHeader title="采集任务" />
+    <PageHeader title="采集任务" desc="管理指标采集任务与本地/边缘采集器" />
 
     <!-- ========== Tab 切换：本地采集器 / Edge采集器 ========== -->
     <el-tabs v-model="activeTab" @tab-change="handleTabChange">

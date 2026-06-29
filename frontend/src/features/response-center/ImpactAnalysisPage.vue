@@ -1,6 +1,6 @@
 <template>
   <div class="p-6">
-    <PageHeader v-if="!embedded" title="影响分析" />
+    <PageHeader v-if="!embedded" title="影响分析" desc="分析异常的影响范围与关联资源" />
 
     <!-- 选择异常 -->
     <div class="autops-card mb-lg">

@@ -1,6 +1,6 @@
 <template>
   <div class="p-6">
-    <PageHeader v-if="!embedded" title="异常列表">
+    <PageHeader v-if="!embedded" title="异常列表" desc="查看与处置检测到的异常">
       <template #actions>
         <el-button type="primary" @click="router.push('/response/anomalies/create')">新建异常</el-button>
       </template>

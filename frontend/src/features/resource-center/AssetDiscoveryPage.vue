@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="资产发现" />
+    <PageHeader title="资产发现" desc="扫描网段自动发现资产并纳管" />
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="stat-row mb-lg">
@@ -8,15 +8,15 @@
         <div class="stat-value">{{ stats.total_discovered }}</div>
         <div class="stat-label">已发现资产</div>
       </el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card success">
+      <el-col :span="6"><el-card shadow="hover" class="autops-metric-card success">
         <div class="stat-value">{{ stats.onboarded }}</div>
         <div class="stat-label">已纳管</div>
       </el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card warning">
+      <el-col :span="6"><el-card shadow="hover" class="autops-metric-card warning">
         <div class="stat-value">{{ stats.pending_review }}</div>
         <div class="stat-label">待审核</div>
       </el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="stat-card primary">
+      <el-col :span="6"><el-card shadow="hover" class="autops-metric-card primary">
         <div class="stat-value">{{ stats.today }}</div>
         <div class="stat-label">今日发现</div>
       </el-card></el-col>

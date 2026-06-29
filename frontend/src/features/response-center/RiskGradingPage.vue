@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader v-if="!embedded" title="风险分级" />
+    <PageHeader v-if="!embedded" title="风险分级" desc="评估资产风险等级与处置优先级" />
     <div class="autops-toolbar">
       <div class="autops-toolbar-right" style="margin-left:auto">
         <el-select v-model="riskFilter" placeholder="风险级别" style="width: 120px" clearable @change="fetchData">

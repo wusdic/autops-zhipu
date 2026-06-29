@@ -1,6 +1,6 @@
 <template>
   <div class="asset-group autops-page-container">
-    <PageHeader title="资产分组" />
+    <PageHeader title="资产分组" desc="按业务、环境等维度对资产分组管理" />
 
     <el-row :gutter="16">
       <!-- 左侧：分组列表 -->

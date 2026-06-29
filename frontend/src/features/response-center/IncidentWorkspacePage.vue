@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="故障工作台">
+    <PageHeader title="故障工作台" desc="集中处理进行中的故障事件">
       <template #actions>
         <el-select v-model="severityFilter" placeholder="严重级别" style="width: 120px" clearable @change="fetchIncidents">
           <el-option label="紧急" value="critical" />

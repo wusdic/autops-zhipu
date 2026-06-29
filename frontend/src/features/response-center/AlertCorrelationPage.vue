@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="告警收敛" />
+    <PageHeader title="告警收敛" desc="将关联告警聚合收敛，降低告警噪声" />
 
     <!-- 选择告警 -->
     <div class="autops-card mb-lg">

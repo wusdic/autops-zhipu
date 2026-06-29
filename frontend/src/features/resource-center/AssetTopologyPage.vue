@@ -1,14 +1,14 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="拓扑视图" />
+    <PageHeader title="拓扑视图" desc="查看资源节点与依赖关系拓扑" />
 
     <!-- 统计卡片 -->
     <el-row :gutter="12" class="stat-row mb-md">
       <el-col :span="4"><el-card shadow="hover" class="autops-metric-card"><div class="stat-value">{{ nodes.length }}</div><div class="stat-label">节点总数</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="stat-card success"><div class="stat-value">{{ edges.length }}</div><div class="stat-label">关系总数</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="stat-card primary"><div class="stat-value">{{ healthyCount }}</div><div class="stat-label">健康节点</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="stat-card warning"><div class="stat-value">{{ warningCount }}</div><div class="stat-label">告警节点</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="stat-card danger"><div class="stat-value">{{ criticalCount }}</div><div class="stat-label">故障节点</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card success"><div class="stat-value">{{ edges.length }}</div><div class="stat-label">关系总数</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card primary"><div class="stat-value">{{ healthyCount }}</div><div class="stat-label">健康节点</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card warning"><div class="stat-value">{{ warningCount }}</div><div class="stat-label">告警节点</div></el-card></el-col>
+      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card danger"><div class="stat-value">{{ criticalCount }}</div><div class="stat-label">故障节点</div></el-card></el-col>
       <el-col :span="4"><el-card shadow="hover" class="autops-metric-card"><div class="stat-value">{{ typeCount }}</div><div class="stat-label">资产类型</div></el-card></el-col>
     </el-row>
 

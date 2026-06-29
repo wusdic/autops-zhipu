@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="工单报告">
+    <PageHeader title="工单报告" desc="工单处理统计与报表导出">
       <template #actions>
         <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" @change="fetchData" />
         <el-button type="primary" @click="generateReport" :loading="generating">

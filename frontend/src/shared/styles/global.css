@@ -305,6 +305,34 @@ body {
 .metric-icon.bg-purple  { background: var(--autops-purple-light);    color: var(--autops-purple); }
 .metric-icon.bg-cyan    { background: var(--autops-cyan-light);      color: var(--autops-cyan); }
 
+/* ─── 7b. 统计卡片兼容层（统一历史命名的数值/标签字号） ───
+ * 历史上各页用了 stat-value / stat-card-value / stat-card__value 等不同命名，
+ * 且多数没命中标准的 .metric-value，导致统计数字字号大小不一（甚至退回 14px）。
+ * 这里把所有变体统一到标准字号（值 28/700、标签 13/text-3），消除页面间差异。
+ * 仅统一字号/字重/行高，不动颜色与布局（保留各页语义色与图标排布）。 */
+.stat-value,
+.stat-card-value,
+.stat-card__value {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  line-height: 1.2;
+}
+
+.stat-label,
+.stat-card-label,
+.stat-card__label {
+  font-size: var(--autops-font-13) !important;
+  color: var(--autops-text-3);
+}
+
+/* 裸 .stat-card 作为卡片容器时，对齐标准指标卡的底色/圆角/描边/内边距 */
+.el-card.stat-card,
+.autops-card.stat-card {
+  background: var(--autops-bg-1);
+  border-radius: var(--autops-radius-md);
+  border: 1px solid var(--autops-bg-4);
+}
+
 /* ─── 8. 工具栏（搜索/过滤/操作按钮区） ─── */
 /*
  * 布局原则：toolbar-right（操作按钮）永远不换行
