@@ -111,6 +111,106 @@ async def _tcp_scan(ip: str, ports: list[int], timeout: float = 2.0) -> list[int
     return sorted(open_ports)
 
 
+async def _ssh_probe(ip: str, port: int = 22, timeout: float = 2.0) -> tuple[bool, str | None]:
+    """SSH 探测：连 TCP 端口并读取 banner（SSH 服务器连接即回 "SSH-2.0-..."）.
+
+    返回 (是否疑似SSH, banner)。端口可连即视为开放；banner 以 SSH- 开头则确认为 SSH。
+    """
+    try:
+        reader, writer = await asyncio.wait_for(
+            asyncio.open_connection(ip, port), timeout=timeout
+        )
+    except Exception:
+        return False, None
+    banner = ""
+    try:
+        raw = await asyncio.wait_for(reader.readline(), timeout=timeout)
+        banner = raw.decode("latin-1", "ignore").strip()
+    except Exception:
+        banner = ""
+    finally:
+        writer.close()
+        try:
+            await writer.wait_closed()
+        except Exception:
+            pass
+    # 端口可连即算开放；有 SSH banner 则更可信
+    return True, (banner or None)
+
+
+def _ber_len(n: int) -> bytes:
+    if n < 0x80:
+        return bytes([n])
+    out = bytearray()
+    while n:
+        out.insert(0, n & 0xFF)
+        n >>= 8
+    return bytes([0x80 | len(out)]) + bytes(out)
+
+
+def _ber_tlv(tag: int, content: bytes) -> bytes:
+    return bytes([tag]) + _ber_len(len(content)) + content
+
+
+def _encode_oid(arcs: tuple[int, ...]) -> bytes:
+    body = bytearray([arcs[0] * 40 + arcs[1]])
+    for a in arcs[2:]:
+        if a < 0x80:
+            body.append(a)
+        else:
+            stack = [a & 0x7F]
+            a >>= 7
+            while a:
+                stack.append((a & 0x7F) | 0x80)
+                a >>= 7
+            body.extend(reversed(stack))
+    return bytes(body)
+
+
+def _snmp_get_packet(community: str = "public") -> bytes:
+    """构造 SNMPv2c GetRequest(sysDescr 1.3.6.1.2.1.1.1.0) 报文."""
+    oid = _ber_tlv(0x06, _encode_oid((1, 3, 6, 1, 2, 1, 1, 1, 0)))
+    varbind = _ber_tlv(0x30, oid + _ber_tlv(0x05, b""))
+    pdu = _ber_tlv(
+        0xA0,
+        _ber_tlv(0x02, (1).to_bytes(4, "big"))   # request-id
+        + _ber_tlv(0x02, b"\x00")                 # error-status
+        + _ber_tlv(0x02, b"\x00")                 # error-index
+        + _ber_tlv(0x30, varbind),                # variable-bindings
+    )
+    return _ber_tlv(
+        0x30,
+        _ber_tlv(0x02, b"\x01")                    # version: 1 = v2c
+        + _ber_tlv(0x04, community.encode())       # community
+        + pdu,
+    )
+
+
+async def _snmp_probe(ip: str, timeout: float = 2.0, community: str = "public") -> bool:
+    """SNMP 探测：向 UDP/161 发 v2c GetRequest，收到合法响应即视为存活."""
+    import socket
+
+    pkt = _snmp_get_packet(community)
+
+    def _probe() -> bool:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(timeout)
+        try:
+            s.sendto(pkt, (ip, 161))
+            data, _ = s.recvfrom(4096)
+            return bool(data) and data[:1] == b"\x30"  # SNMP 响应为 SEQUENCE
+        except Exception:
+            return False
+        finally:
+            s.close()
+
+    loop = asyncio.get_event_loop()
+    try:
+        return await asyncio.wait_for(loop.run_in_executor(None, _probe), timeout=timeout + 1)
+    except Exception:
+        return False
+
+
 def _parse_ports(ports_str: str | None) -> list[int]:
     """解析端口字符串: '22,80,443' or '1-1024'."""
     if not ports_str:
@@ -150,6 +250,9 @@ def _guess_asset_type(open_ports: list[int]) -> str:
         return "web_server"
     if 22 in open_ports:
         return "linux_server"
+    # SNMP 多见于网络设备（且未命中上述端口时）
+    if 161 in open_ports:
+        return "network_device"
     return "unknown"
 
 
@@ -384,10 +487,13 @@ class DiscoveryService:
                     async with sem:
                         alive = False
                         open_ports_list = []
+                        proto_hits: dict = {}
 
                         # ICMP检测
                         if "icmp" in protocols or "ping" in protocols:
-                            alive = await _icmp_ping(ip, timeout=2.0)
+                            if await _icmp_ping(ip, timeout=2.0):
+                                alive = True
+                                proto_hits["icmp"] = True
 
                         # TCP端口扫描
                         if "tcp" in protocols or ports:
@@ -397,9 +503,29 @@ class DiscoveryService:
                             if tcp_ports:
                                 alive = True
                                 open_ports_list = tcp_ports
+                                proto_hits["tcp"] = tcp_ports
+
+                        # SSH 探测（TCP/22 + banner）
+                        if "ssh" in protocols:
+                            ssh_ok, ssh_banner = await _ssh_probe(ip, timeout=2.0)
+                            if ssh_ok:
+                                alive = True
+                                if 22 not in open_ports_list:
+                                    open_ports_list.append(22)
+                                proto_hits["ssh"] = ssh_banner or True
+
+                        # SNMP 探测（UDP/161 v2c GetRequest）
+                        if "snmp" in protocols:
+                            if await _snmp_probe(ip, timeout=2.0):
+                                alive = True
+                                if 161 not in open_ports_list:
+                                    open_ports_list.append(161)
+                                proto_hits["snmp"] = True
 
                         if not alive:
                             return
+
+                        open_ports_list = sorted(set(open_ports_list))
 
                         # 推断资产类型
                         asset_type = _guess_asset_type(open_ports_list)
@@ -414,6 +540,7 @@ class DiscoveryService:
                             status="discovered",
                             metadata_={
                                 "protocols": protocols,
+                                "protocol_hits": proto_hits,
                                 "scan_time": datetime.now(timezone.utc).isoformat(),
                             },
                         )

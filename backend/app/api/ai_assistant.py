@@ -37,26 +37,43 @@ class ChatRequest(BaseModel):
 
 @router.post("/chat")
 async def ai_chat(req: ChatRequest, db: AsyncSession = Depends(get_db)):
-    """与大模型对话。模型不可用时返回降级提示，不抛错。"""
+    """与大模型对话。
+
+    经 ReAct Agent 运行，使其可调用只读工具查询本系统数据（资产/告警/事件/知识等），
+    而非裸聊天——否则模型对"我有多少资产"这类问题只能凭空回答"无法访问您的系统"。
+    模型不可用时返回降级提示，不抛错。
+    """
     if not req.message or not req.message.strip():
         return success({"reply": "请输入内容。", "degraded": False})
 
+    from app.domains.aiops.agent.react import ReActAgent
     from app.domains.aiops.model_runtime import build_llm_client
 
     client = await build_llm_client(db)
-    messages = [{"role": "system", "content": _SYSTEM_PROMPT}]
+
+    # 最近多轮对话作为上下文，供 Agent 维持连续性
+    history: list[dict] = []
     if req.history:
         for h in req.history[-10:]:
             role = h.get("role")
             content = h.get("content")
             if role in ("user", "assistant") and content:
-                messages.append({"role": role, "content": str(content)})
-    messages.append({"role": "user", "content": req.message})
+                history.append({"role": role, "content": str(content)})
+    context = {"系统说明": _SYSTEM_PROMPT}
+    if history:
+        context["对话历史"] = history
 
     try:
-        reply = await client.chat(messages)
-        degraded = reply == "LLM调用超时"
-        return success({"reply": reply, "model": client.model, "degraded": degraded})
+        agent = ReActAgent(llm_client=client)
+        result = await agent.run(task=req.message, context=context)
+        reply = (result.answer or "").strip() or "（模型未返回内容）"
+        degraded = reply in ("LLM调用超时", "（模型未返回内容）") or reply.startswith("LLM 调用失败")
+        return success({
+            "reply": reply,
+            "model": client.model,
+            "degraded": degraded,
+            "tool_calls": result.tool_calls,
+        })
     except Exception as exc:  # noqa: BLE001
         logger.warning("AI chat 失败: %s", exc)
         return success(

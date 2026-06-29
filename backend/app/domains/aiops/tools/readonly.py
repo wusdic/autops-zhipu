@@ -142,3 +142,54 @@ async def query_events(asset_id: str | None = None, event_type: str | None = Non
             params
         )
         return [{"id": str(r[0]), "type": r[1], "title": r[2], "severity": r[3], "time": str(r[4])} for r in result.fetchall()]
+
+
+@registry.register(
+    name="query_assets",
+    description="统计/查询资产清单：按类型、状态、关键词过滤，返回总数与样例列表。"
+                "回答'我有多少资产/有哪些Linux服务器/在线资产数量'等问题时使用。",
+    parameters={
+        "type": "object",
+        "properties": {
+            "asset_type": {"type": "string", "description": "资产类型，如 linux/windows/database/network；留空=全部"},
+            "status": {"type": "string", "description": "状态，如 active/online/offline；留空=全部"},
+            "keyword": {"type": "string", "description": "名称/IP 关键词"},
+            "limit": {"type": "integer", "description": "样例返回数量", "default": 20},
+        },
+    },
+    risk_level="read_only",
+)
+async def query_assets(
+    asset_type: str | None = None, status: str | None = None,
+    keyword: str | None = None, limit: int = 20,
+) -> dict:
+    """统计并列出资产（带过滤）."""
+    from app.infra.database import get_db
+    from sqlalchemy import text
+    async for db in get_db():
+        conditions = ["(is_deleted = 0 OR is_deleted IS NULL)"]
+        params: dict = {"limit": int(limit or 20)}
+        if asset_type:
+            conditions.append("asset_type = :atype")
+            params["atype"] = asset_type
+        if status:
+            conditions.append("status = :status")
+            params["status"] = status
+        if keyword:
+            conditions.append("(name LIKE :kw OR ip_address LIKE :kw)")
+            params["kw"] = f"%{keyword}%"
+        where = " AND ".join(conditions)
+        total = (await db.execute(
+            text(f"SELECT COUNT(*) FROM assets WHERE {where}"), params
+        )).scalar() or 0
+        rows = (await db.execute(
+            text(f"SELECT name, asset_type, status, ip_address FROM assets WHERE {where} "
+                 "ORDER BY created_at DESC LIMIT :limit"),
+            params,
+        )).fetchall()
+        return {
+            "total": int(total),
+            "items": [
+                {"name": r[0], "type": r[1], "status": r[2], "ip": r[3]} for r in rows
+            ],
+        }
