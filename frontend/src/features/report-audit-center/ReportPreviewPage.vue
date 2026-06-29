@@ -1,7 +1,7 @@
 <template>
   <div class="report-preview-page autops-page-container">
     <!-- Page Header -->
-    <PageHeader title="报表预览" back desc="在线预览生成的报表内容">
+    <PageHeader title="报告预览" back desc="在线预览生成的报表内容">
       <template #actions>
         <el-button type="primary" :loading="downloading" @click="handleDownload">
           <el-icon style="margin-right: 4px"><Download /></el-icon>

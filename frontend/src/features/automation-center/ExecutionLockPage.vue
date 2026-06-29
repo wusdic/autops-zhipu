@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="执行锁管理" desc="查看和管理自动化执行锁定记录" />
+    <PageHeader title="执行锁" desc="查看和管理自动化执行锁定记录" />
 
     <!-- 搜索筛选区 -->
     <el-card class="filter-card" shadow="never">

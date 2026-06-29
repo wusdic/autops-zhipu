@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="资产导入" desc="批量导入资产数据" />
+    <PageHeader title="资源导入" desc="批量导入资产数据" />
 
     <!-- 上传区域 -->
     <el-card shadow="never" class="upload-card">

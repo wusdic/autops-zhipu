@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="编辑知识" back desc="编辑知识条目内容">
+    <PageHeader title="知识编辑" back desc="编辑知识条目内容">
       <template #actions>
         <el-button type="primary" @click="save" :loading="saving"><el-icon><Check /></el-icon> 保存</el-button>
         <el-button @click="saveAndPublish" :loading="saving">保存并发布</el-button>

@@ -1,7 +1,7 @@
 <template>
   <div class="autops-page-container">
     <!-- 页面头部 -->
-    <PageHeader title="创建工单" back desc="新建运维工单" />
+    <PageHeader title="新建工单" back desc="新建运维工单" />
 
     <el-card shadow="never">
       <template #header>

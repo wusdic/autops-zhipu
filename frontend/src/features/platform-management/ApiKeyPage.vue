@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="API 密钥" desc="管理系统 API 密钥" />
+    <PageHeader title="API Key" desc="管理系统 API 密钥" />
 
     <el-row :gutter="16" class="stat-row">
       <el-col :xs="12" :sm="6">

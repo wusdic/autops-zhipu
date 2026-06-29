@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="资产发现" desc="扫描网段自动发现资产并纳管" />
+    <PageHeader title="资源发现" desc="扫描网段自动发现资产并纳管" />
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="stat-row mb-lg">

@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="Prompt 模板管理" desc="管理 AI 提示词模板">
+    <PageHeader title="Prompt 模板" desc="管理 AI 提示词模板">
       <template #actions>
         <el-button type="primary" :icon="Plus" @click="openCreate">新建模板</el-button>
       </template>

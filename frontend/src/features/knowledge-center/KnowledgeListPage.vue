@@ -1,6 +1,6 @@
 <template>
   <div class="knowledge-page autops-page-container">
-    <PageHeader title="知识库管理" desc="运维知识沉淀与检索">
+    <PageHeader title="知识列表" desc="运维知识沉淀与检索">
       <template #actions>
         <el-button type="primary" :icon="Plus" @click="goCreate">新建知识</el-button>
         <el-button :icon="Upload" @click="goImport">导入</el-button>

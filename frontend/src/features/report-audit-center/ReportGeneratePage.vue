@@ -1,6 +1,6 @@
 <template>
   <div class="report-generate-page autops-page-container">
-    <PageHeader title="生成报表" desc="选择模板与参数，快速生成运维报表" />
+    <PageHeader title="报告生成" desc="选择模板与参数，快速生成运维报表" />
 
     <!-- Generate Form Card -->
     <div class="autops-card mb-lg">

@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="AI 工具调用策略" desc="管理 AI Agent 可调用的工具及其审批策略">
+    <PageHeader title="AI 工具策略" desc="管理 AI Agent 可调用的工具及其审批策略">
       <template #actions>
         <el-button type="primary" :icon="Plus" @click="openCreate">新增策略</el-button>
       </template>

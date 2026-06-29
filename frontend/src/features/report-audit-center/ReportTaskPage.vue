@@ -1,6 +1,6 @@
 <template>
   <div class="report-task-page autops-page-container">
-    <PageHeader title="报表任务" desc="报表生成任务队列、进度跟踪与日志" />
+    <PageHeader title="报告任务" desc="报表生成任务队列、进度跟踪与日志" />
 
     <!-- Main Card -->
     <div class="autops-card main-card">

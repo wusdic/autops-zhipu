@@ -1,24 +1,23 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="审计日志" desc="查看系统操作审计日志" />
+    <PageHeader title="审计查询" desc="查看系统操作审计日志" />
 
     <div class="autops-card">
-      
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-          <span style="font-size:18px;font-weight:600">审计日志</span>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <el-radio-group v-model="viewMode" size="small">
-              <el-radio-button value="table">表格</el-radio-button>
-              <el-radio-button value="timeline">时间线</el-radio-button>
-            </el-radio-group>
-            <el-button @click="exportLogs" :loading="exporting" size="small">
-              <el-icon><Download /></el-icon>
-              导出
-            </el-button>
-          </div>
+      <div class="autops-card-header">
+        <div class="autops-card-title">审计日志</div>
+        <div class="header-actions">
+          <el-radio-group v-model="viewMode" size="small">
+            <el-radio-button value="table">表格</el-radio-button>
+            <el-radio-button value="timeline">时间线</el-radio-button>
+          </el-radio-group>
+          <el-button @click="exportLogs" :loading="exporting" size="small">
+            <el-icon><Download /></el-icon>
+            导出
+          </el-button>
         </div>
-      
+      </div>
 
+      <div class="autops-card-body">
       <!-- Advanced Filters -->
       <div class="autops-toolbar">
         <el-date-picker
@@ -101,6 +100,7 @@
         @change="loadLogs"
         style="margin-top: 16px; justify-content: flex-end"
       />
+      </div>
     </div>
 
     <!-- Detail Drawer -->
@@ -279,15 +279,11 @@ onMounted(() => loadLogs())
 <style scoped>
 
 
-.filter-bar {
+.header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: var(--autops-space-lg);
-  padding: var(--autops-space-md) 16px;
-  background: var(--autops-bg-2);
-  border-radius: 6px;
 }
 
 .timeline-wrapper { padding: var(--autops-space-sm) 0; max-height: 600px; overflow-y: auto; }

@@ -1,6 +1,6 @@
 <template>
   <div class="similar-case-page autops-page-container">
-    <PageHeader title="相似案例查找" desc="基于历史事件智能匹配相似案例" />
+    <PageHeader title="相似案例" desc="基于历史事件智能匹配相似案例" />
 
     <!-- Search Panel -->
     <div class="autops-card search-panel">

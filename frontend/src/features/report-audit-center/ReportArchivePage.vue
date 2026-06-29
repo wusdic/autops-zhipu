@@ -1,6 +1,6 @@
 <template>
   <div class="report-archive-page autops-page-container">
-    <PageHeader title="报表归档" desc="历史报表存储、下载与管理" />
+    <PageHeader title="报告归档" desc="历史报表存储、下载与管理" />
 
     <!-- Main Card -->
     <div class="autops-card main-card">

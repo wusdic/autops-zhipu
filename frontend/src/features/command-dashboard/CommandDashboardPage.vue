@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="指挥中心" desc="全局态势感知与运维指挥总览" />
+    <PageHeader title="指挥台" desc="全局态势感知与运维指挥总览" />
 
     <!-- ─── 第一行：核心态势指标（V3 M1-RQ-001） ─── -->
     <el-row :gutter="16" class="metric-row">

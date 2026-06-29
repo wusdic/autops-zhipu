@@ -1,6 +1,6 @@
 <template>
   <div class="report-template-page autops-page-container">
-    <PageHeader title="报表模板" desc="管理报表模板，支持创建、编辑和生成报表" />
+    <PageHeader title="报告模板" desc="管理报表模板，支持创建、编辑和生成报表" />
 
     <!-- Main Card -->
     <div class="autops-card main-card">

@@ -1,6 +1,6 @@
 <template>
   <div class="rule-gap-page autops-page-container">
-    <PageHeader title="规则缺口分析" desc="识别缺少告警规则和策略的事件类型">
+    <PageHeader title="规则覆盖度" desc="识别缺少告警规则和策略的事件类型">
       <template #actions>
         <el-button type="primary" @click="runAnalysis" :loading="loading">执行分析</el-button>
         <el-button @click="exportReport" :disabled="gapResults.length === 0">导出报告</el-button>

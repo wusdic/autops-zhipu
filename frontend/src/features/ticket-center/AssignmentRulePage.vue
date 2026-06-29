@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="分配规则" desc="管理工单自动分配规则" />
+    <PageHeader title="派单规则" desc="管理工单自动分配规则" />
 
     <!-- 搜索与筛选栏 -->
     <el-card shadow="never" class="filter-card">

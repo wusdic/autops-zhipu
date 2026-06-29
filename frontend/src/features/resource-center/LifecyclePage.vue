@@ -1,6 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <PageHeader title="资产生命周期" desc="管理资产生命周期规则与状态" />
+    <PageHeader title="生命周期" desc="管理资产生命周期规则与状态" />
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="metric-row">

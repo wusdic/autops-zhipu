@@ -1,7 +1,7 @@
 <template>
   <div class="autops-page-container">
     <!-- Page Header -->
-    <PageHeader title="Dry-run 预演" back desc="模拟自动化策略执行，预览执行计划与影响分析" />
+    <PageHeader title="Dry-run 详情" back desc="模拟自动化策略执行，预览执行计划与影响分析" />
 
     <!-- Alert -->
     <el-alert
