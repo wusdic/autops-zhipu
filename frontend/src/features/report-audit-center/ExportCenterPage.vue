@@ -25,7 +25,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabels[row.status] || row.status }}</el-tag>
+            <StatusBadge :status="row.status" :label="statusLabels[row.status] || row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="progress" label="进度" width="150">
@@ -100,6 +100,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import { taskStatusTag } from '@/shared/utils/labels'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { API } from '@/shared/api/routes'
 
 const loading = ref(false)

@@ -68,12 +68,12 @@
               <el-table-column prop="title" label="告警" min-width="180" show-overflow-tooltip />
               <el-table-column prop="severity" label="级别" width="70">
                 <template #default="{ row }">
-                  <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
+                  <SeverityBadge :severity="row.severity" size="small" />
                 </template>
               </el-table-column>
               <el-table-column prop="status" label="状态" width="70">
                 <template #default="{ row }">
-                  <el-tag :type="(alertStatusType(row.status)) as TagType" size="small">{{ alertStatusLabel(row.status) }}</el-tag>
+                  <StatusBadge :status="row.status" />
                 </template>
               </el-table-column>
             </el-table>
@@ -95,12 +95,12 @@
               <el-table-column prop="title" label="异常" min-width="180" show-overflow-tooltip />
               <el-table-column prop="severity" label="级别" width="70">
                 <template #default="{ row }">
-                  <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
+                  <SeverityBadge :severity="row.severity" size="small" />
                 </template>
               </el-table-column>
               <el-table-column prop="status" label="状态" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="(anomalyStatusType(row.status)) as TagType" size="small">{{ anomalyStatusLabel(row.status) }}</el-tag>
+                  <StatusBadge :status="row.status" />
                 </template>
               </el-table-column>
             </el-table>
@@ -126,7 +126,7 @@
               </el-table-column>
               <el-table-column prop="status" label="状态" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="(execStatusType(row.status)) as TagType" size="small">{{ row.status }}</el-tag>
+                  <StatusBadge :status="row.status" />
                 </template>
               </el-table-column>
             </el-table>
@@ -143,6 +143,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Warning, CircleCheck, VideoPlay, Document } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import { dashboardService, alertService, anomalyService } from '@/shared/api'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

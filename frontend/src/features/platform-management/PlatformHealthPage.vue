@@ -34,9 +34,7 @@
         <div class="autops-card-header">
           <span class="card-icon">{{ comp.icon }}</span>
           <span class="card-title">{{ comp.label }}</span>
-          <el-tag :type="(getTagType(comp.status)) as TagType" size="small" effect="dark">
-            {{ statusLabels[comp.status] || comp.status || '未知' }}
-          </el-tag>
+          <StatusBadge :type="getTagType(comp.status)" :label="statusLabels[comp.status] || comp.status || '未知'" />
         </div>
         <div class="card-body" v-if="comp.detail">
           <div class="detail-row" v-for="(val, key) in comp.detail" :key="key">
@@ -96,7 +94,7 @@
         <el-descriptions :column="1" border class="mt-lg">
           <el-descriptions-item v-for="item in selfCheckResult.items" :key="item.key" :label="item.label">
             <div style="display:flex;align-items:center;gap:8px">
-              <el-tag :type="(getTagType(item.status)) as TagType" size="small">{{ statusLabels[item.status] || item.status }}</el-tag>
+              <StatusBadge :type="getTagType(item.status)" :label="statusLabels[item.status] || item.status" />
               <span style="color:#86909c;font-size:13px">{{ item.message || '' }}</span>
             </div>
           </el-descriptions-item>
@@ -112,6 +110,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh, CircleCheck } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 

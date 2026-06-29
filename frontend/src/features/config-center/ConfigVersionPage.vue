@@ -52,7 +52,7 @@
           </el-table-column>
           <el-table-column prop="status" label="状态" width="100" align="center">
             <template #default="{ row }">
-              <el-tag :type="(statusTag(row.status)) as TagType" size="small">{{ statusText(row.status) }}</el-tag>
+              <StatusBadge :status="row.status" :label="statusText(row.status)" />
             </template>
           </el-table-column>
           <el-table-column prop="published_at" label="发布时间" width="180" align="center">
@@ -163,6 +163,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

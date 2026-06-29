@@ -37,7 +37,7 @@
       <el-descriptions :column="3" border size="small">
         <el-descriptions-item label="告警标题">{{ alertInfo.title || '-' }}</el-descriptions-item>
         <el-descriptions-item label="告警等级">
-          <el-tag :type="(severityTagType(alertInfo.severity)) as TagType" size="small">{{ alertInfo.severity || '-' }}</el-tag>
+          <SeverityBadge :severity="alertInfo.severity" size="small" />
         </el-descriptions-item>
         <el-descriptions-item label="状态">
           <el-tag :type="alertInfo.status === 'resolved' ? 'success' : 'warning'" size="small">
@@ -70,7 +70,7 @@
         <el-table-column prop="title" label="事件标题" min-width="240" show-overflow-tooltip />
         <el-table-column prop="severity" label="严重程度" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(severityTagType(row.severity)) as TagType" size="small">{{ row.severity || '-' }}</el-tag>
+            <SeverityBadge :severity="row.severity" size="small" />
           </template>
         </el-table-column>
         <el-table-column prop="time" label="时间" width="180" align="center">
@@ -117,7 +117,7 @@
           </el-descriptions-item>
           <el-descriptions-item label="事件标题">{{ currentRow.title || '-' }}</el-descriptions-item>
           <el-descriptions-item label="严重程度">
-            <el-tag :type="(severityTagType(currentRow.severity)) as TagType" size="small">{{ currentRow.severity || '-' }}</el-tag>
+            <SeverityBadge :severity="currentRow.severity" size="small" />
           </el-descriptions-item>
           <el-descriptions-item label="时间">{{ formatTime(currentRow.time) }}</el-descriptions-item>
         </el-descriptions>
@@ -136,6 +136,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import { ElMessage } from 'element-plus'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

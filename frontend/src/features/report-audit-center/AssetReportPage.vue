@@ -180,7 +180,7 @@
           <el-table-column prop="ip" label="IP地址" width="140" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="90" align="center">
             <template #default="{ row }">
-              <el-tag :type="(assetStatusType(row.status)) as TagType" size="small">{{ assetStatusLabel(row.status) }}</el-tag>
+              <StatusBadge :status="row.status" />
             </template>
           </el-table-column>
           <el-table-column label="操作系统" min-width="140" show-overflow-tooltip>
@@ -217,6 +217,7 @@ import { ElMessage } from 'element-plus'
 defineProps<{ embedded?: boolean }>()
 import { Search, Refresh, RefreshLeft, Download } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { Monitor, CircleCheckFilled, SwitchButton, WarningFilled } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

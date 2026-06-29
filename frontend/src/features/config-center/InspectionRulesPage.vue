@@ -60,7 +60,7 @@
         </el-table-column>
         <el-table-column prop="severity" label="严重度" width="100">
           <template #default="{ row }">
-            <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
+            <SeverityBadge :severity="row.severity" size="small" />
           </template>
         </el-table-column>
         <el-table-column prop="asset_count" label="适用资产" width="100" />
@@ -182,6 +182,7 @@ import { Plus, Refresh } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { severityTagType, severityLabel as severityLabelFn } from '@/shared/utils/labels'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 
 const router = useRouter()
 const loading = ref(false)

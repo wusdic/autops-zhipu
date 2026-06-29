@@ -53,9 +53,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(statusType(row.status)) as TagType" size="small" effect="light">
-              {{ statusLabel(row.status) }}
-            </el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="generated_at" label="生成时间" width="170">
@@ -143,6 +141,7 @@ import {
 } from '@element-plus/icons-vue'
 import { reportService } from '@/shared/api'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 
 const router = useRouter()

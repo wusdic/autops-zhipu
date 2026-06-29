@@ -48,7 +48,7 @@
           <el-table-column prop="template_name" label="模板" min-width="120" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="100" align="center">
             <template #default="{ row }">
-              <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
+              <StatusBadge :status="row.status" />
             </template>
           </el-table-column>
           <el-table-column prop="progress" label="进度" width="150">
@@ -117,7 +117,7 @@
         <el-descriptions-item label="报告名" :span="2">{{ taskDetail.title || '-' }}</el-descriptions-item>
         <el-descriptions-item label="模板">{{ taskDetail.template_name || '-' }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="(statusType(taskDetail.status)) as TagType" size="small">{{ statusLabel(taskDetail.status) }}</el-tag>
+          <StatusBadge :status="taskDetail.status" />
         </el-descriptions-item>
         <el-descriptions-item label="进度">
           <el-progress
@@ -148,6 +148,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { reportService } from '@/shared/api'
 import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 

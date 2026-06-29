@@ -109,9 +109,7 @@
       </el-table-column>
       <el-table-column prop="status" label="状态" width="110" align="center">
         <template #default="{ row }">
-          <el-tag :type="(statusTagType(row.status)) as TagType" size="small">
-            {{ statusLabels[row.status] || row.status }}
-          </el-tag>
+          <StatusBadge :status="row.status" :label="statusLabels[row.status] || row.status" />
         </template>
       </el-table-column>
       <el-table-column prop="created_at" label="创建时间" width="170" sortable>
@@ -243,6 +241,7 @@ import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { taskStatusTag } from '@/shared/utils/labels'
 import { API as R } from '@/shared/api/routes'
 import { APP_CONFIG } from '@/shared/config'

@@ -59,7 +59,7 @@
         </el-table-column>
         <el-table-column prop="severity" label="严重级别" width="100">
           <template #default="{ row }">
-            <el-tag :type="(severityTag(row.severity)) as TagType" size="small">{{ severityText(row.severity) }}</el-tag>
+            <SeverityBadge :severity="row.severity" size="small" />
           </template>
         </el-table-column>
         <el-table-column prop="enabled" label="状态" width="80">
@@ -156,6 +156,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import { thresholdService } from '@/shared/api'
 
 const loading = ref(false)

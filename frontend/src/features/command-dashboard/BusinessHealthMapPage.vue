@@ -30,9 +30,7 @@
           style="flex: 1"
           :format="(p: number) => p + '分'"
         />
-        <el-tag :type="(healthTagType(overallHealth)) as TagType" size="large">
-          {{ healthText(overallHealth) }}
-        </el-tag>
+        <StatusBadge :status="overallHealth" :label="healthText(overallHealth)" />
       </div>
     </div>
 
@@ -136,7 +134,7 @@
                 <el-table-column prop="title" label="告警" min-width="120" show-overflow-tooltip />
                 <el-table-column prop="severity" label="级别" width="60">
                   <template #default="{ row }">
-                    <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
+                    <SeverityBadge :severity="row.severity" size="small" />
                   </template>
                 </el-table-column>
               </el-table>
@@ -155,6 +153,8 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { CircleCheck, Warning, CircleClose, QuestionFilled } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import { dashboardService, alertService } from '@/shared/api'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
