@@ -4,9 +4,7 @@
     <PageHeader :title="ticket?.title || '工单详情'" back desc="查看工单信息、关联告警、处理历史与 SLA 跟踪">
       <template #title-extra>
         <StatusBadge v-if="ticket" :status="ticket.status" show-icon />
-        <el-tag v-if="ticket" :type="(priorityType(ticket?.priority)) as TagType">
-          {{ ticket?.priority || '-' }}
-        </el-tag>
+        <StatusBadge v-if="ticket" :status="ticket.priority" />
         <!-- SLA 倒计时 -->
         <span v-if="ticket?.sla_deadline">
           <el-tag v-if="slaOverdue" type="danger" effect="dark">
@@ -32,7 +30,7 @@
                 <StatusBadge :status="ticket.status" show-icon />
               </el-descriptions-item>
               <el-descriptions-item label="优先级">
-                <el-tag :type="(priorityType(ticket.priority)) as TagType">{{ ticket.priority }}</el-tag>
+                <StatusBadge :status="ticket.priority" />
               </el-descriptions-item>
               <el-descriptions-item label="负责人">
                 <span>{{ ticket.assigned_to || '未分配' }}</span>

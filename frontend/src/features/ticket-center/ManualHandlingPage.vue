@@ -83,12 +83,12 @@
         <el-table-column prop="title" label="处置标题" min-width="250" />
         <el-table-column prop="priority" label="优先级" width="90">
           <template #default="{ row }">
-            <el-tag :type="(priorityType(row.priority)) as TagType" size="small">{{ priorityLabel(row.priority) }}</el-tag>
+            <StatusBadge :status="row.priority" />
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="handler" label="处置人" width="100" />
@@ -148,6 +148,7 @@ defineProps<{ embedded?: boolean }>()
 import { ElMessage } from 'element-plus'
 import { Plus, Refresh, Clock, Loading, CircleCheck, Timer } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import client from '@/shared/api/client'
 import { priorityTag, priorityLabel as priorityLabelFn } from '@/shared/utils/labels'
 

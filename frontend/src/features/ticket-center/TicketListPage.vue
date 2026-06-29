@@ -228,17 +228,12 @@
         </el-table-column>
         <el-table-column prop="priority" label="优先级" width="90" align="center">
           <template #default="{ row }">
-            <el-tag :type="(priorityType(row.priority)) as TagType" size="small" effect="dark">
-              {{ priorityLabel(row.priority) }}
-            </el-tag>
+            <StatusBadge :status="row.priority" />
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(statusType(row.status)) as TagType" size="small">
-              <el-icon v-if="row.status === 'overdue'" style="margin-right: 2px"><WarningFilled /></el-icon>
-              {{ statusLabel(row.status) }}
-            </el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="assigned_to" label="负责人" width="110" show-overflow-tooltip>
@@ -446,6 +441,7 @@ import {
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { API as R } from '@/shared/api/routes'
 import {
   ticketStatusLabel, ticketStatusTag,

@@ -34,7 +34,7 @@
         <el-table-column prop="title" label="工单标题" min-width="200" show-overflow-tooltip />
         <el-table-column prop="priority" label="优先级" width="80">
           <template #default="{ row }">
-            <el-tag size="small" :type="(priorityType(row.priority)) as TagType">{{ row.priority }}</el-tag>
+            <StatusBadge :status="row.priority" />
           </template>
         </el-table-column>
         <el-table-column prop="assignee_name" label="处理人" width="100" />
@@ -92,12 +92,12 @@
         </el-table-column>
         <el-table-column prop="priority" label="优先级" width="80">
           <template #default="{ row }">
-            <el-tag size="small" :type="(priorityType(row.priority)) as TagType">{{ row.priority || '-' }}</el-tag>
+            <StatusBadge :status="row.priority" />
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="(statusType(row.status)) as TagType">{{ statusLabel(row.status) }}</el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="created_at" label="创建时间" width="170">
@@ -120,7 +120,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag size="small" :type="(statusType(row.status)) as TagType">{{ statusLabel(row.status) }}</el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="assignee_name" label="处理人" width="100" />
@@ -139,6 +139,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Warning, Document, Loading, CircleCheck, Plus } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 import { priorityTag, ticketStatusTag, ticketStatusLabel } from '@/shared/utils/labels'

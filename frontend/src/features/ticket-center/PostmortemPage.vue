@@ -33,7 +33,7 @@
       <el-table-column prop="author_name" label="创建者" width="100" />
       <el-table-column prop="status" label="状态" width="100">
         <template #default="{ row }">
-          <el-tag size="small" :type="(statusType(row.status)) as TagType">{{ statusLabel(row.status) }}</el-tag>
+          <StatusBadge :status="row.status" />
         </template>
       </el-table-column>
       <el-table-column prop="created_at" label="创建时间" width="170">
@@ -87,7 +87,7 @@
       <el-descriptions :column="1" border v-if="currentItem">
         <el-descriptions-item label="标题">{{ currentItem.title }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="(statusType(currentItem.status)) as TagType">{{ statusLabel(currentItem.status) }}</el-tag>
+          <StatusBadge :status="currentItem.status" />
         </el-descriptions-item>
         <el-descriptions-item label="创建者">{{ currentItem.author_name || '-' }}</el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ formatTime(currentItem.created_at) }}</el-descriptions-item>
@@ -109,6 +109,7 @@ import type { TagType } from '@/shared/types'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Refresh } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { knowledgeService } from '@/shared/api'
 
