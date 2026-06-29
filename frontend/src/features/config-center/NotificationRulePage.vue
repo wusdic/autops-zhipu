@@ -1,14 +1,12 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">通知规则</div>
-      <div class="autops-page-desc">配置告警和事件的通知规则和发送渠道</div>
-    </div>
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px">
-      <el-button type="primary" @click="openCreateDialog">
-        <el-icon><Plus /></el-icon> 新建规则
-      </el-button>
-    </div>
+    <PageHeader title="通知规则" desc="配置告警和事件的通知规则和发送渠道">
+      <template #actions>
+        <el-button type="primary" @click="openCreateDialog">
+          <el-icon><Plus /></el-icon> 新建规则
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Filters -->
     <el-card class="mb-md">
@@ -148,6 +146,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { notificationRuleService } from '@/shared/api'
 
 const loading = ref(false)

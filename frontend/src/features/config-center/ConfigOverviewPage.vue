@@ -1,14 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header autops-page-header--between">
-      <div>
-        <div class="autops-page-title">配置总览</div>
-        <div class="autops-page-desc">配置中心入口：发现模板、巡检规则、阈值规则、通知规则、配置版本统一入口</div>
-      </div>
-      <div class="autops-header-actions">
+    <PageHeader title="配置总览" desc="配置中心入口：发现模板、巡检规则、阈值规则、通知规则、配置版本统一入口">
+      <template #actions>
         <el-button plain @click="loadCounts" :loading="loading"><el-icon><Refresh /></el-icon> 刷新</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 入口卡片：点击进入对应专管页（不再在总览页内重复整张表格，避免双份实现） -->
     <el-row :gutter="16" class="mt-lg">
@@ -36,6 +32,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Refresh, ArrowRight, Monitor, Search, Warning, Bell, Document } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

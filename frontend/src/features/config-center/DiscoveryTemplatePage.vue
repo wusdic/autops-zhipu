@@ -1,11 +1,12 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">发现模板</div>
-      <el-button type="primary" @click="openCreateDialog">
-        <el-icon><Plus /></el-icon> 新建模板
-      </el-button>
-    </div>
+    <PageHeader title="发现模板">
+      <template #actions>
+        <el-button type="primary" @click="openCreateDialog">
+          <el-icon><Plus /></el-icon> 新建模板
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Filters -->
     <el-card class="mb-md">
@@ -137,6 +138,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { discoveryTemplateService } from '@/shared/api'
 
 const loading = ref(false)

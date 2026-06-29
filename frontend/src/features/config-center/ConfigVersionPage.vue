@@ -1,11 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">配置版本</div>
-        <div class="autops-page-desc">管理配置定义的版本发布、回滚与对比</div>
-      </div>
-    </div>
+    <PageHeader title="配置版本" desc="管理配置定义的版本发布、回滚与对比" />
 
     <!-- Filter by definition + search -->
     <el-card class="mb-md">
@@ -167,6 +162,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

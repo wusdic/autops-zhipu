@@ -1,11 +1,12 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">阈值规则</div>
-      <el-button type="primary" @click="openCreateDialog">
-        <el-icon><Plus /></el-icon> 新建规则
-      </el-button>
-    </div>
+    <PageHeader title="阈值规则">
+      <template #actions>
+        <el-button type="primary" @click="openCreateDialog">
+          <el-icon><Plus /></el-icon> 新建规则
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Filters -->
     <el-card class="mb-md">
@@ -154,6 +155,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { thresholdService } from '@/shared/api'
 
 const loading = ref(false)
