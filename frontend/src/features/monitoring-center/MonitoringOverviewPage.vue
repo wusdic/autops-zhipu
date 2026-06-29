@@ -4,56 +4,32 @@
 
     <!-- ===== 顶部统计卡片 ===== -->
     <el-row :gutter="16" class="stat-cards mb-lg">
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-events">
-          <div class="autops-card-body">
-            <div class="stat-card-inner">
-              <el-icon :size="36" color="#ff7d00"><Bell /></el-icon>
-              <div class="stat-card-info">
-                <div class="stat-card-value">{{ overview.activeEvents24h }}</div>
-                <div class="stat-card-label">24h 活跃事件</div>
-              </div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Bell /></el-icon></div>
+          <div class="metric-label">24h 活跃事件</div>
+          <div class="metric-value">{{ overview.activeEvents24h }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-alerts">
-          <div class="autops-card-body">
-            <div class="stat-card-inner">
-              <el-icon :size="36" color="#f53f3f"><WarningFilled /></el-icon>
-              <div class="stat-card-info">
-                <div class="stat-card-value">{{ overview.activeAlerts }}</div>
-                <div class="stat-card-label">活跃告警</div>
-              </div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><WarningFilled /></el-icon></div>
+          <div class="metric-label">活跃告警</div>
+          <div class="metric-value">{{ overview.activeAlerts }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-assets">
-          <div class="autops-card-body">
-            <div class="stat-card-inner">
-              <el-icon :size="36" color="#165dff"><Monitor /></el-icon>
-              <div class="stat-card-info">
-                <div class="stat-card-value">{{ overview.totalAssets }}</div>
-                <div class="stat-card-label">监控资产总数</div>
-              </div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Monitor /></el-icon></div>
+          <div class="metric-label">监控资产总数</div>
+          <div class="metric-value">{{ overview.totalAssets }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card stat-rate">
-          <div class="autops-card-body">
-            <div class="stat-card-inner">
-              <el-icon :size="36" color="#00b42a"><CircleCheckFilled /></el-icon>
-              <div class="stat-card-info">
-                <div class="stat-card-value">{{ overview.collectionRate }}<span class="stat-unit">%</span></div>
-                <div class="stat-card-label">采集成功率</div>
-              </div>
-            </div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">采集成功率</div>
+          <div class="metric-value">{{ overview.collectionRate }}<span class="stat-unit">%</span></div>
         </div>
       </el-col>
     </el-row>

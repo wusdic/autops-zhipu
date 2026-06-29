@@ -43,37 +43,33 @@
 
     <!-- 统计概览 -->
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="6">
-        <el-card shadow="hover" class="autops-metric-card">
-          <div class="stat-content">
-            <div class="stat-label">执行总数</div>
-            <div class="stat-value primary">{{ total }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Document /></el-icon></div>
+          <div class="metric-label">执行总数</div>
+          <div class="metric-value">{{ total }}</div>
+        </div>
       </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="autops-metric-card">
-          <div class="stat-content">
-            <div class="stat-label">已完成</div>
-            <div class="stat-value success">{{ completedCount }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">已完成</div>
+          <div class="metric-value">{{ completedCount }}</div>
+        </div>
       </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="autops-metric-card">
-          <div class="stat-content">
-            <div class="stat-label">运行中/待执行</div>
-            <div class="stat-value warning">{{ runningCount }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Loading /></el-icon></div>
+          <div class="metric-label">运行中/待执行</div>
+          <div class="metric-value">{{ runningCount }}</div>
+        </div>
       </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="autops-metric-card">
-          <div class="stat-content">
-            <div class="stat-label">失败数</div>
-            <div class="stat-value danger">{{ failedCount }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><CircleCloseFilled /></el-icon></div>
+          <div class="metric-label">失败数</div>
+          <div class="metric-value">{{ failedCount }}</div>
+        </div>
       </el-col>
     </el-row>
 
@@ -215,7 +211,7 @@
 <script setup lang="ts">
 import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
-import { Search, Refresh, Unlock, Lock } from '@element-plus/icons-vue'
+import { Search, Refresh, Unlock, Lock, Document, CircleCheckFilled, Loading, CircleCloseFilled } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { ElMessage } from 'element-plus'

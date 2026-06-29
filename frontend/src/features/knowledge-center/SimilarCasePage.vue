@@ -43,36 +43,32 @@
 
     <!-- Statistics -->
     <el-row :gutter="16" class="stats-row" v-if="hasSearched">
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value">{{ searchResults.length }}</div>
-            <div class="stat-label">匹配案例</div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Search /></el-icon></div>
+          <div class="metric-label">匹配案例</div>
+          <div class="metric-value">{{ searchResults.length }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value">{{ avgSimilarity }}%</div>
-            <div class="stat-label">平均相似度</div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><DataLine /></el-icon></div>
+          <div class="metric-label">平均相似度</div>
+          <div class="metric-value">{{ avgSimilarity }}%</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value">{{ highSimilarityCount }}</div>
-            <div class="stat-label">高相似度 (≥80%)</div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Star /></el-icon></div>
+          <div class="metric-label">高相似度 (≥80%)</div>
+          <div class="metric-value">{{ highSimilarityCount }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value">{{ resolvedCount }}</div>
-            <div class="stat-label">已解决</div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">已解决</div>
+          <div class="metric-value">{{ resolvedCount }}</div>
         </div>
       </el-col>
     </el-row>
@@ -170,7 +166,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { Connection, Search } from '@element-plus/icons-vue'
+import { Connection, Search, DataLine, Star, CircleCheckFilled } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { knowledgeService } from '@/shared/api'

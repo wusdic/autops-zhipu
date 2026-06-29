@@ -4,12 +4,48 @@
 
     <!-- 统计卡片 -->
     <el-row :gutter="12" class="stat-row mb-md">
-      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card"><div class="stat-value">{{ nodes.length }}</div><div class="stat-label">节点总数</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card success"><div class="stat-value">{{ edges.length }}</div><div class="stat-label">关系总数</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card primary"><div class="stat-value">{{ healthyCount }}</div><div class="stat-label">健康节点</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card warning"><div class="stat-value">{{ warningCount }}</div><div class="stat-label">告警节点</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card danger"><div class="stat-value">{{ criticalCount }}</div><div class="stat-label">故障节点</div></el-card></el-col>
-      <el-col :span="4"><el-card shadow="hover" class="autops-metric-card"><div class="stat-value">{{ typeCount }}</div><div class="stat-label">资产类型</div></el-card></el-col>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Share /></el-icon></div>
+          <div class="metric-label">节点总数</div>
+          <div class="metric-value">{{ nodes.length }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><Connection /></el-icon></div>
+          <div class="metric-label">关系总数</div>
+          <div class="metric-value">{{ edges.length }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">健康节点</div>
+          <div class="metric-value">{{ healthyCount }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><WarningFilled /></el-icon></div>
+          <div class="metric-label">告警节点</div>
+          <div class="metric-value">{{ warningCount }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><CircleCloseFilled /></el-icon></div>
+          <div class="metric-label">故障节点</div>
+          <div class="metric-value">{{ criticalCount }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-purple"><el-icon size="20"><Files /></el-icon></div>
+          <div class="metric-label">资产类型</div>
+          <div class="metric-value">{{ typeCount }}</div>
+        </div>
+      </el-col>
     </el-row>
 
     <!-- 工具栏 -->
@@ -206,7 +242,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Search, Warning, ZoomIn, ZoomOut, FullScreen, Grid } from '@element-plus/icons-vue'
+import { Search, Warning, ZoomIn, ZoomOut, FullScreen, Grid, Share, Connection, CircleCheckFilled, WarningFilled, CircleCloseFilled, Files } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import api from '@/shared/api/client'

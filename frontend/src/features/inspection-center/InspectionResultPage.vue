@@ -57,37 +57,33 @@
 
     <!-- 统计概览 -->
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="6">
-        <el-card shadow="hover" class="autops-metric-card">
-          <div class="stat-content">
-            <div class="stat-label">检查总数</div>
-            <div class="stat-value">{{ total }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Document /></el-icon></div>
+          <div class="metric-label">检查总数</div>
+          <div class="metric-value">{{ total }}</div>
+        </div>
       </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card success-bg">
-          <div class="stat-content">
-            <div class="stat-label">通过</div>
-            <div class="stat-value pass">{{ passCount }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">通过</div>
+          <div class="metric-value">{{ passCount }}</div>
+        </div>
       </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card warning-bg">
-          <div class="stat-content">
-            <div class="stat-label">警告</div>
-            <div class="stat-value warn">{{ warnCount }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Warning /></el-icon></div>
+          <div class="metric-label">警告</div>
+          <div class="metric-value">{{ warnCount }}</div>
+        </div>
       </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="stat-card danger-bg">
-          <div class="stat-content">
-            <div class="stat-label">失败</div>
-            <div class="stat-value fail">{{ failCount }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><CircleCloseFilled /></el-icon></div>
+          <div class="metric-label">失败</div>
+          <div class="metric-value">{{ failCount }}</div>
+        </div>
       </el-col>
     </el-row>
 
@@ -284,7 +280,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { Search, Refresh, Download, Monitor } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
-import { Warning, Document } from '@element-plus/icons-vue'
+import { Warning, Document, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { API } from '@/shared/api/routes'
 import client from '@/shared/api/client'

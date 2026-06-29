@@ -10,40 +10,32 @@
 
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row">
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.total }}</div>
-            <div class="stat-label">知识总数</div>
-          </div>
-          <el-icon class="stat-icon" :size="40" color="#165dff"><Document /></el-icon>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Document /></el-icon></div>
+          <div class="metric-label">知识总数</div>
+          <div class="metric-value">{{ stats.total }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.published }}</div>
-            <div class="stat-label">已发布</div>
-          </div>
-          <el-icon class="stat-icon" :size="40" color="#00b42a"><CircleCheck /></el-icon>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheck /></el-icon></div>
+          <div class="metric-label">已发布</div>
+          <div class="metric-value">{{ stats.published }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.draft }}</div>
-            <div class="stat-label">草稿</div>
-          </div>
-          <el-icon class="stat-icon" :size="40" color="#ff7d00"><EditPen /></el-icon>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><EditPen /></el-icon></div>
+          <div class="metric-label">草稿</div>
+          <div class="metric-value">{{ stats.draft }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.total - stats.published - stats.draft }}</div>
-            <div class="stat-label">其他状态</div>
-          </div>
-          <el-icon class="stat-icon" :size="40" color="#86909c"><InfoFilled /></el-icon>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><InfoFilled /></el-icon></div>
+          <div class="metric-label">其他状态</div>
+          <div class="metric-value">{{ stats.total - stats.published - stats.draft }}</div>
         </div>
       </el-col>
     </el-row>

@@ -4,40 +4,46 @@
 
     <!-- ========== 统计卡片 ========== -->
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="4">
-        <div class="autops-card stat-card">
-          <div class="stat-value">{{ stats.total }}</div>
-          <div class="stat-label">脚本总数</div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Files /></el-icon></div>
+          <div class="metric-label">脚本总数</div>
+          <div class="metric-value">{{ stats.total }}</div>
         </div>
       </el-col>
-      <el-col :span="4">
-        <div class="autops-card stat-card stat-shell">
-          <div class="stat-value">{{ stats.shell }}</div>
-          <div class="stat-label">Shell</div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><Monitor /></el-icon></div>
+          <div class="metric-label">Shell</div>
+          <div class="metric-value">{{ stats.shell }}</div>
         </div>
       </el-col>
-      <el-col :span="4">
-        <div class="autops-card stat-card stat-python">
-          <div class="stat-value">{{ stats.python }}</div>
-          <div class="stat-label">Python</div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><Cpu /></el-icon></div>
+          <div class="metric-label">Python</div>
+          <div class="metric-value">{{ stats.python }}</div>
         </div>
       </el-col>
-      <el-col :span="4">
-        <div class="autops-card stat-card stat-powershell">
-          <div class="stat-value">{{ stats.powershell }}</div>
-          <div class="stat-label">PowerShell</div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Platform /></el-icon></div>
+          <div class="metric-label">PowerShell</div>
+          <div class="metric-value">{{ stats.powershell }}</div>
         </div>
       </el-col>
-      <el-col :span="4">
-        <div class="autops-card stat-card stat-sql">
-          <div class="stat-value">{{ stats.sql }}</div>
-          <div class="stat-label">SQL</div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-purple"><el-icon size="20"><Coin /></el-icon></div>
+          <div class="metric-label">SQL</div>
+          <div class="metric-value">{{ stats.sql }}</div>
         </div>
       </el-col>
-      <el-col :span="4">
-        <div class="autops-card stat-card stat-rest">
-          <div class="stat-value">{{ stats.rest_api }}</div>
-          <div class="stat-label">REST API</div>
+      <el-col :xs="12" :sm="8" :md="4">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-cyan"><el-icon size="20"><Connection /></el-icon></div>
+          <div class="metric-label">REST API</div>
+          <div class="metric-value">{{ stats.rest_api }}</div>
         </div>
       </el-col>
     </el-row>
@@ -513,7 +519,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, Refresh, Delete } from '@element-plus/icons-vue'
+import { Plus, Refresh, Delete, Files, Monitor, Cpu, Platform, Coin, Connection } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'

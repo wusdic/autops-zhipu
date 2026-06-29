@@ -3,10 +3,34 @@
     <PageHeader title="告警规则" desc="配置指标阈值与触发条件，实现自动化告警" />
 
     <el-row :gutter="16" class="stat-row mb-lg">
-      <el-col :span="6"><div class="autops-card stat-card"><div class="autops-card-body"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">规则总数</div></div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card success"><div class="autops-card-body"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已启用</div></div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card warning"><div class="autops-card-body"><div class="stat-value">{{ stats.triggeredToday }}</div><div class="stat-label">今日触发</div></div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card primary"><div class="autops-card-body"><div class="stat-value">{{ stats.mostTriggered || '-' }}</div><div class="stat-label">最常触发</div></div></div></el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Bell /></el-icon></div>
+          <div class="metric-label">规则总数</div>
+          <div class="metric-value">{{ stats.total }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">已启用</div>
+          <div class="metric-value">{{ stats.active }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Warning /></el-icon></div>
+          <div class="metric-label">今日触发</div>
+          <div class="metric-value">{{ stats.triggeredToday }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><DataLine /></el-icon></div>
+          <div class="metric-label">最常触发</div>
+          <div class="metric-value">{{ stats.mostTriggered || '-' }}</div>
+        </div>
+      </el-col>
     </el-row>
 
     <div class="autops-toolbar">
@@ -176,7 +200,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { ElMessage } from 'element-plus'
-import { Plus, Search, Delete } from '@element-plus/icons-vue'
+import { Plus, Search, Delete, Bell, CircleCheckFilled, Warning, DataLine } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import api from '@/shared/api/client'

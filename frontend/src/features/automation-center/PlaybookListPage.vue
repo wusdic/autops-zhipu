@@ -3,10 +3,34 @@
     <PageHeader title="剧本库" desc="编排自动化步骤流程" />
 
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="6"><div class="autops-card stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">Playbook 总数</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">已激活</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card primary"><div class="stat-value">{{ stats.withScripts }}</div><div class="stat-label">关联脚本</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card warning"><div class="stat-value">{{ stats.avgSteps }}</div><div class="stat-label">平均步骤数</div></div></el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Tickets /></el-icon></div>
+          <div class="metric-label">Playbook 总数</div>
+          <div class="metric-value">{{ stats.total }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">已激活</div>
+          <div class="metric-value">{{ stats.active }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><Files /></el-icon></div>
+          <div class="metric-label">关联脚本</div>
+          <div class="metric-value">{{ stats.withScripts }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Operation /></el-icon></div>
+          <div class="metric-label">平均步骤数</div>
+          <div class="metric-value">{{ stats.avgSteps }}</div>
+        </div>
+      </el-col>
     </el-row>
 
     <div class="autops-toolbar">
@@ -163,7 +187,7 @@ import { ref, reactive, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search, Delete } from '@element-plus/icons-vue'
+import { Plus, Search, Delete, Tickets, CircleCheckFilled, Files, Operation } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import api from '@/shared/api/client'

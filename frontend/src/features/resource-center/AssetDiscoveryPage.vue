@@ -4,22 +4,34 @@
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="stat-row mb-lg">
-      <el-col :span="6"><el-card shadow="hover" class="autops-metric-card">
-        <div class="stat-value">{{ stats.total_discovered }}</div>
-        <div class="stat-label">已发现资产</div>
-      </el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="autops-metric-card success">
-        <div class="stat-value">{{ stats.onboarded }}</div>
-        <div class="stat-label">已纳管</div>
-      </el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="autops-metric-card warning">
-        <div class="stat-value">{{ stats.pending_review }}</div>
-        <div class="stat-label">待审核</div>
-      </el-card></el-col>
-      <el-col :span="6"><el-card shadow="hover" class="autops-metric-card primary">
-        <div class="stat-value">{{ stats.today }}</div>
-        <div class="stat-label">今日发现</div>
-      </el-card></el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Search /></el-icon></div>
+          <div class="metric-label">已发现资产</div>
+          <div class="metric-value">{{ stats.total_discovered }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">已纳管</div>
+          <div class="metric-value">{{ stats.onboarded }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Clock /></el-icon></div>
+          <div class="metric-label">待审核</div>
+          <div class="metric-value">{{ stats.pending_review }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><Plus /></el-icon></div>
+          <div class="metric-label">今日发现</div>
+          <div class="metric-value">{{ stats.today }}</div>
+        </div>
+      </el-col>
     </el-row>
 
     <el-tabs v-model="activeTab" class="main-tabs">
@@ -315,7 +327,7 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import type { TagType } from '@/shared/types'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh, Search } from '@element-plus/icons-vue'
+import { Plus, Refresh, Search, CircleCheckFilled, Clock } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 import api from '@/shared/api/client'

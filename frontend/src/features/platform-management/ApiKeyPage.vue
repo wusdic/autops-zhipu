@@ -3,10 +3,34 @@
     <PageHeader title="API 密钥" desc="管理系统 API 密钥" />
 
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="6"><div class="autops-card stat-card"><div class="stat-value">{{ stats.total }}</div><div class="stat-label">API Key 总数</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card success"><div class="stat-value">{{ stats.active }}</div><div class="stat-label">有效 Key</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card danger"><div class="stat-value">{{ stats.expired }}</div><div class="stat-label">已过期</div></div></el-col>
-      <el-col :span="6"><div class="autops-card stat-card warning"><div class="stat-value">{{ stats.expiringSoon }}</div><div class="stat-label">即将过期</div></div></el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Key /></el-icon></div>
+          <div class="metric-label">API Key 总数</div>
+          <div class="metric-value">{{ stats.total }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">有效 Key</div>
+          <div class="metric-value">{{ stats.active }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><CircleCloseFilled /></el-icon></div>
+          <div class="metric-label">已过期</div>
+          <div class="metric-value">{{ stats.expired }}</div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Clock /></el-icon></div>
+          <div class="metric-label">即将过期</div>
+          <div class="metric-value">{{ stats.expiringSoon }}</div>
+        </div>
+      </el-col>
     </el-row>
 
     <div class="autops-toolbar">
@@ -178,7 +202,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search } from '@element-plus/icons-vue'
+import { Plus, Search, Key, CircleCheckFilled, CircleCloseFilled, Clock } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

@@ -51,37 +51,33 @@
 
     <!-- 概览统计 -->
     <el-row :gutter="16" class="stat-row">
-      <el-col :span="6">
-        <el-card shadow="hover" class="autops-metric-card">
-          <div class="stat-content">
-            <div class="stat-label">总执行数</div>
-            <div class="stat-value">{{ total }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><Document /></el-icon></div>
+          <div class="metric-label">总执行数</div>
+          <div class="metric-value">{{ total }}</div>
+        </div>
       </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="autops-metric-card">
-          <div class="stat-content">
-            <div class="stat-label">可回滚</div>
-            <div class="stat-value success">{{ rollbackAvailableCount }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><RefreshLeft /></el-icon></div>
+          <div class="metric-label">可回滚</div>
+          <div class="metric-value">{{ rollbackAvailableCount }}</div>
+        </div>
       </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="autops-metric-card">
-          <div class="stat-content">
-            <div class="stat-label">已回滚</div>
-            <div class="stat-value warning">{{ rolledBackCount }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><RefreshLeft /></el-icon></div>
+          <div class="metric-label">已回滚</div>
+          <div class="metric-value">{{ rolledBackCount }}</div>
+        </div>
       </el-col>
-      <el-col :span="6">
-        <el-card shadow="hover" class="autops-metric-card">
-          <div class="stat-content">
-            <div class="stat-label">回滚中</div>
-            <div class="stat-value primary">{{ rollingBackCount }}</div>
-          </div>
-        </el-card>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-info"><el-icon size="20"><Loading /></el-icon></div>
+          <div class="metric-label">回滚中</div>
+          <div class="metric-value">{{ rollingBackCount }}</div>
+        </div>
       </el-col>
     </el-row>
 
@@ -275,7 +271,7 @@
 <script setup lang="ts">
 import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
-import { Search, Refresh } from '@element-plus/icons-vue'
+import { Search, Refresh, Document, RefreshLeft, Loading } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'

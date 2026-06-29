@@ -30,36 +30,32 @@
 
     <!-- Suggestion Summary -->
     <el-row :gutter="16" class="summary-row" v-if="suggestions.length > 0">
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value">{{ suggestions.length }}</div>
-            <div class="stat-label">建议数</div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-brand"><el-icon size="20"><MagicStick /></el-icon></div>
+          <div class="metric-label">建议数</div>
+          <div class="metric-value">{{ suggestions.length }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value text-danger">{{ highRiskCount }}</div>
-            <div class="stat-label">高风险</div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-danger"><el-icon size="20"><WarningFilled /></el-icon></div>
+          <div class="metric-label">高风险</div>
+          <div class="metric-value">{{ highRiskCount }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value text-warning">{{ mediumRiskCount }}</div>
-            <div class="stat-label">中风险</div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-warning"><el-icon size="20"><Warning /></el-icon></div>
+          <div class="metric-label">中风险</div>
+          <div class="metric-value">{{ mediumRiskCount }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
-        <div class="autops-card stat-card">
-          <div class="stat-content">
-            <div class="stat-value text-success">{{ appliedCount }}</div>
-            <div class="stat-label">已应用</div>
-          </div>
+      <el-col :xs="12" :sm="6">
+        <div class="autops-metric-card">
+          <div class="metric-icon bg-success"><el-icon size="20"><CircleCheckFilled /></el-icon></div>
+          <div class="metric-label">已应用</div>
+          <div class="metric-value">{{ appliedCount }}</div>
         </div>
       </el-col>
     </el-row>
@@ -149,7 +145,7 @@
 <script setup lang="ts">
 import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
-import { MagicStick, CircleCheckFilled } from '@element-plus/icons-vue'
+import { MagicStick, CircleCheckFilled, WarningFilled, Warning } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 

@@ -13,11 +13,12 @@
 
     <!-- 模型总览 -->
     <el-row :gutter="16" class="mt-lg">
-      <el-col :span="6" v-for="stat in overviewStats" :key="stat.label">
-        <el-card shadow="hover" class="autops-metric-card">
-          <div class="stat-value" :style="{ color: stat.color }">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
-        </el-card>
+      <el-col :xs="12" :sm="6" v-for="stat in overviewStats" :key="stat.label">
+        <div class="autops-metric-card">
+          <div class="metric-icon" :class="stat.bg"><el-icon size="20"><component :is="stat.icon" /></el-icon></div>
+          <div class="metric-label">{{ stat.label }}</div>
+          <div class="metric-value">{{ stat.value }}</div>
+        </div>
       </el-col>
     </el-row>
 
@@ -178,9 +179,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, markRaw } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh, Loading } from '@element-plus/icons-vue'
+import { Plus, Refresh, Loading, Cpu, CircleCheckFilled, CircleCloseFilled, DataLine } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { serviceStatusLabel } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
@@ -200,10 +201,10 @@ const testResultData = ref<any>({ success: false, name: '', latency: 0, response
 const formRef = ref()
 
 const overviewStats = computed(() => [
-  { label: '注册模型', value: models.value.length, color: '#165dff' },
-  { label: '活跃模型', value: models.value.filter(m => m.status === 'active').length, color: '#00b42a' },
-  { label: '异常模型', value: models.value.filter(m => m.status === 'error').length, color: '#f53f3f' },
-  { label: '今日调用', value: 0, color: '#ff7d00' },
+  { label: '注册模型', value: models.value.length, icon: markRaw(Cpu), bg: 'bg-brand' },
+  { label: '活跃模型', value: models.value.filter(m => m.status === 'active').length, icon: markRaw(CircleCheckFilled), bg: 'bg-success' },
+  { label: '异常模型', value: models.value.filter(m => m.status === 'error').length, icon: markRaw(CircleCloseFilled), bg: 'bg-danger' },
+  { label: '今日调用', value: 0, icon: markRaw(DataLine), bg: 'bg-warning' },
 ])
 
 const globalConfig = reactive({ default_model: '', timeout: 60, max_tokens: 4096, temperature: 70 })

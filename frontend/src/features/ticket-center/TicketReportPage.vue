@@ -14,8 +14,9 @@
     <el-row :gutter="16" class="mb-lg">
       <el-col :xs="12" :sm="6" v-for="stat in summaryStats" :key="stat.label">
         <div class="autops-metric-card">
+          <div class="metric-icon" :class="stat.bg"><el-icon size="20"><component :is="stat.icon" /></el-icon></div>
           <div class="metric-label">{{ stat.label }}</div>
-          <div class="metric-value" :style="{ color: stat.color }">{{ stat.value }}</div>
+          <div class="metric-value">{{ stat.value }}</div>
         </div>
       </el-col>
     </el-row>
@@ -99,8 +100,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { Document, Download } from '@element-plus/icons-vue'
+import { ref, computed, onMounted, markRaw } from 'vue'
+import { Document, Download, Tickets, CircleCheckFilled, Loading, WarningFilled } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
@@ -119,10 +120,10 @@ const summaryStats = computed(() => {
   const pending = tickets.value.filter(t => t.status === 'open' || t.status === 'in_progress').length
   const overdue = tickets.value.filter(t => t.sla_breached).length
   return [
-    { label: '工单总数', value: total, color: '#165dff' },
-    { label: '已解决', value: resolved, color: '#00b42a' },
-    { label: '处理中', value: pending, color: '#ff7d00' },
-    { label: '超时工单', value: overdue, color: '#f53f3f' },
+    { label: '工单总数', value: total, icon: markRaw(Tickets), bg: 'bg-brand' },
+    { label: '已解决', value: resolved, icon: markRaw(CircleCheckFilled), bg: 'bg-success' },
+    { label: '处理中', value: pending, icon: markRaw(Loading), bg: 'bg-warning' },
+    { label: '超时工单', value: overdue, icon: markRaw(WarningFilled), bg: 'bg-danger' },
   ]
 })
 
