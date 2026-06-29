@@ -1,18 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">
-          <el-icon style="margin-right: 6px"><SetUp /></el-icon>
-          AI 工具调用策略
-        </div>
-        <div class="autops-page-desc">管理 AI Agent 可调用的工具及其审批策略</div>
-      </div>
-      <div class="top-actions">
+    <PageHeader title="AI 工具调用策略" desc="管理 AI Agent 可调用的工具及其审批策略">
+      <template #actions>
         <el-button type="primary" :icon="Plus" @click="openCreate">新增策略</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Search -->
     <div class="autops-card filter-card">
@@ -209,6 +201,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Plus, Search, SetUp, Monitor } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import client from '@/shared/api/client'
 import { riskLabel as riskLabelFn } from '@/shared/utils/labels'

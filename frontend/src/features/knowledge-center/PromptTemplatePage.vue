@@ -1,18 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">
-          <el-icon style="margin-right: 6px"><Notebook /></el-icon>
-          Prompt 模板管理
-        </div>
-        <div class="autops-page-desc">管理 AI 提示词模板</div>
-      </div>
-      <div class="top-actions">
+    <PageHeader title="Prompt 模板管理" desc="管理 AI 提示词模板">
+      <template #actions>
         <el-button type="primary" :icon="Plus" @click="openCreate">新建模板</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Search & Filters -->
     <div class="autops-card filter-card">
@@ -189,6 +181,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Plus, Search, Notebook } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

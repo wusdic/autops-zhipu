@@ -1,19 +1,12 @@
 <template>
-  <div class="knowledge-page">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">
-          <el-icon style="margin-right: 6px"><Reading /></el-icon>
-          知识库管理
-        </div>
-        <div class="autops-page-desc">运维知识沉淀与检索</div>
-      </div>
-      <div class="top-actions">
+  <div class="knowledge-page autops-page-container">
+    <PageHeader title="知识库管理" desc="运维知识沉淀与检索">
+      <template #actions>
         <el-button type="primary" :icon="Plus" @click="goCreate">新建知识</el-button>
         <el-button :icon="Upload" @click="goImport">导入</el-button>
         <el-button :icon="Download" @click="handleExport" :loading="exporting">导出</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Statistics Cards -->
     <el-row :gutter="16" class="stats-row">
@@ -182,6 +175,7 @@ import {
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API } from '@/shared/api/routes'
 
 const router = useRouter()

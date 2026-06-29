@@ -1,14 +1,6 @@
 <template>
-  <div class="knowledge-import">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">知识导入</div>
-        <div class="autops-page-desc">批量导入知识条目</div>
-      </div>
-      <div class="top-actions">
-        <el-button :icon="ArrowLeft" @click="$router.push({ name: 'knowledge' })">返回知识库</el-button>
-      </div>
-    </div>
+  <div class="knowledge-import autops-page-container">
+    <PageHeader title="知识导入" desc="批量导入知识条目" back :back-to="{ name: 'knowledge' }" />
 
     <div class="mt-lg">
       <el-tabs v-model="activeTab" type="border-card">
@@ -290,7 +282,8 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft, UploadFilled, CircleCheck, CircleClose } from '@element-plus/icons-vue'
+import { UploadFilled, CircleCheck, CircleClose } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
 import type { UploadFile } from 'element-plus'

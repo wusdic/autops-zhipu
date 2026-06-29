@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">知识总览</div>
-      <div class="autops-page-desc">查看知识库整体情况，快速访问核心功能</div>
-    </div>
+    <PageHeader title="知识总览" desc="查看知识库整体情况，快速访问核心功能" />
 
     <!-- Stat Cards -->
     <el-row :gutter="16" class="metric-row">
@@ -132,6 +128,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Document, CircleCheck, Edit, Star, ArrowRight, Upload, List, View as Review, Notebook } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { knowledgeService } from '@/shared/api'
 
 const router = useRouter()

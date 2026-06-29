@@ -1,15 +1,6 @@
 <template>
-  <div class="similar-case-page">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">
-          <el-icon style="margin-right: 6px"><Connection /></el-icon>
-          相似案例查找
-        </div>
-        <div class="autops-page-desc">基于历史事件智能匹配相似案例</div>
-      </div>
-    </div>
+  <div class="similar-case-page autops-page-container">
+    <PageHeader title="相似案例查找" desc="基于历史事件智能匹配相似案例" />
 
     <!-- Search Panel -->
     <div class="autops-card search-panel">
@@ -180,6 +171,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Connection, Search } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { knowledgeService } from '@/shared/api'
 
@@ -294,9 +286,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.similar-case-page {
-  padding: 0;
-}
 .autops-page-header {
   display: flex;
   align-items: center;

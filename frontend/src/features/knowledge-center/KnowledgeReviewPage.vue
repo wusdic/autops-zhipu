@@ -1,15 +1,6 @@
 <template>
-  <div class="knowledge-review-page">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">
-          <el-icon style="margin-right: 6px"><Reading /></el-icon>
-          知识审核
-        </div>
-        <div class="autops-page-desc">审核待发布的知识文章</div>
-      </div>
-    </div>
+  <div class="knowledge-review-page autops-page-container">
+    <PageHeader title="知识审核" desc="审核待发布的知识文章" />
 
     <!-- Status Tabs -->
     <div class="autops-card">
@@ -151,6 +142,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Reading, Search } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { knowledgeService } from '@/shared/api'
 import { knowledgeStatusLabel, knowledgeStatusTag } from '@/shared/utils/labels'
@@ -367,9 +359,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.knowledge-review-page {
-  padding: 0;
-}
 .autops-page-header {
   display: flex;
   align-items: center;

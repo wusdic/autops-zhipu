@@ -1,19 +1,11 @@
 <template>
-  <div class="rule-gap-page">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">
-          <el-icon style="margin-right: 6px"><Warning /></el-icon>
-          规则缺口分析
-        </div>
-        <div class="autops-page-desc">识别缺少告警规则和策略的事件类型</div>
-      </div>
-      <div class="top-actions">
+  <div class="rule-gap-page autops-page-container">
+    <PageHeader title="规则缺口分析" desc="识别缺少告警规则和策略的事件类型">
+      <template #actions>
         <el-button type="primary" @click="runAnalysis" :loading="loading">执行分析</el-button>
         <el-button @click="exportReport" :disabled="gapResults.length === 0">导出报告</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Summary Cards -->
     <el-row :gutter="16" class="summary-row" v-if="analysisDone">
@@ -174,6 +166,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Warning, WarningFilled } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
@@ -334,9 +327,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.rule-gap-page {
-  padding: 0;
-}
 .autops-page-header {
   display: flex;
   align-items: center;
