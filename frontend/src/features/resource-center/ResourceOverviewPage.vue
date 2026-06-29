@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">资源总览</div>
-      <div class="autops-page-desc">查看资产整体情况，快速访问核心功能</div>
-    </div>
+    <PageHeader title="资源总览" desc="查看资产整体情况，快速访问核心功能" />
 
     <!-- Stat Cards -->
     <el-row :gutter="16" class="metric-row">
@@ -174,6 +170,7 @@ import {
   Coordinate,
 } from '@element-plus/icons-vue'
 import { assetService, dashboardService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

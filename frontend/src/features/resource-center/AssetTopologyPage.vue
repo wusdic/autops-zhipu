@@ -1,9 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <span class="autops-page-title">拓扑视图</span>
-    </div>
+    <PageHeader title="拓扑视图" />
 
     <!-- 统计卡片 -->
     <el-row :gutter="12" class="stat-row mb-md">
@@ -210,6 +207,7 @@ import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, Warning, ZoomIn, ZoomOut, FullScreen, Grid } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

@@ -1,16 +1,12 @@
 <template>
   <div class="autops-page-container">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">业务系统</div>
-      <div class="autops-page-desc">管理业务系统及其关联资产</div>
-    </div>
-
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
-      <el-button type="primary" @click="openCreateDialog">
-        <el-icon><Plus /></el-icon> 新建业务系统
-      </el-button>
-    </div>
+    <PageHeader title="业务系统" desc="管理业务系统及其关联资产">
+      <template #actions>
+        <el-button type="primary" @click="openCreateDialog">
+          <el-icon><Plus /></el-icon> 新建业务系统
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Search & Filter Bar -->
     <el-card shadow="never" class="filter-card">
@@ -202,6 +198,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { healthLabel as healthLabelFn } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'

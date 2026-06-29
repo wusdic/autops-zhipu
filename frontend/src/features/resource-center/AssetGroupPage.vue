@@ -1,9 +1,6 @@
 <template>
-  <div class="asset-group">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <span class="autops-page-title">资产分组</span>
-    </div>
+  <div class="asset-group autops-page-container">
+    <PageHeader title="资产分组" />
 
     <el-row :gutter="16">
       <!-- 左侧：分组列表 -->
@@ -163,6 +160,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { Plus, Search, Folder } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import api from '@/shared/api/client'

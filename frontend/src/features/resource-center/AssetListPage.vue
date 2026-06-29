@@ -1,16 +1,15 @@
 <template>
-  <div class="asset-list">
-    <div class="autops-page-header">
-      <span class="autops-page-title">资源列表</span>
-      <div class="autops-toolbar-right">
+  <div class="asset-list autops-page-container">
+    <PageHeader title="资源列表">
+      <template #actions>
         <el-button type="success" @click="showImportDialog = true">
           <el-icon><Upload /></el-icon> 批量导入
         </el-button>
         <el-button type="primary" @click="openCreateDialog">
           <el-icon><Plus /></el-icon> 新建资产
         </el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <div class="autops-card">
       <div class="autops-card-body">
@@ -390,6 +389,7 @@ import {
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { UploadFile } from 'element-plus'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API as R } from '@/shared/api/routes'
 import {
   assetTypeLabel, assetStatusTag, assetStatusLabel,

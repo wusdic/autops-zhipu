@@ -1,12 +1,10 @@
 <template>
-  <div class="credential-page">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <span class="autops-page-title">凭证库</span>
-      <div class="autops-toolbar-right">
+  <div class="credential-page autops-page-container">
+    <PageHeader title="凭证库">
+      <template #actions>
         <el-button type="primary" @click="openCreateDialog" :icon="Plus">新建凭证</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <div class="autops-card">
       <div class="autops-card-body">
@@ -189,6 +187,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { Plus, View, Hide, Search } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import api from '@/shared/api/client'

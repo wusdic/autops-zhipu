@@ -1,17 +1,12 @@
 <template>
   <div class="autops-page-container">
-    <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">采集节点</div>
-        <div class="autops-page-desc">管理采集 Agent 节点，监控运行状态</div>
-      </div>
-      <div class="header-actions">
+    <PageHeader title="采集节点" desc="管理采集 Agent 节点，监控运行状态">
+      <template #actions>
         <el-button @click="fetchAgents">
           <el-icon><Refresh /></el-icon> 刷新
         </el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filter Bar -->
     <el-card shadow="never" class="filter-card">
@@ -206,6 +201,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, Search } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { collectorService } from '@/shared/api'
 
 // ---------- Types ----------

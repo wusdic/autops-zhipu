@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">资产生命周期</div>
-      <div class="autops-page-desc">管理资产生命周期规则与状态</div>
-    </div>
+    <PageHeader title="资产生命周期" desc="管理资产生命周期规则与状态" />
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="metric-row">
@@ -166,6 +162,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Plus, CircleCheck, Clock, Remove, List } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

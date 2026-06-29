@@ -1,9 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <span class="autops-page-title">资产发现</span>
-    </div>
+    <PageHeader title="资产发现" />
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="stat-row mb-lg">
@@ -319,6 +316,7 @@ import type { TagType } from '@/shared/types'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, Search } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

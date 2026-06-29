@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">资产导入</div>
-      <div class="autops-page-desc">批量导入资产数据</div>
-    </div>
+    <PageHeader title="资产导入" desc="批量导入资产数据" />
 
     <!-- 上传区域 -->
     <el-card shadow="never" class="upload-card">
@@ -246,6 +242,7 @@ import {
   Document,
 } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API } from '@/shared/api/routes'
 
 // ─── 类型定义 ────────────────────────────────────────
