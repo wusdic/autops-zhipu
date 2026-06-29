@@ -108,8 +108,8 @@
           <el-input v-model="form.model_id" placeholder="如：glm-4-plus" />
         </el-form-item>
         <el-form-item label="API地址" prop="endpoint">
-          <el-input v-model="form.endpoint" placeholder="https://api.example.com/v1/chat/completions" />
-          <div class="form-tip">须为 OpenAI 兼容地址（通常以 /v1 结尾，如 http://localhost:11434/v1）。本地模型首次测试加载较慢，超时阈值为 60 秒。</div>
+          <el-input v-model="form.endpoint" placeholder="如智谱GLM：https://api.z.ai/api/coding/paas/v4" />
+          <div class="form-tip">须为 OpenAI 兼容地址。智谱 GLM(z.ai) 填 https://api.z.ai/api/coding/paas/v4；本地模型通常以 /v1 结尾（如 http://localhost:11434/v1），首次测试加载较慢，超时阈值为 60 秒。</div>
         </el-form-item>
         <el-form-item label="API Key">
           <el-input v-model="form.api_key" type="password" show-password placeholder="sk-xxx" />
