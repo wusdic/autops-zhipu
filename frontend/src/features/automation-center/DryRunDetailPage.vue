@@ -74,9 +74,7 @@ v-loading="loading"
             </el-table-column>
             <el-table-column prop="status" label="状态" width="90" align="center">
               <template #default="{ row }">
-                <el-tag :type="(dryRunStatusTag(row.status)) as TagType" size="small" effect="light">
-                  {{ dryRunStatusLabel(row.status) }}
-                </el-tag>
+                <StatusBadge :status="row.status" />
               </template>
             </el-table-column>
             <el-table-column prop="triggered_at" label="触发时间" width="160">
@@ -128,9 +126,7 @@ v-loading="loading"
                 <el-descriptions-item label="名称">{{ detail.name || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="关联策略">{{ detail.policy_name || detail.policy_id || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="状态">
-                  <el-tag :type="(dryRunStatusTag(detail.status)) as TagType" size="small">
-                    {{ dryRunStatusLabel(detail.status) }}
-                  </el-tag>
+                  <StatusBadge :status="detail.status" />
                 </el-descriptions-item>
                 <el-descriptions-item label="触发时间">{{ formatTime(detail.triggered_at || detail.created_at) }}</el-descriptions-item>
                 <el-descriptions-item label="完成时间" v-if="detail.completed_at">
@@ -197,9 +193,7 @@ v-loading="loading"
                   <el-tag size="small" type="warning">{{ detail.impact.scope || '-' }}</el-tag>
                 </el-descriptions-item>
                 <el-descriptions-item label="风险等级">
-                  <el-tag :type="(riskTagType(detail.impact.risk_level ?? '')) as TagType" size="small">
-                    {{ riskLabel(detail.impact.risk_level) }}
-                  </el-tag>
+                  <StatusBadge :status="detail.impact.risk_level ?? ''" />
                 </el-descriptions-item>
                 <el-descriptions-item label="预计变更">
                   {{ detail.impact.changes || '-' }}
@@ -231,6 +225,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, Search, Close } from '@element-plus/icons-vue'
 import { automationService } from '@/shared/api'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { riskLabel as riskLabelFn } from '@/shared/utils/labels'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

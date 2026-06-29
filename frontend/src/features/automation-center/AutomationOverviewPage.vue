@@ -49,9 +49,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(statusType(row.status)) as TagType" size="small" effect="light">
-              {{ statusLabel(row.status) }}
-            </el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="trigger_type" label="触发方式" width="110" align="center">
@@ -117,6 +115,7 @@ import {
 } from '@element-plus/icons-vue'
 import { automationService } from '@/shared/api'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { execStatusTag, execStatusLabel } from '@/shared/utils/labels'
 
 const router = useRouter()

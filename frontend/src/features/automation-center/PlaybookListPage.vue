@@ -35,7 +35,7 @@
         <template #default="{ row }"><el-tag :type="row.status==='active'?'success':row.status==='draft'?'info':'warning'" size="small">{{ statusLabel(row.status) }}</el-tag></template>
       </el-table-column>
       <el-table-column prop="risk_level" label="风险" width="90">
-        <template #default="{ row }"><el-tag :type="(riskType(row.risk_level)) as TagType" size="small">{{ row.risk_level || 'low' }}</el-tag></template>
+        <template #default="{ row }"><StatusBadge :status="row.risk_level || 'low'" /></template>
       </el-table-column>
       <el-table-column label="关联策略" width="90" align="center">
         <template #default="{ row }">{{ row.policy_count || 0 }}</template>
@@ -119,7 +119,7 @@
         <el-descriptions :column="2" border>
           <el-descriptions-item label="名称">{{ detail.name }}</el-descriptions-item>
           <el-descriptions-item label="状态"><el-tag :type="detail.status==='active'?'success':'info'" size="small">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
-          <el-descriptions-item label="风险等级"><el-tag :type="(riskType(detail.risk_level)) as TagType" size="small">{{ detail.risk_level }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="风险等级"><StatusBadge :status="detail.risk_level" /></el-descriptions-item>
           <el-descriptions-item label="步骤数">{{ detail.steps?.length || 0 }}</el-descriptions-item>
           <el-descriptions-item label="描述" :span="2">{{ detail.description || '-' }}</el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ fmt(detail.created_at) }}</el-descriptions-item>
@@ -165,6 +165,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Delete } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 import { policyStatusLabel, riskTag } from '@/shared/utils/labels'

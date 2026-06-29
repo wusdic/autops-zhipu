@@ -34,7 +34,7 @@
         <template #default="{ row }"><el-tag size="small">{{ triggerLabel(row.trigger_type) }}</el-tag></template>
       </el-table-column>
       <el-table-column prop="risk_level" label="风险" width="80">
-        <template #default="{ row }"><el-tag :type="(riskType(row.risk_level)) as TagType" size="small">{{ row.risk_level }}</el-tag></template>
+        <template #default="{ row }"><StatusBadge :status="row.risk_level" /></template>
       </el-table-column>
       <el-table-column prop="status" label="状态" width="90">
         <template #default="{ row }"><el-tag :type="row.status==='active'?'success':'info'" size="small">{{ statusLabel(row.status) }}</el-tag></template>
@@ -159,7 +159,7 @@
         <el-descriptions :column="2" border>
           <el-descriptions-item label="名称">{{ detail.name }}</el-descriptions-item>
           <el-descriptions-item label="触发源"><el-tag size="small">{{ triggerLabel(detail.trigger_source) }}</el-tag></el-descriptions-item>
-          <el-descriptions-item label="风险等级"><el-tag :type="(riskType(detail.risk_level)) as TagType" size="small">{{ detail.risk_level }}</el-tag></el-descriptions-item>
+          <el-descriptions-item label="风险等级"><StatusBadge :status="detail.risk_level" /></el-descriptions-item>
           <el-descriptions-item label="状态"><el-tag :type="detail.status==='active'?'success':'info'" size="small">{{ statusLabel(detail.status) }}</el-tag></el-descriptions-item>
           <el-descriptions-item label="需要审批">{{ detail.requires_approval ? '是' : '否' }}</el-descriptions-item>
           <el-descriptions-item label="最大影响面">{{ detail.max_impact || '-' }}</el-descriptions-item>
@@ -207,6 +207,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Delete } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 import { policyStatusLabel, riskTag } from '@/shared/utils/labels'

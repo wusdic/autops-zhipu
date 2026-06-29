@@ -135,18 +135,14 @@
 
         <el-table-column prop="original_status" label="原始状态" width="120" align="center">
           <template #default="{ row }">
-            <el-tag :type="(statusTagType(row.status)) as TagType" size="small">
-              {{ statusLabel(row.status) }}
-            </el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
 
         <el-table-column prop="rollback_status" label="回滚状态" width="140" align="center">
           <template #default="{ row }">
             <template v-if="row.rollback_status">
-              <el-tag :type="(rollbackStatusType(row.rollback_status)) as TagType" size="small" effect="dark">
-                {{ rollbackStatusLabel(row.rollback_status) }}
-              </el-tag>
+              <StatusBadge :status="row.rollback_status" />
             </template>
             <template v-else>
               <span class="text-muted">未回滚</span>
@@ -259,15 +255,11 @@
         <el-descriptions-item label="执行名">{{ currentExecution.name }}</el-descriptions-item>
         <el-descriptions-item label="执行ID">{{ currentExecution.id }}</el-descriptions-item>
         <el-descriptions-item label="原始状态">
-          <el-tag :type="(statusTagType(currentExecution.status)) as TagType" size="small">
-            {{ statusLabel(currentExecution.status) }}
-          </el-tag>
+          <StatusBadge :status="currentExecution.status" />
         </el-descriptions-item>
         <el-descriptions-item label="回滚状态">
           <template v-if="currentExecution.rollback_status">
-            <el-tag :type="(rollbackStatusType(currentExecution.rollback_status)) as TagType" size="small">
-              {{ rollbackStatusLabel(currentExecution.rollback_status) }}
-            </el-tag>
+            <StatusBadge :status="currentExecution.rollback_status" />
           </template>
           <span v-else class="text-muted">未回滚</span>
         </el-descriptions-item>
@@ -285,6 +277,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { API } from '@/shared/api/routes'
 import client from '@/shared/api/client'

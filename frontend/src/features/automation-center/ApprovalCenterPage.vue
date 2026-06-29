@@ -70,9 +70,7 @@ v-loading="loading"
         </el-table-column>
         <el-table-column prop="risk_level" label="风险等级" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small" effect="light">
-              {{ riskLabel(row.risk_level) }}
-            </el-tag>
+            <StatusBadge :status="row.risk_level" />
           </template>
         </el-table-column>
         <el-table-column prop="requester" label="请求人" width="110">
@@ -92,9 +90,7 @@ v-loading="loading"
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(statusTagType(row.status)) as TagType" size="small" effect="light">
-              {{ statusLabel(row.status) }}
-            </el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right" align="center">
@@ -142,9 +138,7 @@ v-loading="loading"
           <el-descriptions-item label="请求名称">{{ currentAction?.name || currentAction?.title || '-' }}</el-descriptions-item>
           <el-descriptions-item label="类型">{{ typeLabel(currentAction?.type || currentAction?.execution_type) }}</el-descriptions-item>
           <el-descriptions-item label="风险等级">
-            <el-tag :type="(riskTagType(currentAction?.risk_level ?? '')) as TagType" size="small">
-              {{ riskLabel(currentAction?.risk_level) }}
-            </el-tag>
+            <StatusBadge :status="currentAction?.risk_level ?? ''" />
           </el-descriptions-item>
           <el-descriptions-item label="请求人">{{ currentAction?.requester || currentAction?.applicant || '-' }}</el-descriptions-item>
         </el-descriptions>
@@ -182,14 +176,10 @@ v-loading="loading"
           <el-descriptions-item label="请求名称">{{ currentDetail.name || currentDetail.title || '-' }}</el-descriptions-item>
           <el-descriptions-item label="类型">{{ typeLabel(currentDetail.type || currentDetail.execution_type) }}</el-descriptions-item>
           <el-descriptions-item label="风险等级">
-            <el-tag :type="(riskTagType(currentDetail.risk_level)) as TagType" size="small">
-              {{ riskLabel(currentDetail.risk_level) }}
-            </el-tag>
+            <StatusBadge :status="currentDetail.risk_level" />
           </el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="(statusTagType(currentDetail.status)) as TagType" size="small">
-              {{ statusLabel(currentDetail.status) }}
-            </el-tag>
+            <StatusBadge :status="currentDetail.status" />
           </el-descriptions-item>
           <el-descriptions-item label="请求人">{{ currentDetail.requester || currentDetail.applicant || '-' }}</el-descriptions-item>
           <el-descriptions-item label="请求时间">{{ formatTime(currentDetail.created_at) }}</el-descriptions-item>
@@ -229,6 +219,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { automationService } from '@/shared/api'
 import { riskLabel as riskLabelFn, approvalStatusTag, approvalStatusLabel } from '@/shared/utils/labels'
 

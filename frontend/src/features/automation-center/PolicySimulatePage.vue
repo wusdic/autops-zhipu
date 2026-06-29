@@ -2,9 +2,7 @@
   <div class="autops-page-container">
     <PageHeader title="策略模拟" back desc="在沙箱中验证策略匹配结果">
       <template #title-extra>
-        <el-tag v-if="policyDetail" :type="(riskTagType(policyDetail.risk_level)) as TagType" size="large">
-          风险: {{ policyDetail.risk_level || 'low' }}
-        </el-tag>
+        <StatusBadge v-if="policyDetail" :status="policyDetail.risk_level || 'low'" :label="'风险: ' + (policyDetail.risk_level || 'low')" />
       </template>
     </PageHeader>
 
@@ -294,9 +292,7 @@
               <el-descriptions-item label="影响资产数">{{ simulateResult.impact.affected_assets || 1 }}</el-descriptions-item>
               <el-descriptions-item label="预估影响时间">{{ simulateResult.impact.estimated_duration || '未知' }}</el-descriptions-item>
               <el-descriptions-item label="影响等级">
-                <el-tag :type="(riskTagType(simulateResult.impact.impact_level || 'low')) as TagType" size="small">
-                  {{ simulateResult.impact.impact_level || 'low' }}
-                </el-tag>
+                <StatusBadge :status="simulateResult.impact.impact_level || 'low'" />
               </el-descriptions-item>
               <el-descriptions-item label="可回滚">{{ simulateResult.impact.rollbackable ? '是' : '否' }}</el-descriptions-item>
               <el-descriptions-item label="说明" :span="2">{{ simulateResult.impact.description || '-' }}</el-descriptions-item>
@@ -321,6 +317,7 @@ import api from '@/shared/api/client'
 import { policyStatusLabel } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 
 const route = useRoute()
 const policyId = route.params.id as string

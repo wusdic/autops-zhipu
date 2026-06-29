@@ -132,9 +132,7 @@
 
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(statusTagType(row.status)) as TagType" size="small">
-              {{ statusLabel(row.status) }}
-            </el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
 
@@ -198,7 +196,7 @@
           <el-tag size="small">{{ execTypeLabel(currentLock.execution_type) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="(statusTagType(currentLock.status)) as TagType" size="small">{{ statusLabel(currentLock.status) }}</el-tag>
+          <StatusBadge :status="currentLock.status" />
         </el-descriptions-item>
         <el-descriptions-item label="目标资源" :span="2">{{ currentLock.target_id || '-' }}</el-descriptions-item>
         <el-descriptions-item label="触发来源">{{ triggerLabel(currentLock.trigger_source) }}</el-descriptions-item>
@@ -219,6 +217,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { Search, Refresh, Unlock, Lock } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { ElMessage } from 'element-plus'
 import { API } from '@/shared/api/routes'
 import { taskStatusLabel, taskStatusTag, riskLabel as riskLabelFn } from '@/shared/utils/labels'

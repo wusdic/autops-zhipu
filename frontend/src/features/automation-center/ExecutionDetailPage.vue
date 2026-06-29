@@ -36,7 +36,7 @@
         <el-descriptions-item label="执行ID">{{ execution.id }}</el-descriptions-item>
         <el-descriptions-item label="策略名称">{{ execution.policy_name || '-' }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="(statusType(execution.status)) as TagType">{{ statusLabel(execution.status) }}</el-tag>
+          <StatusBadge :status="execution.status" />
         </el-descriptions-item>
         <el-descriptions-item label="开始时间">{{ execution.started_at || '-' }}</el-descriptions-item>
         <el-descriptions-item label="结束时间">{{ execution.finished_at || '-' }}</el-descriptions-item>
@@ -76,7 +76,7 @@
         <el-table-column prop="action_type" label="动作类型" width="140" />
         <el-table-column prop="status" label="状态" width="110" align="center">
           <template #default="{ row }">
-            <el-tag :type="(statusType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="started_at" label="开始时间" width="180" />
@@ -238,6 +238,7 @@ import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { API as R } from '@/shared/api/routes'
 import { execStatusTag, execStatusLabel } from '@/shared/utils/labels'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
