@@ -348,6 +348,15 @@ body {
   padding: 0;
 }
 
+/* 第三种历史写法 .filter-form（带底部分隔线的内联表单），同样扁平化，
+ * 去掉各页作用域里的下边框/下内边距，统一为与 autops-toolbar 一致的扁平过滤区。
+ * 用 !important 覆盖各页 scoped 样式中的 border-bottom/padding-bottom。 */
+.filter-form {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+  margin-bottom: var(--autops-space-lg) !important;
+}
+
 /* ─── 8. 工具栏（搜索/过滤/操作按钮区） ─── */
 /*
  * 布局原则：toolbar-right（操作按钮）永远不换行
@@ -573,6 +582,13 @@ body {
   height: 48px;
 }
 
+/* 统一表格密度：历史上部分页面用 size="small"、部分用默认，数据行内边距不一致。
+ * 这里把数据单元格纵向内边距统一为 10px（与表头一致），消除页面间行高/密度差异，
+ * 不受各页 size 属性影响。 */
+.el-table td.el-table__cell {
+  padding: 10px 0 !important;
+}
+
 /* 表格操作列按钮间距统一 */
 .el-table .el-table__cell .el-button + .el-button {
   margin-left: 4px;
@@ -586,7 +602,8 @@ body {
 }
 
 .el-card__header {
-  padding: var(--autops-space-md) var(--autops-space-xl) !important;
+  /* 与 .autops-card-header 完全对齐（内边距 lg/xl），使 el-card 与 autops-card 视觉一致 */
+  padding: var(--autops-space-lg) var(--autops-space-xl) !important;
   border-bottom: 1px solid var(--autops-bg-3) !important;
   min-height: 48px;
 }
