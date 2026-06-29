@@ -1,22 +1,20 @@
 <template>
-  <div class="asset-detail">
+  <div class="asset-detail autops-page-container">
     <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title" v-if="asset">
-        <el-button @click="goBack" :icon="ArrowLeft">返回资产列表</el-button>
-        <span style="margin-left: 12px">{{ asset.name }}</span>
-        <el-tag :type="(statusType(asset.status)) as TagType" size="small" style="margin-left: 8px">{{ asset.status }}</el-tag>
-        <el-tag :type="(healthType(asset.health_status)) as TagType" size="small" style="margin-left: 4px">{{ asset.health_status }}</el-tag>
-      </div>
-      <div class="autops-toolbar-right" v-if="asset">
+    <PageHeader v-if="asset" :title="asset.name" back>
+      <template #title-extra>
+        <el-tag :type="(statusType(asset.status)) as TagType" size="small">{{ asset.status }}</el-tag>
+        <el-tag :type="(healthType(asset.health_status)) as TagType" size="small">{{ asset.health_status }}</el-tag>
+      </template>
+      <template #actions>
         <el-button type="primary" plain @click="$router.push('/assets/' + asset.id + '/topology')">
           <el-icon><Connection /></el-icon> 拓扑图
         </el-button>
         <el-button type="primary" @click="navToInspectionFromAsset(assetId)">
           <el-icon><Setting /></el-icon> 绑定巡检模板
         </el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <div v-loading="loading" class="detail-body">
       <!-- 空状态 -->
@@ -375,7 +373,8 @@
 import { ref, onMounted, watch } from 'vue'
 import type { TagType } from '@/shared/types'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Plus, Connection, Setting } from '@element-plus/icons-vue'
+import { Plus, Connection, Setting } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 import { assetStatusTag, healthTag } from '@/shared/utils/labels'

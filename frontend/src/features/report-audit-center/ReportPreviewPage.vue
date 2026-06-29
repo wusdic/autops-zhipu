@@ -1,19 +1,14 @@
 <template>
-  <div class="report-preview-page">
+  <div class="report-preview-page autops-page-container">
     <!-- Page Header -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">报表预览</div>
-        <div class="autops-page-desc">在线预览生成的报表内容</div>
-      </div>
-      <div class="header-actions">
-        <el-button @click="goBack">返回</el-button>
+    <PageHeader title="报表预览" back desc="在线预览生成的报表内容">
+      <template #actions>
         <el-button type="primary" :loading="downloading" @click="handleDownload">
           <el-icon style="margin-right: 4px"><Download /></el-icon>
           下载报表
         </el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Loading State -->
     <div v-if="loading" class="loading-wrapper">
@@ -139,6 +134,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Download } from '@element-plus/icons-vue'
 import { reportService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
 const route = useRoute()
 const router = useRouter()

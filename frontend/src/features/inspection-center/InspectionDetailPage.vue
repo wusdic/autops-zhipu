@@ -1,14 +1,10 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header autops-page-header--between">
-      <div>
-        <div class="autops-page-title">巡检详情</div>
-      </div>
-      <div class="autops-header-actions">
-        <el-button @click="goBack"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
+    <PageHeader title="巡检详情" back>
+      <template #actions>
         <el-button type="primary" @click="rerunInspection" :loading="rerunning"><el-icon><Refresh /></el-icon> 重新巡检</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <div v-loading="loading">
       <!-- 基本信息 -->
@@ -118,9 +114,10 @@
 import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Refresh, Warning, Document, DataAnalysis, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
+import { Refresh, Warning, Document, DataAnalysis, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import {
   taskStatusTag, taskStatusLabel, checkResultTag, checkResultLabel, severityTagType,
 } from '@/shared/utils/labels'

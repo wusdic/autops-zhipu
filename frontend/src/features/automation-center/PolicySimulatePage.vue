@@ -1,20 +1,12 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">策略模拟</div>
-        <div class="autops-page-desc">在沙箱中验证策略匹配结果</div>
-      </div>
-    </div>
-
-    <!-- 顶部导航 -->
-    <div class="autops-toolbar">
-      <el-button @click="$router.back()"><el-icon><ArrowLeft /></el-icon> 返回策略列表</el-button>
-      <div style="flex:1" />
-      <el-tag v-if="policyDetail" :type="(riskTagType(policyDetail.risk_level)) as TagType" size="large">
-        风险: {{ policyDetail.risk_level || 'low' }}
-      </el-tag>
-    </div>
+    <PageHeader title="策略模拟" back desc="在沙箱中验证策略匹配结果">
+      <template #title-extra>
+        <el-tag v-if="policyDetail" :type="(riskTagType(policyDetail.risk_level)) as TagType" size="large">
+          风险: {{ policyDetail.risk_level || 'low' }}
+        </el-tag>
+      </template>
+    </PageHeader>
 
     <!-- 策略概要卡片 -->
     <div class="autops-card summary-card" v-if="policyDetail">
@@ -322,12 +314,13 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
-  ArrowLeft, VideoPlay, Delete, Loading, SuccessFilled,
+  VideoPlay, Delete, Loading, SuccessFilled,
   CircleCloseFilled, Timer, Warning
 } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { policyStatusLabel } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
 const route = useRoute()
 const policyId = route.params.id as string

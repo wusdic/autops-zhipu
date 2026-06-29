@@ -1,12 +1,6 @@
 <template>
-  <div class="p-6">
-    <div class="autops-page-header">
-      <div class="autops-page-title-row">
-        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <span class="autops-page-title">异常详情</span>
-      </div>
-      <div class="autops-page-desc">查看异常详细信息、处置时间线和关联告警</div>
-    </div>
+  <div class="autops-page-container">
+    <PageHeader title="异常详情" back desc="查看异常详细信息、处置时间线和关联告警" />
 
     <div v-loading="loading" class="mt-lg">
       <el-row :gutter="16">
@@ -216,8 +210,8 @@ import type { TagType } from '@/shared/types'
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft } from '@element-plus/icons-vue'
 import { anomalyService, alertService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 const route = useRoute()
 const router = useRouter()

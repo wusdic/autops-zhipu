@@ -1,16 +1,12 @@
 <template>
   <div class="autops-page-container">
     <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">创建工单</div>
-      <div class="autops-page-desc">新建运维工单</div>
-    </div>
+    <PageHeader title="创建工单" back desc="新建运维工单" />
 
     <el-card shadow="never">
       <template #header>
         <div class="autops-card-header">
-          <span class="title">创建工单</span>
-          <el-button :icon="Back" @click="handleBack">返回列表</el-button>
+          <span class="title">工单信息</span>
         </div>
       </template>
 
@@ -263,7 +259,6 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
-  Back,
   CircleCheck,
   FolderOpened,
   RefreshLeft,
@@ -275,6 +270,7 @@ import {
   Cpu,
   DataAnalysis,
 } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

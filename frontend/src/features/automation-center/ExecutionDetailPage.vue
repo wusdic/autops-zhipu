@@ -1,12 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title-row">
-        <el-button link @click="$router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <span class="autops-page-title">执行详情</span>
-      </div>
-      <div class="autops-page-desc">查看单次执行的详细信息、步骤和日志</div>
-    </div>
+    <PageHeader title="执行详情" back desc="查看单次执行的详细信息、步骤和日志" />
 
     <!-- Basic Info -->
     <div class="autops-card" v-loading="loading">
@@ -242,8 +236,8 @@ import { ref, computed, reactive, onMounted, onUnmounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API as R } from '@/shared/api/routes'
 import { execStatusTag, execStatusLabel } from '@/shared/utils/labels'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'

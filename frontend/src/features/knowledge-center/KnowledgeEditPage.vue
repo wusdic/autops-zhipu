@@ -1,18 +1,11 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">编辑知识</div>
-        <div class="autops-page-desc">编辑知识条目内容</div>
-      </div>
-    </div>
-
-    <div class="autops-toolbar">
-      <el-button @click="goBack"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-      <div style="flex:1" />
-      <el-button type="primary" @click="save" :loading="saving"><el-icon><Check /></el-icon> 保存</el-button>
-      <el-button @click="saveAndPublish" :loading="saving">保存并发布</el-button>
-    </div>
+    <PageHeader title="编辑知识" back desc="编辑知识条目内容">
+      <template #actions>
+        <el-button type="primary" @click="save" :loading="saving"><el-icon><Check /></el-icon> 保存</el-button>
+        <el-button @click="saveAndPublish" :loading="saving">保存并发布</el-button>
+      </template>
+    </PageHeader>
 
     <el-tabs v-model="activeTab">
       <!-- 结构化编辑 -->
@@ -184,8 +177,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft, Check, Delete } from '@element-plus/icons-vue'
+import { Check, Delete } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API } from '@/shared/api/routes'
 import { sanitizeHtml } from '@/shared/utils/sanitize'
 

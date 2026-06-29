@@ -1,13 +1,7 @@
 <template>
   <div class="autops-page-container">
     <!-- Page Header -->
-    <div class="autops-page-header">
-      <div class="autops-page-title-row">
-        <el-button plain @click="router.back()"><el-icon><ArrowLeft /></el-icon> 返回</el-button>
-        <span class="autops-page-title">Dry-run 预演</span>
-      </div>
-      <div class="autops-page-desc">模拟自动化策略执行，预览执行计划与影响分析</div>
-    </div>
+    <PageHeader title="Dry-run 预演" back desc="模拟自动化策略执行，预览执行计划与影响分析" />
 
     <!-- Alert -->
     <el-alert
@@ -234,8 +228,9 @@ import { ref, reactive, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Refresh, Search, Close } from '@element-plus/icons-vue'
+import { Refresh, Search, Close } from '@element-plus/icons-vue'
 import { automationService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { riskLabel as riskLabelFn } from '@/shared/utils/labels'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

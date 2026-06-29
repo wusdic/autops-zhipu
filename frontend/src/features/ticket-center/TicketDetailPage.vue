@@ -1,26 +1,14 @@
 <template>
   <div class="autops-page-container">
     <!-- ─── Page Header ─── -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">工单详情</div>
-        <div class="autops-page-desc">查看工单信息、关联告警、处理历史与 SLA 跟踪</div>
-      </div>
-    </div>
-
-    <!-- 顶部导航 -->
-    <div class="autops-card">
-      <div class="autops-card-body">
-        <div class="detail-header">
-      <el-button :icon="ArrowLeft" @click="$router.back()">返回</el-button>
-      <div class="detail-title-area">
-        <h2 style="margin: 0 0 0 12px">{{ ticket?.title || '工单详情' }}</h2>
-        <StatusBadge v-if="ticket" :status="ticket.status" show-icon style="margin-left: 12px" />
-        <el-tag v-if="ticket" :type="(priorityType(ticket?.priority)) as TagType" style="margin-left: 8px">
+    <PageHeader :title="ticket?.title || '工单详情'" back desc="查看工单信息、关联告警、处理历史与 SLA 跟踪">
+      <template #title-extra>
+        <StatusBadge v-if="ticket" :status="ticket.status" show-icon />
+        <el-tag v-if="ticket" :type="(priorityType(ticket?.priority)) as TagType">
           {{ ticket?.priority || '-' }}
         </el-tag>
         <!-- SLA 倒计时 -->
-        <span v-if="ticket?.sla_deadline" style="margin-left: 8px">
+        <span v-if="ticket?.sla_deadline">
           <el-tag v-if="slaOverdue" type="danger" effect="dark">
             <el-icon><WarningFilled /></el-icon>
             已超时 {{ slaRemainingText }}
@@ -29,10 +17,8 @@
             SLA剩余: {{ slaRemainingText }}
           </el-tag>
         </span>
-      </div>
-        </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <div v-loading="loading" class="mt-lg">
       <template v-if="ticket">
@@ -308,10 +294,11 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import type { TagType } from '@/shared/types'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, WarningFilled, Document, Upload } from '@element-plus/icons-vue'
+import { WarningFilled, Document, Upload } from '@element-plus/icons-vue'
 import { APP_CONFIG } from '@/shared/config'
 import api from '@/shared/api/client'
 import { API as R } from '@/shared/api/routes'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { priorityTag } from '@/shared/utils/labels'
 import SeverityBadge from '@/shared/components/SeverityBadge.vue'

@@ -1,16 +1,12 @@
 <template>
   <div class="autops-page-container">
     <!-- 页面头部 -->
-    <div class="autops-page-header">
-      <div class="autops-page-title">策略编辑</div>
-      <div class="autops-page-desc">编辑自动化执行策略</div>
-    </div>
+    <PageHeader :title="isEdit ? '编辑策略' : '新建策略'" back desc="编辑自动化执行策略" />
 
     <el-card shadow="never">
       <template #header>
         <div class="autops-card-header">
-          <span>{{ isEdit ? '编辑策略' : '新建策略' }}</span>
-          <el-button @click="handleBack">返回列表</el-button>
+          <span>策略信息</span>
         </div>
       </template>
 
@@ -118,6 +114,7 @@ import { Check } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { policyService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
 interface PolicyForm {
   name: string

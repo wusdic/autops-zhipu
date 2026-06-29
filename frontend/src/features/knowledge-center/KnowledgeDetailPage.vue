@@ -1,10 +1,8 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div>
-        <el-button @click="goBack" :icon="ArrowLeft">返回知识列表</el-button>
-      </div>
-      <div class="top-actions" v-if="article">
+    <PageHeader :title="article?.title || '知识详情'" back>
+      <template #actions>
+        <template v-if="article">
         <el-button type="primary" :icon="Edit" @click="goEdit">编辑</el-button>
         <el-button
           v-if="article.status === 'draft'"
@@ -31,8 +29,9 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-      </div>
-    </div>
+        </template>
+      </template>
+    </PageHeader>
 
     <div v-loading="loading" class="detail-body">
       <!-- 空状态 -->
@@ -182,10 +181,11 @@ import type { TagType } from '@/shared/types'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
-  ArrowLeft, Edit, Promotion, MoreFilled, Notebook, Clock, Delete,
+  Edit, Promotion, MoreFilled, Notebook, Clock, Delete,
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { API } from '@/shared/api/routes'
 import { sanitizeHtml } from '@/shared/utils/sanitize'
 

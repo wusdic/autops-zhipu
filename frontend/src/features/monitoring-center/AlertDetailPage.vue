@@ -1,61 +1,52 @@
 <template>
-  <div class="alert-detail">
+  <div class="alert-detail autops-page-container">
     <!-- ─── Page Header ─── -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">告警详情</div>
-        <div class="autops-page-desc">查看告警详情、影响分析、证据链和处理历史</div>
-      </div>
-    </div>
+    <PageHeader :title="alert?.title || '告警详情'" back desc="查看告警详情、影响分析、证据链和处理历史">
+      <template #title-extra>
+        <SeverityBadge v-if="alert" :severity="alert.severity" size="large" />
+        <StatusBadge v-if="alert" :status="alert.status" show-icon />
+      </template>
+      <template #actions>
+        <el-button
+          v-if="alert && alert.status === 'firing'"
+          type="warning"
+          @click="handleAcknowledge"
+        >
+          确认告警
+        </el-button>
+        <el-button
+          v-if="alert && alert.status !== 'resolved'"
+          type="success"
+          @click="handleResolve"
+        >
+          恢复告警
+        </el-button>
+        <el-button
+          v-if="alert && alert.status !== 'resolved'"
+          type="danger"
+          plain
+          @click="handleEscalate"
+        >
+          升级告警
+        </el-button>
+        <el-button @click="createTicketFromAlert" :disabled="!alert">
+          转工单
+        </el-button>
+        <el-button @click="handleSuppress" :disabled="!alert" type="info" plain>
+          抑制告警
+        </el-button>
+        <el-button type="primary" @click="triggerIncidentResponse" :disabled="!alert">
+          <el-icon style="margin-right: 4px"><Warning /></el-icon>
+          触发应急响应
+        </el-button>
+        <el-button @click="loadAlert" :loading="loading">刷新</el-button>
+      </template>
+    </PageHeader>
 
-    <!-- ─── Header Bar: title, severity, status, time, duration, quick actions ─── -->
-    <div class="autops-card detail-header-card">
+    <!-- ─── Alert meta bar: time, duration, source ─── -->
+    <div class="autops-card detail-header-card" v-if="alert">
       <div class="autops-card-body">
-        <div class="detail-header">
-          <el-button :icon="ArrowLeft" @click="$router.back()">返回</el-button>
-          <div class="detail-title-area">
-            <SeverityBadge v-if="alert" :severity="alert.severity" size="large" />
-            <h2 style="margin: 0 0 0 12px">{{ alert?.title || '告警详情' }}</h2>
-            <StatusBadge v-if="alert" :status="alert.status" show-icon style="margin-left: 12px" />
-          </div>
-          <div class="header-actions">
-            <el-button
-              v-if="alert && alert.status === 'firing'"
-              type="warning"
-              @click="handleAcknowledge"
-            >
-              确认告警
-            </el-button>
-            <el-button
-              v-if="alert && alert.status !== 'resolved'"
-              type="success"
-              @click="handleResolve"
-            >
-              恢复告警
-            </el-button>
-            <el-button
-              v-if="alert && alert.status !== 'resolved'"
-              type="danger"
-              plain
-              @click="handleEscalate"
-            >
-              升级告警
-            </el-button>
-            <el-button @click="createTicketFromAlert" :disabled="!alert">
-              转工单
-            </el-button>
-            <el-button @click="handleSuppress" :disabled="!alert" type="info" plain>
-              抑制告警
-            </el-button>
-            <el-button type="primary" @click="triggerIncidentResponse" :disabled="!alert">
-              <el-icon style="margin-right: 4px"><Warning /></el-icon>
-              触发应急响应
-            </el-button>
-            <el-button @click="loadAlert" :loading="loading">刷新</el-button>
-          </div>
-        </div>
-        <!-- Alert meta bar: time, duration, source -->
-        <div v-if="alert" class="header-meta">
+        <div class="header-meta">
           <el-descriptions :column="4" size="small" border>
             <el-descriptions-item label="触发时间">{{ formatTime(alert.created_at) }}</el-descriptions-item>
             <el-descriptions-item label="持续时间">{{ alertDuration }}</el-descriptions-item>
@@ -427,10 +418,11 @@ import { ref, computed, onMounted, watch } from 'vue'
 import type { TagType } from '@/shared/types'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Warning } from '@element-plus/icons-vue'
+import { Warning } from '@element-plus/icons-vue'
 import api from '@/shared/api/client'
 import { severityTagType } from '@/shared/utils/labels'
 import { API as R } from '@/shared/api/routes'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
 import TimelineView from '@/shared/components/TimelineView.vue'
