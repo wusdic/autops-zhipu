@@ -1,10 +1,6 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部 -->
-    <div class="autops-page-header" v-if="!embedded">
-      <div class="autops-page-title">关闭验证</div>
-      <div class="autops-page-desc">验证异常处理结果的关闭状态</div>
-    </div>
+    <PageHeader v-if="!embedded" title="关闭验证" desc="验证异常处理结果的关闭状态" />
 
     <!-- Tabs & Search -->
     <el-card shadow="never" class="filter-card">
@@ -141,6 +137,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
 defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'

@@ -1,15 +1,6 @@
 <template>
   <div class="response-suggestion-page">
-    <!-- Page Header -->
-    <div class="autops-page-header" v-if="!embedded">
-      <div>
-        <div class="autops-page-title">
-          <el-icon style="margin-right: 6px"><MagicStick /></el-icon>
-          AI 响应建议
-        </div>
-        <div class="autops-page-desc">基于知识库智能生成告警/异常响应建议</div>
-      </div>
-    </div>
+    <PageHeader v-if="!embedded" title="AI 响应建议" desc="基于知识库智能生成告警/异常响应建议" />
 
     <!-- Input Panel -->
     <div class="autops-card input-panel">
@@ -163,6 +154,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { MagicStick, CircleCheckFilled } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
 defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'

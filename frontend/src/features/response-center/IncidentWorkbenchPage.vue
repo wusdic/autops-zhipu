@@ -1,12 +1,7 @@
 <template>
   <div class="incident-workbench-page autops-page-container">
-    <!-- 统一页头：故障工作台 + AI诊断/影响分析/风险分级/处置建议/关闭验证收敛为闭环 tab（去重 B1/B2） -->
-    <div class="autops-page-header">
-      <div>
-        <div class="autops-page-title">故障工作台</div>
-        <div class="autops-page-desc">故障处置闭环：工作台 → AI诊断 → 影响分析 → 风险分级 → 处置建议 → 关闭验证</div>
-      </div>
-    </div>
+    <!-- 故障工作台 + AI诊断/影响分析/风险分级/处置建议/关闭验证收敛为闭环 tab（去重 B1/B2） -->
+    <PageHeader title="故障工作台" desc="故障处置闭环：工作台 → AI诊断 → 影响分析 → 风险分级 → 处置建议 → 关闭验证" />
 
     <el-tabs v-model="activeTab" class="incident-workbench-tabs">
       <el-tab-pane label="工作台" name="workbench" lazy>
@@ -39,6 +34,7 @@ import AiDiagnosisPage from '@/features/knowledge-center/AiDiagnosisPage.vue'
 import ImpactAnalysisPage from './ImpactAnalysisPage.vue'
 import RiskGradingPage from './RiskGradingPage.vue'
 import ResponseSuggestionPage from './ResponseSuggestionPage.vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import ClosureVerificationPage from './ClosureVerificationPage.vue'
 
 const route = useRoute()

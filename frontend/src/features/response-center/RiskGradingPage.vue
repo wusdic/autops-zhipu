@@ -1,15 +1,15 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title" v-if="!embedded">风险分级</div>
-      <div>
-        <el-select v-model="riskFilter" placeholder="风险级别" style="width: 120px; margin-right: 8px" clearable @change="fetchData">
+    <PageHeader v-if="!embedded" title="风险分级" />
+    <div class="autops-toolbar">
+      <div class="autops-toolbar-right" style="margin-left:auto">
+        <el-select v-model="riskFilter" placeholder="风险级别" style="width: 120px" clearable @change="fetchData">
           <el-option label="高风险" value="high" />
           <el-option label="中风险" value="medium" />
           <el-option label="低风险" value="low" />
           <el-option label="未知" value="unknown" />
         </el-select>
-        <el-select v-model="assetTypeFilter" placeholder="资产类型" style="width: 140px; margin-right: 8px" clearable @change="fetchData">
+        <el-select v-model="assetTypeFilter" placeholder="资产类型" style="width: 140px" clearable @change="fetchData">
           <el-option label="Linux服务器" value="linux" />
           <el-option label="Windows服务器" value="windows" />
           <el-option label="数据库" value="database" />
@@ -140,6 +140,7 @@
 import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { Refresh, Download } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
 defineProps<{ embedded?: boolean }>()
 import { ElMessage } from 'element-plus'

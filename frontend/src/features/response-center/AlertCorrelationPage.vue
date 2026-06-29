@@ -1,8 +1,6 @@
 <template>
-  <div class="p-6">
-    <div class="autops-page-header">
-      <div class="autops-page-title">告警收敛</div>
-    </div>
+  <div class="autops-page-container">
+    <PageHeader title="告警收敛" />
 
     <!-- 选择告警 -->
     <div class="autops-card mb-lg">
@@ -168,6 +166,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { alertService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
 // Alert list state
 const alertsLoading = ref(false)

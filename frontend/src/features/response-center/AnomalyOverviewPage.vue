@@ -1,15 +1,11 @@
 <template>
   <div class="autops-page-container">
-    <!-- 页面头部（嵌入到异常中心页时由宿主统一展示，隐藏自身） -->
-    <div class="autops-page-header autops-page-header--between" v-if="!embedded">
-      <div>
-        <div class="autops-page-title">异常总览</div>
-        <div class="autops-page-desc">监控和处理系统异常事件</div>
-      </div>
-      <div class="autops-header-actions">
+    <!-- 嵌入到异常中心页时由宿主统一展示，隐藏自身 -->
+    <PageHeader v-if="!embedded" title="异常总览" desc="监控和处理系统异常事件">
+      <template #actions>
         <el-button type="primary" @click="router.push('/anomaly/list')"><el-icon><Plus /></el-icon>异常列表</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="metric-row">
@@ -135,6 +131,7 @@ import {
   List,
 } from '@element-plus/icons-vue'
 import { anomalyService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import {
   severityTagType, severityLabel as severityLabelFn, anomalyStatusTag, anomalyStatusLabel,
 } from '@/shared/utils/labels'

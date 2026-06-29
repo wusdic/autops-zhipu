@@ -1,8 +1,6 @@
 <template>
   <div class="p-6">
-    <div class="autops-page-header" v-if="!embedded">
-      <div class="autops-page-title">影响分析</div>
-    </div>
+    <PageHeader v-if="!embedded" title="影响分析" />
 
     <!-- 选择异常 -->
     <div class="autops-card mb-lg">
@@ -193,6 +191,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { anomalyService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
 defineProps<{ embedded?: boolean }>()
 import client from '@/shared/api/client'

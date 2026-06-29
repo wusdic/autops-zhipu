@@ -1,9 +1,10 @@
 <template>
   <div class="p-6">
-    <div class="autops-page-header" v-if="!embedded">
-      <div class="autops-page-title">异常列表</div>
-      <el-button type="primary" @click="router.push('/response/anomalies/create')">新建异常</el-button>
-    </div>
+    <PageHeader v-if="!embedded" title="异常列表">
+      <template #actions>
+        <el-button type="primary" @click="router.push('/response/anomalies/create')">新建异常</el-button>
+      </template>
+    </PageHeader>
 
     <!-- 搜索 / 过滤 -->
     <div class="autops-card mb-lg">
@@ -129,6 +130,7 @@ import { useRouter } from 'vue-router'
 defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { anomalyService } from '@/shared/api'
+import PageHeader from '@/shared/components/PageHeader.vue'
 
 const router = useRouter()
 

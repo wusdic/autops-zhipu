@@ -1,23 +1,22 @@
 <template>
   <div class="autops-page-container">
-    <div class="autops-page-header">
-      <div class="autops-page-title">故障工作台</div>
-      <div>
-        <el-select v-model="severityFilter" placeholder="严重级别" style="width: 120px; margin-right: 8px" clearable @change="fetchIncidents">
+    <PageHeader title="故障工作台">
+      <template #actions>
+        <el-select v-model="severityFilter" placeholder="严重级别" style="width: 120px" clearable @change="fetchIncidents">
           <el-option label="紧急" value="critical" />
           <el-option label="严重" value="major" />
           <el-option label="一般" value="minor" />
           <el-option label="提示" value="info" />
         </el-select>
-        <el-select v-model="statusFilter" placeholder="状态" style="width: 120px; margin-right: 8px" clearable @change="fetchIncidents">
+        <el-select v-model="statusFilter" placeholder="状态" style="width: 120px" clearable @change="fetchIncidents">
           <el-option label="待处理" value="open" />
           <el-option label="处理中" value="in_progress" />
           <el-option label="已解决" value="resolved" />
           <el-option label="已关闭" value="closed" />
         </el-select>
         <el-button @click="fetchIncidents"><el-icon><Refresh /></el-icon> 刷新</el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <el-row :gutter="16">
       <!-- 左栏: 事件列表 -->
@@ -142,6 +141,7 @@
 import { ref, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { Refresh, Loading, Box, Clock, InfoFilled, CircleCheck, MagicStick, VideoPlay, Tickets, Setting, Close } from '@element-plus/icons-vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
