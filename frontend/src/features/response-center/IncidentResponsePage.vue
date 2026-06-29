@@ -6,9 +6,7 @@
         <div class="header-left">
           <div class="autops-page-title" v-if="!embedded">故障工作台</div>
           <span v-if="selectedAlert" class="header-alert-tag">
-            <el-tag :type="(severityType(selectedAlert.severity)) as TagType" effect="dark" size="small">
-              {{ selectedAlert.severity }}
-            </el-tag>
+            <SeverityBadge :severity="selectedAlert.severity" size="small" />
             <span class="alert-title-text">{{ selectedAlert.title }}</span>
             <StatusBadge :status="selectedAlert.status" size="small" show-icon />
           </span>
@@ -42,7 +40,7 @@
       >
         <el-table-column prop="severity" label="级别" width="80">
           <template #default="{ row }">
-            <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag>
+            <SeverityBadge :severity="row.severity" size="small" />
           </template>
         </el-table-column>
         <el-table-column prop="title" label="告警标题" min-width="240" show-overflow-tooltip />
@@ -126,7 +124,7 @@
             <el-descriptions :column="2" border size="small">
               <el-descriptions-item label="告警标题" :span="2">{{ selectedAlert.title }}</el-descriptions-item>
               <el-descriptions-item label="严重程度">
-                <el-tag :type="(severityType(selectedAlert.severity)) as TagType" size="small">{{ selectedAlert.severity }}</el-tag>
+                <SeverityBadge :severity="selectedAlert.severity" size="small" />
               </el-descriptions-item>
               <el-descriptions-item label="状态">
                 <StatusBadge :status="selectedAlert.status" size="small" show-icon />
@@ -151,7 +149,7 @@
             <el-table stripe  :data="relatedAlerts" size="small" max-height="200">
               <el-table-column prop="severity" label="级别" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag>
+                  <SeverityBadge :severity="row.severity" size="small" />
                 </template>
               </el-table-column>
               <el-table-column prop="title" label="告警标题" min-width="180" show-overflow-tooltip />
@@ -469,6 +467,7 @@ import LogStream from '@/shared/components/LogStream.vue'
 import AiAnalysisCard from '@/shared/components/AiAnalysisCard.vue'
 import ApprovalDialog from '@/shared/components/ApprovalDialog.vue'
 import StatusBadge from '@/shared/components/StatusBadge.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 
 defineProps<{ embedded?: boolean }>()
 

@@ -94,9 +94,7 @@
         </el-table-column>
         <el-table-column label="风险等级" width="110">
           <template #default="{ row }">
-            <el-tag :type="(riskTagType(row.risk_level)) as TagType" size="small" effect="dark">
-              {{ riskLabel(row.risk_level) }}
-            </el-tag>
+            <StatusBadge :status="row.risk_level" />
           </template>
         </el-table-column>
         <el-table-column label="置信度" width="100">
@@ -141,9 +139,7 @@
           <div class="detail-content">{{ currentKnowledge.content || '暂无内容' }}</div>
         </el-descriptions-item>
         <el-descriptions-item label="风险等级">
-          <el-tag :type="(riskTagType(currentKnowledge.risk_level)) as TagType" size="small">
-            {{ riskLabel(currentKnowledge.risk_level) }}
-          </el-tag>
+          <StatusBadge :status="currentKnowledge.risk_level" />
         </el-descriptions-item>
       </el-descriptions>
     </el-drawer>
@@ -155,6 +151,7 @@ import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { MagicStick, CircleCheckFilled } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 
 defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'

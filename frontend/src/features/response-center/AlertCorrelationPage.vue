@@ -33,13 +33,13 @@
           <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
           <el-table-column prop="severity" label="级别" width="80">
             <template #default="{ row }">
-              <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
+              <SeverityBadge :severity="row.severity" size="small" />
             </template>
           </el-table-column>
           <el-table-column prop="asset_name" label="资产" width="140" show-overflow-tooltip />
           <el-table-column prop="status" label="状态" width="90">
             <template #default="{ row }">
-              <el-tag :type="(alertStatusType(row.status)) as TagType" size="small">{{ alertStatusLabel(row.status) }}</el-tag>
+              <StatusBadge :status="row.status" />
             </template>
           </el-table-column>
           <el-table-column prop="created_at" label="时间" width="160">
@@ -118,7 +118,7 @@
               <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
               <el-table-column prop="severity" label="级别" width="80">
                 <template #default="{ row }">
-                  <el-tag :type="(severityType(row.severity)) as TagType" size="small">{{ severityLabel(row.severity) }}</el-tag>
+                  <SeverityBadge :severity="row.severity" size="small" />
                 </template>
               </el-table-column>
               <el-table-column prop="asset_name" label="资产" width="140" show-overflow-tooltip />
@@ -167,6 +167,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { alertService } from '@/shared/api'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 
 // Alert list state
 const alertsLoading = ref(false)

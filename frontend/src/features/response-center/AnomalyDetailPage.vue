@@ -10,9 +10,7 @@
           <div class="autops-card">
             <div class="autops-card-header">
               <div class="autops-card-title">异常信息</div>
-              <el-tag :type="(severityType(anomaly.severity)) as TagType" size="large">
-                {{ severityLabel(anomaly.severity) }}
-              </el-tag>
+              <SeverityBadge :severity="anomaly.severity" />
             </div>
             <div class="autops-card-body">
               <el-descriptions :column="2" border>
@@ -20,14 +18,10 @@
                   {{ anomaly.title }}
                 </el-descriptions-item>
                 <el-descriptions-item label="严重级别">
-                  <el-tag :type="(severityType(anomaly.severity)) as TagType" size="small">
-                    {{ severityLabel(anomaly.severity) }}
-                  </el-tag>
+                  <SeverityBadge :severity="anomaly.severity" size="small" />
                 </el-descriptions-item>
                 <el-descriptions-item label="状态">
-                  <el-tag :type="(statusType(anomaly.status)) as TagType" size="small">
-                    {{ statusLabel(anomaly.status) }}
-                  </el-tag>
+                  <StatusBadge :status="anomaly.status" />
                 </el-descriptions-item>
                 <el-descriptions-item label="关联资产">
                   {{ anomaly.asset_name || anomaly.asset_id || '-' }}
@@ -84,17 +78,13 @@
                 <el-table-column prop="title" label="告警标题" min-width="200" show-overflow-tooltip />
                 <el-table-column prop="severity" label="级别" width="80">
                   <template #default="{ row }">
-                    <el-tag :type="(severityType(row.severity)) as TagType" size="small">
-                      {{ severityLabel(row.severity) }}
-                    </el-tag>
+                    <SeverityBadge :severity="row.severity" size="small" />
                   </template>
                 </el-table-column>
                 <el-table-column prop="asset_name" label="资产" width="140" show-overflow-tooltip />
                 <el-table-column prop="status" label="状态" width="90">
                   <template #default="{ row }">
-                    <el-tag :type="(alertStatusType(row.status)) as TagType" size="small">
-                      {{ alertStatusLabel(row.status) }}
-                    </el-tag>
+                    <StatusBadge :status="row.status" />
                   </template>
                 </el-table-column>
                 <el-table-column prop="created_at" label="时间" width="160">
@@ -212,6 +202,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { anomalyService, alertService } from '@/shared/api'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'
 const route = useRoute()
 const router = useRouter()

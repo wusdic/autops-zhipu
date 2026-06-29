@@ -39,9 +39,7 @@
         </el-table-column>
         <el-table-column prop="verification_status" label="验证状态" width="120" align="center">
           <template #default="{ row }">
-            <el-tag :type="(statusTagType(row.verification_status)) as TagType" effect="dark" size="small">
-              {{ statusLabel(row.verification_status) }}
-            </el-tag>
+            <StatusBadge :status="row.verification_status" :label="statusLabel(row.verification_status)" />
           </template>
         </el-table-column>
         <el-table-column prop="verifier" label="验证人" width="120" align="center">
@@ -101,9 +99,7 @@
           <el-descriptions-item label="工单标题">{{ currentRow.title }}</el-descriptions-item>
           <el-descriptions-item label="关联告警">{{ currentRow.alert_name || '-' }}</el-descriptions-item>
           <el-descriptions-item label="验证状态">
-            <el-tag :type="(statusTagType(currentRow.verification_status)) as TagType" effect="dark">
-              {{ statusLabel(currentRow.verification_status) }}
-            </el-tag>
+            <StatusBadge :status="currentRow.verification_status" :label="statusLabel(currentRow.verification_status)" />
           </el-descriptions-item>
           <el-descriptions-item label="验证人">{{ currentRow.verifier || '-' }}</el-descriptions-item>
           <el-descriptions-item label="验证时间">{{ formatTime(currentRow.verification_time) }}</el-descriptions-item>
@@ -138,6 +134,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, onMounted } from 'vue'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 
 defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'

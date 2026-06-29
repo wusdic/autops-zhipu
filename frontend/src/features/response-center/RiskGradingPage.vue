@@ -68,7 +68,7 @@
         </el-table-column>
         <el-table-column prop="risk_level" label="风险级别" width="100" sortable>
           <template #default="{ row }">
-            <el-tag :type="(riskTag(row.risk_level)) as TagType" effect="dark" size="small">{{ riskLabel(row.risk_level) }}</el-tag>
+            <StatusBadge :status="row.risk_level" />
           </template>
         </el-table-column>
         <el-table-column prop="risk_factors" label="风险因素" min-width="200" show-overflow-tooltip>
@@ -113,7 +113,7 @@
           <el-descriptions-item label="资产名称">{{ currentItem.asset_name }}</el-descriptions-item>
           <el-descriptions-item label="资产类型">{{ assetTypeLabel(currentItem.asset_type) }}</el-descriptions-item>
           <el-descriptions-item label="风险级别">
-            <el-tag :type="(riskTag(currentItem.risk_level)) as TagType" effect="dark">{{ riskLabel(currentItem.risk_level) }}</el-tag>
+            <StatusBadge :status="currentItem.risk_level" />
           </el-descriptions-item>
           <el-descriptions-item label="可能性">{{ currentItem.likelihood || '-' }} / 5</el-descriptions-item>
           <el-descriptions-item label="影响度">{{ currentItem.impact || '-' }} / 5</el-descriptions-item>
@@ -141,6 +141,7 @@ import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { Refresh, Download } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 
 defineProps<{ embedded?: boolean }>()
 import { ElMessage } from 'element-plus'

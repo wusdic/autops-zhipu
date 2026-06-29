@@ -50,9 +50,7 @@
           </el-table-column>
           <el-table-column prop="severity" label="严重级别" width="100">
             <template #default="{ row }">
-              <el-tag :type="(severityType(row.severity)) as TagType" size="small">
-                {{ severityLabel(row.severity) }}
-              </el-tag>
+              <SeverityBadge :severity="row.severity" size="small" />
             </template>
           </el-table-column>
           <el-table-column prop="asset_name" label="关联资产" width="150" show-overflow-tooltip>
@@ -67,9 +65,7 @@
           </el-table-column>
           <el-table-column prop="status" label="状态" width="100">
             <template #default="{ row }">
-              <el-tag :type="(statusType(row.status)) as TagType" size="small">
-                {{ statusLabel(row.status) }}
-              </el-tag>
+              <StatusBadge :status="row.status" />
             </template>
           </el-table-column>
           <el-table-column prop="assignee_name" label="负责人" width="100">
@@ -131,6 +127,8 @@ defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { anomalyService } from '@/shared/api'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 
 const router = useRouter()
 

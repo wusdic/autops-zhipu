@@ -49,9 +49,7 @@
         </el-table-column>
         <el-table-column prop="severity" label="严重度" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(severityType(row.severity)) as TagType" size="small" effect="light">
-              {{ severityLabel(row.severity) }}
-            </el-tag>
+            <SeverityBadge :severity="row.severity" size="small" />
           </template>
         </el-table-column>
         <el-table-column prop="asset" label="资产" min-width="160" show-overflow-tooltip>
@@ -61,9 +59,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(statusType(row.status)) as TagType" size="small" effect="light">
-              {{ statusLabel(row.status) }}
-            </el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="discovered_at" label="发现时间" width="170">
@@ -132,6 +128,8 @@ import {
 } from '@element-plus/icons-vue'
 import { anomalyService } from '@/shared/api'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import {
   severityTagType, severityLabel as severityLabelFn, anomalyStatusTag, anomalyStatusLabel,
 } from '@/shared/utils/labels'

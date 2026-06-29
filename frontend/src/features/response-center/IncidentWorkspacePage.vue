@@ -39,8 +39,8 @@
               @click="selectIncident(inc)"
             >
               <div class="incident-header">
-                <el-tag :type="(severityType(inc.severity)) as TagType" size="small" effect="dark">{{ severityLabel(inc.severity) }}</el-tag>
-                <el-tag :type="(statusType(inc.status)) as TagType" size="small">{{ statusLabel(inc.status) }}</el-tag>
+                <SeverityBadge :severity="inc.severity" size="small" />
+                <StatusBadge :status="inc.status" />
               </div>
               <div class="incident-title">{{ inc.title || inc.alert_name || '事件 #' + inc.id?.slice(0,8) }}</div>
               <div class="incident-meta">
@@ -64,8 +64,8 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
               <h3 style="margin: 0">{{ selectedIncident.title || '事件详情' }}</h3>
               <div>
-                <el-tag :type="(severityType(selectedIncident.severity)) as TagType" effect="dark">{{ severityLabel(selectedIncident.severity) }}</el-tag>
-                <el-tag :type="(statusType(selectedIncident.status)) as TagType" style="margin-left: 8px">{{ statusLabel(selectedIncident.status) }}</el-tag>
+                <SeverityBadge :severity="selectedIncident.severity" />
+                <StatusBadge :status="selectedIncident.status" style="margin-left: 8px" />
               </div>
             </div>
 
@@ -142,6 +142,8 @@ import { ref, onMounted } from 'vue'
 import type { TagType } from '@/shared/types'
 import { Refresh, Loading, Box, Clock, InfoFilled, CircleCheck, MagicStick, VideoPlay, Tickets, Setting, Close } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/shared/api/client'
 import { API } from '@/shared/api/routes'

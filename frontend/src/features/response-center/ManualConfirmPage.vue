@@ -59,7 +59,7 @@
         </el-table-column>
         <el-table-column prop="risk_level" label="风险" width="80">
           <template #default="{ row }">
-            <el-tag :type="(riskType(row.risk_level)) as TagType" size="small">{{ row.risk_level }}</el-tag>
+            <StatusBadge :status="row.risk_level" />
           </template>
         </el-table-column>
         <el-table-column prop="asset_name" label="关联资产" width="140" />
@@ -116,6 +116,7 @@ defineProps<{ embedded?: boolean }>()
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import client from '@/shared/api/client'
 import { riskTag } from '@/shared/utils/labels'
 
