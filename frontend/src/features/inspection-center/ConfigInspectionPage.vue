@@ -41,7 +41,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="(statusTag(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="last_checked_at" label="最后检查" width="170" sortable="custom">
@@ -88,7 +88,7 @@
         </el-descriptions-item>
         <el-descriptions-item label="检查类型">{{ checkTypeLabel(currentItem.check_type) }}</el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="(statusTag(currentItem.status)) as TagType">{{ statusLabel(currentItem.status) }}</el-tag>
+          <StatusBadge :status="currentItem.status" />
         </el-descriptions-item>
         <el-descriptions-item label="最后检查">{{ formatTime(currentItem.last_checked_at) }}</el-descriptions-item>
         <el-descriptions-item label="基线版本">{{ currentItem.baseline_version || '-' }}</el-descriptions-item>
@@ -122,6 +122,7 @@ import type { TagType } from '@/shared/types'
 import { ref, computed, onMounted } from 'vue'
 import { Search, VideoPlay } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 import { checkResultLabel, checkResultTag } from '@/shared/utils/labels'

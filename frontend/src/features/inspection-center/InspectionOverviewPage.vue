@@ -49,9 +49,7 @@ empty-text="暂无巡检任务"
         </el-table-column>
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(statusType(row.status)) as TagType" size="small" effect="light">
-              {{ statusLabel(row.status) }}
-            </el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="asset_names" label="巡检资产" min-width="160" show-overflow-tooltip>
@@ -116,6 +114,7 @@ import {
 } from '@element-plus/icons-vue'
 import { inspectionService } from '@/shared/api'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 
 const router = useRouter()

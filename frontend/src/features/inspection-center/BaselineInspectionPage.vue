@@ -65,11 +65,7 @@
       </el-table-column>
       <el-table-column prop="status" label="合规状态" width="120" align="center">
         <template #default="{ row }">
-          <el-tag :type="(complianceTagType(row.status)) as TagType" size="small" effect="light">
-            <el-icon v-if="row.status === 'non-compliant'" style="margin-right: 2px"><CircleCloseFilled /></el-icon>
-            <el-icon v-else-if="row.status === 'compliant'" style="margin-right: 2px"><CircleCheckFilled /></el-icon>
-            {{ complianceLabel(row.status) }}
-          </el-tag>
+          <StatusBadge :type="complianceTagType(row.status)" :label="complianceLabel(row.status)" />
         </template>
       </el-table-column>
       <el-table-column prop="checked_at" label="检查时间" width="180">
@@ -101,6 +97,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import client from '@/shared/api/client'
 import { API } from '@/shared/api/routes'
 

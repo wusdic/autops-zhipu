@@ -122,7 +122,7 @@
           </el-table-column>
           <el-table-column prop="severity" label="严重级别" width="100" align="center">
             <template #default="{ row }">
-              <el-tag v-if="row.severity" :type="(severityType(row.severity)) as TagType" size="small">{{ row.severity }}</el-tag>
+              <SeverityBadge v-if="row.severity" :severity="row.severity" size="small" />
               <span v-else>-</span>
             </template>
           </el-table-column>
@@ -144,6 +144,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, RefreshLeft } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import { Document } from '@element-plus/icons-vue'
 import client from '@/shared/api/client'
 import { severityTagType } from '@/shared/utils/labels'

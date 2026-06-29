@@ -13,7 +13,7 @@
           <el-descriptions-item label="巡检任务ID">{{ taskDetail?.id?.slice(0, 8) || '-' }}</el-descriptions-item>
           <el-descriptions-item label="巡检模板">{{ taskDetail?.template_name || taskDetail?.inspection_type || '-' }}</el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="(statusTag(taskDetail?.status)) as TagType" effect="dark">{{ statusLabel(taskDetail?.status) }}</el-tag>
+            <StatusBadge :status="taskDetail?.status" />
           </el-descriptions-item>
           <el-descriptions-item label="资产数量">{{ taskDetail?.asset_count || taskDetail?.target_assets?.length || 0 }}</el-descriptions-item>
           <el-descriptions-item label="开始时间">{{ formatTime(taskDetail?.started_at) }}</el-descriptions-item>
@@ -76,12 +76,12 @@
           </el-table-column>
           <el-table-column prop="result" label="结果" width="80">
             <template #default="{ row }">
-              <el-tag :type="(resultTag(row.result)) as TagType" size="small">{{ resultLabel(row.result) }}</el-tag>
+              <StatusBadge :type="resultTag(row.result)" :label="resultLabel(row.result)" />
             </template>
           </el-table-column>
           <el-table-column prop="severity" label="严重度" width="80">
             <template #default="{ row }">
-              <el-tag v-if="row.result === 'fail'" :type="(severityTag(row.severity)) as TagType" size="small">{{ row.severity || '-' }}</el-tag>
+              <SeverityBadge v-if="row.result === 'fail'" :severity="row.severity" size="small" />
               <span v-else>-</span>
             </template>
           </el-table-column>
@@ -118,6 +118,8 @@ import { Refresh, Warning, Document, DataAnalysis, CircleCheckFilled, CircleClos
 import { ElMessage } from 'element-plus'
 import api from '@/shared/api/client'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
+import SeverityBadge from '@/shared/components/SeverityBadge.vue'
 import {
   taskStatusTag, taskStatusLabel, checkResultTag, checkResultLabel, severityTagType,
 } from '@/shared/utils/labels'

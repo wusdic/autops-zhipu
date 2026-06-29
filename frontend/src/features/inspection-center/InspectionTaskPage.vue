@@ -41,10 +41,7 @@
       </el-table-column>
       <el-table-column prop="status" label="状态" width="100" align="center">
         <template #default="{ row }">
-          <el-tag :type="(statusTagType(row.status)) as TagType" size="small" effect="light">
-            <el-icon v-if="row.status === 'running'" class="is-loading" style="margin-right: 2px"><Loading /></el-icon>
-            {{ statusLabel(row.status) }}
-          </el-tag>
+          <StatusBadge :status="row.status" />
         </template>
       </el-table-column>
       <el-table-column prop="asset_count" label="执行资产数" width="110" align="center">
@@ -161,7 +158,7 @@
           <el-descriptions-item label="任务名称">{{ taskDetail.name }}</el-descriptions-item>
           <el-descriptions-item label="关联计划">{{ taskDetail.plan_name || taskDetail.plan_id || '-' }}</el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="(statusTagType(taskDetail.status)) as TagType" size="small">{{ statusLabel(taskDetail.status) }}</el-tag>
+            <StatusBadge :status="taskDetail.status" />
           </el-descriptions-item>
           <el-descriptions-item label="执行资产数">{{ taskDetail.asset_count ?? taskDetail.total_assets ?? '-' }}</el-descriptions-item>
           <el-descriptions-item label="开始时间">{{ taskDetail.started_at || '-' }}</el-descriptions-item>
@@ -175,7 +172,7 @@
             <el-table-column prop="asset_name" label="资产" min-width="140" show-overflow-tooltip />
             <el-table-column prop="status" label="状态" width="90">
               <template #default="{ row }">
-                <el-tag :type="(statusTagType(row.status)) as TagType" size="small">{{ statusLabel(row.status) }}</el-tag>
+                <StatusBadge :status="row.status" />
               </template>
             </el-table-column>
             <el-table-column prop="message" label="结果信息" min-width="200" show-overflow-tooltip />
@@ -198,6 +195,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Search, Refresh, VideoPlay, Loading } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { inspectionService } from '@/shared/api'
 import { taskStatusTag, taskStatusLabel } from '@/shared/utils/labels'
 import { useWorkflowNav } from '@/shared/composables/useWorkflowNav'

@@ -51,9 +51,7 @@
       </el-table-column>
       <el-table-column prop="status" label="状态" width="100" align="center">
         <template #default="{ row }">
-          <el-tag :type="(statusTagType(row.status)) as TagType" size="small" effect="light">
-            {{ statusLabel(row.status) }}
-          </el-tag>
+          <StatusBadge :status="row.status" />
         </template>
       </el-table-column>
     </el-table>
@@ -80,6 +78,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import client from '@/shared/api/client'
 import { checkResultTag, checkResultLabel } from '@/shared/utils/labels'
 import { API } from '@/shared/api/routes'

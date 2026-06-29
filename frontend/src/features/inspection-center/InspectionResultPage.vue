@@ -142,9 +142,7 @@
 
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="(statusTagType(row.status)) as TagType" size="small" effect="dark">
-              {{ statusLabel(row.status) }}
-            </el-tag>
+            <StatusBadge :status="row.status" />
           </template>
         </el-table-column>
 
@@ -208,9 +206,7 @@
             </el-table-column>
             <el-table-column prop="status" label="状态" width="100" align="center">
               <template #default="{ row }">
-                <el-tag :type="(statusTagType(row.status)) as TagType" size="small" effect="dark">
-                  {{ statusLabel(row.status) }}
-                </el-tag>
+                <StatusBadge :status="row.status" />
               </template>
             </el-table-column>
             <el-table-column prop="check_item" label="检查项" min-width="200" show-overflow-tooltip />
@@ -249,9 +245,7 @@
           <el-tag size="small" type="info">{{ checkTypeLabel(currentResult.check_type) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="状态">
-          <el-tag :type="(statusTagType(currentResult.status)) as TagType" size="small" effect="dark">
-            {{ statusLabel(currentResult.status) }}
-          </el-tag>
+          <StatusBadge :status="currentResult.status" />
         </el-descriptions-item>
         <el-descriptions-item label="检查项" :span="2">{{ currentResult.check_item || currentResult.item_name }}</el-descriptions-item>
         <el-descriptions-item label="详情" :span="2">
@@ -289,6 +283,7 @@ import type { TagType } from '@/shared/types'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Search, Refresh, Download, Monitor } from '@element-plus/icons-vue'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import StatusBadge from '@/shared/components/StatusBadge.vue'
 import { Warning, Document } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { API } from '@/shared/api/routes'
