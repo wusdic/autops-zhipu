@@ -261,6 +261,47 @@ class DiscoveryService:
         )
         return {"task_id": task_id, "status": "running"}
 
+    async def stop_task(self, task_id: str) -> dict:
+        """停止发现任务：将 pending/running 任务置为 cancelled。
+
+        扫描在 Worker 进程异步执行，跨进程无法强杀；此处标记 DB 终态，
+        _run_scan 完成前会校验该状态、不再覆盖（见 _run_scan 守卫）。
+        """
+        task = (
+            await self.db.execute(
+                select(DiscoveryTask).where(DiscoveryTask.id == task_id)
+            )
+        ).scalar_one_or_none()
+        if not task:
+            return {"error": "任务不存在"}
+        if task.status not in ("pending", "running"):
+            return {"error": f"任务状态为 {task.status}，无需停止"}
+        task.status = "cancelled"
+        task.completed_at = datetime.now(timezone.utc)
+        task.error_message = "用户手动停止"
+        await self.db.flush()
+        return {"task_id": task_id, "status": "cancelled"}
+
+    async def delete_task(self, task_id: str) -> dict:
+        """删除发现任务及其发现结果（无论任务处于何种状态）。"""
+        from sqlalchemy import delete as _delete
+
+        task = (
+            await self.db.execute(
+                select(DiscoveryTask).where(DiscoveryTask.id == task_id)
+            )
+        ).scalar_one_or_none()
+        if not task:
+            return {"error": "任务不存在"}
+        await self.db.execute(
+            _delete(DiscoveryResult).where(DiscoveryResult.task_id == task_id)
+        )
+        await self.db.execute(
+            _delete(DiscoveryTask).where(DiscoveryTask.id == task_id)
+        )
+        await self.db.flush()
+        return {"task_id": task_id, "deleted": True}
+
     async def requeue_stuck_tasks(self) -> int:
         """Worker 启动时恢复孤儿任务：重新派发 pending/running 状态的发现任务。
 
@@ -384,6 +425,16 @@ class DiscoveryService:
                 for i in range(0, len(ips), batch_size):
                     batch = ips[i : i + batch_size]
                     await asyncio.gather(*[_scan_host(ip) for ip in batch])
+
+                # 若扫描期间用户已停止/删除该任务，则不覆盖其终态
+                cur_status = (
+                    await session.execute(
+                        select(DiscoveryTask.status).where(DiscoveryTask.id == task_id)
+                    )
+                ).scalar_one_or_none()
+                if cur_status is None or cur_status == "cancelled":
+                    logger.info("discovery: 任务 %s 已被停止/删除，跳过完成写入", task_id)
+                    return
 
                 # 更新任务
                 task.status = "completed"

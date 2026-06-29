@@ -38,6 +38,24 @@ async def start_discovery_task(task_id: str, svc: DiscoveryService = Depends(_ge
     return success(result)
 
 
+@router.post("/tasks/{task_id}/stop")
+async def stop_discovery_task(task_id: str, svc: DiscoveryService = Depends(_get_svc)):
+    """停止发现任务（置为 cancelled）."""
+    result = await svc.stop_task(task_id)
+    if "error" in result:
+        raise ValidationError(result["error"])
+    return success(result)
+
+
+@router.delete("/tasks/{task_id}")
+async def delete_discovery_task(task_id: str, svc: DiscoveryService = Depends(_get_svc)):
+    """删除发现任务及其结果."""
+    result = await svc.delete_task(task_id)
+    if "error" in result:
+        raise NotFoundError(result["error"])
+    return success(result)
+
+
 @router.get("/tasks/{task_id}")
 async def get_discovery_task(task_id: str, svc: DiscoveryService = Depends(_get_svc)):
     """获取任务详情."""
