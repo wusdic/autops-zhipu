@@ -137,6 +137,7 @@ export const API = {
     // Agent
     AGENT_RUN: '/api/v1/aiops/agent/run',
     AGENT_RESULTS: '/api/v1/aiops/agent/results',
+    AGENT_RESULT_DETAIL: (id: string) => '/api/v1/aiops/agent/' + id,
     AGENT_APPROVE: (id: string) => '/api/v1/aiops/agent/' + id + '/approve',
     // 模型服务
     MODEL_AGENTS: '/api/v1/aiops/agents',

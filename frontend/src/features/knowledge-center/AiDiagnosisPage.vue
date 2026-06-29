@@ -762,64 +762,39 @@ async function runAgent() {
   agentConclusion.value = null
 
   try {
+    // /agent/run 同步返回完整结果（answer/steps/tool_calls），直接消费，无需轮询
     const { data } = await api.post(R.AIOPS.AGENT_RUN, { task })
-    if (data.code === 0) {
-      const runId = data.data?.id || data.data?.task_id
-      ElMessage.success('Agent 任务已提交')
-      // Start polling for steps & result
-      startAgentPolling(runId)
+    if (data.code === 0 && data.data) {
+      const r = data.data
+      agentSteps.value = (r.steps || []).map((s: any) => ({
+        action: s.action || s.name || '',
+        thought: s.thought || s.reasoning || '',
+        observation:
+          typeof s.observation === 'string'
+            ? s.observation
+            : (s.observation != null ? JSON.stringify(s.observation) : ''),
+        tool: s.action || s.tool || '',
+        status: s.final_answer ? 'done' : (s.error ? 'error' : 'done'),
+      }))
+      agentConclusion.value = {
+        id: r.id,
+        summary: r.answer || r.conclusion || r.summary || '（Agent 未给出结论）',
+        actions: r.tool_calls || r.actions || [],
+        completed_at: new Date().toISOString(),
+        pending_approval: r.pending_approval,
+      }
+      ElMessage.success(r.pending_approval ? 'Agent 已生成方案，待审批' : 'Agent 运行完成')
+      loadAgentHistory()
     } else {
-      ElMessage.error(data.message || 'Agent 启动失败')
-      agentRunning.value = false
+      ElMessage.error(data.message || 'Agent 运行失败')
     }
   } catch (e: any) {
-    ElMessage.error('Agent 启动失败: ' + (e.message || e))
+    ElMessage.error('Agent 运行失败: ' + (e.message || e))
+  } finally {
     agentRunning.value = false
   }
 }
 
-function startAgentPolling(runId: string) {
-  // Poll every 2 seconds
-  agentPollTimer = setInterval(async () => {
-    try {
-      const { data } = await api.get(R.AIOPS.AGENT_RESULTS, {
-        params: { task_id: runId },
-      })
-      if (data.code === 0) {
-        const result = data.data
-        // Update steps
-        if (result.steps?.length) {
-          agentSteps.value = result.steps.map((s: any) => ({
-            action: s.action || s.name || '',
-            thought: s.thought || s.reasoning || '',
-            observation: s.observation || s.result || '',
-            tool: s.tool || s.tool_name || '',
-            status: s.status || (s.error ? 'error' : 'done'),
-          }))
-        }
-        // Check completion
-        if (result.status === 'completed' || result.conclusion) {
-          agentConclusion.value = {
-            id: result.id || runId,
-            summary: result.conclusion || result.summary || '',
-            actions: result.actions || [],
-            completed_at: result.completed_at || new Date().toISOString(),
-            ...result,
-          }
-          stopAgentPolling()
-          agentRunning.value = false
-          loadAgentHistory()
-        } else if (result.status === 'failed') {
-          stopAgentPolling()
-          agentRunning.value = false
-          ElMessage.error('Agent 运行失败: ' + (result.error || '未知错误'))
-        }
-      }
-    } catch {
-      // Continue polling on transient errors
-    }
-  }, 2000)
-}
 
 function stopAgentPolling() {
   if (agentPollTimer) {
@@ -854,9 +829,7 @@ async function loadAgentHistory() {
 // ─── Agent: Load Single Result ──────────────────────────────────────
 async function loadAgentResult(id: string) {
   try {
-    const { data } = await api.get(R.AIOPS.AGENT_RESULTS, {
-      params: { task_id: id },
-    })
+    const { data } = await api.get(R.AIOPS.AGENT_RESULT_DETAIL(id))
     if (data.code === 0) {
       const result = data.data
       if (result.steps?.length) {
@@ -871,8 +844,8 @@ async function loadAgentResult(id: string) {
       agentConclusion.value = {
         id: result.id || id,
         summary: result.conclusion || result.summary || '',
-        actions: result.actions || [],
-        completed_at: result.completed_at || '',
+        actions: result.actions || result.tool_calls || [],
+        completed_at: result.completed_at || result.created_at || '',
         ...result,
       }
     }

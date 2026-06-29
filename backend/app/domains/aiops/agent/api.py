@@ -8,8 +8,7 @@ from pydantic import BaseModel
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.infra.database import get_db
-from app.common.response import success
-from app.domains.aiops.agent.llm_client import LLMClient
+from app.common.response import error, success
 from app.domains.aiops.agent.react import ReActAgent
 from app.domains.aiops.agent.context import ContextBuilder
 from app.domains.aiops.models import AIAnalysis
@@ -32,7 +31,10 @@ class AgentApproveRequest(BaseModel):
 @router.post("/agent/run")
 async def run_agent(req: AgentRunRequest, db: AsyncSession = Depends(get_db)):
     """运行AI Agent推理循环."""
-    llm = LLMClient()
+    from app.domains.aiops.model_runtime import build_llm_client
+
+    # 走统一运行时配置，让「模型服务」页注册的本地/默认模型对 Agent 同样生效
+    llm = await build_llm_client(db)
     agent = ReActAgent(llm_client=llm)
 
     # 构建上下文
@@ -117,6 +119,35 @@ async def list_agent_results(
     })
 
 
+@router.get("/agent/{analysis_id}")
+async def get_agent_result(analysis_id: str, db: AsyncSession = Depends(get_db)):
+    """查询单条 Agent 运行结果（供历史回看）。"""
+    from sqlalchemy import select
+
+    res = await db.execute(select(AIAnalysis).where(AIAnalysis.id == analysis_id))
+    a = res.scalar_one_or_none()
+    if not a:
+        return error(1, "Analysis not found")
+
+    def _loads(v, default):
+        try:
+            return json.loads(v) if v else default
+        except (json.JSONDecodeError, ValueError, TypeError):
+            return default
+
+    thoughts = _loads(a.root_causes, [])
+    return success({
+        "id": str(a.id),
+        "task": _loads(a.input_context, {}).get("task", "") if a.input_context else "",
+        "summary": a.summary or "",
+        "steps": [{"thought": t} for t in thoughts] if isinstance(thoughts, list) else [],
+        "tool_calls": _loads(a.recommended_actions, []),
+        "status": a.status,
+        "model": a.model_name,
+        "created_at": str(a.created_at),
+    })
+
+
 @router.post("/agent/{analysis_id}/approve")
 async def approve_agent_action(
     analysis_id: str,
@@ -128,7 +159,7 @@ async def approve_agent_action(
     result = await db.execute(select(AIAnalysis).where(AIAnalysis.id == analysis_id))
     analysis = result.scalar_one_or_none()
     if not analysis:
-        return success({"error": "Analysis not found"}, code=1)
+        return error(1, "Analysis not found")
 
     if req.approved:
         analysis.status = "approved"
