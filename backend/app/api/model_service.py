@@ -197,5 +197,22 @@ async def save_model_config(data: dict, db: AsyncSession = Depends(get_db)):
             text("INSERT INTO system_settings (skey, svalue, updated_at) VALUES ('model_config', :v, :ts)"),
             {"v": value, "ts": ts},
         )
+
+    # 让「默认模型」真正生效：运行时 load_active_model 按 is_default 选模型，
+    # 因此把所选模型置为默认（其余清零），否则切换默认模型不会改变实际调用的模型。
+    default_id = data.get("default_model")
+    if default_id:
+        exists = (
+            await db.execute(
+                text("SELECT 1 FROM model_agents WHERE id = :id"), {"id": default_id}
+            )
+        ).first()
+        if exists:
+            await db.execute(text("UPDATE model_agents SET is_default = 0"))
+            await db.execute(
+                text("UPDATE model_agents SET is_default = 1, status = 'active' WHERE id = :id"),
+                {"id": default_id},
+            )
+
     await db.commit()
     return success({"saved": True})

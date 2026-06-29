@@ -142,8 +142,33 @@ const quickQuestions = [
   '平台各模块健康情况如何？',
 ]
 
+const STORAGE_KEY = 'autops_ai_conversations'
+
+function persist() {
+  try {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ conversations: conversations.value, currentConvId: currentConvId.value }),
+    )
+  } catch { /* 配额或隐私模式下忽略 */ }
+}
+
+function restore() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return
+    const s = JSON.parse(raw)
+    conversations.value = Array.isArray(s.conversations) ? s.conversations : []
+    currentConvId.value = s.currentConvId || ''
+    const conv = conversations.value.find(c => c.id === currentConvId.value)
+    messages.value = conv ? conv.messages : []
+  } catch { /* 损坏数据忽略 */ }
+}
+
 onMounted(() => {
   username.value = localStorage.getItem('username') || 'admin'
+  restore()
+  scrollToBottom()
 })
 
 function newConversation() {
@@ -155,6 +180,7 @@ function newConversation() {
   conversations.value.unshift(conv)
   currentConvId.value = conv.id
   messages.value = conv.messages
+  persist()
 }
 
 function switchConversation(id: string) {
@@ -162,6 +188,7 @@ function switchConversation(id: string) {
   if (conv) {
     currentConvId.value = conv.id
     messages.value = conv.messages
+    persist()
     scrollToBottom()
   }
 }
@@ -178,16 +205,24 @@ async function sendMessage() {
   scrollToBottom()
 
   try {
+    // 携带最近多轮历史（不含刚 push 的本条 user 已在 history 末尾），供后端构建上下文
+    const history = messages.value
+      .slice(0, -1)
+      .slice(-10)
+      .map((m) => ({ role: m.role, content: m.content }))
+
     const resp = await api.post(API.AI.CHAT, {
       message: text,
-      conversation_id: currentConvId.value,
+      history,
     })
 
     if (resp.data?.code === 0 && resp.data?.data) {
       const data = resp.data.data
+      // 后端契约返回 data.reply；兼容 content/message 历史字段
+      const reply = data.reply || data.content || data.message || '（模型未返回内容）'
       messages.value.push({
         role: 'assistant',
-        content: data.content || data.message || '处理完成',
+        content: reply,
         actions: data.actions || [],
       })
       // Update conversation title from first exchange
@@ -210,6 +245,7 @@ async function sendMessage() {
     })
   } finally {
     loading.value = false
+    persist()
     scrollToBottom()
   }
 }
@@ -264,6 +300,7 @@ async function executeAction(action: MessageAction) {
     // 失败也 push 到对话流，让用户在历史中能看到操作失败
     messages.value.push({ role: 'assistant', content: '⚠️ 操作执行失败：' + msg })
   }
+  persist()
   scrollToBottom()
 }
 
@@ -401,6 +438,18 @@ function scrollToBottom() {
   flex-direction: row-reverse;
 }
 
+/* 消息主体占满剩余宽度，气泡按内容自适应（短文不再被压成两行） */
+.message-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-item.user .message-body {
+  align-items: flex-end;
+}
+
 .message-item.user .message-content {
   background: var(--autops-primary);
   color: var(--autops-bg-1);
@@ -414,6 +463,8 @@ function scrollToBottom() {
 }
 
 .message-content {
+  display: inline-block;
+  width: fit-content;
   padding: 10px 16px;
   max-width: 70%;
   font-size: var(--autops-font-14);

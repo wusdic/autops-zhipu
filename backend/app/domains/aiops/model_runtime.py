@@ -90,9 +90,8 @@ async def build_llm_client(session: AsyncSession) -> LLMClient:
             client.timeout = int(cfg["timeout"])
         if cfg.get("max_tokens"):
             client.max_tokens = int(cfg["max_tokens"])
-        # 若全局配置指定 default_model 且存在对应模型名，可覆盖
-        if cfg.get("default_model") and not (active and active.get("model_id")):
-            client.model = str(cfg["default_model"])
+        # 注：default_model 存的是 model_agents.id，由保存配置时置 is_default 生效，
+        # load_active_model 已据此选中正确模型，这里不再用 id 当作模型名覆盖。
     except Exception:  # noqa: BLE001
         logger.warning("加载运行时模型配置失败，回退 env/yaml", exc_info=True)
     return client

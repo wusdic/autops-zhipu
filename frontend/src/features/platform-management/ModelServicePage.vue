@@ -214,8 +214,22 @@ async function loadData() {
   try {
     const res = await client.get(API.AIOPS.MODEL_AGENTS)
     const data = res.data?.data ?? res.data
-    models.value = data?.items || []
+    // 后端返回裸数组（success([...])）；兼容分页 {items} 结构
+    models.value = Array.isArray(data) ? data : (data?.items || [])
   } catch { models.value = [] } finally { loading.value = false }
+}
+
+async function loadConfig() {
+  try {
+    const res = await client.get(API.AIOPS.MODEL_CONFIG)
+    const cfg = res.data?.data ?? res.data
+    if (cfg && typeof cfg === 'object') {
+      globalConfig.default_model = cfg.default_model || ''
+      if (cfg.timeout) globalConfig.timeout = cfg.timeout
+      if (cfg.max_tokens) globalConfig.max_tokens = cfg.max_tokens
+      if (cfg.temperature != null) globalConfig.temperature = Math.round(cfg.temperature * 100)
+    }
+  } catch { /* 无配置时保持默认 */ }
 }
 
 function openDialog(row?: any) {
@@ -296,7 +310,7 @@ async function saveConfig() {
   } finally { saving.value = false }
 }
 
-onMounted(loadData)
+onMounted(() => { loadData(); loadConfig() })
 </script>
 
 <style scoped>
