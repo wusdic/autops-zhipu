@@ -34,9 +34,22 @@
 6. **降级**：端点不支持 `tools` 或模型不可用 → 退回纯聊天（仍是真实模型，
    绝不返回硬编码假答案）；再失败 → 明确的降级提示。
 
-只读工具（`backend/app/domains/aiops/tools/readonly.py`）：
-`query_assets` / `check_asset_status` / `query_alerts` / `query_events` /
-`query_knowledge` / `query_execution_logs`。
+只读工具（`backend/app/domains/aiops/tools/readonly.py`）——决定 AI 能回答哪些数据：
+
+| 工具 | 覆盖 | 典型问题 |
+|------|------|----------|
+| `get_platform_overview` | **全平台概览**：资产/告警/异常/自动化/巡检/工单/报告/发现/策略/脚本/采集器/知识 计数 | 平台现状？系统总体情况？各模块数据 |
+| `query_assets` | 资产清单（类型/状态/关键词） | 有多少资产？哪些 Linux？在线数量 |
+| `check_asset_status` | 单台资产状态（按 id） | 某资产健康如何 |
+| `query_alerts` | 告警（级别/状态） | 有哪些告警 |
+| `query_events` | 事件（资产/类型） | 最近事件 |
+| `query_tickets` | 工单（状态） | 有多少工单/待处理工单 |
+| `query_knowledge` | 知识库检索 | 有没有 X 的处理方案 |
+| `query_execution_logs` | 单次执行详情（按 id） | 某次执行结果 |
+
+> 覆盖说明：`get_platform_overview` 已覆盖**各模块的现状/计数**（含巡检、异常、自动化、
+> 工单、报告等）；明细列表目前提供资产/告警/事件/工单/知识。其余模块（如逐条巡检结果、
+> 采集任务明细）暂只有概览数字，需要时可继续按同样模式加只读工具。
 > 注意：工具靠 `tools/__init__.py` 显式 import 触发 `@register` 注册——
 > 不导入则 `ToolRegistry` 为空、Agent 无工具可用（历史 bug，已修）。
 

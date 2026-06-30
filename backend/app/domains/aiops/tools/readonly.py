@@ -193,3 +193,95 @@ async def query_assets(
                 {"name": r[0], "type": r[1], "status": r[2], "ip": r[3]} for r in rows
             ],
         }
+
+
+@registry.register(
+    name="get_platform_overview",
+    description="获取平台整体运行现状概览：资产/告警/异常/自动化执行/巡检/工单/报告/资产发现 "
+                "各模块的关键数量与状态。回答'平台现状/系统总体情况/各模块数据/有多少告警工单巡检'"
+                "等总体性问题时优先使用本工具。",
+    parameters={"type": "object", "properties": {}},
+    risk_level="read_only",
+)
+async def get_platform_overview() -> dict:
+    """跨域只读聚合（每项独立容错，某表缺失不影响其余）."""
+    from app.infra.database import get_db
+    from sqlalchemy import text
+
+    async for db in get_db():
+        async def _c(sql: str) -> int | None:
+            try:
+                return int((await db.execute(text(sql))).scalar() or 0)
+            except Exception:  # noqa: BLE001
+                return None
+
+        real = "(is_deleted = 0 OR is_deleted IS NULL) AND asset_type <> 'business_system'"
+        return {
+            "assets": {
+                "total": await _c(f"SELECT COUNT(*) FROM assets WHERE {real}"),
+                "online": await _c(f"SELECT COUNT(*) FROM assets WHERE {real} AND reachability='reachable'"),
+                "offline": await _c(f"SELECT COUNT(*) FROM assets WHERE {real} AND reachability='unreachable'"),
+                "abnormal": await _c(f"SELECT COUNT(*) FROM assets WHERE {real} AND health_status IN ('critical','warning')"),
+            },
+            "alerts_open": await _c("SELECT COUNT(*) FROM alerts WHERE status='open'"),
+            "anomalies_open": await _c("SELECT COUNT(*) FROM anomalies WHERE status IN ('new','confirmed','analyzing')"),
+            "automation": {
+                "total": await _c("SELECT COUNT(*) FROM executions"),
+                "running": await _c("SELECT COUNT(*) FROM executions WHERE status='running'"),
+                "pending_approval": await _c("SELECT COUNT(*) FROM executions WHERE status='awaiting_approval'"),
+                "failed": await _c("SELECT COUNT(*) FROM executions WHERE status='failed'"),
+            },
+            "inspection": {
+                "tasks_total": await _c("SELECT COUNT(*) FROM inspection_tasks"),
+                "completed": await _c("SELECT COUNT(*) FROM inspection_tasks WHERE status='completed'"),
+                "failed": await _c("SELECT COUNT(*) FROM inspection_tasks WHERE status='failed'"),
+            },
+            "tickets_open": await _c("SELECT COUNT(*) FROM tickets WHERE status IN ('open','in_progress')"),
+            "reports_total": await _c("SELECT COUNT(*) FROM report_tasks"),
+            "discovery_tasks": await _c("SELECT COUNT(*) FROM discovery_tasks"),
+            "policies": await _c("SELECT COUNT(*) FROM policies"),
+            "playbooks": await _c("SELECT COUNT(*) FROM playbooks"),
+            "scripts": await _c("SELECT COUNT(*) FROM scripts"),
+            "collectors": await _c("SELECT COUNT(*) FROM collectors"),
+            "knowledge": await _c("SELECT COUNT(*) FROM knowledge_articles"),
+        }
+
+
+@registry.register(
+    name="query_tickets",
+    description="查询/统计工单：按状态过滤，返回总数与样例。回答'有多少工单/待处理工单/工单情况'等问题。",
+    parameters={
+        "type": "object",
+        "properties": {
+            "status": {"type": "string", "description": "状态：open/in_progress/resolved/closed；留空=全部"},
+            "limit": {"type": "integer", "description": "样例返回数量", "default": 20},
+        },
+    },
+    risk_level="read_only",
+)
+async def query_tickets(status: str | None = None, limit: int = 20) -> dict:
+    """统计并列出工单."""
+    from app.infra.database import get_db
+    from sqlalchemy import text
+    async for db in get_db():
+        conditions = []
+        params: dict = {"limit": int(limit or 20)}
+        if status:
+            conditions.append("status = :status")
+            params["status"] = status
+        where = " AND ".join(conditions) if conditions else "1=1"
+        total = (await db.execute(
+            text(f"SELECT COUNT(*) FROM tickets WHERE {where}"), params
+        )).scalar() or 0
+        rows = (await db.execute(
+            text(f"SELECT id, title, status, priority, created_at FROM tickets WHERE {where} "
+                 "ORDER BY created_at DESC LIMIT :limit"),
+            params,
+        )).fetchall()
+        return {
+            "total": int(total),
+            "items": [
+                {"id": str(r[0]), "title": r[1], "status": r[2], "priority": r[3], "time": str(r[4])}
+                for r in rows
+            ],
+        }
