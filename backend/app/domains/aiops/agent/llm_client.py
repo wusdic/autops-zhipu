@@ -172,6 +172,44 @@ class LLMClient:
             return "LLM调用超时"
         raise last_exc  # type: ignore[misc]
 
+    async def chat_raw(
+        self, messages: list[dict], tools: list[dict] | None = None
+    ) -> dict:
+        """单次调用，返回原始 assistant message（可能含 tool_calls）。
+
+        用于 OpenAI 原生 function calling：传入 tools 时模型可返回结构化 tool_calls，
+        比 ReAct 文本协议稳健得多（小模型无需严格遵守 Thought/Action 文本格式）。
+        端点不支持 tools 时通常忽略该字段并正常返回 content；若返回非 200 则抛错由调用方降级。
+        """
+        headers: dict[str, str] = {"Content-Type": "application/json"}
+        if self.api_key and self.api_key != "EMPTY":
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        payload: dict = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": 0.3,
+            "max_tokens": self.max_tokens,
+        }
+        if self.chat_template_kwargs is not None:
+            payload["chat_template_kwargs"] = self.chat_template_kwargs
+        if tools:
+            payload["tools"] = tools
+            payload["tool_choice"] = "auto"
+
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.post(
+                f"{self.base_url}/chat/completions", json=payload, headers=headers
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return data["choices"][0]["message"]
+            logger.error("LLM chat_raw error: %s %s", resp.status_code, resp.text[:200])
+            raise AppError(
+                ErrorCode.AI_UNAVAILABLE_ANALYSIS,
+                f"LLM returned status {resp.status_code}", 502,
+            )
+
     async def stream(self, messages: list[dict[str, str]]) -> AsyncIterator[str]:
         """流式调用LLM, 逐块yield SSE chunk内容."""
         headers: dict[str, str] = {"Content-Type": "application/json"}
