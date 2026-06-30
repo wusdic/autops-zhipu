@@ -47,10 +47,24 @@
 | `query_knowledge` | 知识库检索 | 有没有 X 的处理方案 |
 | `query_execution_logs` | 单次执行详情（按 id） | 某次执行结果 |
 
-> 覆盖说明：`get_platform_overview` 已覆盖**各模块的现状/计数**（含巡检、异常、自动化、
-> 工单、报告等）；明细列表目前提供资产/告警/事件/工单/知识。其余模块（如逐条巡检结果、
-> 采集任务明细）暂只有概览数字，需要时可继续按同样模式加只读工具。
-> 注意：工具靠 `tools/__init__.py` 显式 import 触发 `@register` 注册——
+**智能问数（NL2SQL，覆盖结构化工具够不到的任意数据问题）**
+`backend/app/domains/aiops/tools/nl2sql.py`：
+
+| 工具 | 作用 |
+|------|------|
+| `get_database_schema` | 返回可查询的表与字段（中文释义），已自动排除鉴权/密钥等敏感表 |
+| `run_sql_query` | 执行**一条只读 SELECT** 并返回结果 |
+
+模型据 schema 自行生成 SQL → 执行 → 据结果作答，因此**任意表/任意维度的数据问题**
+（按业务系统/环境分组统计、关联查询、时间范围筛选等）都能回答，无需为每类问题写专用工具。
+
+安全闸门（纵深防御，见模块 docstring）：仅 SELECT/WITH、单条语句、关键字黑名单
+（insert/update/delete/drop/outfile/load_file…）、**表白名单=全库−敏感表黑名单**
+（users/roles/api_keys/credentials/model_agents/system_settings/config_versions…）、
+**敏感字段名黑名单**（password/api_key/secret/token/credential/…）、强制 LIMIT≤200。
+> 已实测：分号串联、非 SELECT、敏感表/字段、OUTFILE 等全部被拒；CTE 别名亦从严拒绝（安全优先）。
+
+> 工具靠 `tools/__init__.py` 显式 import 触发 `@register` 注册——
 > 不导入则 `ToolRegistry` 为空、Agent 无工具可用（历史 bug，已修）。
 
 ## 3. 模型选择（关键！能力决定可用性）

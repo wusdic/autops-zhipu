@@ -11,5 +11,6 @@ from app.domains.aiops.tools.guard import ToolGuard, RiskLevel
 # 触发工具注册（模块级 @registry.register 副作用）；放在末尾避免循环导入
 from app.domains.aiops.tools import readonly as _readonly  # noqa: E402,F401
 from app.domains.aiops.tools import execution as _execution  # noqa: E402,F401
+from app.domains.aiops.tools import nl2sql as _nl2sql  # noqa: E402,F401
 
 __all__ = ["ToolRegistry", "ToolGuard", "RiskLevel", "tool"]
