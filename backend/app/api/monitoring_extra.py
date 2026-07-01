@@ -183,6 +183,17 @@ async def collectors_health_summary(db: AsyncSession = Depends(get_db)):
         ok = int(agg[1] or 0)
         avg_ms = float(agg[2]) if agg[2] is not None else None
         last_run = agg[3]
+        # 任务积压：该采集器下"已派发但未完成"的采集任务数（running/pending/queued）。
+        # 健康时应≈0；持续>0 说明采集任务堆积（Worker 未消费/卡死/超时未清理）。
+        backlog = int((
+            await db.execute(
+                text(
+                    "SELECT COUNT(*) FROM collection_jobs "
+                    "WHERE collector_id = :cid AND status IN ('running','pending','queued')"
+                ),
+                {"cid": c.id},
+            )
+        ).scalar() or 0)
         rate = (ok / total) if total else None
         if rate is None:
             status = "unknown"
@@ -205,8 +216,7 @@ async def collectors_health_summary(db: AsyncSession = Depends(get_db)):
             "last_heartbeat": last_run.isoformat() if hasattr(last_run, "isoformat") else last_run,
             "runs_total": total,
             "runs_ok": ok,
-            "version": None,                # 采集器无版本字段
-            "task_backlog": None,           # 暂无可靠积压来源
+            "task_backlog": backlog,        # 已派发未完成(running/pending/queued)的采集任务数
         })
 
     total_c = len(collectors)

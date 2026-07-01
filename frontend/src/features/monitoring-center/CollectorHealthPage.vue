@@ -57,19 +57,19 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="version" label="版本" width="90" align="center">
-            <template #default="{ row }">
-              {{ row.version || '-' }}
-            </template>
-          </el-table-column>
           <el-table-column prop="last_heartbeat" label="最后心跳" width="175">
             <template #default="{ row }">
               {{ formatTime(row.last_heartbeat) }}
             </template>
           </el-table-column>
-          <el-table-column prop="task_backlog" label="任务积压" width="100" align="right">
+          <el-table-column prop="task_backlog" label="任务积压" width="110" align="right">
+            <template #header>
+              <el-tooltip content="已派发但未完成(running/pending)的采集任务数；健康时应≈0，持续>0 说明任务堆积" placement="top">
+                <span>任务积压 <el-icon size="12"><InfoFilled /></el-icon></span>
+              </el-tooltip>
+            </template>
             <template #default="{ row }">
-              <span :class="{ 'text-danger': row.task_backlog > 100 }">
+              <span :class="{ 'text-danger': (row.task_backlog ?? 0) > 10 }">
                 {{ row.task_backlog ?? '-' }}
               </span>
             </template>
@@ -143,6 +143,7 @@ import {
   CircleCloseFilled,
   WarningFilled,
   SuccessFilled,
+  InfoFilled,
 } from '@element-plus/icons-vue'
 import { monitoringService } from '@/shared/api'
 import PageHeader from '@/shared/components/PageHeader.vue'
