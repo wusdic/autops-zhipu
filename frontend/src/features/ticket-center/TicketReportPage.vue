@@ -89,11 +89,6 @@
         <el-table-column prop="handler" label="处理人" min-width="120" />
         <el-table-column prop="resolved" label="解决数" width="80" sortable />
         <el-table-column prop="avg_hours" label="平均时长(h)" width="120" sortable />
-        <el-table-column prop="satisfaction" label="满意度" width="100">
-          <template #default="{ row }">
-            <el-rate v-model="row.satisfaction" disabled :max="5" size="small" />
-          </template>
-        </el-table-column>
       </el-table>
     </div>
   </div>
@@ -146,24 +141,31 @@ const typeDistribution = computed(() => {
 })
 
 const slaData = computed(() => {
+  // 真实数据：达标=未超时(sla_breached=false)，超时=sla_breached=true
   const levels = ['紧急', '高', '中', '低']
   return levels.map(level => {
     const matching = tickets.value.filter(t => (t.priority || '').includes(level) || (t.severity || '').includes(level))
-    const total = matching.length || Math.floor(Math.random() * 10) + 1
-    const met = Math.floor(total * (0.7 + Math.random() * 0.3))
-    return { level, total, met, breached: total - met, rate: total > 0 ? Math.round(met / total * 100) : 100 }
+    const total = matching.length
+    const breached = matching.filter(t => t.sla_breached).length
+    const met = total - breached
+    return { level, total, met, breached, rate: total > 0 ? Math.round(met / total * 100) : 100 }
   })
 })
 
 const handlerRanking = computed(() => {
-  const handlerMap: Record<string, { resolved: number; hours: number }> = {}
+  // 真实数据：按处理人聚合已解决工单数与平均处理时长；无满意度数据来源，故不再展示
+  const handlerMap: Record<string, { resolved: number; hours: number; hoursCnt: number }> = {}
   tickets.value.filter(t => t.handler && (t.status === 'resolved' || t.status === 'closed')).forEach(t => {
-    if (!handlerMap[t.handler]) handlerMap[t.handler] = { resolved: 0, hours: 0 }
+    if (!handlerMap[t.handler]) handlerMap[t.handler] = { resolved: 0, hours: 0, hoursCnt: 0 }
     handlerMap[t.handler].resolved++
-    handlerMap[t.handler].hours += t.resolve_hours || 2
+    if (t.resolve_hours != null) { handlerMap[t.handler].hours += t.resolve_hours; handlerMap[t.handler].hoursCnt++ }
   })
   return Object.entries(handlerMap)
-    .map(([handler, data]) => ({ handler, resolved: data.resolved, avg_hours: (data.hours / data.resolved).toFixed(1), satisfaction: 3 + Math.floor(Math.random() * 3) }))
+    .map(([handler, data]) => ({
+      handler,
+      resolved: data.resolved,
+      avg_hours: data.hoursCnt ? (data.hours / data.hoursCnt).toFixed(1) : '-',
+    }))
     .sort((a, b) => b.resolved - a.resolved)
     .slice(0, 10)
 })
@@ -184,9 +186,14 @@ async function fetchData() {
     if (res.data?.code === 0) {
       tickets.value = (res.data.data?.items || []).map((t: any) => ({
         ...t,
-        resolve_hours: t.resolve_hours || Math.floor(Math.random() * 48) + 1,
+        // 处理时长：优先后端字段，否则用 已解决时间-创建时间 计算（小时）；都没有则 null
+        resolve_hours: t.resolve_hours
+          ?? ((t.resolved_at && t.created_at)
+            ? Math.round((new Date(t.resolved_at).getTime() - new Date(t.created_at).getTime()) / 3600000)
+            : null),
         sla_breached: t.sla_breached || false,
       }))
+      fetchTrend()
     }
   } catch (e) {
     console.error('Fetch ticket report error:', e)
@@ -194,15 +201,25 @@ async function fetchData() {
 }
 
 function fetchTrend() {
+  // 真实趋势：按工单 created_at / (resolved_at|已解决状态的 updated_at) 的日期聚合
   const days = trendPeriod.value === '7d' ? 7 : 30
   const now = new Date()
-  trendData.value = Array.from({ length: days }, (_, i) => {
-    const d = new Date(now.getTime() - (days - 1 - i) * 86400000)
-    return {
-      date: d.toISOString().slice(0, 10),
-      created: Math.floor(Math.random() * 10),
-      resolved: Math.floor(Math.random() * 8),
+  const createdBy: Record<string, number> = {}
+  const resolvedBy: Record<string, number> = {}
+  tickets.value.forEach(t => {
+    if (t.created_at) {
+      const d = String(t.created_at).slice(0, 10)
+      createdBy[d] = (createdBy[d] || 0) + 1
     }
+    const rt = t.resolved_at || (['resolved', 'closed'].includes(t.status) ? t.updated_at : null)
+    if (rt) {
+      const d = String(rt).slice(0, 10)
+      resolvedBy[d] = (resolvedBy[d] || 0) + 1
+    }
+  })
+  trendData.value = Array.from({ length: days }, (_, i) => {
+    const d = new Date(now.getTime() - (days - 1 - i) * 86400000).toISOString().slice(0, 10)
+    return { date: d, created: createdBy[d] || 0, resolved: resolvedBy[d] || 0 }
   })
 }
 

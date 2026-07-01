@@ -205,7 +205,7 @@ async function fetchSuggestions() {
         suggestion: item.title || item.name || item.suggestion || '-',
         basis: item.basis || item.source || item.summary || item.content?.substring(0, 100) || '-',
         risk_level: item.risk_level || 'medium',
-        confidence: item.confidence ?? Math.round(60 + Math.random() * 35),
+        confidence: item.confidence ?? null,
         knowledge_id: item.id,
         knowledge_title: item.title,
         applied: false,

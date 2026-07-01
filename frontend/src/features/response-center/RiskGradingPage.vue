@@ -166,9 +166,9 @@ const matrixCells = computed(() => {
     const likelihood = 4 - Math.floor(i / 4)
     const impact = (i % 4) + 1
     const count = items.value.filter(it => {
-      const l = it.likelihood || 1
-      const im = it.impact || 1
-      return l === likelihood && im === impact
+      // 未评估（likelihood/impact 为空）的资产不计入矩阵，避免堆到低-低格误导
+      if (it.likelihood == null || it.impact == null) return false
+      return it.likelihood === likelihood && it.impact === impact
     }).length
     return { key: likelihood + '-' + impact, level, likelihood, impact, count }
   })
@@ -199,8 +199,8 @@ async function fetchData() {
         asset_name: a.name,
         risk_level: a.health_status === 'critical' ? 'high' : a.health_status === 'warning' ? 'medium' : a.health_status === 'healthy' ? 'low' : 'unknown',
         risk_factors: a.tags || [],
-        likelihood: a.risk_likelihood || Math.ceil(Math.random() * 4),
-        impact: a.risk_impact || Math.ceil(Math.random() * 4),
+        likelihood: a.risk_likelihood ?? null,
+        impact: a.risk_impact ?? null,
         assessed_at: a.updated_at || a.created_at,
         recommendations: a.health_status === 'critical' ? ['检查资产连通性', '排查异常进程'] : [],
       }))

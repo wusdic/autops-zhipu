@@ -228,12 +228,20 @@ async function handleSearch() {
     const { data } = await knowledgeService.list(params)
     if (data.code === 0) {
       const items = data.data?.items || data.data || []
-      // Enrich with similarity score (backend may provide, or simulate)
-      searchResults.value = items.map((item: any, index: number) => ({
+      // 相似度：优先用后端分值；后端未提供时用“关键词命中率”作为真实可解释的匹配度，
+      // 不再伪造递减随机值。
+      const terms = searchKeyword.value.toLowerCase().split(/\s+/).filter(Boolean)
+      const relevance = (item: any): number | null => {
+        if (!terms.length) return null
+        const text = ((item.title || '') + ' ' + (item.content || '')).toLowerCase()
+        const hit = terms.filter((t) => text.includes(t)).length
+        return Math.round((hit / terms.length) * 100)
+      }
+      searchResults.value = items.map((item: any) => ({
         ...item,
-        similarity: item.similarity ?? Math.max(minSimilarity.value, Math.round(95 - index * 5 - Math.random() * 10)),
-      })).filter((item: any) => (item.similarity || 0) >= minSimilarity.value)
-        .sort((a: any, b: any) => (b.similarity || 0) - (a.similarity || 0))
+        similarity: item.similarity ?? relevance(item),
+      })).filter((item: any) => item.similarity == null || item.similarity >= minSimilarity.value)
+        .sort((a: any, b: any) => (b.similarity ?? -1) - (a.similarity ?? -1))
     }
   } catch (e: any) {
     ElMessage.error('搜索失败: ' + (e.message || e))

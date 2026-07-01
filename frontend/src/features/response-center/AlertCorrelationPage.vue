@@ -297,8 +297,10 @@ async function runCorrelation() {
           strength += 20
           corrType = corrType || 'same_type'
         }
-        return { ...a, correlation_strength: Math.min(strength, 100) || Math.floor(Math.random() * 40 + 30), correlation_type: corrType || 'same_type' }
+        return { ...a, correlation_strength: Math.min(strength, 100), correlation_type: corrType }
       })
+      // 仅保留有真实关联信号（同资产/时间窗/同类型）的告警，不再对无关联者伪造强度
+      .filter((a: any) => a.correlation_strength > 0)
 
     corrTotal.value = correlatedAlerts.value.length
 

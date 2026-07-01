@@ -94,7 +94,7 @@
         </el-table-column>
         <el-table-column label="近期事件数" width="120" align="center">
           <template #default="{ row }">
-            <span :class="{ 'text-danger': row.recent_event_count > 10 }">{{ row.recent_event_count || 0 }}</span>
+            <span :class="{ 'text-danger': (row.recent_event_count ?? 0) > 10 }">{{ row.recent_event_count ?? '-' }}</span>
           </template>
         </el-table-column>
         <el-table-column label="缺口评分" width="130" sortable="custom" prop="gap_score">
@@ -257,20 +257,19 @@ async function runAnalysis() {
     allResults.value = Array.from(allEventTypes).map(eventType => {
       const alertRuleCount = ruleMap.get(eventType) || 0
       const policyCount = policyMap.get(eventType) || 0
-      const recentEventCount = Math.floor(Math.random() * 50) // Simulated, backend should provide
 
-      // Gap score: higher means bigger gap
+      // 缺口分：仅依据真实的“是否配置告警规则/处置策略”，不再用伪造的事件数。
+      // 近期事件数需后端按 event_type 聚合，暂不展示（null → “-”）。
       let gapScore = 0
-      if (alertRuleCount === 0) gapScore += 40
-      if (policyCount === 0) gapScore += 40
-      gapScore += Math.min(recentEventCount, 20) // More recent events = higher priority
+      if (alertRuleCount === 0) gapScore += 50
+      if (policyCount === 0) gapScore += 50
 
       return {
         event_type: eventType,
         alert_rule_count: alertRuleCount,
         policy_count: policyCount,
-        recent_event_count: recentEventCount,
-        gap_score: Math.min(gapScore, 100),
+        recent_event_count: null,
+        gap_score: gapScore,
       }
     })
 
