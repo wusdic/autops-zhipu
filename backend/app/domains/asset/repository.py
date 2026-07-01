@@ -27,6 +27,11 @@ class AssetRepository(BaseRepository[Asset]):
         filters = [Asset.is_deleted == False]  # noqa: E712
         if asset_type:
             filters.append(Asset.asset_type == asset_type)
+        else:
+            # 资源列表默认只显示“具体资源”（服务器/数据库/网络设备等）；
+            # “业务系统”是 asset_type='business_system' 的语义封装，有独立的业务系统页面，
+            # 不应混入资源列表。显式按 asset_type 过滤时（含 business_system）仍尊重该过滤。
+            filters.append(Asset.asset_type != "business_system")
         if status:
             filters.append(Asset.status == status)
         if health_status:

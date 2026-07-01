@@ -40,7 +40,7 @@ class BusinessSystemUpdate(BaseModel):
 @router.get("")
 async def list_business_systems(
     page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    page_size: int = Query(20, ge=1, le=500),  # 供前端下拉一次性拉全量业务系统
     db: AsyncSession = Depends(get_db),
 ):
     """列出所有业务系统."""
