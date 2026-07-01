@@ -78,7 +78,10 @@
       <template #header>
         <div class="autops-card-header">
           <span class="autops-card-title">我的待办工单</span>
-          <el-button type="primary" size="small" @click="router.push('/tickets/create')">新建工单</el-button>
+          <div style="display:flex;gap:8px">
+            <el-button plain type="primary" size="small" @click="router.push('/tickets')">查看全部 →</el-button>
+            <el-button type="primary" size="small" @click="router.push('/tickets/create')">新建工单</el-button>
+          </div>
         </div>
       </template>
       <el-table stripe :data="myTickets" v-loading="myLoading">

@@ -67,13 +67,6 @@ empty-text="暂无巡检任务"
             <span>{{ formatDuration(row) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100" align="center" fixed="right">
-          <template #default="{ row }">
-            <el-button plain type="primary" size="small" @click="router.push('/inspection/' + row.id)">
-              详情
-            </el-button>
-          </template>
-        </el-table-column>
       </el-table>
     </el-card>
 

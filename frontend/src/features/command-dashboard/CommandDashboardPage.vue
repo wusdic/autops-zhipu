@@ -321,6 +321,7 @@
         <div class="autops-card mt-lg">
           <div class="autops-card-header">
             <div class="autops-card-title"><el-icon><Calendar /></el-icon> 今日摘要</div>
+            <el-button plain type="primary" size="small" @click="navigateTo('/daily-summary')">详情 →</el-button>
           </div>
           <div class="autops-card-body">
             <div class="today-summary">
