@@ -594,6 +594,17 @@ body {
   margin-left: 4px;
 }
 
+/* 表格内按钮更紧凑（缩小左右内边距），让多个操作按钮更容易在一行内放下 */
+.el-table .el-table__cell .cell .el-button {
+  padding-left: 9px;
+  padding-right: 9px;
+}
+
+/* 操作列（约定为行内最后一列）整格不换行，避免按钮被挤到下一行 */
+.el-table .el-table__row > td.el-table__cell:last-child > .cell {
+  white-space: nowrap;
+}
+
 /* 卡片 — 统一圆角和边框 */
 .el-card {
   border-radius: var(--autops-radius-md) !important;

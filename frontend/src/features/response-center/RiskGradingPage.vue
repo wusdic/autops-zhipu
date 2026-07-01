@@ -274,8 +274,8 @@ onMounted(fetchData)
 .legend-item.high { background: var(--autops-danger-light); color: var(--autops-danger); }
 .legend-item.medium { background: var(--autops-warning-light); color: var(--autops-warning); }
 .legend-item.low { background: var(--autops-success-light); color: var(--autops-success); }
-.risk-summary { display: flex; justify-content: space-around; padding: 32px 16px; }
-.risk-stat { text-align: center; }
+.risk-summary { display: flex; padding: 32px 16px; }
+.risk-stat { flex: 1 1 0; min-width: 0; text-align: center; }
 .risk-stat-num { font-size: 36px; font-weight: 700; }
 .risk-stat-num.high { color: var(--autops-danger); }
 .risk-stat-num.medium { color: var(--autops-warning); }

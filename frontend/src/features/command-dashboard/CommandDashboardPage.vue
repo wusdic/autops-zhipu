@@ -793,7 +793,9 @@ onUnmounted(() => {
 .v3-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
 /* 仅 v3 主线卡片的 body 用横向均分布局；此前误写成 .autops-card-body 命中了本页
  * 全部卡片 body（含图表容器），导致图表 div 被 flex 压成 0 宽而不显示。 */
-.v3-card-body { display: flex; justify-content: space-around; padding: var(--autops-space-lg) 8px !important; }
+.v3-card-body { display: flex; padding: var(--autops-space-lg) 8px !important; }
+/* 三个并列小框等分，避免按内容宽度参差不齐 */
+.v3-card-body > .autops-metric-card { flex: 1 1 0; min-width: 0; }
 .autops-metric-card { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .autops-metric-card-num { font-size: 22px; font-weight: 600; line-height: 1.2; }
 .autops-metric-card-label { font-size: var(--autops-font-12); color: var(--autops-info); }
