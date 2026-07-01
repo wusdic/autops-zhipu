@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select, func
+from sqlalchemy import select, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.response import success, paginate
@@ -152,48 +152,69 @@ async def list_log_sources(
 # ======================================================================
 @router.get("/collectors/health")
 async def collectors_health_summary(db: AsyncSession = Depends(get_db)):
-    """采集器健康汇总."""
-    try:
-        from app.domains.collector.models import Collector
+    """采集器健康：逐采集器返回真实指标（成功率/平均延迟/最近运行/状态）。
 
-        total = (
-            await db.execute(select(func.count()).select_from(Collector))
-        ).scalar() or 0
+    collectors 表本身不记录运行指标，故按 collection_results(status,duration_ms) 经
+    collection_jobs.collector_id 聚合计算：
+      成功率 = success / 总执行；平均延迟 = avg(duration_ms)；状态由成功率分档。
+    无执行记录的采集器成功率/延迟返回 null（前端显示“-”），状态为 unknown。
+    同时返回汇总计数供概览使用。
+    """
+    from app.domains.collector.models import Collector
 
-        online = (
+    collectors = (await db.execute(select(Collector))).scalars().all()
+    items: list[dict] = []
+    healthy = degraded = down = 0
+    for c in collectors:
+        agg = (
             await db.execute(
-                select(func.count())
-                .select_from(Collector)
-                .where(Collector.status == "online")
+                text(
+                    "SELECT COUNT(*) AS total, "
+                    "SUM(CASE WHEN cr.status='success' THEN 1 ELSE 0 END) AS ok, "
+                    "AVG(cr.duration_ms) AS avg_ms, MAX(cr.completed_at) AS last_run "
+                    "FROM collection_results cr "
+                    "JOIN collection_jobs cj ON cr.job_id = cj.id "
+                    "WHERE cj.collector_id = :cid"
+                ),
+                {"cid": c.id},
             )
-        ).scalar() or 0
+        ).first()
+        total = int(agg[0] or 0)
+        ok = int(agg[1] or 0)
+        avg_ms = float(agg[2]) if agg[2] is not None else None
+        last_run = agg[3]
+        rate = (ok / total) if total else None
+        if rate is None:
+            status = "unknown"
+        elif rate >= 0.9:
+            status = "healthy"
+            healthy += 1
+        elif rate >= 0.5:
+            status = "degraded"
+            degraded += 1
+        else:
+            status = "down"
+            down += 1
+        items.append({
+            "id": c.id,
+            "collector_name": c.name,
+            "collector_type": c.collector_type,
+            "status": status,
+            "success_rate": rate,           # 0~1 小数
+            "avg_latency": avg_ms,          # 毫秒
+            "last_heartbeat": last_run.isoformat() if hasattr(last_run, "isoformat") else last_run,
+            "runs_total": total,
+            "runs_ok": ok,
+            "version": None,                # 采集器无版本字段
+            "task_backlog": None,           # 暂无可靠积压来源
+        })
 
-        offline = (
-            await db.execute(
-                select(func.count())
-                .select_from(Collector)
-                .where(Collector.status == "offline")
-            )
-        ).scalar() or 0
-
-        error = (
-            await db.execute(
-                select(func.count())
-                .select_from(Collector)
-                .where(Collector.status == "error")
-            )
-        ).scalar() or 0
-
-        return success(
-            {
-                "total": total,
-                "online": online,
-                "offline": offline,
-                "error": error,
-                "health_rate": round(online / max(total, 1) * 100, 1),
-            }
-        )
-    except Exception:
-        return success(
-            {"total": 0, "online": 0, "offline": 0, "error": 0, "health_rate": 0}
-        )
+    total_c = len(collectors)
+    return success({
+        "items": items,
+        "total": total_c,
+        "healthy": healthy,
+        "degraded": degraded,
+        "down": down,
+        "health_rate": round(healthy / max(total_c, 1) * 100, 1),
+    })

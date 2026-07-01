@@ -224,14 +224,19 @@ function applyFilter() {
 async function runAnalysis() {
   loading.value = true
   try {
-    // Fetch alert rules
-    const [rulesRes, policiesRes] = await Promise.allSettled([
+    // Fetch alert rules + policies + 近30天各类型事件真实计数
+    const [rulesRes, policiesRes, eventsRes] = await Promise.allSettled([
       client.get(API.ALERT_RULES, { params: { page_size: 1000 } }),
       client.get(API.POLICIES, { params: { page_size: 1000 } }),
+      client.get(API.EVENTS_BY_TYPE, { params: { days: 30 } }),
     ])
 
     const rulesData = rulesRes.status === 'fulfilled' ? rulesRes.value.data : { data: { data: { items: [] } } }
     const policiesData = policiesRes.status === 'fulfilled' ? policiesRes.value.data : { data: { data: { items: [] } } }
+    // 后端返回 { event_type: count }
+    const eventCounts: Record<string, number> = eventsRes.status === 'fulfilled'
+      ? (eventsRes.value.data?.data || {})
+      : {}
 
     const rules = rulesData.data?.data?.items || rulesData.data?.data || []
     const policies = policiesData.data?.data?.items || policiesData.data?.data || []
@@ -257,19 +262,21 @@ async function runAnalysis() {
     allResults.value = Array.from(allEventTypes).map(eventType => {
       const alertRuleCount = ruleMap.get(eventType) || 0
       const policyCount = policyMap.get(eventType) || 0
+      const recentEventCount = eventCounts[eventType] ?? 0
 
-      // 缺口分：仅依据真实的“是否配置告警规则/处置策略”，不再用伪造的事件数。
-      // 近期事件数需后端按 event_type 聚合，暂不展示（null → “-”）。
+      // 缺口分：依据真实“是否配置告警规则/处置策略” + 近期真实事件量加权
+      // （有事件却无规则/策略 = 更高优先级缺口）。
       let gapScore = 0
-      if (alertRuleCount === 0) gapScore += 50
-      if (policyCount === 0) gapScore += 50
+      if (alertRuleCount === 0) gapScore += 40
+      if (policyCount === 0) gapScore += 40
+      gapScore += Math.min(recentEventCount, 20)
 
       return {
         event_type: eventType,
         alert_rule_count: alertRuleCount,
         policy_count: policyCount,
-        recent_event_count: null,
-        gap_score: gapScore,
+        recent_event_count: recentEventCount,
+        gap_score: Math.min(gapScore, 100),
       }
     })
 

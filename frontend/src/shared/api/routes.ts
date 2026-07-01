@@ -61,6 +61,7 @@ export const API = {
 
   // 事件
   EVENTS: '/api/v1/events',
+  EVENTS_BY_TYPE: '/api/v1/events/stats/by-type',
   EVENT_DETAIL: (id: string) => '/api/v1/events/' + id,
 
   // 工单
